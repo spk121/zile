@@ -85,7 +85,7 @@ you use strange formats.
 /*#########################################################################*/
 
 
-#ifndef HAS_VASPRINTF
+#ifndef HAVE_VASPRINTF
 
 #include <stdio.h>
 #include <string.h>

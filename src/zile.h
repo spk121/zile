@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.9 2003/05/25 21:34:56 rrt Exp $	*/
+/*	$Id: zile.h,v 1.10 2003/05/25 21:41:39 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -408,7 +408,7 @@ struct terminal {
  * Missing functions.
  *--------------------------------------------------------------------------*/
 
-#ifndef HAS_VASPRINTF
+#ifndef HAVE_VASPRINTF
 int vasprintf(char ** ptr, const char * format_string, va_list vargs);
 #endif
 
