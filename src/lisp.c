@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.5 2005/01/25 00:51:12 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.6 2005/01/25 16:48:28 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -100,10 +100,11 @@ astr lisp_dump(le *list)
 {
   astr as = astr_new();
 
+  astr_cat_cstr(as, "Eval results:\n");
   astr_cat_delete(as, leDumpEval(list, 0));
-  astr_cat_cstr(as, "Variables:\n");
+  astr_cat_cstr(as, "\n\nVariables:\n");
   astr_cat_delete(as, variableDump(mainVarList));
-  astr_cat_cstr(as, "Defuns:\n");
+  astr_cat_cstr(as, "\nDefuns:\n");
   astr_cat_delete(as, variableDump(defunList));
 
   return as;
