@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.7 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: astr.h,v 1.8 2004/03/10 13:01:12 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -39,16 +39,11 @@ extern void   astr_delete(astr as);
 extern void   astr_clear(astr as);
 extern const char * astr_cstr(castr as);
 extern size_t astr_size(castr as);
-extern size_t astr_maxsize(castr as);
-extern int    astr_isempty(castr as);
-extern astr   astr_fill(astr as, int c, size_t size);
 extern int    astr_cmp(castr s1, castr s2);
-extern int    astr_cmp_cstr(castr s1, const char *s2);
 extern int    astr_eq(castr s1, castr s2);
 extern int    astr_eq_cstr(castr as, const char *s);
 extern astr   astr_assign(astr as, castr src);
 extern astr   astr_assign_cstr(astr as, const char *s);
-extern astr   astr_assign_char(astr as, int c);
 extern astr   astr_insert(astr as, int pos, castr src);
 extern astr   astr_insert_cstr(astr as, int pos, const char *s);
 extern astr   astr_insert_char(astr as, int pos, int c);
@@ -61,16 +56,11 @@ extern astr   astr_append_char(astr as, int c);
 extern astr   astr_remove(astr as, int pos, size_t size);
 extern astr   astr_truncate(astr as, size_t size);
 extern astr   astr_substr(castr as, int pos, size_t size);
-extern astr   astr_left(castr as, size_t size);
-extern astr   astr_right(castr as, size_t size);
-extern char   astr_first_char(castr as);
 extern char   astr_last_char(castr as);
 extern int    astr_find(castr as, castr src);
 extern int    astr_find_cstr(castr as, const char *s);
-extern int    astr_find_char(castr as, int c);
 extern int    astr_rfind(castr as, castr src);
 extern int    astr_rfind_cstr(castr as, const char *s);
-extern int    astr_rfind_char(castr as, int c);
 extern astr   astr_replace(astr as, int pos, size_t size, castr src);
 extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 extern astr   astr_replace_char(astr as, int pos, size_t size, int c);
@@ -101,12 +91,8 @@ struct astr_s {
 
 #define astr_cstr(as)		((const char *)as->text)
 #define astr_size(as)		((const int)as->size)
-#define astr_maxsize(as)	((const int)as->maxsize)
-#define astr_isempty(as)	(as->size == 0)
-#define astr_first_char(as)	(as->text[0])
 #define astr_last_char(as)	(as->text[as->size - 1])
 #define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
-#define astr_cmp_cstr(s1, s2)	(strcmp(s1->text, s2))
 #define astr_eq(s1, s2)		(!strcmp(s1->text, s2->text))
 #define astr_eq_cstr(s1, s2)	(!strcmp(s1->text, s2))
 

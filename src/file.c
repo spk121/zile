@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.19 2004/03/09 16:17:59 rrt Exp $	*/
+/*	$Id: file.c,v 1.20 2004/03/10 13:01:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -180,7 +180,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 		}
 	}
 
-	if (astr_isempty(dir))
+	if (astr_size(dir) == 0)
 		astr_append_char(dir, '/');
 
 	return TRUE;
@@ -230,7 +230,7 @@ astr get_current_dir(astr buf, int interactive)
 		int p;
 
 		astr_assign_cstr(buf, cur_bp->filename);
-                p = astr_rfind_char(buf, '/');
+                p = astr_rfind_cstr(buf, "/");
                 if (p != -1)
                         astr_truncate(buf, p ? p : 1);
 		if (astr_last_char(buf) != '/')

@@ -20,18 +20,20 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.11 2004/03/09 16:11:30 rrt Exp $	*/
+/*	$Id: astr.c,v 1.12 2004/03/10 13:01:12 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
 #endif
+
+#include "config.h"
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "astr.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
@@ -57,12 +59,6 @@ void astr_resize(astr as, size_t reqsize)
 		as->maxsize = reqsize + ALLOCATION_CHUNK_SIZE;
 		as->text = (char *)xrealloc(as->text, as->maxsize + 1);
         }
-}
-
-int (astr_isempty)(castr as)
-{
-	assert(as != NULL);
-	return as->size == 0;
 }
 
 astr astr_copy(castr as)
@@ -110,31 +106,10 @@ size_t (astr_size)(castr as)
 	return as->size;
 }
 
-size_t (astr_maxsize)(castr as)
-{
-	assert(as != NULL);
-	return as->maxsize;
-}
-
-astr astr_fill(astr as, int c, size_t size)
-{
-	assert(as != NULL);
-	astr_resize(as, size);
-	memset(as->text, c, size);
-	as->text[size] = '\0';
-	return as;
-}
-
 int (astr_cmp)(castr s1, castr s2)
 {
 	assert(s1 != NULL && s2 != NULL);
 	return strcmp(s1->text, s2->text);
-}
-
-int (astr_cmp_cstr)(castr s1, const char *s2)
-{
-	assert(s1 != NULL && s2 != NULL);
-	return strcmp(s1->text, s2);
 }
 
 int (astr_eq)(castr s1, castr s2)
@@ -167,16 +142,6 @@ astr astr_assign_cstr(astr as, const char *s)
 {
 	assert(as != NULL && s != NULL);
 	return astr_assign_x(as, s, strlen(s));
-}
-
-astr astr_assign_char(astr as, int c)
-{
-	assert(as != NULL);
-	as->text[0] = c;
-	as->text[1] = '\0';
-	as->size = 1;
-
-	return as;
 }
 
 static astr astr_insert_x(astr as, int pos, const char *s, size_t csize)
@@ -320,33 +285,6 @@ astr astr_substr(castr as, int pos, size_t size)
 	return dest;
 }
 
-astr astr_left(castr as, size_t size)
-{
-	assert(as != NULL);
-	if (size == 0)
-		return astr_new();
-	if (size > as->size)
-		size = as->size;
-	return astr_substr(as, 0, size);
-}
-
-astr astr_right(castr as, size_t size)
-{
-	assert(as != NULL);
-	if (size == 0)
-		return astr_new();
-	if (size > as->size)
-		size = as->size;
-	return astr_substr(as, as->size - size, size);
-}
-
-char (astr_first_char)(castr as)
-{
-	assert(as != NULL);
-	assert(as->size != 0);
-	return as->text[0];
-}
-
 char (astr_last_char)(castr as)
 {
 	assert(as != NULL);
@@ -367,14 +305,6 @@ int astr_find_cstr(castr as, const char *s)
 	return (sp == NULL) ? -1 : sp - as->text;
 }
 
-int astr_find_char(castr as, int c)
-{
-	char *sp;
-	assert(as != NULL);
-	sp = strchr(as->text, c);
-	return (sp == NULL) ? -1 : sp - as->text;
-}
-
 int astr_rfind(castr as, castr src)
 {
 	return astr_rfind_cstr(as, src->text);
@@ -382,20 +312,9 @@ int astr_rfind(castr as, castr src)
 
 int astr_rfind_cstr(castr as, const char *s)
 {
-	char *sp, *prevsp;
-	assert(as != NULL && s != NULL);
-	prevsp = NULL;
-	sp = as->text;
-	while ((sp = strstr(sp, s)) != NULL)
-		prevsp = sp;
-	return (prevsp == NULL) ? -1 : prevsp - as->text;
-}
-
-int astr_rfind_char(castr as, int c)
-{
 	char *sp;
-	assert(as != NULL);
-	sp = strrchr(as->text, c);
+	assert(as != NULL && s != NULL);
+        sp = strrstr(as->text, s);
 	return (sp == NULL) ? -1 : sp - as->text;
 }
 
@@ -537,17 +456,6 @@ int main(void)
 
 	astr_assign_cstr(as1, "12345");
 	astr_delete(as2);
-	as2 = astr_left(as1, 10);
-	assert_eq(as2, "12345");
-	astr_delete(as2);
-	as2 = astr_left(as1, 3);
-	assert_eq(as2, "123");
-	astr_delete(as2);
-	as2 = astr_right(as1, 10);
-	assert_eq(as2, "12345");
-	astr_delete(as2);
-	as2 = astr_right(as1, 3);
-	assert_eq(as2, "345");
 
 	astr_assign_cstr(as1, "12345");
 	astr_insert_cstr(as1, 3, "mid");

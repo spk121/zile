@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: astr.3,v 1.6 2004/03/09 16:30:35 rrt Exp $
+.\" $Id: astr.3,v 1.7 2004/03/10 13:01:12 rrt Exp $
 .Dd May 17, 2003
 .Os
 .Dt ASTR 3
@@ -21,16 +21,11 @@ void   astr_delete(astr as);
 void   astr_clear(astr as);
 char * astr_cstr(castr as);
 size_t astr_size(castr as);
-size_t astr_maxsize(castr as);
-int    astr_isempty(castr as);
-astr   astr_fill(astr as, int c, size_t size);
 int    astr_cmp(castr s1, castr s2);
-int    astr_cmp_cstr(castr s1, const char *s2);
 int    astr_eq(castr s1, castr s2);
 int    astr_eq_cstr(castr as, const char *s);
 astr   astr_assign(astr as, castr src);
 astr   astr_assign_cstr(astr as, const char *s);
-astr   astr_assign_char(astr as, int c);
 astr   astr_insert(astr as, int pos, castr src);
 astr   astr_insert_cstr(astr as, int pos, const char *s);
 astr   astr_insert_char(astr as, int pos, int c);
@@ -43,16 +38,11 @@ astr   astr_append_char(astr as, int c);
 astr   astr_remove(astr as, int pos, size_t size);
 astr   astr_truncate(astr as, size_t size);
 astr   astr_substr(castr as, int pos, size_t size);
-astr   astr_left(castr as, size_t size);
-astr   astr_right(castr as, size_t size);
-char   astr_first_char(castr as);
 char   astr_last_char(castr as);
 int    astr_find(castr as, castr src);
 int    astr_find_cstr(castr as, const char *s);
-int    astr_find_char(castr as, int c);
 int    astr_rfind(castr as, castr src);
 int    astr_rfind_cstr(castr as, const char *s);
-int    astr_rfind_char(castr as, int c);
 astr   astr_replace(astr as, int pos, size_t size, castr src);
 astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 astr   astr_replace_char(astr as, int pos, size_t size, int c);
@@ -134,31 +124,8 @@ function returns the length of the argument string
 .Fa as .
 .Pp
 The
-.Fn astr_maxsize
-function returns the current buffer size of the argument string
-.Fa as .
-.Pp
-The
-.Fn astr_isempty
-function returns a non-zero value if the argument string
-.Fa as
-is empty, zero otherwise.
-.Pp
-The
-.Fn astr_fill
-function fills the argument string
-.Fa as
-with the character
-.Fa c ,
-up to
-.Fa size
-characters.
-.Pp
-The
 .Fn astr_cmp
-and
-.Fn astr_cmp_cstr
-functions compare the argument strings and return an integer less than,
+function compares the argument strings and returns an integer less than,
 equal to, or greater than zero if
 .Fa s1
 is found, respectively, to be less than, to match, or be greater than
@@ -177,9 +144,8 @@ otherwise a zero value.
 .Pp
 The
 .Fn astr_assign ,
-.Fn astr_assign_cstr ,
 and
-.Fn astr_assign_char
+.Fn astr_assign_cstr
 functions assign the contents of the argument string or character
 to the string
 .Fa as ,
@@ -245,39 +211,22 @@ values mean
 starting counting from the end of the string, instead of the beginning.
 .Pp
 The
-.Fn astr_left
-function returns a new allocated substring containing the beginning
-.Fa size
-characters extracted from the argument string
-.Fa as .
-.Pp
-The
-.Fn astr_right
-function returns a new allocated substring containing the ending
-.Fa size
-characters extracted from the argument string
-.Fa as .
-.Pp
-The
-.Fn astr_first_char ,
 .Fn astr_last_char
-functions return the first and the last character in string, respectively.
+function returns the last character in the string.
 .Pp
 The
-.Fn astr_find ,
-.Fn astr_find_cstr ,
+.Fn astr_find
 and
-.Fn astr_find_char
+.Fn astr_find_cstr
 functions find the first occurrence of the argument string or character
 into the argument
 .Fa as ,
 returning the position starting from the beginning of the string.
 .Pp
 The
-.Fn astr_rfind ,
-.Fn astr_rfind_cstr ,
+.Fn astr_rfind
 and
-.Fn astr_rfind_char
+.Fn astr_rfind_cstr
 functions find the first occurrence of the argument string or character
 into the argument
 .Fa as ,
@@ -352,10 +301,8 @@ This prevents defining at least the following function macros that makes
 code faster but debugging harder:
 .Fn astr_cstr ,
 .Fn astr_size ,
-.Fn astr_first_char ,
 .Fn astr_last_char ,
 .Fn astr_cmp ,
-.Fn astr_cmp_cstr ,
 .Fn astr_eq ,
 .Fn astr_eq_cstr .
 Side effects (like incrementing the argument) in parameters of these macros
