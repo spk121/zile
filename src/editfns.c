@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.11 2005/01/27 01:27:20 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.12 2005/01/29 13:08:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -78,9 +78,9 @@ int is_empty_line(void)
 
 int is_blank_line(void)
 {
-  int c;
+  size_t c;
   for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
-    if (!isspace(*astr_char(cur_bp->pt.p->item, c)))
+    if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
       return FALSE;
   return TRUE;
 }
