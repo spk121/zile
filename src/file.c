@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.56 2005/01/13 00:16:16 rrt Exp $        */
+/*      $Id: file.c,v 1.57 2005/01/14 00:43:31 rrt Exp $        */
 
 #include "config.h"
 
@@ -505,16 +505,13 @@ void kill_buffer(Buffer *kill_bp)
   if (next_bp == kill_bp) {
     Window *wp;
     Buffer *new_bp = create_buffer(cur_bp->name);
-    /*
-     * If this is the sole buffer available, then
-     * remove the contents and set the name to `*scratch*'
-     * if it is not already set.
-     */
+    /* If this is the sole buffer available, then remove the contents
+       and set the name to `*scratch*' if it is not already set. */
     assert(cur_bp == kill_bp);
 
     free_buffer(cur_bp);
 
-    /* Scan all the windows that have markers to this buffer. */
+    /* Scan all the windows that display this buffer. */
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->bp == cur_bp) {
         wp->bp = new_bp;
@@ -535,8 +532,6 @@ void kill_buffer(Buffer *kill_bp)
     Buffer *bp;
     Window *wp;
 
-    assert(kill_bp != next_bp);
-
     /* Search for windows displaying the buffer to kill. */
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->bp == kill_bp) {
@@ -555,7 +550,6 @@ void kill_buffer(Buffer *kill_bp)
         break;
       }
 
-    /* Free the buffer. */
     free_buffer(kill_bp);
 
     thisflag |= FLAG_NEED_RESYNC;
