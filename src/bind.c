@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.53 2005/01/29 13:14:07 rrt Exp $	*/
+/*	$Id: bind.c,v 1.54 2005/01/30 02:25:16 dacap Exp $	*/
 
 #include "config.h"
 
@@ -35,6 +35,7 @@
 #include "extern.h"
 
 static History functions_history;
+static Function _last_command;
 
 /*--------------------------------------------------------------------------
  * Key binding.
@@ -225,6 +226,7 @@ void process_key(size_t key)
   } else {
     int oldflag = thisflag;
     p->func(last_uniarg);
+    _last_command = p->func;
     if ((oldflag & FLAG_DEFINING_MACRO)
         && (thisflag & FLAG_DEFINING_MACRO)
         && p->func != F_universal_argument)
@@ -234,6 +236,11 @@ void process_key(size_t key)
   }
   if (keys)
     free(keys);
+}
+
+Function last_command(void)
+{
+  return _last_command;
 }
 
 /*--------------------------------------------------------------------------
