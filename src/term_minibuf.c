@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.3 2004/05/20 21:48:40 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.4 2004/05/20 22:13:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,7 +34,7 @@
 #include "extern.h"
 #include "term_ncurses.h"
 
-void ncurses_minibuf_clear(void)
+void term_minibuf_clear(void)
 {
 	int y, x;
 
@@ -58,7 +58,7 @@ static void xminibuf_write(const char *fmt)
 	}
 }
 
-void ncurses_minibuf_write(const char *fmt)
+void term_minibuf_write(const char *fmt)
 {
 	int y, x;
 
@@ -344,7 +344,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 
 static char *rotation_buffers[MAX_ROTATIONS];
 
-char *ncurses_minibuf_read(const char *prompt, const char *value,
+char *term_minibuf_read(const char *prompt, const char *value,
 			   Completion *cp, History *hp)
 {
 	static int max[MAX_ROTATIONS], rot;
@@ -372,7 +372,7 @@ char *ncurses_minibuf_read(const char *prompt, const char *value,
 	return s;
 }
 
-void ncurses_free_rotation_buffers(void)
+void free_rotation_buffers(void)
 {
 	int i;
 	for (i = 0; i < MAX_ROTATIONS; ++i)

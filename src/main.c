@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.26 2004/05/10 16:49:50 rrt Exp $	*/
+/*	$Id: main.c,v 1.27 2004/05/20 22:13:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -177,7 +177,14 @@ static void about_screen(void)
 		replace_string(about_minibuf_str, "C-h", "M-h");
 	}
 
-	cur_tp->show_about(about_splash_str, about_minibuf_str);
+	if (!lookup_bool_variable("novice-level") &&
+	    !lookup_bool_variable("skip-splash-screen")) {
+		show_splash_screen(about_splash_str);
+		minibuf_write(about_minibuf_str);
+		waitkey(20 * 1000);
+		minibuf_clear();
+	} else
+		minibuf_write(about_minibuf_str);
 }
 
 /*
@@ -395,7 +402,7 @@ int main(int argc, char **argv)
 	set_variables(vargs);
 
 	/* Force refresh of cached variables. */
-	cur_tp->refresh_cached_variables();
+	refresh_cached_variables();
 	cur_tp->open();
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.2 2004/05/20 21:48:40 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.3 2004/05/20 22:13:53 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -67,13 +67,14 @@ extern void term_beep(void);
 extern int ncurses_getkey(void);
 extern int ncurses_xgetkey(int mode, int arg);
 extern int ncurses_ungetkey(int c);
-extern void ncurses_refresh_cached_variables(void);
 extern void ncurses_refresh(void);
-extern void ncurses_redisplay(void);
-extern void ncurses_full_redisplay(void);
-extern void ncurses_show_about(const char *splash, const char *minibuf);
-extern void ncurses_minibuf_write(const char *fmt);
-extern char *ncurses_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-extern void ncurses_minibuf_clear(void);
-extern void ncurses_resize_windows(void);
-extern void ncurses_free_rotation_buffers(void);
+
+extern void show_splash_screen(const char *splash);
+extern void refresh_cached_variables(void);
+extern void do_redisplay(void);
+extern void full_redisplay(void);
+extern void resize_windows(void);
+extern void term_minibuf_write(const char *fmt);
+extern char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
+extern void term_minibuf_clear(void);
+extern void free_rotation_buffers(void);

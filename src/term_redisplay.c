@@ -20,14 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.4 2004/05/20 21:48:40 rrt Exp $	*/
-
-/*
- * ncurses redisplay engine.
- *
- * This redisplay engine is simple since ncurses does all the work of
- * finding what is changed on the screen and updating when is needed.
- */
+/*	$Id: term_redisplay.c,v 1.5 2004/05/20 22:13:53 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -208,7 +201,7 @@ static void parse_displayable_chars(const char *s)
 #endif
 }
 
-void ncurses_refresh_cached_variables(void)
+void refresh_cached_variables(void)
 {
 	/*
 	 * Refresh the font cache.
@@ -541,7 +534,7 @@ static void draw_status_line(int line, Window *wp)
 	term_attrset(0);
 }
 
-static void do_redisplay(void)
+void do_redisplay(void)
 {
 	int topline, cur_topline = 0;
 	Window *wp;
@@ -577,25 +570,20 @@ static void do_redisplay(void)
 	term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
-void ncurses_redisplay(void)
-{
-	do_redisplay();
-}
-
-void ncurses_full_redisplay(void)
+void full_redisplay(void)
 {
 	term_clear();
 	do_redisplay();
 }
 
-static void resize_windows(int width, int height)
+void resize_windows(void)
 {
 	Window *wp;
-	int hdelta = height - ncurses_tp->height;
+	int hdelta = ZILE_LINES - ncurses_tp->height;
 
 	/* Resize windows horizontally. */
 	for (wp = head_wp; wp != NULL; wp = wp->next)
-		wp->fwidth = wp->ewidth = width;
+		wp->fwidth = wp->ewidth = ZILE_COLS;
 
 	/* Resize windows vertically. */
 	if (hdelta > 0) { /* Increase windows height. */
@@ -624,17 +612,13 @@ static void resize_windows(int width, int height)
 	 * Sometimes Zile cannot reduce the windows height to a certain
 	 * value (too small); take care of this case.
 	 */
-	ncurses_tp->width = width;
-	ncurses_tp->height = height - hdelta;
-}
+	ncurses_tp->width = ZILE_COLS;
+	ncurses_tp->height = ZILE_LINES - hdelta;
 
-void ncurses_resize_windows(void)
-{
-	resize_windows(ZILE_COLS, ZILE_LINES);
 	FUNCALL(recenter);
 }
 
-static void show_splash_screen(const char *splash)
+void show_splash_screen(const char *splash)
 {
 	int i, bold = 0, red = 0;
 	const char *p;
@@ -661,16 +645,4 @@ static void show_splash_screen(const char *splash)
 		default:
 			term_addch(*p);
 		}
-}
-
-void ncurses_show_about(const char *splash, const char *minibuf)
-{
-	if (!lookup_bool_variable("novice-level") &&
-	    !lookup_bool_variable("skip-splash-screen")) {
-		show_splash_screen(splash);
-		minibuf_write(minibuf);
-		waitkey(20 * 1000);
-		minibuf_clear();
-	} else
-		minibuf_write(minibuf);
 }

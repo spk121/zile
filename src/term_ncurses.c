@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.2 2004/05/20 21:48:40 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.3 2004/05/20 22:13:53 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -54,16 +54,14 @@ static Terminal thisterm = {
 	ncurses_getkey,
 	ncurses_xgetkey,
 	ncurses_ungetkey,
-	ncurses_refresh_cached_variables,
 	term_refresh,
-	ncurses_redisplay,
-	ncurses_full_redisplay,
-	ncurses_show_about,
+	do_redisplay,
+	full_redisplay,
 	term_clear,
 	term_beep,
-	ncurses_minibuf_write,
-	ncurses_minibuf_read,
-	ncurses_minibuf_clear,
+	term_minibuf_write,
+	term_minibuf_read,
+	term_minibuf_clear,
 };
 
 Terminal *ncurses_tp = &thisterm;
@@ -202,10 +200,10 @@ int term_close(void)
 	/* Clear last line.  */
 	term_move(ZILE_LINES - 1, 0);
 	term_clrtoeol();
-	refresh();
+	term_refresh();
 
 	/* Free memory and finish with ncurses.  */
-	ncurses_free_rotation_buffers();
+	free_rotation_buffers();
 	endwin();
 	delscreen(ncurses_tp->screen);
 	ncurses_tp->screen = NULL;
@@ -308,7 +306,7 @@ int ncurses_getkey(void)
 		c = getch();
 		if (c != KEY_RESIZE)
 			break;
-		ncurses_resize_windows();
+		resize_windows();
 	}
 #else
 	c = getch();
@@ -361,7 +359,7 @@ int ncurses_xgetkey(int mode, int arg)
 		c = xgetkey(mode, arg);
 		if (c != KEY_RESIZE)
 			break;
-		ncurses_resize_windows();
+		resize_windows();
 	}
 #else
 	c = xgetkey(mode, arg);

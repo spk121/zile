@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.25 2004/05/10 16:39:54 rrt Exp $        */
+/*      $Id: zile.h,v 1.26 2004/05/20 22:13:53 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -286,11 +286,9 @@ struct Terminal {
         int (*getkey)(void);
         int (*xgetkey)(int mode, int arg);
         int (*ungetkey)(int c);
-        void (*refresh_cached_variables)(void);
         void (*refresh)(void);
         void (*redisplay)(void);
         void (*full_redisplay)(void);
-        void (*show_about)(const char *splash, const char *minibuf);
         void (*clear)(void);
         void (*beep)(void);
         void (*minibuf_write)(const char *fmt);
