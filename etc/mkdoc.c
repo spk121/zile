@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.7 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.8 2004/11/15 00:47:12 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -150,6 +150,14 @@ static void usage(void)
 {
 	fprintf(stderr, "usage: mkdoc [-d] [-o file] [file ...]\n");
 	exit(1);
+}
+
+/*
+ * Function called on unexpected error or Zile crash (SIGSEGV).
+ */
+void zile_exit(int exitcode)
+{
+        exit(exitcode);
 }
 
 int main(int argc, char **argv)

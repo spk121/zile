@@ -20,18 +20,20 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.c,v 1.7 2004/10/14 00:49:37 rrt Exp $	*/
+/*	$Id: alist.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
 
 #include "config.h"
 #include "alist.h"
+#include "zile.h"
+#include "extern.h"
 
 static aentry aentry_new(void *p)
 {
 	aentry ae;
-	ae = (aentry)xmalloc(sizeof *ae);
+	ae = (aentry)zmalloc(sizeof *ae);
 	ae->p = p;
 	ae->prev = ae->next = NULL;
 	return ae;
@@ -57,7 +59,7 @@ static aentry find_aentry(alist al, unsigned int i)
 alist alist_new(void)
 {
 	alist al;
-	al = (alist)xmalloc(sizeof *al);
+	al = (alist)zmalloc(sizeof *al);
 	al->head = al->tail = al->current = NULL;
 	al->idx = 0;
 	al->size = 0;
@@ -221,7 +223,7 @@ void alist_sort(alist al, int (*cmp)(const void *p1, const void *p2))
 	assert(al != NULL && cmp != NULL);
 	if (al->size == 0)
 		return;
-	vec = (void **)xmalloc(sizeof(void *) * al->size);
+	vec = (void **)zmalloc(sizeof(void *) * al->size);
 	for (ae = al->head, i = 0; ae != NULL; ae = ae->next, ++i)
 		vec[i] = ae->p;
 	qsort(vec, al->size, sizeof(void *), cmp);

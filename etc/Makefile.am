@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.7 2004/11/14 21:39:48 rrt Exp $
+## $Id: Makefile.am,v 1.8 2004/11/15 00:47:12 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
 
-mkdoc_LDADD = $(top_srcdir)/lib/libzile.a
+mkdoc_LDADD = $(top_srcdir)/src/astr.o $(top_srcdir)/src/strrstr.o $(top_srcdir)/src/zmalloc.o
 
 ziledir = $(datadir)/zile
 zile_DATA =					\
@@ -32,8 +32,5 @@ AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
-$(top_srcdir)/lib/libzile.a:
-	cd $(top_srcdir)/lib && make libzile.a
-
 clean-local:
-	-rm -f mkdoc AUTODOC HELP *.o *.dvi *.ps *.log *.aux
+	-rm -f mkdoc AUTODOC HELP *.o

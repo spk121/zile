@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.6 2004/10/14 00:49:37 rrt Exp $	*/
+/*	$Id: htable.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -29,6 +29,8 @@
 
 #include "config.h"
 #include "htable.h"
+#include "zile.h"
+#include "extern.h"
 
 typedef struct hbucket_s *hbucket;
 
@@ -58,10 +60,10 @@ static unsigned long hash_func(const char *p, unsigned long size)
 
 static hbucket build_bucket(const char *key)
 {
-	hbucket ptr = (hbucket)xmalloc(sizeof(*ptr));
+	hbucket ptr = (hbucket)zmalloc(sizeof(*ptr));
 
 	memset(ptr, 0, sizeof(*ptr));
-	ptr->pair.key = xstrdup(key);
+	ptr->pair.key = zstrdup(key);
 
 	return ptr;
 }
@@ -76,10 +78,10 @@ static void free_bucket(hbucket ptr)
 
 htable htable_new(unsigned long size)
 {
-	htable ptr = (htable)xmalloc(sizeof(*ptr));
+	htable ptr = (htable)zmalloc(sizeof(*ptr));
 
 	ptr->size = size;
-	ptr->table = (hbucket *)xmalloc(ptr->size * sizeof(hbucket));
+	ptr->table = (hbucket *)zmalloc(ptr->size * sizeof(hbucket));
 	memset(ptr->table, 0, ptr->size * sizeof(hbucket));
 
 	return ptr;

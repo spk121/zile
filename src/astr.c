@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.25 2004/10/14 00:49:37 rrt Exp $	*/
+/*	$Id: astr.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -30,16 +30,18 @@
 #include <string.h>
 
 #include "astr.h"
+#include "zile.h"
+#include "extern.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
 
 astr astr_new(void)
 {
 	astr as;
-	as = (astr)xmalloc(sizeof *as);
+	as = (astr)zmalloc(sizeof *as);
 	as->maxlen = ALLOCATION_CHUNK_SIZE;
 	as->len = 0;
-	as->text = (char *)xmalloc(as->maxlen + 1);
+	as->text = (char *)zmalloc(as->maxlen + 1);
 	memset(as->text, 0, as->maxlen + 1);
 	return as;
 }
@@ -49,7 +51,7 @@ static void astr_resize(astr as, size_t reqsize)
 	assert(as != NULL);
 	if (reqsize > as->maxlen) {
 		as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-		as->text = (char *)xrealloc(as->text, as->maxlen + 1);
+		as->text = (char *)zrealloc(as->text, as->maxlen + 1);
 	}
 }
 

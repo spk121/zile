@@ -18,20 +18,21 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.c,v 1.3 2004/10/23 15:36:03 rrt Exp $	*/
+/*	$Id: vector.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include <stddef.h>
 #include <stdlib.h>
 
 #include "config.h"
 #include "vector.h"
-
+#include "zile.h"
+#include "extern.h"
 
 /* Create a vector whose items' size is size */
 vector *
 vec_new(size_t itemsize)
 {
-        vector *v = xmalloc(sizeof(vector));
+        vector *v = zmalloc(sizeof(vector));
         vec_itemsize(v) = itemsize;
         vec_items(v) = 0;
         v->size = 0;
@@ -52,7 +53,7 @@ static vector *
 resize(vector *v, size_t items)
 {
         v->size = items;
-        v->array = xrealloc(v->array, items * vec_itemsize(v));
+        v->array = zrealloc(v->array, items * vec_itemsize(v));
         return v;
 }
 

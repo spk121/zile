@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.h,v 1.6 2004/03/13 20:07:00 rrt Exp $	*/
+/*	$Id: alist.h,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #ifndef ALIST_H
 #define ALIST_H

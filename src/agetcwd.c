@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: agetcwd.c,v 1.5 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: agetcwd.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <errno.h>
@@ -26,6 +26,8 @@
 
 #include "config.h"
 #include "agetcwd.h"
+#include "zile.h"
+#include "extern.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX 256
@@ -34,11 +36,11 @@
 astr agetcwd(astr as)
 {
         size_t len = PATH_MAX;
-        char *buf = (char *)xmalloc(len);
+        char *buf = (char *)zmalloc(len);
         char *res;
         while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
                 len *= 2;
-                buf = xrealloc(buf, len);
+                buf = zrealloc(buf, len);
         }
         /* If there was an error, return the empty string */
         if (res == NULL)

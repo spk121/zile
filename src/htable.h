@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.h,v 1.5 2004/10/14 00:49:37 rrt Exp $	*/
+/*	$Id: htable.h,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #ifndef HTABLE_H
 #define HTABLE_H

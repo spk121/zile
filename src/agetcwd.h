@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: agetcwd.h,v 1.3 2004/02/17 20:21:17 ssigala Exp $	*/
+/*	$Id: agetcwd.h,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #ifndef AGETCWD_H
 #define AGETCWD_H

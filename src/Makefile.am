@@ -1,10 +1,39 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.17 2004/10/11 01:08:42 rrt Exp $
+## $Id: Makefile.am,v 1.18 2004/11/15 00:47:12 rrt Exp $
+
+if HAVE_REGEX_H
+regex =
+else
+regex = regex.o
+endif
+
+TESTS = alist astr htable
+check_PROGRAMS = alist astr htable
+
+alist_CPPFLAGS = -DTEST
+
+astr_CPPFLAGS = -DTEST
+
+htable_CPPFLAGS = -DTEST
 
 INCLUDES = -I$(top_srcdir)/lib
 
 bin_PROGRAMS = zile
+
 zile_base_SOURCES =				\
+	agetcwd.c				\
+	agetcwd.h				\
+	alist.c					\
+	alist.h					\
+	astr.c					\
+	astr.h					\
+	htable.c				\
+	htable.h				\
+	vector.c				\
+	vector.h				\
+	strrstr.c				\
+	vasprintf.c				\
+	zmalloc.c				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
@@ -49,10 +78,11 @@ zile_SOURCES = $(zile_base_SOURCES)		\
 endif
 
 zile_LDADD =					\
-	$(top_srcdir)/lib/libzile.a
+	$(regex)
+
 man_MANS = zile.1
 
-EXTRA_DIST = zile.1.in
+EXTRA_DIST = zile.1.in regex.c regex.h
 
 zile.1: zile.1.in
 	rm -f $@

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.16 2004/11/14 23:57:54 rrt Exp $	*/
+/*	$Id: glue.c,v 1.17 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -218,48 +218,6 @@ void goto_point(Point pt)
 		do
 			FUNCALL(forward_char);
 		while (cur_bp->pt.o < pt.o);
-}
-
-/*
- * Return a zeroed allocated memory area.
- */
-void *zmalloc(size_t size)
-{
-	void *ptr;
-
-	assert(size > 0);
-
-	if ((ptr = calloc(size, 1)) == NULL) {
-		fprintf(stderr, "zile: cannot allocate memory\n");
-		zile_exit(1);
-	}
-
-	return ptr;
-}
-
-/*
- * Resize an allocated memory area.
- */
-void *zrealloc(void *ptr, size_t size)
-{
-	void *newptr;
-
-	assert(size > 0);
-
-	if ((newptr = realloc(ptr, size)) == NULL) {
-		fprintf(stderr, "zile: cannot allocate memory\n");
-		zile_exit(1);
-	}
-
-	return newptr;
-}
-
-/*
- * Duplicate a string.
- */
-char *zstrdup(const char *s)
-{
-	return strcpy(zmalloc(strlen(s) + 1), s);
 }
 
 #ifdef DEBUG

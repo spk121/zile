@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: strrstr.c,v 1.3 2004/05/10 16:00:26 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
 
 #include "config.h"
 
