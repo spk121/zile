@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.29 2004/10/24 22:37:07 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.30 2004/10/24 23:55:58 rrt Exp $	*/
 
 #include "config.h"
 
@@ -529,12 +529,30 @@ int term_getkey(void)
         return term_xgetkey(0, 0);
 }
 
-int term_unget_char(char c)
+void term_unget_char(int c)
 {
 	if (keyp == key_buf)
-		return FALSE;
+		return;
 
-	*--keyp = c;
-
-	return TRUE;
+        if (c & KBD_CTL)
+                switch (c & 0xff) {
+                case '@':
+                        *--keyp = '\0';
+                        break;
+                case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
+                case 'f':  case 'g':  case 'h':             case 'j':
+                case 'k':  case 'l':             case 'n':  case 'o':
+                case 'p':  case 'q':  case 'r':  case 's':  case 't':
+                case 'u':  case 'v':  case 'w':  case 'x':  case 'y':
+                case 'z':
+                        *--keyp = (c & 0xff) - 'a' + 1;
+                        break;
+                case '_':
+                        *--keyp = '\37';
+                        break;
+                }
+        else
+                *--keyp = c & 0xff;
+        if (c & KBD_META)
+                *--keyp = '\033';
 }

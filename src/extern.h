@@ -200,7 +200,7 @@ int term_printw(const char *fmt, ...);
 void term_beep(void);
 int term_getkey(void);
 int term_xgetkey(int mode, int arg);
-int term_unget_char(char c);
+void term_unget_char(int c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 void free_rotation_buffers(void);
