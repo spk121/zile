@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.21 2004/04/23 20:34:55 rrt Exp $	*/
+/*	$Id: astr.c,v 1.22 2004/05/02 06:17:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -50,22 +50,22 @@ static void astr_resize(astr as, size_t reqsize)
 	if (reqsize > as->maxlen) {
 		as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
 		as->text = (char *)xrealloc(as->text, as->maxlen + 1);
-        }
+	}
 }
 
 static int astr_pos(astr as, int pos)
 {
 	if (pos < 0)
 		pos = as->len + pos;
-        assert(pos >=0 && pos <= (int)as->len);
-        return pos;
+	assert(pos >=0 && pos <= (int)as->len);
+	return pos;
 }
 
 char *astr_char(const astr as, int pos)
 {
-        assert(as != NULL);
-        pos = astr_pos(as, pos);
-        return as->text + pos;
+	assert(as != NULL);
+	pos = astr_pos(as, pos);
+	return as->text + pos;
 }
 
 void astr_delete(astr as)
@@ -101,7 +101,7 @@ static astr astr_cat_x(astr as, const char *s, size_t csize)
 	astr_resize(as, as->len + csize);
 	strncpy(as->text + as->len, s, csize);
 	as->len += csize;
-        as->text[as->len] = '\0';
+	as->text[as->len] = '\0';
 	return as;
 }
 
