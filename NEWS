@@ -1,5 +1,8 @@
 Changes between Zile 1.6.1 - Zile 1.7 BETA 1
 
+Note: 1.7 BETA 1 was produced from 1.6.1, not 1.6.2, but all the same
+fixes were applied.
+
 * Changed configure script so no syntax colouring modes are built by
   default.
 * Implemented Java Mode.  Contributed by Marius Nita <marius@cs.pdx.edu>.
