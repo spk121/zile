@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.42 2004/10/16 20:24:09 rrt Exp $        */
+/*      $Id: file.c,v 1.43 2004/10/24 23:10:31 rrt Exp $        */
 
 #include "config.h"
 
@@ -312,36 +312,6 @@ void read_from_disk(const char *filename)
         cur_bp->pt.p = cur_bp->limitp->next;
 
         close(fd);
-}
-
-static int have_extension(const char *filename, const char *exts[])
-{
-        int i, len, extlen;
-
-        len = strlen(filename);
-        for (i = 0; exts[i] != NULL; ++i) {
-                extlen = strlen(exts[i]);
-                if (len > extlen && !strcmp(filename + len - extlen, exts[i]))
-                        return TRUE;
-        }
-
-        return FALSE;
-}
-
-static int exists_corr_file(char *dest, char *src, const char *ext)
-{
-        char *p;
-        strcpy(dest, src);
-        if ((p = strrchr(dest, '.')) != NULL)
-                *p = '\0';
-        strcat(dest, ext);
-        if (exist_file(dest))
-                return TRUE;
-        strcpy(dest, src);
-        strcat(dest, ext);
-        if (exist_file(dest))
-                return TRUE;
-        return FALSE;
 }
 
 int find_file(const char *filename)
