@@ -1,6 +1,0 @@
-* Undoing insertions of binary files can be very slow.
-
-* The method of resolving the `C-h' problem by replacing it with `M-h'
-  is not a ``Good Thing''(TM).
-
-* The macros do not work for interactive commands.

@@ -23,11 +23,11 @@ transpose-words
 transpose-sexps
 transpose-lines
 
+* Strip binary during make install.
+
 ------------------------------------------------------------------------------
 
 MEDIUM PRIORITY
-
-* Strip binary during make install.
 
 * Functions/bindings to implement and document (dummy functions
   already exist):
@@ -46,3 +46,7 @@ LOW PRIORITY (may require a rewrite)
   high level functions should call these functions to access the data.
 * Buffer oriented structures vs. line oriented structures (like now).
 * Mouse support.
+* Undoing insertions of binary files can be very slow.
+* The method of resolving the `C-h' problem by replacing it with `M-h'
+  is not a ``Good Thing''(TM).
+* The macros do not work for interactive commands.
