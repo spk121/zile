@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.8 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: killring.c,v 1.9 2004/03/09 16:20:03 rrt Exp $	*/
 
 #include "config.h"
 
@@ -60,13 +60,6 @@ static void kill_ring_push(char c)
 		kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
 	}
 	kill_ring_text[kill_ring_size++] = c;
-}
-
-static void kill_ring_push_in_beginning(char c)
-{
-	kill_ring_push(0);
-	memmove(kill_ring_text+1, kill_ring_text, kill_ring_size-1);
-	kill_ring_text[0] = c;
 }
 
 static void kill_ring_push_nstring(char *s, size_t size)
