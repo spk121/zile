@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.80 2005/01/29 13:05:32 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.81 2005/01/30 02:41:13 dacap Exp $	*/
 
 #include "config.h"
 
@@ -1108,6 +1108,7 @@ DEFUN("backward-paragraph", backward_paragraph)
     return FUNCALL_ARG(forward_paragraph, -uniarg);
 
   do {
+    while (previous_line() && is_empty_line());
     while (previous_line() && !is_empty_line());
   } while (--uniarg > 0);
 
@@ -1125,6 +1126,7 @@ DEFUN("forward-paragraph", forward_paragraph)
     return FUNCALL_ARG(backward_paragraph, -uniarg);
         
   do {
+    while (next_line() && is_empty_line());
     while (next_line() && !is_empty_line());
   } while (--uniarg > 0);
 
@@ -1142,9 +1144,16 @@ DEFUN("mark-paragraph", mark_paragraph)
     The paragraph marked is the one that contains point or follows point.
     +*/
 {
-  FUNCALL(forward_paragraph);
-  FUNCALL(set_mark_command);
-  FUNCALL(backward_paragraph);
+  if (last_command() == F_mark_paragraph) {
+    FUNCALL(exchange_point_and_mark);
+    FUNCALL_ARG(forward_paragraph, uniarg);
+    FUNCALL(exchange_point_and_mark);
+  }
+  else {
+    FUNCALL_ARG(forward_paragraph, uniarg);
+    FUNCALL(set_mark_command);
+    FUNCALL_ARG(backward_paragraph, uniarg);
+  }
   return TRUE;
 }
 
