@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.64 2005/01/16 13:04:15 rrt Exp $	*/
+/*	$Id: main.c,v 1.65 2005/01/17 01:09:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,11 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <getopt.h> /* XXX */
+#if HAVE_GETOPT_H
+#include <getopt.h>
+#else
+#include "getopt.h"
+#endif
 #include <signal.h>
 #if ALLEGRO
 #if HAVE_ALLEGRO_H
