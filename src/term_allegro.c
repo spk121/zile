@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.25 2005/02/05 02:01:40 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.26 2005/02/05 13:32:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -218,8 +218,8 @@ void term_init(void)
   termp->width = ZILE_COLS;
   termp->height = ZILE_LINES;
 
-  cur_scr = zcalloc(1, sizeof(short)*ZILE_COLS*ZILE_LINES);
-  new_scr = zcalloc(1, sizeof(short)*ZILE_COLS*ZILE_LINES);
+  cur_scr = zmalloc(sizeof(short) * ZILE_COLS * ZILE_LINES);
+  new_scr = zmalloc(sizeof(short) * ZILE_COLS * ZILE_LINES);
 }
 
 void term_close(void)
