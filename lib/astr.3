@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: astr.3,v 1.3 2003/05/19 21:50:23 rrt Exp $
+.\" $Id: astr.3,v 1.4 2003/05/25 21:23:24 rrt Exp $
 .Dd May 17, 2003
 .Os
 .Dt ASTR 3
@@ -18,7 +18,6 @@ void   astr_resize(astr as, size_t reqsize);
 astr   astr_copy(castr as);
 astr   astr_copy_cstr(const char *s);
 void   astr_delete(astr as);
-char * astr_delete_struct_only(astr as);
 void   astr_clear(astr as);
 char * astr_cstr(castr as);
 size_t astr_size(castr as);
@@ -114,12 +113,6 @@ function deallocates the previously allocated string
 .Fa as .
 .Pp
 The
-.Fn astr_delete_struct_only
-function deallocates the previously allocated string
-.Fa as ,
-and returns the C null-terminated string, which must be freed after use.
-.Pp
-The
 .Fn astr_clear
 function truncates the argument string
 .Fa as
@@ -131,12 +124,6 @@ function converts the argument string
 .Fa as
 into a C null-terminated string.  The returned string should
 not be modified.
-.Pp
-The
-.Fn astr_str
-function converts the argument string
-.Fa as
-into a C null-terminated string, which can be modified.
 .Pp
 The
 .Fn astr_size

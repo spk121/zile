@@ -1,4 +1,4 @@
-/*	$Id: astr.h,v 1.3 2003/05/19 21:50:23 rrt Exp $	*/
+/*	$Id: astr.h,v 1.4 2003/05/25 21:23:24 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -38,7 +38,6 @@ extern void   astr_resize(astr as, size_t reqsize);
 extern astr   astr_copy(castr as);
 extern astr   astr_copy_cstr(const char *s);
 extern void   astr_delete(astr as);
-extern char * astr_delete_struct_only(astr as);
 extern void   astr_clear(astr as);
 extern const char * astr_cstr(castr as);
 extern size_t astr_size(castr as);
@@ -100,7 +99,6 @@ struct astr_s {
  */
 
 #define astr_cstr(as)		((const char *)as->text)
-#define astr_str(as)		((char *)as->text)
 #define astr_size(as)		((const int)as->size)
 #define astr_maxsize(as)	((const int)as->maxsize)
 #define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))

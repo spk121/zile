@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.3 2003/05/19 21:50:23 rrt Exp $	*/
+/*	$Id: astr.c,v 1.4 2003/05/25 21:23:24 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -86,15 +86,6 @@ void astr_delete(astr as)
 	free(as);
 }
 
-char *astr_delete_struct_only(astr as)
-{
-	char *text;
-	assert(as != NULL);
-        text = as->text;
-	free(as);
-	return text;
-}
-
 void astr_clear(astr as)
 {
 	assert(as != NULL);
@@ -103,12 +94,6 @@ void astr_clear(astr as)
 }
 
 const char *(astr_cstr)(castr as)
-{
-	assert(as != NULL);
-	return as->text;
-}
-
-char *(astr_str)(castr as)
 {
 	assert(as != NULL);
 	return as->text;

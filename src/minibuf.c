@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.5 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.6 2003/05/25 21:23:24 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -247,7 +247,9 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 
 	astr_delete(dir);
 	astr_delete(fname);
-	return astr_delete_struct_only(rbuf);
+        p = zstrdup(astr_cstr(rbuf));
+        astr_delete(rbuf);
+        return p;
 }
 
 int minibuf_read_forced(const char *fmt, const char *errmsg,
