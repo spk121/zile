@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.16 2005/01/10 00:24:59 rrt Exp $   */
+/*      $Id: completion.c,v 1.17 2005/01/11 00:09:42 rrt Exp $   */
 
 #include "config.h"
 
@@ -169,14 +169,13 @@ static void popup_completion(Completion *cp, int allflag, int num)
   if ((wp = find_window("*Completions*")) == NULL) {
     if (head_wp->next == NULL)
       cp->fl_close = 1;
-    set_current_window(popup_window ());
+    set_current_window(popup_window());
     if (!cp->fl_close)
       cp->old_bp = cur_bp;
     bp = find_buffer("*Completions*", TRUE);
     switch_to_buffer(bp);
-  } else {
+  } else
     set_current_window(wp);
-  }
 
   zap_buffer_content();
   cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
