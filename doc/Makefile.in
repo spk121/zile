@@ -1,0 +1,56 @@
+#	$Id: Makefile.in,v 1.1 2001/01/19 22:00:01 ssigala Exp $
+
+srcdir = @srcdir@
+VPATH = $(srcdir)
+
+prefix = @prefix@
+
+infodir = @infodir@
+
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL = @INSTALL@
+
+FILES = $(srcdir)/zile.info
+
+all: $(FILES)
+
+zile.info: zile.texi zilerc.texi
+	cd $(srcdir) && $(MAKEINFO) zile.texi
+
+zilerc.texi: ../etc/zilerc.sample
+	echo "@c Automatically generated file: NO DOT EDIT!" >zilerc.texi
+	echo "@example" >>zilerc.texi
+	expand $(srcdir)/../etc/zilerc.sample >>zilerc.texi
+	echo "@end example" >>zilerc.texi
+
+dvi: zile.dvi
+
+zile.dvi: zile.texi zilerc.texi
+	$(TEXI2DVI) $(srcdir)/zile.texi
+
+.PHONY: install uninstall clean realclean distclean mostlyclean
+
+install: all
+	${srcdir}/../mkinsdir.sh $(infodir)
+	for f in $(FILES); do \
+		$(INSTALL_DATA) $$f $(infodir); \
+	done
+
+uninstall:
+	for f in $(FILES); do \
+		rm -f $(infodir)/`basename $$f`; \
+	done
+
+clean: 
+	-rm -f zile.aux zile.cp zile.cps zile.dvi zile.fn zile.ky zile.log
+	-rm -f zile.pg zile.toc zile.tp zile.vr
+	-rm -f zile.fns zile.kys zile.pgs zile.tps zile.vrs
+
+distclean: clean 
+	-rm -f Makefile
+
+realclean: distclean
+	-rm -f zile.info
+
+mostlyclean: clean

@@ -1,0 +1,95 @@
+Changes between Zile 1.3 - Zile 1.4
+
+* Added support for `F1'..`F12' keys.
+* Implemented the following functions:
+	tabify
+	untabify
+	copy-region-as-kill (bound to `M-w')
+* Added support for xterm resizing (SIGWINCH signal).
+* Added `text-mode-auto-fill' variable that automatically turns on the
+  Auto Fill Mode in Text Mode.
+* Now `set-variable' suggests the possibile variable values.
+* Added `-f function' command line option for calling internal functions
+  at Zile startup.
+* Bug fixes.
+
+Changes between Zile 1.2 - Zile 1.3
+
+* Implemented region highlighting.
+* Added support for non-English character sets.
+* Fixed a security hole that made Zile prone to "symlink attack".
+
+Changes between Zile 1.1 - Zile 1.2
+
+* Fixed some memory leaks thanks to the dmalloc package.
+* Added alternative key bindings (`M-h' replaces `C-h') that can be set
+  using the `alternative-bindings' variable.
+* Now the users with home "/" and users not recorded in the `/etc/passwd'
+  file are handled correctly.
+
+Changes between Zile 1.0a5 - Zile 1.1
+
+* Fixed a lot of annoying bugs and updated the documentation.
+* Added Auto Fill Mode.
+* Added C++ Mode (ISO C++ 14882:1998).
+* Updated C Mode keywords to latest C standard (ISO C 9899:1999).
+* Implemented `goto-line' (M-g).  Contributed by
+  Carsten Leonhardt <leo@debian.org>.
+* Added backup directory feature.  Contributed by
+  Tim Middelkoop <mtim@arranvale.com>.
+* Added `describe-function' (C-h d), `describe-variable' (C-h v) and
+  `describe-key' (C-h k).  Now the program is really self-documenting!
+* Added `list-bindings' (C-h l b), `list-functions' (C-h l f) and
+  `list-registers' (C-h l r).
+* Now the search functions remember the last searched value.
+* All the help functions bound to `M-h' are now bound to `C-h' like Emacs.
+* Added a lot of minor but useful features.
+
+WARNING: the file backup variable `backup-files' has been renamed to
+`backup-method' and the behavior has changed.  Please take a look at the
+sample initialization file (press `C-h s').
+
+Changes between Zile 1.0a4 - Zile 1.0a5
+
+* Implemented `insert-buffer', `insert-file'.
+* Implemented `start-kbd-macro', `end-kbd-macro', `call-last-kbd-macro'.
+* Implemented novice mode.
+* Lot of bug fixes and minor changes.
+
+Changes between Zile 1.0a3 - Zile 1.0a4
+
+* Rewritten from scratch for adding proper windows code, using a better
+  coding that's more simple to fix.
+* Cleaned up editor structures.
+* Added independent terminal support.
+
+Changes between Zile 1.0a2 - Zile 1.0a3
+
+* Rewritten buffer list handling.  Now it is more simple, bug free and
+  like Emacs one.
+* Rewritten key binding.
+* Removed `next-buffer' (C-x C-n) and `previous-buffer' (C-x C-p) commands
+  due to the new buffer list handling.
+* Added `--with-ndebug' switch to configure.
+* Fixed access permissions on saving.
+
+Changes between Zile 1.0a1 - Zile 1.0a2
+
+* Added a new Texinfo manual (not yet finished).
+* Added the undo facility.
+* Added `universal-argument' (C-u) facility.
+* Added `tab-width' variable.
+* Added the time display to the status line; added the `display-time' and
+  `display-time-format' variables.
+* Added revisions facility to backup.
+* Added variables to allow changing of highlight colors.
+* Added `status-line-color' variable.
+* Added delayed key sequence completion.
+* Removed `mode-line-like-emacs' variable and facility.
+* Rewritten variable handling.  Now the variables are stored into an hash
+  table.
+* Rewritten `list-buffers' to be more verbose.
+* All the editor functions are now declared with `DEFUN()'.
+* Fixed handling of tabulations.
+* Fixed FreeBSD refresh bug.
+* Minor fixes to font lock.

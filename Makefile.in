@@ -1,0 +1,14 @@
+#	$Id: Makefile.in,v 1.1 2001/01/19 21:59:12 ssigala Exp $
+
+subdirs = lib doc etc src
+
+all install uninstall clean realclean mostlyclean:
+	@for f in $(subdirs); do \
+		(cd $$f && $(MAKE) $@); \
+	done
+
+distclean:
+	@for f in $(subdirs); do \
+		(cd $$f && $(MAKE) $@); \
+	done
+	-rm -f Makefile config.cache config.status config.log

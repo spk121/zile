@@ -1,0 +1,37 @@
+Opaque types used in the code:
+
+historyp	is a typedef defined as struct history *
+linep		is a typedef defined as struct line *
+undop		is a typedef defined as struct undo *
+regionp		is a typedef defined as struct region *
+bufferp		is a typedef defined as struct buffer *
+windowp		is a typedef defined as struct window *
+terminalp	is a typedef defined as struct terminal *
+funcp		is a typedef defined as int (*)(int)
+
+Common variables names used in the code:
+
+hp		is a variable of type historyp
+lp		is a variable of type linep
+up		is a variable of type undop
+rp		is a variable of type regionp
+bp		is a variable of type bufferp
+wp		is a variable of type windowp
+tp		is a variable of type terminalp
+ms		is a variable of type char * (usually used to hold the
+		return value of minibuf_read())
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+Here is a list of the used names for keys; they are all in upper case:
+
+SPC	Space
+RET	Return
+LFD	Linefeed
+TAB	Tab
+BS	Backspace
+ESC	Escape
+DEL	Delete
+SFT	Shift
+CTL	Control
+META	Meta

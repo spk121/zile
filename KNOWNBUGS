@@ -1,0 +1,8 @@
+* Zile crashes when doing C-w on large regions.
+
+* The background colors are not handled very well under X Window terminals.
+
+* The macros do not work for interactive commands.
+
+* Font lock lacks correct support for floats (e.g: 1.-e3.4e5 is recognized
+  as a number).

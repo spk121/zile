@@ -1,0 +1,900 @@
+\input texinfo   @c -*-texinfo-*-
+@setfilename zile.info
+@settitle The Zile Manual
+
+@c If "finalout" is commented out, the printed output will show
+@c black boxes that mark lines that are too long.  Thus, it is
+@c unwise to comment it out when running a master in case there are
+@c overfulls which are deemed okay.
+
+@iftex
+@c @finalout
+@end iftex
+
+@setchapternewpage odd
+
+@titlepage
+@title The Zile Manual
+@subtitle Edition 1.4 for Zile version 1.4
+@subtitle January 2001
+@author Sandro Sigala
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1997-2001 Sandro Sigala @email{ssigala@@tiscalinet.it}.
+@end titlepage
+
+@c ---------------------------------------------------------------------------
+@node Top, Overview, (dir), (dir)
+
+This is the @emph{Zile} manual.
+
+Zile is another Emacs-clone.
+Zile is a customizable, self-documenting real-time display editor.
+Zile was written to be as similar as possible to Emacs; every Emacs
+user should feel at home with Zile.
+
+@menu
+* Overview::                    An overview of the Zile editor.
+* Features::                    The characteristics of Zile.
+* Differences::                 What makes Zile different from other editors.
+* Invoking Zile::               Command line options that you can give to Zile.
+* Initialization file::         The ``.zilerc'' initialization file.
+* Getting help::                How to get help under Zile.
+* Key names::                   How the keys are named.
+* Key bindings::                The functions associated with keys.
+* Functions::                   The list of functions.
+* Variables::                   The list of variables.
+* Bug reports::                 How to report a bug.
+@end menu
+
+@c ---------------------------------------------------------------------------
+@node Overview, Features, Top, Top
+@chapter Overview
+
+The @emph{Zile} editor is written entirely in ``C'' with the help of the
+@emph{ncurses}
+library.  Zile can't be compiled with a library different than ncurses.
+It has been tested under @emph{Linux} only, but it
+should be fairly
+simple to port it under other operating systems, since it is written in
+@emph{@w{ANSI C}}.
+
+Zile should really appear like
+Emacs, but a lot of good ideas were also taken from from other editors:
+@itemize -
+@item Emacs:
+General look-n-feel, function names, function behaviors, key bindings.
+@item XEmacs:
+Some minor hints for look-n-feel.
+@item Jed:
+Mini help window, mode line.
+@item ce:
+Structure names, function names.
+@end itemize
+
+@c ---------------------------------------------------------------------------
+@node Features, Differences, Overview, Top
+@chapter Features
+
+@itemize -
+@item Small but fast and powerful.
+It is very useful for small footprint installations (like on floppy disk)
+or quick editing sessions.
+@item 8-bit clean.
+Zile can operate with binary files.
+@item Looks like @emph{Emacs}.
+Most Zile key sequences and function names are identical to Emacs ones.
+@item Multi buffer editing w/multi level undo.
+Zile can open an infinite number of files and can record an infinite
+sequence of undo operations.
+@item Multi window.
+Zile can display multiple windows on the screen.
+@item Killing, yanking and registers.
+The typical killing, yanking and register features of Emacs are available
+under Zile.
+@item Minibuffer completion.
+Zile can complete the user written text.  This is very useful for
+@kbd{M-x} commands and for selecting files.
+@item Colors.
+Zile makes use of the color capatibilities of the terminal if available.
+@item Source highlighting (``C'' and ``C++'' only for now).
+Zile can highlight the ``C'' and ``C++'' source files for better reading.
+@item Auto fill (word wrap).
+Zile automatically breaks the lines when they become too wide (if the
+@i{Auto Fill Mode} is enabled).
+@end itemize
+
+@c ---------------------------------------------------------------------------
+@node Differences, Invoking Zile, Features, Top
+@chapter Differences
+
+@menu
+* Differences from Emacs::      The differences between Zile and Emacs.
+@end menu
+
+@c ---------------------------------------------------------------------------
+@node Differences from Emacs,  , Differences, Differences
+@section Differences from Emacs
+
+@itemize -
+@item @key{HOME} is bound to @code{beginning-of-line}, not
+@code{beginning-of-buffer}.
+@item @key{END} is bound to @code{end-of-line}, not @code{end-of-buffer}.
+@item @key{PGUP} and @key{PGDN} will move the cursor to the
+beginning or end of buffer if the beginning or the end buffer page is
+already displayed.
+@item @kbd{M-g} is bound to @code{goto-line}.
+@end itemize
+
+@c ---------------------------------------------------------------------------
+@node Invoking Zile, Initialization file, Differences, Top
+@chapter Invoking Zile
+
+The options are as follows:
+
+@table @samp
+@item file
+Edit file @file{file}.
+@item +number
+For the first file the cursor will be positioned on the line specified by
+@samp{number} (do not insert a space between the @samp{+} sign and the number).
+@item -h
+Display the minihelp window at startup.  This may be useful for
+novice users.
+@item -q
+Do not load the user's initialization file.
+@item -V
+Print version information on standard output then exit.
+@item -f function
+Invoke the named internal function with no arguments.
+For example, @samp{-f auto-fill-mode} turns on @i{Auto Fill Mode}.
+@end table
+
+@c ---------------------------------------------------------------------------
+@node Initialization file, Getting help, Invoking Zile, Top
+@chapter Initialization file
+
+When Zile is started, it normally loads the @file{.zilerc} file in your
+home directory.  We call this file your ``initialization file''
+because it specifies how to initialize Zile for you.  You can use the
+command line switch @samp{-q} to tell Zile whether to load the
+init file.
+
+@menu
+* File syntax::                 The initialization file syntax.
+* Sample file::                 A sample initialization file.
+@end menu
+
+@c ---------------------------------------------------------------------------
+@node File syntax, Sample file, Initialization file, Initialization file
+@section File syntax
+
+The initialization file is composed by a sequence of variable assignments.
+Every variable assignment is terminated by a newline and
+is composed by a variable name, an equality sign (@samp{=})
+and a value.  If the value contains non alpha-numerical characters
+(like spaces or punctuation characters) it should be enclosed within the
+double quote (@samp{"}) characters.
+
+The comments begin with a @samp{#} character and terminate with the end
+of the line.  The comments can be placed anywhere in the initialization
+file (obviously not within an assignment).
+
+Some examples:
+
+@example
+# This is a comment.
+expand-tabs = false
+colors = true
+tab-width = 8    # This is another comment.
+display-time-format = "%I:%M%p"
+@end example
+
+@c ---------------------------------------------------------------------------
+@node Sample file,  , File syntax, Initialization file
+@section A sample file
+
+This is the initialization file that comes with the Zile sources.
+
+@include zilerc.texi
+
+@c ---------------------------------------------------------------------------
+@node Getting help, Key names, Initialization file, Top
+@chapter Getting help
+
+This table contains the commands that can be used during an editing
+session to get help.
+
+If you have set the @samp{alternative-bindings} variable to @samp{true},
+the @kbd{M-h} key should be used instead of @kbd{C-h}.
+
+@table @kbd
+@item C-h C-d
+Show informations about getting the latest version.
+@item C-h C-h
+Toggle the command help window.
+@item C-h F
+Show the Frequently Asked Questions about Zile.
+@item C-h d, C-h f
+Describe a function.
+@item C-h h, F1
+Show this manual.
+@item C-h k
+Describe a key sequence.
+@item C-h l b
+Show the defined bindings.
+@item C-h l f
+Show the defined functions.
+@item C-h l r
+Show the defined registers.
+@item C-h l v
+Show the defined variables.
+@item C-h s
+Show a sample configuration file.
+@item C-h t
+Show a tutorial window.
+@item C-h v
+Describe a variable.
+@end table
+
+@c ---------------------------------------------------------------------------
+@node Key names, Key bindings, Getting help, Top
+@chapter Key names
+
+This table contains the names of the keys that are used in this manual
+and under Zile.
+
+@table @key
+@item SPC
+Space
+@item RET
+Return
+@item LFD
+Linefeed
+@item TAB
+Tab
+@item BS
+Backspace
+@item ESC
+Escape
+@item DEL
+Delete
+@item SFT
+Shift
+@item CTRL
+Control
+@item META
+Meta (also known as @key{EDIT} or @key{ALT} on some keyboards).
+@end table
+
+In key combinations, like @kbd{M-g}, the @kbd{M-} prefix means hold the
+@key{META} (or @key{EDIT} or @key{ALT}) key down while typing @kbd{g}.
+The combination @kbd{C-x} means hold the @key{CTRL} key down while
+typing @kbd{x}.
+
+@c ---------------------------------------------------------------------------
+@node Key bindings, Functions, Key names, Top
+@chapter Key bindings
+
+This table contains the full list of commands associated with key
+sequences.
+
+If you have set the @samp{alternative-bindings} variable to @samp{true},
+the @kbd{M-h} key should be used instead of @kbd{C-h}.
+
+At run-time, you can list the current defined bindings with the
+@samp{list-bindings} command.
+
+@table @kbd
+@item @key{BS}
+Delete the previous character.
+@item @key{INS}
+Toggle overwrite mode.
+@item @key{RET}
+Insert a new line.
+@item @key{TAB}
+Insert a tab character.
+@item C-@@, C-@key{SPC}
+Set mark.
+@item C-a, @key{HOME}
+Go to the beginning of line.
+@item C-b, @key{LEFT}
+Move cursor to the previous char.
+@item C-d, @key{DEL}
+Delete current char.
+@item C-e, @key{END}
+Go to the end of line.
+@item C-f, @key{RIGHT}
+Move cursor to the next char.
+@item C-g
+Cancel current command.
+@item C-h C-d
+Show informations about getting the latest version.
+@item C-h C-h
+Toggle mini help window.
+@item C-h F
+Show the FAQ.
+@item C-h d, C-h f
+Describe a function.
+@item C-h h, F1
+Show an help window.
+@item C-h k
+Describe a key sequence.
+@item C-h l b
+Show the defined bindings.
+@item C-h l f
+Show the defined functions.
+@item C-h l r
+Show the defined registers.
+@item C-h l v
+List defined variables.
+@item C-h s
+Show a sample configuration file.
+@item C-h t
+Show a tutorial window.
+@item C-h v
+Describe a variable.
+@item C-k
+Kill line.
+@item C-l
+Redraw display.
+@item C-n, @key{DOWN}
+Move cursor to the next line.
+@item C-p, @key{UP}
+Move cursor to the previous line.
+@item C-q
+Read next input character and insert it.
+@item C-r
+Search backward.
+@item C-s
+Search forward.
+@item C-u
+Begin a numeric argument for the following command.
+@item C-w
+Kill region.
+@item C-x C-b
+List buffers.
+@item C-x C-c
+Save modified buffers and quit zile.
+@item C-x C-f
+Find a file for editing.
+@item C-x C-l
+Convert the region to downcase.
+@item C-x C-q
+Toggle read only mode.
+@item C-x C-s
+Save the current buffer.
+@item C-x C-u
+Convert the region to upcase.
+@item C-x C-v
+Kill the current buffer and find a file for editing.
+@item C-x C-w
+Write buffer to a file.
+@item C-x C-x
+Exchange point and mark.
+@item C-x ^
+Enlarge current window.
+@item C-x (
+Start recording keyboard macro.
+@item C-x )
+End recording keyboard macro.
+@item C-x 0
+Delete the current window.
+@item C-x 1
+Delete the other open windows.
+@item C-x 2
+Split current window.
+@item C-x b
+Switch to a buffer.
+@item C-x e
+Execute the last recorded keyboard macro.
+@item C-x f
+Set the fill column.
+@item C-x h
+Mark whole buffer.
+@item C-x i
+Insert the contents of a file.
+@item C-x k
+Kill current buffer.
+@item C-x r i
+Insert register.
+@item C-x r s
+Copy region to register.
+@item C-x s
+Save modified buffers.
+@item C-x o
+Select the other window.
+@item C-x u, C-_
+Undo some previous changes.
+@item C-y
+Yank killed text.
+@item C-v, @key{PGDN}
+Scroll up one screen page.
+@item C-z, C-x C-z
+Stop Zile and return to superior process.
+@item M-<
+Go to the beginning of buffer.
+@item M->
+Go to the end of buffer.
+@item M-g
+Read line number and go there.
+@item M-v, @key{PGUP}
+Scroll down one screen page.
+@item M-w
+Save the region as if killed, but don't kill it.
+@item M-x
+Execute extended command.
+@end table
+
+@c ---------------------------------------------------------------------------
+@node Functions, Variables, Key bindings, Top
+@chapter Functions
+
+This table contains the full list of available functions, that can be
+called with the @kbd{M-x} key (please note that most functions have a
+key binding, anyway).
+
+At run-time, you can list the current defined functions with the
+@samp{list-functions} command.
+
+@table @code
+@item auto-fill-mode
+Toggle @i{Auto Fill Mode}.
+In @i{Auto Fill Mode}, inserting a space at a column beyond @samp{fill-column}
+automatically breaks the line at a previous space.
+@item backward-char
+Move point left one character.
+On attempt to pass beginning or end of buffer, stop and signal error.
+@item backward-delete-char
+Delete the previous character.
+Join lines if the character is a newline.
+@item beginning-of-buffer
+Move point to the beginning of the buffer; leave mark at previous position.
+@item beginning-of-line
+Move point to beginning of current line.
+@item c-mode
+Turn on the @i{C Mode} mode for editing K&R and ANSI/ISO C code.
+@item c++-mode
+Turn on the @i{C++ Mode} for editing ANSI/ISO C++ code.
+@item call-last-kbd-macro
+Call the last keyboard macro that you defined with @kbd{C-x (}.
+A prefix argument serves as a repeat count.  Zero means repeat until error.
+@item cd
+Make the user specified directory become the current buffer's default
+directory.
+@item copy-region-as-kill
+Save the region as if killed, but don't kill it.
+@item copy-to-register
+Copy region into the user specified register.
+@item delete-char
+Delete the following character.
+Join lines if the character is a newline.
+@item delete-other-windows
+Make the selected window fill the screen.
+@item delete-window
+Remove the current window from the screen.
+@item describe-function
+Display the full documentation of a function.
+@item describe-key
+Display documentation of the function invoked by a key sequence.
+@item describe-variable
+Display the full documentation of a variable.
+@item downcase-region
+Convert the region to lower case.
+@item end-kbd-macro
+Finish defining a keyboard macro.
+The definition was started by @kbd{C-x (}.
+The macro is now available for use via @kbd{C-x e}.
+@item end-of-buffer
+Move point to the end of the buffer; leave mark at previous position.
+@item end-of-line
+Move point to end of current line.
+@item enlarge-window
+Make current window one line bigger.
+@item exchange-point-and-mark
+Put the mark where point is now, and point where the mark is now.
+@item execute-extended-command
+Read function name, then read its arguments and call it.
+@item find-alternate-file
+Find the file specified by the user, select its buffer, kill previous buffer.
+If the current buffer now contains an empty file that you just visited
+(presumably by mistake), use this command to visit the file you really want.
+@item find-file
+Edit a file specified by the user.  Switch to a buffer visiting the file,
+creating one if none already exists.
+@item font-lock-mode
+Toggle @i{Font Lock Mode}.
+When @i{Font Lock Mode} is enabled, text is fontified as you type it.
+@item font-lock-refresh
+Refresh the @i{Font Lock Mode} internal structures.
+This may be called when the fontification looks weird.
+@item forward-char
+Move point right one character.
+On reaching end of buffer, stop and signal error.
+@item goto-line
+Move cursor to the beginning of the specified line.
+@item help
+Show a help window.
+@item help-config-sample
+Show a configuration file sample.
+@item help-faq
+Show the Zile @i{Frequently Asked Questions} (FAQ).
+@item help-latest-version
+Show informations about getting the latest version.
+@item help-tutorial
+Show a tutorial window.
+@item insert-buffer
+Insert after point the contents of the user specified buffer.
+Puts mark after the inserted text.
+@item insert-file
+Insert contents of the user specified file into buffer after point.
+Set mark after the inserted text.
+@item insert-register
+Insert contents of the user specified register.
+Puts point before and mark after the inserted text.
+@item keyboard-quit
+Cancel current command.
+@item kill-buffer
+Kill the current buffer or the user specified one.
+@item kill-line
+Kill the rest of the current line; if no nonblanks there, kill thru newline.
+@item kill-region
+Kill between point and mark.
+The text is deleted but saved in the kill ring.
+The command @kbd{C-y} (yank) can retrieve it from there.
+
+If the buffer is read-only, Zile will beep and refrain from deleting
+the text, but put the text in the kill ring anyway.  This means that
+you can use the killing commands to copy text from a read-only buffer.
+
+If the previous command was also a kill command,
+the text killed this time appends to the text killed last time
+to make one entry in the kill ring.
+@item list-bindings
+List defined bindings.
+@item list-buffers
+Display a list of names of existing buffers.
+The list is displayed in a buffer named @samp{*Buffer List*}.
+Note that buffers with names starting with spaces are omitted.
+
+@itemize -
+@item The @samp{M} column contains a @samp{*} for buffers that are modified.
+@item The @samp{R} column contains a @samp{%} for buffers that are read-only.
+@end itemize
+@item list-functions
+List defined functions.
+@item list-registers
+List defined registers.
+@item list-variables
+List defined variables.
+@item mark-whole-buffer
+Put point at beginning and mark at end of buffer.
+@item newline
+Insert a newline at the current point position into
+the current buffer.
+@item next-line
+Move cursor vertically down one line.
+If there is no character in the target line exactly under the current column,
+the cursor is positioned after the character in that line which spans this
+column, or at the end of the line if it is not long enough.
+@item other-window
+Select the first different window on the screen.
+All windows are arranged in a cyclic order.
+This command selects the window one step away in that order.
+@item overwrite-mode
+In @i{Overwrite Mode}, printing characters typed in replace existing text
+on a one-for-one basis, rather than pushing it to the right.  At the
+end of a line, such characters extend the line.
+@kbd{C-q} still inserts characters in @i{Overwrite Mode}; this
+is supposed to make it easier to insert characters when necessary.
+@item previous-line
+Move cursor vertically up one line.
+If there is no character in the target line exactly over the current column,
+the cursor is positioned after the character in that line which spans this
+column, or at the end of the line if it is not long enough.
+@item quoted-insert
+Read next input character and insert it.
+This is useful for inserting control characters.
+@item recenter
+Center point in window and redisplay screen.
+The desired position of point is always relative to the current window.
+@item save-buffer
+Save current buffer in visited file if modified. By default, makes the
+previous version into a backup file if this is the first save.
+@item save-buffers-kill-zile
+Offer to save each buffer, then kill this Zile process.
+@item save-some-buffers
+Save some modified file-visiting buffers.  Asks user about each one.
+@item scroll-down
+Scroll text of current window downward near full screen.
+@item scroll-up
+Scroll text of current window upward near full screen.
+@item search-backward
+Search backward from point for the user specified text.
+@item search-forward
+Search forward from point for the user specified text.
+@item self-insert-command
+Insert the character you type.
+@item set-fill-column
+Set the fill column.
+If an argument value is passed, set the @samp{fill-column} variable with
+that value, otherwise with the current column value.
+@item set-mark-command
+Set mark at where point is.
+@item set-variable
+Set a variable value to the user specified value.
+@item split-window
+Split current window into two windows, one above the other.
+Both windows display the same buffer now current.
+@item start-kbd-macro
+Record subsequent keyboard input, defining a keyboard macro.
+The commands are recorded even as they are executed.
+Use @kbd{C-x )} to finish recording and make the macro available.
+@item suspend-zile
+Stop Zile and return to superior process.
+@item switch-to-buffer
+Select to the user specified buffer in the current window.
+@item tabify
+Convert multiple spaces in region to tabs when possible.
+A group of spaces is partially replaced by tabs
+when this can be done without changing the column they end at.
+The variable @samp{tab-width} controls the spacing of tab stops.
+@item tab-to-tab-stop
+Insert a tabulation at the current point position into
+the current buffer.  Convert the tabulation into spaces
+if the @samp{expand-tabs} variable is bound and set to true.
+@item text-mode
+Turn on the @i{Text Mode} for editing text intended for humans to read.
+@item toggle-minihelp-window
+Toggle the mini help window.
+@item toggle-read-only
+Change whether this buffer is visiting its file read-only.
+@item undo
+Undo some previous changes.
+Repeat this command to undo more changes.
+@item universal-argument
+Begin a numeric argument for the following command.
+Digits or minus sign following @kbd{C-u} make up the numeric argument.
+@kbd{C-u} following the digits or minus sign ends the argument.
+@kbd{C-u} without digits or minus sign provides 4 as argument.
+Repeating @kbd{C-u} without digits or minus sign multiplies the argument
+by 4 each time.
+@item untabify
+Convert all tabs in region to multiple spaces, preserving columns.
+The variable @samp{tab-width} controls the spacing of tab stops.
+@item upcase-region
+Convert the region to upper case.
+@item write-file
+Write current buffer into the user specified file.
+Makes buffer visit that file, and marks it not modified.
+@item yank
+Reinsert the last stretch of killed text.
+More precisely, reinsert the stretch of killed text most recently
+killed @i{or} yanked.  Put point at end, and set mark at beginning.
+@item zile-version
+Show the zile version.
+@end table
+
+@c ---------------------------------------------------------------------------
+@node Variables, Bug reports, Functions, Top
+@chapter Variables
+
+This table contains the full list of available variables, that can be
+modified at run-time with the @samp{set-variable} function or set at start-up
+in the @file{.zilerc} initialization file.
+
+At run-time, you can list the current defined variables with the
+@samp{list-variables} command.
+
+@table @code
+@item alternative-bindings
+Remap the help functions (bound by default to @kbd{C-h}) to @kbd{M-h}.
+This may be useful when @kbd{C-h} is already bound to @key{BS}
+or @key{DEL}.
+Please note that changing this variable at run-time has no effect; you
+need instead to modify your @file{~/.zilerc} configuration file and
+restart Zile.
+Default value is @samp{false}.
+@item auto-font-lock
+Automatically turn on @i{Font Lock Mode} when a C or C++ file is opened.
+Default value is @samp{true}.
+@item auto-font-lock-refresh
+If enabled, the file will be reparsed by @i{Font Lock} on every @kbd{C-l}
+press. This may be disabled on slow machines.
+Default value is @samp{true}.
+@item backup-directory
+Specify target backup directory.  Directory must be existent.
+This value is used only when the @samp{backup-with-directory} value is true.
+Default value is @samp{~/.backup}.
+@item backup-method
+Specify the file backup method.
+Possible values are: @samp{none}, @samp{simple} and @samp{revision}.
+@table @samp
+@item none
+If @samp{none} is specified, Zile will not create backup files.
+@item simple
+If @samp{simple} is specified, Zile will create a backup file with a
+tilde @samp{~} appended to the name (e.g.: on saving @file{foo.c} it will
+create the backup @file{foo.c~}).
+@item revision
+If @samp{revision} is specified, Zile will create a new backup file on
+each file saving preserving the old backups of the original file
+(e.g.: on saving @file{foo.c} it will create the backup @file{foo.c~1~},
+then on next save @file{foo.c~2~}, etc.).
+@end table
+Default value is @samp{simple}.
+@item backup-with-directory
+If enabled Zile will backup files to a user specified directory;
+the directory must exist and must be specified in the
+variable @samp{backup-directory}.
+Default value is @samp{false}.
+@item beep
+If enabled, a sound will be emitted on any error.
+Default value is @samp{true}.
+@item colors
+Enable colors. If your terminal supports colors, you should leave this enabled.
+Please note that changing this variable at run-time has no effect; you
+need instead to modify your @file{~/.zilerc} configuration file and
+restart Zile.
+Default value is @samp{true}.
+@item display-time
+If enabled the time is displayed in the status line.
+Default value is @samp{true}.
+@item display-time-format
+The format of the displayed time in the status line.
+
+Conversion specifiers are introduced by a @samp{%} character, and are replaced
+in the time format string as follows:
+
+@table @samp
+@item %a
+The abbreviated weekday name according to the current locale.
+@item %A
+The full weekday name according to the current locale.
+@item %b
+The abbreviated month name according to the current locale.
+@item %B
+The full month name according to the current locale.
+@item %c
+The preferred date and time representation for the current locale.
+@item %d
+The day of the month as a decimal number (range 01 to 31).
+@item %H
+The hour as a decimal number using a 24-hour clock (range 00 to 23).
+@item %I
+The hour as a decimal number using a 12-hour clock (range 01 to 12).
+@item %j
+The day of the year as a decimal number (range 001 to 366).
+@item %m
+The month as a decimal number (range 01 to 12).
+@item %M
+The minute as a decimal number.
+@item %p
+Either `am' or `pm' according to the given time value, or the
+corresponding strings for the current locale.
+@item %S
+The second as a decimal number.
+@item %U
+The week number of the current year as a decimal number, starting
+with the first Sunday as the first day of the first week.
+@item %W
+The week number of the current year as a decimal number, starting
+with the first Monday as the first day of the first week.
+@item %w
+The day of the week as a decimal, Sunday being 0.
+@item %x
+The preferred date representation for the current locale without the time.
+@item %X
+The preferred time representation for the current locale without the date.
+@item %y
+The year as a decimal number without a century (range 00 to 99).
+@item %Y
+The year as a decimal number including the century.
+@item %Z
+The time zone or name or abbreviation.
+@item %%
+A literal @samp{%} character.
+@end table
+
+Default value is @samp{%I:%M%p}.
+@item displayable-characters
+Specify the set of characters that can be shown as-is on the screen.
+The characters not included in this set are shown as octal
+sequences (like @samp{\261}).
+
+The set syntax is the following:
+@example
+set       ::= range | value ( ',' range | value )*
+range     ::= value '-' value
+value     ::= hex_value | oct_value | dec_value
+hex_value ::= '0x'[0-9a-fA-F]+
+oct_value ::= '0'[0-7]*
+dec_value ::= [1-9][0-9]*
+@end example
+For example, the following are valid sets:
+@table @samp
+@item 0x20-0x7e
+Standard English-only character set.
+@item 0x20-0x7e,0xa1-0xff
+Typical European character set.
+@item 0-15,17,0xef-0xff
+@itemx 012,015-0x50
+Correct but useless character sets.
+@end table
+Default value is @samp{0x20-0x7e}.
+@item expand-tabs
+If disabled, Zile will insert hard tabs (the character @samp{\t}),
+otherwise it will insert spaces.
+Default value is @samp{false}.
+@item fill-column
+The default fill column (used in @i{Auto Fill Mode}).
+Default value is @samp{72}.
+@item font-character
+The color used in @i{Font Lock Mode} for characters.
+Default value is @samp{green}.
+@item font-character-delimiters
+The color used in @i{Font Lock Mode} for character delimiters.
+Default value is @samp{white}.
+@item font-comment
+The color used in @i{Font Lock Mode} for comments.
+Default value is @samp{red}.
+@item font-directive
+The color used in @i{Font Lock Mode} for preprocessor directives.
+Default value is @samp{blue}.
+@item font-identifier
+The color used in @i{Font Lock Mode} for identifiers.
+Default value is @samp{white}.
+@item font-keyword
+The color used in @i{Font Lock Mode} for keywords.
+Default value is @samp{magenta}.
+@item font-number
+The color used in @i{Font Lock Mode} for numbers.
+Default value is @samp{cyan}.
+@item font-other
+The color used in @i{Font Lock Mode} for the text.
+Default value is @samp{white}.
+@item font-string
+The color used in @i{Font Lock Mode} for strings.
+Default value is @samp{green}.
+@item font-string-delimiters
+The color used in @i{Font Lock Mode} for string delimiters.
+Default value is @samp{white}.
+@item highlight-region
+If enabled, highlight the current region with reversed colors.
+Default value is @samp{true}.
+@item novice-level
+Enable this if you are novice to Emacs in general.
+Disabling this variable the key press wait at startup, the @i{Mini Help}
+window and the message in the scratch buffer will be disabled.
+Default value is @samp{true}.
+@item show-eob-marker
+If enabled, a marker will be displayed at the end of the buffer.
+Default value is @samp{true}.
+@item status-line-color
+The color of the status line.
+Default value is @samp{cyan}.
+@item tab-width
+The default tabulation width.
+Default value is @samp{8}.
+@item text-mode-auto-fill
+If enabled, the @i{Auto Fill Mode} is automatically enabled in @i{Text Mode}.
+Default value is @samp{false}.
+@end table
+
+@c ---------------------------------------------------------------------------
+@node Bug reports,  , Variables, Top
+@chapter Bug reports
+
+Any questions, comments, or bug reports should be sent to the
+author at the Internet email address @email{ssigala@@tiscalinet.it}.
+Please take a look at the @file{KNOWNBUGS} file in the source package
+before posting a bug report.
+
+@contents
+
+@bye
+
+Local Variables:
+compile-command: "texi2dvi zile.texi"
+End:

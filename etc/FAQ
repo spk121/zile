@@ -1,0 +1,176 @@
+		    Zile FAQ - Frequently Asked Questions
+
+			   Last updated: 2001-01-03
+
+------------------------------------------------------------------------------
+
+INDEX
+
+1. General questions
+   1.1. What does `Zile' mean?
+   1.2. How to quit Zile?
+   1.3. How to return to the shell without leaving Zile?
+   1.4. Zile is hung.
+   1.5. How to undo the previous command?
+   1.6. What does `C-something' or `M-something' mean?
+   1.7. Is Zile GNU GPL copylefted?
+   1.8. The colors are not displayed on my screen.
+   1.9. What are the available variables that can be modified?
+   1.10. Zile resets the fontlock on every `C-l' press.
+   1.11. How to display non-English characters?
+   1.12. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   1.13. How to enable Auto Fill Mode in Text Mode at startup?
+
+2. Functionality
+   2.1. Zile is bogus.
+   2.2. I like the xyz function of (X)Emacs but in Zile isn't implemented.
+   2.3. Why did you choose such difficult key sequences?
+   2.4. What is the Zile internal macro language?
+   2.5. What about a GUI version of Zile?
+   2.6. Why another clone of Emacs?  Why not just use Emacs?
+
+3. Compiling
+   3.1. Can I compile Zile with the old Berkeley curses?
+   3.2. Zile doesn't compile correctly under the Foobar operating system.
+
+------------------------------------------------------------------------------
+
+1. General questions
+
+1.1. What does `Zile' mean?
+
+    It stands for `Zile Is Lossy Emacs'.  It is just another recursive
+    achronim like GNU (GNU's Not Unix).
+
+1.2. How to quit Zile?
+
+    Type `C-x C-c' (that means holding CONTROL while typing X, releasing them,
+    then holding CONTROL while typing C)
+
+1.3. How to return to the shell without leaving Zile?
+
+    Type `C-x C-z' or simply `C-z'.
+
+1.4. Zile is hung.
+
+    From the tutorial (`C-h t'):
+    If Zile gets into an infinite (or simply very long) computation which
+    you don't want to finish, you can stop it safely by typing `C-g'.
+    You can also use `C-g' to discard a numeric argument or the beginning of
+    a command that you don't want to finish.
+
+1.5. How to undo the previous command?
+
+    Type `C-x u'.
+
+1.6. What does `C-something' or `M-something' mean?
+
+    From the tutorial (`C-h t'):
+    C-<chr>  means hold the CONTROL key while typing the character <chr>
+	     Thus, `C-f' would be: hold the CONTROL key and type `f'.
+    M-<chr>  means hold the META or EDIT or ALT key down while typing <chr>.
+	     If there is no META, EDIT or ALT key, instead press and release
+	     the ESC key and then type <chr>.  We write <ESC> for the ESC key.
+
+1.7. Is Zile GNU GPL copylefted?
+
+    No it isn't.  It is released under a Berkeley-style license.
+    For more information read the `COPYRIGHT' file.
+
+1.8. The colors are not displayed on my screen.
+
+    Enable the `colors' variable into your `~/.zilerc' file.  If it is already
+    enabled, check your `TERM' environment variable and the ncurses manual.
+
+1.9. What are the available variables that can be modified?
+
+    Check out the `zilerc.sample' file (type `C-h s') for a full list
+    of modifiable variables.
+    You might also see the list of defined variables with the
+    command `list-variables' (or the key sequence `C-h l v').
+
+1.10. Zile resets the fontlock on every `C-l' press.
+
+    Disable the `auto-font-lock-refresh' variable in your `~/.zilerc'
+    initialization file.
+
+1.11. How to display non-English characters?
+
+    Put the following line in your `~/.zilerc' file:
+
+    	displayable-characters = "0x20-0x7e,0xa1-0xff"
+
+1.12. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+
+    You might try adding the following line to your `~/.zilerc' file:
+
+	alternative-bindings = true
+
+    and using the alternative key sequences (`M-h' instead of `C-h').
+
+1.13. How to enable Auto Fill Mode in Text Mode at startup?
+
+    Add the following line to your `~/.zilerc' file:
+
+	text-mode-auto-fill = true
+
+------------------------------------------------------------------------------
+
+2. Functionality
+
+2.1. Zile is bogus.
+
+    Any bug reports should be sent to the author at the Internet email
+    address <ssigala@tiscalinet.it>.  Patches are appreciated.
+
+2.2. I like the xyz function of (X)Emacs but in Zile isn't implemented.
+
+    Zile was written to be small but fast and powerful enough.
+    The most important thing is to be useful for small footprint
+    installations (like on floppy disk) or quick editing sessions.
+    In general, if you need something more powerful, use Emacs or XEmacs.
+    If you still think that a certain function should be implemented
+    in Zile, please send a message to the author (see previous question).
+
+2.3. Why did you choose such difficult key sequences?
+
+    Ask rms@gnu.org.
+
+2.4. What is the Zile internal macro language?
+
+    Zile is written in C only.  It doesn't currently support any macro
+    language like Lisp under Emacs or SLang under Jed.
+
+2.5. What about a GUI version of Zile?
+
+    See question 2.3.
+
+2.6. Why another clone of Emacs?  Why not just use Emacs?
+
+    From the features list in the Info documentation:
+	``Small but fast and powerful.  It is very useful for small
+	footprint installations (like on floppy disk) or quick editing
+	sessions.''
+
+    That's why sometimes (X)Emacs isn't the best editor to use :-)
+    I use XEmacs myself when I do coding, but I use Zile when I have,
+    let's say, to quick edit the dot files in the home directory; I don't
+    want to wait 5 seconds to load XEmacs for doing a 2 seconds editing...
+
+------------------------------------------------------------------------------
+
+3. Compiling
+
+3.1. Can I compile Zile with the old Berkeley curses?
+
+    No, you can't.  The 4.4BSD or prior versions of curses are obsolete.
+    Zile supports only ncurses (tested with version 4.2).
+
+3.2. Zile doesn't compile correctly under the Foobar operating system.
+
+    I have tested Zile under SuSE Linux 6.1 only.  Since it is
+    written in ANSI C, should be fairly easy to port it under other UNIX-like
+    operating systems.  If you get Zile running under any other OS, please
+    send a message to the Zile author telling him that (you might send him
+    the patches you done to the Zile sources if you want them included in the
+    next release).

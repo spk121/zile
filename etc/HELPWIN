@@ -1,0 +1,7 @@
+CURSOR                     FILE                       EDITING
+PGUP       previous page   C-x C-f    find file       C-@  set mark
+PGDN       next page       C-x C-s    save buffer     C-k  kill line
+C-a, HOME  beg. of line    C-x C-w    write to file   C-y  yank
+C-e, END   end of line     C-x C-c    quit Zile       C-w  kill region
+C-n, DOWN  next line       M-<        beg. of file
+C-p, UP    previous line   M->        end of file     Type C-h h for more help

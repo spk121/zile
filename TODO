@@ -1,0 +1,53 @@
+------------------------------------------------------------------------------
+
+HIGH PRIORITY
+
+* Functions/bindings to implement:
+
+C-s, C-r	isearch-forward
+C-r		isearch-backward
+		replace-string
+		query-replace
+C-x r k		kill-rectangle
+C-t		transpose-chars
+M-t		transpose-words
+C-M-t		transpose-sexps
+C-x C-t		transpose-lines
+M-DEL		backward-kill-word
+C-x DEL		backward-kill-sentence
+M-f		forward-word
+M-b		backward-word
+M-d		kill-word
+		goto-char
+
+* overwrite-mode: support the following Emacs functionality:
+In overwrite mode, printing characters typed in replace existing text
+on a one-for-one basis, rather than pushing it to the right.  At the
+end of a line, such characters extend the line.  Before a tab,
+such characters insert until the tab is filled in.
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C-q still inserts characters in overwrite mode; this
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+is supposed to make it easier to insert characters when necessary.
+
+------------------------------------------------------------------------------
+
+LOW PRIORITY
+
+* Allow the user to modify/define key bindings.
+* Regex pattern patching for search/replace functions.
+* Syntax highlighting for shell mode.
+* Automatic indentation for C/C++ modes.
+* Reimplement syntax highlighting using regex pattern matching.
+* Mouse support.
+* Dialogs are more user friendly than the minibuf buffer.
+
+* `*Messages Buffer*' feature.
+  zilerc.sample entry:
+    # Enable `*Messages*' buffer [default: yes]
+    # If enabled, echo area informative messages are saved in an editor
+    # buffer named `*Messages*'.  If you miss a message that appears briefly
+    # on the screen, you can switch to the `*Messages*' buffer to see it again.
+    messages-buffer = true
+
+* Parser for `-*- C -*-' and `-*- C++ -*-' like headers.

@@ -1,0 +1,19 @@
+* Richard M. Stallman <rms@gnu.ai.mit.edu> for creating the powerful
+  Emacs editor.
+* Daniel Sobral <Daniel_Sobral@voga.com.br> for suggestions.
+* Mikael Karpberg <karpen@ocean.campus.luth.se> for bug reports, fixes
+  and suggestions.
+* George Young <gryoung@nortel.ca> for bug reports.
+* Jim Buchanan <c22jrb@dawg.delcoelect.com> for suggestions.
+* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes and the
+  `goto-line' function.
+* Tim Middelkoop <mtim@arranvale.com> for the backup directory feature.
+* Jeff Sheinberg <jeffsh@erols.com> for bug reports.
+* Christian Weisgerber <naddy@mips.inka.de> for bug reports.
+* Pawel A. Gajda <mis@k2.net.pl> for bug reports.
+* Jason Evans <jasone@canonware.com> for bug reports.
+* Mattias R"onnblom <hofors@lysator.liu.se> for bug reports.
+* Rouge Alain <alain.rouge@enac.fr> for suggestions and bug reports.
+* Gerd Bavendiek <bav@esn.sbs.de> for suggestions.
+* Dale DePriest <daled@cadence.com> for suggestions.
+* Florian Nykrin <flo.n@gmx.de> for suggestions and bug reports.

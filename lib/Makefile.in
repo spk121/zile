@@ -1,0 +1,39 @@
+#	$Id: Makefile.in,v 1.1 2001/01/19 22:01:44 ssigala Exp $
+
+srcdir = @srcdir@
+VPATH = $(srcdir)
+
+CC = @CC@
+CFLAGS = -I../src -W @CFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+RANLIB = @RANLIB@
+
+LIB = libzile.a
+OBJS = @LIBOBJS@
+
+.c.o:
+	$(CC) -c -I. -I$(srcdir) $(CFLAGS) $<
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	rm -f $(LIB)
+	ar rc $(LIB) $(OBJS)
+	$(RANLIB) $(LIB)
+
+.PHONY: install uninstall clean realclean distclean mostlyclean
+
+install:
+
+uninstall:
+
+clean: 
+	-rm -f $(LIB) *.o
+
+distclean: clean 
+	-rm -f Makefile
+
+realclean: distclean
+
+mostlyclean: clean

@@ -1,0 +1,108 @@
+# .zilerc sample configuration
+
+# Enable this if you are novice to Emacs in general [default: true]
+# Disabling this variable the key press wait at startup, the Mini Help
+# window and the message in the scratch buffer will be disabled.
+novice-level = true
+
+# Enable alternative key bindings [default: false]
+# Remap the help functions (bound by default to `C-h') to `M-h'.
+# This may be useful when `C-h' is already bound to Backspace or Delete.
+alternative-bindings = false
+
+# The displayable characters [default: "0x20-0x7e"]
+# Specify the set of characters that can be shown as-is on the screen.
+# The characters not included in this set are shown as octal
+# sequences (like \261).  For European character sets, set this
+# variable to "0x20-0x7e,0xa1-0xff".
+displayable-characters = "0x20-0x7e"
+
+# The default tabulation width [default: 8]
+tab-width = 8
+
+# The default fill column (in Auto Fill Mode) [default: 72]
+fill-column = 72
+
+# Automatically enable the Auto Fill Mode in Text Mode [default: false]
+text-mode-auto-fill = false
+
+# Display time in status line [default: true]
+display-time = true
+# Display time format (see strftime(3) man page) [default: %I:%M%p]
+display-time-format = "%I:%M%p"
+
+# Enable display of End Of Buffer marker [default: true]
+# If enabled, a marker will be displayed at the end of the buffer.
+show-eob-marker = true
+
+# Highlight the current region with reversed colors [default: true]
+highlight-region = true
+
+# Specify the file backup method [default: simple]
+#
+# Possible values are: none, simple and revision.
+#
+# * If `none' is specified, Zile will not create backup files.
+#
+# * If `simple' is specified, Zile will create a backup file with a
+#   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
+#   create the backup `foo.c~').
+#
+# * If `revision' is specified, Zile will create a new backup file on
+#   each file saving preserving the old backups of the original file
+#   (e.g.: on saving `foo.c' it will create the backup `foo.c~1~', then
+#   on next save `foo.c~2~', etc.).
+backup-method = simple
+
+# Enable backup directory for backup files [default: false]
+# If enabled Zile will backup files to a user specified directory;
+# the directory must exist and must be specified in the
+# variable `backup-directory' (see below).
+backup-with-directory = false
+
+# Specify target backup directory [default: "~/.backup"]
+# Directory must be existent.
+backup-directory = "~/.backup"
+
+# Expand tabs [default: false]
+# If disabled, Zile will insert hard tabs (the character \t),
+# otherwise it will insert spaces.
+expand-tabs = false
+
+# Display colors [default: true]
+# If your terminal supports colors, you should leave this enabled.
+colors = true
+
+# The color of the status line [default: cyan]
+# For a list of colors, see below.
+status-line-color = cyan
+
+# Font lock fonts for C/C++ source files
+# Available colors are:
+#     black, blue, cyan, green, magenta, red, white, yellow,
+#     light-black, light-blue, light-cyan, light-green, light-magenta,
+#     light-red, light-white, light-yellow
+font-character = green			# [default: green]
+font-character-delimiters = white	# [default: white]
+font-comment = red			# [default: red]
+font-directive = blue			# [default: blue]
+font-identifier = white			# [default: white]
+font-keyword = magenta			# [default: magenta]
+font-number = cyan			# [default: cyan]
+font-other = white			# [default: white]
+font-string = green			# [default: green]
+font-string-delimiters = white		# [default: white]
+
+# Enable automatic font lock mode for C/C++ files [default: true]
+# Font lock can also be toggled using the `M-x font-lock-mode' command.
+# Font lock currently recognizes only the C and C++ languages.
+auto-font-lock = true
+
+# Enable automatic font lock refresh [default: true]
+# If enabled, the file will be reparsed by font lock on every C-l press.
+# This may be disabled on slow machines.
+auto-font-lock-refresh = true
+
+# Enable beep [default: true]
+# If enabled, a sound will be emitted on any error.
+beep = true

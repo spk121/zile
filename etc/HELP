@@ -1,0 +1,1144 @@
+Please consider reading the Texinfo version of this manual.
+
+This is the *Zile* manual.
+
+   Zile is another Emacs-clone.  Zile is a customizable,
+self-documenting real-time display editor.  Zile was written to be as
+similar as possible to Emacs; every Emacs user should feel at home with
+Zile.
+
+Overview
+********
+
+   The *Zile* editor is written entirely in "C" with the help of the
+*ncurses* library.  Zile can't be compiled with a library different
+than ncurses.  It has been tested under *Linux* only, but it should be
+fairly simple to port it under other operating systems, since it is
+written in *ANSI C*.
+
+   Zile should really appear like Emacs, but a lot of good ideas were
+also taken from from other editors:
+   - Emacs: General look-n-feel, function names, function behaviors,
+     key bindings.
+
+   - XEmacs: Some minor hints for look-n-feel.
+
+   - Jed: Mini help window, mode line.
+
+   - ce: Structure names, function names.
+
+Features
+********
+
+   - Small but fast and powerful.  It is very useful for small
+     footprint installations (like on floppy disk) or quick editing
+     sessions.
+
+   - 8-bit clean.  Zile can operate with binary files.
+
+   - Looks like *Emacs*.  Most Zile key sequences and function names
+     are identical to Emacs ones.
+
+   - Multi buffer editing w/multi level undo.  Zile can open an
+     infinite number of files and can record an infinite sequence of
+     undo operations.
+
+   - Multi window.  Zile can display multiple windows on the screen.
+
+   - Killing, yanking and registers.  The typical killing, yanking and
+     register features of Emacs are available under Zile.
+
+   - Minibuffer completion.  Zile can complete the user written text.
+     This is very useful for `M-x' commands and for selecting files.
+
+   - Colors.  Zile makes use of the color capatibilities of the
+     terminal if available.
+
+   - Source highlighting ("C" and "C++" only for now).  Zile can
+     highlight the "C" and "C++" source files for better reading.
+
+   - Auto fill (word wrap).  Zile automatically breaks the lines when
+     they become too wide (if the Auto Fill Mode is enabled).
+
+Differences
+***********
+
+Differences from Emacs
+======================
+
+   - <HOME> is bound to `beginning-of-line', not `beginning-of-buffer'.
+
+   - <END> is bound to `end-of-line', not `end-of-buffer'.
+
+   - <PGUP> and <PGDN> will move the cursor to the beginning or end of
+     buffer if the beginning or the end buffer page is already
+     displayed.
+
+   - `M-g' is bound to `goto-line'.
+
+Invoking Zile
+*************
+
+   The options are as follows:
+
+`file'
+     Edit file `file'.
+
+`+number'
+     For the first file the cursor will be positioned on the line
+     specified by `number' (do not insert a space between the `+' sign
+     and the number).
+
+`-h'
+     Display the minihelp window at startup.  This may be useful for
+     novice users.
+
+`-q'
+     Do not load the user's initialization file.
+
+`-V'
+     Print version information on standard output then exit.
+
+`-f function'
+     Invoke the named internal function with no arguments.  For
+     example, `-f auto-fill-mode' turns on Auto Fill Mode.
+
+Initialization file
+*******************
+
+   When Zile is started, it normally loads the `.zilerc' file in your
+home directory.  We call this file your "initialization file" because
+it specifies how to initialize Zile for you.  You can use the command
+line switch `-q' to tell Zile whether to load the init file.
+
+File syntax
+===========
+
+   The initialization file is composed by a sequence of variable
+assignments.  Every variable assignment is terminated by a newline and
+is composed by a variable name, an equality sign (`=') and a value.  If
+the value contains non alpha-numerical characters (like spaces or
+punctuation characters) it should be enclosed within the double quote
+(`"') characters.
+
+   The comments begin with a `#' character and terminate with the end
+of the line.  The comments can be placed anywhere in the initialization
+file (obviously not within an assignment).
+
+   Some examples:
+
+     # This is a comment.
+     expand-tabs = false
+     colors = true
+     tab-width = 8    # This is another comment.
+     display-time-format = "%I:%M%p"
+
+A sample file
+=============
+
+   This is the initialization file that comes with the Zile sources.
+
+     # .zilerc sample configuration
+     
+     # Enable this if you are novice to Emacs in general [default: true]
+     # Disabling this variable the key press wait at startup, the Mini Help
+     # window and the message in the scratch buffer will be disabled.
+     novice-level = true
+     
+     # Enable alternative key bindings [default: false]
+     # Remap the help functions (bound by default to `C-h') to `M-h'.
+     # This may be useful when `C-h' is already bound to Backspace or Delete.
+     alternative-bindings = false
+     
+     # The displayable characters [default: "0x20-0x7e"]
+     # Specify the set of characters that can be shown as-is on the screen.
+     # The characters not included in this set are shown as octal
+     # sequences (like \261).  For European character sets, set this
+     # variable to "0x20-0x7e,0xa1-0xff".
+     displayable-characters = "0x20-0x7e"
+     
+     # The default tabulation width [default: 8]
+     tab-width = 8
+     
+     # The default fill column (in Auto Fill Mode) [default: 72]
+     fill-column = 72
+     
+     # Automatically enable the Auto Fill Mode in Text Mode [default: false]
+     text-mode-auto-fill = false
+     
+     # Display time in status line [default: true]
+     display-time = true
+     # Display time format (see strftime(3) man page) [default: %I:%M%p]
+     display-time-format = "%I:%M%p"
+     
+     # Enable display of End Of Buffer marker [default: true]
+     # If enabled, a marker will be displayed at the end of the buffer.
+     show-eob-marker = true
+     
+     # Highlight the current region with reversed colors [default: true]
+     highlight-region = true
+     
+     # Specify the file backup method [default: simple]
+     #
+     # Possible values are: none, simple and revision.
+     #
+     # * If `none' is specified, Zile will not create backup files.
+     #
+     # * If `simple' is specified, Zile will create a backup file with a
+     #   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
+     #   create the backup `foo.c~').
+     #
+     # * If `revision' is specified, Zile will create a new backup file on
+     #   each file saving preserving the old backups of the original file
+     #   (e.g.: on saving `foo.c' it will create the backup `foo.c~1~', then
+     #   on next save `foo.c~2~', etc.).
+     backup-method = simple
+     
+     # Enable backup directory for backup files [default: false]
+     # If enabled Zile will backup files to a user specified directory;
+     # the directory must exist and must be specified in the
+     # variable `backup-directory' (see below).
+     backup-with-directory = false
+     
+     # Specify target backup directory [default: "~/.backup"]
+     # Directory must be existent.
+     backup-directory = "~/.backup"
+     
+     # Expand tabs [default: false]
+     # If disabled, Zile will insert hard tabs (the character \t),
+     # otherwise it will insert spaces.
+     expand-tabs = false
+     
+     # Display colors [default: true]
+     # If your terminal supports colors, you should leave this enabled.
+     colors = true
+     
+     # The color of the status line [default: cyan]
+     # For a list of colors, see below.
+     status-line-color = cyan
+     
+     # Font lock fonts for C/C++ source files
+     # Available colors are:
+     #     black, blue, cyan, green, magenta, red, white, yellow,
+     #     light-black, light-blue, light-cyan, light-green, light-magenta,
+     #     light-red, light-white, light-yellow
+     font-character = green                  # [default: green]
+     font-character-delimiters = white       # [default: white]
+     font-comment = red                      # [default: red]
+     font-directive = blue                   # [default: blue]
+     font-identifier = white                 # [default: white]
+     font-keyword = magenta                  # [default: magenta]
+     font-number = cyan                      # [default: cyan]
+     font-other = white                      # [default: white]
+     font-string = green                     # [default: green]
+     font-string-delimiters = white          # [default: white]
+     
+     # Enable automatic font lock mode for C/C++ files [default: true]
+     # Font lock can also be toggled using the `M-x font-lock-mode' command.
+     # Font lock currently recognizes only the C and C++ languages.
+     auto-font-lock = true
+     
+     # Enable automatic font lock refresh [default: true]
+     # If enabled, the file will be reparsed by font lock on every C-l press.
+     # This may be disabled on slow machines.
+     auto-font-lock-refresh = true
+     
+     # Enable beep [default: true]
+     # If enabled, a sound will be emitted on any error.
+     beep = true
+
+Getting help
+************
+
+   This table contains the commands that can be used during an editing
+session to get help.
+
+   If you have set the `alternative-bindings' variable to `true', the
+`M-h' key should be used instead of `C-h'.
+
+`C-h C-d'
+     Show informations about getting the latest version.
+
+`C-h C-h'
+     Toggle the command help window.
+
+`C-h F'
+     Show the Frequently Asked Questions about Zile.
+
+`C-h d, C-h f'
+     Describe a function.
+
+`C-h h, F1'
+     Show this manual.
+
+`C-h k'
+     Describe a key sequence.
+
+`C-h l b'
+     Show the defined bindings.
+
+`C-h l f'
+     Show the defined functions.
+
+`C-h l r'
+     Show the defined registers.
+
+`C-h l v'
+     Show the defined variables.
+
+`C-h s'
+     Show a sample configuration file.
+
+`C-h t'
+     Show a tutorial window.
+
+`C-h v'
+     Describe a variable.
+
+Key names
+*********
+
+   This table contains the names of the keys that are used in this
+manual and under Zile.
+
+<SPC>
+     Space
+
+<RET>
+     Return
+
+<LFD>
+     Linefeed
+
+<TAB>
+     Tab
+
+<BS>
+     Backspace
+
+<ESC>
+     Escape
+
+<DEL>
+     Delete
+
+<SFT>
+     Shift
+
+<CTRL>
+     Control
+
+<META>
+     Meta (also known as <EDIT> or <ALT> on some keyboards).
+
+   In key combinations, like `M-g', the `M-' prefix means hold the
+<META> (or <EDIT> or <ALT>) key down while typing `g'.  The combination
+`C-x' means hold the <CTRL> key down while typing `x'.
+
+Key bindings
+************
+
+   This table contains the full list of commands associated with key
+sequences.
+
+   If you have set the `alternative-bindings' variable to `true', the
+`M-h' key should be used instead of `C-h'.
+
+   At run-time, you can list the current defined bindings with the
+`list-bindings' command.
+
+`<BS>'
+     Delete the previous character.
+
+`<INS>'
+     Toggle overwrite mode.
+
+`<RET>'
+     Insert a new line.
+
+`<TAB>'
+     Insert a tab character.
+
+`C-@, C-<SPC>'
+     Set mark.
+
+`C-a, <HOME>'
+     Go to the beginning of line.
+
+`C-b, <LEFT>'
+     Move cursor to the previous char.
+
+`C-d, <DEL>'
+     Delete current char.
+
+`C-e, <END>'
+     Go to the end of line.
+
+`C-f, <RIGHT>'
+     Move cursor to the next char.
+
+`C-g'
+     Cancel current command.
+
+`C-h C-d'
+     Show informations about getting the latest version.
+
+`C-h C-h'
+     Toggle mini help window.
+
+`C-h F'
+     Show the FAQ.
+
+`C-h d, C-h f'
+     Describe a function.
+
+`C-h h, F1'
+     Show an help window.
+
+`C-h k'
+     Describe a key sequence.
+
+`C-h l b'
+     Show the defined bindings.
+
+`C-h l f'
+     Show the defined functions.
+
+`C-h l r'
+     Show the defined registers.
+
+`C-h l v'
+     List defined variables.
+
+`C-h s'
+     Show a sample configuration file.
+
+`C-h t'
+     Show a tutorial window.
+
+`C-h v'
+     Describe a variable.
+
+`C-k'
+     Kill line.
+
+`C-l'
+     Redraw display.
+
+`C-n, <DOWN>'
+     Move cursor to the next line.
+
+`C-p, <UP>'
+     Move cursor to the previous line.
+
+`C-q'
+     Read next input character and insert it.
+
+`C-r'
+     Search backward.
+
+`C-s'
+     Search forward.
+
+`C-u'
+     Begin a numeric argument for the following command.
+
+`C-w'
+     Kill region.
+
+`C-x C-b'
+     List buffers.
+
+`C-x C-c'
+     Save modified buffers and quit zile.
+
+`C-x C-f'
+     Find a file for editing.
+
+`C-x C-l'
+     Convert the region to downcase.
+
+`C-x C-q'
+     Toggle read only mode.
+
+`C-x C-s'
+     Save the current buffer.
+
+`C-x C-u'
+     Convert the region to upcase.
+
+`C-x C-v'
+     Kill the current buffer and find a file for editing.
+
+`C-x C-w'
+     Write buffer to a file.
+
+`C-x C-x'
+     Exchange point and mark.
+
+`C-x ^'
+     Enlarge current window.
+
+`C-x ('
+     Start recording keyboard macro.
+
+`C-x )'
+     End recording keyboard macro.
+
+`C-x 0'
+     Delete the current window.
+
+`C-x 1'
+     Delete the other open windows.
+
+`C-x 2'
+     Split current window.
+
+`C-x b'
+     Switch to a buffer.
+
+`C-x e'
+     Execute the last recorded keyboard macro.
+
+`C-x f'
+     Set the fill column.
+
+`C-x h'
+     Mark whole buffer.
+
+`C-x i'
+     Insert the contents of a file.
+
+`C-x k'
+     Kill current buffer.
+
+`C-x r i'
+     Insert register.
+
+`C-x r s'
+     Copy region to register.
+
+`C-x s'
+     Save modified buffers.
+
+`C-x o'
+     Select the other window.
+
+`C-x u, C-_'
+     Undo some previous changes.
+
+`C-y'
+     Yank killed text.
+
+`C-v, <PGDN>'
+     Scroll up one screen page.
+
+`C-z, C-x C-z'
+     Stop Zile and return to superior process.
+
+`M-<'
+     Go to the beginning of buffer.
+
+`M->'
+     Go to the end of buffer.
+
+`M-g'
+     Read line number and go there.
+
+`M-v, <PGUP>'
+     Scroll down one screen page.
+
+`M-w'
+     Save the region as if killed, but don't kill it.
+
+`M-x'
+     Execute extended command.
+
+Functions
+*********
+
+   This table contains the full list of available functions, that can be
+called with the `M-x' key (please note that most functions have a key
+binding, anyway).
+
+   At run-time, you can list the current defined functions with the
+`list-functions' command.
+
+`auto-fill-mode'
+     Toggle Auto Fill Mode.  In Auto Fill Mode, inserting a space at a
+     column beyond `fill-column' automatically breaks the line at a
+     previous space.
+
+`backward-char'
+     Move point left one character.  On attempt to pass beginning or
+     end of buffer, stop and signal error.
+
+`backward-delete-char'
+     Delete the previous character.  Join lines if the character is a
+     newline.
+
+`beginning-of-buffer'
+     Move point to the beginning of the buffer; leave mark at previous
+     position.
+
+`beginning-of-line'
+     Move point to beginning of current line.
+
+`c-mode'
+     Turn on the C Mode mode for editing K&R and ANSI/ISO C code.
+
+`c++-mode'
+     Turn on the C++ Mode for editing ANSI/ISO C++ code.
+
+`call-last-kbd-macro'
+     Call the last keyboard macro that you defined with `C-x ('.  A
+     prefix argument serves as a repeat count.  Zero means repeat until
+     error.
+
+`cd'
+     Make the user specified directory become the current buffer's
+     default directory.
+
+`copy-region-as-kill'
+     Save the region as if killed, but don't kill it.
+
+`copy-to-register'
+     Copy region into the user specified register.
+
+`delete-char'
+     Delete the following character.  Join lines if the character is a
+     newline.
+
+`delete-other-windows'
+     Make the selected window fill the screen.
+
+`delete-window'
+     Remove the current window from the screen.
+
+`describe-function'
+     Display the full documentation of a function.
+
+`describe-key'
+     Display documentation of the function invoked by a key sequence.
+
+`describe-variable'
+     Display the full documentation of a variable.
+
+`downcase-region'
+     Convert the region to lower case.
+
+`end-kbd-macro'
+     Finish defining a keyboard macro.  The definition was started by
+     `C-x ('.  The macro is now available for use via `C-x e'.
+
+`end-of-buffer'
+     Move point to the end of the buffer; leave mark at previous
+     position.
+
+`end-of-line'
+     Move point to end of current line.
+
+`enlarge-window'
+     Make current window one line bigger.
+
+`exchange-point-and-mark'
+     Put the mark where point is now, and point where the mark is now.
+
+`execute-extended-command'
+     Read function name, then read its arguments and call it.
+
+`find-alternate-file'
+     Find the file specified by the user, select its buffer, kill
+     previous buffer.  If the current buffer now contains an empty file
+     that you just visited (presumably by mistake), use this command to
+     visit the file you really want.
+
+`find-file'
+     Edit a file specified by the user.  Switch to a buffer visiting
+     the file, creating one if none already exists.
+
+`font-lock-mode'
+     Toggle Font Lock Mode.  When Font Lock Mode is enabled, text is
+     fontified as you type it.
+
+`font-lock-refresh'
+     Refresh the Font Lock Mode internal structures.  This may be
+     called when the fontification looks weird.
+
+`forward-char'
+     Move point right one character.  On reaching end of buffer, stop
+     and signal error.
+
+`goto-line'
+     Move cursor to the beginning of the specified line.
+
+`help'
+     Show a help window.
+
+`help-config-sample'
+     Show a configuration file sample.
+
+`help-faq'
+     Show the Zile Frequently Asked Questions (FAQ).
+
+`help-latest-version'
+     Show informations about getting the latest version.
+
+`help-tutorial'
+     Show a tutorial window.
+
+`insert-buffer'
+     Insert after point the contents of the user specified buffer.
+     Puts mark after the inserted text.
+
+`insert-file'
+     Insert contents of the user specified file into buffer after point.
+     Set mark after the inserted text.
+
+`insert-register'
+     Insert contents of the user specified register.  Puts point before
+     and mark after the inserted text.
+
+`keyboard-quit'
+     Cancel current command.
+
+`kill-buffer'
+     Kill the current buffer or the user specified one.
+
+`kill-line'
+     Kill the rest of the current line; if no nonblanks there, kill
+     thru newline.
+
+`kill-region'
+     Kill between point and mark.  The text is deleted but saved in the
+     kill ring.  The command `C-y' (yank) can retrieve it from there.
+
+     If the buffer is read-only, Zile will beep and refrain from
+     deleting the text, but put the text in the kill ring anyway.  This
+     means that you can use the killing commands to copy text from a
+     read-only buffer.
+
+     If the previous command was also a kill command, the text killed
+     this time appends to the text killed last time to make one entry
+     in the kill ring.
+
+`list-bindings'
+     List defined bindings.
+
+`list-buffers'
+     Display a list of names of existing buffers.  The list is
+     displayed in a buffer named `*Buffer List*'.  Note that buffers
+     with names starting with spaces are omitted.
+
+        - The `M' column contains a `*' for buffers that are modified.
+
+        - The `R' column contains a `%' for buffers that are read-only.
+
+`list-functions'
+     List defined functions.
+
+`list-registers'
+     List defined registers.
+
+`list-variables'
+     List defined variables.
+
+`mark-whole-buffer'
+     Put point at beginning and mark at end of buffer.
+
+`newline'
+     Insert a newline at the current point position into the current
+     buffer.
+
+`next-line'
+     Move cursor vertically down one line.  If there is no character in
+     the target line exactly under the current column, the cursor is
+     positioned after the character in that line which spans this
+     column, or at the end of the line if it is not long enough.
+
+`other-window'
+     Select the first different window on the screen.  All windows are
+     arranged in a cyclic order.  This command selects the window one
+     step away in that order.
+
+`overwrite-mode'
+     In Overwrite Mode, printing characters typed in replace existing
+     text on a one-for-one basis, rather than pushing it to the right.
+     At the end of a line, such characters extend the line.  `C-q'
+     still inserts characters in Overwrite Mode; this is supposed to
+     make it easier to insert characters when necessary.
+
+`previous-line'
+     Move cursor vertically up one line.  If there is no character in
+     the target line exactly over the current column, the cursor is
+     positioned after the character in that line which spans this
+     column, or at the end of the line if it is not long enough.
+
+`quoted-insert'
+     Read next input character and insert it.  This is useful for
+     inserting control characters.
+
+`recenter'
+     Center point in window and redisplay screen.  The desired position
+     of point is always relative to the current window.
+
+`save-buffer'
+     Save current buffer in visited file if modified. By default, makes
+     the previous version into a backup file if this is the first save.
+
+`save-buffers-kill-zile'
+     Offer to save each buffer, then kill this Zile process.
+
+`save-some-buffers'
+     Save some modified file-visiting buffers.  Asks user about each
+     one.
+
+`scroll-down'
+     Scroll text of current window downward near full screen.
+
+`scroll-up'
+     Scroll text of current window upward near full screen.
+
+`search-backward'
+     Search backward from point for the user specified text.
+
+`search-forward'
+     Search forward from point for the user specified text.
+
+`self-insert-command'
+     Insert the character you type.
+
+`set-fill-column'
+     Set the fill column.  If an argument value is passed, set the
+     `fill-column' variable with that value, otherwise with the current
+     column value.
+
+`set-mark-command'
+     Set mark at where point is.
+
+`set-variable'
+     Set a variable value to the user specified value.
+
+`split-window'
+     Split current window into two windows, one above the other.  Both
+     windows display the same buffer now current.
+
+`start-kbd-macro'
+     Record subsequent keyboard input, defining a keyboard macro.  The
+     commands are recorded even as they are executed.  Use `C-x )' to
+     finish recording and make the macro available.
+
+`suspend-zile'
+     Stop Zile and return to superior process.
+
+`switch-to-buffer'
+     Select to the user specified buffer in the current window.
+
+`tabify'
+     Convert multiple spaces in region to tabs when possible.  A group
+     of spaces is partially replaced by tabs when this can be done
+     without changing the column they end at.  The variable `tab-width'
+     controls the spacing of tab stops.
+
+`tab-to-tab-stop'
+     Insert a tabulation at the current point position into the current
+     buffer.  Convert the tabulation into spaces if the `expand-tabs'
+     variable is bound and set to true.
+
+`text-mode'
+     Turn on the Text Mode for editing text intended for humans to read.
+
+`toggle-minihelp-window'
+     Toggle the mini help window.
+
+`toggle-read-only'
+     Change whether this buffer is visiting its file read-only.
+
+`undo'
+     Undo some previous changes.  Repeat this command to undo more
+     changes.
+
+`universal-argument'
+     Begin a numeric argument for the following command.  Digits or
+     minus sign following `C-u' make up the numeric argument.  `C-u'
+     following the digits or minus sign ends the argument.  `C-u'
+     without digits or minus sign provides 4 as argument.  Repeating
+     `C-u' without digits or minus sign multiplies the argument by 4
+     each time.
+
+`untabify'
+     Convert all tabs in region to multiple spaces, preserving columns.
+     The variable `tab-width' controls the spacing of tab stops.
+
+`upcase-region'
+     Convert the region to upper case.
+
+`write-file'
+     Write current buffer into the user specified file.  Makes buffer
+     visit that file, and marks it not modified.
+
+`yank'
+     Reinsert the last stretch of killed text.  More precisely,
+     reinsert the stretch of killed text most recently killed or
+     yanked.  Put point at end, and set mark at beginning.
+
+`zile-version'
+     Show the zile version.
+
+Variables
+*********
+
+   This table contains the full list of available variables, that can be
+modified at run-time with the `set-variable' function or set at start-up
+in the `.zilerc' initialization file.
+
+   At run-time, you can list the current defined variables with the
+`list-variables' command.
+
+`alternative-bindings'
+     Remap the help functions (bound by default to `C-h') to `M-h'.
+     This may be useful when `C-h' is already bound to <BS> or <DEL>.
+     Please note that changing this variable at run-time has no effect;
+     you need instead to modify your `~/.zilerc' configuration file and
+     restart Zile.  Default value is `false'.
+
+`auto-font-lock'
+     Automatically turn on Font Lock Mode when a C or C++ file is
+     opened.  Default value is `true'.
+
+`auto-font-lock-refresh'
+     If enabled, the file will be reparsed by Font Lock on every `C-l'
+     press. This may be disabled on slow machines.  Default value is
+     `true'.
+
+`backup-directory'
+     Specify target backup directory.  Directory must be existent.
+     This value is used only when the `backup-with-directory' value is
+     true.  Default value is `~/.backup'.
+
+`backup-method'
+     Specify the file backup method.  Possible values are: `none',
+     `simple' and `revision'.
+    `none'
+          If `none' is specified, Zile will not create backup files.
+
+    `simple'
+          If `simple' is specified, Zile will create a backup file with
+          a tilde `~' appended to the name (e.g.: on saving `foo.c' it
+          will create the backup `foo.c~').
+
+    `revision'
+          If `revision' is specified, Zile will create a new backup
+          file on each file saving preserving the old backups of the
+          original file (e.g.: on saving `foo.c' it will create the
+          backup `foo.c~1~', then on next save `foo.c~2~', etc.).
+     Default value is `simple'.
+
+`backup-with-directory'
+     If enabled Zile will backup files to a user specified directory;
+     the directory must exist and must be specified in the variable
+     `backup-directory'.  Default value is `false'.
+
+`beep'
+     If enabled, a sound will be emitted on any error.  Default value
+     is `true'.
+
+`colors'
+     Enable colors. If your terminal supports colors, you should leave
+     this enabled.  Please note that changing this variable at run-time
+     has no effect; you need instead to modify your `~/.zilerc'
+     configuration file and restart Zile.  Default value is `true'.
+
+`display-time'
+     If enabled the time is displayed in the status line.  Default
+     value is `true'.
+
+`display-time-format'
+     The format of the displayed time in the status line.
+
+     Conversion specifiers are introduced by a `%' character, and are
+     replaced in the time format string as follows:
+
+    `%a'
+          The abbreviated weekday name according to the current locale.
+
+    `%A'
+          The full weekday name according to the current locale.
+
+    `%b'
+          The abbreviated month name according to the current locale.
+
+    `%B'
+          The full month name according to the current locale.
+
+    `%c'
+          The preferred date and time representation for the current
+          locale.
+
+    `%d'
+          The day of the month as a decimal number (range 01 to 31).
+
+    `%H'
+          The hour as a decimal number using a 24-hour clock (range 00
+          to 23).
+
+    `%I'
+          The hour as a decimal number using a 12-hour clock (range 01
+          to 12).
+
+    `%j'
+          The day of the year as a decimal number (range 001 to 366).
+
+    `%m'
+          The month as a decimal number (range 01 to 12).
+
+    `%M'
+          The minute as a decimal number.
+
+    `%p'
+          Either `am' or `pm' according to the given time value, or the
+          corresponding strings for the current locale.
+
+    `%S'
+          The second as a decimal number.
+
+    `%U'
+          The week number of the current year as a decimal number,
+          starting with the first Sunday as the first day of the first
+          week.
+
+    `%W'
+          The week number of the current year as a decimal number,
+          starting with the first Monday as the first day of the first
+          week.
+
+    `%w'
+          The day of the week as a decimal, Sunday being 0.
+
+    `%x'
+          The preferred date representation for the current locale
+          without the time.
+
+    `%X'
+          The preferred time representation for the current locale
+          without the date.
+
+    `%y'
+          The year as a decimal number without a century (range 00 to
+          99).
+
+    `%Y'
+          The year as a decimal number including the century.
+
+    `%Z'
+          The time zone or name or abbreviation.
+
+    `%%'
+          A literal `%' character.
+
+     Default value is `%I:%M%p'.
+
+`displayable-characters'
+     Specify the set of characters that can be shown as-is on the
+     screen.  The characters not included in this set are shown as octal
+     sequences (like `\261').
+
+     The set syntax is the following:
+          set       ::= range | value ( ',' range | value )*
+          range     ::= value '-' value
+          value     ::= hex_value | oct_value | dec_value
+          hex_value ::= '0x'[0-9a-fA-F]+
+          oct_value ::= '0'[0-7]*
+          dec_value ::= [1-9][0-9]*
+     For example, the following are valid sets:
+    `0x20-0x7e'
+          Standard English-only character set.
+
+    `0x20-0x7e,0xa1-0xff'
+          Typical European character set.
+
+    `0-15,17,0xef-0xff'
+    `012,015-0x50'
+          Correct but useless character sets.  Default value is
+     `0x20-0x7e'.
+
+`expand-tabs'
+     If disabled, Zile will insert hard tabs (the character `\t'),
+     otherwise it will insert spaces.  Default value is `false'.
+
+`fill-column'
+     The default fill column (used in Auto Fill Mode).  Default value
+     is `72'.
+
+`font-character'
+     The color used in Font Lock Mode for characters.  Default value is
+     `green'.
+
+`font-character-delimiters'
+     The color used in Font Lock Mode for character delimiters.
+     Default value is `white'.
+
+`font-comment'
+     The color used in Font Lock Mode for comments.  Default value is
+     `red'.
+
+`font-directive'
+     The color used in Font Lock Mode for preprocessor directives.
+     Default value is `blue'.
+
+`font-identifier'
+     The color used in Font Lock Mode for identifiers.  Default value
+     is `white'.
+
+`font-keyword'
+     The color used in Font Lock Mode for keywords.  Default value is
+     `magenta'.
+
+`font-number'
+     The color used in Font Lock Mode for numbers.  Default value is
+     `cyan'.
+
+`font-other'
+     The color used in Font Lock Mode for the text.  Default value is
+     `white'.
+
+`font-string'
+     The color used in Font Lock Mode for strings.  Default value is
+     `green'.
+
+`font-string-delimiters'
+     The color used in Font Lock Mode for string delimiters.  Default
+     value is `white'.
+
+`highlight-region'
+     If enabled, highlight the current region with reversed colors.
+     Default value is `true'.
+
+`novice-level'
+     Enable this if you are novice to Emacs in general.  Disabling this
+     variable the key press wait at startup, the Mini Help window and
+     the message in the scratch buffer will be disabled.  Default value
+     is `true'.
+
+`show-eob-marker'
+     If enabled, a marker will be displayed at the end of the buffer.
+     Default value is `true'.
+
+`status-line-color'
+     The color of the status line.  Default value is `cyan'.
+
+`tab-width'
+     The default tabulation width.  Default value is `8'.
+
+`text-mode-auto-fill'
+     If enabled, the Auto Fill Mode is automatically enabled in Text
+     Mode.  Default value is `false'.
+
+Bug reports
+***********
+
+   Any questions, comments, or bug reports should be sent to the author
+at the Internet email address <ssigala@tiscalinet.it>.  Please take a
+look at the `KNOWNBUGS' file in the source package before posting a bug
+report.
+

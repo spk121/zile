@@ -1,0 +1,69 @@
+#	$Id: Makefile.in,v 1.1 2001/01/19 22:01:36 ssigala Exp $
+
+srcdir = @srcdir@
+VPATH = $(srcdir)
+
+prefix = @prefix@
+
+etcdir = $(prefix)/share/zile
+
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL = @INSTALL@
+
+CC = @CC@
+CFLAGS = -I.. -I../lib -I../src -W @CFLAGS@
+LDFLAGS = @LDFLAGS@
+ZILELIBS = ../lib/libzile.a
+LIBS = $(ZILELIBS) @LIBS@
+
+FILES = $(srcdir)/zilerc.sample \
+	$(srcdir)/FAQ $(srcdir)/HELP $(srcdir)/HELPWIN $(srcdir)/HELPWINALT \
+	$(srcdir)/LATEST_VERSION $(srcdir)/TUTORIAL \
+	AUTODOC
+
+AUTODOCSRCS = $(srcdir)/../src/*.c
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+.c.o:
+	$(CC) -c -I. -I$(srcdir)/../src $(CFLAGS) $<
+
+all: $(FILES)
+
+$(srcdir)/HELP: ../doc/zile.texi ../doc/zilerc.texi
+	echo "Please consider reading the Texinfo version of this manual." >$(srcdir)/HELP
+	echo "" >>$(srcdir)/HELP
+	makeinfo --no-header --no-split -I$(srcdir)/../doc $(srcdir)/../doc/zile.texi >>$(srcdir)/HELP
+
+AUTODOC: $(AUTODOCSRCS) mkdoc
+	./mkdoc $(AUTODOCSRCS) >AUTODOC
+
+mkdoc: mkdoc.o
+	$(CC) $(LDFLAGS) -o mkdoc mkdoc.o $(ZILELIBS)
+
+.PHONY: install uninstall clean realclean distclean mostlyclean
+
+install: all
+	${srcdir}/../mkinsdir.sh $(etcdir)
+	for f in $(FILES); do \
+		$(INSTALL_DATA) $$f $(etcdir); \
+	done
+
+uninstall:
+	for f in $(FILES); do \
+		rm -f $(etcdir)/`basename $$f`; \
+	done
+
+clean: 
+	-rm -f mkdoc *.o
+	-rm -f AUTODOC
+
+distclean: clean 
+	-rm -f Makefile
+
+realclean: distclean
+
+mostlyclean: clean
+
+mkdoc.o: $(srcdir)/../src/tbl_funcs.h $(srcdir)/../src/tbl_vars.h

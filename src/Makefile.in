@@ -1,0 +1,145 @@
+#	$Id: Makefile.in,v 1.1 2001/01/19 22:01:45 ssigala Exp $
+
+srcdir = @srcdir@
+VPATH = $(srcdir)
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+etcdir = $(prefix)/share/zile
+mandir = @mandir@/man1
+
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL = @INSTALL@
+
+CC = @CC@
+PROG = zile
+CFLAGS = -I../lib -W @CFLAGS@
+LDFLAGS = @LDFLAGS@
+ZILELIBS = ../lib/libzile.a
+LIBS = $(ZILELIBS) @LIBS@
+GPERF = gperf
+
+TERMINALS = ncurses
+TERMINALSLIBS = term_ncurses/libterm_ncurses.a
+
+ZSRCS =	$(srcdir)/basic.c	\
+	$(srcdir)/bind.c	\
+	$(srcdir)/buffer.c	\
+	$(srcdir)/file.c	\
+	$(srcdir)/fontlock.c	\
+	$(srcdir)/fontlock_c.c	\
+	$(srcdir)/fontlock_cpp.c\
+	$(srcdir)/funcs.c	\
+	$(srcdir)/glue.c	\
+	$(srcdir)/help.c	\
+	$(srcdir)/keys.c	\
+	$(srcdir)/killring.c	\
+	$(srcdir)/line.c	\
+	$(srcdir)/macro.c	\
+	$(srcdir)/main.c	\
+	$(srcdir)/minibuf.c	\
+	$(srcdir)/rc.c		\
+	$(srcdir)/redisplay.c	\
+	$(srcdir)/registers.c	\
+	$(srcdir)/search.c	\
+	$(srcdir)/undo.c	\
+	$(srcdir)/variables.c	\
+	$(srcdir)/window.c
+
+SRCS = $(ZSRCS)			\
+	$(srcdir)/hash.c
+
+OBJS =	basic.o			\
+	bind.o			\
+	buffer.o		\
+	file.o			\
+	fontlock.o		\
+	fontlock_c.o		\
+	fontlock_cpp.o		\
+	funcs.o			\
+	glue.o			\
+	hash.o			\
+	help.o			\
+	keys.o			\
+	killring.o		\
+	line.o			\
+	macro.o			\
+	main.o			\
+	minibuf.o		\
+	rc.o			\
+	redisplay.o		\
+	registers.o		\
+	search.o		\
+	undo.o			\
+	variables.o		\
+	window.o
+
+.c.o:
+	$(CC) -c -I. -I$(srcdir) $(CFLAGS) $<
+
+all: paths.h maketerminals $(PROG) zile.1
+
+maketerminals:
+	@for f in $(TERMINALS); do \
+		(cd term_$$f && $(MAKE) all); \
+	done
+
+$(PROG): $(OBJS) $(TERMINALSLIBS) $(LIBS)
+	$(CC) $(LDFLAGS) -o $(PROG) $(OBJS) $(TERMINALSLIBS) $(LIBS)
+
+paths.h: Makefile
+	@echo "Producing \`paths.h'."
+	@echo "/* Automatically generated file.  NO NOT EDIT! */" >paths.h.tmp
+	@echo "" >>paths.h.tmp
+	@echo '#define PATH_PREFIX "${prefix}"' >>paths.h.tmp
+	@echo '#define PATH_DATA "${etcdir}"' >>paths.h.tmp
+	@sh ${srcdir}/../move-if-change paths.h.tmp paths.h
+
+fontlock_c.c: fontlock_c.gperf
+	$(GPERF) -a -l -S1 -N is_c_keyword fontlock_c.gperf >fontlock_c.c
+
+fontlock_cpp.c: fontlock_cpp.gperf
+	$(GPERF) -a -l -S1 -N is_cpp_keyword fontlock_cpp.gperf >fontlock_cpp.c
+
+zile.1: zile.1.in Makefile
+	sed "s+@ETCDIR@+$(etcdir)+" <$(srcdir)/zile.1.in >zile.1
+
+.PHONY: install uninstall clean realclean distclean mostlyclean
+
+install: all
+	$(srcdir)/../mkinsdir.sh $(bindir) $(mandir)
+	$(INSTALL_PROGRAM) $(PROG) $(bindir)
+	$(INSTALL_DATA) zile.1 $(mandir)/$(PROG).1
+
+uninstall:
+	rm -f $(bindir)/$(PROG)
+	rm -f $(mandir)/$(PROG).1
+
+clean:
+	@for f in $(TERMINALS); do \
+		(cd term_$$f && $(MAKE) $@); \
+	done
+	-rm -f $(PROG) paths.h zile.1 *.o
+
+distclean: clean
+	@for f in $(TERMINALS); do \
+		(cd term_$$f && $(MAKE) $@); \
+	done
+	-rm -f config.h Makefile
+
+realclean: distclean
+	@for f in $(TERMINALS); do \
+		(cd term_$$f && $(MAKE) $@); \
+	done
+	-rm -f extern.h
+
+mostlyclean: clean
+
+$(OBJS): $(srcdir)/zile.h $(srcdir)/extern.h config.h
+help.o main.o: $(srcdir)/version.h paths.h
+hash.o variables.o: $(srcdir)/hash.h
+bind.o: $(srcdir)/tbl_funcs.h
+variables.o: $(srcdir)/tbl_vars.h
