@@ -197,6 +197,8 @@ Show a sample configuration file.
 Show a tutorial window.
 @item C-h v
 Describe a variable.
+@item C-h w
+Show the key or keys to which a command is bound.
 @end table
 
 @c ---------------------------------------------------------------------------
@@ -492,12 +494,6 @@ Move point to beginning of current line.
 Capitalize the following word (or argument N words), moving over.
 This gives the word(s) a first character in upper case and the rest
 lower case.
-@item c-mode
-Turn on the @i{C Mode} for editing K&R and ANSI/ISO C code.
-@item c++-mode
-Turn on the @i{C++ Mode} for editing ANSI/ISO C++ code.
-@item c#-mode
-Turn on the @i{C# Mode} for editing C# (@i{C sharp}) code.
 @item call-last-kbd-macro
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.  Zero means repeat until error.
@@ -626,8 +622,6 @@ Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
 Like ordinary incremental search except that your input
 is treated as a regexp.  See @kbd{C-s} for more info.
-@item java-mode
-Turn on the @i{Java Mode} for editing Java code.
 @item keyboard-quit
 Cancel current command.
 @item kill-buffer
@@ -748,9 +742,6 @@ that value, otherwise with the current column value.
 Set mark at where point is.
 @item set-variable
 Set a variable value to the user specified value.
-@item sh-mode
-@item shell-script-mode
-Turn on the @i{Shell-script Mode} for editing shell scripts.
 @item shell-command
 Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command.
@@ -832,6 +823,8 @@ The variable @samp{tab-width} controls the spacing of tab stops.
 Convert the region to upper case.
 @item upcase-word
 Convert following word (or argument N words) to upper case, moving over.
+@item where-is
+Show the key or keys to which the given command is bound.
 @item write-file
 Write current buffer into the user specified file.
 Makes buffer visit that file, and marks it not modified.
@@ -898,6 +891,9 @@ Default value is @samp{false}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
+@item kill-whole-line
+If enabled, `kill-line' with no arg at the beginning of a line kills the whole line.
+Default value is @samp{false}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
 value is @samp{false}.
@@ -913,14 +909,12 @@ Default value is @samp{8}.
 @item auto-fill-mode
 If enabled, the @i{Auto Fill Mode} is automatically enabled.  Default
 value is @samp{false}.
-
 @item transient-mark-mode
 If enabled, deactivates the mark when the buffer contents change.
 Also enables highlighting of the region whenever the mark is active.
 The variable `highlight-nonselected-windows' controls whether to
 highlight all windows or just the selected window.  Default value is
 @samp{true}.
-
 @end table
 @c LINT END VAR
 
