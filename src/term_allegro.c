@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.3 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.4 2004/10/11 00:57:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -246,11 +246,6 @@ void term_init(void)
 
 	cur_scr = calloc(1, sizeof(unsigned short)*ZILE_COLS*ZILE_LINES);
 	new_scr = calloc(1, sizeof(unsigned short)*ZILE_COLS*ZILE_LINES);
-}
-
-int term_open(void)
-{
-	return TRUE;
 }
 
 void term_close(void)

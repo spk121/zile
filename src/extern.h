@@ -183,7 +183,6 @@ void free_search_history(void);
 
 /* term.c ----------------------------------------------------------------- */
 void term_init(void);
-void term_open(void);
 void term_close(void);
 void term_move(int y, int x);
 void term_clrtoeol(void);

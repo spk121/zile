@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.36 2004/10/11 00:47:19 rrt Exp $	*/
+/*	$Id: main.c,v 1.37 2004/10/11 00:57:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -397,7 +397,6 @@ int main(int argc, char **argv)
 
 	/* Force refresh of cached variables. */
 	term_refresh_cached_variables();
-	term_open();
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */
 	create_first_window();
@@ -426,7 +425,7 @@ int main(int argc, char **argv)
 
 	execute_functions(fargs);
 
-	/* Run the main Zile loop (read key, process key, read key, ...). */
+	/* Run the main Zile loop. */
 	loop();
 
 	/* Free all the memory allocated. */

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.13 2004/10/10 21:52:03 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.14 2004/10/11 00:57:48 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
@@ -255,10 +255,6 @@ void term_init(void)
         }
 
        setvbuf(stdout, NULL, _IONBF, 0);
-}
-
-void term_open(void)
-{
 }
 
 void term_close(void)
