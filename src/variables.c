@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.11 2004/03/13 16:31:20 rrt Exp $	*/
+/*	$Id: variables.c,v 1.12 2004/03/13 20:06:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -53,22 +53,21 @@ void init_variables(void)
 {
 	struct var_entry *p;
 
-	var_table = htable_new();
+	var_table = htable_new(127);
 
 	for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
 		set_variable(p->var, p->val);
 }
 
+static void free_var_iter(hpair *pair, va_list ap)
+{
+        (void)ap;
+        unset_variable(pair->key);
+}
+
 void free_variables(void)
 {
-	alist al;
-	hpair *pair;
-
-	al = htable_list(var_table);
-	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
-		unset_variable(pair->key);
-	alist_delete(al);
-
+        htable_foreach(var_table, free_var_iter);
 	htable_delete(var_table);
 }
 
@@ -81,7 +80,6 @@ void set_variable(char *var, char *val)
 void unset_variable(char *var)
 {
 	char *p = htable_fetch(var_table, var);
-	htable_remove(var_table, var);
 	free(p);
 }
 
@@ -110,7 +108,7 @@ int lookup_bool_variable(char *var)
 	if ((p = htable_fetch(var_table, var)) != NULL)
 		return !strcmp(p, "true");
 
-#if 0
+#if DEBUG
 	minibuf_error("Warning: used uninitialized variable `%s'", var);
 	waitkey(2 * 1000);
 #endif
@@ -259,8 +257,8 @@ static void write_variables_list(va_list ap)
 	al = htable_list(var_table);
 	alist_sort(al, sorter);
 	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
-		if (pair->data != NULL)
-			bprintf("%-30s \"%s\"\n", pair->key, pair->data);
+		if (pair->val != NULL)
+			bprintf("%-30s \"%s\"\n", pair->key, pair->val);
 	alist_delete(al);
 
 	bprintf("\nLocal buffer variables:\n\n");

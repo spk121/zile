@@ -1,5 +1,7 @@
 /* Hash table library
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,19 +20,15 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.4 2004/03/09 16:13:39 rrt Exp $	*/
+/*	$Id: htable.c,v 1.5 2004/03/13 20:07:00 rrt Exp $	*/
 
-#ifdef TEST
-#undef NDEBUG
-#endif
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "config.h"
 #include "htable.h"
-
-#define HTABLE_DEFAULT_SIZE		127
 
 typedef struct hbucket_s *hbucket;
 
@@ -42,13 +40,12 @@ struct hbucket_s {
 struct htable_s {
 	unsigned long size;
 	hbucket *table;
-	hfunc_t hfunc;
 };
 
 /*
- * Default hashing function.
+ * Hashing function.
  */
-static unsigned long htable_hash(const char *p, unsigned long size)
+static unsigned long hash_func(const char *p, unsigned long size)
 {
 	unsigned long hash = 0, g;
 
@@ -64,9 +61,8 @@ static unsigned long htable_hash(const char *p, unsigned long size)
 
 static hbucket build_bucket(const char *key)
 {
-	hbucket ptr;
+	hbucket ptr = (hbucket)xmalloc(sizeof(*ptr));
 
-	ptr = (hbucket)xmalloc(sizeof(*ptr));
 	memset(ptr, 0, sizeof(*ptr));
 	ptr->pair.key = xstrdup(key);
 
@@ -81,20 +77,13 @@ static void free_bucket(hbucket ptr)
 	free(ptr);
 }
 
-htable htable_new(void)
+htable htable_new(unsigned long size)
 {
-	return htable_new_custom(HTABLE_DEFAULT_SIZE);
-}
+	htable ptr = (htable)xmalloc(sizeof(*ptr));
 
-htable htable_new_custom(unsigned long size)
-{
-	htable ptr;
-
-	ptr = (htable)xmalloc(sizeof(*ptr));
 	ptr->size = size;
 	ptr->table = (hbucket *)xmalloc(ptr->size * sizeof(hbucket));
 	memset(ptr->table, 0, ptr->size * sizeof(hbucket));
-	ptr->hfunc = htable_hash;
 
 	return ptr;
 }
@@ -102,7 +91,7 @@ htable htable_new_custom(unsigned long size)
 void htable_delete(htable ht)
 {
 	hbucket bucket, next;
-	unsigned int i;
+	unsigned i;
 
 	for (i = 0; i < ht->size; i++) {
 		bucket = ht->table[i];
@@ -117,19 +106,14 @@ void htable_delete(htable ht)
 	free(ht);
 }
 
-void htable_set_hash_func(htable ht, hfunc_t hfunc)
-{
-	ht->hfunc = hfunc;
-}
-
-int htable_store_key(htable ht, const char *key)
+static int store_key(htable ht, const char *key)
 {
 	unsigned long hash;
 
-	if (htable_exists(ht, key))
+	if (htable_fetch(ht, key) != NULL)
 		return -1;
 
-	hash = ht->hfunc(key, ht->size);
+	hash = hash_func(key, ht->size);
 
 	if (ht->table[hash] == NULL)
 		ht->table[hash] = build_bucket(key);
@@ -142,45 +126,33 @@ int htable_store_key(htable ht, const char *key)
 	return 0;
 }
 
-int htable_store_data(htable ht, const char *key, void *data)
+static int store_value(htable ht, const char *key, void *val)
 {
 	hbucket bucket;
 	unsigned long hash;
 
-	hash = ht->hfunc(key, ht->size);
+	hash = hash_func(key, ht->size);
 
 	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next)
 		if (!strcmp(bucket->pair.key, key)) {
-			bucket->pair.data = data;
+			bucket->pair.val = val;
 			return 0;
 		}
 
 	return -1;
 }
 
-int htable_store(htable ht, const char *key, void *data)
+int htable_store(htable ht, const char *key, void *val)
 {
-	if (htable_exists(ht, key))
+        int exists;
+
+	if (htable_fetch(ht, key) != NULL)
 		htable_remove(ht, key);
 
-	htable_store_key(ht, key);
-	htable_store_data(ht, key, data);
+	exists = store_key(ht, key);
+	assert(store_value(ht, key, val) == 0);
 
-	return 0;
-}
-
-int htable_exists(htable ht, const char *key)
-{
-	hbucket bucket;
-	unsigned long hash;
-
-	hash = ht->hfunc(key, ht->size);
-
-	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next)
-		if (!strcmp(bucket->pair.key, key))
-			return 1;
-
-	return 0;
+	return exists;
 }
 
 void *htable_fetch(htable ht, const char *key)
@@ -188,11 +160,11 @@ void *htable_fetch(htable ht, const char *key)
 	hbucket bucket;
 	unsigned long hash;
 
-	hash = ht->hfunc(key, ht->size);
+	hash = hash_func(key, ht->size);
 
 	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next)
 		if (!strcmp(bucket->pair.key, key))
-			return bucket->pair.data;
+			return bucket->pair.val;
 
 	return NULL;
 }
@@ -202,7 +174,7 @@ int htable_remove(htable ht, const char *key)
 	hbucket bucket, last = NULL;
 	unsigned long hash;
 
-	hash = ht->hfunc(key, ht->size);
+	hash = hash_func(key, ht->size);
 
 	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next) {
 		if (!strcmp(bucket->pair.key, key)) {
@@ -219,73 +191,62 @@ int htable_remove(htable ht, const char *key)
 	return -1;
 }
 
-void htable_dump(htable ht, FILE *fout)
+htable htable_foreach(htable ht, hiterator f, ...)
 {
 	hbucket bucket;
-	unsigned int i;
-	int nelements = 0, dups = 0;
+	unsigned i;
+        va_list ap;
 
-	fprintf(fout, "Hash table dump:\n");
-	for (i = 0; i < ht->size; ++i) {
-		bucket = ht->table[i];
-		if (bucket != NULL) {
-			fprintf(fout, "table[%d] = {\n", i);
-			for (; bucket != NULL; bucket = bucket->next) {
-				++nelements;
-				if (bucket != ht->table[i])
-					++dups;
-				fprintf(fout, "\ttable[\"%s\"] = %p\n",
-					bucket->pair.key, bucket->pair.data);
-			}
-			fprintf(fout, "}\n");
-		}
-	}
-	fprintf(fout, "Table size: %ld\n", ht->size);
-	fprintf(fout, "Number of elements: %d\n", nelements);
-	fprintf(fout, "Duplicated hash values: %d\n", dups);
-	fprintf(fout, "Performance: %.2f%%\n", (1-(float)dups/nelements)*100);
+        va_start(ap, f);
+
+	for (i = 0; i < ht->size; ++i)
+		if ((bucket = ht->table[i]) != NULL)
+			for (; bucket != NULL; bucket = bucket->next)
+				f(&bucket->pair, ap);
+
+        va_end(ap);
+	return ht;
+}
+
+static void add_to_list(hpair *pair, va_list ap)
+{
+        alist_append(va_arg(ap, alist), pair);
 }
 
 alist htable_list(htable ht)
 {
-	alist al;
-	hbucket bucket;
-	unsigned int i;
-
-	al = alist_new();
-	for (i = 0; i < ht->size; ++i)
-		if ((bucket = ht->table[i]) != NULL)
-			for (; bucket != NULL; bucket = bucket->next)
-				alist_append(al, &bucket->pair);
+	alist al = alist_new();
+        htable_foreach(ht, add_to_list, al);
 	return al;
 }
 
 #ifdef TEST
 
+#include <stdio.h>
+
 int main(void)
 {
-	htable ht = htable_new();
+	htable ht = htable_new(127);
 
-	assert(htable_store_key(ht, "hello") == 0);
-	assert(htable_store_key(ht, "world") == 0);
-	assert(htable_store_key(ht, "bar") == 0);
-	assert(htable_store_key(ht, "hello") != 0);
-	assert(htable_exists(ht, "hello"));
-	assert(htable_exists(ht, "world"));
+	assert(htable_store(ht, "hello", NULL) == 0);
+	assert(htable_store(ht, "world", NULL) == 0);
+	assert(htable_store(ht, "bar", NULL) == 0);
+	assert(htable_store(ht, "hello", NULL) != 0);
+	assert(htable_fetch(ht, "hello") != NULL);
+	assert(htable_fetch(ht, "world") != NULL);
 	assert(htable_remove(ht, "world") == 0);
-	assert(!htable_exists(ht, "world"));
-	assert(htable_store_key(ht, "world") == 0);
-	assert(htable_store_data(ht, "hello", "hello data") == 0);
-	assert(htable_store_data(ht, "baz", "baz data") != 0);
-	assert(!htable_exists(ht, "baz"));
-	assert(htable_store(ht, "foo", "foo data") == 0);
-	assert(htable_store_key(ht, "var1") == 0);
-	assert(htable_store_key(ht, "var2") == 0);
+	assert(htable_fetch(ht, "world") == NULL);
+	assert(htable_store(ht, "world", NULL) == 0);
+	assert(htable_store(ht, "hello", "hello value") == 0);
+	assert(htable_store(ht, "baz", "baz value") != 0);
+	assert(htable_fetch(ht, "baz") == NULL);
+	assert(htable_store(ht, "foo", "foo value") == 0);
+	assert(htable_store(ht, "var1", NULL) == 0);
+	assert(htable_store(ht, "var2", NULL) == 0);
 	assert(htable_fetch(ht, "foo") != NULL &&
-	       !strcmp(htable_fetch(ht, "foo"), "foo data"));
+	       !strcmp(htable_fetch(ht, "foo"), "foo value"));
 	assert(htable_fetch(ht, "hello") != NULL &&
-	       !strcmp(htable_fetch(ht, "hello"), "hello data"));
-	htable_dump(ht, stdout);
+	       !strcmp(htable_fetch(ht, "hello"), "hello value"));
 	htable_delete(ht);
 	printf("htable test successful.\n");
 

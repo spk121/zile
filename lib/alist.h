@@ -1,5 +1,7 @@
 /* Doubly-linked lists
-   Copyright (c) 2001-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 2001-2004 Sandro Sigala.
+   Copyright (c) 2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.h,v 1.5 2004/03/13 17:27:50 rrt Exp $	*/
+/*	$Id: alist.h,v 1.6 2004/03/13 20:07:00 rrt Exp $	*/
 
 #ifndef ALIST_H
 #define ALIST_H

@@ -1,5 +1,7 @@
 /* Doubly-linked lists
-   Copyright (c) 2001-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 2001-2004 Sandro Sigala.
+   Copyright (c) 2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,15 +20,10 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.c,v 1.5 2004/03/13 17:27:50 rrt Exp $	*/
+/*	$Id: alist.c,v 1.6 2004/03/13 20:07:00 rrt Exp $	*/
 
-#ifdef TEST
-#undef NDEBUG
-#endif
 #include <assert.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "config.h"
 #include "alist.h"
@@ -53,15 +50,6 @@ static aentry find_aentry(alist al, unsigned int i)
 	unsigned int count;
 	for (ae = al->head, count = 0; ae != NULL; ae = ae->next, ++count)
 		if (count == i)
-			return ae;
-	return NULL;
-}
-
-static aentry find_aentry_ptr(alist al, void *p)
-{
-	aentry ae;
-	for (ae = al->head; ae != NULL; ae = ae->next)
-		if (ae->p == p)
 			return ae;
 	return NULL;
 }
@@ -147,7 +135,8 @@ void *alist_next(alist al)
 
 void alist_insert(alist al, unsigned int i, void *p)
 {
-	if (i >= al->size) {
+        assert(i <= al->size);
+	if (i == al->size) {
 		i = al->size;
 		alist_append(al, p);
 	} else if (i == 0)
@@ -252,6 +241,9 @@ void *alist_at(alist al, unsigned int i)
 }
 
 #ifdef TEST
+
+#include <stdio.h>
+#include <string.h>
 
 int sorter(const void *p1, const void *p2)
 {

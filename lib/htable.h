@@ -1,5 +1,7 @@
 /* Hash table library
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,35 +20,78 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.h,v 1.3 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: htable.h,v 1.4 2004/03/13 20:07:00 rrt Exp $	*/
 
 #ifndef HTABLE_H
 #define HTABLE_H
 
-#include <stdio.h>
+#include <stdarg.h>
 
 #include "alist.h"
 
-typedef unsigned long (*hfunc_t)(const char *data, unsigned long table_size);
+/*
+ * The hash table library provides string-keyed open non-extensible
+ * hash tables.
+ *
+ * The hash table type, htable, is a pointer type.
+ */
 
-typedef struct hpair_s {
-	char *key;
-	void *data;
-} hpair;
-
+/*
+ * The hash table type.
+ */
 typedef struct htable_s *htable;
 
-extern htable htable_new(void);
-extern htable htable_new_custom(unsigned long size);
+/*
+ * Allocate a new hash table with the given number of buckets.
+ */
+extern htable htable_new(unsigned long size);
+
+/*
+ * Deallocate ht.
+ */
 extern void   htable_delete(htable ht);
-extern void   htable_set_hash_func(htable ht, hfunc_t hfunc);
-extern int    htable_store_key(htable ht, const char *key);
-extern int    htable_store_data(htable ht, const char *key, void *data);
-extern int    htable_store(htable ht, const char *key, void *data);
-extern int    htable_exists(htable ht, const char *key);
+
+/*
+ * Store a key-value pair into ht. The return value is -1 if the key
+ * already existed and 0 otherwise.
+ */
+extern int    htable_store(htable ht, const char *key, void *val);
+
+/*
+ * Return the data associated with the key in ht. If the key does not
+ * exist or no data was associated with the key, NULL will be
+ * returned.
+ */
 extern void * htable_fetch(htable ht, const char *key);
+
+/*
+ * Remove the specified key from ht.
+ */
 extern int    htable_remove(htable ht, const char *key);
-extern void   htable_dump(htable ht, FILE *fout);
+
+/*
+ * The type of key-value pairs, used by htable_foreach iterators and
+ * htable_list.
+ */
+typedef struct hpair_s {
+	char *key;
+	void *val;
+} hpair;
+
+/*
+ * Iterate over every item of ht, calling f(&key, &val, ...) for each
+ * item. The variadic arguments to f are those passed to
+ * htable_foreach.
+ */
+typedef void (*hiterator)(hpair *pair, va_list ap);
+htable htable_foreach(htable ht, hiterator f, ...);
+
+/*
+ * Build an (unsorted) list filled with all the pairs (of type hpair)
+ * defined in the hash table. After use, the list should be freed (but
+ * not the elements, because they belong to the hash table).
+ */
 extern alist  htable_list(htable ht);
+
 
 #endif /* !HTABLE_H */

@@ -20,17 +20,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.17 2004/03/13 16:31:20 rrt Exp $	*/
-
-#ifdef TEST
-#undef NDEBUG
-#endif
+/*	$Id: astr.c,v 1.18 2004/03/13 20:07:00 rrt Exp $	*/
 
 #include "config.h"
 
 #include <assert.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -249,6 +244,8 @@ astr astr_afmt(astr as, const char *fmt, ...)
 }
 
 #ifdef TEST
+
+#include <stdio.h>
 
 void assert_eq(astr as, const char *s)
 {
