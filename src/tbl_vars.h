@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.18 2005/01/13 00:16:16 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.19 2005/01/25 20:45:41 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -40,11 +40,17 @@ the directory must exist and must be specified in the\n\
 variable `backup-directory'.")
 X("beep",				"b", "true", "\
 If enabled, a sound will be emitted on any error.")
+X("case-fold-search",			"b", "true", "\
+Non-nil if searches and matches should ignore case.\n\
+Automatically becomes buffer-local when set in any fashion.")
+X("case-replace",			"b", "true", "\
+Non-nil means `query-replace' should preserve case in replacements.")
 X("expand-tabs",			"b", "false", "\
 If disabled, Zile will insert hard tabs (the character `\\t'),\n\
 otherwise it will insert spaces.")
 X("fill-column",			"", "72", "\
-The default fill column (used in Auto Fill Mode).")
+Column beyond which automatic line-wrapping should happen.\n\
+Automatically becomes buffer-local when set in any fashion.")
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
 X("skip-splash-screen",			"b", "false", "\
@@ -52,7 +58,8 @@ If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\
 Default number of columns for margin-changing functions to indent.")
 X("tab-width",				"", "8", "\
-The default tabulation width.")
+Distance between tab stops (for display of tab characters), in columns.\n\
+Automatically becomes buffer-local when set in any fashion.")
 X("transient-mark-mode",		"b", "true", "\
 If enabled, deactivates the mark when the buffer contents change.\n\
 Also enables highlighting of the region whenever the mark is active.\n\
