@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.18 2004/10/11 01:17:40 rrt Exp $	*/
+/*	$Id: variables.c,v 1.19 2004/10/16 20:17:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -110,7 +110,7 @@ int lookup_bool_variable(char *var)
 
 #if DEBUG
 	minibuf_error("Warning: used uninitialized variable `%s'", var);
-	waitkey(2 * 1000);
+	waitkey(2 * 10);
 #endif
 
 	return FALSE;
@@ -144,7 +144,7 @@ char *minibuf_read_variable_name(char *msg)
 			return NULL;
 		} else if (get_variable(ms) == NULL) {
 			minibuf_error("Undefined variable name `%s'", ms);
-			waitkey(2 * 1000);
+			waitkey(2 * 10);
 		} else {
 			minibuf_clear();
 			break;
@@ -207,7 +207,7 @@ Set a variable value to the user specified value.
 		int i = atoi(val);
 		if (i < 1) {
 			minibuf_error("Invalid tab-width value `%s'", val);
-			waitkey(2 * 1000);
+			waitkey(2 * 10);
 		} else
 			cur_bp->tab_width = i;
 
@@ -215,7 +215,7 @@ Set a variable value to the user specified value.
 		int i = atoi(val);
 		if (i < 2) {
 			minibuf_error("Invalid fill-column value `%s'", val);
-			waitkey(2 * 1000);
+			waitkey(2 * 10);
 		} else
 			cur_bp->fill_column = i;
 	} else

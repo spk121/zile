@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.40 2004/10/11 03:02:05 rrt Exp $	*/
+/*	$Id: main.c,v 1.41 2004/10/16 20:17:03 rrt Exp $	*/
 
 #include "config.h"
 
@@ -163,7 +163,7 @@ static void about_screen(void)
 	    !lookup_bool_variable("skip-splash-screen")) {
 		show_splash_screen(about_splash_str);
 		minibuf_write(about_minibuf_str);
-		waitkey(20 * 1000);
+		waitkey(20 * 10);
 		minibuf_clear();
 	} else
 		minibuf_write(about_minibuf_str);
