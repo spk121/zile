@@ -20,42 +20,43 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.h,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: lists.h,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
 
-#ifndef __LISTS_H__
-#define __LISTS_H__
+#ifndef LISTS_H
+#define LISTS_H
 
-#include <stdio.h>
+#include "astr.h"
 
 typedef struct le{
   /* either data or a branch */
-  struct le * branch;
-  char * data;
+  struct le *branch;
+  char *data;
   int quoted;
   int tag;
 
   /* for the next in the list in the current parenlevel */
-  struct le * list_prev;
-  struct le * list_next;
+  struct le *list_prev;
+  struct le *list_next;
 } le;
 
-le * leNew(char * text);
-void leDelete(le * element);
-void leWipe(le * list);
+le *leNew(char *text);
+void leDelete(le *element);
+void leWipe(le *list);
 
-le * leAddHead(le * list, le * element);
-le * leAddTail(le * list, le * element);
+le *leAddHead(le *list, le *element);
+le *leAddTail(le *list, le *element);
 
-le * leAddBranchElement( le * list, le * branch, int quoted );
-le * leAddDataElement( le * list, char * data, int quoted );
-le * leDup( le * list );
+le *leAddBranchElement(le *list, le *branch, int quoted);
+le *leAddDataElement(le *list, char *data, int quoted);
+le *leDup(le *list);
 
-void leClearTag( le * list );
-void leTagData(le * list, char * data, int tagval);
-void leTagReplace(le * list, int tagval, le * newinfo);
+void leClearTag(le *list);
+void leTagData(le *list, char *data, int tagval);
+void leTagReplace(le *list, int tagval, le *newinfo);
 
-void leDump( le * list, int indent );
-void leDumpEval( le * list, int indent );
-void leDumpEvalTree( le * list, int indent );
-void leDumpReformat(FILE * of, le * tree);
+astr leDump(le *list, int indent);
+astr leDumpEval(le *list, int indent);
+astr leDumpEvalTree(le *list, int indent);
+astr leDumpReformat(le *tree);
+
 #endif

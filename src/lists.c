@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.3 2005/01/14 22:31:10 rrt Exp $	*/
+/*	$Id: lists.c,v 1.4 2005/01/14 23:46:47 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -182,94 +182,94 @@ void leTagReplace(le *list, int tagval, le *newinfo)
   }
 }
 
-void leDump(le *list, int indent)
+astr leDump(le *list, int indent)
 {
   int c;
-  le *temp = list;
+  astr as = astr_new();
 
-  while (temp) {
-    if (temp->data) {
-      for(c=0 ; c<indent ; c++) printf(" ");
-      printf("%s %s\n", 
-             temp->data,
-             (temp->quoted == 1) ? "quoted" : ""
-             );
+  for (; list; list=list->list_next) {
+    if (list->data) {
+      for (c = 0; c<indent; c++)
+        astr_cat_char(as, ' ');
+      astr_afmt(as, "%s %s\n", list->data,
+             list->quoted == 1 ? "quoted" : "");
     } else
-      leDump(temp->branch, indent + 4);
-
-    temp=temp->list_next;
+      leDump(list->branch, indent + 4);
   }
+
+  return as;
 }
     
-void leDumpEvalTree(le *list, int indent)
+astr leDumpEvalTree(le *list, int indent)
 {
   int c;
-  le *temp = list;
+  astr as = astr_new();
 
-  while (temp) {
-    for (c=0; c<indent; c++)
-      printf(" ");
+  for (; list; list = list->list_next) {
+    for (c = 0; c < indent; c++)
+      astr_cat_char(as, ' ');
 
-    if (temp->data)
-      printf("%s %s\n", temp->data,
-             (temp->quoted == 1) ? "quoted" : "");
+    if (list->data)
+      astr_afmt(as, "%s %s\n", list->data,
+                list->quoted == 1 ? "quoted" : "");
     else {
-      le *le_value = evaluateBranch(temp->branch);
-      printf("B: %s", (temp->quoted) ? "quoted " : "");
-      leDumpReformat(stdout, le_value);
-      printf("\n");
+      le *le_value = evaluateBranch(list->branch);
+      astr_afmt(as, "B: %s", list->quoted ? "quoted " : "");
+      astr_cat(as, leDumpReformat(le_value));
+      astr_cat_cstr(as, "\n");
       leWipe(le_value);
 
-      leDump(temp->branch, indent + 4);
+      leDump(list->branch, indent + 4);
     }
-
-    temp=temp->list_next;
   }
+
+  return as;
 }
     
-void leDumpEval(le *list, int indent)
+astr leDumpEval(le *list, int indent)
 {
-  le *temp = list;
   le *le_value = NULL;
+  astr as = astr_new();
 
-  while (temp) {
-    if (temp->branch) {
-      printf("\n");
-      leDumpReformat(stdout, temp->branch);
+  for (; list; list = list->list_next) {
+    if (list->branch) {
+      astr_cat_cstr(as, "\n");
+      leDumpReformat(list->branch);
 
-      printf("\n==> ");
-      le_value = evaluateBranch(temp->branch) ;
-      leDumpReformat(stdout, le_value);
+      astr_cat_cstr(as, "\n==> ");
+      le_value = evaluateBranch(list->branch) ;
+      astr_cat(as, leDumpReformat(le_value));
       leWipe(le_value);
-      printf("\n");
+      astr_cat_cstr(as, "\n");
     }
-
-    temp=temp->list_next;
   }
-  printf("=======\n");
+  astr_cat_cstr(as, "=======\n");
+
+  return as;
 }
     
-void leDumpReformat(FILE *of, le *tree)
+astr leDumpReformat(le *tree)
 {
-  le *treetemp = tree;
-  int notfirst = 0;
+  int notfirst = FALSE;
+  astr as = astr_new();
 
-  if (!tree)
-    return;
+  if (tree) {
+    astr_cat_char(as, '(');
 
-  fprintf(of, "(");
-  while (treetemp) {
-    if (treetemp->data) {
-      fprintf(of, "%s%s", notfirst? " " : "", treetemp->data);
-      notfirst++;
+    for (; tree; tree = tree->list_next) {
+      if (tree->data) {
+        astr_afmt(as, "%s%s", notfirst ? " " : "", tree->data);
+        notfirst = TRUE;
+      }
+
+      if (tree->branch) {
+        astr_afmt(as, " %s", tree->quoted ? "\'" : "");
+        astr_cat(as, leDumpReformat(tree->branch));
+      }
+
+      astr_cat_char(as, ')');
     }
-
-    if (treetemp->branch) {
-      fprintf(of, " %s", (treetemp->quoted)? "\'":"");
-      leDumpReformat(of, treetemp->branch);
-    }
-
-    treetemp = treetemp->list_next;
   }
-  fprintf(of, ")");
+
+  return as;
 }

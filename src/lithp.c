@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lithp.c,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: lithp.c,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
 
 #include <stdio.h>
 #include "zile.h"
@@ -59,16 +59,16 @@ void lithp(char* file)
   }
 
   /* evaluate the read-in lists and free */
-  leDumpEval(list, 0); 
+  printf(astr_cstr(leDumpEval(list, 0)));
   leWipe(list);
 
   /* display the variables and free */
   printf("Variables:\n");
-  variableDump(mainVarList);
+  printf("%s", astr_cstr(variableDump(mainVarList)));
   variableFree(mainVarList);
 
   /* display the user-defined functions and free */
   printf("defun's:\n");
-  variableDump(defunList);
+  printf("%s", astr_cstr(variableDump(defunList)));
   variableFree(defunList);
 }

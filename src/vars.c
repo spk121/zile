@@ -20,101 +20,81 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: vars.c,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
 
 #include "vars.h"
 #include "eval.h"
 #include <string.h>
 
-le * mainVarList = NULL;
-le * defunList = NULL;
 
-    
-le * variableFind( le * varlist, char * key )
+le *mainVarList = NULL;
+le *defunList = NULL;
+
+
+le *variableFind(le *varlist, char *key)
 {
-  le * temp = varlist;
+  if (varlist != NULL && key != NULL)
+    for (; varlist; varlist = varlist->list_next)
+      if (!strcmp(key, varlist->data))
+        return varlist;
 
-  if (!varlist || !key) return( NULL );
-
-  while (temp)
-    {
-      if (!strcmp(key, temp->data))
-        {
-          return( temp );
-        }
-      temp = temp->list_next;
-    }
-
-  return( NULL );
+  return NULL;
 }
 
-    
-le * variableSet( le * varlist, char * key, le * value )
+le *variableSet(le *varlist, char *key, le *value)
 {
-  le * temp;
+  if (key && value) {
+    le *temp = variableFind(varlist, key);
 
-  if (!key || !value)  return( varlist );
-
-  temp = variableFind( varlist, key );
-  if ( temp )
-    {
-      leWipe( temp->branch );
-      temp->branch = leDup( value );
+    if (temp) {
+      leWipe(temp->branch);
+      temp->branch = leDup(value);
     } else {
-      temp = leNew( key );
-      temp->branch = leDup( value );
-      varlist = leAddHead( varlist, temp );
+      temp = leNew(key);
+      temp->branch = leDup(value);
+      varlist = leAddHead(varlist, temp);
     }
-  return( varlist );
+  }
+
+  return varlist;
 }
     
-le * variableSetString( le * varlist, char * key, char * value )
+le *variableSetString(le *varlist, char *key, char *value)
 {
-  le * temp;
-
-  if (!key || !value)  return( varlist );
-
-  temp = leNew(value);
-
-  varlist = variableSet( varlist, key, temp );
-	
-  leWipe( temp );
-
-  return( varlist );
+  if (key && value) {
+    le *temp = leNew(value);
+    varlist = variableSet(varlist, key, temp);	
+    leWipe(temp);
+  }
+  return varlist;
 }
     
-le * variableGet( le * varlist, char * key )
+le *variableGet(le *varlist, char *key)
 {
-  le * temp = variableFind(varlist, key);
-  if (temp && temp->branch)
-    return( temp->branch );
-  return( NULL );
+  le *temp = variableFind(varlist, key);
+  return temp ? temp->branch : NULL;
 }
     
-char * variableGetString( le * varlist, char * key )
+char *variableGetString(le *varlist, char *key)
 {
-  le * temp = variableFind(varlist, key);
-  if (   temp
-         && temp->branch
-         && temp->branch->data
-         && countNodes(temp->branch) == 1
-         )
-    return( strdup(temp->branch->data) );
-  return( strdup("-1") );
+  le *temp = variableFind(varlist, key);
+  if (temp && temp->branch && temp->branch->data
+      && countNodes(temp->branch) == 1)
+    return strdup(temp->branch->data);
+  return strdup("-1");
 }
-
     
-void variableDump( le * varlist )
+astr variableDump(le *varlist)
 {
-  le * temp = varlist;
-  while (temp)
-    {
-      if (temp->branch && temp->data)
-        {
-          printf("%s \t", temp->data);
-          leDumpReformat( stdout, temp->branch );
-          printf("\n");
-        }
-      temp = temp->list_next;
+  astr as = astr_new();
+  
+  for (; varlist; varlist = varlist->list_next) {
+    if (varlist->branch && varlist->data) {
+      astr_afmt(as, "%s \t", varlist->data);
+      astr_cat(as, leDumpReformat(varlist->branch));
+      astr_cat_char(as, '\n');
     }
+  }
+
+  return as;
 }

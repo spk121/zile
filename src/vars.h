@@ -20,21 +20,22 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.h,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: vars.h,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
 
 #include <stdio.h>
 #include "lists.h"
+#include "astr.h"
 
-extern le * mainVarList;
-extern le * defunList;
+extern le *mainVarList;
+extern le *defunList;
 
-le * variableFind( le * varlist, char * key );
-#define variableFree( L ) \
-                leWipe( (L) );
+le *variableFind(le *varlist, char *key);
+#define variableFree(L) \
+  leWipe(L);
 
-le * variableSet( le * varlist, char * key, le * value );
-le * variableSetString( le * varlist, char * key, char * value );
-le * variableGet( le * varlist, char * key );
-char * variableGetString( le * varlist, char * key );
+le *variableSet(le *varlist, char *key, le *value);
+le *variableSetString(le *varlist, char *key, char *value);
+le *variableGet(le *varlist, char *key);
+char *variableGetString(le *varlist, char *key);
 
-void variableDump( le * varlist );
+astr variableDump(le *varlist);
