@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.20 2004/03/10 10:46:21 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.21 2004/03/10 11:00:25 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -642,9 +642,8 @@ static void draw_line_shell(int line, int startcol, Window *wp, Line *lp,
  * Draw a line on the screen with font lock color.
  * Mail Mode.
  */
-static void draw_line_mail(int line, int startcol, Window *wp, Line *lp,
-			   int lineno, Region *r, int highlight,
-			   int *lastanchor)
+static void draw_line_mail(int line, int startcol, Line *lp,
+			   int lineno, Region *r, int highlight)
 {
 	int i, x, level;
 
@@ -756,9 +755,8 @@ static void draw_window(int topline, Window *wp)
 		}
 #if ENABLE_MAIL_MODE
 		else if (wp->bp->mode == BMODE_MAIL &&
-			   wp->bp->flags & BFLAG_FONTLOCK)
-			draw_line_mail(i, startcol, wp, lp,
-				       lineno, &r, highlight, &lastanchor);
+                         wp->bp->flags & BFLAG_FONTLOCK)
+                        draw_line_mail(i, startcol, lp, lineno, &r, highlight);
 #endif
 		else
 #endif /* ENABLE_NONTEXT_MODES */
