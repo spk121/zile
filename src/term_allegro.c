@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.11 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.12 2005/01/11 23:13:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -225,8 +225,8 @@ void term_init(void)
   install_keyboard();
   set_color_depth(8);
   if (set_gfx_mode(GFX_SAFE, 640, 480, 0, 0) < 0) {
-    /* XXX */
-    exit(1);
+    fprintf(stderr, "Could not set VGA screen mode.");
+    zile_exit(1);
   }
 
   LOCK_VARIABLE(blink_state);
