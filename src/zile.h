@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: zile.h,v 1.20 2004/04/04 21:01:50 rrt Exp $	*/
+/*	$Id: zile.h,v 1.21 2004/04/05 00:50:26 rrt Exp $	*/
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -179,11 +179,6 @@ struct Region {
 				     this buffer. */
 #define BFLAG_ISEARCH	(0002000) /* The buffer is in Isearch loop. */
 
-/* Mutually exclusive buffer major modes. */
-enum {
-	BMODE_TEXT,	/* The buffer is in Text mode. */
-};
-
 struct Buffer {
 	/* The next buffer in buffer list. */
 	Buffer *next;
@@ -206,7 +201,6 @@ struct Buffer {
 
 	/* Buffer flags. */
 	int flags;
-	int mode;
 	int tab_width;
 	int fill_column;
 	unsigned mark_active : 1;

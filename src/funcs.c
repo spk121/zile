@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.34 2004/04/04 21:01:50 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.35 2004/04/05 00:50:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -250,7 +250,6 @@ DEFUN("text-mode", text_mode)
 Turn on the mode for editing text intended for humans to read.
 +*/
 {
-	cur_bp->mode = BMODE_TEXT;
 	if (lookup_bool_variable("text-mode-auto-fill"))
 		cur_bp->flags |= BFLAG_AUTOFILL;
 

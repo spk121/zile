@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.24 2004/04/04 20:33:12 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.25 2004/04/05 00:50:30 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -558,8 +558,8 @@ static char *make_time_str(void)
 
 static void draw_status_line(int line, Window *wp)
 {
-	int i;
-	char *mode, *buf;
+	int i, someflag = 0;
+	char *buf;
 	Point pt = window_pt(wp);
 
 	attrset(A_REVERSE | status_line_color);
@@ -568,19 +568,25 @@ static void draw_status_line(int line, Window *wp)
 	for (i = 0; i < wp->ewidth; ++i)
 		addch('-');
 
-	switch (wp->bp->mode) {
-	default:
-		mode = "Text";
-	}
-
 	move(line, 0);
-	printw("--%2s- %-18s (%s%s%s%s%s)--L%d--C%d--%s",
-	       make_mode_line_flags(wp),
-	       wp->bp->name, mode,
-	       (wp->bp->flags & BFLAG_AUTOFILL) ? " Fill" : "",
-	       (wp->bp->flags & BFLAG_OVERWRITE) ? " Ovwrt" : "",
-	       (thisflag & FLAG_DEFINING_MACRO) ? " Def" : "",
-	       (wp->bp->flags & BFLAG_ISEARCH) ? " Isearch" : "",
+	printw("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
+
+        if (wp->bp->flags & BFLAG_AUTOFILL) {
+                printw("Fill");
+                someflag = 1;
+        }
+        if (wp->bp->flags & BFLAG_OVERWRITE) {
+                printw("%sOvwrt", someflag ? " " : "");
+                someflag = 1;
+        }
+        if (thisflag & FLAG_DEFINING_MACRO) {
+                printw("%sDef", someflag ? " " : "");
+                someflag = 1;
+        }
+        if (wp->bp->flags & BFLAG_ISEARCH)
+                printw("%sIsearch", someflag ? " " : "");
+
+        printw(")--L%d--C%d--%s",
 	       pt.n+1, get_goalc_wp(wp),
 	       make_screen_pos(wp, &buf));
         free(buf);
