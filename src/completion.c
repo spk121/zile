@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.23 2005/01/27 01:33:17 rrt Exp $   */
+/*      $Id: completion.c,v 1.24 2005/01/29 13:10:25 rrt Exp $   */
 
 #include "config.h"
 
@@ -120,7 +120,7 @@ void completion_scroll_down(void)
  */
 static size_t calculate_max_length(list l, size_t size)
 {
-  int len, i, max = 0;
+  size_t len, i, max = 0;
   list p;
 
   for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++)
@@ -168,7 +168,7 @@ static void write_completion(va_list ap)
 /*
  * Popup the completion window.
  */
-static void popup_completion(Completion *cp, int allflag, int num)
+static void popup_completion(Completion *cp, int allflag, size_t num)
 {
   cp->fl_poppedup = 1;
   if (head_wp->next == NULL)
@@ -197,7 +197,7 @@ static int completion_reread(Completion *cp, astr as)
   struct dirent *d;
   struct stat st;
   list p;
-  int i;
+  size_t i;
 
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
     free(p->item);
@@ -211,16 +211,16 @@ static int completion_reread(Completion *cp, astr as)
   fname = astr_new();
 
   for (i = 0; i < astr_len(as); i++){
-    if (*astr_char(as, i) == '/') {
-      if (*astr_char(as, i + 1) == '/') {
+    if (*astr_char(as, (ptrdiff_t)i) == '/') {
+      if (*astr_char(as, (ptrdiff_t)(i + 1)) == '/') {
         /* Got `//'; restart from this point. */
-        while (*astr_char(as, i + 1) == '/')
+        while (*astr_char(as, (ptrdiff_t)(i + 1)) == '/')
           i++;
         astr_truncate(buf, 0);
         /* Final '/' remains to be copied below. */
       }
     }
-    astr_cat_char(buf, *astr_char(as, i));
+    astr_cat_char(buf, *astr_char(as, (ptrdiff_t)i));
   }
   astr_cpy(as, buf);
   astr_delete(buf);
@@ -262,8 +262,8 @@ static int completion_reread(Completion *cp, astr as)
  */
 int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
-  int fullmatches = 0, partmatches = 0;
   size_t i, j, ssize;
+  size_t fullmatches = 0, partmatches = 0;
   char c;
   list p;
 
