@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.41 2004/10/16 20:17:03 rrt Exp $        */
+/*      $Id: file.c,v 1.42 2004/10/16 20:24:09 rrt Exp $        */
 
 #include "config.h"
 
@@ -341,58 +341,6 @@ static int exists_corr_file(char *dest, char *src, const char *ext)
         strcat(dest, ext);
         if (exist_file(dest))
                 return TRUE;
-        return FALSE;
-}
-
-DEFUN("switch-to-correlated-buffer", switch_to_correlated_buffer)
-/*+
-Find and open a file correlated with the current buffer.
-Some examples of correlated files are the following:
-    anyfile.c  --> anyfile.h
-    anyfile.h  --> anyfile.c
-    anyfile.in --> anyfile
-    anyfile    --> anyfile.in
-+*/
-{
-        const char *c_src[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".m", NULL };
-        const char *c_hdr[] = { ".h", ".H", ".hpp", ".hh", NULL };
-        const char *in_ext[] = { ".in", ".IN", NULL };
-        int i;
-        char *nfile;
-        char *fname;
-
-        fname = cur_bp->filename;
-        if (fname == NULL)
-                fname = cur_bp->name;
-        nfile = (char *)zmalloc(strlen(fname) + 10);
-
-        if (have_extension(fname, c_src))
-                for (i = 0; c_hdr[i] != NULL; ++i)
-                        if (exists_corr_file(nfile, fname, c_hdr[i])) {
-                                int retvalue = find_file(nfile);
-                                free(nfile);
-                                return retvalue;
-                        }
-        if (have_extension(fname, c_hdr))
-                for (i = 0; c_src[i] != NULL; ++i)
-                        if (exists_corr_file(nfile, fname, c_src[i])) {
-                                int retvalue = find_file(nfile);
-                                free(nfile);
-                                return retvalue;
-                        }
-        if (have_extension(fname, in_ext))
-                if (exists_corr_file(nfile, fname, "")) {
-                        int retvalue = find_file(nfile);
-                        free(nfile);
-                        return retvalue;
-                }
-        if (exists_corr_file(nfile, fname, ".in")) {
-                int retvalue = find_file(nfile);
-                free(nfile);
-                return retvalue;
-        }
-
-        minibuf_error("No correlated file was found for this buffer");
         return FALSE;
 }
 

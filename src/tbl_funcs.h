@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.17 2004/05/06 22:16:53 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.18 2004/10/16 20:24:09 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -118,7 +118,6 @@ X1("split-window", split_window,			"\\C-x2")
 X1("start-kbd-macro", start_kbd_macro,			"\\C-x(")
 X2("suspend-zile", suspend_zile,			"\\C-x\\C-z", "\\C-z")
 X1("switch-to-buffer", switch_to_buffer,		"\\C-xb")
-X1("switch-to-correlated-buffer", switch_to_correlated_buffer, "\\F11")
 X0("tabify", tabify)
 X1("tab-to-tab-stop", tab_to_tab_stop,			"\\M-i")
 X1("toggle-read-only", toggle_read_only,		"\\C-x\\C-q")
