@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.14 2005/01/13 07:32:18 rrt Exp $	*/
+/*	$Id: window.c,v 1.15 2005/01/14 22:31:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -259,7 +259,7 @@ DEFUN("other-window", other_window)
     This command selects the window one step away in that order.
     +*/
 {
-  set_current_window((cur_wp->next != NULL) ? cur_wp->next: head_wp);
+  set_current_window((cur_wp->next != NULL) ? cur_wp->next : head_wp);
   return TRUE;
 }
 

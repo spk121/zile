@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.24 2005/01/13 00:16:15 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.25 2005/01/14 22:31:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -407,7 +407,7 @@ int is_mark_actived(void)
   if (!cur_bp->mark)
     return FALSE;
   else if (transient_mark_mode())
-    return (cur_bp->mark_active) ? TRUE: FALSE;
+    return (cur_bp->mark_active) ? TRUE : FALSE;
   else
     return TRUE;
 }

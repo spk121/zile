@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.29 2005/01/10 14:09:47 rrt Exp $	*/
+/*	$Id: search.c,v 1.30 2005/01/14 22:31:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -338,7 +338,7 @@ static int isearch(int dir, int regexp)
   astr pattern = astr_new();
   Point start, cur;
   Marker *old_mark = cur_wp->bp->mark ?
-    copy_marker(cur_wp->bp->mark): NULL;
+    copy_marker(cur_wp->bp->mark) : NULL;
 
   start = cur_bp->pt;
   cur = cur_bp->pt;
@@ -351,8 +351,8 @@ static int isearch(int dir, int regexp)
     astr_truncate(buf, 0);
     astr_afmt(buf, "%sI-search%s: %s",
               (last ?
-               (regexp ? "Regexp ": "") :
-               (regexp ? "Failing regexp ": "Failing ")),
+               (regexp ? "Regexp " : "") :
+               (regexp ? "Failing regexp " : "Failing ")),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               astr_cstr(pattern));
     /* Regex error.  */

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.43 2005/01/14 17:22:55 rrt Exp $	*/
+/*	$Id: bind.c,v 1.44 2005/01/14 22:31:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -512,7 +512,7 @@ static void write_functions_list(va_list ap)
     for (j = 0; j < 3; ++j) {
       key = simplify_key(fentry_table[i].key[j]);
       if (astr_len(key) > 0)
-        bprintf("%s%s", !j ? "": ", ", astr_cstr(key));
+        bprintf("%s%s", !j ? "" : ", ", astr_cstr(key));
       astr_delete(key);
     }
     bprintf("\n");

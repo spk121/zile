@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: point.c,v 1.7 2005/01/10 14:09:47 rrt Exp $	*/
+/*	$Id: point.c,v 1.8 2005/01/14 22:31:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -45,8 +45,8 @@ int cmp_point(Point pt1, Point pt2)
   else if (pt1.n > pt2.n)
     return +1;
   else
-    return ((pt1.o < pt2.o) ? -1:
-            (pt1.o > pt2.o) ? +1: 0);
+    return ((pt1.o < pt2.o) ? -1 :
+            (pt1.o > pt2.o) ? +1 : 0);
 }
 
 int point_dist(Point pt1, Point pt2)

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.12 2005/01/11 23:13:07 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.13 2005/01/14 22:31:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -112,7 +112,7 @@ static void draw_cursor(int state)
       _get_color(c, &fg, &bg);
       text_mode(bg);
       font->vtable->render_char
-        (font, ((c&0xff) < ' ') ? ' ': (c&0xff),
+        (font, ((c&0xff) < ' ') ? ' ' : (c&0xff),
          fg, bg, screen,
          cur_x*FW, cur_y*FH);
     }
@@ -147,7 +147,7 @@ void term_refresh(void)
         text_mode(bg);
         font->vtable->render_char
           (font,
-           ((c&0xff) < ' ') ? ' ': (c&0xff),
+           ((c&0xff) < ' ') ? ' ' : (c&0xff),
            fg, bg, screen, x*FW, y*FH);
       }
       i++;
@@ -268,7 +268,7 @@ static int translate_key(int c)
     ascii = scancode_to_ascii (scancode);
     if (ascii)
       return KBD_META | ascii |
-        ((key_shifts & KB_CTRL_FLAG) ? KBD_CTL: 0);
+        ((key_shifts & KB_CTRL_FLAG) ? KBD_CTL : 0);
     else
       return KBD_NOKEY;
   }

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.44 2005/01/12 00:16:49 rrt Exp $	*/
+/*	$Id: line.c,v 1.45 2005/01/14 22:31:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -524,8 +524,7 @@ DEFUN("backward-delete-char", backward_delete_char)
   /* In overwrite-mode and isn't called by delete_char().  */
   int (*f)(void) = ((cur_bp->flags & BFLAG_OVERWRITE) &&
                     (last_uniarg > 0)) ?
-    backward_delete_char_overwrite:
-  backward_delete_char;
+    backward_delete_char_overwrite : backward_delete_char;
   int uni, ret = TRUE;
 
   if (uniarg < 0)
@@ -688,7 +687,7 @@ static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
   /* Update the markers.  */
   for (marker = cur_bp->markers; marker; marker = marker->next) {
     if (marker->pt.p == lp &&
-        CMP_MARKER_OFFSET(marker, pointo, ((offset < 0) ? 1: 0)))
+        CMP_MARKER_OFFSET(marker, pointo, ((offset < 0) ? 1 : 0)))
       marker->pt.o += offset;
   }
 

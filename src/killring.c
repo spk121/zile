@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.15 2005/01/10 14:09:46 rrt Exp $	*/
+/*	$Id: killring.c,v 1.16 2005/01/14 22:31:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -254,7 +254,7 @@ DEFUN("backward-kill-word", backward_kill_word)
     With argument, do this that many times.
     +*/
 {
-  return FUNCALL_ARG(kill_word, !uniarg? -1: -uniarg);
+  return FUNCALL_ARG(kill_word, !uniarg ? -1 : -uniarg);
 }
 
 DEFUN("kill-sexp", kill_sexp)
