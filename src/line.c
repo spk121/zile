@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.8 2003/05/25 21:20:12 rrt Exp $	*/
+/*	$Id: line.c,v 1.9 2003/09/30 22:11:11 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -219,7 +219,7 @@ int insert_char_in_insert_mode(int c)
 
 	/* save current mode */
 	overwrite_mode_save = cur_bp->flags & BFLAG_OVERWRITE;
-	
+
 	/* force insert mode */
 	cur_bp->flags &= ~BFLAG_OVERWRITE;
 
@@ -325,7 +325,7 @@ static int common_insert_newline(int undo_mode)
 	for (wp = head_wp; wp != NULL; wp = wp->next) {
 		if (wp->bp != cur_bp)
 			continue;
-		if (wp->pointp == lp1 && 
+		if (wp->pointp == lp1 &&
 		    ((undo_mode && wp->pointo > lp1len)
 		     || (!undo_mode && wp->pointo >= lp1len))) {
 			wp->pointp = lp2;
@@ -465,8 +465,11 @@ static void auto_fill_break_line()
 	int break_col, last_col;
 	linep lp;
 
-	/* Find break point starting from fill column. */
-	for (break_col = cur_wp->bp->fill_column + 1; break_col > 0; --break_col) {
+	/* Find break point starting from fill column, or end of line,
+         * whichever is smaller (if there are tabs, the end of line
+         * may be smaller than the fill column). */
+	for (break_col = min(cur_wp->bp->fill_column + 1, cur_wp->pointp->size);
+             break_col > 0; --break_col) {
 		int c = cur_wp->pointp->text[break_col - 1];
 		if (isspace(c))
 			break;
@@ -834,4 +837,3 @@ Join lines if the character is a newline.
 
 	return ret;
 }
-
