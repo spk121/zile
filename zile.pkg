@@ -6,9 +6,9 @@
 
 "doc/BANNER.EPOC"-"",FT,TA
 "src/zile"-"!:\zile.exe"
-"doc/AUTODOC"-"!:\emx\share\AUTODOC"
-"doc/FAQ"-"!:\emx\share\FAQ"
-"doc/HELP"-"!:\emx\share\HELP"
-"doc/TUTORIAL"-"!:\emx\share\TUTORIAL"
-"doc/zilerc.sample"-"!:\emx\share\zilerc.sample"
+"doc/AUTODOC"-"!:\emx\share\zile\AUTODOC"
+"doc/FAQ"-"!:\emx\share\zile\FAQ"
+"doc/HELP"-"!:\emx\share\zile\HELP"
+"doc/TUTORIAL"-"!:\emx\share\zile\TUTORIAL"
+"doc/zilerc.sample"-"!:\emx\share\zile\zilerc.sample"
 
