@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.12 2004/01/31 02:21:59 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.13 2004/02/04 02:59:01 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -194,23 +194,15 @@ static void write_buffers_list(va_list ap)
 	bprintf(" MR Buffer          Size  Mode	 File\n");
 	bprintf(" -- ------          ----  ----	 ----\n");
 
-	/* Print non-temporary buffers. */
-	bp = old_wp->bp;
-	do {
-		if (!(bp->flags & BFLAG_TEMPORARY))
+        /* Print buffers. */
+        bp = old_wp->bp;
+        do {
+		/* Print all buffer less this one (the *Buffer List*). */
+		if (cur_bp != bp)
 			print_buf(old_wp->bp, bp);
-		if ((bp = bp->next) == NULL)
-			bp = head_bp;
-	} while (bp != old_wp->bp);
-
-	/* Print temporary buffers. */
-	bp = old_wp->bp;
-	do {
-		if (bp->flags & BFLAG_TEMPORARY)
-			print_buf(old_wp->bp, bp);
-		if ((bp = bp->next) == NULL)
-			bp = head_bp;
-	} while (bp != old_wp->bp);
+                if ((bp = bp->next) == NULL)
+                        bp = head_bp;
+        } while (bp != old_wp->bp);
 }
 
 DEFUN("list-buffers", list_buffers)
@@ -449,7 +441,8 @@ Put the mark where point is now, and point where the mark is now.
 	cur_wp->pointp = swapp;
 	cur_wp->pointo = swapo;
 
-	thisflag |= FLAG_NEED_RESYNC | FLAG_HIGHLIGHT_REGION_STAYS;
+	thisflag |= FLAG_NEED_RESYNC | FLAG_HIGHLIGHT_REGION_STAYS
+		 | FLAG_HIGHLIGHT_REGION;
 
 	return TRUE;
 }
