@@ -3,5 +3,5 @@ Makefile
 Makefile.in
 zile
 paths.h
-astr htable
+astr
 test*.stdout
