@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.14 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.15 2004/10/11 01:21:00 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -38,26 +38,6 @@ the directory must exist and must be specified in the\n\
 variable `backup-directory'.")
 X("beep",				"b", "true", "\
 If enabled, a sound will be emitted on any error.")
-X("displayable-characters",		"", "0x20-0x7e", "\
-Specify the set of characters that can be shown as-is on the screen.\n\
-The characters not included in this set are shown as octal\n\
-sequences (like \\261).\n\
-\n\
-The set syntax is the following:\n\
-\n\
-    set       ::= range | value ( ',' range | value )*\n\
-    range     ::= value '-' value\n\
-    value     ::= hex_value | oct_value | dec_value\n\
-    hex_value ::= '0x'[0-9a-fA-F]+\n\
-    oct_value ::= '0'[0-7]*\n\
-    dec_value ::= [1-9][0-9]*\n\
-\n\
-For example, the following are valid sets:\n\
-\n\
-    0x20-0x7e			(standard English-only character set)\n\
-    0x20-0x7e,0xa1-0xff		(typical European character set)\n\
-    0-15,17,0xef-0xff\n\
-    012,015-0x50		(two correct but useless character sets)")
 X("expand-tabs",			"b", "false", "\
 If disabled, Zile will insert hard tabs (the character `\\t'),\n\
 otherwise it will insert spaces.")

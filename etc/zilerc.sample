@@ -13,13 +13,6 @@ skip-splash-screen = false
 # This may be useful when `C-h' is already bound to Backspace or Delete.
 alternative-bindings = false
 
-# The displayable characters [default: "0x20-0x7e"]
-# Specify the set of characters that can be shown as-is on the screen.
-# The characters not included in this set are shown as octal
-# sequences (like \261).  For European character sets, set this
-# variable to "0x20-0x7e,0xa1-0xff".
-displayable-characters = "0x20-0x7e"
-
 # The default tabulation width [default: 8]
 tab-width = 8
 

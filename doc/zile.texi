@@ -936,33 +936,6 @@ Default value is @samp{false}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{true}.
-@item displayable-characters
-Specify the set of characters that can be shown as-is on the screen.
-The characters not included in this set are shown as octal
-sequences (like @samp{\261}).
-
-The set syntax is the following:
-@example
-set       ::= range | value ( ',' range | value )*
-range     ::= value '-' value
-value     ::= hex_value | oct_value | dec_value
-hex_value ::= '0x'[0-9a-fA-F]+
-oct_value ::= '0'[0-7]*
-dec_value ::= [1-9][0-9]*
-@end example
-For example, the following are valid sets:
-@c LINT IGNORE
-@table @samp
-@item 0x20-0x7e
-Standard English-only character set.
-@item 0x20-0x7e,0xa1-0xff
-Typical European character set.
-@item 0-15,17,0xef-0xff
-@itemx 012,015-0x50
-Correct but useless character sets.
-@end table
-@c LINT END IGNORE
-Default value is @samp{0x20-0x7e}.
 @item expand-tabs
 If disabled, Zile will insert hard tabs (the character @samp{\t}),
 otherwise it will insert spaces.

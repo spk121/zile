@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/10/11 01:08:42 $
+		   Last updated: $Date: 2004/10/11 01:21:00 $
 
 ------------------------------------------------------------------------------
 
@@ -147,9 +147,7 @@ INDEX
 
 2.7. How to display non-English characters?
 
-    Put the following line in your `~/.zilerc' file:
-
-    	displayable-characters = "0x20-0x7e,0xa1-0xff"
+    TODO. (With appropriate locale setting.)
 
 2.8. Zile doesn't handle filenames with non-English characters.
 
