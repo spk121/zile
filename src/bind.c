@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.57 2005/02/04 02:10:07 rrt Exp $	*/
+/*	$Id: bind.c,v 1.58 2005/02/05 01:49:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -148,7 +148,7 @@ size_t do_completion(astr as)
   size_t key;
 
   minibuf_write("%s", astr_cstr(as));
-  key = term_getkey();
+  key = getkey();
   minibuf_clear();
 
   return key;
@@ -460,7 +460,7 @@ DEFUN("global-set-key", global_set_key)
   astr as;
 
   minibuf_write("Set key globally: ");
-  key = term_getkey();
+  key = getkey();
   p = completion_scan(key, &keys, &numkeys);
 
   as = keyvectostr(keys, numkeys);
@@ -484,7 +484,7 @@ DEFUN("global-set-key", global_set_key)
 char *get_function_by_key_sequence(void)
 {
   leafp p;
-  size_t c = term_getkey();
+  size_t c = getkey();
   size_t *keys, numkeys;
 
   if (c & KBD_META && isdigit(c & 255))

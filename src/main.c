@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.82 2005/02/03 02:17:00 rrt Exp $	*/
+/*	$Id: main.c,v 1.83 2005/02/05 01:49:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -84,7 +84,7 @@ static void loop(void)
     if (lastflag & FLAG_DEFINING_MACRO)
       thisflag |= FLAG_DEFINING_MACRO;
 
-    process_key(term_getkey());
+    process_key(getkey());
 
     if (thisflag & FLAG_QUIT_ZILE)
       break;

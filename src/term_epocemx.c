@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.12 2005/01/30 23:24:34 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.13 2005/02/05 01:49:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -374,12 +374,12 @@ static int xgetkey(int mode)
 
   code= _read_key(0);
 
-  if (mode & GETKEY_NONFILTERED) {
+  if (mode & GETKEY_UNFILTERED) {
     return code & 0xff;
   } else {
     int key = translate_key(code);
     while (key == KBD_META)
-      key = term_getkey() | KBD_META;
+      key = getkey() | KBD_META;
     return key;
   }
 }
@@ -389,7 +389,7 @@ int term_xgetkey(int mode, size_t timeout)
   return xgetkey(mode);
 }
 
-int term_getkey(void)
+int getkey(void)
 {
   return term_xgetkey(0, 0);
 }

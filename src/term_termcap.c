@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.63 2005/02/04 02:10:08 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.64 2005/02/05 01:49:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -447,7 +447,7 @@ static size_t translate_key(char *s, size_t nbytes)
   return key;
 }
 
-static size_t xgetkey(int mode, size_t dsecs)
+static size_t _xgetkey(int mode, size_t dsecs)
 {
   size_t nbytes;
   char *keys = zmalloc(max_key_chars);
@@ -470,7 +470,7 @@ static size_t xgetkey(int mode, size_t dsecs)
 
   nbytes = read(STDIN_FILENO, keys, max_key_chars);
 
-  if (mode & GETKEY_NONFILTERED) {
+  if (mode & GETKEY_UNFILTERED) {
     int i;
     for (i = nbytes - 2; i >= 0; i--)
       term_ungetkey((size_t)keys[i]);
@@ -478,7 +478,7 @@ static size_t xgetkey(int mode, size_t dsecs)
   } else {
     key = translate_key(keys, nbytes);
     while (key == KBD_META)
-      key = term_getkey() | KBD_META;
+      key = getkey() | KBD_META;
   }
 
   free(keys);
@@ -498,20 +498,12 @@ size_t term_xgetkey(int mode, size_t timeout)
   winch_sig.sa_flags = SA_RESTART;
   sigaction(SIGWINCH, &winch_sig, NULL);
 
-  key = xgetkey(mode, timeout);
-
-  if (thisflag & FLAG_DEFINING_MACRO)
-    add_key_to_cmd(key);
+  key = _xgetkey(mode, timeout);
 
   winch_sig.sa_handler = SIG_DFL;
   sigaction(SIGWINCH, &winch_sig, NULL);
 
   return key;
-}
-
-size_t term_getkey(void)
-{
-  return term_xgetkey(0, 0);
 }
 
 /* XXX Use macro routines for this, suitably pulled out into keys.c */

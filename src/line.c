@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.58 2005/01/28 02:07:05 rrt Exp $	*/
+/*	$Id: line.c,v 1.59 2005/02/05 01:49:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -422,7 +422,7 @@ DEFUN("self-insert-command", self_insert_command)
 {
   int uni, c, ret = TRUE;
 
-  c = term_getkey();
+  c = getkey();
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)

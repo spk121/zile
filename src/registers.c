@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.16 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: registers.c,v 1.17 2005/02/05 01:49:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,7 +48,7 @@ DEFUN("copy-to-register", copy_to_register)
 
   minibuf_write("Copy to register: ");
   term_refresh();
-  if ((reg = term_getkey()) == KBD_CANCEL)
+  if ((reg = getkey()) == KBD_CANCEL)
     return cancel();
   minibuf_clear();
   reg %= NUM_REGISTERS;
@@ -88,7 +88,7 @@ DEFUN("insert-register", insert_register)
 
   minibuf_write("Insert register: ");
   term_refresh();
-  if ((reg = term_getkey()) == KBD_CANCEL)
+  if ((reg = getkey()) == KBD_CANCEL)
     return cancel();
   minibuf_clear();
   reg %= NUM_REGISTERS;

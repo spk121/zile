@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.42 2005/01/30 17:46:16 rrt Exp $	*/
+/*	$Id: search.c,v 1.43 2005/02/05 01:49:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -267,7 +267,7 @@ static int isearch(int dir)
 
     minibuf_write("%s", astr_cstr(buf));
 
-    c = term_getkey();
+    c = getkey();
 
     if (c == KBD_CANCEL) {
       cur_bp->pt = start;
@@ -465,7 +465,7 @@ DEFUN("query-replace-regexp", query_replace_regexp)
         resync_redisplay();
       for (;;) {
         minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
-        c = term_getkey();
+        c = getkey();
         if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
             c == 'q' || c == '.' || c == '!')
           goto exitloop;

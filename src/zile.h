@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.60 2005/01/30 23:24:34 rrt Exp $        */
+/*      $Id: zile.h,v 1.61 2005/02/05 01:49:15 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -277,7 +277,7 @@ typedef size_t Font;
  *--------------------------------------------------------------------------*/
 
 #define GETKEY_DELAYED                  0001
-#define GETKEY_NONFILTERED              0002
+#define GETKEY_UNFILTERED              0002
 
 /* Special value returned in non blocking mode, when no key is pressed. */
 #define KBD_NOKEY                       UINT_MAX

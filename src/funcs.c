@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.83 2005/02/02 02:16:22 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.84 2005/02/05 01:49:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -306,7 +306,7 @@ static int quoted_insert_octal(int c1)
 {
   int c2, c3;
   minibuf_write("C-q %d-", c1 - '0');
-  c2 = term_getkey();
+  c2 = getkey();
 
   if (!isdigit(c2) || c2 - '0' >= 8) {
     insert_char_in_insert_mode(c1 - '0');
@@ -315,7 +315,7 @@ static int quoted_insert_octal(int c1)
   }
 
   minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
-  c3 = term_getkey();
+  c3 = getkey();
 
   if (!isdigit(c3) || c3 - '0' >= 8) {
     insert_char_in_insert_mode((c1 - '0') * 8 + (c2 - '0'));
@@ -338,7 +338,7 @@ DEFUN("quoted-insert", quoted_insert)
   int c;
 
   minibuf_write("C-q-");
-  c = term_xgetkey(GETKEY_NONFILTERED, 0);
+  c = term_xgetkey(GETKEY_UNFILTERED, 0);
 
   if (isdigit(c) && c - '0' < 8)
     quoted_insert_octal(c);

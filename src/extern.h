@@ -97,6 +97,8 @@ int backward_sexp(void);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
+size_t xgetkey(int mode, size_t timeout);
+size_t getkey(void);
 void waitkey(size_t delay);
 char *copy_text_block(size_t startn, size_t starto, size_t size);
 astr shorten_string(char *s, int maxlen);
@@ -224,7 +226,6 @@ void term_clear(void);
 void term_addch(int c);
 void term_attrset(size_t attrs, ...);
 void term_beep(void);
-size_t term_getkey(void);
 size_t term_xgetkey(int mode, size_t timeout);
 void term_ungetkey(size_t key);
 

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.23 2005/02/03 02:17:01 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.24 2005/02/05 01:49:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -329,7 +329,7 @@ static int hooked_readkey(size_t timeout)
   return readkey();
 }
 
-static size_t _term_getkey(size_t timeout)
+static size_t _getkey(size_t timeout)
 {
   size_t key;
 
@@ -346,24 +346,26 @@ static size_t _term_getkey(size_t timeout)
   return key;
 }
 
-size_t term_getkey(void)
+size_t getkey(void)
 {
-  return _term_getkey(0);
+  return _getkey(0);
 }
 
-static int xgetkey(int mode, size_t timeout)
+static int _xgetkey(int mode, size_t timeout)
 {
   int c = 0;
   switch (mode) {
-  case GETKEY_NONFILTERED:
+  case GETKEY_UNFILTERED:
     c = hooked_readkey(0) & 0xff;
     break;
   case GETKEY_DELAYED:
-    c = _term_getkey(timeout);
+    c = _getkey(timeout);
     break;
-  case GETKEY_NONFILTERED|GETKEY_DELAYED:
+  case GETKEY_UNFILTERED|GETKEY_DELAYED:
     c = hooked_readkey(timeout) & 0xff;
     break;
+  default:
+    c = _getkey(0);
   }
   return c;
 }
@@ -375,7 +377,7 @@ size_t term_xgetkey(int mode, size_t timeout)
   if (ungetkey_p > ungetkey_buf)
     return *--ungetkey_p;
 
-  key = xgetkey(mode, timeout);
+  key = _xgetkey(mode, timeout);
 
   return key;
 }

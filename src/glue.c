@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.28 2005/01/29 12:55:00 rrt Exp $	*/
+/*	$Id: glue.c,v 1.29 2005/02/05 01:49:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -47,8 +47,29 @@ void ding(void)
 }
 
 /*
+ * Get a keystroke, waiting for up to timeout 10ths of a second if
+ * mode contains GETKEY_DELAYED, and translating it into a Zile
+ * keycode unless mode contains GETKEY_UNFILTERED.
+ */
+size_t xgetkey(int mode, size_t timeout)
+{
+  size_t key = term_xgetkey(mode, timeout);
+  if (thisflag & FLAG_DEFINING_MACRO)
+    add_key_to_cmd(key);
+  return key;
+}
+
+/*
+ * Wait for a keystroke and return the Zile key code.
+ */
+size_t getkey(void)
+{
+  return term_xgetkey(0, 0);
+}
+
+/*
  * Wait for two seconds or until a key is pressed.
- * The key is then available with term_getkey().
+ * The key is then available with getkey().
  */
 void waitkey(size_t delay)
 {
