@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.20 2005/01/10 14:09:45 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.21 2005/01/10 15:01:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -68,12 +68,13 @@ static Buffer *new_buffer(void)
     bp->fill_column = 70;
 
   /* Allocate a line. */
-  bp->pt.p = new_line();
+  bp->pt.p = list_new();
+  bp->pt.p->item = astr_new();
   bp->pt.n = 0;
   bp->pt.o = 0;
 
   /* Allocate the limit marker. */
-  bp->lines = new_line();
+  bp->lines = list_new();
 
   list_prev(bp->lines) = list_next(bp->lines) = bp->pt.p;
   list_prev(bp->pt.p) = list_next(bp->pt.p) = bp->lines;
@@ -92,24 +93,15 @@ static Buffer *new_buffer(void)
  */
 void free_buffer(Buffer *bp)
 {
-  Line *lp, *next_lp;
+  Line *lp;
   Undo *up, *next_up;
 
-  /*
-   * Free all the lines.
-   */
-  lp = list_next(bp->lines);
-  while (lp != bp->lines) {
-    next_lp = list_next(lp);
-    free_line(lp);
-    lp = next_lp;
-  }
+  /* Free all the lines. */
+  for (lp = list_first(bp->lines); lp != bp->lines; lp = list_next(lp))
+    astr_delete(lp->item);
+  list_delete(bp->lines);
 
-  free_line(bp->lines);
-
-  /*
-   * Free all the undo operations.
-   */
+  /* Free all the undo operations. */
   up = bp->last_undop;
   while (up != NULL) {
     next_up = up->next;
@@ -119,15 +111,11 @@ void free_buffer(Buffer *bp)
     up = next_up;
   }
 
-  /*
-   * Free markers.
-   */
+  /* Free markers. */
   while (bp->markers)
     free_marker(bp->markers);
 
-  /*
-   * Free the name and the filename.
-   */
+  /* Free the name and the filename. */
   free(bp->name);
   if (bp->filename != NULL)
     free(bp->filename);
@@ -307,7 +295,8 @@ void zap_buffer_content(void)
   Window *wp;
   Line *new_lp, *old_lp, *next_lp;
 
-  new_lp = new_line();
+  new_lp = list_new();
+  new_lp->item = astr_new();
   list_next(new_lp) = list_prev(new_lp) = cur_bp->lines;
 
   old_lp = list_next(cur_bp->lines);
@@ -327,7 +316,8 @@ void zap_buffer_content(void)
   /* Free all the old lines. */
   do {
     next_lp = list_next(old_lp);
-    free_line(old_lp);
+    astr_delete(old_lp->item);
+    free(old_lp);
     old_lp = next_lp;
   } while (old_lp != cur_bp->lines);
 

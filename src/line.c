@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.42 2005/01/10 14:09:46 rrt Exp $	*/
+/*	$Id: line.c,v 1.43 2005/01/10 15:01:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,28 +38,6 @@
 static void adjust_markers_for_offset(Line *lp, int pointo, int offset);
 static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type);
 static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len);
-
-/*
- * This function creates a new line structure for holding a line
- * of buffer text.
- *
- * The '\n' is not stored in the text buffer since it is implicit.
- */
-Line *new_line(void)
-{
-  Line *lp = list_new();
-  lp->item = astr_new();
-  return lp;
-}
-
-/*
- * Free the line contents.
- */
-void free_line(Line *lp)
-{
-  astr_delete(lp->item);
-  free(lp);
-}
 
 /* Insert the character at the current position and move the text at its right
  * whatever the insert/overwrite mode is.

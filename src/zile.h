@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.42 2005/01/10 14:09:48 rrt Exp $        */
+/*      $Id: zile.h,v 1.43 2005/01/10 15:01:07 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -63,9 +63,12 @@ typedef struct Terminal Terminal;
  */
 typedef int (*Function)(int uniarg);
 
-/*
- * Point and Marker.
+/* Line.
+ * A line is a list whose items are astrs. The newline at the end of
+ * each line is implicit.
  */
+
+/* Point and Marker. */
 struct Point {
   Line *p;                /* Line pointer. */
   int n;                  /* Line number. */
