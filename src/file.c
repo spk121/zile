@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.30 2004/04/23 21:18:54 rrt Exp $        */
+/*      $Id: file.c,v 1.31 2004/05/02 06:19:34 rrt Exp $        */
 
 #include "config.h"
 
@@ -94,7 +94,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 
         if (*sp != '/') {
                 astr_cat_cstr(dir, cwdir);
-                if (*astr_char(dir, -1) != '/')
+                if (astr_len(dir) == 0 || *astr_char(dir, -1) != '/')
                         astr_cat_cstr(dir, "/");
         }
 
