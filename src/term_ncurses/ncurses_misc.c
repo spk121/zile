@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.5 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.6 2004/01/07 00:45:20 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -116,7 +116,8 @@ int ncurses_init(void)
 	sigemptyset(&other_sig.sa_mask);
 	other_sig.sa_flags = SA_RESTART;
 
-	initscr();
+	ncurses_tp->screen = newterm(NULL, stdout, stdin);
+	set_term(ncurses_tp->screen);	
 
 	ncurses_tp->width = COLS;
 	ncurses_tp->height = LINES;
@@ -181,6 +182,8 @@ int ncurses_close(void)
 {
 	ncurses_free_rotation_buffers();
 	endwin();
+	delscreen(ncurses_tp->screen);
+	ncurses_tp->screen = NULL;
 
 	return TRUE;
 }
