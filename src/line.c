@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.23 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: line.c,v 1.24 2004/02/20 16:05:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -329,7 +329,7 @@ static void replace_text_case(char *to, int tlen, char *from, int flen)
 {
         int i;
         int overlap = min(tlen, flen);
-        int tail = max(tlen, flen) - overlap;
+        int tail = max(flen - overlap, 0);
 
         for (i = 0; i < overlap; i++) {
                 if (isupper(*to))
@@ -343,7 +343,6 @@ static void replace_text_case(char *to, int tlen, char *from, int flen)
 /* This routine replaces text in the line "lp" with "newtext".  If
  * "replace_case" is TRUE it will replace only the case of characters
  * comparing with original text the "newtext".  */
-
 void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
 		       int replace_case)
 {
