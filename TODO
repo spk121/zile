@@ -5,14 +5,14 @@ HIGH PRIORITY
 To implement and document the following functions (dummy functions
 already exist):
 
-X1("backward-sentence", backward_sentence,		"M-a")
-X1("forward-sentence", forward_sentence,		"M-e")
-X1("kill-sentence", kill_sentence,			"M-k")
-X1("backward-kill-sentence", backward_kill_sentence,	"C-x\\DEL")
-X1("backward-paragraph", backward_paragraph,		"M-{")
-X1("forward-paragraph", forward_paragraph,		"M-}")
-X1("mark-paragraph", mark_paragraph,			"M-h")
-X1("fill-paragraph", fill_paragraph,			"M-q")
+X1("backward-sentence", backward_sentence,              "M-a")
+X1("forward-sentence", forward_sentence,                "M-e")
+X1("kill-sentence", kill_sentence,                      "M-k")
+X1("backward-kill-sentence", backward_kill_sentence,    "C-x\\DEL")
+X1("backward-paragraph", backward_paragraph,            "M-{")
+X1("forward-paragraph", forward_paragraph,              "M-}")
+X1("mark-paragraph", mark_paragraph,                    "M-h")
+X1("fill-paragraph", fill_paragraph,                    "M-q")
 
 Plus these (which don't have dummy functions yet):
 
@@ -27,9 +27,9 @@ transpose-lines
 
 ------------------------------------------------------------------------------
 
-LOW PRIORITY
+MEDIUM PRIORITY
 
-X1("kill-rectangle", kill_rectangle,			"C-xrk")
+X1("kill-rectangle", kill_rectangle,                    "C-xrk")
 
 * Allow search and replace not to follow case (case-fold-search, case-replace)
 * Regex pattern matching for replace functions.
@@ -37,7 +37,7 @@ X1("kill-rectangle", kill_rectangle,			"C-xrk")
 
 ------------------------------------------------------------------------------
 
-VERY LOW PRIORITY (may require a rewrite)
+LOW PRIORITY (may require a rewrite)
 
 * Use a kernel of editing functions for low level editing; all other
   high level functions should call these functions to access the data.
