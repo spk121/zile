@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.26 2004/03/09 23:10:45 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.27 2004/03/10 10:46:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -107,32 +107,32 @@ static astr make_buffer_mode(Buffer *bp)
 	switch (bp->mode) {
 #if ENABLE_C_MODE
 	case BMODE_C:
-		astr_assign_cstr(buf, "C");
+		astr_assign_cstr(as, "C");
 		break;
 #endif
 #if ENABLE_CPP_MODE
 	case BMODE_CPP:
-		astr_assign_cstr(buf, "C++");
+		astr_assign_cstr(as, "C++");
 		break;
 #endif
 #if ENABLE_CSHARP_MODE
 	case BMODE_CSHARP:
-		astr_assign_cstr(buf, "C#");
+		astr_assign_cstr(as, "C#");
 		break;
 #endif
 #if ENABLE_JAVA_MODE
 	case BMODE_JAVA:
-		astr_assign_cstr(buf, "Java");
+		astr_assign_cstr(as, "Java");
 		break;
 #endif
 #if ENABLE_SHELL_MODE
 	case BMODE_SHELL:
-		astr_assign_cstr(buf, "Shell-script");
+		astr_assign_cstr(as, "Shell-script");
 		break;
 #endif
 #if ENABLE_MAIL_MODE
 	case BMODE_MAIL:
-		astr_assign_cstr(buf, "Mail");
+		astr_assign_cstr(as, "Mail");
 		break;
 #endif
 	default:

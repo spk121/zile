@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.19 2004/03/09 16:27:26 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.20 2004/03/10 10:46:21 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -401,7 +401,7 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 #define OUTCH(c, font)							    \
 do {									    \
 	if (i >= startcol) {						    \
-		if (highlight && in_region(wp, lp, lineno, i, r))	    \
+		if (highlight && in_region(lineno, i, r))	            \
 			outch(c, (font & A_BOLD) | C_FG_WHITE_BG_BLUE, &x); \
 		else							    \
 			outch(c, font, &x);				    \
