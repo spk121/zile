@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.5 2004/04/23 20:45:36 rrt Exp $   */
+/*      $Id: completion.c,v 1.6 2004/05/02 06:21:22 rrt Exp $   */
 
 #include "config.h"
 
@@ -312,27 +312,27 @@ static int default_completion_reread(Completion *cp, astr as)
         cp->fl_sorted = 0;
 
         buf = astr_new();
-        agetcwd(buf);
         pdir = astr_new();
         fname = astr_new();
 
-        astr_cpy(buf, as);
         for (i = 0; i < astr_len(as); i++){
                 if (*astr_char(as, i) == '/') {
-                        if (*astr_char(as, ++i) == '/') {
+                        if (*astr_char(as, i + 1) == '/') {
                                 /*
                                  * Got `//'.  Restart from this point.
                                  */
-                                while (*astr_char(as, i) == '/')
+                                while (*astr_char(as, i + 1) == '/')
                                         i++;
                                 astr_truncate(buf, 0);
+                                /* Final '/' remains to be copied
+                                   below */
                         }
-                        astr_cat_char(buf, '/');
-                } else
-                        astr_cat_char(buf, *astr_char(as, i++));
+                }
+                astr_cat_char(buf, *astr_char(as, i));
         }
         astr_cpy(as, buf);
 
+        agetcwd(buf);
         if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
                 return FALSE;
 
