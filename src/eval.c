@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.5 2005/01/19 01:23:37 rrt Exp $	*/
+/*	$Id: eval.c,v 1.6 2005/01/22 18:26:10 rrt Exp $	*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,21 +29,17 @@
 #include "vars.h"
 
 evalLookupNode evalTable[] = {
-  { "+" 	 , eval_cb_add		},
-  { "-" 	 , eval_cb_subtract	},
-  { "*" 	 , eval_cb_multiply	},
-  { "/" 	 , eval_cb_divide	},
+  { "+" 	, eval_cb_add		},
+  { "-" 	, eval_cb_subtract	},
+  { "*" 	, eval_cb_multiply	},
+  { "/" 	, eval_cb_divide	},
+  { "%" 	, eval_cb_modulus	},
 
-  { "1+" 	 , eval_cb_oneplus	},
-  { "1-" 	 , eval_cb_oneminus	},
-
-  { "%" 	 , eval_cb_modulus	},
-
-  { "<" 	 , eval_cb_lt		},
-  { "<=" 	 , eval_cb_lt_eq	},
-  { ">" 	 , eval_cb_gt		},
-  { ">=" 	 , eval_cb_gt_eq	},
-  { "=" 	 , eval_cb_eqsign	},
+  { "<" 	, eval_cb_lt		},
+  { "<=" 	, eval_cb_lt_eq		},
+  { ">" 	, eval_cb_gt		},
+  { ">=" 	, eval_cb_gt_eq		},
+  { "=" 	, eval_cb_eqsign	},
 
   { "and" 	, eval_cb_and		},
   { "or" 	, eval_cb_or		},
@@ -61,10 +57,8 @@ evalLookupNode evalTable[] = {
   { "unless"	, eval_cb_unless	},
   { "when"	, eval_cb_when		},
   { "cond"	, eval_cb_cond		},
-  { "select"	, eval_cb_select	},
 
   { "princ"	, eval_cb_princ		},
-  { "terpri"	, eval_cb_terpri	},
 
   { "eval"	, eval_cb_eval		},
   { "prog1"	, eval_cb_prog1		},
@@ -74,11 +68,9 @@ evalLookupNode evalTable[] = {
   { "set"	, eval_cb_set		},
   { "setq"	, eval_cb_setq		},
   { "setf"	, eval_cb_setq		},
-  { "enum"	, eval_cb_enum		},
 
   { "defun"	, eval_cb_defun		},
 
-  { "gc"	, eval_cb_nothing	},
   { "garbage-collect" , eval_cb_nothing	},
 
   { NULL	, NULL			}
@@ -353,35 +345,6 @@ le * eval_cb_divide( int argc, le * branch )
                                            )
                           )
           );
-}
-    
-le * eval_cb_oneplus( int argc, le * branch )
-{
-  le * retle;
-  int value;
-
-  if (!branch || argc < 2) return( leNIL );
-
-  retle = evaluateNode( branch->list_next ); 
-  value = evalCastLeToInt( retle );
-  leWipe( retle );
-
-  return( evalCastIntToLe(value + 1) );
-}
-    
-le * eval_cb_oneminus( int argc, le * branch )
-{
-  le * retle;
-  int value;
-
-  if (!branch || argc < 2) return( leNIL );
-
-  retle = evaluateNode( branch->list_next ); 
-  value = evalCastLeToInt( retle );
-  leWipe( retle );
-
-  return( evalCastIntToLe(value - 1) );
-
 }
     
 le * eval_cb_modulus( int argc, le * branch )
@@ -923,42 +886,6 @@ le * eval_cb_cond( int argc, le * branch )
   return( retval );
 }
     
-le * eval_cb_select( int argc, le * branch )
-{
-  le * result;
-
-  if (argc < 2)  return( leNIL);
-
-  branch = branch->list_next;
-  result = evaluateNode(branch);
-
-  branch = branch->list_next;
-  while( branch )
-    {
-      if( branch->branch )
-        {
-          le * check = branch->branch;
-          if (check && check->data
-              && (!strcmp( check->data, result->data )))
-            {
-              /* we're in the right place, evaluate and return */
-              le * computelist = check->list_next;
-              while( computelist )
-                {
-                  leWipe( result );
-                  result = evaluateNode( computelist );
-                  computelist = computelist->list_next;
-                }
-              return( result );
-            }
-        }
-	    
-      branch = branch->list_next;
-    }
-
-  return( result );
-}
-
     
 le * eval_cb_princ(int argc, le *branch)
 {
@@ -977,13 +904,6 @@ le * eval_cb_princ(int argc, le *branch)
   return retblock;
 }
     
-le *eval_cb_terpri(int argc, le *branch)
-{
-  if (branch != NULL && argc == 1)
-    printf("\n");
-  return leNIL;
-}
-
     
 le * eval_cb_eval( int argc, le * branch )
 {
@@ -1082,36 +1002,6 @@ le *eval_cb_setq(int argc, le *branch)
   return eval_cb_set_helper(S_SETQ, argc, branch);
 }
     
-le * eval_cb_enum( int argc, le * branch )
-{
-  le * current;
-  int count = -1;
-  char value[16];
-
-  if (!branch || argc < 2)  return( leNIL );
-
-  current = branch->list_next;
-  while ( current )
-    {
-      if (current->data)
-        {
-          sprintf( value, "%d", ++count);
-
-          mainVarList = variableSetString( 
-                                          mainVarList,
-                                          current->data,
-                                          value
-                                          );
-        }
-      current = current->list_next;
-    }
-
-  if (count == -1)
-    return( leNIL );
-  else
-    return( evalCastIntToLe(count) );
-}
-
     
 le *eval_cb_defun(int argc, le * branch)
 {

@@ -20,13 +20,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.h,v 1.3 2005/01/19 00:40:49 rrt Exp $	*/
+/*	$Id: eval.h,v 1.4 2005/01/22 18:26:10 rrt Exp $	*/
 
 #include "lists.h"
 
 typedef le *(*eval_cb)(int argc, le *branch);
 typedef struct evalLookupNode {
-  char    *word;
+  char *word;
   eval_cb callback;
 } evalLookupNode;
 
@@ -48,13 +48,12 @@ enum cumefcn {
   C_MULTIPLY,
   C_DIVIDE
 };
+
 int eval_cume_helper(enum cumefcn function, int value, le *branch) ;
 le *eval_cb_add(int argc, le *branch);
 le *eval_cb_subtract(int argc, le *branch);
 le *eval_cb_multiply(int argc, le *branch);
 le *eval_cb_divide(int argc, le *branch);
-le *eval_cb_oneplus(int argc, le *branch);
-le *eval_cb_oneminus(int argc, le *branch);
 le *eval_cb_modulus(int argc, le *branch);
 
 le *eval_cb_lt(int argc, le *branch);
@@ -76,18 +75,18 @@ int eval_cb_lists_same( le *list1, le *list2);
 le *eval_cb_equal(int argc, le *branch);
 
 le *eval_cb_if(int argc, le *branch);
+
 enum whenunless {
   WU_WHEN,
   WU_UNLESS
 };
+
 le *eval_cb_whenunless_helper(enum whenunless which, int argc, le *branch);
 le *eval_cb_unless(int argc, le *branch);
 le *eval_cb_when(int argc, le *branch);
 le *eval_cb_cond(int argc, le *branch);
-le *eval_cb_select(int argc, le *branch);
 
 le *eval_cb_princ(int argc, le *branch);
-le *eval_cb_terpri(int argc, le *branch);
 
 le *eval_cb_eval(int argc, le *branch);
 le *eval_cb_prog(int argc, le *branch, int returnit);
@@ -103,7 +102,6 @@ enum setfcn {
 le *eval_cb_set_helper(enum setfcn function, int argc, le *branch);
 le *eval_cb_set(int argc, le *branch);
 le *eval_cb_setq(int argc, le *branch);
-le *eval_cb_enum(int argc, le *branch);
 
 le *eval_cb_defun(int argc, le *branch);
 
