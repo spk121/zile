@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.8 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.9 2004/10/11 00:47:19 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -28,7 +28,6 @@
 
 void resync_redisplay(void)
 {
-#if 1
 	/* Normal Emacs-like resyncing calculation. */
 	int delta = cur_bp->pt.n - cur_wp->lastpointn;
 
@@ -48,13 +47,6 @@ void resync_redisplay(void)
 			cur_wp->topdelta = cur_bp->pt.n;
 	}
 	cur_wp->lastpointn = cur_bp->pt.n;
-#else
-	/* Alternative classic resyncing calculation. */
-	if (cur_bp->pt.n < cur_wp->eheight)
-		cur_wp->topdelta = cur_bp->pt.n;
-	else
-		cur_wp->topdelta = cur_bp->pt.n % cur_wp->eheight;
-#endif
 }
 
 void recenter(Window *wp)

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.35 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: main.c,v 1.36 2004/10/11 00:47:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -298,7 +298,6 @@ static void setup_main_screen(int argc, int hflag)
 			FUNCALL(minihelp_toggle_window);
 
 		if (argc < 1 && lookup_bool_variable("novice-level")) {
-			/* Cut & pasted from Emacs 20.2. */
 			insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
