@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.13 2004/01/28 10:37:07 rrt Exp $	*/
+/*	$Id: line.c,v 1.14 2004/01/29 03:50:50 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -449,7 +449,7 @@ void insert_string(const char *s)
 	undo_nosave = FALSE;
 }
 
-void insert_nstring(char *s, size_t size)
+void insert_nstring(const char *s, size_t size)
 {
 	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
 	undo_nosave = TRUE;
