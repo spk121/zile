@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.c,v 1.5 2005/01/24 23:13:24 rrt Exp $	*/
+/*	$Id: parser.c,v 1.6 2005/01/25 00:28:39 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -29,17 +29,95 @@
 #include "zile.h"
 #include "extern.h"
 
+static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokenname *tokenid)
+{
+  int c;
+  int doublequotes = 0;
+  astr tok = astr_new();
+
+  *tokenid = T_EOF;
+
+  /* Chew space to next token */
+  do {
+    c = getachar();
+
+    /* Munch comments */
+    if (c == ';')
+      do {
+        c = getachar();
+      } while (c != EOF && c != '\n');
+  } while (c == ' ' || c == '\t');
+
+  /* Snag token */
+  if (c == '(') {
+    *tokenid = T_OPENPAREN;
+    return tok;
+  } else if (c == ')') {
+    *tokenid = T_CLOSEPAREN;
+    return tok;
+  } else if (c == '\'') {
+    *tokenid = T_QUOTE;
+    return tok;
+  } else if (c == '\n') {
+    *tokenid = T_NEWLINE;
+    return tok;
+  } else if (c == EOF) {
+    *tokenid = T_EOF;
+    return tok;
+  }
+
+  /* It looks like a string. Snag to the next whitespace. */
+  if (c == '\"') {
+    doublequotes = 1;
+    c = getachar();
+  }
+
+  while (1) {
+    astr_cat_char(tok, (char)c);
+
+    if (!doublequotes) { 
+      if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
+        ungetachar(c);
+        astr_truncate(tok, astr_len(tok) - 1);
+
+        if (!astr_cmp_cstr(tok, "quote")) {
+          *tokenid = T_QUOTE;
+          return tok;
+        }
+        *tokenid = T_WORD;
+        return tok;
+      }
+    } else {
+      switch (c) {
+      case '\n':
+      case '\r':
+      case EOF:
+        ungetachar(c);
+        /* Fall through */
+
+      case '\"':
+        astr_truncate(tok, astr_len(tok) - 1);
+        *tokenid = T_WORD;
+        return tok;
     
+      }
+    }
+
+    c = getachar();
+  }
+
+  return tok;
+}
+
 struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct le *list, int *line)
 {
-  char *tok = NULL;
+  astr tok;
   enum tokenname tokenid = T_NONE;
   int isquoted = 0;
 
-  if (!getachar || !ungetachar)
-    return NULL;
+  assert(getachar && ungetachar);
 
-  while (1) {	    
+  while (1) {
     tok = snagAToken(getachar, ungetachar, &tokenid);
 
     switch (tokenid) {
@@ -63,98 +141,17 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
       break;
 
     case (T_WORD):
-      list = leAddDataElement(list, tok, isquoted);
-      free(tok);
+      list = leAddDataElement(list, astr_cstr(tok), isquoted);
       isquoted = 0;
       break;
 	    
     case (T_CLOSEPAREN):
     case (T_EOF):
       isquoted = 0;
+      astr_delete(tok);
       return list;
     }
+
+    astr_delete(tok);
   }
-}
-    
-char *snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokenname *tokenid)
-{
-  unsigned pos = 0;
-  int c;
-  int doublequotes = 0;
-  char temp[128];
-
-  assert(getachar && ungetachar);
-
-  *tokenid = T_EOF;
-
-  /* Chew space to next token */
-  do {
-    c = getachar();
-
-    /* Munch comments */
-    if (c == ';')
-      do {
-        c = getachar();
-      } while (c != EOF && c != '\n');
-  } while (c == ' ' || c == '\t');
-
-  /* Snag token */
-  if (c == '(') {
-    *tokenid = T_OPENPAREN;
-    return NULL;
-  } else if (c == ')') {
-    *tokenid = T_CLOSEPAREN;
-    return NULL;
-  } else if (c == '\'') {
-    *tokenid = T_QUOTE;
-    return NULL;
-  } else if (c == '\n') {
-    *tokenid = T_NEWLINE;
-    return NULL;
-  } else if (c == EOF) {
-    *tokenid = T_EOF;
-    return NULL;
-  }
-
-  /* It looks like a string. Snag to the next whitespace. */
-  if (c == '\"') {
-    doublequotes = 1;
-    c = getachar();
-  }
-
-  while (1) {
-    temp[pos++] = (char)c;
-
-    if (!doublequotes) { 
-      if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
-        ungetachar(c);
-        temp[pos-1] = '\0';
-
-        if (!strcmp(temp, "quote")) {
-          *tokenid = T_QUOTE;
-          return NULL;
-        }
-        *tokenid = T_WORD;
-        return zstrdup(temp);
-      }
-    } else {
-      switch (c) {
-      case '\n':
-      case '\r':
-      case EOF:
-        ungetachar(c);
-        /* Fall through */
-
-      case '\"':
-        temp[pos-1] = '\0';
-        *tokenid = T_WORD;
-        return zstrdup(temp);
-    
-      }
-    }
-
-    c = getachar();
-  }
-
-  return NULL;
 }

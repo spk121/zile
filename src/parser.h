@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.h,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: parser.h,v 1.3 2005/01/25 00:28:39 rrt Exp $	*/
 
 #include <stdio.h>
 #include "lists.h"
@@ -37,9 +37,6 @@ enum tokenname {
 
 typedef int (*getcCallback)(void);
 typedef void (*ungetcCallback)(int c);
-
-char *snagAToken(getcCallback getachar, ungetcCallback ungetachar,
-                 enum tokenname * tokenid);
 
 struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar,
             struct le * list, int *line);
