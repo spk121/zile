@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.54 2005/01/25 20:04:57 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.55 2005/01/25 20:19:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -71,9 +71,9 @@ static int key_code[] = {
   KBD_LEFT, KBD_RIGHT, KBD_UP, KBD_DOWN,
   KBD_HOME, KBD_END, KBD_PGUP, KBD_PGDN,
   KBD_BS, KBD_DEL, KBD_INS,
-  /* KBD_F1, KBD_F2, KBD_F3, KBD_F4,
-     KBD_F5, KBD_F6, KBD_F7, KBD_F8,
-     KBD_F9, KBD_F10, KBD_F11, KBD_F12, */
+  KBD_F1, KBD_F2, KBD_F3, KBD_F4,
+  KBD_F5, KBD_F6, KBD_F7, KBD_F8,
+  KBD_F9, KBD_F10, KBD_F11, KBD_F12,
 };
 
 #define KEYS (sizeof(key_code) / sizeof(key_code[0]))
@@ -82,6 +82,7 @@ static char *key_cap_name[KEYS] = {
   "kl", "kr", "ku", "kd",
   "kh", "kH", "kP", "kN",
   "kb", "kD", "kI",
+  "k1", "k2", "k3", "k4", "k5", "k6", "k7", "k8", "k9", "k0", "F1", "F2",
 };
 
 static char *key_cap[KEYS];
