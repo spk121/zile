@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.49 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: bind.c,v 1.50 2005/01/29 00:25:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -331,7 +331,7 @@ static struct fentry *bsearch_function(char *name)
   return bsearch(&key, fentry_table, fentry_table_size, sizeof fentry_table[0], bind_compar);
 }
 
-static Function get_function(char *name)
+Function get_function(char *name)
 {
   size_t i;
   for (i = 0; i < fentry_table_size; ++i)
@@ -340,7 +340,7 @@ static Function get_function(char *name)
   return NULL;
 }
 
-static char *get_function_name(Function p)
+char *get_function_name(Function p)
 {
   size_t i;
   for (i = 0; i < fentry_table_size; ++i)
