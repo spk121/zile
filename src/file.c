@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.44 2004/11/14 23:57:54 rrt Exp $        */
+/*      $Id: file.c,v 1.45 2004/11/15 22:01:31 rrt Exp $        */
 
 #include "config.h"
 
@@ -773,11 +773,17 @@ static int copy_file(const char *source, const char *dest)
 
         stat_valid = fstat(ifd, &st) != -1;
 
+#if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
         /* Recover file permissions and ownership. */
         if (stat_valid) {
+#ifdef HAVE_FCHMOD
                 fchmod(ofd, st.st_mode);
+#endif
+#ifdef HAVE_FCHOWN
                 fchown(ofd, st.st_uid, st.st_gid);
+#endif
         }
+#endif
 
         close(ifd);
         close(ofd);

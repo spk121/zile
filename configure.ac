@@ -28,7 +28,7 @@ dnl ==================================================================
 dnl Checks for functions.
 dnl ==================================================================
 
-AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf strrstr)
+AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf strrstr fchown fchmod)
 
 dnl ==================================================================
 dnl Checks for header files.
