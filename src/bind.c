@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.11 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: bind.c,v 1.12 2004/02/23 02:05:10 dacap Exp $	*/
 
 #include "config.h"
 
@@ -326,22 +326,20 @@ struct fentry {
 	Function func;
 
 	/* The assigned keys. */
-	char *key1;
-	char *key2;
-	char *key3;
+	char *key[3];
 };
 
 typedef struct fentry *fentryp;
 
 static struct fentry fentry_table[] = {
 #define X0(zile_name, c_name) \
-	{ zile_name, F_ ## c_name, NULL, NULL, NULL },
+	{ zile_name, F_ ## c_name, { NULL, NULL, NULL } },
 #define X1(zile_name, c_name, key1) \
-	{ zile_name, F_ ## c_name, key1, NULL, NULL },
+	{ zile_name, F_ ## c_name, { key1, NULL, NULL } },
 #define X2(zile_name, c_name, key1, key2) \
-	{ zile_name, F_ ## c_name, key1, key2, NULL },
+	{ zile_name, F_ ## c_name, { key1, key2, NULL } },
 #define X3(zile_name, c_name, key1, key2, key3) \
-	{ zile_name, F_ ## c_name, key1, key2, key3 },
+	{ zile_name, F_ ## c_name, { key1, key2, key3 } },
 #include "tbl_funcs.h"
 #undef X0
 #undef X1
@@ -360,24 +358,16 @@ static int alternative_bindings = 0;
 
 void init_bindings(void)
 {
-	unsigned int i;
+	unsigned int i, j;
 
 	if (lookup_bool_variable("alternative-bindings")) {
 		alternative_bindings = 1;
-		for (i = 0; i < fentry_table_size; ++i) {
-			if (fentry_table[i].key1 != NULL) {
-				fentry_table[i].key1 = zstrdup(fentry_table[i].key1);
-				replace_string(fentry_table[i].key1, "C-h", "M-h");
-			}
-			if (fentry_table[i].key2 != NULL) {
-				fentry_table[i].key2 = zstrdup(fentry_table[i].key2);
-				replace_string(fentry_table[i].key2, "C-h", "M-h");
-			}
-			if (fentry_table[i].key3 != NULL) {
-				fentry_table[i].key3 = zstrdup(fentry_table[i].key3);
-				replace_string(fentry_table[i].key3, "C-h", "M-h");
-			}
-		}
+		for (i = 0; i < fentry_table_size; ++i)
+			for (j = 0; j < 3; ++j)
+				if (fentry_table[i].key[j] != NULL) {
+					fentry_table[i].key[j] = zstrdup(fentry_table[i].key[j]);
+					replace_string(fentry_table[i].key[j], "C-h", "M-h");
+				}
 	}
 
 	/*
@@ -388,14 +378,11 @@ void init_bindings(void)
 	/*
 	 * Bind all the default functions.
 	 */
-	for (i = 0; i < fentry_table_size; i++) {
-		if (fentry_table[i].key1 != NULL)
-			bind_key(fentry_table[i].key1, fentry_table[i].func);
-		if (fentry_table[i].key2 != NULL)
-			bind_key(fentry_table[i].key2, fentry_table[i].func);
-		if (fentry_table[i].key3 != NULL)
-			bind_key(fentry_table[i].key3, fentry_table[i].func);
-	}
+	for (i = 0; i < fentry_table_size; i++)
+		for (j = 0; j < 3; ++j)
+			if (fentry_table[i].key[j] != NULL)
+				bind_key(fentry_table[i].key[j],
+					 fentry_table[i].func);
 }
 
 static void recursive_free_bindings(leafp p)
@@ -409,19 +396,15 @@ static void recursive_free_bindings(leafp p)
 
 void free_bindings(void)
 {
+	unsigned int i, j;
+
 	recursive_free_bindings(leaf_tree);
 
-	if (alternative_bindings) {
-		unsigned int i;
-		for (i = 0; i < fentry_table_size; ++i) {
-			if (fentry_table[i].key1 != NULL)
-				free(fentry_table[i].key1);
-			if (fentry_table[i].key2 != NULL)
-				free(fentry_table[i].key2);
-			if (fentry_table[i].key3 != NULL)
-				free(fentry_table[i].key3);
-		}
-	}
+	if (alternative_bindings)
+		for (i = 0; i < fentry_table_size; ++i)
+			for (j = 0; j < 3; ++j)
+				if (fentry_table[i].key[j] != NULL)
+					free(fentry_table[i].key[j]);
 
 	free_history_elements(&functions_history);
 }
@@ -550,22 +533,18 @@ char *get_function_by_key_sequence(void)
 
 static void write_functions_list(va_list ap)
 {
-	unsigned int i;
+	unsigned int i, j;
+	char key[64];
 
 	bprintf("%-30s%s\n", "Function", "Bindings");
 	bprintf("%-30s%s\n", "--------", "--------");
 	for (i = 0; i < fentry_table_size; ++i) {
-		char key1[64], key2[64], key3[64];
-		simplify_key(key1, fentry_table[i].key1);
-		simplify_key(key2, fentry_table[i].key2);
-		simplify_key(key3, fentry_table[i].key3);
 		bprintf("%-30s", fentry_table[i].name);
-		if (key1[0] != '\0')
-			bprintf("%s", key1);
-		if (key2[0] != '\0')
-			bprintf(", %s", key2);
-		if (key3[0] != '\0')
-			bprintf(", %s", key3);
+		for (j = 0; j < 3; ++j) {
+			simplify_key(key, fentry_table[i].key[j]);
+			if (*key != '\0')
+				bprintf("%s%s", !j ? "": ", ", key);
+		}
 		bprintf("\n");
 	}
 }
