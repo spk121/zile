@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.5 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.6 2003/05/19 22:26:41 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -39,7 +39,6 @@
 #endif
 
 #include "zile.h"
-#include "pathbuffer.h"
 #include "extern.h"
 
 #include "term_ncurses.h"
