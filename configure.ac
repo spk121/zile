@@ -118,7 +118,7 @@ AC_DEFUN(zile_CHECK_CURSES,
         dnl Check if ncurses library is available as libncurses or libcurses
         AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
 	        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-		AC_MSG_FAILURE([cannot find either libncurses.a or libcurses.a]))])
+		AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 ])
 
 AC_MSG_CHECKING([if curses is required])
@@ -132,6 +132,8 @@ else
         curses=false
         AC_MSG_RESULT(no)
         AC_CHECK_HEADERS([termios.h] [term.h])
+        AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
+		AC_MSG_FAILURE([cannot find libtermcap]))
 fi
 ],[
         curses=true
