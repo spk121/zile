@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.9 2005/01/03 11:11:32 rrt Exp $
+## $Id: Makefile.am,v 1.10 2005/01/12 00:43:04 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -17,8 +17,11 @@ EXTRA_DIST =					\
 	zilerc.sample				\
 	zlint					\
 	zilerc.texi				\
+	zile.1.in				\
 	mkdoc.c					\
 	config.h
+
+man_MANS = zile.1
 
 HELP: $(top_srcdir)/doc/zile.texi
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
@@ -44,7 +47,12 @@ zilerc.texi: zilerc.sample
 	expand $< >>$@
 	@echo "@end example" >>$@
 
+zile.1: zile.1.in
+	rm -f $@
+	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $< > $@
+
 all-local: HELP AUTODOC
 
 clean-local:
-	-rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
+	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
+	rm -f zile.1

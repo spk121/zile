@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.25 2005/01/10 00:24:59 rrt Exp $
+## $Id: Makefile.am,v 1.26 2005/01/12 00:43:05 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -83,16 +83,7 @@ endif
 zile_LDADD =					\
 	$(regex)
 
-man_MANS = zile.1
-
-EXTRA_DIST = zile.1.in regex.c regex.h
-
-zile.1: zile.1.in
-	rm -f $@
-	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $< > $@
-
-clean-local:
-	rm -f zile.1
+EXTRA_DIST = regex.c regex.h
 
 distclean-local:
 	rm -f paths.h
