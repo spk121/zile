@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.4 2003/10/24 23:32:09 ssigala Exp $
+.\" $Id: zile.1.in,v 1.5 2004/01/23 01:49:54 dacap Exp $
 .Dd Nov, 2003
 .Os
 .Dt ZILE 1
@@ -214,19 +214,19 @@ execute extended command
 .Bl -tag -width Fl
 .It Pa ~/.zilerc
 user customized Zile initialization file
-.It Pa @ETCDIR@/AUTODOC
+.It Pa @pkgdatadir@/AUTODOC
 self-documentation
-.It Pa @ETCDIR@/FAQ
+.It Pa @pkgdatadir@/FAQ
 Zile FAQ
-.It Pa @ETCDIR@/HELP
+.It Pa @pkgdatadir@/HELP
 Zile manual
-.It Pa @ETCDIR@/LATEST_VERSION
+.It Pa @pkgdatadir@/LATEST_VERSION
 where to get the latest version
-.It Pa @ETCDIR@/MINIHELP*
+.It Pa @pkgdatadir@/MINIHELP*
 Mini Help window text
-.It Pa @ETCDIR@/TUTORIAL
+.It Pa @pkgdatadir@/TUTORIAL
 Zile tutorial
-.It Pa @ETCDIR@/zilerc.sample
+.It Pa @pkgdatadir@/zilerc.sample
 sample Zile initialization file
 .El
 .Sh SEE ALSO
