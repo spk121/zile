@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.51 2005/01/26 23:45:01 rrt Exp $        */
+/*      $Id: zile.h,v 1.52 2005/01/26 23:49:58 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -235,7 +235,7 @@ struct Completion {
 
   list matches;           /* The matches list. */
   char *match;            /* The match buffer. */
-  int matchsize;          /* The match buffer size. */
+  unsigned matchsize;     /* The match buffer size. */
 };
 
 struct History {
