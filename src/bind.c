@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.26 2004/04/16 01:24:18 dacap Exp $	*/
+/*	$Id: bind.c,v 1.27 2004/04/23 20:34:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -229,7 +229,7 @@ void process_key(int c)
 		for (uni = 0; uni < last_uniarg; ++uni) {
 			if (!self_insert_command(c)) {
 				astr as = make_completion(keys, numkeys);
-				astr_truncate(as, astr_size(as) - 1);
+				astr_truncate(as, astr_len(as) - 1);
 				minibuf_error("%s not defined.", astr_cstr(as));
                                 astr_delete(as);
 				undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -537,7 +537,7 @@ static void write_functions_list(va_list ap)
 		bprintf("%-30s", fentry_table[i].name);
 		for (j = 0; j < 3; ++j) {
 			key = simplify_key(fentry_table[i].key[j]);
-			if (astr_size(key) > 0)
+			if (astr_len(key) > 0)
 				bprintf("%s%s", !j ? "": ", ", astr_cstr(key));
                         astr_delete(key);
 		}

@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.14 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: search.c,v 1.15 2004/04/23 20:34:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -417,8 +417,8 @@ static int isearch(int dir, int regexp)
 				cur_bp->mark = old_mark;
 			break;
 		} else if (c == KBD_BS) {
-			if (astr_size(pattern) > 0) {
-				astr_truncate(pattern, astr_size(pattern) - 1);
+			if (astr_len(pattern) > 0) {
+				astr_truncate(pattern, astr_len(pattern) - 1);
 				cur_bp->pt = start;
 				thisflag |= FLAG_NEED_RESYNC;
 			} else
@@ -429,7 +429,7 @@ static int isearch(int dir, int regexp)
 				dir = ISEARCH_BACKWARD;
 			else if ((c & 255) == 's' && dir == ISEARCH_BACKWARD)
 				dir = ISEARCH_FORWARD;
-			if (astr_size(pattern) > 0) {
+			if (astr_len(pattern) > 0) {
 				/* Find next match. */
 				cur = cur_bp->pt;
 				/* Save search string. */
@@ -440,7 +440,7 @@ static int isearch(int dir, int regexp)
 			else if (last_search != NULL)
 				astr_cpy_cstr(pattern, last_search);
 		} else if (c & KBD_META || c & KBD_CTL || c > KBD_TAB) {
-			if (c == KBD_RET && astr_size(pattern) == 0) {
+			if (c == KBD_RET && astr_len(pattern) == 0) {
 				if (dir == ISEARCH_FORWARD) {
 					if (regexp)
 						FUNCALL(search_forward_regexp);
@@ -453,7 +453,7 @@ static int isearch(int dir, int regexp)
 					else
 						FUNCALL(search_backward);
 				}
-			} else if (astr_size(pattern) > 0) {
+			} else if (astr_len(pattern) > 0) {
 				/* Save mark. */
 				set_mark();
 				cur_bp->mark->pt = start;
@@ -469,7 +469,7 @@ static int isearch(int dir, int regexp)
 			break;
 		} else
 			astr_cat_char(pattern, c);
-		if (astr_size(pattern) > 0) {
+		if (astr_len(pattern) > 0) {
 			if (dir == ISEARCH_FORWARD)
 				last = search_forward(cur.p, cur.o, astr_cstr(pattern), regexp);
 			else

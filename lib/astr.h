@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.17 2004/04/05 16:01:51 rrt Exp $	*/
+/*      $Id: astr.h,v 1.18 2004/04/23 20:34:55 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -60,14 +60,14 @@ extern void   astr_delete(astr as);
 
 /*
  * Convert as into a C null-terminated string.
- * as[0] to as[astr_size(as) - 1] inclusive may be read and modified.
+ * as[0] to as[astr_size(as) - 1] inclusive may be read.
  */
-#define astr_cstr(as)		((const char *)((as)->text))
+#define astr_cstr(as)           ((const char *)((as)->text))
 
 /*
  * Return the length of the argument string as.
  */
-#define astr_size(as)		((const int)((as)->size))
+#define astr_len(as)            ((const int)((as)->len))
 
 /*
  * Return the address of the pos'th character of as. If pos is >= 0,
@@ -85,10 +85,10 @@ extern astr   astr_substr(const astr as, int pos, size_t size);
 /*
  * Do strcmp on the contents of s1 and s2
  */
-#define astr_cmp(s1, s2)	(strcmp((s1)->text, (s2)->text))
+#define astr_cmp(s1, s2)        (strcmp((s1)->text, (s2)->text))
 
 /*
- * Assign the contents of the argument string or to the string as.
+ * Assign the contents of the argument string to the string as.
  */
 extern astr   astr_cpy(astr as, const astr src);
 extern astr   astr_cpy_cstr(astr as, const char *s);
@@ -145,9 +145,9 @@ extern astr   astr_afmt(astr as, const char *fmt, ...);
  * You should never directly access the struct fields.
  */
 struct astr_s {
-	char *	text;
-	size_t	size;
-	size_t	maxsize;
+        char *  text;
+        size_t  len;
+        size_t  maxlen;
 };
 
 

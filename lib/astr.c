@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.20 2004/04/05 16:01:51 rrt Exp $	*/
+/*	$Id: astr.c,v 1.21 2004/04/23 20:34:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,27 +37,27 @@ astr astr_new(void)
 {
 	astr as;
 	as = (astr)xmalloc(sizeof *as);
-	as->maxsize = ALLOCATION_CHUNK_SIZE;
-	as->size = 0;
-	as->text = (char *)xmalloc(as->maxsize + 1);
-	memset(as->text, 0, as->maxsize + 1);
+	as->maxlen = ALLOCATION_CHUNK_SIZE;
+	as->len = 0;
+	as->text = (char *)xmalloc(as->maxlen + 1);
+	memset(as->text, 0, as->maxlen + 1);
 	return as;
 }
 
 static void astr_resize(astr as, size_t reqsize)
 {
 	assert(as != NULL);
-	if (reqsize > as->maxsize) {
-		as->maxsize = reqsize + ALLOCATION_CHUNK_SIZE;
-		as->text = (char *)xrealloc(as->text, as->maxsize + 1);
+	if (reqsize > as->maxlen) {
+		as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
+		as->text = (char *)xrealloc(as->text, as->maxlen + 1);
         }
 }
 
 static int astr_pos(astr as, int pos)
 {
 	if (pos < 0)
-		pos = as->size + pos;
-        assert(pos >=0 && pos <= (int)as->size);
+		pos = as->len + pos;
+        assert(pos >=0 && pos <= (int)as->len);
         return pos;
 }
 
@@ -80,14 +80,14 @@ static astr astr_cpy_x(astr as, const char *s, size_t csize)
 {
 	astr_resize(as, csize);
 	strcpy(as->text, s);
-	as->size = csize;
+	as->len = csize;
 	return as;
 }
 
 astr astr_cpy(astr as, const astr src)
 {
 	assert(as != NULL && src != NULL);
-	return astr_cpy_x(as, src->text, src->size);
+	return astr_cpy_x(as, src->text, src->len);
 }
 
 astr astr_cpy_cstr(astr as, const char *s)
@@ -98,17 +98,17 @@ astr astr_cpy_cstr(astr as, const char *s)
 
 static astr astr_cat_x(astr as, const char *s, size_t csize)
 {
-	astr_resize(as, as->size + csize);
-	strncpy(as->text + as->size, s, csize);
-	as->size += csize;
-        as->text[as->size] = '\0';
+	astr_resize(as, as->len + csize);
+	strncpy(as->text + as->len, s, csize);
+	as->len += csize;
+        as->text[as->len] = '\0';
 	return as;
 }
 
 astr astr_cat(astr as, const astr src)
 {
 	assert(as != NULL && src != NULL);
-	return astr_cat_x(as, src->text, src->size);
+	return astr_cat_x(as, src->text, src->len);
 }
 
 astr astr_ncat_cstr(astr as, const char *s, size_t len)
@@ -125,17 +125,17 @@ astr astr_cat_cstr(astr as, const char *s)
 astr astr_cat_char(astr as, int c)
 {
 	assert(as != NULL);
-	astr_resize(as, as->size + 1);
-	as->text[as->size] = c;
-	as->text[++as->size] = '\0';
+	astr_resize(as, as->len + 1);
+	as->text[as->len] = c;
+	as->text[++as->len] = '\0';
 	return as;
 }
 
 astr astr_truncate(astr as, size_t size)
 {
 	assert(as != NULL);
-	if (size < as->size) {
-		as->size = size;
+	if (size < as->len) {
+		as->len = size;
 		as->text[size] = '\0';
 	}
 	return as;
@@ -145,7 +145,7 @@ astr astr_substr(const astr as, int pos, size_t size)
 {
 	assert(as != NULL);
         pos = astr_pos(as, pos);
-	assert(size + pos <= as->size);
+	assert(size + pos <= as->len);
         return astr_ncat_cstr(astr_new(), astr_char(as, pos), size);
 }
 
