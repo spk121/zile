@@ -1,31 +1,27 @@
-==== File test2.el
+Eval results:
+(5)
+(-1)
+(36)
+(5)
+(16)
+(323)
+(323)
+(323)
+(-4)
 
-(+ 3 2)
-==> (5)
-
-(- 4 5)
-==> (-1)
-
-(* 4 9)
-==> (36)
-
-(/ 100 20)
-==> (5)
-
-(+ (- 4 5) (+ 3 4) 10)
-==> (16)
-
-(* (+ 3 4 (- 10 7) 9) 17)
-==> (323)
-
-(* (+ 3 4 (- 10 7) 9) 17)
-==> (323)
-
-(* (+ 3 4 (- 10 7) 9) 17)
-==> (323)
-
-(- 4)
-==> (-4)
-=======
 Variables:
-defuns:
+transient-mark-mode 	(true)
+tab-width 	(8)
+standard-indent 	(4)
+skip-splash-screen 	(false)
+highlight-nonselected-windows 	(false)
+fill-column 	(72)
+expand-tabs 	(false)
+beep 	(true)
+backup-with-directory 	(false)
+backup-method 	(simple)
+backup-directory 	(~/.backup)
+auto-fill-mode 	(false)
+alternative-bindings 	(false)
+
+Defuns:

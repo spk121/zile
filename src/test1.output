@@ -1,14 +1,24 @@
-==== File test1.el
+Eval results:
+(!)
+(Hello , world !)
 
-(setq world world hi Hello comma , exclamation !)
-==> (!)
-
-(list hi comma world exclamation)
-==> (Hello , world !)
-=======
 Variables:
 exclamation 	(!)
 comma 	(,)
 hi 	(Hello)
 world 	(world)
-defuns:
+transient-mark-mode 	(true)
+tab-width 	(8)
+standard-indent 	(4)
+skip-splash-screen 	(false)
+highlight-nonselected-windows 	(false)
+fill-column 	(72)
+expand-tabs 	(false)
+beep 	(true)
+backup-with-directory 	(false)
+backup-method 	(simple)
+backup-directory 	(~/.backup)
+auto-fill-mode 	(false)
+alternative-bindings 	(false)
+
+Defuns:
