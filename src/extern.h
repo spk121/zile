@@ -193,9 +193,9 @@ void term_move(int y, int x);
 void term_clrtoeol(void);
 void term_refresh(void);
 void term_redisplay(void);
-void full_redisplay(void);
+void term_full_redisplay(void);
 void term_clear(void);
-void term_addch(char c);
+void term_addch(int c);
 void term_addnstr(const char *s, int len);
 void term_attrset(Font f);
 int term_printw(const char *fmt, ...);
@@ -206,6 +206,7 @@ int term_ungetkey(int c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 void term_minibuf_clear(void);
+void term_refresh_cached_variables(void);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

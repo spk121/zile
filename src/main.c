@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.28 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: main.c,v 1.29 2004/05/29 16:38:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -402,7 +402,7 @@ int main(int argc, char **argv)
 	set_variables(vargs);
 
 	/* Force refresh of cached variables. */
-	refresh_cached_variables();
+	term_refresh_cached_variables();
 	term_open();
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.6 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.7 2004/05/29 16:38:43 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -201,7 +201,7 @@ static void parse_displayable_chars(const char *s)
 #endif
 }
 
-void refresh_cached_variables(void)
+void term_refresh_cached_variables(void)
 {
 	/*
 	 * Refresh the font cache.

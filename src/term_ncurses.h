@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.4 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.5 2004/05/29 16:38:43 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -49,6 +49,5 @@ extern Font C_FG_WHITE;
 extern Font C_FG_WHITE_BG_BLUE;
 
 extern void show_splash_screen(const char *splash);
-extern void refresh_cached_variables(void);
 extern void resize_windows(void);
 extern void free_rotation_buffers(void);

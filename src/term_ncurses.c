@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.5 2004/05/23 21:47:20 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.6 2004/05/29 16:38:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -83,7 +83,7 @@ void term_clear(void)
         clear();
 }
 
-void term_addch(char c)
+void term_addch(int c)
 {
         addch(c);
 }
