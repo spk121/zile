@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.32 2004/10/08 13:30:45 rrt Exp $        */
+/*      $Id: zile.h,v 1.33 2004/10/14 23:29:38 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -67,16 +67,16 @@ typedef int (*Function)(int uniarg);
  * Point and Marker.
  */
 struct Point {
-        Line *p;                /* Line pointer.  */
-        int n;                  /* Line number.  */
-        int o;                  /* Offset.  */
+        Line *p;                /* Line pointer. */
+        int n;                  /* Line number. */
+        int o;                  /* Offset. */
 };
 
 struct Marker {
-        Buffer *bp;             /* Buffer that points into.  */
-        Point pt;               /* Point position.  */
-        Marker *next;           /* Used to chain all markers in the buffer.  */
-        unsigned type : 1;      /* Insertion type (1=after text).  */
+        Buffer *bp;             /* Buffer that points into. */
+        Point pt;               /* Point position. */
+        Marker *next;           /* Used to chain all markers in the buffer. */
+        unsigned type : 1;      /* Insertion type (1=after text). */
 };
 
 struct Line {
