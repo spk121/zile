@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.29 2004/05/29 16:38:43 rrt Exp $	*/
+/*	$Id: main.c,v 1.30 2004/06/30 22:52:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -41,7 +41,7 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "term_ncurses.h"
+#include "zterm.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX	_POSIX_PATH_MAX
@@ -134,7 +134,7 @@ static void select_terminal(int term)
 {
         switch (term) {
         case 0:
-                cur_tp = ncurses_tp;
+                cur_tp = termp;
                 break;
         default:
 		fprintf(stderr, "fatal error: bad terminal type chosen\n");

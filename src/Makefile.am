@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.13 2004/05/20 21:41:05 rrt Exp $
+## $Id: Makefile.am,v 1.14 2004/06/30 22:52:41 rrt Exp $
 
 INCLUDES = -I$(top_srcdir)/lib
 
 bin_PROGRAMS = zile
-zile_SOURCES =					\
+zile_base_SOURCES =				\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
@@ -36,9 +36,17 @@ zile_SOURCES =					\
 	window.c				\
 	term_minibuf.c				\
 	term_redisplay.c			\
-	term_ncurses.c				\
-	term_ncurses.h				\
 	zile.h
+
+if CURSES
+zile_SOURCES = $(zile_base_SOURCES)		\
+	term_ncurses.c				\
+	term_ncurses.h
+else
+zile_SOURCES = $(zile_base_SOURCES)		\
+	term_termcap.c				\
+	term_termcap.h
+endif
 
 zile_LDADD =					\
 	$(top_srcdir)/lib/libzile.a

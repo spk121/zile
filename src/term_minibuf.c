@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.5 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.6 2004/06/30 22:52:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,7 +32,7 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "term_ncurses.h"
+#include "zterm.h"
 
 void term_minibuf_clear(void)
 {

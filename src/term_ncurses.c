@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.6 2004/05/29 16:38:43 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.7 2004/06/30 22:52:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,7 +34,7 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "term_ncurses.h"
+#include "zterm.h"
 
 static Terminal thisterm = {
 	/* Unitialised screen pointer */
@@ -44,7 +44,7 @@ static Terminal thisterm = {
 	-1, -1,
 };
 
-Terminal *ncurses_tp = &thisterm;
+Terminal *termp = &thisterm;
 
 Font ZILE_REVERSE = A_REVERSE, ZILE_BOLD = A_BOLD;
 
@@ -125,11 +125,11 @@ void term_init(void)
         C_FG_WHITE = COLOR_PAIR(ZILE_COLOR_WHITE);
         C_FG_WHITE_BG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUEBG);
 
-        ncurses_tp->screen = newterm(NULL, stdout, stdin);
-	set_term(ncurses_tp->screen);
+        termp->screen = newterm(NULL, stdout, stdin);
+	set_term(termp->screen);
 
-	ncurses_tp->width = ZILE_COLS;
-	ncurses_tp->height = ZILE_LINES;
+	termp->width = ZILE_COLS;
+	termp->height = ZILE_LINES;
 }
 
 static void init_colors(void)
@@ -185,8 +185,8 @@ int term_close(void)
 	/* Free memory and finish with ncurses.  */
 	free_rotation_buffers();
 	endwin();
-	delscreen(ncurses_tp->screen);
-	ncurses_tp->screen = NULL;
+	delscreen(termp->screen);
+	termp->screen = NULL;
 
 	return TRUE;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.7 2004/05/29 16:38:43 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.8 2004/06/30 22:52:41 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -35,7 +35,7 @@
 #include "zile.h"
 #include "config.h"
 #include "extern.h"
-#include "term_ncurses.h"
+#include "zterm.h"
 
 #ifdef __FreeBSD__
 /*
@@ -579,7 +579,7 @@ void term_full_redisplay(void)
 void resize_windows(void)
 {
 	Window *wp;
-	int hdelta = ZILE_LINES - ncurses_tp->height;
+	int hdelta = ZILE_LINES - termp->height;
 
 	/* Resize windows horizontally. */
 	for (wp = head_wp; wp != NULL; wp = wp->next)
@@ -612,8 +612,8 @@ void resize_windows(void)
 	 * Sometimes Zile cannot reduce the windows height to a certain
 	 * value (too small); take care of this case.
 	 */
-	ncurses_tp->width = ZILE_COLS;
-	ncurses_tp->height = ZILE_LINES - hdelta;
+	termp->width = ZILE_COLS;
+	termp->height = ZILE_LINES - hdelta;
 
 	FUNCALL(recenter);
 }

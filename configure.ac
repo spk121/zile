@@ -36,12 +36,6 @@ dnl ==================================================================
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h limits.h)
-dnl Check if ncurses header is available as ncurses.h or curses.h
-AC_CHECK_HEADER(ncurses.h,
-	[AC_DEFINE(HAVE_NCURSES_H, 1, [Define this if you have ncurses.h])],
-	[AC_CHECK_HEADER(curses.h,
-		[AC_DEFINE(HAVE_CURSES_H, 1, [Define this if you have curses.h instead of ncurses.h])],
-		AC_MSG_FAILURE([cannot find neither curses.h or ncurses.h]))])
 
 dnl ==================================================================
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -113,6 +107,33 @@ fi
 ], [
 AC_MSG_RESULT(no)
 ])
+
+dnl ==================================================================
+dnl Curses
+dnl ==================================================================
+dnl Check if ncurses header is available as ncurses.h or curses.h
+AC_MSG_CHECKING([if curses is required])
+AC_ARG_ENABLE(curses,
+AC_HELP_STRING([--disable-curses], [don't use curses interface]),
+[
+if test $enableval = yes; then
+        AC_MSG_RESULT(yes)
+        AC_DEFINE(CURSES, 1, [Define this to use curses.])
+        AC_CHECK_HEADER(ncurses.h,,
+	[AC_CHECK_HEADER(curses.h,,
+	        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
+else
+        AC_MSG_RESULT(no)
+        AC_CHECK_HEADERS([termios.h] [term.h])
+fi
+],[
+AC_MSG_RESULT(yes)
+AC_DEFINE(CURSES, 1, [Define this to use curses.])
+AC_CHECK_HEADER(ncurses.h,,
+        [AC_CHECK_HEADER(curses.h,,
+        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
+])
+AM_CONDITIONAL(CURSES, test x$curses = xtrue)
 
 dnl ==================================================================
 dnl Extra definitions for config.h
