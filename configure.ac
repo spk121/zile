@@ -33,7 +33,7 @@ dnl Checks for header files.
 dnl ==================================================================
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h limits.h)
+AC_CHECK_HEADERS(fcntl.h)
 
 dnl ==================================================================
 dnl Check for GNU Regex library
@@ -66,24 +66,6 @@ dnl ==================================================================
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -Wstrict-prototypes -pedantic"
 fi
-
-dnl ==================================================================
-dnl Debugging
-dnl ==================================================================
-
-AC_MSG_CHECKING([if the debugging code should be included])
-AC_ARG_ENABLE(debug,
-AC_HELP_STRING([--enable-debug], [include debugging code]),
-[
-if test $enableval = yes; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(DEBUG, 1, [Define this to include debugging code.])
-else
-	AC_MSG_RESULT(no)
-fi
-], [
-AC_MSG_RESULT(no)
-])
 
 dnl ==================================================================
 dnl Allegro
