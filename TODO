@@ -19,6 +19,7 @@ X1("kill-sentence", kill_sentence,                      "M-k")
 X1("backward-kill-sentence", backward_kill_sentence,    "C-x\\DEL")
 X1("name-last-kbd-macro", name_last_kbd_macro,          "")
 
+* Add the ability to rebind keys within zile, and in the prefs file.
 * Add function key support to termcap.
 * Allow search and replace not to follow case (case-fold-search,
   case-replace).
