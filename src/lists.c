@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.12 2005/01/24 22:49:26 rrt Exp $	*/
+/*	$Id: lists.c,v 1.13 2005/01/25 00:27:48 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +32,7 @@
 #include "eval.h"
 
 
-le *leNew(char *text)
+le *leNew(const char *text)
 {
   le *new = (le *)zmalloc(sizeof(le));
 
@@ -117,7 +117,7 @@ le *leAddBranchElement(le *list, le *branch, int quoted)
   return leAddTail(list, temp);
 }
     
-le *leAddDataElement(le *list, char *data, int quoted)
+le *leAddDataElement(le *list, const char *data, int quoted)
 {
   le *newdata = leNew(data);
   assert(newdata);
