@@ -20,9 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.20 2004/10/12 23:22:22 rrt Exp $	*/
-
-/* TODO: signal handler resize_windows(); */
+/*	$Id: term_termcap.c,v 1.21 2004/10/13 15:50:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -31,6 +29,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 #include <termcap.h>
 #include <termios.h>
 #include <unistd.h>
@@ -142,7 +141,7 @@ void term_refresh(void)
         astr_cat_cstr(as, tgoto(cm_string, screen.curx, screen.cury));
 
         /* Display the output. */
-        printf("%s", astr_cstr(as));
+        write(STDOUT_FILENO, astr_cstr(as), astr_len(as));
         astr_delete(as);
 }
 
@@ -150,8 +149,10 @@ void term_clear(void)
 {
         int i;
         term_move(0, 0);
-        for (i = 0; i < termp->width * termp->height; i++)
-                term_addch(0);
+        for (i = 0; i < termp->width * termp->height; i++) {
+                screen.array[i] = 0;
+                screen.oarray[i] = -1;
+        }
 }
 
 void term_addch(int c)
@@ -212,20 +213,7 @@ void term_beep(void)
         putchar('\a');
 }
 
-static void term_init_screen(void)
-{
-        int i, size = termp->width * termp->height;
-        
-        screen.array = zmalloc(size * sizeof(int));
-        screen.oarray = zmalloc(size * sizeof(int));
-        screen.curx = screen.cury = 0;
-
-        /* Make the first call to term_refresh will update the screen */
-        for (i = 0; i < size; i++)
-                screen.oarray[i] = 1;
-}
-
-void term_init(void)
+static char *get_tcap(void)
 {
         /* termcap buffer, conventionally big enough. */
         char *tcap = (char *)zmalloc(2048);
@@ -246,9 +234,36 @@ void term_init(void)
                 zile_exit(1);
         }
 
-	ZILE_COLS = termp->width = tgetnum("co");
-	ZILE_LINES = termp->height = tgetnum("li");
+        return tcap;
+}
+
+void term_read_screen_size(void)
+{
+        char *tcap = get_tcap();
+        ZILE_COLS = tgetnum("co");
+	ZILE_LINES = tgetnum("li");
+        free(tcap);
+}
+
+static void term_init_screen(void)
+{
+        int size = termp->width * termp->height;
         
+        screen.array = zmalloc(size * sizeof(int));
+        screen.oarray = zmalloc(size * sizeof(int));
+        screen.curx = screen.cury = 0;
+
+        term_clear(); /* Ensure the first call to term_refresh will update the screen. */
+}
+
+void term_init(void)
+{
+        char *tcap = get_tcap();
+        
+        term_read_screen_size();
+        termp->width = ZILE_COLS;
+        termp->height = ZILE_LINES;
+
         term_init_screen();
         termp->screen = &screen;
 
@@ -438,12 +453,36 @@ static int xgetkey(int mode, int arg)
 static int ungetkey_buf[MAX_UNGETKEY_BUF];
 static int *ungetkey_p = ungetkey_buf;
 
+static void winch_sig_handler(int signo)
+{
+        (void)signo;
+        term_read_screen_size();
+        resize_windows();
+        termp->width = ZILE_COLS;
+        termp->height = ZILE_LINES;
+        resync_redisplay();
+        term_refresh();
+}
+
 int term_xgetkey(int mode, int arg)
 {
+        int key;
+        struct sigaction winch_sig;
+
 	if (ungetkey_p > ungetkey_buf)
 		return *--ungetkey_p;
 
-	return xgetkey(mode, arg);
+        winch_sig.sa_handler = winch_sig_handler;
+        sigemptyset(&winch_sig.sa_mask);
+        winch_sig.sa_flags = SA_RESTART;
+        sigaction(SIGWINCH, &winch_sig, NULL);
+
+        key = xgetkey(mode, arg);
+
+        winch_sig.sa_handler = SIG_DFL;
+        sigaction(SIGWINCH, &winch_sig, NULL);
+
+        return key;
 }
 
 int term_getkey(void)

@@ -124,6 +124,7 @@ extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
 extern Terminal *cur_tp;
 extern int thisflag, lastflag, last_uniarg;
+extern int resize_needed;
 
 /* marker.c --------------------------------------------------------------- */
 Marker *make_marker(void);
@@ -175,8 +176,9 @@ Point line_end_position(int count);
 void read_rc_file(const char *filename);
 
 /* redisplay.c ------------------------------------------------------------ */
-void recenter(Window *wp);
 void resync_redisplay(void);
+void resize_windows(void);
+void recenter(Window *wp);
 
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);
@@ -184,6 +186,7 @@ void free_search_history(void);
 /* term.c ----------------------------------------------------------------- */
 void term_init(void);
 void term_close(void);
+void term_read_screen_size(void);
 void term_move(int y, int x);
 void term_clrtoeol(void);
 void term_refresh(void);
@@ -200,7 +203,6 @@ int term_xgetkey(int mode, int arg);
 int term_ungetkey(int c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-void resize_windows(void);
 void free_rotation_buffers(void);
 void show_splash_screen(const char *splash);
 
