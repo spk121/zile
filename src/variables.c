@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.12 2004/03/13 20:06:59 rrt Exp $	*/
+/*	$Id: variables.c,v 1.13 2004/03/13 20:32:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -116,27 +116,18 @@ int lookup_bool_variable(char *var)
 	return FALSE;
 }
 
-static Completion *make_variable_completion(void)
+static void make_var_compl_iter(hpair *pair, va_list ap)
 {
-	alist al;
-	Completion *cp;
-	hpair *pair;
-
-	al = htable_list(var_table);
-	cp = new_completion(FALSE);
-	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
-		alist_append(cp->completions, zstrdup(pair->key));
-	alist_delete(al);
-
-	return cp;
+        Completion *cp = va_arg(ap, Completion *);
+        alist_append(cp->completions, zstrdup(pair->key));
 }
 
 char *minibuf_read_variable_name(char *msg)
 {
 	char *ms;
-	Completion *cp;
+	Completion *cp = new_completion(FALSE);
 
-	cp = make_variable_completion();
+        htable_foreach(var_table, make_var_compl_iter, cp);
 
 	for (;;) {
 		ms = minibuf_read_completion(msg, "", cp, NULL);
