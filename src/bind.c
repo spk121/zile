@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.34 2004/11/14 20:57:33 rrt Exp $	*/
+/*	$Id: bind.c,v 1.35 2004/11/14 20:58:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -344,10 +344,7 @@ static void recursive_free_bindings(leafp p)
 
 void free_bindings(void)
 {
-	unsigned int i, j;
-
 	recursive_free_bindings(leaf_tree);
-
 	free_history_elements(&functions_history);
 }
 
