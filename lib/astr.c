@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.5 2003/05/25 21:38:49 rrt Exp $	*/
+/*	$Id: astr.c,v 1.6 2003/06/24 09:42:13 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -209,7 +209,9 @@ astr astr_insert_cstr(astr as, int pos, const char *s)
 
 astr astr_insert_char(astr as, int pos, int c)
 {
-	char buf[2] = {c, '\0'};
+	char buf[2];
+        buf[0] = c;
+        buf[1] = '\0';
 	assert(as != NULL);
 	return astr_insert_x(as, pos, buf, 1);
 }
@@ -418,7 +420,9 @@ astr astr_replace_cstr(astr as, int pos, size_t size, const char *s)
 
 astr astr_replace_char(astr as, int pos, size_t size, int c)
 {
-	char buf[2] = {c, '\0'};
+	char buf[2];
+        buf[0] = c;
+        buf[1] = '\0';
 	assert(as != NULL);
 	return astr_replace_x(as, pos, size, buf, 1);
 }
