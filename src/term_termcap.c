@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.16 2004/10/11 12:57:43 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.17 2004/10/12 11:36:41 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
@@ -62,7 +62,7 @@ Terminal *termp = &thisterm;
 int ZILE_COLS;
 int ZILE_LINES;
 
-static char *cm_string;
+static char *ti_string, *te_string, *cm_string;
 static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
 astr norm_string;
@@ -223,6 +223,8 @@ static void term_init_screen(void)
         /* Make the first call to term_refresh will update the screen */
         for (i = 0; i < size; i++)
                 screen.oarray[i] = 1;
+
+        printf(ti_string); /* Enter full-screen mode. */
 }
 
 void term_init(void)
@@ -252,22 +254,6 @@ void term_init(void)
         term_init_screen();
         termp->screen = &screen;
 
-        /* Extract information we will use. */
-        cm_string = tgetstr("cm", &tcap);
-        so_string = tgetstr("so", &tcap);
-        se_string = tgetstr("se", &tcap);
-	mr_string = tgetstr("mr", &tcap);
-	me_string = tgetstr("me", &tcap);
-        kl_string = tgetstr("kl", &tcap);
-        kr_string = tgetstr("ku", &tcap);
-        ku_string = tgetstr("kr", &tcap);
-        kd_string = tgetstr("kd", &tcap);
-        /* TODO: Use km, mm, mo for Meta key. */
-
-        norm_string = astr_new();
-        astr_cat_cstr(norm_string, se_string);
-        astr_cat_cstr(norm_string, me_string);
-
         /* Save terminal flags. */
         if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
                 fprintf(stderr, "Can't read terminal capabilites\n");
@@ -287,7 +273,26 @@ void term_init(void)
                 zile_exit(1);
         }
 
-       setvbuf(stdout, NULL, _IONBF, 0);
+        setvbuf(stdout, NULL, _IONBF, 0);
+
+        /* Extract information we will use. */
+        ti_string = tgetstr("ti", &tcap);
+        te_string = tgetstr("te", &tcap);
+        cm_string = tgetstr("cm", &tcap);
+        so_string = tgetstr("so", &tcap);
+        se_string = tgetstr("se", &tcap);
+	mr_string = tgetstr("mr", &tcap);
+	me_string = tgetstr("me", &tcap);
+        kl_string = tgetstr("kl", &tcap);
+        kr_string = tgetstr("kr", &tcap);
+        ku_string = tgetstr("ku", &tcap);
+        kd_string = tgetstr("kd", &tcap);
+        /* TODO: Use km, mm, mo for Meta key. */
+
+        norm_string = astr_new();
+        astr_cat_cstr(norm_string, se_string);
+        astr_cat_cstr(norm_string, me_string);
+
 }
 
 void term_close(void)
@@ -297,6 +302,7 @@ void term_close(void)
 	term_clrtoeol();
 	term_refresh();
         printf(getattr(ZILE_NORMAL));
+        printf(te_string); /* Leave full-screen mode. */
 
 	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
@@ -311,26 +317,27 @@ void term_close(void)
         }
 }
 
-static int translate_key(char *s, int bytes)
+static int translate_key(char *s, int nbytes)
 {
-	switch (*s) {
-	case '\0':		/* C-@ */
-		return KBD_CTL | '@';
-	case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
-	case '\6':  case '\7':  case '\10':             case '\12':
-	case '\13': case '\14':             case '\16': case '\17':
-	case '\20': case '\21': case '\22': case '\23': case '\24':
-	case '\25': case '\26': case '\27': case '\30': case '\31':
-	case '\32':		/* C-a ... C-z */
-		return KBD_CTL | ('a' + *s - 1);
-	case '\11':
-		return KBD_TAB;
-	case '\15':
-		return KBD_RET;
-	case '\37':
-		return KBD_CTL | (*s ^ 0x40);
-	case '\33':		/* META */
-		return KBD_META;
+        if (nbytes == 1) {
+                switch (*s) {
+                case '\0':		/* C-@ */
+                        return KBD_CTL | '@';
+                case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
+                case '\6':  case '\7':  case '\10':             case '\12':
+                case '\13': case '\14':             case '\16': case '\17':
+                case '\20': case '\21': case '\22': case '\23': case '\24':
+                case '\25': case '\26': case '\27': case '\30': case '\31':
+                case '\32':		/* C-a ... C-z */
+                        return KBD_CTL | ('a' + *s - 1);
+                case '\11':
+                        return KBD_TAB;
+                case '\15':
+                        return KBD_RET;
+                case '\37':
+                        return KBD_CTL | (*s ^ 0x40);
+                case '\33':		/* META */
+                        return KBD_META;
 /*	case KEY_PPAGE:		/\* PGUP *\/ */
 /*		return KBD_PGUP; */
 /*	case KEY_NPAGE:		/\* PGDN *\/ */
@@ -342,18 +349,10 @@ static int translate_key(char *s, int bytes)
 /*	case KEY_DC:		/\* DEL *\/ */
 /*		return KBD_DEL; */
 /*	case KEY_BACKSPACE:	/\* BS *\/ */
-	case 0177:		/* BS */
-		return KBD_BS;
+                case 0177:		/* BS */
+                        return KBD_BS;
 /*	case KEY_IC:		/\* INSERT *\/ */
 /*		return KBD_INS; */
-/*	case KEY_LEFT:		/\* LEFT *\/ */
-/*		return KBD_LEFT; */
-/*	case KEY_RIGHT:		/\* RIGHT *\/ */
-/*		return KBD_RIGHT; */
-/*	case KEY_UP:		/\* UP *\/ */
-/*		return KBD_UP; */
-/*	case KEY_DOWN:		/\* DOWN *\/ */
-/*		return KBD_DOWN; */
 /*	case KEY_F(1): */
 /*		return KBD_F1; */
 /*	case KEY_F(2): */
@@ -378,9 +377,19 @@ static int translate_key(char *s, int bytes)
 /*		return KBD_F11; */
 /*	case KEY_F(12): */
 /*		return KBD_F12; */
-	default:
-		return *s;
-	}
+                default:
+                        return *s;
+                }
+        } else if (strcmp(s, kl_string) == 0)
+                return KBD_LEFT;
+        else if (strcmp(s, kr_string) == 0)
+                return KBD_RIGHT;
+        else if (strcmp(s, ku_string) == 0)
+                return KBD_UP;
+        else if (strcmp(s, kd_string) == 0)
+                return KBD_DOWN;
+        else
+                return KBD_NOKEY;
 }
 
 #define MAX_KEY_CHARS 16 /* Hopefully more than the longest keycode sequence. */
@@ -396,14 +405,15 @@ static int xgetkey(int mode, int arg)
         FD_SET(STDIN_FILENO, &rfds);
 
         if (mode & GETKEY_DELAYED)
-                nstate.c_cc[VTIME] = 0;	/* Wait indefinitely for at least one character. */
+                nstate.c_cc[VTIME] = 0;	 /* Wait indefinitely for at least one character. */
         else {
-                if (arg == 0) /* If we want to wait no time at all, wait the minimum. */
+                if (arg == 0)  /* If we want to wait no time at all, wait the minimum. */
                         arg = 1;
-                nstate.c_cc[VTIME] = arg / 100; /* Wait up to arg/100 10ths of a second. */
+                nstate.c_cc[VTIME] = arg / 100;  /* Wait up to arg/100 10ths of a second. */
         }                
 
         nbytes = read(STDIN_FILENO, keys, MAX_KEY_CHARS);
+        keys[nbytes] = '\0';
         
 	if (ret < 0)
 		return KBD_NOKEY;
