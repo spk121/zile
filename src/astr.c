@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.10 2005/01/27 01:27:19 rrt Exp $	*/
+/*	$Id: astr.c,v 1.11 2005/01/29 13:16:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -234,7 +234,7 @@ astr astr_truncate(astr as, ptrdiff_t pos)
 {
   assert(as != NULL);
   pos = astr_pos(as, pos);
-  if (pos < as->len) {
+  if ((size_t)pos < as->len) {
     as->len = pos;
     as->text[pos] = '\0';
   }
