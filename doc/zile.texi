@@ -46,7 +46,7 @@ user should feel at home with Zile.
 * Features::                    The characteristics of Zile.
 * Invoking Zile::               Command line options that you can give to Zile.
 * Initialization file::         The ``.zile'' initialization file.
-* Getting help::                How to get help under Zile.
+* Getting help::                How to get help in Zile.
 * Key names::                   How the keys are named.
 * Key bindings::                The functions associated with keys.
 * Functions::                   The list of functions.
@@ -93,7 +93,7 @@ sequence of undo operations (limited only by the amount of free memory).
 Zile can display multiple windows on the screen.
 @item Killing, yanking and registers.
 The killing, yanking and register features of Emacs are available
-under Zile.
+in Zile.
 @item Minibuffer completion.
 This works for @kbd{M-x} commands and for file names.
 @item Auto fill (word wrap).
@@ -203,8 +203,7 @@ Show the key or keys to which a command is bound.
 @node Key names, Key bindings, Getting help, Top
 @chapter Key names
 
-This table contains the names of the keys that are used in this manual
-and under Zile.
+This table contains the names of the keys that are used in Zile.
 
 @table @key
 @item SPC
@@ -676,7 +675,7 @@ Insert a newline, then indent according to major mode.
 Indentation is done using the @i{indent-command} function.
 @item next-line
 Move cursor vertically down one line.
-If there is no character in the target line exactly under the current column,
+If there is no character in the target line exactly in the current column,
 the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 @item open-line
