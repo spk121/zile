@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.6 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: zile.h,v 1.7 2003/05/23 09:37:25 ssigala Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -312,11 +312,11 @@ struct terminal {
 	void	(*refresh)(void);
 	void	(*redisplay)(void);
 	void	(*full_redisplay)(void);
-	void	(*show_about)(char *splash, char *minibuf);
+	void	(*show_about)(const char *splash, const char *minibuf);
 	void	(*clear)(void);
 	void	(*beep)(void);
 	void	(*minibuf_write)(const char *fmt);
-	char *	(*minibuf_read)(char *prompt, const char *value, historyp hp);
+	char *	(*minibuf_read)(const char *prompt, const char *value, historyp hp);
 	void	(*minibuf_clear)(void);
 };
 

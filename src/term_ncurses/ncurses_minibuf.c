@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.6 2003/05/19 22:26:41 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.7 2003/05/23 09:37:26 ssigala Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -128,7 +128,7 @@ void ncurses_minibuf_write(const char *fmt)
 	move(y, x);
 }
 
-static void draw_minibuf_read(char *prompt, char *value, int prompt_len,
+static void draw_minibuf_read(const char *prompt, const char *value, int prompt_len,
 			      char *match, int pointo)
 {
 	move(LINES - 1, 0);
@@ -157,7 +157,7 @@ static void draw_minibuf_read(char *prompt, char *value, int prompt_len,
 	}
 }
 
-static char *rot_vminibuf_read(char *prompt, const char *value, historyp hp,
+static char *rot_vminibuf_read(const char *prompt, const char *value, historyp hp,
 			       char **p, int *max)
 {
 	static int overwrite_mode = 0;
@@ -356,7 +356,7 @@ static char *rot_vminibuf_read(char *prompt, const char *value, historyp hp,
 
 static char *rotation_buffers[MAX_ROTATIONS];
 
-char *ncurses_minibuf_read(char *prompt, const char *value, historyp hp)
+char *ncurses_minibuf_read(const char *prompt, const char *value, historyp hp)
 {
 	static int max[MAX_ROTATIONS], rot;
 	windowp wp, old_wp = cur_wp;

@@ -1,4 +1,4 @@
-/*	$Id: term_ncurses.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.4 2003/05/23 09:37:26 ssigala Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -53,11 +53,11 @@ extern void ncurses_refresh_cached_variables(void);
 extern void ncurses_refresh(void);
 extern void ncurses_redisplay(void);
 extern void ncurses_full_redisplay(void);
-extern void ncurses_show_about(char *splash, char *minibuf);
+extern void ncurses_show_about(const char *splash, const char *minibuf);
 extern void ncurses_clear(void);
 extern void ncurses_beep(void);
 extern void ncurses_minibuf_write(const char *fmt);
-extern char *ncurses_minibuf_read(char *prompt, char *value, historyp hp);
+extern char *ncurses_minibuf_read(const char *prompt, const char *value, historyp hp);
 extern void ncurses_minibuf_clear(void);
 
 static struct terminal thisterm = {

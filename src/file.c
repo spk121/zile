@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.5 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: file.c,v 1.6 2003/05/23 09:37:25 ssigala Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -479,7 +479,7 @@ static int is_shell_file(const char *filename)
 #endif
 
 #if ENABLE_NONTEXT_MODES
-static void find_file_hooks(char *filename)
+static void find_file_hooks(const char *filename)
 {
 	const char *c_file[] = { ".c", ".h", ".m", NULL };
 #if ENABLE_CPP_MODE

@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.4 2003/05/23 09:37:26 ssigala Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -190,10 +190,10 @@ void ncurses_refresh(void)
 	refresh();
 }
 
-static void show_splash_screen(char *splash)
+static void show_splash_screen(const char *splash)
 {
 	int i, bold = 0, red = 0;
-	char *p;
+	const char *p;
 
 	for (i = 0; i < LINES - 2; ++i) {
 		move(i, 0);
@@ -223,7 +223,7 @@ static void show_splash_screen(char *splash)
 		}
 }
 
-void ncurses_show_about(char *splash, char *minibuf)
+void ncurses_show_about(const char *splash, const char *minibuf)
 {
 	if (!lookup_bool_variable("novice-level") &&
 	    !lookup_bool_variable("skip-splash-screen")) {
