@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.81 2005/01/30 02:41:13 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.82 2005/01/30 14:37:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1148,12 +1148,12 @@ DEFUN("mark-paragraph", mark_paragraph)
     FUNCALL(exchange_point_and_mark);
     FUNCALL_ARG(forward_paragraph, uniarg);
     FUNCALL(exchange_point_and_mark);
-  }
-  else {
+  } else {
     FUNCALL_ARG(forward_paragraph, uniarg);
     FUNCALL(set_mark_command);
     FUNCALL_ARG(backward_paragraph, uniarg);
   }
+
   return TRUE;
 }
 
