@@ -283,7 +283,7 @@ For full documentation, see @ref{Functions}.
 @c LINT KEY
 @table @kbd
 @item @key{TAB}
-Insert a tab character.  Bound to @code{tab-to-tab-stop}.
+Insert indentation.  Bound to @code{indent-command}.
 @item @key{RET}
 Insert a new line.  Bound to @code{newline}.
 @item @key{BS}
@@ -294,6 +294,8 @@ Toggle @i{Overwrite Mode}.  Bound to @code{overwrite-mode}.
 Switch to a correlated buffer.  Bound to @code{switch-to-correlated-buffer}.
 @item C-@@, C-@key{SPC}, @key{F5}
 Set mark.  Bound to @code{set-mark-command}.
+@item C-\
+Delete spaces and tabs around point.  Bound to @code{delete-horizontal-space}.
 @item C-a, @key{HOME}
 Go to the beginning of line.  Bound to @code{beginning-of-line}.
 @item C-b, @key{LEFT}
@@ -336,6 +338,8 @@ Show informations about getting the latest version.  Bound to @code{describe-fun
 Toggle @i{Mini Help} window.  Bound to @code{toggle-minihelp-window}.
 @item C-h C-r, @key{F9}
 Rotate @i{Mini Help} contents.  Bound to @code{rotate-minihelp-contents}.
+@item C-j
+Equivalent to <RET> followed by <TAB>.  Bound to @code{newline-and-indent}.
 @item C-k, @key{F6}
 Kill line.  Bound to @code{kill-line}.
 @item C-l
@@ -350,6 +354,8 @@ Read next input character and insert it.  Bound to @code{quoted-insert}.
 Incrementally search backward.  Bound to @code{isearch-backward}.
 @item C-s
 Incrementally search forward.  Bound to @code{isearch-forward}.
+@item C-t
+Transpose two characters.  Bound to @code{transpose-chars}.
 @item C-u
 Begin a numeric argument for the following command.  Bound to @code{universal-argument}.
 @item C-v, @key{PGDN}
@@ -390,6 +396,8 @@ Copy region to register.  Bound to @code{copy-to-register}.
 Save modified buffers.  Bound to @code{save-some-buffers}.
 @item C-x u, C-_, @key{F4}
 Undo some previous changes.  Bound to @code{undo}.
+@item C-x C-o
+Delete all but one of many consecutive blank lines.  Bound to @code{delete-blank-lines}.
 @item C-y, @key{F8}
 Yank killed text.  Bound to @code{yank}.
 @item C-z, C-x C-z
@@ -406,6 +414,8 @@ Convert the region to lower case.  Bound to @code{downcase-region}.
 Toggle @i{Read Only Mode}.  Bound to @code{toggle-read-only}.
 @item C-x C-s, @key{F3}
 Save the current buffer.  Bound to @code{save-buffer}.
+@item C-x C-t
+Transpose two lines.  Bound to @code{transpose-lines}.
 @item C-x C-u
 Convert the region to upper case.  Bound to @code{upcase-region}.
 @item C-x C-v
@@ -416,6 +426,10 @@ Write buffer to a file.  Bound to @code{write-file}.
 Exchange point and mark.  Bound to @code{exchange-point-and-mark}.
 @item M-@key{BS}
 Kill word backward.  Bound to @code{backward-kill-word}.
+@item M-@key{SPC}
+Delete spaces and tabs around point, leaving one space.  Bound to @code{just-one-space}.
+@item M-@@
+Mark the end of the next word.  Bound to @code{mark-word}.
 @item M-!
 Execute an external command in inferior shell.  Bound to @code{shell-command}.
 @item M-|
@@ -434,12 +448,16 @@ Kill word.  Bound to @code{kill-word}.
 Move point forward one word.  Bound to @code{forward-word}.
 @item M-g
 Read line number and go there.  Bound to @code{goto-line}.
+@item M-i
+Insert a tab character.  Bound to @code{tab-to-tab-stop}.
 @item M-l
 Convert following word to lower case.  Bound to @code{downcase-word}.
 @item M-m
 Move point to the first non-whitespace character on this line.  Bound to @code{back-to-indentation}.
 @item M-s
 Shrink current window.  Bound to @code{shrink-window}.
+@item M-t
+Transpose two words.  Bound to @code{transpose-words}.
 @item M-u
 Convert following word to upper case.  Bound to @code{upcase-word}.
 @item M-v, @key{PGUP}
@@ -448,6 +466,20 @@ Scroll down one screen page.  Bound to @code{scroll-down}.
 Save the region as if killed, but don't kill it.  Bound to @code{copy-region-as-kill}.
 @item M-x
 Execute extended command.  Bound to @code{execute-extended-command}.
+@item C-M-@@
+Put mark after following expression.  Bound to @code{mark-sexp}.
+@item C-M-b
+Move backward over a balanced expression.  Bound to @code{backward-sexp}.
+@item C-M-f
+Move forward over a balanced expression.  Bound to @code{forward-sexp}.
+@item C-M-k
+Kill balanced expression forward.  Bound to @code{kill-sexp}.
+@item C-M-r
+Incrementally regexp search backward.  Bound to @code{isearch-backward-regexp}.
+@item C-M-s
+Incrementally regexp search forward.  Bound to @code{isearch-forward-regexp}.
+@item C-M-t
+Transpose two balanced expressions.  Bound to @code{transpose-sexps}.
 @end table
 @c LINT END KEY
 
@@ -531,6 +563,8 @@ Delete all spaces and tabs around point.
 Make the selected window fill the screen.
 @item just-one-space
 Delete all spaces and tabs around point, leaving one space.
+@item delete-region
+Delete the text between point and mark.
 @item delete-window
 Remove the current window from the screen.
 @item describe-function
