@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.15 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: main.c,v 1.16 2004/02/14 10:16:31 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -161,7 +161,7 @@ $(Type C-h F [a capital F!].)$\
 ";
 
 static char about_minibuf_str[] =
-"Welcome to Zile!  For help type @kC-h h@@ or @kF1@@";
+"Welcome to Zile!  For help type `C-h h' or `F1'";
 
 static void about_screen(void)
 {
@@ -201,7 +201,7 @@ static void execute_functions(alist al)
 	for (func = alist_first(al); func != NULL; func = alist_next(al)) {
 		cur_tp->redisplay();
 		if (!execute_function(func, 1))
-			minibuf_error("Function `@f%s@@' not defined", func);
+			minibuf_error("Function `%s' not defined", func);
 		lastflag |= FLAG_NEED_RESYNC;
 	}
 }

@@ -1,4 +1,4 @@
-/*	$Id: variables.c,v 1.6 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: variables.c,v 1.7 2004/02/14 10:18:54 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -113,7 +113,7 @@ int lookup_bool_variable(char *var)
 		return !strcmp(p, "true");
 
 #if 0
-	minibuf_error("Warning: used uninitialized variable `@v%s@@'", var);
+	minibuf_error("Warning: used uninitialized variable `%s'", var);
 	waitkey(2 * 1000);
 #endif
 
@@ -156,7 +156,7 @@ char *minibuf_read_variable_name(char *msg)
 			minibuf_error("No variable name given");
 			return NULL;
 		} else if (get_variable(ms) == NULL) {
-			minibuf_error("Undefined variable name `@v%s@@'", ms);
+			minibuf_error("Undefined variable name `%s'", ms);
 			waitkey(2 * 1000);
 		} else {
 			minibuf_clear();
@@ -219,7 +219,7 @@ Set a variable value to the user specified value.
 	if (!strcmp(var, "tab-width")) {
 		int i = atoi(val);
 		if (i < 1) {
-			minibuf_error("Invalid tab-width value `@v%s@@'", val);
+			minibuf_error("Invalid tab-width value `%s'", val);
 			waitkey(2 * 1000);
 		} else
 			cur_bp->tab_width = i;
@@ -227,7 +227,7 @@ Set a variable value to the user specified value.
 	} else if (!strcmp(var, "fill-column")) {
 		int i = atoi(val);
 		if (i < 2) {
-			minibuf_error("Invalid fill-column value `@v%s@@'", val);
+			minibuf_error("Invalid fill-column value `%s'", val);
 			waitkey(2 * 1000);
 		} else
 			cur_bp->fill_column = i;

@@ -1,4 +1,4 @@
-/*	$Id: help.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: help.c,v 1.9 2004/02/14 10:14:01 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -89,7 +89,7 @@ static int read_minihelp_page(Buffer *bp)
 		astr_fmt(fname, "%s%d", PATH_DATA "/MINIHELP",
 				minihelp_page);
 		if (!exist_file(astr_cstr(fname))) {
-			minibuf_error("Unable to read file `@b%s@@'",
+			minibuf_error("Unable to read file `%s'",
 				      astr_cstr(fname));
 			astr_delete(fname);
 			return FALSE;
@@ -163,7 +163,7 @@ Show the next mini help entry.
 static int show_file(char *filename)
 {
 	if (!exist_file(filename)) {
-		minibuf_error("Unable to read file `@b%s@@'", filename);
+		minibuf_error("Unable to read file `%s'", filename);
 		return FALSE;
 	}
 
@@ -241,7 +241,7 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 	doc = astr_new();
 
 	if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
-		minibuf_error("Unable to read file `@b%s@@'",
+		minibuf_error("Unable to read file `%s'",
 			      PATH_DATA "/AUTODOC");
 		return NULL;
 	}
@@ -269,7 +269,7 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 	astr_delete(match);
 
 	if (!reading_doc) {
-		minibuf_error("Cannot find documentation for `@f%s@@'", name);
+		minibuf_error("Cannot find documentation for `%s'", name);
 		astr_delete(doc);
 		return NULL;
 	}
@@ -365,7 +365,7 @@ Display documentation of the function invoked by a key sequence.
 		return FALSE;
 	}
 
-	minibuf_write("Key sequence is bound to `@f%s@@'", name);
+	minibuf_write("Key sequence is bound to `%s'", name);
 
 	if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
 		return FALSE;
@@ -393,7 +393,7 @@ Display the name of the function invoked by a key sequence.
 		return FALSE;
 	}
 
-	minibuf_write("Key sequence runs the command `@f%s@@'", name);
+	minibuf_write("Key sequence runs the command `%s'", name);
 
 	return TRUE;
 }

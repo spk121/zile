@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.11 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: minibuf.c,v 1.12 2004/02/14 10:17:19 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -42,105 +42,11 @@ static History files_history;
  * Minibuffer wrapper functions.
  *--------------------------------------------------------------------------*/
 
-/*
- * Formatting escapes:
- *  %s  insert string
- *  %d	insert integer
- * Color escapes:
- *  @b  begin buffer name
- *  @f  begin function name
- *  @k  begin key sequence
- *  @r  begin register name
- *  @v  begin variable name
- *  @w  begin window name
- *  @:	start foreground color mode `x', where `x' can be:
- *	   b: blue     B: light blue
- *	   c: cyan     C: light cyan
- *	   g: green    G: light green
- *	   m: magenta  M: light magenta
- *	   r: red      R: light red
- *	   w: white    W: light white
- *	   y: yellow   Y: light yellow
- *	   k: black
- *  @@	end color mode
- */
-static char *minibuf_format(const char *fmt, va_list ap, int error)
+static char *minibuf_format(const char *fmt, va_list ap)
 {
 	char *buf, *sp, *dp;
-	int maxsize;
-
-	maxsize = max(cur_tp->width, 160);
-	buf = (char *)zmalloc(maxsize);
-
-	sp = (char *)fmt;
-	dp = buf;
-
-#if 0
-	if (error) {
-		*dp++ = MINIBUF_SET_COLOR;
-		*dp++ = 'C';
-	}
-#endif
-
-	while (*sp != '\0' && dp < buf + maxsize)
-		switch (*sp) {
-		case '%':
-			switch (*++sp) {
-			case 's': {
-				char *p = va_arg(ap, char *);
-				while (*p != '\0' && dp < buf + maxsize)
-					*dp++ = *p++;
-				++sp;
-				break;
-			}
-			case 'd': {
-				int i = va_arg(ap, int);
-				char buf[16], *p = buf;
-				sprintf(buf, "%d", i);
-				while (*p != '\0' && dp < buf + maxsize)
-					*dp++ = *p++;
-				++sp;
-				break;
-			}
-			default:
-				*dp++ = *sp++;
-			}
-			break;
-		case '@':
-			switch (*++sp) {
-			case 'b': /* Buffer. */
-			case 'w': /* Window. */
-			case 'f': /* Function. */
-			case 'r': /* Register. */
-			case 'v': /* Variable. */
-				*dp++ = MINIBUF_SET_COLOR;
-				*dp++ = 'Y';
-				++sp;
-				break;
-			case 'k': /* Key. */
-				*dp++ = MINIBUF_SET_COLOR;
-				*dp++ = 'W';
-				++sp;
-				break;
-			case ':': /* Custom color. */
-				*dp++ = MINIBUF_SET_COLOR;
-				*dp++ = *++sp;
-				++sp;
-				break;
-			case '@':
-				*dp++ = MINIBUF_UNSET_COLOR;
-				++sp;
-				break;
-			default:
-				*dp++ = *sp++;
-			}
-			break;
-		default:
-			*dp++ = *sp++;
-		}
-
-	*dp = '\0';
-
+	vasprintf(&buf, fmt, ap);
+	vsprintf(buf, fmt, ap);
 	return buf;
 }
 
@@ -158,7 +64,7 @@ void minibuf_write(const char *fmt, ...)
 	char *buf;
 
 	va_start(ap, fmt);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	cur_tp->minibuf_write(buf);
@@ -174,7 +80,7 @@ void minibuf_error(const char *fmt, ...)
 	char *buf;
 
 	va_start(ap, fmt);
-	buf = minibuf_format(fmt, ap, TRUE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	cur_tp->minibuf_write(buf);
@@ -192,7 +98,7 @@ char *minibuf_read(const char *fmt, const char *value, ...)
 	char *buf, *p;
 
 	va_start(ap, value);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	if (value != NULL)
@@ -214,7 +120,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 	astr rbuf;
 
 	va_start(ap, value);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	rbuf = astr_new();
@@ -261,7 +167,7 @@ int minibuf_read_forced(const char *fmt, const char *errmsg,
 	char *buf, *p;
 
 	va_start(ap, cp);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	for (;;) {
@@ -300,7 +206,7 @@ int minibuf_read_yesno(const char *fmt, ...)
 	int retvalue;
 
 	va_start(ap, fmt);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	cp = new_completion(FALSE);
@@ -330,7 +236,7 @@ int minibuf_read_boolean(const char *fmt, ...)
 	int retvalue;
 
 	va_start(ap, fmt);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	cp = new_completion(FALSE);
@@ -367,7 +273,7 @@ char *minibuf_read_color(const char *fmt, ...)
 	};
 
 	va_start(ap, fmt);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	cp = new_completion(FALSE);
@@ -401,7 +307,7 @@ char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, Hist
 	char *buf, *p;
 
 	va_start(ap, hp);
-	buf = minibuf_format(fmt, ap, FALSE);
+	buf = minibuf_format(fmt, ap);
 	va_end(ap);
 
 	p = cur_tp->minibuf_read(buf, value, cp, hp);
