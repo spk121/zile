@@ -20,11 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.4 2004/05/20 22:34:50 rrt Exp $	*/
-
-/*
- * This module exports only the `ncurses_tp' pointer.
- */
+/*	$Id: term_ncurses.c,v 1.5 2004/05/23 21:47:20 rrt Exp $	*/
 
 #include "config.h"
 
