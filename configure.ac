@@ -25,7 +25,7 @@ dnl ==================================================================
 dnl Checks for functions.
 dnl ==================================================================
 
-AC_REPLACE_FUNCS(vasprintf strrstr)
+AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
 AC_CHECK_FUNCS(getcwd fchmod fchown)
 
 dnl ==================================================================
@@ -33,7 +33,7 @@ dnl Checks for header files.
 dnl ==================================================================
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h limits.h getopt.h)
+AC_CHECK_HEADERS(fcntl.h limits.h)
 
 dnl ==================================================================
 dnl Check for GNU Regex library
