@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.18 2004/04/23 20:42:39 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.19 2004/05/10 16:00:36 rrt Exp $     */
 
 #include "config.h"
 
@@ -160,7 +160,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
         return p;
 }
 
-int minibuf_read_forced(const char *fmt, const char *errmsg,
+static int minibuf_read_forced(const char *fmt, const char *errmsg,
                         Completion *cp, ...)
 {
         va_list ap;

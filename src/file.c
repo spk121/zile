@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.31 2004/05/02 06:19:34 rrt Exp $        */
+/*      $Id: file.c,v 1.32 2004/05/10 16:00:32 rrt Exp $        */
 
 #include "config.h"
 
@@ -673,7 +673,7 @@ Kill the current buffer or the user specified one.
         return FALSE;
 }
 
-void insert_buffer(Buffer *bp)
+static void insert_buffer(Buffer *bp)
 {
         Line *lp;
         char *p;

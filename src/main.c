@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.23 2004/04/20 02:10:45 dacap Exp $	*/
+/*	$Id: main.c,v 1.24 2004/05/10 16:00:36 rrt Exp $	*/
 
 #include "config.h"
 
@@ -386,6 +386,7 @@ int main(int argc, char **argv)
         /*
          * Initialise terminal.
          */
+        term_init();
 	select_terminal(0);
 	cur_tp->init();
 

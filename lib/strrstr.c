@@ -20,7 +20,9 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: strrstr.c,v 1.2 2004/03/10 14:09:02 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.3 2004/05/10 16:00:26 rrt Exp $	*/
+
+#include "config.h"
 
 #ifndef HAVE_STRRSTR
 
@@ -35,7 +37,7 @@ char *strrstr(const char *s, const char *t) {
 	for (i = slen - tlen; i > 0; i--) {
 		for (j = 0; j < tlen && s[i + j] == t[j]; j++);
                 if (j == tlen)
-                        return s + i;
+                        return (char *)(s + i);
         }
 	return NULL;
 }

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.28 2004/04/04 20:33:12 rrt Exp $	*/
+/*	$Id: line.c,v 1.29 2004/05/10 16:00:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -374,7 +374,7 @@ void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
  * Split the current line so that the text width is less
  * than the value specified by `fill-column'.
  */
-static void auto_fill_break_line()
+static void auto_fill_break_line(void)
 {
 	int break_col, last_col, excess = 0;
 
@@ -612,7 +612,7 @@ int backward_delete_char(void)
 	}
 }
 
-int backward_delete_char_overwrite(void)
+static int backward_delete_char_overwrite(void)
 {
 	if (!bolp() && !eolp()) {
 		if (warn_if_readonly_buffer())
@@ -644,8 +644,8 @@ Join lines if the character is a newline.
 +*/
 {
 	 /* In overwrite-mode and isn't called by delete_char().  */
-	int (*f)() = ((cur_bp->flags & BFLAG_OVERWRITE) &&
-		      (last_uniarg > 0)) ?
+	int (*f)(void) = ((cur_bp->flags & BFLAG_OVERWRITE) &&
+                          (last_uniarg > 0)) ?
 		backward_delete_char_overwrite:
 		backward_delete_char;
 	int uni, ret = TRUE;
