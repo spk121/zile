@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.20 2004/03/14 14:36:05 rrt Exp $	*/
+/*	$Id: main.c,v 1.21 2004/04/05 22:31:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -35,12 +35,14 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <signal.h>
 
 #include "alist.h"
 
 #include "zile.h"
 #include "extern.h"
 #include "term_ncurses/term_ncurses.h"
+#include "term_terminfo/term_terminfo.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX	_POSIX_PATH_MAX
@@ -127,13 +129,21 @@ static void loop(void)
 }
 
 /*
- * Select the output interface; this function is dummy for now (only ncurses
- * is supported), but other terminals can be easily added.
+ * Select the output interface.
  */
-static void select_terminal(void)
+static void select_terminal(int term)
 {
-	/* Only the ncurses terminal is available for now. */
-	cur_tp = ncurses_tp;
+        switch (term) {
+        case 0:
+                cur_tp = ncurses_tp;
+                break;
+        case 1:
+                cur_tp = terminfo_tp;
+                break;
+        default:
+		fprintf(stderr, "fatal error: bad terminal type chosen\n");
+		exit(1);
+        }
 }
 
 static char about_splash_str[] = "\
@@ -298,11 +308,27 @@ then enter the text in that file's own buffer.\n\
 	}
 }
 
+static void segv_sig_handler(int signo)
+{
+        (void)signo;
+	fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+	zile_exit(2);
+}
+
+static void other_sig_handler(int signo)
+{
+        (void)signo;
+	fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
+	zile_exit(2);
+}
+
 int main(int argc, char **argv)
 {
 	int c;
 	int hflag = 0, qflag = 0;
 	char *uarg = NULL;
+	struct sigaction segv_sig;
+	struct sigaction other_sig;
 	alist fargs = alist_new();
 	alist vargs = alist_new();
 
@@ -343,7 +369,28 @@ int main(int argc, char **argv)
 
 	sanity_checks();
 
-	select_terminal();
+        /*
+         * Set up signal handling
+         */
+	segv_sig.sa_handler = segv_sig_handler;
+	sigemptyset(&segv_sig.sa_mask);
+        segv_sig.sa_flags = SA_RESTART;
+
+	other_sig.sa_handler = other_sig_handler;
+	sigemptyset(&other_sig.sa_mask);
+	other_sig.sa_flags = SA_RESTART;
+
+	sigaction(SIGFPE, &segv_sig, NULL);
+	sigaction(SIGSEGV, &segv_sig, NULL);
+	sigaction(SIGHUP, &other_sig, NULL);
+	sigaction(SIGINT, &other_sig, NULL);
+	sigaction(SIGQUIT, &other_sig, NULL);
+	sigaction(SIGTERM, &other_sig, NULL);
+
+        /*
+         * Initialise terminal.
+         */
+	select_terminal(1);
 	cur_tp->init();
 
 	init_variables();

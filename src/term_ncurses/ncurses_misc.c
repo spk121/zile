@@ -20,13 +20,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_misc.c,v 1.17 2004/03/09 16:26:32 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.18 2004/04/05 22:31:19 rrt Exp $	*/
 
 #include "config.h"
 
 #include <assert.h>
 #include <ctype.h>
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,45 +86,13 @@ void ncurses_resize_windows(void)
 	FUNCALL(recenter);
 }
 
-static void segv_sig_handler(int signo)
-{
-        (void)signo;
-	fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
-	zile_exit(2);
-}
-
-static void other_sig_handler(int signo)
-{
-        (void)signo;
-	fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
-	zile_exit(2);
-}
-
 int ncurses_init(void)
 {
-	struct sigaction segv_sig;
-	struct sigaction other_sig;
-
-	segv_sig.sa_handler = segv_sig_handler;
-	sigemptyset(&segv_sig.sa_mask);
-        segv_sig.sa_flags = SA_RESTART;
-
-	other_sig.sa_handler = other_sig_handler;
-	sigemptyset(&other_sig.sa_mask);
-	other_sig.sa_flags = SA_RESTART;
-
 	ncurses_tp->screen = newterm(NULL, stdout, stdin);
 	set_term(ncurses_tp->screen);
 
 	ncurses_tp->width = COLS;
 	ncurses_tp->height = LINES;
-
-	sigaction(SIGFPE, &segv_sig, NULL);
-	sigaction(SIGSEGV, &segv_sig, NULL);
-	sigaction(SIGHUP, &other_sig, NULL);
-	sigaction(SIGINT, &other_sig, NULL);
-	sigaction(SIGQUIT, &other_sig, NULL);
-	sigaction(SIGTERM, &other_sig, NULL);
 
 	return TRUE;
 }
