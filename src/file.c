@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.34 2004/07/11 00:29:37 rrt Exp $        */
+/*      $Id: file.c,v 1.35 2004/09/26 10:55:12 rrt Exp $        */
 
 #include "config.h"
 
@@ -803,16 +803,14 @@ Set mark after the inserted text.
 /*
  * Create a backup filename according to user specified variables.
  */
-static char *create_backup_filename(const char *filename,
-                                    int withdirectory)
+static astr create_backup_filename(const char *filename,
+                                   int withdirectory)
 {
-        astr buf;
-        char *s;
-
-        buf = NULL;  /* to know if it has been used */
+        astr res;
+        
         /* Add the backup directory path to the filename */
         if (withdirectory) {
-                astr dir, fname;
+                astr dir, fname, buf;
                 char *backupdir;
 
                 backupdir = get_variable("backup-directory");
@@ -840,22 +838,20 @@ static char *create_backup_filename(const char *filename,
                 astr_delete(dir);
                 astr_delete(fname);
                 filename = astr_cstr(buf);
+                astr_delete(buf);
         }
 
-        s = (char *)zmalloc(strlen(filename) + 1);
-        strcpy(s, filename);
-        strcat(s, "~");
+        res = astr_new();
+        astr_cat_cstr(res, filename);
+        astr_cat_char(res, '~');
 
-        if (buf != NULL)
-                astr_delete(buf);
-
-        return s;
+        return res;
 }
 
 /*
  * Copy a file.
  */
-static int copy_file(char *source, char *dest)
+static int copy_file(const char *source, const char *dest)
 {
         char buf[BUFSIZ];
         int ifd, ofd, len, stat_valid;
@@ -875,7 +871,7 @@ static int copy_file(char *source, char *dest)
         }
 
         while ((len = read(ifd, buf, sizeof buf)) > 0)
-                if(write(ofd, buf, len) < 0) {
+                if (write(ofd, buf, len) < 0) {
                         minibuf_error("unable to write to backup %s", dest);
                         close(ifd);
                         close(ofd);
@@ -941,12 +937,12 @@ static int write_to_disk(Buffer *bp, char *filename)
          */
         if (!(bp->flags & BFLAG_BACKUP) && backupsimple
             && (fd = open(filename, O_RDWR, 0)) != -1) {
-                char *bfilename;
+                astr bfilename;
                 close(fd);
                 bfilename = create_backup_filename(filename, backupwithdir);
-                if (!copy_file(filename, bfilename))
+                if (!copy_file(filename, astr_cstr(bfilename)))
                         waitkey_discard(3 * 1000);
-                free(bfilename);
+                astr_delete(bfilename);
                 bp->flags |= BFLAG_BACKUP;
         }
 
