@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.6 2005/01/22 01:06:00 rrt Exp $	*/
+/*	$Id: vars.c,v 1.7 2005/01/22 11:24:59 rrt Exp $	*/
 
 #include <string.h>
 
@@ -92,7 +92,7 @@ astr variableDump(le *varlist)
   astr as = astr_new();
   
   for (; varlist; varlist = varlist->list_next) {
-    if (varlist->branch && varlist->data) {
+    if (varlist->branch) {
       astr_afmt(as, "%s \t", varlist->data);
       astr_cat_delete(as, leDumpReformat(varlist->branch));
       astr_cat_char(as, '\n');
