@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: line.c,v 1.3 2003/04/24 15:43:51 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -240,7 +240,7 @@ if the `expand-tabs' variable is bound and set to true.
 int insert_newline(void)
 {
 	linep lp1, lp2;
-	int lp1len, lp2len;
+        int lp1len, lp2len, cur_pointn;
 	windowp wp;
 
 	if (warn_if_readonly_buffer())
@@ -279,6 +279,7 @@ int insert_newline(void)
 	 * Scan all the windows searching for points
 	 * pointing at the changed line.
 	 */
+        cur_pointn = cur_wp->pointn;
 	for (wp = head_wp; wp != NULL; wp = wp->next) {
 		if (wp->bp != cur_bp)
 			continue;
@@ -286,7 +287,7 @@ int insert_newline(void)
 			wp->pointp = lp2;
 			wp->pointo -= lp1len;
 			++wp->pointn;
-		} else if (wp->pointn > cur_wp->pointn)
+                } else if (wp->pointn > cur_pointn)
 			++wp->pointn;
 	}
 
