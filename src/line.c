@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.54 2005/01/27 00:21:25 rrt Exp $	*/
+/*	$Id: line.c,v 1.55 2005/01/27 00:24:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,7 @@
 #include "extern.h"
 
 
-static void adjust_markers(Line *newlp, Line *oldlp, int pointo, int dir, int offset)
+static void adjust_markers(Line *newlp, Line *oldlp, unsigned pointo, int dir, int offset)
 {
   Marker *pt = point_marker(), *marker;
 
@@ -176,7 +176,7 @@ DEFUN("tab-to-tab-stop", tab_to_tab_stop)
 int intercalate_newline()
 {
   Line *lp1, *lp2;
-  int lp1len, lp2len;
+  size_t lp1len, lp2len;
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -264,7 +264,7 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen,
   if (newlen != oldlen) {
     cur_bp->flags |= BFLAG_MODIFIED;
     astr_replace_cstr((*lp)->item, offset, oldlen, newtext);
-    adjust_markers(*lp, *lp, offset, 0, newlen - oldlen);
+    adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
   } else if (memcmp(astr_char((*lp)->item, offset), newtext, newlen) != 0) {
     memcpy(astr_char((*lp)->item, offset), newtext, newlen);
     cur_bp->flags |= BFLAG_MODIFIED;
@@ -280,7 +280,7 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen,
  */
 void fill_break_line(void)
 {
-  int break_col, last_col, excess = 0;
+  unsigned break_col, last_col, excess = 0;
 
   /* Move cursor back to fill column */
   while (get_goalc() > get_variable_number("fill-column") + 1) {
@@ -348,7 +348,7 @@ DEFUN("open-line", open_line)
 
 void insert_string(const char *s)
 {
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, (int)strlen(s), 0);
   undo_nosave = TRUE;
   for (; *s != '\0'; ++s)
     if (*s == '\n')
@@ -360,7 +360,7 @@ void insert_string(const char *s)
 
 void insert_nstring(const char *s, size_t size)
 {
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, (int)size, 0);
   undo_nosave = TRUE;
   for (; 0 < size--; ++s)
     if (*s == '\n')
@@ -442,7 +442,7 @@ int delete_char(void)
     return TRUE;
   } else if (!eobp()) {
     Line *lp1, *lp2;
-    int lp1len;
+    size_t lp1len;
 
     if (warn_if_readonly_buffer())
       return FALSE;
