@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.17 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: rc.c,v 1.18 2005/01/14 16:56:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -147,9 +147,6 @@ static void parse_rc(void)
 
 void read_rc_file(const char *filename)
 {
-  astr buf;
-
-  buf = astr_new();
   rc_file = NULL;
 
   if (filename != NULL) {
@@ -161,16 +158,15 @@ void read_rc_file(const char *filename)
   }
 
   if (rc_file == NULL) {
-    astr_cpy_cstr(buf, getenv("HOME"));
+    astr buf = get_home_dir();
     astr_cat_cstr(buf, "/.zilerc");
     rc_name = astr_cstr(buf);
     rc_file = fopen(rc_name, "r");
+    astr_delete(buf);
   }
 
   if (rc_file != NULL) {
     parse_rc();
     fclose(rc_file);
   }
-
-  astr_delete(buf);
 }

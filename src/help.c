@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.25 2005/01/12 10:55:33 rrt Exp $	*/
+/*	$Id: help.c,v 1.26 2005/01/14 16:56:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -93,9 +93,8 @@ DEFUN("help-with-tutorial", help_with_tutorial)
 {
   if (show_file(PATH_DATA "/TUTORIAL")) {
     astr buf;
-    buf = astr_new();
     cur_bp->flags = 0;
-    astr_cpy_cstr(buf, getenv("HOME"));
+    buf = get_home_dir();
     astr_cat_cstr(buf, "/TUTORIAL");
     set_buffer_filename(cur_bp, astr_cstr(buf));
 

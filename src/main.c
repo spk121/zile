@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.60 2005/01/14 01:09:11 rrt Exp $	*/
+/*	$Id: main.c,v 1.61 2005/01/14 16:56:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -122,24 +122,6 @@ static void about_screen(void)
 }
 
 /*
- * Do some sanity checks on the environment.
- */
-static void sanity_checks(void)
-{
-  /* The functions `read_rc_file' and `help_with_tutorial' rely on a
-     usable `HOME' environment variable. */
-  if (getenv("HOME") == NULL) {
-    fprintf(stderr, "zile: please set `HOME' to point to your home directory\n");
-    exit(1);
-  }
-
-  if (strlen(getenv("HOME")) + 12 > PATH_MAX) {
-    fprintf(stderr, "zile: `HOME' is longer than the longest pathname your system supports\n");
-    exit(1);
-  }
-}
-
-/*
  * Output the program syntax then exit.
  */
 static void usage(void)
@@ -157,7 +139,6 @@ static void setup_main_screen(int argc)
     /* Last buffer that isn't *scratch*.  */
     if (bp->next && !bp->next->next)
       last_bp = bp;
-
     c++;
   }
 
@@ -227,8 +208,6 @@ int main(int argc, char **argv)
   argc -= optind;
   argv += optind;
 
-  sanity_checks();
-
   /* Set up signal handling */
   signal(SIGFPE, segv_sig_handler);
   signal(SIGSEGV, segv_sig_handler);
@@ -258,10 +237,15 @@ int main(int argc, char **argv)
       if (*argv)
         open_file(*argv++, line - 1);
     }
-  else
-    /* Show the splash screen only if there isn't any file specified
-       on command line. */
+  else if (earg == NULL)
+    /* Show the splash screen only if no files and no Lisp expression
+       is specified on the command line. */
     about_screen();
+
+  if (earg) {
+    lithp(earg);
+    getchar();
+  }
 
   setup_main_screen(argc);
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.57 2005/01/14 00:43:31 rrt Exp $        */
+/*      $Id: file.c,v 1.58 2005/01/14 16:56:56 rrt Exp $        */
 
 #include "config.h"
 
@@ -206,9 +206,7 @@ astr compact_path(const char *path)
     return buf;
   }
 
-  /*
-   * Replace `/userhome/' (if existent) with `~/'.
-   */
+  /* Replace `/userhome/' (if existent) with `~/'. */
   i = strlen(pw->pw_dir);
   if (!strncmp(pw->pw_dir, path, i)) {
     astr_cpy_cstr(buf, "~/");
@@ -228,10 +226,8 @@ astr compact_path(const char *path)
 astr get_current_dir(astr buf, int interactive)
 {
   if (interactive && cur_bp->filename != NULL) {
-    /*
-     * If the current buffer has a filename, get the current
-     * directory name from it.
-     */
+    /* If the current buffer has a filename, get the current directory
+       name from it. */
     int p;
 
     astr_cpy_cstr(buf, cur_bp->filename);
@@ -241,14 +237,26 @@ astr get_current_dir(astr buf, int interactive)
     if (*astr_char(buf, -1) != '/')
       astr_cat_cstr(buf, "/");
   } else {
-    /*
-     * Get the current directory name from the system.
-     */
+    /* Get the current directory name from the system. */
     agetcwd(buf);
     astr_cat_cstr(buf, "/");
   }
 
   return buf;
+}
+
+/*
+ * Get HOME directory.
+ */
+astr get_home_dir(void)
+{
+  char *s = getenv("HOME");
+  astr as;
+  if (s != NULL && strlen(s) < PATH_MAX)
+    as = astr_cat_cstr(astr_new(), s);
+  else
+    as = agetcwd(as);
+  return as;
 }
 
 void open_file(char *path, int lineno)
