@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.14 2004/04/05 13:27:44 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.15 2004/04/05 16:06:55 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -15,7 +15,7 @@ X2("backward-char", backward_char,			"\\C-b", "\\LEFT")
 X1("backward-delete-char", backward_delete_char,	"\\BS")
 X1("backward-kill-sentence", backward_kill_sentence,	"\\C-x\\DEL")
 X2("backward-kill-word", backward_kill_word,		"\\M-\\DEL", "\\M-\\BS")
-X1("backward-paragraph", backward_paragraph,		"\\M-[")
+X1("backward-paragraph", backward_paragraph,		"\\M-{")
 X1("backward-sentence", backward_sentence,		"\\M-a")
 X1("backward-sexp", backward_sexp,			"\\C-\\M-b")
 X1("backward-word", backward_word,			"\\M-b")
@@ -49,7 +49,7 @@ X1("find-alternate-file", find_alternate_file,		"\\C-x\\C-v")
 X2("find-file", find_file,				"\\C-x\\C-f", "\\F2")
 X2("forward-char", forward_char,			"\\C-f", "\\RIGHT")
 X0("forward-line", forward_line)
-X1("forward-paragraph", forward_paragraph,		"\\M-]")
+X1("forward-paragraph", forward_paragraph,		"\\M-}")
 X1("forward-sentence", forward_sentence,		"\\M-e")
 X1("forward-sexp", forward_sexp,			"\\C-\\M-f")
 X1("forward-word", forward_word,			"\\M-f")
