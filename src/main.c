@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.14 2004/02/05 10:14:43 rrt Exp $	*/
+/*	$Id: main.c,v 1.15 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -50,11 +50,11 @@
 	"Zile " VERSION
 
 /* The current window; the first window in list. */
-windowp cur_wp = NULL, head_wp = NULL;
+Window *cur_wp = NULL, *head_wp = NULL;
 /* The current buffer; the first buffer in list. */
-bufferp cur_bp = NULL, head_bp = NULL;
+Buffer *cur_bp = NULL, *head_bp = NULL;
 /* The current output terminal. */
-terminalp cur_tp = NULL;
+Terminal *cur_tp = NULL;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;
@@ -67,9 +67,9 @@ int last_uniarg = 1;
  * appends list informations to the `zile.abort' file if
  * some unexpected corruption is found.
  */
-static void check_list(windowp wp)
+static void check_list(Window *wp)
 {
-	linep lp, prevlp;
+	Line *lp, *prevlp;
 
 	prevlp = wp->bp->limitp;
 	for (lp = wp->bp->limitp->next;; lp = lp->next) {
@@ -78,7 +78,7 @@ static void check_list(windowp wp)
 			fprintf(f, "---------- buffer `%s' corruption\n", wp->bp->name);
 			fprintf(f, "limitp = %p, limitp->prev = %p, limitp->next = %p\n", wp->bp->limitp, wp->bp->limitp->prev, wp->bp->limitp->next);
 			fprintf(f, "prevlp = %p, prevlp->prev = %p, prevlp->next = %p\n", prevlp, prevlp->prev, prevlp->next);
-			fprintf(f, "pointp = %p, pointp->prev = %p, pointp->next = %p\n", wp->bp->save_pointp, wp->bp->save_pointp->prev, wp->bp->save_pointp->next);
+			fprintf(f, "pointp = %p, pointp->prev = %p, pointp->next = %p\n", wp->bp->pt.p, wp->bp->pt.p->prev, wp->bp->pt.p->next);
 			fprintf(f, "lp = %p, lp->prev = %p, lp->next = %p\n", lp, lp->prev, lp->next);
 			fclose(f);
 			cur_tp->close();
@@ -114,15 +114,8 @@ static void loop(void)
 		thisflag = 0;
 		if (lastflag & FLAG_DEFINING_MACRO)
 			thisflag |= FLAG_DEFINING_MACRO;
-		if (lastflag & FLAG_HIGHLIGHT_REGION)
-			thisflag |= FLAG_HIGHLIGHT_REGION;
 
 		process_key(c);
-
-		if (thisflag & FLAG_HIGHLIGHT_REGION) {
-			if (!(thisflag & FLAG_HIGHLIGHT_REGION_STAYS))
-				thisflag &= ~FLAG_HIGHLIGHT_REGION;
-		}
 
 		if (thisflag & FLAG_QUIT_ZILE)
 			break;
@@ -261,6 +254,50 @@ static void usage(void)
 	exit(1);
 }
 
+void setup_main_screen(int argc, int hflag)
+{
+	Buffer *bp, *last_bp = NULL;
+	int c = 0;
+
+	for (bp = head_bp; bp; bp = bp->next) {
+		/* Last buffer that isn't *scratch*.  */
+		if (bp->next && !bp->next->next)
+			last_bp = bp;
+
+		c++;
+	}
+
+	/* *scratch* and two files.  */
+	if (c == 3) {
+		FUNCALL(split_window);
+		switch_to_buffer(last_bp);
+		FUNCALL(other_window);
+	}
+	/* More than two files.  */
+	else if (c > 3) {
+		FUNCALL(list_buffers);
+	}
+	else {
+		/*
+		 * Show the Mini Help window if the `-h' flag was specified
+		 * on command line or the novice level is enabled.
+		 */
+		if (hflag || lookup_bool_variable("novice-level"))
+			FUNCALL(minihelp_toggle_window);
+
+		if (argc < 1 && lookup_bool_variable("novice-level")) {
+			/* Cut & pasted from Emacs 20.2. */
+			insert_string("\
+This buffer is for notes you don't want to save.\n\
+If you want to create a file, visit that file with C-x C-f,\n\
+then enter the text in that file's own buffer.\n\
+\n");
+			cur_bp->flags &= ~BFLAG_MODIFIED;
+			resync_redisplay();
+		}
+	}
+}
+
 int main(int argc, char **argv)
 {
 	int c;
@@ -346,23 +383,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	/*
-	 * Show the Mini Help window if the `-h' flag was specified
-	 * on command line or the novice level is enabled.
-	 */
-	if (hflag || lookup_bool_variable("novice-level"))
-		FUNCALL(minihelp_toggle_window);
-
-	if (argc < 1 && lookup_bool_variable("novice-level")) {
-		/* Cut & pasted from Emacs 20.2. */
-		insert_string("\
-This buffer is for notes you don't want to save.\n\
-If you want to create a file, visit that file with C-x C-f,\n\
-then enter the text in that file's own buffer.\n\
-\n");
-		cur_bp->flags &= ~BFLAG_MODIFIED;
-		resync_redisplay();
-	}
+	setup_main_screen(argc, hflag);
 
 	execute_functions(fargs);
 
@@ -385,6 +406,7 @@ then enter the text in that file's own buffer.\n\
 	free_buffers();
 	free_bindings();
 	free_variables();
+	free_minibuf();
 
 	cur_tp->close();
 

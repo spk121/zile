@@ -1,4 +1,4 @@
-/*	$Id: variables.c,v 1.5 2004/01/07 00:36:14 rrt Exp $	*/
+/*	$Id: variables.c,v 1.6 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -120,39 +120,39 @@ int lookup_bool_variable(char *var)
 	return FALSE;
 }
 
-static historyp make_variable_history(void)
+static Completion *make_variable_completion(void)
 {
 	alist al;
-	historyp hp;
+	Completion *cp;
 	hpair *pair;
 
 	al = htable_list(var_table);
-	hp = new_history(FALSE);
+	cp = new_completion(FALSE);
 	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
-		alist_append(hp->completions, zstrdup(pair->key));
+		alist_append(cp->completions, zstrdup(pair->key));
 	alist_delete(al);
 
-	return hp;
+	return cp;
 }
 
 char *minibuf_read_variable_name(char *msg)
 {
 	char *ms;
-	historyp hp;
+	Completion *cp;
 
-	hp = make_variable_history();
+	cp = make_variable_completion();
 
 	for (;;) {
-		ms = minibuf_read_history(msg, "", hp);
+		ms = minibuf_read_completion(msg, "", cp, NULL);
 
 		if (ms == NULL) {
-			free_history(hp);
+			free_completion(cp);
 			cancel();
 			return NULL;
 		}
 
 		if (ms[0] == '\0') {
-			free_history(hp);
+			free_completion(cp);
 			minibuf_error("No variable name given");
 			return NULL;
 		} else if (get_variable(ms) == NULL) {
@@ -164,7 +164,7 @@ char *minibuf_read_variable_name(char *msg)
 		}
 	}
 
-	free_history(hp);
+	free_completion(cp);
 
 	return ms;
 }
@@ -247,7 +247,7 @@ static int sorter(const void *p1, const void *p2)
 
 static void write_variables_list(va_list ap)
 {
-	windowp old_wp = va_arg(ap, windowp);
+	Window *old_wp = va_arg(ap, Window *);
 	alist al;
 	hpair *pair;
 

@@ -1,4 +1,4 @@
-/*	$Id: rc.c,v 1.7 2004/01/21 01:20:59 dacap Exp $	*/
+/*	$Id: rc.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -77,7 +77,7 @@ static void parse_id_line(int c)
 	id[i = 0] = tolower(c);
 	while (isalnum(c = fgetc(rc_file)) || c == '-') {
 		/* Prevent overflow.  */
-		if (i < sizeof (id)-2)
+		if (i < sizeof(id)-2)
 			id[++i] = tolower(c);
 	}
 	id[++i] = '\0';
@@ -93,7 +93,7 @@ static void parse_id_line(int c)
 		value[i = 0] = tolower(c);
 		while (isalnum(c = fgetc(rc_file)) || c == '-') {
 			/* Prevent overflow.  */
-			if (i < sizeof (value)-2)
+			if (i < sizeof(value)-2)
 				value[++i] = tolower(c);
 		}
 		value[++i] = '\0';
@@ -103,12 +103,12 @@ static void parse_id_line(int c)
 		i = 0;
 		while ((c = fgetc(rc_file)) != '"' && c != EOF) {
 			/* Prevent overflow.  */
-			if (i < sizeof (value)-2) { /* prevent "\\\0" string */
+			if (i < sizeof(value)-2) { /* prevent "\\\0" string */
 				value[i++] = c;
 				if (c == '\\') {
 					c2 = fgetc(rc_file);
 					/* Prevent overflow.  */
-					if (i < sizeof (value)-1)
+					if (i < sizeof(value)-1)
 						value[i++] = c2;
 				}
 			}
@@ -118,7 +118,7 @@ static void parse_id_line(int c)
 		error("syntax error");
 
 #if 0
-	fprintf (stderr, "'%s' = '%s'\n", id, value);
+	fprintf(stderr, "'%s' = '%s'\n", id, value);
 #endif
 
 	/* Change variable's value.  */

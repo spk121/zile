@@ -1,5 +1,12 @@
-Changes between Zile 1.7 BETA 2 - Zile 1.7
+Changes between Zile 1.7 BETA 2 - Zile 1.7 BETA 3
 
+* You can use the M-p and M-n in minibuffer to navigate through
+  history elements.
+* Added `transient-mark-mode' and `highlight-nonselected-windows'
+  variables (removed old `highlight-region').
+* Added `delete-blank-lines'.
+* Modified the internal structures to handle point in a better way.
+* Support indentation for text-mode.
 * Added regexp search functions.
 * Now the `exchange-point-and-mark' activates the mark.
 * Fixed `insert_char' to don't move the mark when a character is

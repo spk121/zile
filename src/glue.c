@@ -1,4 +1,4 @@
-/*	$Id: glue.c,v 1.6 2004/01/28 10:47:33 rrt Exp $	*/
+/*	$Id: glue.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -78,13 +78,13 @@ char *copy_text_block(int startn, int starto, size_t size)
 {
 	char *buf, *sp, *dp;
 	int max_size, n;
-	linep lp;
+	Line *lp;
 
 	max_size = 10;
 	dp = buf = (char *)zmalloc(max_size);
 
-	lp = cur_wp->pointp;
-	n = cur_wp->pointn;
+	lp = cur_bp->pt.p;
+	n = cur_bp->pt.n;
 	if (n > startn)
 		do
 			lp = lp->prev;
@@ -153,23 +153,6 @@ char *replace_string(char *s, char *match, char *subst)
 }
 
 /*
- * Get the current column number taking into account also the tabulations.
- */
-int get_text_goalc(windowp wp)
-{
-	int col = 0, t = wp->bp->tab_width;
-	char *sp = wp->pointp->text, *p = sp;
-
-	while (p < sp + wp->pointo) {
-		if (*p == '\t')
-			col |= t - 1;
-		++col, ++p;
-	}
-
-	return col;
-}
-
-/*
  * Compact the spaces into tabulations according to the `tw' tab width.
  */
 void tabify_string(char *dest, char *src, int scol, int tw)
@@ -226,58 +209,27 @@ void untabify_string(char *dest, char *src, int scol, int tw)
 }
 
 /*
- * Calculate the mark line number.
- */
-int calculate_mark_lineno(windowp wp)
-{
-	int n;
-	linep lp;
-
-	if (wp->bp->markp == NULL)
-		return -1;
-
-	if (wp->bp->markp == wp->pointp)
-		return wp->pointn;
-
-	n = wp->pointn;
-	for (lp = wp->pointp->prev; lp != wp->bp->limitp; lp = lp->prev) {
-		--n;
-		if (lp == wp->bp->markp)
-			return n;
-	}
-
-	n = wp->pointn;
-	for (lp = wp->pointp->next; lp != wp->bp->limitp; lp = lp->next) {
-		++n;
-		if (lp == wp->bp->markp)
-			return n;
-	}
-
-	assert(0); /* Cannot happen */
-	return 0;
-}
-
-/*
  * Jump to the specified line number and offset.
  */
-void goto_point (int pointn, int pointo)
+void goto_point(Point pt)
 {
-	if (cur_wp->pointn > pointn)
+	if (cur_bp->pt.n > pt.n)
 		do
 			FUNCALL(previous_line);
-		while (cur_wp->pointn > pointn);
-	else if (cur_wp->pointn < pointn)
+		while (cur_bp->pt.n > pt.n);
+	else if (cur_bp->pt.n < pt.n)
 		do
 			FUNCALL(next_line);
-		while (cur_wp->pointn < pointn);
-	if (cur_wp->pointo > pointo)
+		while (cur_bp->pt.n < pt.n);
+
+	if (cur_bp->pt.o > pt.o)
 		do
 			FUNCALL(backward_char);
-		while (cur_wp->pointo > pointo);
-	else if (cur_wp->pointo < pointo)
+		while (cur_bp->pt.o > pt.o);
+	else if (cur_bp->pt.o < pt.o)
 		do
 			FUNCALL(forward_char);
-		while (cur_wp->pointo < pointo);
+		while (cur_bp->pt.o < pt.o);
 }
 
 /*

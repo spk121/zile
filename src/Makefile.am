@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.4 2004/02/05 02:38:27 dacap Exp $
+## $Id: Makefile.am,v 1.5 2004/02/08 04:39:26 dacap Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -20,28 +20,38 @@ if ENABLE_JAVA_MODE
 fontlock_java = fontlock_java.o
 endif
 
+if HAVE_REGEX_H
+regex =
+else
+regex = regex.o
+endif
+
 bin_PROGRAMS = zile
 zile_SOURCES =					\
 	basic.c					\
 	bind.c					\
 	buffer.c				\
+	completion.c				\
+	editfns.c				\
+	editfns.h				\
 	extern.h				\
 	file.c					\
 	fontlock.c				\
 	funcs.c					\
 	glue.c					\
 	help.c					\
+	history.c				\
 	keys.c					\
 	killring.c				\
 	line.c					\
 	lua.c					\
 	macro.c					\
 	main.c					\
+	marker.c				\
 	minibuf.c				\
+	point.c					\
 	rc.c					\
 	redisplay.c				\
-	regex.c					\
-	regex.h					\
 	registers.c				\
 	search.c				\
 	tbl_funcs.h				\
@@ -57,7 +67,8 @@ zile_LDADD =					\
 	$(fontlock_c)				\
 	$(fontlock_cpp)				\
 	$(fontlock_csharp)			\
-	$(fontlock_java)
+	$(fontlock_java)			\
+	$(regex)
 
 man_MANS = zile.1
 
@@ -66,6 +77,8 @@ EXTRA_DIST =					\
 	fontlock_cpp.gperf			\
 	fontlock_csharp.gperf			\
 	fontlock_java.gperf			\
+	regex.c					\
+	regex.h					\
 	zile.1.in
 
 zile.1: zile.1.in

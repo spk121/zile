@@ -39,9 +39,6 @@ display-time-format = "%I:%M%p"
 # If enabled, a marker will be displayed at the end of the buffer.
 show-eob-marker = true
 
-# Highlight the current region with reversed colors [default: true]
-highlight-region = true
-
 # Specify the file backup method [default: simple]
 #
 # Possible values are: none, simple and revision.
@@ -88,9 +85,9 @@ expand-tabs = false
 # If your terminal supports colors, you should leave this enabled.
 colors = true
 
-# The color of the status line [default: cyan]
+# The color of the status line [default: white]
 # For a list of colors, see below.
-status-line-color = cyan
+status-line-color = white
 
 # Font Lock fonts
 # Available colors are:
@@ -131,3 +128,17 @@ mail-quoting-char = ">"
 # Enable beep [default: true]
 # If enabled, a sound will be emitted on any error.
 beep = true
+
+# Standard indentation level [default: 4]
+# Default number of columns for margin-changing functions to indent.
+standard-indent = 4
+
+# If enabled, deactivates the mark when the buffer contents change.
+# Also enables highlighting of the region whenever the mark is active.
+# The variable `highlight-nonselected-windows' controls whether to
+# highlight all windows or just the selected window. [default: true]
+transient-mark-mode = true
+
+# If enabled, highlight region even in nonselected windows.
+# [default: false]
+highlight-nonselected-windows = false

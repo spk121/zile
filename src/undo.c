@@ -1,4 +1,4 @@
-/*	$Id: undo.c,v 1.7 2004/01/21 01:48:55 dacap Exp $	*/
+/*	$Id: undo.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -45,19 +45,18 @@ static int doing_undo = FALSE;
 /*
  * Save a reverse delta for doing undo.
  */
-void undo_save(int type, int startn, int starto, int arg1, int arg2)
+void undo_save(int type, Point pt, int arg1, int arg2)
 {
-	undop up;
+	Undo *up;
 
 	if (cur_bp->flags & BFLAG_NOUNDO || undo_nosave)
 		return;
 
-	up = (undop)zmalloc(sizeof(*up));
+	up = (Undo *)zmalloc(sizeof(Undo));
 
 	up->type = type;
 
-	up->pointn = startn;
-	up->pointo = starto;
+	up->pt = pt;
 
 	switch (type) {
 	case UNDO_INSERT_CHAR:
@@ -67,12 +66,12 @@ void undo_save(int type, int startn, int starto, int arg1, int arg2)
 		break;
 	case UNDO_INSERT_BLOCK:
 		up->delta.block.size = arg1;
-		up->delta.block.text = copy_text_block(startn, starto, arg1);
+		up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
 		break;
 	case UNDO_REPLACE_BLOCK:
 		up->delta.block.osize = arg1;
 		up->delta.block.size = arg2;
-		up->delta.block.text = copy_text_block(startn, starto, arg1);
+		up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
 		break;
 	case UNDO_REMOVE_BLOCK:
 		up->delta.block.size = arg1;
@@ -91,24 +90,24 @@ void undo_save(int type, int startn, int starto, int arg1, int arg2)
 /*
  * Revert an action.  Return the next undo entry.
  */
-static undop revert_action(undop up)
+static Undo *revert_action(Undo *up)
 {
 	int i;
 
 	doing_undo = TRUE;
 
 	if (up->type == UNDO_END_SEQUENCE) {
-		undo_save(UNDO_START_SEQUENCE, up->pointn, up->pointo, 0, 0);
+		undo_save(UNDO_START_SEQUENCE, up->pt, 0, 0);
 		up = up->next;
 		while (up->type != UNDO_START_SEQUENCE) {
 			up = revert_action(up);
 		}
-		undo_save(UNDO_END_SEQUENCE, up->pointn, up->pointo, 0, 0);
-		goto_point(up->pointn, up->pointo);
+		undo_save(UNDO_END_SEQUENCE, up->pt, 0, 0);
+		goto_point(up->pt);
 		return up->next;
 	}
 
-	goto_point(up->pointn, up->pointo);
+	goto_point(up->pt);
 
 	switch (up->type) {
 	case UNDO_INSERT_CHAR:
@@ -124,7 +123,7 @@ static undop revert_action(undop up)
 			intercalate_char(up->delta.c);
 		break;
 	case UNDO_INSERT_BLOCK:
-		undo_save(UNDO_REMOVE_BLOCK, up->pointn, up->pointo, up->delta.block.size, 0);
+		undo_save(UNDO_REMOVE_BLOCK, up->pt, up->delta.block.size, 0);
 		undo_nosave = TRUE;
 		for (i = 0; i < up->delta.block.size; ++i)
 			if (up->delta.block.text[i] != '\n')
@@ -137,24 +136,24 @@ static undop revert_action(undop up)
 		delete_char();
 		break;
 	case UNDO_REMOVE_BLOCK:
-		undo_save(UNDO_INSERT_BLOCK, up->pointn, up->pointo, up->delta.block.size, 0);
+		undo_save(UNDO_INSERT_BLOCK, up->pt, up->delta.block.size, 0);
 		undo_nosave = TRUE;
 		for (i = 0; i < up->delta.block.size; ++i)
 			delete_char();
 		undo_nosave = FALSE;
 		break;
 	case UNDO_REPLACE_CHAR:
-		undo_save(UNDO_REPLACE_CHAR, up->pointn, up->pointo,
-			  cur_wp->pointp->text[up->pointo], 0);
-		cur_wp->pointp->text[up->pointo] = up->delta.c;
+		undo_save(UNDO_REPLACE_CHAR, up->pt,
+			  cur_bp->pt.p->text[up->pt.o], 0);
+		cur_bp->pt.p->text[up->pt.o] = up->delta.c;
 		cur_bp->flags |= BFLAG_MODIFIED;
 #if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 		break;
 	case UNDO_REPLACE_BLOCK:
-		undo_save(UNDO_REPLACE_BLOCK, up->pointn, up->pointo,
+		undo_save(UNDO_REPLACE_BLOCK, up->pt,
 			  up->delta.block.size, up->delta.block.osize);
 		undo_nosave = TRUE;
 		for (i = 0; i < up->delta.block.size; ++i)

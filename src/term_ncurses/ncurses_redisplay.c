@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.13 2004/01/29 14:03:23 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.14 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -73,7 +73,6 @@ static chtype font_mail[5];
 static int quoting_char;
 #endif
 #endif /* ENABLE_NONTEXT_MODES */
-static int highlight_region;
 static chtype status_line_color;
 static int display_time;
 static char *display_time_format;
@@ -263,7 +262,6 @@ void ncurses_refresh_cached_variables(void)
 		quoting_char = '>';
 #endif
 #endif /* ENABLE_NONTEXT_MODES */
-	highlight_region = lookup_bool_variable("highlight-region");
 	status_line_color = get_font("status-line-color");
 	display_time = lookup_bool_variable("display-time");
 	display_time_format = get_variable("display-time-format");
@@ -348,39 +346,17 @@ static void outch(int c, chtype font, int *x)
 	}
 }
 
-/*
- * Structure used for calculating the highlighted region.
- *
- * We could use the `region' structure and the `calculate_region' function,
- * but this way is faster (no need to calculate the region size, for example).
- */
-struct highlight_region {
-	/* TRUE if highlight is enabled. */
-	int	highlight;
-
-	/* The beginning of the region. */
-	linep	startp;
-	int	startn;
-	int	starto;
-
-	/* The end of the region. */
-	linep	endp;
-	int	endn;
-	int	endo;
-};
-
-static int in_region(windowp wp, linep lp, int lineno, int x,
-		     struct highlight_region *d)
+static int in_region(Window *wp, Line *lp, int lineno, int x, Region *r)
 {
-	if (lineno >= d->startn && lineno <= d->endn) {
-		if (d->startn == d->endn) {
-			if (x >= d->starto && x < d->endo)
+	if (lineno >= r->start.n && lineno <= r->end.n) {
+		if (r->start.n == r->end.n) {
+			if (x >= r->start.o && x < r->end.o)
 				return TRUE;
-		} else if (lineno == d->startn) {
-			if (x >= d->starto)
+		} else if (lineno == r->start.n) {
+			if (x >= r->start.o)
 				return TRUE;
-		} else if (lineno == d->endn) {
-			if (x < d->endo)
+		} else if (lineno == r->end.n) {
+			if (x < r->end.o)
 				return TRUE;
 		} else {
 			return TRUE;
@@ -390,15 +366,15 @@ static int in_region(windowp wp, linep lp, int lineno, int x,
 	return FALSE;
 }
 
-static void draw_end_of_line(int line, windowp wp, linep lp,
-			     int lineno, struct highlight_region *d,
+static void draw_end_of_line(int line, Window *wp, Line *lp,
+			     int lineno, Region *r, int highlight,
 			     int x, int i)
 {
 	if (x >= COLS) {
 		mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
-	} else if (d->highlight) {
+	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
-			if (in_region(wp, lp, lineno, i, d))
+			if (in_region(wp, lp, lineno, i, r))
 				outch(' ', C_FG_WHITE_BG_BLUE, &x);
 			else
 				x++;
@@ -406,20 +382,20 @@ static void draw_end_of_line(int line, windowp wp, linep lp,
 	}
 }
 
-static void draw_line(int line, int startcol, windowp wp, linep lp,
-		      int lineno, struct highlight_region *d)
+static void draw_line(int line, int startcol, Window *wp, Line *lp,
+		      int lineno, Region *r, int highlight)
 {
 	int x, j;
 
 	move(line, 0);
 	for (x = 0, j = startcol; j < lp->size && x < wp->ewidth; ++j) {
-		if (d->highlight && in_region(wp, lp, lineno, j, d))
+		if (highlight && in_region(wp, lp, lineno, j, r))
 			outch(lp->text[j], C_FG_WHITE_BG_BLUE, &x);
 		else
 			outch(lp->text[j], C_FG_WHITE, &x);
 	}
 
-	draw_end_of_line(line, wp, lp, lineno, d, x, j);
+	draw_end_of_line(line, wp, lp, lineno, r, highlight, x, j);
 }
 
 #if ENABLE_NONTEXT_MODES
@@ -431,7 +407,7 @@ static void draw_line(int line, int startcol, windowp wp, linep lp,
 #define OUTCH(c, font)							    \
 do {									    \
 	if (i >= startcol) {						    \
-		if (d->highlight && in_region(wp, lp, lineno, i, d))	    \
+		if (highlight && in_region(wp, lp, lineno, i, r))	    \
 			outch(c, (font & A_BOLD) | C_FG_WHITE_BG_BLUE, &x); \
 		else							    \
 			outch(c, font, &x);				    \
@@ -444,8 +420,8 @@ do {									    \
  * Draw a line on the screen with font lock color.
  * C/C++/C#/Java Mode.
  */
-static void draw_line_cpp(int line, int startcol, windowp wp, linep lp,
-			  int lineno, struct highlight_region *d,
+static void draw_line_cpp(int line, int startcol, Window *wp, Line *lp,
+			  int lineno, Region *r, int highlight,
 			  int *lastanchor)
 {
 	int i, x, c, nonspace = FALSE;
@@ -558,12 +534,11 @@ static void draw_line_cpp(int line, int startcol, windowp wp, linep lp,
 			nonspace = TRUE;
 	}
 
-	draw_end_of_line(line, wp, lp, lineno, d, x, i);
+	draw_end_of_line(line, wp, lp, lineno, r, highlight, x, i);
 }
 #endif /* ENABLE_CLIKE_MODES */
 
 #if ENABLE_SHELL_MODE
-/* Contributed by David A. Capello <dacap@users.sourceforge.net> */
 static char *my_strnchr(const char *text, int size, int chr)
 {
 	int c;
@@ -580,8 +555,8 @@ static char *my_strnchr(const char *text, int size, int chr)
  * Identifiers hightlighting contributed by
  * David A. Capello <dacap@users.sourceforge.net>
  */
-static void draw_line_shell(int line, int startcol, windowp wp, linep lp,
-			    int lineno, struct highlight_region *d,
+static void draw_line_shell(int line, int startcol, Window *wp, Line *lp,
+			    int lineno, Region *r, int highlight,
 			    int *lastanchor)
 {
 	int i, x, c;
@@ -667,7 +642,7 @@ static void draw_line_shell(int line, int startcol, windowp wp, linep lp,
 		}
 	}
 
-	draw_end_of_line(line, wp, lp, lineno, d, x, i);
+	draw_end_of_line(line, wp, lp, lineno, r, highlight, x, i);
 }
 #endif /* ENABLE_SHELL_MODE */
 
@@ -676,9 +651,9 @@ static void draw_line_shell(int line, int startcol, windowp wp, linep lp,
  * Draw a line on the screen with font lock color.
  * Mail Mode.
  */
-static void draw_line_mail(int line, int startcol, windowp wp, linep lp,
-			    int lineno, struct highlight_region *d,
-			    int *lastanchor)
+static void draw_line_mail(int line, int startcol, Window *wp, Line *lp,
+			   int lineno, Region *r, int highlight,
+			   int *lastanchor)
 {
 	int i, x, level;
 
@@ -703,52 +678,41 @@ static void draw_line_mail(int line, int startcol, windowp wp, linep lp,
 }
 #endif /* ENABLE_MAIL_MODE */
 
-static void calculate_highlight_region(windowp wp, struct highlight_region *tdata)
+static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 {
-	if (!highlight_region || !(thisflag & FLAG_HIGHLIGHT_REGION) ||
-	    wp != cur_wp || wp->bp->markp == NULL) {
-		tdata->highlight = FALSE;
+	if ((wp != cur_wp
+	     && !lookup_bool_variable("highlight-nonselected-windows"))
+	    || (!wp->bp->mark)
+	    || (!transient_mark_mode())
+	    || (transient_mark_mode() && !(wp->bp->mark_active))) {
+		*highlight = FALSE;
 		return;
 	}
 
-	tdata->highlight = TRUE;
-	tdata->startp = wp->pointp;
-	tdata->startn = wp->pointn;
-	tdata->starto = wp->pointo;
-	tdata->endp = wp->bp->markp;
-	tdata->endn = calculate_mark_lineno(wp);
-	tdata->endo = wp->bp->marko;
-	if (tdata->endn < tdata->startn ||
-	    (tdata->endn == tdata->startn && tdata->endo <= tdata->starto)) {
-		linep lp;
-		int n, o;
-		lp = tdata->startp;
-		n = tdata->startn;
-		o = tdata->starto;
-		tdata->startp = tdata->endp;
-		tdata->startn = tdata->endn;
-		tdata->starto = tdata->endo;
-		tdata->endp = lp;
-		tdata->endn = n;
-		tdata->endo = o;
-	}
+	*highlight = TRUE;
+	r->start = window_pt(wp);
+	r->end = wp->bp->mark->pt;
+	if (cmp_point(r->end, r->start) < 0)
+		swap_point(&r->end, &r->start);
 }
 
-static void draw_window(int topline, windowp wp)
+static void draw_window(int topline, Window *wp)
 {
 	int i, startcol, lineno;
 #if ENABLE_NONTEXT_MODES
         int lastanchor;
 #endif
-	linep lp;
-	struct highlight_region tdata;
+	Line *lp;
+	Region r;
+	int highlight;
+	Point pt = window_pt(wp);
 
-	calculate_highlight_region(wp, &tdata);
+	calculate_highlight_region(wp, &r, &highlight);
 
 	/*
 	 * Find the first line to display on the first screen line.
 	 */
-	for (lp = wp->pointp, lineno = wp->pointn, i = wp->topdelta;
+	for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
 	     i > 0 && lp->prev != wp->bp->limitp; lp = lp->prev, --i, --lineno)
 		;
 
@@ -769,7 +733,7 @@ static void draw_window(int topline, windowp wp)
 		/* If at the end of the buffer, don't write any text. */
 		if (lp == wp->bp->limitp)
 			continue;
-		if (lp == cur_wp->pointp)
+		if (lp == pt.p)
 			startcol = point_start_column;
 		else
 			startcol = 0;
@@ -782,28 +746,28 @@ static void draw_window(int topline, windowp wp)
 			case BMODE_JAVA:
 #if ENABLE_CLIKE_MODES
 				draw_line_cpp(i,  startcol, wp, lp,
-					      lineno, &tdata, &lastanchor);
+					      lineno, &r, highlight, &lastanchor);
 #endif
 				break;
 			case BMODE_SHELL:
 #if ENABLE_SHELL_MODE
 				draw_line_shell(i, startcol, wp, lp,
-						lineno, &tdata, &lastanchor);
+						lineno, &r, highlight, &lastanchor);
 #endif
 				break;
 			default:
-				draw_line(i, startcol, wp, lp, lineno, &tdata);
+				draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 			}
 		}
 #if ENABLE_MAIL_MODE
 		else if (wp->bp->mode == BMODE_MAIL &&
 			   wp->bp->flags & BFLAG_FONTLOCK)
 			draw_line_mail(i, startcol, wp, lp,
-				       lineno, &tdata, &lastanchor);
+				       lineno, &r, highlight, &lastanchor);
 #endif
 		else
 #endif /* ENABLE_NONTEXT_MODES */
-			draw_line(i, startcol, wp, lp, lineno, &tdata);
+			draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
 		/*
 		 * Draw the `[EOB]' end of buffer marker if
@@ -829,7 +793,7 @@ static void draw_window(int topline, windowp wp)
 	}
 }
 
-static char *make_mode_line_flags(windowp wp)
+static char *make_mode_line_flags(Window *wp)
 {
 	static char buf[3];
 
@@ -850,16 +814,17 @@ static char *make_mode_line_flags(windowp wp)
  * needs to get truncated.
  * Called only for the line where is the point.
  */
-static void calculate_start_column(windowp wp)
+static void calculate_start_column(Window *wp)
 {
 	int col = 0, lastcol = 0, t = wp->bp->tab_width;
 	int rpfact, lpfact;
 	char buf[16], *rp, *lp, *p;
+	Point pt = window_pt(wp);
 
-	rp = wp->pointp->text + wp->pointo;
-	rpfact = wp->pointo / (wp->ewidth / 3);
+	rp = pt.p->text + pt.o;
+	rpfact = pt.o / (wp->ewidth / 3);
 
-	for (lp = rp; lp >= cur_wp->pointp->text; --lp) {
+	for (lp = rp; lp >= pt.p->text; --lp) {
 		for (col = 0, p = lp; p < rp; ++p)
 			if (*p == '\t') {
 				col |= t - 1;
@@ -869,10 +834,10 @@ static void calculate_start_column(windowp wp)
 			else
 				col += make_char_printable(buf, *p);
 
-		lpfact = (lp - cur_wp->pointp->text) / (wp->ewidth / 3);
+		lpfact = (lp - pt.p->text) / (wp->ewidth / 3);
 
 		if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2)) {
-			point_start_column = lp + 1 - cur_wp->pointp->text;
+			point_start_column = lp + 1 - pt.p->text;
 			point_screen_column = lastcol;
 			return;
 		}
@@ -884,17 +849,20 @@ static void calculate_start_column(windowp wp)
 	point_screen_column = col;
 }
 
-static char *make_screen_pos(windowp wp)
+static char *make_screen_pos(Window *wp)
 {
 	static char buf[16];
-	if (wp->bp->num_lines <= wp->eheight && wp->topdelta == wp->pointn)
+	Point pt = window_pt(wp);
+
+	if (wp->bp->num_lines <= wp->eheight && wp->topdelta == pt.n)
 		strcpy(buf, "All");
-	else if (wp->pointn == wp->topdelta)
+	else if (pt.n == wp->topdelta)
 		strcpy(buf, "Top");
-	else if (wp->pointn + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
+	else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
 		strcpy(buf, "Bot");
 	else
-		sprintf(buf, "%2d%%", (int)((float)wp->pointn / wp->bp->num_lines * 100));
+		sprintf(buf, "%2d%%", (int)((float)pt.n / wp->bp->num_lines * 100));
+
 	return buf;
 }
 
@@ -912,10 +880,11 @@ static char *make_time_str(char *buf)
 	return buf;
 }
 
-static void draw_status_line(int line, windowp wp)
+static void draw_status_line(int line, Window *wp)
 {
 	int i;
 	char *mode;
+	Point pt = window_pt(wp);
 
 	attrset(A_REVERSE | status_line_color);
 
@@ -966,7 +935,7 @@ static void draw_status_line(int line, windowp wp)
 	       (wp->bp->flags & BFLAG_OVERWRITE) ? " Ovwrt" : "",
 	       (thisflag & FLAG_DEFINING_MACRO) ? " Def" : "",
 	       (wp->bp->flags & BFLAG_ISEARCH) ? " Isearch" : "",
-	       wp->pointn+1, get_text_goalc(wp),
+	       pt.n+1, get_goalc_wp(wp),
 	       make_screen_pos(wp));
 
 	if (display_time) {
@@ -981,7 +950,7 @@ static void draw_status_line(int line, windowp wp)
 static void do_redisplay(void)
 {
 	int topline, cur_topline = 0;
-	windowp wp;
+	Window *wp;
 
 	topline = 0;
 

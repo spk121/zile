@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.17 2004/02/06 04:20:09 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.18 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -38,13 +38,12 @@
 #include "zile.h"
 #include "extern.h"
 #include "astr.h"
+#include "editfns.h"
 
 int cancel(void)
 {
-	cur_wp->bp->markp = NULL;
-
+	desactivate_mark();
 	minibuf_error("Quit");
-
 	return FALSE;
 }
 
@@ -54,7 +53,6 @@ Stop Zile and return to superior process.
 +*/
 {
 	raise(SIGTSTP);
-
 	return TRUE;
 }
 
@@ -63,13 +61,32 @@ DEFUN("keyboard-quit", keyboard_quit)
 Cancel current command.
 +*/
 {
-	if (cur_wp->bp->markp == NULL)
-		return cancel();
-	cur_wp->bp->markp = NULL;
-	return FALSE;
+	return cancel();
 }
 
-static char *make_buffer_flags(bufferp bp, int iscurrent)
+DEFUN("transient-mark-mode", transient_mark_mode)
+/*+
+Toggle Transient Mark mode.
+With arg, turn Transient Mark mode on if arg is positive, off otherwise.
++*/
+{
+	if (!(thisflag & FLAG_SET_UNIARG)) {
+		if (transient_mark_mode())
+			set_variable("transient-mark-mode", "false");
+		else
+			set_variable("transient-mark-mode", "true");
+	}
+	else {
+		if (transient_mark_mode() > 0)
+			set_variable("transient-mark-mode", "true");
+		else
+			set_variable("transient-mark-mode", "false");
+	}
+	activate_mark();
+	return TRUE;
+}
+
+static char *make_buffer_flags(Buffer *bp, int iscurrent)
 {
 	static char buf[4];
 
@@ -85,7 +102,7 @@ static char *make_buffer_flags(bufferp bp, int iscurrent)
 	return buf;
 }
 
-static char *make_buffer_mode(bufferp bp)
+static char *make_buffer_mode(Buffer *bp)
 {
 	static char buf[32]; /* Make sure the buffer is large enough. */
 
@@ -133,7 +150,7 @@ static char *make_buffer_mode(bufferp bp)
 	return buf;
 }
 
-static void print_buf(bufferp old_bp, bufferp bp)
+static void print_buf(Buffer *old_bp, Buffer *bp)
 {
 	char buf[80];
 
@@ -155,54 +172,57 @@ static void print_buf(bufferp old_bp, bufferp bp)
 
 void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
 {
-	windowp wp, old_wp = cur_wp;
+	Window *wp, *old_wp = cur_wp;
 	va_list ap;
 
-	if ((wp = find_window(name)) == NULL) {
-		bufferp bp;
-		cur_wp = popup_window();
-		cur_bp = cur_wp->bp;
-		bp = find_buffer(name, TRUE);
-		switch_to_buffer(bp);
-	} else {
-		cur_wp = wp;
-		cur_bp = wp->bp;
+	/* Popup a window with the buffer "name".  */
+	if ((wp = find_window(name)))
+		set_current_window(wp);
+	else {
+		set_current_window(popup_window());
+		switch_to_buffer(find_buffer(name, TRUE));
 	}
 
+	/* Remove all the content of that buffer.  */
 	zap_buffer_content();
+
+	/* Make the buffer like a temporary one.  */
 	cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO
 		| BFLAG_NOEOB;
 	set_temporary_buffer(cur_bp);
 
+	/* Use the "callback" routine.  */
 	va_start(ap, func);
 	func(ap);
 	va_end(ap);
 
+	/* Go to beginning of buffer.  */
 	gotobob();
 
+	/* It'll be read only.  */
 	cur_bp->flags |= BFLAG_READONLY;
 
-	cur_wp = old_wp;
-	cur_bp = old_wp->bp;
+	/* Restore old current window.  */
+	set_current_window(old_wp);
 }
 
 static void write_buffers_list(va_list ap)
 {
-	windowp old_wp = va_arg(ap, windowp);
-	bufferp bp;
+	Window *old_wp = va_arg(ap, Window *);
+	Buffer *bp;
 
 	bprintf(" MR Buffer          Size  Mode	 File\n");
 	bprintf(" -- ------          ----  ----	 ----\n");
 
-        /* Print buffers. */
-        bp = old_wp->bp;
-        do {
+	/* Print buffers. */
+	bp = old_wp->bp;
+	do {
 		/* Print all buffer less this one (the *Buffer List*). */
 		if (cur_bp != bp)
 			print_buf(old_wp->bp, bp);
-                if ((bp = bp->next) == NULL)
-                        bp = head_bp;
-        } while (bp != old_wp->bp);
+		if ((bp = bp->next) == NULL)
+			bp = head_bp;
+	} while (bp != old_wp->bp);
 }
 
 DEFUN("list-buffers", list_buffers)
@@ -379,8 +399,8 @@ that value, otherwise with the current column value.
 {
 	if (uniarg > 1)
 		cur_bp->fill_column = uniarg;
-	else if (cur_wp->pointo > 1)
-		cur_bp->fill_column = cur_wp->pointo + 1;
+	else if (cur_bp->pt.o > 1)
+		cur_bp->fill_column = cur_bp->pt.o + 1;
 	else {
 		minibuf_error("Invalid fill column");
 		return FALSE;
@@ -391,11 +411,8 @@ that value, otherwise with the current column value.
 
 int set_mark_command(void)
 {
-	cur_bp->markp = cur_wp->pointp;
-	cur_bp->marko = cur_wp->pointo;
-
+	set_mark();
 	minibuf_write("Mark set");
-
 	return TRUE;
 }
 
@@ -404,45 +421,38 @@ DEFUN("set-mark-command", set_mark_command)
 Set mark at where point is.
 +*/
 {
-	thisflag |= FLAG_HIGHLIGHT_REGION | FLAG_HIGHLIGHT_REGION_STAYS;
-	return set_mark_command();
+	int ret = set_mark_command();
+	activate_mark();
+	return ret;
 }
+
+int exchange_point_and_mark(void)
+{
+	/* No mark? */
+	if (!cur_bp->mark) {
+		minibuf_error("No mark set in this buffer");
+		return FALSE;
+	}
+
+	/* Swap the point with the mark.  */
+	swap_point(&cur_bp->pt, &cur_bp->mark->pt);
+	return TRUE;
+}
+
 
 DEFUN("exchange-point-and-mark", exchange_point_and_mark)
 /*+
 Put the mark where point is now, and point where the mark is now.
 +*/
 {
-	struct region r;
-	linep swapp;
-	int swapo;
-
-	if (warn_if_no_mark())
+	if (!exchange_point_and_mark())
 		return FALSE;
 
-	calculate_region(&r);
+	/* In transient-mark-mode we must reactivate the mark.  */
+	if (transient_mark_mode())
+		activate_mark();
 
-	/*
-	 * Increment or decrement the current line according to the
-	 * mark position.
-	 */
-	if (r.startp == cur_wp->pointp)
-		cur_wp->pointn += r.num_lines;
-	else
-		cur_wp->pointn -= r.num_lines;
-
-	/*
-	 * Swap the point and the mark.
-	 */
-	swapp = cur_bp->markp;
-	swapo = cur_bp->marko;
-	cur_bp->markp = cur_wp->pointp;
-	cur_bp->marko = cur_wp->pointo;
-	cur_wp->pointp = swapp;
-	cur_wp->pointo = swapo;
-
-	thisflag |= FLAG_NEED_RESYNC | FLAG_HIGHLIGHT_REGION_STAYS
-		 | FLAG_HIGHLIGHT_REGION;
+	thisflag |= FLAG_NEED_RESYNC;
 
 	return TRUE;
 }
@@ -453,11 +463,8 @@ Put point at beginning and mark at end of buffer.
 +*/
 {
 	gotoeob();
-	set_mark_command();
+	FUNCALL(set_mark_command);
 	gotobob();
-
-	thisflag |= FLAG_HIGHLIGHT_REGION | FLAG_HIGHLIGHT_REGION_STAYS;
-
 	return TRUE;
 }
 
@@ -533,28 +540,28 @@ int universal_argument(int keytype, int xarg)
 	compl = 0;
 
 	if (keytype == KBD_META) {
-		strcpy (buf, "ESC");
-		cur_tp->ungetkey (xarg + '0');
+		strcpy(buf, "ESC");
+		cur_tp->ungetkey(xarg + '0');
 	}
 	else
-		strcpy (buf, "C-u");
+		strcpy(buf, "C-u");
 
 	for (;;) {
-		strcat (buf, "-"); /* Add the '-' character.  */
-		c = do_completion (buf, &compl);
-		buf[strlen (buf)-1] = '\0'; /* Remove the '-' character.  */
+		strcat(buf, "-"); /* Add the '-' character.  */
+		c = do_completion(buf, &compl);
+		buf[strlen(buf) - 1] = '\0'; /* Remove the '-' character.  */
 
 		/* Cancelled.  */
 		if (c == KBD_CANCEL)
-			return cancel ();
+			return cancel();
 		/* Digit pressed.  */
-		else if (isdigit (c & 0xff)) {
+		else if (isdigit(c & 0xff)) {
 			digit = (c & 0xff) - '0';
 
 			if (c & KBD_META)
-				strcat (buf, " ESC");
+				strcat(buf, " ESC");
 
-			sprintf (buf+strlen (buf), " %d", digit);
+			sprintf(buf+strlen(buf), " %d", digit);
 
 			if (i == 0)
 				arg = digit;
@@ -564,7 +571,7 @@ int universal_argument(int keytype, int xarg)
 			i++;
 		}
 		else if (c == (KBD_CTL | 'u')) {
-			sprintf (buf+strlen (buf), " C-u");
+			sprintf(buf+strlen(buf), " C-u");
 			if (i == 0)
 				arg *= 4;
 		}
@@ -572,7 +579,7 @@ int universal_argument(int keytype, int xarg)
 			/* After any number && if sign doesn't change */
 			if (i == 0 && sgn > 0) {
 				sgn = -sgn;
-				strcat (buf, " -");
+				strcat(buf, " -");
 				/* The default "arg" isn't -4, is -1 */
 				arg = 1;
 			}
@@ -585,13 +592,13 @@ int universal_argument(int keytype, int xarg)
 					   back to normal state).  */
 				}
 				else {
-					cur_tp->ungetkey (c);
+					cur_tp->ungetkey(c);
 					break;
 				}
 			}
 		}
 		else {
-			cur_tp->ungetkey (c);
+			cur_tp->ungetkey(c);
 			break;
 		}
 	}
@@ -621,7 +628,7 @@ by 4 each time.
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
 
-static void edit_tab_line(linep *lp, int lineno, int offset, int size, int action)
+static void edit_tab_line(Line **lp, int lineno, int offset, int size, int action)
 {
 	char *src, *dest;
 
@@ -640,7 +647,8 @@ static void edit_tab_line(linep *lp, int lineno, int offset, int size, int actio
 		tabify_string(dest, src, offset, cur_bp->tab_width);
 
 	if (strcmp(src, dest) != 0) {
-		undo_save(UNDO_REPLACE_BLOCK, lineno, offset, size, strlen(dest));
+		undo_save(UNDO_REPLACE_BLOCK, make_point(lineno, offset),
+			  size, strlen(dest));
 		line_replace_text(lp, offset, size, dest);
 	}
 	free(src);
@@ -649,9 +657,10 @@ static void edit_tab_line(linep *lp, int lineno, int offset, int size, int actio
 
 static int edit_tab_region(int action)
 {
-	struct region r;
-	linep lp;
+	Region r;
+	Line *lp;
 	int lineno;
+	Marker *marker;
 
 	if (warn_if_readonly_buffer() || warn_if_no_mark())
 		return FALSE;
@@ -660,26 +669,27 @@ static int edit_tab_region(int action)
 	if (r.size == 0)
 		return TRUE;
 
-	undo_save(UNDO_START_SEQUENCE, r.startn, r.starto, 0, 0);
-	for (lp = r.startp, lineno = r.startn;; lp = lp->next, ++lineno) {
-		if (lp == r.startp) {
-			if (lp == r.endp) /* Region on a sole line. */
-				edit_tab_line(&lp, lineno, r.starto,
-					      r.endo - r.starto, action);
+	marker = point_marker();
+
+	undo_save(UNDO_START_SEQUENCE, marker->pt, 0, 0);
+	for (lp = r.start.p, lineno = r.start.n; ; lp = lp->next, ++lineno) {
+		if (lp == r.start.p) {
+			if (lp == r.end.p) /* Region on a sole line. */
+				edit_tab_line(&lp, lineno, r.start.o,
+					      r.end.o - r.start.o, action);
 			else /* Region is multi-line. */
-				edit_tab_line(&lp, lineno, r.starto, lp->size,
+				edit_tab_line(&lp, lineno, r.start.o, lp->size,
 					      action);
-		} else if (lp == r.endp) /* Last line of multi-line region. */
-			edit_tab_line(&lp, lineno, 0, r.endo, action);
+		} else if (lp == r.end.p) /* Last line of multi-line region. */
+			edit_tab_line(&lp, lineno, 0, r.end.o, action);
 		else /* Middle line of multi-line region. */
-			edit_tab_line(&lp, lineno, r.starto,
-				      lp->size - r.starto, action);
-		if (lp == r.endp)
+			edit_tab_line(&lp, lineno, r.start.o,
+				      lp->size - r.start.o, action);
+		if (lp == r.end.p)
 			break;
 	}
-	undo_save(UNDO_END_SEQUENCE, r.startn, r.starto, 0, 0);
-
-	cur_wp->bp->markp = NULL;
+	undo_save(UNDO_END_SEQUENCE, marker->pt, 0, 0);
+	free_marker(marker);
 
 	return TRUE;
 }
@@ -692,12 +702,7 @@ when this can be done without changing the column they end at.
 The variable `tab-width' controls the spacing of tab stops.
 +*/
 {
-	if (edit_tab_region(TAB_TABIFY)) {
-		/* Avoid pointing over the end of the line. */
-		cur_wp->pointo = 0;
-		return TRUE;
-	}
-	return FALSE;
+	return edit_tab_region(TAB_TABIFY);
 }
 
 DEFUN("untabify", untabify)
@@ -714,67 +719,56 @@ DEFUN("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-	cur_wp->pointo = 0;
-	while (cur_wp->pointo < cur_wp->pointp->size) {
-		if (!isspace(cur_wp->pointp->text[cur_wp->pointo]))
+	cur_bp->pt = line_beginning_position(0);
+	while (!eolp()) {
+		if (!isspace(following_char()))
 			break;
-		++cur_wp->pointo;
+		forward_char();
 	}
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 	return TRUE;
 }
 
-/**********************************************************************/
-/* Tranpose functions */
-/**********************************************************************/
+/***********************************************************************
+			  Tranpose functions
+ ***********************************************************************/
 
-static void insert_region (astr s)
+static void astr_append_region(astr s)
 {
-	struct region r;
+	Region r;
 	char *t;
 	int c;
 
-	calculate_region (&r);
+	activate_mark();
+	calculate_region(&r);
+
 	if (r.size > 0) {
-		t = copy_text_block (r.startn, r.starto, r.size);
+		t = copy_text_block(r.start.n, r.start.o, r.size);
 		if (t) {
 			for (c=0; c<r.size; c++)
-				astr_append_char (s, t[c]);
-			free (t);
+				astr_append_char(s, t[c]);
+			free(t);
 		}
 	}
 }
 
-static int transpose_subr(funcp f)
+static int transpose_subr(Function f)
 {
-	linep markp;
-	int marko;
-	int n0, o0;
-	int n1, o1;
-	int n2, o2;
+	Marker *p0, *p1, *p2;
 	astr s1 = NULL;
 	astr s2 = NULL;
-	int forward_after_del1 = 1;
 	int seq_started = FALSE;
 
-	markp = cur_bp->markp;
-	marko = cur_bp->marko;
-
-	n0 = cur_wp->pointn;
-	o0 = cur_wp->pointo;
+	p0 = point_marker();
 
 	/* For transpose-chars.  */
 	if (f == F_forward_char) {
-		if (cur_wp->pointo == cur_wp->pointp->size) {
-			if (cur_wp->pointo == 0)
-				forward_after_del1 = 2;
+		if (eolp())
 			f(-1);
-		}
 	}
 	/* For transpose-lines.  */
 	else if (f == F_forward_line) {
 		/* If we are in first line, go to next line.  */
-		if (cur_wp->pointp->prev == cur_bp->limitp) {
+		if (cur_bp->pt.p->prev == cur_bp->limitp) {
 			f(1);
 		}
 	}
@@ -782,110 +776,116 @@ static int transpose_subr(funcp f)
 	/* Backward.  */
 	if (!f(-1)) {
 		minibuf_error("Beginning of buffer");
+		free_marker(p0);
 		return FALSE;
 	}
 
+	/* Save mark.  */
+	push_mark();
+
 	/* Mark the beginning of first string.  */
-	set_mark_command();
+	set_mark();
+	p1 = point_marker();
 
-	n1 = cur_wp->pointn;
-	o1 = cur_wp->pointo;
-
-	/* Check end of buffer.  */
+	/* Check end of buffer (only to check if we could make the
+	   operation).  */
 	if (!f(2)) {
 		/* For transpose-lines.  */
 		if (f == F_forward_line) {
 			if (!seq_started) {
 				seq_started = TRUE;
-				undo_save(UNDO_START_SEQUENCE, n0, o0, 0, 0);
+				undo_save(UNDO_START_SEQUENCE, p0->pt, 0, 0);
 			}
 
 			/* When last line has characters. */
-			if (cur_wp->pointp->size > 0)
-				/* We must insert the '\n' at the end
-				   of line (not at the beginning) */
+			if (!is_empty_line())
+				/* We must insert the '\n' in the end
+				   of line (not in the beginning) */
 				FUNCALL(end_of_line);
 
 			/* Insert a newline */
 			FUNCALL(newline);
 		}
 		else {
-			goto_point(n1, o1);
+			pop_mark();
+			goto_point(p1->pt);
 			minibuf_error("End of buffer");
+
+			free_marker(p0);
+			free_marker(p1);
 			return FALSE;
 		}
 	}
 
-	goto_point(n1, o1);
+	goto_point(p1->pt);
 
 	/* Forward.  */
 	f(1);
 
 	/* Save and delete 1st marked region.  */
 	s1 = astr_new();
-	insert_region(s1);
+	astr_append_region(s1);
 
 	if (!seq_started) {
 		seq_started = TRUE;
-		undo_save(UNDO_START_SEQUENCE, n0, o0, 0, 0);
+		undo_save(UNDO_START_SEQUENCE, p0->pt, 0, 0);
 	}
 
 	FUNCALL(delete_region);
 
+	/* Forward.  */
+	f(1);
+
 	/* For transpose-lines.  */
 	if (f == F_forward_line) {
-		/* Forward.  */
-		f(forward_after_del1);
-
-		n2 = cur_wp->pointn;
-		o2 = cur_wp->pointo;
+		p2 = point_marker();
 	}
 	else {
-		/* Forward.  */
-		f(forward_after_del1);
-
 		/* Mark the end of second string.  */
-		set_mark_command();
+		set_mark();
 
 		/* Backward.  */
 		f(-1);
-
-		n2 = cur_wp->pointn;
-		o2 = cur_wp->pointo;
+		p2 = point_marker();
 
 		/* Save and delete the marked region.  */
 		s2 = astr_new();
-		insert_region(s2);
+		astr_append_region(s2);
 		FUNCALL(delete_region);
 	}
 
+	set_marker_insertion_type(p2, TRUE);
+
 	/* Insert the second string in the first position.  */
 	if (s2) {
-		goto_point(n1, o1);
+		goto_point(p1->pt);
 		if (astr_size(s2) > 0)
 			insert_string(astr_cstr(s2));
 	}
 
 	/* Insert the first string in the second position.  */
 	if (s1) {
-		goto_point(n2, (n1 != n2) ? o2 : o2 + astr_size(s2));
+		goto_point(p2->pt);
 		if (astr_size(s1) > 0)
-			insert_string(astr_cstr (s1));
+			insert_string(astr_cstr(s1));
 	}
 
 	if (seq_started)
-		undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	/* Delete temporary strings.  */
 	if (s1) astr_delete(s1);
 	if (s2) astr_delete(s2);
 
 	/* Restore mark.  */
-	cur_bp->markp = markp;
-	cur_bp->marko = marko;
+	pop_mark();
 
-	thisflag &= ~(FLAG_HIGHLIGHT_REGION | FLAG_HIGHLIGHT_REGION_STAYS);
+	desactivate_mark();
 
+	/* Free markers.  */
+	free_marker(p0);
+	free_marker(p1);
+	free_marker(p2);
 	return TRUE;
 }
 
@@ -895,15 +895,14 @@ Interchange characters around point, moving forward one character.
 If at end of line, the previous two chars are exchanged.
 +*/
 {
-        int i, ok = TRUE;
-
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-        for (i = 0; i < uniarg && ok; i++)
-                ok = transpose_subr(F_forward_char);
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr(F_forward_char);
 
-        return ok;
+	minibuf_error("transpose-chars doesn't support uniarg yet");
+	return FALSE;
 }
 
 DEFUN("transpose-words", transpose_words)
@@ -911,15 +910,14 @@ DEFUN("transpose-words", transpose_words)
 Interchange words around point, leaving point at end of them.
 +*/
 {
-        int i, ok = TRUE;
-
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-        for (i = 0; i < uniarg && ok; i++)
-		ok = transpose_subr(F_forward_word);
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr(F_forward_word);
 
-	return ok;
+	minibuf_error("transpose-words doesn't support uniarg yet");
+	return FALSE;
 }
 
 DEFUN("transpose-sexps", transpose_sexps)
@@ -927,15 +925,14 @@ DEFUN("transpose-sexps", transpose_sexps)
 Like M-t but applies to sexps.
 +*/
 {
-        int i, ok = TRUE;
-
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-        for (i = 0; i < uniarg && ok; i++)
-		ok = transpose_subr(F_forward_sexp);
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr(F_forward_sexp);
 
-	return ok;
+	minibuf_error("transpose-sexps doesn't support uniarg yet");
+	return FALSE;
 }
 
 DEFUN("transpose-lines", transpose_lines)
@@ -945,20 +942,19 @@ With argument ARG, takes previous line and moves it past ARG lines.
 With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
-        int i, ok = TRUE;
-
-        if (warn_if_readonly_buffer())
+	if (warn_if_readonly_buffer())
 		return FALSE;
 
-        for (i = 0; i < uniarg && ok; i++)
-		ok = transpose_subr(F_forward_line);
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr(F_forward_line);
 
-	return ok;
+	minibuf_error("transpose-lines doesn't support uniarg yet");
+	return FALSE;
 }
 
-/**********************************************************************/
-/* Move through words */
-/**********************************************************************/
+/***********************************************************************
+			  Move through words
+ ***********************************************************************/
 
 #define ISWORDCHAR(c)	(isalnum(c) || c == '$')
 
@@ -966,21 +962,21 @@ static int forward_word(void)
 {
 	int gotword = FALSE;
 	for (;;) {
-		while (cur_wp->pointo < cur_wp->pointp->size) {
-			int c = cur_wp->pointp->text[cur_wp->pointo];
+		while (!eolp()) {
+			int c = following_char();
 			if (!ISWORDCHAR(c)) {
 				if (gotword)
 					return TRUE;
 			} else
 				gotword = TRUE;
-			++cur_wp->pointo;
+			cur_bp->pt.o++;
 		}
 		if (gotword)
 			return TRUE;
-		cur_wp->pointo = cur_wp->pointp->size;
+		cur_bp->pt.o = cur_bp->pt.p->size;
 		if (!next_line())
 			break;
-		cur_wp->pointo = 0;
+		cur_bp->pt.o = 0;
 	}
 	return FALSE;
 }
@@ -992,8 +988,6 @@ With argument, do this that many times.
 +*/
 {
 	int uni;
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(backward_word, -uniarg);
@@ -1009,19 +1003,19 @@ static int backward_word(void)
 {
 	int gotword = FALSE;
 	for (;;) {
-		if (cur_wp->pointo == 0) {
+		if (bolp()) {
 			if (!previous_line())
 				break;
-			cur_wp->pointo = cur_wp->pointp->size;
+			cur_bp->pt.o = cur_bp->pt.p->size;
 		}
-		while (cur_wp->pointo > 0) {
-			int c = cur_wp->pointp->text[cur_wp->pointo - 1];
+		while (!bolp()) {
+			int c = preceding_char();
 			if (!ISWORDCHAR(c)) {
 				if (gotword)
 					return TRUE;
 			} else
 				gotword = TRUE;
-			--cur_wp->pointo;
+			cur_bp->pt.o--;
 		}
 		if (gotword)
 			return TRUE;
@@ -1038,8 +1032,6 @@ With argument, do this that many times.
 {
 	int uni;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	if (uniarg < 0)
 		return FUNCALL_ARG(forward_word, -uniarg);
 
@@ -1050,9 +1042,9 @@ With argument, do this that many times.
 	return TRUE;
 }
 
-/**********************************************************************/
-/* Move through balanced expressions (sexp) */
-/**********************************************************************/
+/***********************************************************************
+	       Move through balanced expressions (sexp)
+ ***********************************************************************/
 
 #define ISSEXPCHAR(c)	      (isalnum(c) || c == '$' || c == '_')
 
@@ -1067,30 +1059,30 @@ With argument, do this that many times.
 #define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR(c) ||	\
 			       ISCLOSEBRACKETCHAR(c))
 
-#define CONTROL_SEXP_LEVEL(open, close)					 \
-	if (open(c)) {							 \
-		if (level == 0 && gotsexp)				 \
-			return TRUE;					 \
-									 \
-		level++;						 \
-		gotsexp = TRUE;						 \
-		if (c == '\"') double_quote ^= 1;			 \
-		if (c == '\'') single_quote ^= 1;			 \
-	}								 \
-	else if (close (c)) {						 \
-		if (level == 0 && gotsexp)				 \
-			return TRUE;					 \
-									 \
-		level--;						 \
-		gotsexp = TRUE;						 \
-		if (c == '\"') double_quote ^= 1;			 \
-		if (c == '\'') single_quote ^= 1;			 \
-									 \
-		if (level < 0) {					 \
-			minibuf_error("Scan error: \"Containing "	 \
-				      "expression ends prematurely\"");  \
-			return FALSE;					 \
-		}							 \
+#define CONTROL_SEXP_LEVEL(open, close)					\
+	if (open(c)) {							\
+		if (level == 0 && gotsexp)				\
+			return TRUE;					\
+									\
+		level++;						\
+		gotsexp = TRUE;						\
+		if (c == '\"') double_quote ^= 1;			\
+		if (c == '\'') single_quote ^= 1;			\
+	}								\
+	else if (close(c)) {						\
+		if (level == 0 && gotsexp)				\
+			return TRUE;					\
+									\
+		level--;						\
+		gotsexp = TRUE;						\
+		if (c == '\"') double_quote ^= 1;			\
+		if (c == '\'') single_quote ^= 1;			\
+									\
+		if (level < 0) {					\
+			minibuf_error("Scan error: \"Containing "	\
+				      "expression ends prematurely\"");	\
+			return FALSE;					\
+		}							\
 	}
 
 static int forward_sexp(void)
@@ -1101,27 +1093,28 @@ static int forward_sexp(void)
 	int single_quote = 0;
 
 	for (;;) {
-		while (cur_wp->pointo < cur_wp->pointp->size) {
-			int c = cur_wp->pointp->text[cur_wp->pointo];
+		while (!eolp()) {
+			int c = following_char();
 
 			/* Jump quotes that doesn't are sexp separators.  */
 			if (c == '\\'
-			    && cur_wp->pointo+1 < cur_wp->pointp->size
-			    && ((cur_wp->pointp->text[cur_wp->pointo+1] == '\"')
-				|| (cur_wp->pointp->text[cur_wp->pointo+1] == '\''))) {
-				cur_wp->pointo++;
-				c = 'a';
+			    && cur_bp->pt.o+1 < cur_bp->pt.p->size
+			    && ((cur_bp->pt.p->text[cur_bp->pt.o+1] == '\"')
+				|| (cur_bp->pt.p->text[cur_bp->pt.o+1] == '\''))) {
+				cur_bp->pt.o++;
+				c = 'a'; /* Convert \' and \" like a
+					    word char */
 			}
 
 			CONTROL_SEXP_LEVEL(ISOPENBRACKETCHAR,
 					   ISCLOSEBRACKETCHAR);
 
-			cur_wp->pointo++;
+			cur_bp->pt.o++;
 
-			if (!ISSEXPCHAR (c)) {
+			if (!ISSEXPCHAR(c)) {
 				if (gotsexp && level == 0) {
 					if (!ISSEXPSEPARATOR(c))
-						cur_wp->pointo--;
+						cur_bp->pt.o--;
 					return TRUE;
 				}
 			}
@@ -1130,13 +1123,13 @@ static int forward_sexp(void)
 		}
 		if (gotsexp && level == 0)
 			return TRUE;
-		cur_wp->pointo = cur_wp->pointp->size;
+		cur_bp->pt.o = cur_bp->pt.p->size;
 		if (!next_line()) {
 			if (level != 0)
 				minibuf_error("Scan error: \"Unbalanced parentheses\"");
 			break;
 		}
-		cur_wp->pointo = 0;
+		cur_bp->pt.o = 0;
 	}
 	return FALSE;
 }
@@ -1149,8 +1142,6 @@ move backward across N balanced expressions.
 +*/
 {
 	int uni;
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(backward_sexp, -uniarg);
@@ -1170,34 +1161,35 @@ static int backward_sexp(void)
 	int single_quote = 1;
 
 	for (;;) {
-		if (cur_wp->pointo == 0) {
+		if (bolp()) {
 			if (!previous_line()) {
 				if (level != 0)
 					minibuf_error("Scan error: \"Unbalanced parentheses\"");
 				break;
 			}
-			cur_wp->pointo = cur_wp->pointp->size;
+			cur_bp->pt.o = cur_bp->pt.p->size;
 		}
-		while (cur_wp->pointo > 0) {
-			int c = cur_wp->pointp->text[cur_wp->pointo - 1];
+		while (!bolp()) {
+			int c = preceding_char();
 
 			/* Jump quotes that doesn't are sexp separators.  */
 			if (((c == '\'') || (c == '\"'))
-			    && cur_wp->pointo-1 > 0
-			    && (cur_wp->pointp->text[cur_wp->pointo-2] == '\\')) {
-				cur_wp->pointo--;
-				c = 'a';
+			    && cur_bp->pt.o-1 > 0
+			    && (cur_bp->pt.p->text[cur_bp->pt.o-2] == '\\')) {
+				cur_bp->pt.o--;
+				c = 'a'; /* Convert \' and \" like a
+					    word char */
 			}
 
 			CONTROL_SEXP_LEVEL(ISCLOSEBRACKETCHAR,
 					   ISOPENBRACKETCHAR);
 
-			--cur_wp->pointo;
+			cur_bp->pt.o--;
 
-			if (!ISSEXPCHAR (c)) {
+			if (!ISSEXPCHAR(c)) {
 				if (gotsexp && level == 0) {
 					if (!ISSEXPSEPARATOR(c))
-						cur_wp->pointo++;
+						cur_bp->pt.o++;
 					return TRUE;
 				}
 			} else
@@ -1217,8 +1209,6 @@ move forward across N balanced expressions.
 +*/
 {
 	int uni;
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(forward_sexp, -uniarg);
@@ -1264,23 +1254,23 @@ Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
-        FUNCALL(beginning_of_line);
+	FUNCALL(beginning_of_line);
 
-        if (uniarg == 0)
-                uniarg = 1;
+	if (uniarg == 0)
+		uniarg = 1;
 
-        if (uniarg < 0) {
-                while (uniarg++)
-                        if (!previous_line())
-                                return FALSE;
-        }
-        else if (uniarg > 0) {
-                while (uniarg--)
-                        if (!next_line())
-                                return FALSE;
-        }
+	if (uniarg < 0) {
+		while (uniarg++)
+			if (!previous_line())
+				return FALSE;
+	}
+	else if (uniarg > 0) {
+		while (uniarg--)
+			if (!next_line())
+				return FALSE;
+	}
 
-        return TRUE;
+	return TRUE;
 }
 
 DEFUN("backward-sentence", backward_sentence)
@@ -1288,7 +1278,7 @@ DEFUN("backward-sentence", backward_sentence)
 Move backward to start of sentence.  With argument N, do it N times.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("forward-sentence", forward_sentence)
@@ -1296,7 +1286,7 @@ DEFUN("forward-sentence", forward_sentence)
 Move forward to next sentence end.  With argument N, do it N times.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("kill-sentence", kill_sentence)
@@ -1304,7 +1294,7 @@ DEFUN("kill-sentence", kill_sentence)
 Kill from point to end of sentence.  With argument N, do it N times.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("backward-kill-sentence", backward_kill_sentence)
@@ -1312,7 +1302,7 @@ DEFUN("backward-kill-sentence", backward_kill_sentence)
 Kill back from point to start of sentence.  With argument N, do it N times.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("backward-paragraph", backward_paragraph)
@@ -1320,7 +1310,7 @@ DEFUN("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.  With argument N, do it N times.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("forward-paragraph", forward_paragraph)
@@ -1328,7 +1318,7 @@ DEFUN("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("mark-paragraph", mark_paragraph)
@@ -1337,7 +1327,7 @@ Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 DEFUN("fill-paragraph", fill_paragraph)
@@ -1345,7 +1335,7 @@ DEFUN("fill-paragraph", fill_paragraph)
 Fill paragraph at or after point.
 +*/
 {
-        return FALSE;
+	return FALSE;
 }
 
 #define UPPERCASE		1
@@ -1361,19 +1351,19 @@ static int setcase_word(int rcase)
 	if (!backward_word())
 		return FALSE;
 
-	i = cur_wp->pointo;
-	while (i < cur_wp->pointp->size) {
-		if (!ISWORDCHAR(cur_wp->pointp->text[i]))
+	i = cur_bp->pt.o;
+	while (i < cur_bp->pt.p->size) {
+		if (!ISWORDCHAR(cur_bp->pt.p->text[i]))
 			break;
 		++i;
 	}
-	size = i-cur_wp->pointo;
+	size = i-cur_bp->pt.o;
 	if (size > 0)
-		undo_save(UNDO_REPLACE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, size);
+		undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
 
 	gotword = FALSE;
-	while (cur_wp->pointo < cur_wp->pointp->size) {
-		char *p = &cur_wp->pointp->text[cur_wp->pointo];
+	while (cur_bp->pt.o < cur_bp->pt.p->size) {
+		char *p = &cur_bp->pt.p->text[cur_bp->pt.o];
 		if (!ISWORDCHAR(*p))
 			break;
 		if (isalpha(*p)) {
@@ -1393,14 +1383,14 @@ static int setcase_word(int rcase)
 			}
 		}
 		gotword = TRUE;
-		++cur_wp->pointo;
+		cur_bp->pt.o++;
 	}
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
 #if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK)
-		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 
 	return TRUE;
@@ -1413,13 +1403,13 @@ Convert following word (or argument N words) to lower case, moving over.
 {
 	int uni, ret = TRUE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!setcase_word(LOWERCASE)) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
@@ -1431,13 +1421,13 @@ Convert following word (or argument N words) to upper case, moving over.
 {
 	int uni, ret = TRUE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!setcase_word(UPPERCASE)) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
@@ -1451,13 +1441,13 @@ lower case.
 {
 	int uni, ret = TRUE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!setcase_word(CAPITALIZE)) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
@@ -1467,8 +1457,8 @@ lower case.
  */
 static int setcase_region(int rcase)
 {
-	struct region r;
-	linep lp;
+	Region r;
+	Line *lp;
 	char *p;
 	int size;
 
@@ -1478,10 +1468,10 @@ static int setcase_region(int rcase)
 	calculate_region(&r);
 	size = r.size;
 
-	undo_save(UNDO_REPLACE_BLOCK, r.startn, r.starto, size, size);
+	undo_save(UNDO_REPLACE_BLOCK, r.start, size, size);
 
-	lp = r.startp;
-	p = lp->text + r.starto;
+	lp = r.start.p;
+	p = lp->text + r.start.o;
 	while (size--) {
 		if (p < lp->text + lp->size) {
 			if (rcase == UPPERCASE)
@@ -1609,9 +1599,13 @@ it as the contents of the region.
 	if (ms[0] == '\0')
 		return FALSE;
 
+	if (warn_if_no_mark())
+		return FALSE;
+
 	cmd = astr_new();
-	if (cur_bp->markp != NULL) { /* Region selected; filter text. */
-		struct region r;
+/* 	if (cur_bp->mark != NULL) { /\* Region selected; filter text. *\/ */
+	{
+		Region r;
 		char *p;
 		int fd;
 
@@ -1622,15 +1616,16 @@ it as the contents of the region.
 		}
 
 		calculate_region(&r);
-		p = copy_text_block(r.startn, r.starto, r.size);
+		p = copy_text_block(r.start.n, r.start.o, r.size);
 		write(fd, p, r.size);
 		free(p);
 
 		close(fd);
 
 		astr_fmt(cmd, "%s 2>&1 <%s", ms, tempfile);
-	} else
-		astr_fmt(cmd, "%s 2>&1 </dev/null", ms);
+	}
+/* 	else */
+/* 		astr_fmt(cmd, "%s 2>&1 </dev/null", ms); */
 
 	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
 		minibuf_error("Cannot open pipe to process");
@@ -1647,27 +1642,29 @@ it as the contents of the region.
 	}
 	astr_delete(s);
 	pclose(pipe);
-	if (cur_bp->markp != NULL)
+/* 	if (cur_bp->mark != NULL) */
 		remove(tempfile);
 
 	if (lines == 0)
 		minibuf_write("(Shell command succeeded with no output)");
 	else { /* lines >= 1 */
 		if (lastflag & FLAG_SET_UNIARG) {
-			undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
-			if (cur_bp->markp != NULL) {
-				struct region r;
+			undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+			/* if (cur_bp->mark != NULL)  */
+			{
+				Region r;
 				calculate_region(&r);
-				if (cur_wp->pointp != r.startp || r.starto != cur_wp->pointo)
+				if (cur_bp->pt.p != r.start.p 
+				    || r.start.o != cur_bp->pt.o)
 					FUNCALL(exchange_point_and_mark);
-				undo_save(UNDO_INSERT_BLOCK, cur_wp->pointn, cur_wp->pointo, r.size, 0);
+				undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, r.size, 0);
 				undo_nosave = TRUE;
 				while (r.size--)
 					FUNCALL(delete_char);
 				undo_nosave = FALSE;
 			}
 			insert_string((char *)astr_cstr(out));
-			undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+			undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 		} else {
 			if (lines > 1)
 				write_temp_buffer("*Shell Command Output*",
@@ -1686,7 +1683,7 @@ DEFUN("delete-region", delete_region)
 Delete the text between point and mark.
 +*/
 {
-	struct region r;
+	Region r;
 
 	if (warn_if_no_mark())
 		return FALSE;
@@ -1698,17 +1695,95 @@ Delete the text between point and mark.
 	} else {
 		int size = r.size;
 
-		if (cur_wp->pointp != r.startp || r.starto != cur_wp->pointo)
+		if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
 			FUNCALL(exchange_point_and_mark);
 
-		undo_save(UNDO_INSERT_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+		undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
 		undo_nosave = TRUE;
 		while (size--)
 			FUNCALL(delete_char);
 		undo_nosave = FALSE;
 	}
 
-	thisflag &= ~(FLAG_HIGHLIGHT_REGION_STAYS);
+	desactivate_mark();
+	return TRUE;
+}
+
+DEFUN("delete-blank-lines", delete_blank_lines)
+/*+
+On blank line, delete all surrounding blank lines, leaving just one.
+On isolated blank line, delete that one.
+On nonblank line, delete any immediately following blank lines.
++*/
+{
+	Marker *old_marker = point_marker();
+	int seq_started = FALSE;
+
+	/* Delete any immediately following blank lines.  */
+	if (next_line()) {
+		if (is_blank_line()) {
+			push_mark();
+			FUNCALL(beginning_of_line);
+			set_mark();
+			activate_mark();
+			do {
+				if (!FUNCALL(forward_line))
+					break;
+			} while (is_blank_line());
+			if (!seq_started) {
+				seq_started = TRUE;
+				undo_save(UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
+			}
+			FUNCALL(delete_region);
+			pop_mark();
+		}
+		previous_line();
+	}
+
+	/* Delete any immediately preceding blank lines.  */
+	if (is_blank_line()) {
+		int forward = TRUE;
+		push_mark();
+		FUNCALL(beginning_of_line);
+		set_mark();
+		activate_mark();
+		do {
+			if (!FUNCALL_ARG(forward_line, -1)) {
+				forward = FALSE;
+				break;
+			}
+		} while (is_blank_line());
+		if (forward)
+			FUNCALL(forward_line);
+		if (cur_bp->pt.p != old_marker->pt.p) {
+			if (!seq_started) {
+				seq_started = TRUE;
+				undo_save(UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
+			}
+			FUNCALL(delete_region);
+		}
+		pop_mark();
+	}
+
+	/* Isolated blank line, delete that one.  */
+	if (!seq_started && is_blank_line()) {
+		push_mark();
+		FUNCALL(beginning_of_line);
+		set_mark();
+		activate_mark();
+		FUNCALL(forward_line);
+		FUNCALL(delete_region); /* Just one action, without a
+					   sequence. */
+		pop_mark();
+	}
+
+	cur_bp->pt = old_marker->pt;
+
+	if (seq_started)
+		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+
+	free_marker(old_marker);
+	desactivate_mark();
 
 	return TRUE;
 }

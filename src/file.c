@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.14 2004/02/04 02:56:21 dacap Exp $	*/
+/*	$Id: file.c,v 1.15 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -278,13 +278,13 @@ void open_file(char *path, int lineno)
  * Add the character `c' to the end of the line `lp'.
  * Reallocate the line if there is no more space left for the addition.
  */
-static linep fadd_char(linep lp, int c)
+static Line *fadd_char(Line *lp, int c)
 {
-	linep lp1;
+	Line *lp1;
 
 	if (lp->size + 1 >= lp->maxsize) {
 		lp->maxsize += 10;
-		lp1 = (linep)zrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
+		lp1 = (Line *)zrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
 		if (lp != lp1) {
 			if (cur_bp->limitp->next == lp)
 				cur_bp->limitp->next = lp1;
@@ -301,9 +301,9 @@ static linep fadd_char(linep lp, int c)
 /*
  * Add a newline at the end of the line `lp'.
  */
-static linep fadd_newline(linep lp)
+static Line *fadd_newline(Line *lp)
 {
-	linep lp1;
+	Line *lp1;
 
 #if 0
 	lp->maxsize = lp->size ? lp->size : 1;
@@ -333,7 +333,7 @@ static linep fadd_newline(linep lp)
  */
 void read_from_disk(const char *filename)
 {
-	linep lp;
+	Line *lp;
 	int fd, i, size;
 	char buf[BUFSIZ];
 
@@ -345,7 +345,7 @@ void read_from_disk(const char *filename)
 		return;
 	}
 
-	lp = cur_wp->pointp;
+	lp = cur_bp->pt.p;
 
 	while ((size = read(fd, buf, BUFSIZ)) > 0)
 		for (i = 0; i < size; i++)
@@ -356,7 +356,7 @@ void read_from_disk(const char *filename)
 
 	lp->next = cur_bp->limitp;
 	cur_bp->limitp->prev = lp;
-	cur_wp->pointp = cur_bp->limitp->next;
+	cur_bp->pt.p = cur_bp->limitp->next;
 
 	close(fd);
 }
@@ -520,7 +520,7 @@ static void find_file_hooks(const char *filename)
 
 int find_file(const char *filename)
 {
-	bufferp bp;
+	Buffer *bp;
 	char *s;
 
 	for (bp = head_bp; bp != NULL; bp = bp->next)
@@ -555,16 +555,16 @@ int find_file(const char *filename)
 	return TRUE;
 }
 
-historyp make_buffer_history(void)
+Completion *make_buffer_completion(void)
 {
-	bufferp bp;
-	historyp hp;
+	Buffer *bp;
+	Completion *cp;
 
-	hp = new_history(FALSE);
+	cp = new_completion(FALSE);
 	for (bp = head_bp; bp != NULL; bp = bp->next)
-		alist_append(hp->completions, zstrdup(bp->name));
+		alist_append(cp->completions, zstrdup(bp->name));
 
-	return hp;
+	return cp;
 }
 
 DEFUN("find-file", find_file)
@@ -632,14 +632,15 @@ Select to the user specified buffer in the current window.
 +*/
 {
 	char *ms;
-	bufferp swbuf;
-	historyp hp;
+	Buffer *swbuf;
+	Completion *cp;
 
 	swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
-	hp = make_buffer_history();
-	ms = minibuf_read_history("Switch to buffer (default @b%s@@): ", "", hp, swbuf->name);
-	free_history(hp);
+	cp = make_buffer_completion();
+	ms = minibuf_read_completion("Switch to buffer (default @b%s@@): ",
+				     "", cp, NULL, swbuf->name);
+	free_completion(cp);
 	if (ms == NULL)
 		return cancel();
 
@@ -660,7 +661,7 @@ Select to the user specified buffer in the current window.
  * he/she wants to save the changes.  If the response is positive, return
  * TRUE, else FALSE.
  */
-int check_modified_buffer(bufferp bp)
+int check_modified_buffer(Buffer *bp)
 {
 	int ans;
 
@@ -681,9 +682,9 @@ int check_modified_buffer(bufferp bp)
  * its space.  Avoid killing the sole buffers and creates the scratch
  * buffer when required.
  */
-void kill_buffer(bufferp kill_bp)
+void kill_buffer(Buffer *kill_bp)
 {
-	bufferp next_bp;
+	Buffer *next_bp;
 
 	if (kill_bp->next != NULL)
 		next_bp = kill_bp->next;
@@ -707,42 +708,20 @@ void kill_buffer(bufferp kill_bp)
 			}
 		}
 	} else {
-		bufferp bp;
-		windowp wp;
-		linep pointp;
-		int pointo, pointn;
+		Buffer *bp;
+		Window *wp;
 
 		assert(kill_bp != next_bp);
-
-		pointp = next_bp->save_pointp;
-		pointo = next_bp->save_pointo;
-		pointn = next_bp->save_pointn;
-
-		/*
-		 * Search for windows displaying the next buffer available.
-		 */
-		for (wp = head_wp; wp != NULL; wp = wp->next)
-			if (wp->bp == next_bp) {
-				pointp = wp->pointp;
-				pointo = wp->pointo;
-				pointn = wp->pointn;
-				break;
-			}
 
 		/*
 		 * Search for windows displaying the buffer to kill.
 		 */
 		for (wp = head_wp; wp != NULL; wp = wp->next)
 			if (wp->bp == kill_bp) {
-				--kill_bp->num_windows;
-				++next_bp->num_windows;
 				wp->bp = next_bp;
-				wp->pointp = pointp;
-				wp->pointo = pointo;
-				wp->pointn = pointn;
+				/* The marker will be free.  */
+				wp->saved_pt = NULL;
 			}
-
-		assert(kill_bp->num_windows == 0);
 
 		/*
 		 * Remove the buffer from the buffer list.
@@ -756,6 +735,7 @@ void kill_buffer(bufferp kill_bp)
 				break;
 			}
 
+		/* Free the buffer.  */
 		free_buffer(kill_bp);
 
 		thisflag |= FLAG_NEED_RESYNC;
@@ -767,14 +747,15 @@ DEFUN("kill-buffer", kill_buffer)
 Kill the current buffer or the user specified one.
 +*/
 {
-	bufferp bp;
+	Buffer *bp;
 	char *ms;
-	historyp hp;
+	Completion *cp;
 
-	hp = make_buffer_history();
-	if ((ms = minibuf_read_history("Kill buffer (default @b%s@@): ", "", hp, cur_bp->name)) == NULL)
+	cp = make_buffer_completion();
+	if ((ms = minibuf_read_completion("Kill buffer (default @b%s@@): ",
+					  "", cp, NULL, cur_bp->name)) == NULL)
 		return cancel();
-	free_history(hp);
+	free_completion(cp);
 	if (ms[0] != '\0') {
 		if ((bp = find_buffer(ms, FALSE)) == NULL) {
 			minibuf_error("Buffer `@b%s@@' not found", ms);
@@ -791,13 +772,13 @@ Kill the current buffer or the user specified one.
 	return FALSE;
 }
 
-void insert_buffer(bufferp bp)
+void insert_buffer(Buffer *bp)
 {
-	linep lp;
+	Line *lp;
 	char *p;
 	int size = calculate_buffer_size(bp);
 
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
 	undo_nosave = TRUE;
 	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
 		for (p = lp->text; p < lp->text + lp->size; ++p)
@@ -814,18 +795,19 @@ Insert after point the contents of the user specified buffer.
 Puts mark after the inserted text.
 +*/
 {
-	bufferp bp, swbuf;
+	Buffer *bp, *swbuf;
 	char *ms;
-	historyp hp;
+	Completion *cp;
 
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
 	swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
-	hp = make_buffer_history();
-	if ((ms = minibuf_read_history("Insert buffer (default @b%s@@): ", "", hp, swbuf->name)) == NULL)
+	cp = make_buffer_completion();
+	if ((ms = minibuf_read_completion("Insert buffer (default @b%s@@): ",
+					  "", cp, NULL, swbuf->name)) == NULL)
 		return cancel();
-	free_history(hp);
+	free_completion(cp);
 	if (ms[0] != '\0') {
 		if ((bp = find_buffer(ms, FALSE)) == NULL) {
 			minibuf_error("Buffer `@b%s@@' not found", ms);
@@ -867,7 +849,7 @@ static int insert_file(char *filename)
 	}
 
 	lseek(fd, 0, SEEK_SET);
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
 	undo_nosave = TRUE;
 	while ((size = read(fd, buf, BUFSIZ)) > 0)
 		for (i = 0; i < size; i++)
@@ -1096,10 +1078,10 @@ static int copy_file(char *source, char *dest)
 	return TRUE;
 }
 
-static int raw_write_to_disk(bufferp bp, const char *filename)
+static int raw_write_to_disk(Buffer *bp, const char *filename)
 {
 	int fd;
-	linep lp;
+	Line *lp;
 
 	if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
 		return FALSE;
@@ -1120,10 +1102,10 @@ static int raw_write_to_disk(bufferp bp, const char *filename)
  * Write the buffer contents to a file.  Create a backup file if specified
  * by the user variables.
  */
-static int write_to_disk(bufferp bp, char *filename)
+static int write_to_disk(Buffer *bp, char *filename)
 {
 	int fd, backupsimple, backuprevs, backupwithdir;
-	linep lp;
+	Line *lp;
 
 	backupsimple = is_variable_equal("backup-method", "simple");
 	backuprevs = is_variable_equal("backup-method", "revision");
@@ -1161,7 +1143,7 @@ static int write_to_disk(bufferp bp, char *filename)
 	return TRUE;
 }
 
-static int save_buffer(bufferp bp)
+static int save_buffer(Buffer *bp)
 {
 	char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
 	int ms_is_from_minibuffer = 0;
@@ -1236,7 +1218,7 @@ Makes buffer visit that file, and marks it not modified.
 
 static int save_some_buffers(void)
 {
-	bufferp bp;
+	Buffer *bp;
 	int i = 0, noask = FALSE, c;
 
 	for (bp = head_bp; bp != NULL; bp = bp->next)
@@ -1318,7 +1300,7 @@ DEFUN("save-buffers-kill-zile", save_buffers_kill_zile)
 Offer to save each buffer, then kill this Zile process.
 +*/
 {
-	bufferp bp;
+	Buffer *bp;
 	int ans, i = 0;
 
 	if (!save_some_buffers())
@@ -1348,7 +1330,7 @@ Offer to save each buffer, then kill this Zile process.
  */
 void zile_exit(int exitcode)
 {
-	bufferp bp;
+	Buffer *bp;
 
 	fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
 	for (bp = head_bp; bp != NULL; bp = bp->next)

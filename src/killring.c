@@ -1,4 +1,4 @@
-/*	$Id: killring.c,v 1.5 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: killring.c,v 1.6 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -33,6 +33,7 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "editfns.h"
 
 static char *kill_ring_text;
 static int kill_ring_size;
@@ -85,15 +86,15 @@ static void kill_ring_push_nstring(char *s, size_t size)
 
 static int kill_line(int literally)
 {
-	if (cur_wp->pointo < cur_wp->pointp->size) {
+	if (!eolp()) {
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		undo_save(UNDO_INSERT_BLOCK, cur_wp->pointn, cur_wp->pointo,
-			  cur_wp->pointp->size - cur_wp->pointo, 0);
+		undo_save(UNDO_INSERT_BLOCK, cur_bp->pt,
+			  cur_bp->pt.p->size - cur_bp->pt.o, 0);
 		undo_nosave = TRUE;
-		while (cur_wp->pointo < cur_wp->pointp->size) {
-			kill_ring_push(cur_wp->pointp->text[cur_wp->pointo]);
+		while (!eolp()) {
+			kill_ring_push(following_char());
 			FUNCALL(delete_char);
 		}
 		undo_nosave = FALSE;
@@ -104,7 +105,7 @@ static int kill_line(int literally)
 		  return TRUE;
 	}
 
-	if (cur_wp->pointp->next != cur_bp->limitp) {
+	if (cur_bp->pt.p->next != cur_bp->limitp) {
 		if (!FUNCALL(delete_char))
 			return FALSE;
 
@@ -131,18 +132,19 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 		flush_kill_ring();
 
 	if (uniarg == 1) {
-	  kill_line(FALSE);
+		kill_line(FALSE);
 	}
 	else {
-	  undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
-	  for (uni = 0; uni < uniarg; ++uni)
-	    if (!kill_line(TRUE)) {
-	      ret = FALSE;
-	      break;
-	    }
-	  undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+		for (uni = 0; uni < uniarg; ++uni)
+			if (!kill_line(TRUE)) {
+				ret = FALSE;
+				break;
+			}
+		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 	}
 
+	desactivate_mark();
 	return ret;
 }
 
@@ -159,7 +161,7 @@ the text killed this time appends to the text killed last time
 to make one entry in the kill ring.
 +*/
 {
-	struct region r;
+	Region r;
 
 	if (!(lastflag & FLAG_DONE_KILL))
 		flush_kill_ring();
@@ -176,7 +178,7 @@ to make one entry in the kill ring.
 		 */
 		char *p;
 
-		p = copy_text_block(r.startn, r.starto, r.size);
+		p = copy_text_block(r.start.n, r.start.o, r.size);
 		kill_ring_push_nstring(p, r.size);
 		free(p);
 
@@ -184,13 +186,13 @@ to make one entry in the kill ring.
 	} else {
 		int size = r.size;
 
-		if (cur_wp->pointp != r.startp || r.starto != cur_wp->pointo)
+		if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
 			FUNCALL(exchange_point_and_mark);
-		undo_save(UNDO_INSERT_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+		undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
 		undo_nosave = TRUE;
 		while (size--) {
-			if (cur_wp->pointo < cur_wp->pointp->size)
-				kill_ring_push(cur_wp->pointp->text[cur_wp->pointo]);
+			if (!eolp())
+				kill_ring_push(following_char());
 			else
 				kill_ring_push('\n');
 			FUNCALL(delete_char);
@@ -199,7 +201,7 @@ to make one entry in the kill ring.
 	}
 
 	thisflag |= FLAG_DONE_KILL;
-	thisflag &= ~(FLAG_HIGHLIGHT_REGION_STAYS);
+	desactivate_mark();
 
 	return TRUE;
 }
@@ -209,7 +211,7 @@ DEFUN("copy-region-as-kill", copy_region_as_kill)
 Save the region as if killed, but don't kill it.
 +*/
 {
-	struct region r;
+	Region r;
 	char *p;
 
 	if (!(lastflag & FLAG_DONE_KILL))
@@ -220,130 +222,76 @@ Save the region as if killed, but don't kill it.
 
 	calculate_region(&r);
 
-	p = copy_text_block(r.startn, r.starto, r.size);
+	p = copy_text_block(r.start.n, r.start.o, r.size);
 	kill_ring_push_nstring(p, r.size);
 	free(p);
 
 	thisflag |= FLAG_DONE_KILL;
-	thisflag &= ~(FLAG_HIGHLIGHT_REGION_STAYS);
+	desactivate_mark();
 
 	return TRUE;
 }
 
-#define ISWORDCHAR(c)	(isalnum(c) || c == '$')
-
-/* Contributed by David A. Capello <dacap@users.sourceforge.net> */
 DEFUN("kill-word", kill_word)
 /*+
 Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-	int c, uni, word_is_killed, ret = TRUE;
-
 	if (!(lastflag & FLAG_DONE_KILL))
 		flush_kill_ring();
 
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
-
-	for (uni = 0; uni < uniarg && ret; ++uni) {
-		word_is_killed = FALSE;
-
-		for (;;) {
-			if (cur_wp->pointo < cur_wp->pointp->size)
-				c = cur_wp->pointp->text[cur_wp->pointo];
-			else if (cur_wp->pointp->next != cur_bp->limitp)
-				c = '\n';
-			else {
-				ret = FALSE;
-				break;
-			}
-
-			if (ISWORDCHAR(c)) {
-				if (!word_is_killed)
-					word_is_killed = TRUE;
-
-				kill_ring_push(c);
-				if (!delete_char()) {
-					ret = FALSE;
-					break;
-				}
-			} else if (!word_is_killed) {
-				kill_ring_push(c);
-				if (!delete_char()) {
-					ret = FALSE;
-					break;
-				}
-			} else
-				break;
-		}
-	}
-
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	push_mark();
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+	FUNCALL_ARG(mark_word, uniarg);
+	FUNCALL(kill_region);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+	pop_mark();
 
 	thisflag |= FLAG_DONE_KILL;
 
-	return ret;
+	minibuf_write("");	/* Don't write "Set mark" message.  */
+
+	return TRUE;
 }
 
-/* Contributed by David A. Capello <dacap@users.sourceforge.net> */
 DEFUN("backward-kill-word", backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-	int c, uni, word_is_killed, ret = TRUE;
+	return FUNCALL_ARG(kill_word, !uniarg? -1: -uniarg);
+}
 
+DEFUN("kill-sexp", kill_sexp)
+/*+
+Kill the sexp (balanced expression) following the cursor.
+With ARG, kill that many sexps after the cursor.
+Negative arg -N means kill N sexps before the cursor.
++*/
+{
 	if (!(lastflag & FLAG_DONE_KILL))
 		flush_kill_ring();
 
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
-
-	for (uni = 0; uni < uniarg && ret; ++uni) {
-		word_is_killed = FALSE;
-
-		for (;;) {
-			if (cur_wp->pointo > 0)
-				c = cur_wp->pointp->text[cur_wp->pointo-1];
-			else if (cur_wp->pointp->prev != cur_bp->limitp)
-				c = '\n';
-			else {
-				ret = FALSE;
-				break;
-			}
-
-			if (ISWORDCHAR(c)) {
-				if (!word_is_killed)
-					word_is_killed = TRUE;
-
-				kill_ring_push_in_beginning(c);
-				if (!backward_delete_char()) {
-					ret = FALSE;
-					break;
-				}
-			} else if (!word_is_killed) {
-				kill_ring_push_in_beginning(c);
-				if (!backward_delete_char()) {
-					ret = FALSE;
-					break;
-				}
-			} else
-				break;
-		}
-	}
-
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	push_mark();
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+	FUNCALL_ARG(mark_sexp, uniarg);
+	FUNCALL(kill_region);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+	pop_mark();
 
 	thisflag |= FLAG_DONE_KILL;
 
-	return ret;
+	minibuf_write("");	/* Don't write "Set mark" message.  */
+
+	return TRUE;
 }
 
 DEFUN("yank", yank)
@@ -363,10 +311,12 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
 	set_mark_command();
 
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, kill_ring_size, 0);
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, kill_ring_size, 0);
 	undo_nosave = TRUE;
 	insert_nstring(kill_ring_text, kill_ring_size);
 	undo_nosave = FALSE;
+
+	desactivate_mark();
 
 	return TRUE;
 }

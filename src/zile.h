@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.14 2004/01/28 10:50:21 rrt Exp $	*/
+/*	$Id: zile.h,v 1.15 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -51,39 +51,60 @@
 /*
  * The forward opaque types used in the editor.
  */
-typedef struct line *linep;
-typedef struct undo *undop;
-typedef struct region *regionp;
-typedef struct buffer *bufferp;
-typedef struct window *windowp;
-typedef struct history *historyp;
-typedef struct terminal *terminalp;
+typedef struct Point Point;
+typedef struct Marker Marker;
+typedef struct Line Line;
+typedef struct Undo Undo;
+typedef struct Region Region;
+typedef struct Buffer Buffer;
+typedef struct Window Window;
+typedef struct Completion Completion;
+typedef struct History History;
+typedef struct Terminal Terminal;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*funcp)(int uniarg);
+typedef int (*Function)(int uniarg);
+
+/* 
+ * Point and Marker.
+ */
+struct Point {
+	Line *p;		/* Line pointer.  */
+	int n;			/* Line number.  */
+	int o;			/* Offset.  */
+};
+
+struct Marker {
+	Buffer *bp;		/* Buffer that points into.  */
+	Point pt;		/* Point position.  */
+	Marker *next;		/* Used to chain all markers in the buffer.  */
+	unsigned type : 1;	/* Insertion type (1=after text).  */
+};
 
 /* Font lock anchors. */
-#define ANCHOR_NULL			0
-#define ANCHOR_BEGIN_COMMENT		1
-#define ANCHOR_END_COMMENT		2
-#define ANCHOR_BEGIN_STRING		3
-#define ANCHOR_END_STRING		4
-#define ANCHOR_BEGIN_HEREDOC		5
-#define ANCHOR_END_HEREDOC		6
+enum {
+  ANCHOR_NULL,
+  ANCHOR_BEGIN_COMMENT,
+  ANCHOR_END_COMMENT,
+  ANCHOR_BEGIN_STRING,
+  ANCHOR_END_STRING,
+  ANCHOR_BEGIN_HEREDOC,
+  ANCHOR_END_HEREDOC
+};
 
-struct line {
+struct Line {
 	/* The previous line and next line pointers. */
-	linep	prev, next;
+	Line *prev, *next;
 
 	/* The used size and the allocated space size. */
-	int	size;
-	int	maxsize;
+	int size;
+	int maxsize;
 
 	/* Pointer to anchors for font lock. */
-	char	*anchors;
+	char *anchors;
 
 	/*
 	 * The text space label; must be the last entry of the structure!
@@ -91,237 +112,207 @@ struct line {
 	 * Using this trick we can avoid allocating two memory areas for each
 	 * line (one for the structure and one for the contained text).
 	 */
-	char	text[1];
+	char text[1];
 };
 
-/* Insert a character. */
-#define UNDO_INSERT_CHAR		1
-/* Insert a block of characters. */
-#define UNDO_INSERT_BLOCK		2
-/* Remove a character. */
-#define UNDO_REMOVE_CHAR		3
-/* Remove a block of characters. */
-#define UNDO_REMOVE_BLOCK		4
-/* Replace a character. */
-#define UNDO_REPLACE_CHAR		5
-/* Replace a block of characters. */
-#define UNDO_REPLACE_BLOCK		6
-/* Start a multi operation sequence. */
-#define UNDO_START_SEQUENCE		7
-/* End a multi operation sequence. */
-#define UNDO_END_SEQUENCE		8
-/* Insert a char without moving the current pointer */
-#define UNDO_INTERCALATE_CHAR		9
+#define UNDO_INSERT_CHAR	1 /* Insert a character. */
+#define UNDO_INSERT_BLOCK	2 /* Insert a block of characters. */
+#define UNDO_REMOVE_CHAR	3 /* Remove a character. */
+#define UNDO_REMOVE_BLOCK	4 /* Remove a block of characters. */
+#define UNDO_REPLACE_CHAR	5 /* Replace a character. */
+#define UNDO_REPLACE_BLOCK	6 /* Replace a block of characters. */
+#define UNDO_START_SEQUENCE	7 /* Start a multi operation sequence. */
+#define UNDO_END_SEQUENCE	8 /* End a multi operation sequence. */
+#define UNDO_INTERCALATE_CHAR	9 /* Insert a char without moving the
+				     current pointer */
 
-struct undo {
+struct Undo {
 	/* Next undo delta in list. */
-	undop	next;
+	Undo *next;
 
 	/* The type of undo delta. */
-	int	type;
+	int type;
 
-	/* Where the undo delta need to be applied. */
-	int	pointn;
-	int	pointo;
+	/* Where the undo delta need to be applied.
+	 *
+	 * Warning!: Do not use the "pt.p" field.
+	 */
+	Point pt;
 
 	/* The undo delta. */
 	union {
 		/* The character to insert or replace. */
-		int	c;
+		int c;
 
 		/* The block to insert. */
 		struct {
-			char	*text;
-			int	osize;	/* Original size; only for replace. */
-			int	size;	/* New block size. */
-		}	block;
-	}	delta;
+			char *text;
+			int osize;	/* Original size; only for replace. */
+			int size;	/* New block size. */
+		} block;
+	} delta;
 };
 
-struct region {
-	/* The region start line pointer, line number and offset. */
-	linep	startp;
-	int	startn;
-	int	starto;
-
-	/* The region end line pointer, line number and offset. */
-	linep	endp;
-	int	endn;
-	int	endo;
-
-	/* The region size. */
-	int	size;
+struct Region {
+	Point start;		/* The region start. */
+	Point end;		/* The region end. */
+	int size;		/* The region size. */
 
 	/* The total number of lines ('\n' newlines) in region. */
-	int	num_lines;
+	int num_lines;
 };
 
 /* Buffer flags or minor modes. */
 
-/* The buffer has been modified. */
-#define BFLAG_MODIFIED			(0000001)
-/* The buffer need not to be saved. */
-#define BFLAG_NOSAVE			(0000002)
-/* On save, ask for a file name. */
-#define BFLAG_NEEDNAME			(0000004)
-/* The buffer is a temporary buffer. */
-#define BFLAG_TEMPORARY			(0000010)
-/* The buffer cannot be modified. */
-#define BFLAG_READONLY			(0000020)
-/* The buffer is in overwrite mode. */
-#define BFLAG_OVERWRITE			(0000040)
-/* The old file has already been backed up. */
-#define BFLAG_BACKUP			(0000100)
-/* The buffer has font lock mode turned on. */
-#define BFLAG_FONTLOCK			(0000200)
-/* Do not record undo informations. */
-#define BFLAG_NOUNDO			(0000400)
-/* The buffer is in Auto Fill mode. */
-#define BFLAG_AUTOFILL			(0001000)
-/* Do not display the EOB marker in this buffer. */
-#define BFLAG_NOEOB			(0002000)
-/* The buffer is in Isearch loop. */
-#define BFLAG_ISEARCH			(0004000)
+#define BFLAG_MODIFIED	(0000001) /* The buffer has been modified. */
+#define BFLAG_NOSAVE	(0000002) /* The buffer need not to be saved. */
+#define BFLAG_NEEDNAME	(0000004) /* On save, ask for a file name. */
+#define BFLAG_TEMPORARY	(0000010) /* The buffer is a temporary buffer. */
+#define BFLAG_READONLY	(0000020) /* The buffer cannot be modified. */
+#define BFLAG_OVERWRITE	(0000040) /* The buffer is in overwrite mode. */
+#define BFLAG_BACKUP	(0000100) /* The old file has already been
+				     backed up. */
+#define BFLAG_FONTLOCK	(0000200) /* The buffer has font lock mode
+				     turned on. */
+#define BFLAG_NOUNDO	(0000400) /* Do not record undo informations. */
+#define BFLAG_AUTOFILL	(0001000) /* The buffer is in Auto Fill mode. */
+#define BFLAG_NOEOB	(0002000) /* Do not display the EOB marker in
+				     this buffer. */
+#define BFLAG_ISEARCH	(0004000) /* The buffer is in Isearch loop. */
 
 /* Mutually exclusive buffer major modes. */
 
-/* The buffer is in Text mode. */
-#define BMODE_TEXT			0
-/* The buffer is in C mode. */
-#define BMODE_C				1
-/* The buffer is in C++ mode. */
-#define BMODE_CPP			2
-/* The buffer is in C# (C sharp) mode. */
-#define BMODE_CSHARP			3
-/* The buffer is in Java mode */
-#define BMODE_JAVA			4
-/* The buffer is in Shell-script mode. */
-#define BMODE_SHELL			5
-/* The buffer is in Mail mode */
-#define BMODE_MAIL			6
+#define BMODE_TEXT	0 /* The buffer is in Text mode. */
+#define BMODE_C		1 /* The buffer is in C mode. */
+#define BMODE_CPP	2 /* The buffer is in C++ mode. */
+#define BMODE_CSHARP	3 /* The buffer is in C# (C sharp) mode. */
+#define BMODE_JAVA	4 /* The buffer is in Java mode */
+#define BMODE_SHELL	5 /* The buffer is in Shell-script mode. */
+#define BMODE_MAIL	6 /* The buffer is in Mail mode */
 
-struct buffer {
+struct Buffer {
 	/* The next buffer in buffer list. */
-	bufferp	next;
+	Buffer *next;
 
 	/* limitp->next == first line; limitp->prev == last line. */
-	linep	limitp;
+	Line *limitp;
 
-	/* The point line pointer, line number and offset. */
-	linep	save_pointp;
-	int	save_pointn;
-	int	save_pointo;
+	/* The point. */
+	Point pt;
 
-	/* The mark line and offset. */
-	linep	markp;
-	int	marko;
+	/* The mark. */
+	Marker *mark;
+
+	/* Markers (points that are updated when text is modified).  */
+	Marker *markers;
 
 	/* The undo deltas recorded for this buffer. */
-	undop	next_undop;
-	undop	last_undop;
+	Undo *next_undop;
+	Undo *last_undop;
 
 	/* Buffer flags. */
-	int	flags;
-	int	mode;
-	int	tab_width;
-	int	fill_column;
+	int flags;
+	int mode;
+	int tab_width;
+	int fill_column;
+	unsigned mark_active : 1;
 
 	/* The total number of lines ('\n' newlines) in buffer. */
-	int	num_lines;
-
-	/* The number of windows that display this buffer. */
-	int	num_windows;
+	int num_lines;
 
 	/* The name of the buffer and the file name. */
-	char	*name;
-	char	*filename;
+	char *name;
+	char *filename;
 };
 
-struct window {
+struct Window {
 	/* The next window in window list. */
-	windowp	next;
+	Window *next;
 
 	/* The buffer displayed in window. */
-	bufferp bp;
+	Buffer *bp;
 
 	/* The top line delta and last point line number. */
-	int	topdelta;
-	int	lastpointn;
+	int topdelta;
+	int lastpointn;
 
-	/* The point line pointer, line number and offset. */
-	linep	pointp;
-	int	pointn;
-	int	pointo;
+	/* The point line pointer, line number and offset (used to
+	   hold the point in non-current windows). */
+	Marker *saved_pt;
 
 	/* The formal and effective width and height of window. */
-	int	fwidth, fheight;
-	int	ewidth, eheight;
+	int fwidth, fheight;
+	int ewidth, eheight;
 };
 
-#define HISTORY_NOTMATCHED		0
-#define HISTORY_MATCHED			1
-#define HISTORY_MATCHEDNONUNIQUE	2
-#define HISTORY_NONUNIQUE		3
+enum {
+  COMPLETION_NOTMATCHED,
+  COMPLETION_MATCHED,
+  COMPLETION_MATCHEDNONUNIQUE,
+  COMPLETION_NONUNIQUE,
+};
 
-struct history {
+struct Completion {
 	/* This flag is set when the vector is sorted. */
-	int	fl_sorted;
+	int fl_sorted;
 	/* This flag is set when a completion window has been popped up. */
-	int	fl_poppedup;
+	int fl_poppedup;
 
 	/* This flag is set when the completion window should be closed. */
-	int	fl_close;
+	int fl_close;
 	/* The old buffer. */
-	bufferp	old_bp;
+	Buffer *old_bp;
 
-	/* This flag is set when this is a filename history. */
-	int	fl_dir;
-	astr    path;
+	/* This flag is set when this is a filename completion. */
+	int fl_dir;
+	astr path;
 
 	/* This flag is set when the space character is allowed. */
-	int	fl_space;
+	int fl_space;
 
-	/* The completions list. */
-	alist	completions;
+	alist completions;	/* The completions list. */
 
-	/* The matches list. */
-	alist	matches;
-	/* The match buffer. */
-	char	*match;
-	/* The match buffer size. */
-	int	matchsize;
+	alist matches;		/* The matches list. */
+	char *match;		/* The match buffer. */
+	int matchsize;		/* The match buffer size. */
 
 	/* The action functions. */
-	int	(*reread)(historyp hp, astr as);
-	int	(*try)(historyp hp, astr search);
-	void	(*scroll_up)(historyp hp);
-	void	(*scroll_down)(historyp hp);
+	int (*reread)(Completion *cp, astr as);
+	int (*try)(Completion *cp, astr search);
+	void (*scroll_up)(Completion *cp);
+	void (*scroll_down)(Completion *cp);
+};
+
+struct History {
+	alist elements;		/* Elements (strings).  */
+	aentry sel;
 };
 
 #define MINIBUF_SET_COLOR	'\1'
 #define MINIBUF_UNSET_COLOR	'\2'
 
-struct terminal {
-        void *	screen; /* Really a SCREEN *, but we don't want
-                           ncurses-specific code or data here */
-	int	width, height;
+struct Terminal {
+        void *screen; /* Really a SCREEN *, but we don't want
+			 ncurses-specific code or data here */
+	int width, height;
 
-	int	(*init)(void);
-	int	(*open)(void);
-	int	(*close)(void);
-	int	(*getkey)(void);
-	int	(*xgetkey)(int mode, int arg);
-	int	(*ungetkey)(int c);
-	void	(*refresh_cached_variables)(void);
-	void	(*refresh)(void);
-	void	(*redisplay)(void);
-	void	(*full_redisplay)(void);
-	void	(*show_about)(const char *splash, const char *minibuf);
-	void	(*clear)(void);
-	void	(*beep)(void);
-	void	(*minibuf_write)(const char *fmt);
-	char *	(*minibuf_read)(const char *prompt, const char *value, historyp hp);
-	void	(*minibuf_clear)(void);
+	int (*init)(void);
+	int (*open)(void);
+	int (*close)(void);
+	int (*getkey)(void);
+	int (*xgetkey)(int mode, int arg);
+	int (*ungetkey)(int c);
+	void (*refresh_cached_variables)(void);
+	void (*refresh)(void);
+	void (*redisplay)(void);
+	void (*full_redisplay)(void);
+	void (*show_about)(const char *splash, const char *minibuf);
+	void (*clear)(void);
+	void (*beep)(void);
+	void (*minibuf_write)(const char *fmt);
+	char *(*minibuf_read)(const char *prompt, const char *value,
+			      Completion *cp, History *hp);
+	void (*minibuf_clear)(void);
 };
 
 /*--------------------------------------------------------------------------
@@ -387,10 +378,6 @@ struct terminal {
 #define FLAG_EXECUTING_MACRO		(0000100)
 /* Encountered an error. */
 #define FLAG_GOT_ERROR			(0000200)
-/* Enable the highlight region. */
-#define FLAG_HIGHLIGHT_REGION		(0000400)
-/* The highlight region should be left enabled. */
-#define FLAG_HIGHLIGHT_REGION_STAYS	(0001000)
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

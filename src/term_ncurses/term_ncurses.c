@@ -1,4 +1,4 @@
-/*	$Id: term_ncurses.c,v 1.7 2004/01/29 10:36:01 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -52,10 +52,10 @@ extern void ncurses_show_about(const char *splash, const char *minibuf);
 extern void ncurses_clear(void);
 extern void ncurses_beep(void);
 extern void ncurses_minibuf_write(const char *fmt);
-extern char *ncurses_minibuf_read(const char *prompt, const char *value, historyp hp);
+extern char *ncurses_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 extern void ncurses_minibuf_clear(void);
 
-static struct terminal thisterm = {
+static Terminal thisterm = {
 	/* Unitialised screen pointer */
 	NULL,
 
@@ -81,4 +81,4 @@ static struct terminal thisterm = {
 	ncurses_minibuf_clear,
 };
 
-terminalp ncurses_tp = &thisterm;
+Terminal *ncurses_tp = &thisterm;

@@ -1,4 +1,4 @@
-/*	$Id: basic.c,v 1.8 2004/02/06 04:18:17 dacap Exp $	*/
+/*	$Id: basic.c,v 1.9 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -37,8 +37,9 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "editfns.h"
 
-/* Goal-column to arrive when {prev,next}-line functions are used.  */
+/* Goal-column to arrive when `prev/next-line' functions are used.  */
 static int cur_goalc;
 
 DEFUN("beginning-of-line", beginning_of_line)
@@ -46,11 +47,11 @@ DEFUN("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-	cur_wp->pointo = 0;
+	cur_bp->pt = line_beginning_position(uniarg);
 
-        /* Change the `goalc' to the beginning of line for next
-           `prev/next-line' calls.  */
-	thisflag |= FLAG_DONE_CPCN | FLAG_HIGHLIGHT_REGION_STAYS;
+	/* Change the `goalc' to the beginning of line for next
+	   `prev/next-line' calls.  */
+	thisflag |= FLAG_DONE_CPCN;
 	cur_goalc = 0;
 
 	return TRUE;
@@ -61,32 +62,41 @@ DEFUN("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-	cur_wp->pointo = cur_wp->pointp->size;
+	cur_bp->pt = line_end_position(uniarg);
 
-        /* Change the `goalc' to the end of line for next
-           `prev/next-line' calls.  */
-	thisflag |= FLAG_DONE_CPCN | FLAG_HIGHLIGHT_REGION_STAYS;
+	/* Change the `goalc' to the end of line for next
+	   `prev/next-line' calls.  */
+	thisflag |= FLAG_DONE_CPCN;
 	cur_goalc = INT_MAX;
 
 	return TRUE;
 }
 
 /*
- * Get the current goal column.  Take care of expanding
- * tabulations.
+ * Get the goal column.  Take care of expanding tabulations.
  */
-static int get_goalc(void)
+int get_goalc_bp(Buffer *bp, Point pt)
 {
-	int col = 0, t = cur_bp->tab_width;
-	char *sp = cur_wp->pointp->text, *p = sp;
+	int col = 0, t = bp->tab_width;
+	char *sp = pt.p->text, *p = sp;
 
-	while (p < sp + cur_wp->pointo) {
+	while (p < sp + pt.o) {
 		if (*p == '\t')
 			col |= t - 1;
 		++col, ++p;
 	}
 
 	return col;
+}
+
+int get_goalc_wp(Window *wp)
+{
+	return get_goalc_bp(wp->bp, window_pt(wp));
+}
+
+int get_goalc(void)
+{
+	return get_goalc_bp(cur_bp, cur_bp->pt);
 }
 
 /*
@@ -96,9 +106,9 @@ static int get_goalc(void)
 static void goto_goalc(int goalc)
 {
 	int col = 0, t = cur_bp->tab_width, w;
-	char *sp = cur_wp->pointp->text, *p = sp;
+	char *sp = cur_bp->pt.p->text, *p = sp;
 
-	while (p < sp + cur_wp->pointp->size) {
+	while (p < sp + cur_bp->pt.p->size) {
 		if (col == goalc)
 			break;
 		else if (*p == '\t') {
@@ -110,24 +120,23 @@ static void goto_goalc(int goalc)
 		++p;
 	}
 
-	cur_wp->pointo = p - sp;
+	cur_bp->pt.o = p - sp;
 }
 
 int previous_line(void)
 {
-	if (cur_wp->pointp->prev != cur_bp->limitp) {
+	if (cur_bp->pt.p->prev != cur_bp->limitp) {
 		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
 		if (!(lastflag & FLAG_DONE_CPCN)) {
-                        if (cur_wp->pointo > 0 &&
-			    cur_wp->pointo == cur_wp->pointp->size)
-                                cur_goalc = INT_MAX;
-                        else
-                                cur_goalc = get_goalc();
+			if (!bolp() && eolp())
+				cur_goalc = INT_MAX;
+			else
+				cur_goalc = get_goalc();
 		}
 
-		cur_wp->pointp = cur_wp->pointp->prev;
-		--cur_wp->pointn;
+		cur_bp->pt.p = cur_bp->pt.p->prev;
+		cur_bp->pt.n--;
 
 		goto_goalc(cur_goalc);
 
@@ -147,42 +156,37 @@ column, or at the end of the line if it is not long enough.
 {
 	int uni;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	if (uniarg < 0)
 		return FUNCALL_ARG(next_line, -uniarg);
 
-	/* if (!bobp()) */
-        if (!(cur_wp->pointp->prev == cur_bp->limitp &&
-	      cur_wp->pointo == 0)) {
+	if (!bobp()) {
 		for (uni = 0; uni < uniarg; ++uni)
 			if (!previous_line()) {
-                                thisflag |= FLAG_DONE_CPCN;
-                                FUNCALL(beginning_of_line);
-                                break;
+				thisflag |= FLAG_DONE_CPCN;
+				FUNCALL(beginning_of_line);
+				break;
 			}
 	}
-        else if (lastflag & FLAG_DONE_CPCN)
-                thisflag |= FLAG_DONE_CPCN;
+	else if (lastflag & FLAG_DONE_CPCN)
+		thisflag |= FLAG_DONE_CPCN;
 
 	return TRUE;
 }
 
 int next_line(void)
 {
-	if (cur_wp->pointp->next != cur_bp->limitp) {
+	if (cur_bp->pt.p->next != cur_bp->limitp) {
 		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
 		if (!(lastflag & FLAG_DONE_CPCN)) {
-                        if (cur_wp->pointo > 0 &&
-			    cur_wp->pointo == cur_wp->pointp->size)
-                                cur_goalc = INT_MAX;
-                        else
-                                cur_goalc = get_goalc();
+			if (!bolp() && eolp())
+				cur_goalc = INT_MAX;
+			else
+				cur_goalc = get_goalc();
 		}
 
-		cur_wp->pointp = cur_wp->pointp->next;
-		++cur_wp->pointn;
+		cur_bp->pt.p = cur_bp->pt.p->next;
+		cur_bp->pt.n++;
 
 		goto_goalc(cur_goalc);
 
@@ -202,25 +206,21 @@ column, or at the end of the line if it is not long enough.
 {
 	int uni;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	if (uniarg < 0)
 		return FUNCALL_ARG(previous_line, -uniarg);
 
-	/* if (!eobp()) */
-	if (!(cur_wp->pointp->next == cur_bp->limitp &&
-	      cur_wp->pointo == cur_wp->pointp->size)) {
+	if (!eobp()) {
 		for (uni = 0; uni < uniarg; ++uni)
 			if (!next_line()) {
-                                int old = cur_goalc;
-                                thisflag |= FLAG_DONE_CPCN;
-                                FUNCALL(end_of_line);
-                                cur_goalc = old;
+				int old = cur_goalc;
+				thisflag |= FLAG_DONE_CPCN;
+				FUNCALL(end_of_line);
+				cur_goalc = old;
 				break;
 			}
 	}
-        else if (lastflag & FLAG_DONE_CPCN)
-                thisflag |= FLAG_DONE_CPCN;
+	else if (lastflag & FLAG_DONE_CPCN)
+		thisflag |= FLAG_DONE_CPCN;
 
 	return TRUE;
 }
@@ -231,10 +231,10 @@ column, or at the end of the line if it is not long enough.
  */
 void goto_line(int to_line)
 {
-	if (cur_wp->pointn > to_line)
-		ngotoup(cur_wp->pointn - to_line);
-	else if (cur_wp->pointn < to_line)
-		ngotodown(to_line - cur_wp->pointn);
+	if (cur_bp->pt.n > to_line)
+		ngotoup(cur_bp->pt.n - to_line);
+	else if (cur_bp->pt.n < to_line)
+		ngotodown(to_line - cur_bp->pt.n);
 }
 
 DEFUN("goto-char", goto_char)
@@ -278,7 +278,7 @@ Line 1 is the beginning of the buffer.
 	} while (to_line < 0);
 
 	goto_line(to_line - 1);
-	cur_wp->pointo = 0;
+	cur_bp->pt.o = 0;
 
 	return TRUE;
 }
@@ -288,9 +288,7 @@ Line 1 is the beginning of the buffer.
  */
 void gotobob(void)
 {
-	cur_wp->pointp = cur_bp->limitp->next;
-	cur_wp->pointo = 0;
-	cur_wp->pointn = 0;
+	cur_bp->pt = point_min();
 	thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -301,9 +299,6 @@ Move point to the beginning of the buffer; leave mark at previous position.
 {
 	set_mark_command();
 	gotobob();
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	return TRUE;
 }
 
@@ -312,9 +307,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
  */
 void gotoeob(void)
 {
-	cur_wp->pointp = cur_bp->limitp->prev;
-	cur_wp->pointo = cur_wp->pointp->size;
-	cur_wp->pointn = cur_bp->num_lines;
+	cur_bp->pt = point_max();
 	thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -325,22 +318,19 @@ Move point to the end of the buffer; leave mark at previous position.
 {
 	set_mark_command();
 	gotoeob();
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	return TRUE;
 }
 
 int backward_char(void)
 {
-	if (cur_wp->pointo > 0) {
-		--cur_wp->pointo;
+	if (!bolp()) {
+		cur_bp->pt.o--;
 
 		return TRUE;
-	} else if (cur_wp->pointp->prev != cur_bp->limitp) {
+	} else if (!bobp()) {
 		thisflag |= FLAG_NEED_RESYNC;
-		cur_wp->pointp = cur_wp->pointp->prev;
-		--cur_wp->pointn;
+		cur_bp->pt.p = cur_bp->pt.p->prev;
+		cur_bp->pt.n--;
 		FUNCALL(end_of_line);
 
 		return TRUE;
@@ -357,8 +347,6 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 {
 	int uni;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	if (uniarg < 0)
 		return FUNCALL_ARG(forward_char, -uniarg);
 
@@ -373,20 +361,20 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 
 int forward_char(void)
 {
-	if (cur_wp->pointo < cur_wp->pointp->size) {
-		++cur_wp->pointo;
+	if (!eolp()) {
+		cur_bp->pt.o++;
 
 		return TRUE;
-	} else if (cur_wp->pointp->next != cur_bp->limitp) {
+	} else if (!eobp()) {
 		thisflag |= FLAG_NEED_RESYNC;
-		cur_wp->pointp = cur_wp->pointp->next;
-		++cur_wp->pointn;
+		cur_bp->pt.p = cur_bp->pt.p->next;
+		cur_bp->pt.n++;
 		FUNCALL(beginning_of_line);
 
 		return TRUE;
 	}
-
-	return FALSE;
+	else
+		return FALSE;
 }
 
 DEFUN("forward-char", forward_char)
@@ -396,8 +384,6 @@ On reaching end of buffer, stop and signal error.
 +*/
 {
 	int uni;
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(backward_char, -uniarg);
@@ -414,7 +400,7 @@ On reaching end of buffer, stop and signal error.
 int ngotoup(int n)
 {
 	for (; n > 0; n--)
-		if (cur_wp->pointp->prev != cur_bp->limitp)
+		if (cur_bp->pt.p->prev != cur_bp->limitp)
 			FUNCALL(previous_line);
 		else
 			return FALSE;
@@ -425,7 +411,7 @@ int ngotoup(int n)
 int ngotodown(int n)
 {
 	for (; n > 0; n--)
-		if (cur_wp->pointp->next != cur_bp->limitp)
+		if (cur_bp->pt.p->next != cur_bp->limitp)
 			FUNCALL(next_line);
 		else
 			return FALSE;
@@ -438,13 +424,13 @@ int ngotodown(int n)
 
 int scroll_down(void)
 {
-	if (cur_wp->pointn > 0) {
+	if (cur_bp->pt.n > 0) {
 		if (ngotoup(SCROLL_LINES)) {
 			/* XXX */
 			return TRUE;
 		} else
 			return FALSE;
-	} else if (cur_wp->pointo > 0)
+	} else if (!bolp())
 		FUNCALL(beginning_of_line);
 	else {
 		minibuf_error("Beginning of buffer");
@@ -461,8 +447,6 @@ Scroll text of current window downward near full screen.
 {
 	int uni;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	if (uniarg < 0)
 		return FUNCALL_ARG(scroll_up, -uniarg);
 
@@ -475,13 +459,13 @@ Scroll text of current window downward near full screen.
 
 int scroll_up(void)
 {
-	if (cur_wp->pointn < cur_bp->num_lines) {
+	if (cur_bp->pt.n < cur_bp->num_lines) {
 		if (ngotodown(SCROLL_LINES)) {
 			/* XXX */
 			return TRUE;
 		} else
 			return FALSE;
-	} else if (cur_wp->pointo < cur_wp->pointp->size)
+	} else if (!eolp())  /* XXX Emacs doesn't make this .-dacap */
 		FUNCALL(end_of_line);
 	else {
 		minibuf_error("End of buffer");
@@ -497,8 +481,6 @@ Scroll text of current window upward near full screen.
 +*/
 {
 	int uni;
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(scroll_down, -uniarg);

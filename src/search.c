@@ -1,4 +1,4 @@
-/*	$Id: search.c,v 1.6 2004/02/05 02:43:21 dacap Exp $	*/
+/*	$Id: search.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -32,11 +32,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 
 #include "zile.h"
 #include "extern.h"
 #include "astr.h"
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#else
 #include "regex.h"
+#endif
+
+static History search_history;
+static History regexp_history;
 
 #ifdef DEBUG			/* Needed by regex.c */
 void printchar () { }
@@ -145,19 +155,17 @@ static char *re_find_substr(const char *s1, size_t s1size,
 	return ret;
 }
 
-static void goto_linep(linep lp)
+static void goto_linep(Line *lp)
 {
-	cur_wp->pointp = cur_bp->limitp->next;
-	cur_wp->pointn = 0;
-	cur_wp->pointo = 0;
+	cur_bp->pt = point_min();
 	resync_redisplay();
-	while (cur_wp->pointp != lp)
+	while (cur_bp->pt.p != lp)
 		next_line();
 }
 
-static int search_forward(linep startp, int starto, const char *s, int regexp)
+static int search_forward(Line *startp, int starto, const char *s, int regexp)
 {
-	linep lp;
+	Line *lp;
 	const char *sp, *sp2;
 	size_t s1size, s2size = strlen(s);
 
@@ -180,7 +188,7 @@ static int search_forward(linep startp, int starto, const char *s, int regexp)
 					     sp == lp->text, TRUE, FALSE);
 			if (sp2 != NULL) {
 				goto_linep(lp);
-				cur_wp->pointo = sp2 - lp->text;
+				cur_bp->pt.o = sp2 - lp->text;
 				return TRUE;
 			}
 		}
@@ -188,7 +196,7 @@ static int search_forward(linep startp, int starto, const char *s, int regexp)
 			sp2 = find_substr(sp, s1size, s, s2size);
 			if (sp2 != NULL) {
 				goto_linep(lp);
-				cur_wp->pointo = sp2 - lp->text + s2size;
+				cur_bp->pt.o = sp2 - lp->text + s2size;
 				return TRUE;
 			}
 		}
@@ -197,9 +205,9 @@ static int search_forward(linep startp, int starto, const char *s, int regexp)
 	return FALSE;
 }
 
-static int search_backward(linep startp, int starto, const char *s, int regexp)
+static int search_backward(Line *startp, int starto, const char *s, int regexp)
 {
-	linep lp;
+	Line *lp;
 	const char *sp, *sp2;
 	size_t s1size, s2size = strlen(s);
 
@@ -220,7 +228,7 @@ static int search_backward(linep startp, int starto, const char *s, int regexp)
 					     TRUE, s1size == lp->size, TRUE);
 			if (sp2 != NULL) {
 				goto_linep(lp);
-				cur_wp->pointo = sp2 - lp->text;
+				cur_bp->pt.o = sp2 - lp->text;
 				return TRUE;
 			}
 		}
@@ -228,7 +236,7 @@ static int search_backward(linep startp, int starto, const char *s, int regexp)
 			sp2 = rfind_substr(sp, s1size, s, s2size);
 			if (sp2 != NULL) {
 				goto_linep(lp);
-				cur_wp->pointo = sp2 - lp->text;
+				cur_bp->pt.o = sp2 - lp->text;
 				return TRUE;
 			}
 		}
@@ -237,8 +245,6 @@ static int search_backward(linep startp, int starto, const char *s, int regexp)
 	return FALSE;
 }
 
-static char *last_search = NULL;
-
 DEFUN("search-forward", search_forward)
 /*+
 Search forward from point for the user specified text.
@@ -246,16 +252,16 @@ Search forward from point for the user specified text.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Search: ", last_search)) == NULL)
+	if ((ms = minibuf_read("Search: ", "")) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-	if (last_search != NULL)
-		free(last_search);
-	last_search = zstrdup(ms);
+/* 	if (last_search != NULL) */
+/* 		free(last_search); */
+/* 	last_search = zstrdup(ms); */
 
-	if (!search_forward(cur_wp->pointp, cur_wp->pointo, ms, FALSE)) {
+	if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms, FALSE)) {
 		minibuf_error("Failing search: `@v%s@@'", ms);
 		return FALSE;
 	}
@@ -270,16 +276,16 @@ Search backward from point for the user specified text.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Search backward: ", last_search)) == NULL)
+	if ((ms = minibuf_read("Search backward: ", "")) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-	if (last_search != NULL)
-		free(last_search);
-	last_search = zstrdup(ms);
+/* 	if (last_search != NULL) */
+/* 		free(last_search); */
+/* 	last_search = zstrdup(ms); */
 
-	if (!search_backward(cur_wp->pointp, cur_wp->pointo, ms, FALSE)) {
+	if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms, FALSE)) {
 		minibuf_error("Failing search: `@v%s@@'", ms);
 		return FALSE;
 	}
@@ -294,16 +300,16 @@ Search forward from point for regular expression REGEXP.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Regexp search: ", last_search)) == NULL)
+	if ((ms = minibuf_read("Regexp search: ", "")) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-	if (last_search != NULL)
-		free(last_search);
-	last_search = zstrdup(ms);
+/* 	if (last_search != NULL) */
+/* 		free(last_search); */
+/* 	last_search = zstrdup(ms); */
 
-	if (!search_forward(cur_wp->pointp, cur_wp->pointo, ms, TRUE)) {
+	if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms, TRUE)) {
 		minibuf_error("Failing regexp search: `@v%s@@'", ms);
 		return FALSE;
 	}
@@ -318,16 +324,16 @@ Search backward from point for match for regular expression REGEXP.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Regexp search backward: ", last_search)) == NULL)
+	if ((ms = minibuf_read("Regexp search backward: ", "")) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-	if (last_search != NULL)
-		free(last_search);
-	last_search = zstrdup(ms);
+/* 	if (last_search != NULL) */
+/* 		free(last_search); */
+/* 	last_search = zstrdup(ms); */
 
-	if (!search_backward(cur_wp->pointp, cur_wp->pointo, ms, TRUE)) {
+	if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms, TRUE)) {
 		minibuf_error("Failing regexp search backward: `@v%s@@'", ms);
 		return FALSE;
 	}
@@ -347,13 +353,12 @@ static int isearch(int dir, int regexp)
 	int last = TRUE;
 	astr buf = astr_new();
 	astr pattern = astr_new();
-	linep startp = cur_wp->pointp;
-	int starto = cur_wp->pointo;
-	int startn = cur_wp->pointn;
-	linep curp = startp;
-	int curo = starto;
-	int curn = startn;
-	linep old_markp = cur_wp->bp->markp;
+	Point start, cur;
+	Marker *old_mark = cur_wp->bp->mark ?
+		copy_marker(cur_wp->bp->mark): NULL;
+
+	start = cur_bp->pt;
+	cur = cur_bp->pt;
 
 	/* I-search mode.  */
 	cur_wp->bp->flags |= BFLAG_ISEARCH;
@@ -381,23 +386,20 @@ static int isearch(int dir, int regexp)
 		minibuf_write("%s", astr_cstr(buf));
 
 		if (thisflag & FLAG_EXECUTING_MACRO) {
-		    if (!last) {
-			thisflag ^= FLAG_EXECUTING_MACRO;
-			lastflag |= FLAG_GOT_ERROR;
-			break;
-		    } else {
 			c = get_macro_key_data();
-		    }
+			if (c == KBD_RET && !last) {
+				thisflag ^= FLAG_EXECUTING_MACRO;
+				lastflag |= FLAG_GOT_ERROR;
+				break;
+			}
 		} else {
-		    c = cur_tp->getkey();
-		    if (thisflag & FLAG_DEFINING_MACRO)
-			add_macro_key_data(c);
+			c = cur_tp->getkey();
+			if (thisflag & FLAG_DEFINING_MACRO)
+				add_macro_key_data(c);
 		}
 
 		if (c == KBD_CANCEL) {
-			cur_wp->pointp = startp;
-			cur_wp->pointo = starto;
-			cur_wp->pointn = startn;
+			cur_bp->pt = start;
 			thisflag |= FLAG_NEED_RESYNC;
 
 			/* "Quit" (also it calls ding() and stops
@@ -405,14 +407,18 @@ static int isearch(int dir, int regexp)
 			cancel();
 
 			/* Restore old mark position.  */
-			cur_wp->bp->markp = old_markp;
+			if (cur_bp->mark)
+				free_marker(cur_bp->mark);
+
+			if (old_mark)
+				cur_bp->mark = copy_marker(old_mark);
+			else
+				cur_bp->mark = old_mark;
 			break;
 		} else if (c == KBD_BS) {
 			if (astr_size(pattern) > 0) {
 				astr_truncate(pattern, astr_size(pattern) - 1);
-				cur_wp->pointp = startp;
-				cur_wp->pointo = starto;
-				cur_wp->pointn = startn;
+				cur_bp->pt = start;
 				thisflag |= FLAG_NEED_RESYNC;
 			} else
 				ding();
@@ -424,15 +430,14 @@ static int isearch(int dir, int regexp)
 				dir = ISEARCH_FORWARD;
 			if (astr_size(pattern) > 0) {
 				/* Find next match. */
-				curp = cur_wp->pointp;
-				curo = cur_wp->pointo;
-				curn = cur_wp->pointn;
+				cur = cur_bp->pt;
 				/* Save search string. */
-				if (last_search != NULL)
-					free(last_search);
-				last_search = zstrdup(astr_cstr(pattern));
-			} else if (last_search != NULL)
-				astr_assign_cstr(pattern, last_search);
+/* 				if (last_search != NULL) */
+/* 					free(last_search); */
+/* 				last_search = zstrdup(astr_cstr(pattern)); */
+			}
+/* 			else if (last_search != NULL) */
+/* 				astr_assign_cstr(pattern, last_search); */
 		} else if (c & KBD_META || c & KBD_CTL || c > KBD_TAB) {
 			if (c == KBD_RET && astr_size(pattern) == 0) {
 				if (dir == ISEARCH_FORWARD) {
@@ -449,13 +454,14 @@ static int isearch(int dir, int regexp)
 				}
 			} else if (astr_size(pattern) > 0) {
 				/* Save mark. */
-				cur_bp->markp = startp;
-				cur_bp->marko = starto;
+				set_mark();
+				cur_bp->mark->pt = start;
 
 				/* Save search string. */
-				if (last_search != NULL)
-					free(last_search);
-				last_search = zstrdup(astr_cstr(pattern));
+/* 				if (last_search != NULL) */
+/* 					free(last_search); */
+/* 				last_search = zstrdup(astr_cstr(pattern)); */
+
 				minibuf_write("Mark saved when search started");
 			} else
 				minibuf_clear();
@@ -464,9 +470,9 @@ static int isearch(int dir, int regexp)
 			astr_append_char(pattern, c);
 		if (astr_size(pattern) > 0) {
 			if (dir == ISEARCH_FORWARD)
-				last = search_forward(curp, curo, astr_cstr(pattern), regexp);
+				last = search_forward(cur.p, cur.o, astr_cstr(pattern), regexp);
 			else
-				last = search_backward(curp, curo, astr_cstr(pattern), regexp);
+				last = search_backward(cur.p, cur.o, astr_cstr(pattern), regexp);
 		} else
 			last = TRUE;
 		if (thisflag & FLAG_NEED_RESYNC)
@@ -478,6 +484,9 @@ static int isearch(int dir, int regexp)
 
 	astr_delete(buf);
 	astr_delete(pattern);
+
+	if (old_mark)
+		free_marker(old_mark);
 
 	return TRUE;
 }
@@ -532,8 +541,8 @@ is treated as a regexp.  See C-s for more info.
 
 void free_search_history(void)
 {
-	if (last_search != NULL)
-		free(last_search);
+	free_history_elements(&search_history);
+	free_history_elements(&regexp_history);
 }
 
 DEFUN("replace-string", replace_string)
@@ -557,11 +566,13 @@ Replace occurrences of a string with other text.
 		return FALSE;
 	}
 
-	while (search_forward(cur_wp->pointp, cur_wp->pointo, find, FALSE)) {
+	while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
 		++count;
-		undo_save(UNDO_REPLACE_BLOCK, cur_wp->pointn, cur_wp->pointo - strlen(find),
+		undo_save(UNDO_REPLACE_BLOCK,
+			  make_point(cur_bp->pt.n,
+				     cur_bp->pt.o - strlen(find)),
 			  strlen(find), strlen(repl));
-		line_replace_text(&cur_wp->pointp, cur_wp->pointo - strlen(find),
+		line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - strlen(find),
 				  strlen(find), repl);
 	}
 
@@ -600,7 +611,7 @@ what to do with it.
 	/*
 	 * Spaghetti code follows... :-(
 	 */
-	while (search_forward(cur_wp->pointp, cur_wp->pointo, find, FALSE)) {
+	while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
 		if (!noask) {
 			int c;
 			if (thisflag & FLAG_NEED_RESYNC)
@@ -650,9 +661,11 @@ what to do with it.
 
 	replblock:
 		++count;
-		undo_save(UNDO_REPLACE_BLOCK, cur_wp->pointn, cur_wp->pointo - strlen(find),
+		undo_save(UNDO_REPLACE_BLOCK,
+			  make_point(cur_bp->pt.n,
+				     cur_bp->pt.o - strlen(find)),
 			  strlen(find), strlen(repl));
-		line_replace_text(&cur_wp->pointp, cur_wp->pointo - strlen(find),
+		line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - strlen(find),
 				  strlen(find), repl);
 	nextmatch:
 		if (exitloop)

@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.11 2004/01/29 10:36:01 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.12 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -152,12 +152,12 @@ static void draw_minibuf_read(const char *prompt, const char *value, int prompt_
 	}
 }
 
-static char *rot_vminibuf_read(const char *prompt, const char *value, historyp hp,
-			       char **p, int *max)
+static char *rot_vminibuf_read(const char *prompt, const char *value,
+			       Completion *cp, History *hp, char **p, int *max)
 {
 	static int overwrite_mode = 0;
 	int c, i, len, prompt_len, thistab, lasttab = -1;
-	char *s;
+	char *s, *saved = NULL;
 
 	prompt_len = astrlen(prompt);
 
@@ -173,13 +173,13 @@ static char *rot_vminibuf_read(const char *prompt, const char *value, historyp h
 
 	for (;;) {
 		switch (lasttab) {
-		case HISTORY_MATCHEDNONUNIQUE:
+		case COMPLETION_MATCHEDNONUNIQUE:
 			s = " [Complete, but not unique]";
 			break;
-		case HISTORY_NOTMATCHED:
+		case COMPLETION_NOTMATCHED:
 			s = " [No match]";
 			break;
-		case HISTORY_MATCHED:
+		case COMPLETION_MATCHED:
 			s = " [Sole completion]";
 			break;
 		default:
@@ -198,10 +198,12 @@ static char *rot_vminibuf_read(const char *prompt, const char *value, historyp h
 		case KBD_RET:
 			move(LINES-1, 0);
 			clrtoeol();
+			if (saved) free(saved);
 			return *p;
 		case KBD_CANCEL:
 			move(LINES-1, 0);
 			clrtoeol();
+			if (saved) free(saved);
 			return NULL;
 		case KBD_CTL | 'a':
 		case KBD_HOME:
@@ -250,71 +252,113 @@ static char *rot_vminibuf_read(const char *prompt, const char *value, historyp h
 		case KBD_INS:
 			overwrite_mode = overwrite_mode ? 0 : 1;
 			break;
+		case KBD_META | 'v':
 		case KBD_PGUP:
-			if (hp == NULL) {
+			if (cp == NULL) {
 				ding();
 				break;
 			}
 
-			if (hp->fl_poppedup) {
-				hp->scroll_down(hp);
+			if (cp->fl_poppedup) {
+				cp->scroll_down(cp);
 				thistab = lasttab;
 			}
 			break;
+		case KBD_CTL | 'v':
 		case KBD_PGDN:
-			if (hp == NULL) {
+			if (cp == NULL) {
 				ding();
 				break;
 			}
 
-			if (hp->fl_poppedup) {
-				hp->scroll_up(hp);
+			if (cp->fl_poppedup) {
+				cp->scroll_up(cp);
 				thistab = lasttab;
+			}
+			break;
+		case KBD_META | 'p':
+			if (hp) {
+				const char *elem = previous_history_element(hp);
+				if (elem) {
+					if (!saved)
+						saved = zstrdup(*p);
+
+					len = i = strlen(elem);
+					*max = i + 10;
+					*p = zrealloc(*p, *max);
+					strcpy(*p, elem);
+				}
+/* 				else { */
+/* 					minibuf_error("Beginning of history; no preceding item"); */
+/* 				} */
+			}
+			break;
+		case KBD_META | 'n':
+			if (hp) {
+				const char *elem = next_history_element(hp);
+				if (elem) {
+					len = i = strlen(elem);
+					*max = i + 10;
+					*p = zrealloc(*p, *max);
+					strcpy(*p, elem);
+				}
+				else if (saved) {
+					len = i = strlen(saved);
+					*max = i + 10;
+					*p = zrealloc(*p, *max);
+					strcpy(*p, saved);
+
+					free(saved);
+					saved = NULL;
+				}
+/* 				else { */
+/* 					minibuf_error("End of history; no default item"); */
+/* 				} */
 			}
 			break;
 		case KBD_TAB:
 		got_tab:
-			if (hp == NULL) {
+			if (cp == NULL) {
 				ding();
 				break;
 			}
 
-			if (lasttab != -1 && lasttab != HISTORY_NOTMATCHED
-			    && hp->fl_poppedup) {
-				hp->scroll_up(hp);
+			if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
+			    && cp->fl_poppedup) {
+				cp->scroll_up(cp);
 				thistab = lasttab;
 			} else {
                                 astr as = astr_copy_cstr(*p);
-				thistab = hp->try(hp, as);
+				thistab = cp->try(cp, as);
                                 astr_delete(as);
 				switch (thistab) {
-				case HISTORY_NONUNIQUE:
-				case HISTORY_MATCHED:
-				case HISTORY_MATCHEDNONUNIQUE:
-					if (hp->fl_dir)
-						len = i = hp->matchsize + strlen(astr_cstr(hp->path));
+				case COMPLETION_NONUNIQUE:
+				case COMPLETION_MATCHED:
+				case COMPLETION_MATCHEDNONUNIQUE:
+					if (cp->fl_dir)
+						len = i = cp->matchsize + strlen(astr_cstr(cp->path));
 					else
-						len = i = hp->matchsize;
+						len = i = cp->matchsize;
 					*max = len + 1;
 					s = (char *)zmalloc(*max);
-					if (hp->fl_dir) {
-						strcpy(s, astr_cstr(hp->path));
-						strncat(s, hp->match, hp->matchsize);
+					if (cp->fl_dir) {
+						strcpy(s, astr_cstr(cp->path));
+						strncat(s, cp->match, cp->matchsize);
 					} else
-						strncpy(s, hp->match, hp->matchsize);
+						strncpy(s, cp->match, cp->matchsize);
 					s[len] = '\0';
 					if (strncmp(s, *p, len) != 0)
 						thistab = -1;
 					free(*p);
 					*p = s;
 					break;
-				case HISTORY_NOTMATCHED:
+				case COMPLETION_NOTMATCHED:
 					ding();
 				}
 			}
 			break;
 		case ' ':
-			if (hp != NULL && !hp->fl_space)
+			if (cp != NULL && !cp->fl_space)
 				goto got_tab;
 			/* FALLTROUGH */
 		default:
@@ -353,26 +397,29 @@ static char *rot_vminibuf_read(const char *prompt, const char *value, historyp h
 
 static char *rotation_buffers[MAX_ROTATIONS];
 
-char *ncurses_minibuf_read(const char *prompt, const char *value, historyp hp)
+char *ncurses_minibuf_read(const char *prompt, const char *value,
+			   Completion *cp, History *hp)
 {
 	static int max[MAX_ROTATIONS], rot;
-	windowp wp, old_wp = cur_wp;
+	Window *wp, *old_wp = cur_wp;
 	char **p = rotation_buffers, *s;
+
+	/* Prepare the history.  */
+	if (hp) prepare_history(hp);
 
 	/* Rotate text buffer. */
 	if (++rot >= MAX_ROTATIONS)
 		rot = 0;
-	s = rot_vminibuf_read(prompt, value, hp, &p[rot], &max[rot]);
 
-	if (hp != NULL && hp->fl_poppedup && (wp = find_window("*Completions*")) != NULL) {
-		cur_wp = wp;
-		cur_bp = wp->bp;
-		if (hp->fl_close)
+	s = rot_vminibuf_read(prompt, value, cp, hp, &p[rot], &max[rot]);
+
+	if (cp != NULL && cp->fl_poppedup && (wp = find_window("*Completions*")) != NULL) {
+		set_current_window(wp);
+		if (cp->fl_close)
 			FUNCALL(delete_window);
-		else if (hp->old_bp)
-			switch_to_buffer(hp->old_bp);
-		cur_wp = old_wp;
-		cur_bp = old_wp->bp;
+		else if (cp->old_bp)
+			switch_to_buffer(cp->old_bp);
+		set_current_window(old_wp);
 	}
 
 	return s;

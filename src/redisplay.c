@@ -1,4 +1,4 @@
-/*	$Id: redisplay.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: redisplay.c,v 1.5 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -38,39 +38,41 @@ void resync_redisplay(void)
 {
 #if 1
 	/* Normal Emacs-like resyncing calculation. */
-	int delta = cur_wp->pointn - cur_wp->lastpointn;
+	int delta = cur_bp->pt.n - cur_wp->lastpointn;
 
 	if (delta > 0) {
 		if (cur_wp->topdelta + delta < cur_wp->eheight)
 			cur_wp->topdelta += delta;
-		else if (cur_wp->pointn > cur_wp->eheight / 2)
+		else if (cur_bp->pt.n > cur_wp->eheight / 2)
 			cur_wp->topdelta = cur_wp->eheight / 2;
 		else
-			cur_wp->topdelta = cur_wp->pointn;
+			cur_wp->topdelta = cur_bp->pt.n;
 	} else if (delta < 0) {
 		if (cur_wp->topdelta + delta >= 0)
 			cur_wp->topdelta += delta;
-		else if (cur_wp->pointn > cur_wp->eheight / 2)
+		else if (cur_bp->pt.n > cur_wp->eheight / 2)
 			cur_wp->topdelta = cur_wp->eheight / 2;
 		else
-			cur_wp->topdelta = cur_wp->pointn;
+			cur_wp->topdelta = cur_bp->pt.n;
 	}
-	cur_wp->lastpointn = cur_wp->pointn;
+	cur_wp->lastpointn = cur_bp->pt.n;
 #else
 	/* Alternative classic resyncing calculation. */
-	if (cur_wp->pointn < cur_wp->eheight)
-		cur_wp->topdelta = cur_wp->pointn;
+	if (cur_bp->pt.n < cur_wp->eheight)
+		cur_wp->topdelta = cur_bp->pt.n;
 	else
-		cur_wp->topdelta = cur_wp->pointn % cur_wp->eheight;
+		cur_wp->topdelta = cur_bp->pt.n % cur_wp->eheight;
 #endif
 }
 
-void recenter(windowp wp)
+void recenter(Window *wp)
 {
-	if (wp->pointn > wp->eheight / 2)
+	Point pt = window_pt(wp);
+
+	if (pt.n > wp->eheight / 2)
 		wp->topdelta = wp->eheight / 2;
 	else
-		wp->topdelta = wp->pointn;
+		wp->topdelta = pt.n;
 }
 
 DEFUN("recenter", recenter)
@@ -83,8 +85,5 @@ The desired position of point is always relative to the current window.
 	if (cur_bp->flags & BFLAG_FONTLOCK && lookup_bool_variable("auto-font-lock-refresh"))
 		FUNCALL(font_lock_refresh);
 	cur_tp->full_redisplay();
-
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
-
 	return TRUE;
 }

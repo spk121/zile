@@ -14,6 +14,13 @@ X1("forward-paragraph", forward_paragraph,		"M-]")
 X1("mark-paragraph", mark_paragraph,			"M-h")
 X1("fill-paragraph", fill_paragraph,			"M-q")
 
+* Complete universal-argument functionality for:
+
+transpose-chars
+transpose-words
+transpose-sexps
+transpose-lines
+
 ------------------------------------------------------------------------------
 
 LOW PRIORITY

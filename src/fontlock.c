@@ -1,4 +1,4 @@
-/*	$Id: fontlock.c,v 1.6 2004/01/23 01:34:43 dacap Exp $	*/
+/*	$Id: fontlock.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -47,7 +47,7 @@
  * Parse the line for comments and strings and add anchors if found.
  * C/C++/C#/Java Mode.
  */
-static void cpp_set_anchors(linep lp, int *lastanchor)
+static void cpp_set_anchors(Line *lp, int *lastanchor)
 {
 	char *sp, *ap;
 
@@ -136,7 +136,7 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
 #if ENABLE_SHELL_MODE
 static char *heredoc_string = NULL;
 
-static int make_heredoc_string(linep lp, char *sp, char *ap)
+static int make_heredoc_string(Line *lp, char *sp, char *ap)
 {
 	char *start, *end;
 
@@ -184,7 +184,7 @@ static int make_heredoc_string(linep lp, char *sp, char *ap)
  * Parse the line for comments and strings and add anchors if found.
  * Shell Mode.
  */
-static void shell_set_anchors(linep lp, int *lastanchor)
+static void shell_set_anchors(Line *lp, int *lastanchor)
 {
 	char *sp, *ap;
 	static int laststrchar;
@@ -265,7 +265,7 @@ static void shell_set_anchors(linep lp, int *lastanchor)
 }
 #endif /* ENABLE_SHELL_MODE */
 
-static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
+static void line_set_anchors(Buffer *bp, Line *lp, int *lastanchor)
 {
 	if (lp->anchors) {
 		free(lp->anchors);
@@ -293,7 +293,7 @@ static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
  * Parse again the line for finding the anchors.  This is called when
  * the line get modified.
  */
-void font_lock_reset_anchors(bufferp bp, linep lp)
+void font_lock_reset_anchors(Buffer *bp, Line *lp)
 {
 	int lastanchor;
 
@@ -304,7 +304,7 @@ void font_lock_reset_anchors(bufferp bp, linep lp)
 /*
  * Find the last set anchor walking backward in the line list.
  */
-int find_last_anchor(bufferp bp, linep lp)
+int find_last_anchor(Buffer *bp, Line *lp)
 {
 	char *p;
 
@@ -327,9 +327,9 @@ int find_last_anchor(bufferp bp, linep lp)
 /*
  * Go to the beginning of the buffer and parse for anchors.
  */
-static void font_lock_set_anchors(bufferp bp)
+static void font_lock_set_anchors(Buffer *bp)
 {
-	linep lp;
+	Line *lp;
 	int lastanchor = ANCHOR_NULL;
 
 	minibuf_write("Font Lock: setting anchors in `%s'...", bp->name);
@@ -344,9 +344,9 @@ static void font_lock_set_anchors(bufferp bp)
 /*
  * Go to the beginning of the buffer and remove the anchors.
  */
-static void font_lock_unset_anchors(bufferp bp)
+static void font_lock_unset_anchors(Buffer *bp)
 {
-	linep lp;
+	Line *lp;
 
 	minibuf_write("Font Lock: removing anchors from `%s'...", bp->name);
 	cur_tp->refresh();

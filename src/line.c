@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.18 2004/02/06 01:53:47 dacap Exp $	*/
+/*	$Id: line.c,v 1.19 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -39,6 +39,12 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "editfns.h"
+
+static void adjust_markers_for_linep(Line *lp, Line *newlp);
+static void adjust_markers_for_offset(Line *lp, int pointo, int offset);
+static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type);
+static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len);
 
 /*
  * This function creates a new line structure for holding a line
@@ -50,12 +56,12 @@
  *
  * The tail of the line structure is used for storing the text buffer.
  */
-linep new_line(int maxsize)
+Line *new_line(int maxsize)
 {
-	linep lp;
+	Line *lp;
 	size_t size = sizeof *lp + maxsize - sizeof lp->text;
 
-	lp = (linep)zmalloc(size);
+	lp = (Line *)zmalloc(size);
 	memset(lp, 0, size);
 
 	lp->size = 0;
@@ -70,12 +76,11 @@ linep new_line(int maxsize)
  * is different from the original one, scan all the windows looking
  * for the references to the old pointer and update their value.
  */
-linep resize_line(windowp wp, linep lp, int maxsize)
+Line *resize_line(Line *lp, int maxsize)
 {
-	linep newlp;
-	windowp wp1;
+	Line *newlp;
 
-	newlp = (linep)zrealloc(lp, sizeof *lp + maxsize - sizeof lp->text);
+	newlp = (Line *)zrealloc(lp, sizeof *lp + maxsize - sizeof lp->text);
 	newlp->maxsize = maxsize;
 
 	/*
@@ -89,15 +94,9 @@ linep resize_line(windowp wp, linep lp, int maxsize)
 	newlp->next->prev = newlp;
 
 	/*
-	 * Scan all the windows searching for points and marks
-	 * pointing at the reallocated line.
+	 * Update all things pointing to the modified line.
 	 */
-	for (wp1 = head_wp; wp1 != NULL; wp1 = wp1->next)
-		if (wp1->pointp == lp)
-			wp1->pointp = newlp;
-
-	if (wp->bp->markp == lp)
-		wp->bp->markp = newlp;
+	adjust_markers_for_linep(lp, newlp);
 
 	return newlp;
 }
@@ -105,7 +104,7 @@ linep resize_line(windowp wp, linep lp, int maxsize)
 /*
  * Free the line contents.
  */
-void free_line(linep lp)
+void free_line(Line *lp)
 {
 	if (lp->anchors != NULL)
 		free(lp->anchors);
@@ -124,28 +123,27 @@ int intercalate_char(int c)
 	/*
 	 * Resize the line if required.
 	 */
-	if (cur_wp->pointp->size + 1 >= cur_wp->pointp->maxsize)
-		resize_line(cur_wp, cur_wp->pointp,
-			    cur_wp->pointp->maxsize + 10);
+	if (cur_bp->pt.p->size + 1 >= cur_bp->pt.p->maxsize)
+		resize_line(cur_bp->pt.p, cur_bp->pt.p->maxsize + 10);
 	/*
 	 * Move the line text one position forward after the
 	 * point if required.
 	 * This code assumes that memmove(d, s, 0) does nothing.
 	 */
-	memmove(cur_wp->pointp->text + cur_wp->pointo + 1,
-                cur_wp->pointp->text + cur_wp->pointo,
-                cur_wp->pointp->size - cur_wp->pointo);
+	memmove(cur_bp->pt.p->text + cur_bp->pt.o + 1,
+		cur_bp->pt.p->text + cur_bp->pt.o,
+		cur_bp->pt.p->size - cur_bp->pt.o);
 
-	undo_save(UNDO_REMOVE_CHAR, cur_wp->pointn, cur_wp->pointo, 0, 0);
-	cur_wp->pointp->text[cur_wp->pointo] = c;
+	undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
+	cur_bp->pt.p->text[cur_bp->pt.o] = c;
 
-	++cur_wp->pointp->size;
+	++cur_bp->pt.p->size;
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
 #if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK)
-		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 
 	return TRUE;
@@ -157,9 +155,6 @@ int intercalate_char(int c)
  */
 int insert_char(int c)
 {
-	windowp wp;
-	int pointo;
-
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
@@ -168,24 +163,23 @@ int insert_char(int c)
 		   && isn't a \t
 		      || tab width isn't correct
 		      || current char is a \t && we are in the tab limit.  */
-		if ((cur_wp->pointo < cur_wp->pointp->size)
-		    && ((cur_wp->pointp->text[cur_wp->pointo] != '\t')
+		if ((cur_bp->pt.o < cur_bp->pt.p->size)
+		    && ((cur_bp->pt.p->text[cur_bp->pt.o] != '\t')
 			|| (cur_bp->tab_width < 1)
-			|| ((cur_wp->pointp->text[cur_wp->pointo] == '\t')
-			    && ((get_text_goalc (cur_wp) % cur_bp->tab_width)
+			|| ((cur_bp->pt.p->text[cur_bp->pt.o] == '\t')
+			    && ((get_goalc() % cur_bp->tab_width)
 				== cur_bp->tab_width-1)))) {
-			/* Replace the character.  */
-			undo_save(UNDO_REPLACE_CHAR,
-				  cur_wp->pointn, cur_wp->pointo,
-				  cur_wp->pointp->text[cur_wp->pointo], 0);
-			cur_wp->pointp->text[cur_wp->pointo] = c;
-			++cur_wp->pointo;
+			/* Replace the charater.  */
+			undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
+				  cur_bp->pt.p->text[cur_bp->pt.o], 0);
+			cur_bp->pt.p->text[cur_bp->pt.o] = c;
+			++cur_bp->pt.o;
 
 			cur_bp->flags |= BFLAG_MODIFIED;
 
 #if ENABLE_NONTEXT_MODES
 			if (cur_bp->flags & BFLAG_FONTLOCK)
-				font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+				font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 
 			return TRUE;
@@ -198,19 +192,7 @@ int insert_char(int c)
 	}
 
 	(void)intercalate_char(c);
-
-	pointo = cur_wp->pointo;
-
-	/*
-	 * Scan all the windows searching for points
-	 * pointing at the modified line.
-	 */
-	for (wp = head_wp; wp != NULL; wp = wp->next)
-		if (wp->pointp == cur_wp->pointp && wp->pointo >= pointo)
-			++wp->pointo;
-
-	if (cur_bp->markp == cur_wp->pointp && cur_bp->marko > pointo)
-		++cur_bp->marko;
+	adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, 1);
 
 	return TRUE;
 }
@@ -236,19 +218,13 @@ int insert_char_in_insert_mode(int c)
 	return ret_value;
 }
 
-static void insert_expanded_tab(void)
+static void insert_expanded_tab(int (*inschr)(int chr))
 {
-	int col = 0, t = cur_bp->tab_width;
-	char *sp = cur_wp->pointp->text, *p = sp;
+	int c = get_goalc();
+	int t = cur_bp->tab_width;
 
-	while (p < sp + cur_wp->pointo) {
-		if (*p == '\t')
-			col |= t - 1;
-		++col, ++p;
-	}
-
-	for (col = t - col % t; col > 0; --col)
-		insert_char(' ');
+	for (c = t - c % t; c > 0; --c)
+		(*inschr)(' ');
 }
 
 int insert_tab(void)
@@ -257,9 +233,9 @@ int insert_tab(void)
 		return FALSE;
 
 	if (!lookup_bool_variable("expand-tabs"))
-		insert_char('\t');
+		insert_char_in_insert_mode('\t');
 	else
-		insert_expanded_tab();
+		insert_expanded_tab(insert_char_in_insert_mode);
 
 	return TRUE;
 }
@@ -273,35 +249,34 @@ if the `expand-tabs' variable is bound and set to true.
 {
 	int uni, ret = TRUE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!insert_tab()) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
 
-static int common_insert_newline(int undo_mode)
+static int common_insert_newline(int move_pt)
 {
-	linep lp1, lp2;
-	int lp1len, lp2len, cur_pointn;
-	windowp wp;
+	Line *lp1, *lp2;
+	int lp1len, lp2len;
 
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	undo_save(UNDO_REMOVE_CHAR, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
 
 	/*
 	 * Calculate the two line lengths.
 	 */
-	lp1len = cur_wp->pointo;
-	lp2len = cur_wp->pointp->size - lp1len;
+	lp1len = cur_bp->pt.o;
+	lp2len = cur_bp->pt.p->size - lp1len;
 
-	lp1 = cur_wp->pointp;
+	lp1 = cur_bp->pt.p;
 	lp2 = new_line(lp2len ? lp2len : 1);
 
 	/*
@@ -322,35 +297,14 @@ static int common_insert_newline(int undo_mode)
 	lp1->next = lp2;
 	++cur_bp->num_lines;
 
-	/*
-	 * Scan all the windows searching for points
-	 * pointing at the changed line.
-	 */
-	cur_pointn = cur_wp->pointn;
-	for (wp = head_wp; wp != NULL; wp = wp->next) {
-		if (wp->bp != cur_bp)
-			continue;
-		if (wp->pointp == lp1 &&
-		    ((undo_mode && wp->pointo > lp1len)
-		     || (!undo_mode && wp->pointo >= lp1len))) {
-			wp->pointp = lp2;
-			wp->pointo -= lp1len;
-			++wp->pointn;
-		} else if (wp->pointn > cur_pointn)
-			++wp->pointn;
-	}
-
-	if (cur_bp->markp == lp1 && cur_bp->marko >= lp1len) {
-		cur_bp->markp = lp2;
-		cur_bp->marko -= lp1len;
-	}
+	adjust_markers_for_addline(lp1, lp2, lp1len, move_pt);
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
 #if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
-		font_lock_reset_anchors(cur_bp, cur_wp->pointp->prev);
-		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+		font_lock_reset_anchors(cur_bp, cur_bp->pt.p->prev);
+		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 	}
 #endif
 
@@ -361,7 +315,7 @@ static int common_insert_newline(int undo_mode)
 
 int insert_newline(void)
 {
-	return common_insert_newline(0);
+	return common_insert_newline(TRUE);
 }
 
 /* Insert a newline at the current position without moving the cursor.
@@ -369,7 +323,7 @@ int insert_newline(void)
  */
 int intercalate_newline(void)
 {
-	return common_insert_newline(1);
+	return common_insert_newline(FALSE);
 }
 
 /* Replace a text string in the same case as the original */
@@ -391,10 +345,9 @@ static void replace_text_case(char *to, int tlen, char *from, int flen)
         memcpy(to, from, tail);
 }
 
-void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
+void line_replace_text(Line **lp, int offset, int orgsize, char *newtext)
 {
 	int modified = FALSE, newsize, newmaxsize, trailing_size;
-	windowp wp;
 
 	if (orgsize == 0)
 		return;
@@ -405,7 +358,7 @@ void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
 		modified = TRUE;
 		newmaxsize = (*lp)->size - orgsize + newsize;
 		if (newmaxsize > (*lp)->maxsize)
-			*lp = resize_line(cur_wp, *lp, newmaxsize + 1);
+			*lp = resize_line(*lp, newmaxsize + 1);
 		trailing_size = (*lp)->size - (offset + orgsize);
 		if (trailing_size > 0)
 			memmove((*lp)->text + offset + newsize,
@@ -413,13 +366,7 @@ void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
 		replace_text_case((*lp)->text + offset, orgsize, newtext, newsize);
 		(*lp)->size = newmaxsize;
 
-		/*
-		 * Scan all the windows searching for points
-		 * pointing at the modified line.
-		 */
-		for (wp = head_wp; wp != NULL; wp = wp->next)
-			if (wp->pointp == *lp && wp->pointo > offset)
-				wp->pointo += newsize - orgsize;
+		adjust_markers_for_offset(*lp, offset, newsize-orgsize);
 	} else { /* The new text size is equal to old text size. */
 		if (memcmp((*lp)->text + offset, newtext, newsize) != 0) {
 			replace_text_case((*lp)->text + offset, orgsize, newtext, newsize);
@@ -445,20 +392,20 @@ the current buffer.
 {
 	int uni, ret = TRUE;
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!insert_newline()) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
 
 void insert_string(const char *s)
 {
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, strlen(s), 0);
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
 	undo_nosave = TRUE;
 	for (; *s != '\0'; ++s)
 		if (*s == '\n')
@@ -470,7 +417,7 @@ void insert_string(const char *s)
 
 void insert_nstring(const char *s, size_t size)
 {
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
 	undo_nosave = TRUE;
 	for (; 0 < size--; ++s)
 		if (*s == '\n')
@@ -487,40 +434,41 @@ void insert_nstring(const char *s, size_t size)
 static void auto_fill_break_line()
 {
 	int break_col, last_col, excess = 0;
-	linep lp;
 
         /* Move cursor back to fill_column */
-        while (get_text_goalc(cur_wp) > cur_wp->bp->fill_column + 1) {
-                cur_wp->pointo--;
+        while (get_goalc() > cur_bp->fill_column + 1) {
+                cur_bp->pt.o--;
                 excess++;
         }
 
         /* Find break point moving left from fill-column. */
-        for (break_col = cur_wp->pointo; break_col > 0; --break_col) {
-                int c = cur_wp->pointp->text[break_col - 1];
+        for (break_col = cur_bp->pt.o; break_col > 0; --break_col) {
+                int c = cur_bp->pt.p->text[break_col - 1];
                 if (isspace(c))
                         break;
         }
 
 	if (break_col > 1) {
 		/* Break line. */
-		last_col = cur_wp->pointo - break_col;
-		cur_wp->pointo = break_col;
+		last_col = cur_bp->pt.o - break_col;
+		cur_bp->pt.o = break_col;
                 FUNCALL(delete_horizontal_space);
 		insert_newline();
-		cur_wp->pointo = last_col + excess;
+		cur_bp->pt.o = last_col + excess;
 	}
 }
 
 int self_insert_command(int c)
 {
+	desactivate_mark();
+
 	if (c == KBD_RET)
 		insert_newline();
 	else if (c == KBD_TAB)
 		insert_tab();
 	else if (c <= 255) {
-		if (isspace(c) && cur_wp->bp->flags & BFLAG_AUTOFILL &&
-		    get_text_goalc(cur_wp) > cur_wp->bp->fill_column)
+		if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
+		    get_goalc() > cur_bp->fill_column)
 			auto_fill_break_line();
 		insert_char(c);
 	} else {
@@ -540,13 +488,13 @@ Insert the character you type.
 
 	c = cur_tp->getkey();
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!self_insert_command(c)) {
 			ret = FALSE;
 			break;
-		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+ 		}
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
@@ -564,58 +512,46 @@ void bprintf(const char *fmt, ...)
 
 int delete_char(void)
 {
-	windowp wp;
+	desactivate_mark();
 
-	if (cur_wp->pointo < cur_wp->pointp->size) {
+	if (!eolp()) {
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		undo_save(UNDO_INTERCALATE_CHAR, cur_wp->pointn, cur_wp->pointo,
-			  cur_wp->pointp->text[cur_wp->pointo], 0);
+		undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
+			  cur_bp->pt.p->text[cur_bp->pt.o], 0);
 
 		/*
 		 * Move the text one position backward after the point,
 		 * if required.
 		 * This code assumes that memmove(d, s, 0) does nothing.
 		 */
-		memmove(cur_wp->pointp->text + cur_wp->pointo,
-                        cur_wp->pointp->text + cur_wp->pointo + 1,
-                        cur_wp->pointp->size - cur_wp->pointo - 1);
-		--cur_wp->pointp->size;
+		memmove(cur_bp->pt.p->text + cur_bp->pt.o,
+			cur_bp->pt.p->text + cur_bp->pt.o + 1,
+			cur_bp->pt.p->size - cur_bp->pt.o - 1);
+		--cur_bp->pt.p->size;
 
-		/*
-		 * Scan all the windows searching for points
-		 * pointing at the modified line.
-		 */
-		for (wp = head_wp; wp != NULL; wp = wp->next)
-			if (wp->pointp == cur_wp->pointp
-			    && wp->pointo > cur_wp->pointo)
-				--wp->pointo;
-
-		if (cur_bp->markp == cur_wp->pointp
-		    && cur_bp->marko > cur_wp->pointo)
-			--cur_bp->marko;
+		adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, -1);
 
 #if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
 		return TRUE;
-	} else if (cur_wp->pointp->next != cur_bp->limitp) {
-		linep lp1, lp2;
+	} else if (!eobp()) {
+		Line *lp1, *lp2;
 		int lp1len, lp2len;
 
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		undo_save(UNDO_INTERCALATE_CHAR, cur_wp->pointn, cur_wp->pointo,
-			  '\n', 0);
+		undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt, '\n', 0);
 
-		lp1 = cur_wp->pointp;
-		lp2 = cur_wp->pointp->next;
+		lp1 = cur_bp->pt.p;
+		lp2 = cur_bp->pt.p->next;
 		lp1len = lp1->size;
 		lp2len = lp2->size;
 
@@ -623,7 +559,7 @@ int delete_char(void)
 		 * Resize line if required.
 		 */
 		if (lp1len + lp2len + 1 >= lp1->maxsize)
-			lp1 = resize_line(cur_wp, lp1, lp1len + lp2len + 1);
+			lp1 = resize_line(lp1, lp1len + lp2len + 1);
 
 		if (lp2len > 0) {
 			/*
@@ -645,31 +581,13 @@ int delete_char(void)
 		 */
 		free_line(lp2);
 
-		/*
-		 * Scan all the windows searching for points
-		 * pointing at the deallocated line.
-		 */
-		for (wp = head_wp; wp != NULL; wp = wp->next) {
-			if (wp->bp != cur_bp)
-				continue;
-			if (wp->pointp == lp2) {
-				wp->pointp = lp1;
-				wp->pointo += lp1len;
-				--wp->pointn;
-			} else if (wp->pointn > cur_wp->pointn)
-				--wp->pointn;
-		}
-
-		if (cur_bp->markp == lp2) {
-			cur_bp->markp = lp1;
-			cur_bp->marko += lp1len;
-		}
+		adjust_markers_for_delline(lp1, lp2, lp1len);
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
 #if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 
 		thisflag |= FLAG_NEED_RESYNC;
@@ -693,170 +611,54 @@ Join lines if the character is a newline.
 	if (uniarg < 0)
 		return FUNCALL_ARG(backward_delete_char, -uniarg);
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!delete_char()) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
 
 int backward_delete_char(void)
 {
-	windowp wp;
+	desactivate_mark();
 
-	if (cur_wp->pointo > 0) {
-		if (warn_if_readonly_buffer())
-			return FALSE;
-
-		undo_save(UNDO_INSERT_CHAR, cur_wp->pointn, cur_wp->pointo - 1,
-			  cur_wp->pointp->text[cur_wp->pointo - 1], 0);
-
-		/*
-		 * Move the text one position backward before the point,
-		 * if required.
-		 * This code assumes that memmove(d, s, 0) does nothing.
-		 */
-		memmove(cur_wp->pointp->text + cur_wp->pointo - 1,
-                        cur_wp->pointp->text + cur_wp->pointo,
-                        cur_wp->pointp->size - cur_wp->pointo);
-		--cur_wp->pointp->size;
-
-		/*
-		 * Scan all the windows searching for points
-		 * pointing at the modified line.
-		 */
-		for (wp = head_wp; wp != NULL; wp = wp->next)
-			if (wp->pointp == cur_wp->pointp
-			    && wp->pointo >= cur_wp->pointo)
-				--wp->pointo;
-
-		if (cur_bp->markp == cur_wp->pointp
-		    && cur_bp->marko >= cur_wp->pointo)
-			--cur_bp->marko;
-
-		cur_bp->flags |= BFLAG_MODIFIED;
-
-#if ENABLE_NONTEXT_MODES
-		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
-#endif
-
-		return TRUE;
-	} else if (cur_wp->pointp->prev != cur_bp->limitp) {
-		linep lp1, lp2;
-		int lp1len, lp2len;
-
-		if (warn_if_readonly_buffer())
-			return FALSE;
-
-		undo_save(UNDO_INSERT_CHAR, cur_wp->pointn - 1,
-			  cur_wp->pointp->prev->size, '\n', 0);
-
-		lp1 = cur_wp->pointp->prev;
-		lp2 = cur_wp->pointp;
-		lp1len = lp1->size;
-		lp2len = lp2->size;
-
-		/*
-		 * Resize line if required.
-		 */
-		if (lp1len + lp2len + 1 >= lp1->maxsize)
-			lp1 = resize_line(cur_wp, lp1, lp1len + lp2len + 1);
-
-		if (lp2len > 0) {
-			/*
-			 * Move the current line text into the previous line.
-			 */
-			memcpy(lp1->text + lp1len, lp2->text, lp2len);
-			lp1->size += lp2len;
-		}
-
-		/*
-		 * Update line linked list.
-		 */
-		lp1->next = lp2->next;
-		lp1->next->prev = lp1;
-		--cur_bp->num_lines;
-		assert(cur_bp->limitp->next != lp2);
-		assert(cur_bp->limitp->prev != lp2);
-
-		/*
-		 * Free the unlinked line.
-		 */
-		free_line(lp2);
-
-		cur_wp->pointp = lp1;
-		cur_wp->pointo += lp1len;
-		--cur_wp->pointn;
-
-		/*
-		 * Scan all the windows searching for points
-		 * pointing at the deallocated line.
-		 */
-		for (wp = head_wp; wp != NULL; wp = wp->next) {
-			if (wp->bp != cur_bp)
-				continue;
-			if (wp->pointp == lp2) {
-				wp->pointp = lp1;
-				wp->pointo += lp1len;
-				--wp->pointn;
-			} else if (wp->pointn > cur_wp->pointn)
-				--wp->pointn;
-		}
-
-		if (cur_bp->markp == lp2) {
-			cur_bp->markp = lp1;
-			cur_bp->marko += lp1len;
-		}
-
-		cur_bp->flags |= BFLAG_MODIFIED;
-
-#if ENABLE_NONTEXT_MODES
-		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
-#endif
-
-		thisflag |= FLAG_NEED_RESYNC;
-
+	if (backward_char()) {
+		delete_char();
 		return TRUE;
 	}
-
-	minibuf_error("Beginning of buffer");
-
-	return FALSE;
+	else {
+		minibuf_error("Beginning of buffer");
+		return FALSE;
+	}
 }
 
 int backward_delete_char_overwrite(void)
 {
-	windowp wp;
-
-	if ((cur_wp->pointo > 0) && (cur_wp->pointo < cur_wp->pointp->size)) {
+	if (!bolp() && !eolp()) {
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		cur_wp->pointo--;
-		if (cur_wp->pointp->text[cur_wp->pointo] == '\t') {
-			int c;
-
-			undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
-			for (c=0; c<cur_bp->tab_width; c++)
-				insert_char (' ');
-			undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		backward_char();
+		if (following_char() == '\t') {
+			/* In overwrite-mode.  */
+			undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+			insert_expanded_tab(insert_char);
+			undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 		}
 		else {
-			insert_char (' ');
+			insert_char(' '); /* In overwrite-mode.  */
 		}
-		cur_wp->pointo--;
+		backward_char();
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
 #if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 #endif
 
 		return TRUE;
@@ -872,7 +674,7 @@ Join lines if the character is a newline.
 +*/
 {
 	 /* In overwrite-mode and isn't called by delete_char().  */
-	int (*f)() = (cur_bp->flags & BFLAG_OVERWRITE &&
+	int (*f)() = ((cur_bp->flags & BFLAG_OVERWRITE) &&
 		      (last_uniarg > 0)) ?
 		backward_delete_char_overwrite:
 		backward_delete_char;
@@ -881,38 +683,294 @@ Join lines if the character is a newline.
 	if (uniarg < 0)
 		return FUNCALL_ARG(delete_char, -uniarg);
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!(*f) ()) {
+		if (!(*f)()) {
 			ret = FALSE;
 			break;
 		}
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;
 }
 
 DEFUN("delete-horizontal-space", delete_horizontal_space)
+/*+
+Delete all spaces and tabs around point.
++*/
 {
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
-	while ((cur_wp->pointo < cur_wp->pointp->size)
-	       && isspace(cur_wp->pointp->text[cur_wp->pointo]))
+	while (!eolp() && isspace(following_char()))
 		delete_char();
 
-	while ((cur_wp->pointo > 0) &&
-	       isspace(cur_wp->pointp->text[cur_wp->pointo-1]))
+	while (!bolp() && isspace(preceding_char()))
 		backward_delete_char();
 
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 	return TRUE;
 }
 
 DEFUN("just-one-space", just_one_space)
+/*+
+Delete all spaces and tabs around point, leaving one space.
++*/
 {
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	FUNCALL(delete_horizontal_space);
 	insert_char_in_insert_mode(' ');
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 	return TRUE;
+}
+
+/***********************************************************************
+			 Indentation command
+ ***********************************************************************/
+
+static int indent_relative(void)
+{
+	int target_goalc;
+	int cur_goalc = get_goalc();
+	Marker *old_point;
+
+	if (warn_if_readonly_buffer())
+		return FALSE;
+
+	desactivate_mark();
+	old_point = point_marker();
+
+	/* Find previous non-blank line.  */
+	do {
+		if (!FUNCALL_ARG(forward_line, -1)) {
+/* 			restore_excursion(); */
+			cur_bp->pt = old_point->pt;
+			free_marker(old_point);
+
+			return insert_tab();
+		}
+	} while (is_blank_line());
+
+	/* Reference line.  */
+/* 	ref_line = point_marker(); */
+
+	/* Find the first blank char.  */
+	while (!eolp()) {
+		if (isspace(following_char()) &&
+		    (get_goalc() > cur_goalc))
+			break;
+		forward_char();
+	}
+
+	/* Find first non-blank char */
+	while (!eolp()) {
+		if ((!isspace(following_char())) &&
+		    (get_goalc() > cur_goalc))
+			break;
+		forward_char();
+	}
+
+	/* Target column.  */
+	if (!eolp()) {
+		target_goalc = get_goalc();
+	}
+	else {
+/* 		restore_excursion(); */
+		cur_bp->pt = old_point->pt;
+		free_marker(old_point);
+
+		return insert_tab();
+	}
+
+/* 	restore_excursion(); */
+	cur_bp->pt = old_point->pt;
+	free_marker(old_point);
+
+	/* Insert spaces.  XXX and tabs .-dacap */
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+	while (get_goalc() < target_goalc)
+		insert_char_in_insert_mode(' ');
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+
+	return TRUE;
+}
+
+#if ENABLE_CLIKE_MODES
+int c_indent_command(void)
+{
+#if 0				/* XXX finish it .-dacap */
+	char *indent_string = get_variable("standard-indent");
+	int c, ret, indent = !indent_string ? 4 : atoi(indent_string);
+
+	if (indent < 0)
+		indent = 0;
+
+	if (indent) {
+		save_excursion();
+
+		while (!bolp()) {
+			if (!isspace(preceding_char())) {
+				indent = 0;
+				break;
+			}
+			backward_char();
+		}
+
+		if (indent) {
+			while (!bobp()) {
+				if (!isspace(preceding_char())) {
+					if (preceding_char() != '{')
+						indent = 0;
+					break;
+				}
+				backward_char();
+			}
+		}
+
+		restore_excursion();
+	}
+
+	ret = indent_relative();
+	if (ret) {
+		for (c=0; c<indent; c++)
+			insert_char_in_insert_mode(' ');
+	}
+#else
+	return indent_relative();
+#endif
+}
+#endif
+
+DEFUN("indent-command", indent_command)
+{
+	if (cur_bp->mode == BMODE_TEXT
+#if ENABLE_MAIL_MODE
+		|| cur_bp->mode == BMODE_MAIL
+#endif
+		) {
+		return indent_relative();
+	}
+#if ENABLE_CLIKE_MODES
+	else if (0
+#if ENABLE_C_MODE
+		 || cur_bp->mode == BMODE_C
+#endif
+#if ENABLE_CPP_MODE
+		 || cur_bp->mode == BMODE_CPP
+#endif
+#if ENABLE_CSHARP_MODE
+		 || cur_bp->mode == BMODE_CSHARP
+#endif
+#if ENABLE_JAVA_MODE
+		 || cur_bp->mode == BMODE_JAVA
+#endif
+		) {
+		return c_indent_command ();
+	}
+#endif
+	else {
+		return insert_tab();
+	}
+}
+
+DEFUN("newline-and-indent", newline_and_indent)
+/*+
+Insert a newline, then indent according to major mode.
+Indentation is done using the `indent-command' function.
++*/
+{
+	int ret;
+
+	if (warn_if_readonly_buffer())
+		return FALSE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+	ret = insert_newline();
+	if (ret)
+		FUNCALL(indent_command);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+	return ret;
+}
+
+/***********************************************************************
+		       Adjust markers routines
+ ***********************************************************************/
+
+#define CMP_MARKER_OFFSET(marker, offset, extra)			\
+	(((!(marker)->type) && (marker)->pt.o > (offset))		\
+	 || ((marker)->type && (marker)->pt.o >= (offset)+(extra)))
+
+static void adjust_markers_for_linep(Line *lp, Line *newlp)
+{
+	Marker *pt, *marker;
+	pt = point_marker();
+	set_marker_insertion_type(pt, TRUE);
+
+	/* Update the markers.  */
+	for (marker=cur_bp->markers; marker; marker=marker->next) {
+		if (marker->pt.p == lp)
+			marker->pt.p = newlp;
+	}
+
+	cur_bp->pt = pt->pt;
+	free_marker(pt);
+}
+
+static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
+{
+	Marker *pt, *marker;
+	pt = point_marker();
+	set_marker_insertion_type(pt, TRUE);
+
+	/* Update the markers.  */
+	for (marker=cur_bp->markers; marker; marker=marker->next) {
+		if (marker->pt.p == cur_bp->pt.p &&
+		    CMP_MARKER_OFFSET(marker, pointo, ((offset < 0) ? 1: 0)))
+			marker->pt.o += offset;
+	}
+
+	cur_bp->pt = pt->pt;
+	free_marker(pt);
+}
+
+static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type)
+{
+	Marker *pt, *marker;
+	pt = point_marker();
+	set_marker_insertion_type(pt, pt_insertion_type);
+
+	/* Update the markers.  */
+	for (marker=cur_bp->markers; marker; marker=marker->next) {
+		if (marker->pt.p == lp1 &&
+		    CMP_MARKER_OFFSET(marker, lp1len, 0)) {
+			marker->pt.p = lp2;
+			marker->pt.o -= lp1len;
+			marker->pt.n++;
+		}
+		else if (marker->pt.n > cur_bp->pt.n)
+			marker->pt.n++;
+	}
+
+	cur_bp->pt = pt->pt;
+	free_marker(pt);
+}
+
+static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len)
+{
+	Marker *pt, *marker;
+	pt = point_marker();
+	set_marker_insertion_type(pt, TRUE);
+
+	/* Update the markers.  */
+	for (marker=cur_bp->markers; marker; marker=marker->next) {
+		if (marker->pt.p == lp2) {
+			marker->pt.p = lp1;
+			marker->pt.o += lp1len;
+			marker->pt.n--;
+		}
+		else if (marker->pt.n > cur_bp->pt.n)
+			marker->pt.n--;
+	}
+
+	cur_bp->pt = pt->pt;
+	free_marker(pt);
 }

@@ -1,7 +1,7 @@
-/*	$Id: term_ncurses.h,v 1.5 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: editfns.h,v 1.1 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
- * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 2004 David A. Capello.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -24,24 +24,30 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define ZILE_COLOR_BLACK	0
-#define ZILE_COLOR_RED		1
-#define ZILE_COLOR_GREEN	2
-#define ZILE_COLOR_YELLOW	3
-#define ZILE_COLOR_BLUE		4
-#define ZILE_COLOR_MAGENTA	5
-#define ZILE_COLOR_CYAN		6
-#define ZILE_COLOR_WHITE	7
-#define ZILE_COLOR_BLUEBG	8
+#ifndef EDITFNS_H
+#define EDITFNS_H
 
-#define C_FG_BLACK		COLOR_PAIR(ZILE_COLOR_BLACK)
-#define C_FG_RED		COLOR_PAIR(ZILE_COLOR_RED)
-#define C_FG_GREEN		COLOR_PAIR(ZILE_COLOR_GREEN)
-#define C_FG_YELLOW		COLOR_PAIR(ZILE_COLOR_YELLOW)
-#define C_FG_BLUE		COLOR_PAIR(ZILE_COLOR_BLUE)
-#define C_FG_MAGENTA		COLOR_PAIR(ZILE_COLOR_MAGENTA)
-#define C_FG_CYAN		COLOR_PAIR(ZILE_COLOR_CYAN)
-#define C_FG_WHITE		COLOR_PAIR(ZILE_COLOR_WHITE)
-#define C_FG_WHITE_BG_BLUE	COLOR_PAIR(ZILE_COLOR_BLUEBG)
+/* Mark-ring.  */
 
-extern Terminal *ncurses_tp;
+void push_mark(void);
+void pop_mark(void);
+void set_mark(void);
+
+/* What type of line.  */
+
+int is_empty_line(void);
+int is_blank_line(void);
+
+/* Examining text near point.  */
+
+int char_after(Point *pt);
+int char_before(Point *pt);
+int following_char(void);
+int preceding_char(void);
+
+int bobp(void);
+int eobp(void);
+int bolp(void);
+int eolp(void);
+
+#endif /* !EDITFNS_H */

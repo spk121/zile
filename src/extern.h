@@ -1,199 +1,240 @@
 /* basic.c ---------------------------------------------------------------- */
-extern int	backward_char(void);
-extern int	forward_char(void);
-extern void	goto_line(int to_line);
-extern void	gotobob(void);
-extern void	gotoeob(void);
-extern int	next_line(void);
-extern int	ngotodown(int n);
-extern int	ngotoup(int n);
-extern int	previous_line(void);
-extern int	scroll_down(void);
-extern int	scroll_up(void);
+int get_goalc_bp(Buffer *bp, Point pt);
+int get_goalc_wp(Window *wp);
+int get_goalc(void);
+int backward_char(void);
+int forward_char(void);
+void goto_line(int to_line);
+void gotobob(void);
+void gotoeob(void);
+int next_line(void);
+int ngotodown(int n);
+int ngotoup(int n);
+int previous_line(void);
+int scroll_down(void);
+int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
-extern void	bind_key(char *key, funcp func);
-extern int	do_completion(char *s, int *compl);
-extern int	execute_function(char *name, int uniarg);
-extern void	free_bindings(void);
-extern char *	get_function_by_key_sequence(void);
-extern void	init_bindings(void);
-extern char *	minibuf_read_function_name(char *msg);
-extern void	process_key(int c);
+void bind_key(char *key, Function func);
+int do_completion(char *s, int *compl);
+int execute_function(char *name, int uniarg);
+void free_bindings(void);
+char *get_function_by_key_sequence(void);
+void init_bindings(void);
+char *minibuf_read_function_name(char *msg);
+void process_key(int c);
 
 /* buffer.c --------------------------------------------------------------- */
-extern int	calculate_region(regionp rp);
-extern bufferp	create_buffer(const char *name);
-extern bufferp	new_buffer(void);
-extern void	free_buffer(bufferp bp);
-extern void	free_buffers(void);
-extern void	set_buffer_name(bufferp bp, const char *name);
-extern void	set_buffer_filename(bufferp bp, const char *filename);
-extern bufferp	find_buffer(const char *name, int cflag);
-extern bufferp	get_next_buffer(void);
-extern char *	make_buffer_name(const char *filename);
-extern void	switch_to_buffer(bufferp bp);
-extern int	zap_buffer_content(void);
-extern int	warn_if_readonly_buffer(void);
-extern int	warn_if_no_mark(void);
-extern void	set_temporary_buffer(bufferp bp);
-extern int	calculate_buffer_size(bufferp bp);
+int calculate_region(Region *rp);
+Buffer *create_buffer(const char *name);
+void free_buffer(Buffer *bp);
+void free_buffers(void);
+void set_buffer_name(Buffer *bp, const char *name);
+void set_buffer_filename(Buffer *bp, const char *filename);
+Buffer *find_buffer(const char *name, int cflag);
+Buffer *get_next_buffer(void);
+char *make_buffer_name(const char *filename);
+void switch_to_buffer(Buffer *bp);
+int zap_buffer_content(void);
+int warn_if_readonly_buffer(void);
+int warn_if_no_mark(void);
+void set_temporary_buffer(Buffer *bp);
+int calculate_buffer_size(Buffer *bp);
+
+int transient_mark_mode(void);
+void activate_mark(void);
+void desactivate_mark(void);
+int is_mark_actived(void);
 
 /* file.c ----------------------------------------------------------------- */
-extern int	exist_file(const char *filename);
-extern int	is_regular_file(const char *filename);
-extern int	expand_path(const char *path, const char *cwdir, astr dir,
-			    astr fname);
-extern astr	compact_path(astr buf, const char *path);
-extern astr	get_current_dir(astr buf, int interactive);
-extern void	open_file(char *path, int lineno);
-extern void	read_from_disk(const char *filename);
-extern int	find_file(const char *filename);
-extern historyp	make_buffer_history(void);
-extern int	check_modified_buffer(bufferp bp);
-extern void	kill_buffer(bufferp kill_bp);
-extern void	zile_exit(int exitcode);
+int exist_file(const char *filename);
+int is_regular_file(const char *filename);
+int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
+astr compact_path(astr buf, const char *path);
+astr get_current_dir(astr buf, int interactive);
+void open_file(char *path, int lineno);
+void read_from_disk(const char *filename);
+int find_file(const char *filename);
+Completion *make_buffer_completion(void);
+int check_modified_buffer(Buffer *bp);
+void kill_buffer(Buffer *kill_bp);
+void zile_exit(int exitcode);
 
 /* fontlock.c ------------------------------------------------------------- */
-extern void	font_lock_reset_anchors(bufferp bp, linep lp);
-extern int	find_last_anchor(bufferp bp, linep lp);
+void font_lock_reset_anchors(Buffer *bp, Line *lp);
+int find_last_anchor(Buffer *bp, Line *lp);
 
 /* fontlock_c.c ----------------------------------------------------------- */
-extern char *	is_c_keyword(const char *str, int len);
+char *is_c_keyword(const char *str, int len);
 
 /* fontlock_cpp.c --------------------------------------------------------- */
 #if ENABLE_CPP_MODE
-extern char *	is_cpp_keyword(const char *str, int len);
+char *is_cpp_keyword(const char *str, int len);
 #endif
 
 /* fontlock_csharp.c --------------------------------------------------------- */
 #if ENABLE_CSHARP_MODE
-extern char *   is_csharp_keyword(const char *str, int len);
+char *is_csharp_keyword(const char *str, int len);
 #endif
 
 /* fontlock_java.c --------------------------------------------------------- */
 #if ENABLE_JAVA_MODE
-extern char *   is_java_keyword(const char *str, int len);
+char *is_java_keyword(const char *str, int len);
 #endif
 
 /* funcs.c ---------------------------------------------------------------- */
-extern int	cancel(void);
-extern int	set_mark_command(void);
-extern int	universal_argument(int keytype, int xarg);
-extern void	write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
+int cancel(void);
+int set_mark_command(void);
+int exchange_point_and_mark(void);
+int universal_argument(int keytype, int xarg);
+void write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
 
 /* glue.c ----------------------------------------------------------------- */
-extern void	ding(void);
-extern void	waitkey(int msecs);
-extern int	waitkey_discard(int msecs);
-extern char *	copy_text_block(int startn, int starto, size_t size);
-extern char *	shorten_string(char *dest, char *s, int maxlen);
-extern char *	replace_string(char *s, char *match, char *subst);
-extern void	tabify_string(char *dest, char *src, int scol, int tw);
-extern void	untabify_string(char *dest, char *src, int scol, int tw);
-extern int	get_text_goalc(windowp wp);
-extern int	calculate_mark_lineno(windowp wp);
-extern void	goto_point (int pointn, int pointo);
-extern void *	zmalloc(size_t size);
-extern void *	zrealloc(void *ptr, size_t size);
-extern char *	zstrdup(const char *s);
+void ding(void);
+void waitkey(int msecs);
+int waitkey_discard(int msecs);
+char *copy_text_block(int startn, int starto, size_t size);
+char *shorten_string(char *dest, char *s, int maxlen);
+char *replace_string(char *s, char *match, char *subst);
+void tabify_string(char *dest, char *src, int scol, int tw);
+void untabify_string(char *dest, char *src, int scol, int tw);
+void goto_point(Point pt);
+void *zmalloc(size_t size);
+void *zrealloc(void *ptr, size_t size);
+char *zstrdup(const char *s);
 #ifdef DEBUG
-extern void	ztrace(const char *fmt, ...);
+void ztrace(const char *fmt, ...);
 #define ZTRACE(arg)	ztrace arg
 #else
 #define ZTRACE(arg)	(void)0
 #endif
 
 /* keys.c ----------------------------------------------------------------- */
-extern char *	keytostr(char *buf, int key, int *len);
-extern char *	keytostr_nobs(char *buf, int key, int *len);
-extern int	strtokey(char *buf, int *len);
-extern int	keytovec(char *key, int *keyvec);
-extern char *	simplify_key(char *dest, char *key);
+char *keytostr(char *buf, int key, int *len);
+char *keytostr_nobs(char *buf, int key, int *len);
+int strtokey(char *buf, int *len);
+int keytovec(char *key, int *keyvec);
+char *simplify_key(char *dest, char *key);
 
 /* line.c ----------------------------------------------------------------- */
-extern linep	new_line(int maxsize);
-extern linep	resize_line(windowp wp, linep lp, int maxsize);
-extern void	free_line(linep lp);
-extern void	line_replace_text(linep *lp, int offset, int orgsize, char *newtext);
-extern int	insert_char(int c);
-extern int      insert_char_in_insert_mode(int c);
-extern int      intercalate_char(int c);
-extern int	insert_tab(void);
-extern int	insert_newline(void);
-extern int      intercalate_newline(void);
-extern void	insert_string(const char *s);
-extern void	insert_nstring(const char *s, size_t size);
-extern int	self_insert_command(int c);
-extern void	bprintf(const char *fmt, ...);
-extern int	delete_char(void);
-extern int	backward_delete_char(void);
-extern void	free_registers(void);
-extern void	free_kill_ring(void);
+Line *new_line(int maxsize);
+Line *resize_line(Line *lp, int maxsize);
+void free_line(Line *lp);
+void line_replace_text(Line **lp, int offset, int orgsize, char *newtext);
+int insert_char(int c);
+int insert_char_in_insert_mode(int c);
+int intercalate_char(int c);
+int insert_tab(void);
+int insert_newline(void);
+int intercalate_newline(void);
+void insert_string(const char *s);
+void insert_nstring(const char *s, size_t size);
+int self_insert_command(int c);
+void bprintf(const char *fmt, ...);
+int delete_char(void);
+int backward_delete_char(void);
+void free_registers(void);
+void free_kill_ring(void);
 
 /* lua.c ------------------------------------------------------------------ */
-extern int	zlua_do(const char *s, astr *out);
-extern void	zlua_open(void);
+int zlua_do(const char *s, astr *out);
+void zlua_open(void);
 
 /* macro.c ---------------------------------------------------------------- */
-extern void	cancel_kbd_macro(void);
-extern void	add_kbd_macro(funcp func, int uniarg);
-extern void	add_macro_key_data(int key);
-extern int	get_macro_key_data(void);
-extern void	free_macros(void);
+void cancel_kbd_macro(void);
+void add_kbd_macro(Function func, int set_uniarg, int uniarg);
+void add_macro_key_data(int key);
+int get_macro_key_data(void);
+void free_macros(void);
 
 /* main.c ----------------------------------------------------------------- */
-extern windowp	cur_wp, head_wp;
-extern bufferp	cur_bp, head_bp;
-extern terminalp cur_tp;
-extern int	thisflag, lastflag, last_uniarg;
+extern Window *cur_wp, *head_wp;
+extern Buffer *cur_bp, *head_bp;
+extern Terminal *cur_tp;
+extern int thisflag, lastflag, last_uniarg;
+
+/* marker.c --------------------------------------------------------------- */
+Marker *make_marker(void);
+void free_marker(Marker *marker);
+void unchain_marker(Marker *marker);
+void move_marker(Marker *marker, Buffer *bp, Point pt);
+Marker *copy_marker(Marker *marker);
+Marker *point_marker(void);
+Marker *point_min_marker(void);
+Marker *point_max_marker(void);
+void set_marker_insertion_type(Marker *marker, int type);
+int marker_insertion_type(Marker *marker);
 
 /* minibuf.c -------------------------------------------------------------- */
-extern void	minibuf_clear(void);
-extern void	minibuf_error(const char *fmt, ...);
-extern void	minibuf_write(const char *fmt, ...);
-extern char *	minibuf_read(const char *fmt, const char *value, ...);
-extern int	minibuf_read_boolean(const char *fmt, ...);
-extern char *	minibuf_read_color(const char *fmt, ...);
-extern char *	minibuf_read_dir(const char *fmt, const char *value, ...);
-extern char *	minibuf_read_history(const char *fmt, char *value, historyp hp, ...);
-extern int	minibuf_read_yesno(const char *fmt, ...);
-extern historyp new_history(int fileflag);
-extern void	free_history(historyp hp);
+void free_minibuf(void);
+void minibuf_clear(void);
+void minibuf_error(const char *fmt, ...);
+void minibuf_write(const char *fmt, ...);
+char *minibuf_read(const char *fmt, const char *value, ...);
+int minibuf_read_boolean(const char *fmt, ...);
+char *minibuf_read_color(const char *fmt, ...);
+char *minibuf_read_dir(const char *fmt, const char *value, ...);
+char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
+int minibuf_read_yesno(const char *fmt, ...);
+
+/* completion.c ----------------------------------------------------------- */
+Completion *new_completion(int fileflag);
+void free_completion(Completion *cp);
+
+/* history.c -------------------------------------------------------------- */
+void free_history_elements(History *hp);
+void add_history_element(History *hp, const char *string);
+void prepare_history(History *hp);
+const char *previous_history_element(History *hp);
+const char *next_history_element(History *hp);
+
+/* point.c ---------------------------------------------------------------- */
+Point make_point(int lineno, int offset);
+int cmp_point(Point pt1, Point pt2);
+int point_dist(Point pt1, Point pt2);
+int count_lines(Point pt1, Point pt2);
+void swap_point(Point *pt1, Point *pt2);
+Point point_min(void);
+Point point_max(void);
+Point line_beginning_position(int count);
+Point line_end_position(int count);
 
 /* rc.c ------------------------------------------------------------------- */
-extern void	read_rc_file(const char *filename);
+void read_rc_file(const char *filename);
 
 /* redisplay.c ------------------------------------------------------------ */
-extern void	recenter(windowp wp);
-extern void	resync_redisplay(void);
+void recenter(Window *wp);
+void resync_redisplay(void);
 
 /* search.c --------------------------------------------------------------- */
-extern void	free_search_history(void);
+void free_search_history(void);
 
 /* undo.c ----------------------------------------------------------------- */
-extern int	undo_nosave;
-extern void	undo_start_sequence(void);
-extern void	undo_end_sequence(void);
-extern void	undo_save(int type, int startn, int starto, int arg1, int arg2);
+extern int undo_nosave;
+
+void undo_start_sequence(void);
+void undo_end_sequence(void);
+void undo_save(int type, Point pt, int arg1, int arg2);
 
 /* variables.c ------------------------------------------------------------ */
-extern void	init_variables(void);
-extern void	free_variables(void);
-extern int	is_variable_equal(char *var, char *val);
-extern int	lookup_bool_variable(char *var);
-extern char *	minibuf_read_variable_name(char *msg);
-extern void	set_variable(char *var, char *val);
-extern void	unset_variable(char *var);
-extern char *	get_variable(char *var);
+void init_variables(void);
+void free_variables(void);
+int is_variable_equal(char *var, char *val);
+int lookup_bool_variable(char *var);
+char *minibuf_read_variable_name(char *msg);
+void set_variable(char *var, char *val);
+void unset_variable(char *var);
+char *get_variable(char *var);
 
 /* window.c --------------------------------------------------------------- */
-extern void	create_first_window(void);
-extern windowp	new_window(void);
-extern void	free_window(windowp wp);
-extern windowp	find_window(const char *name);
-extern void	free_windows(void);
-extern windowp	popup_window(void);
+void create_first_window(void);
+Window *new_window(void);
+void free_window(Window *wp);
+Window *find_window(const char *name);
+void free_windows(void);
+Window *popup_window(void);
+void set_current_window (Window *wp);
+Point window_pt(Window *wp);
 
 /*
  * Declare external Zile functions.

@@ -13,7 +13,10 @@ AC_SUBST(ISODATE)
 
 AC_CANONICAL_HOST
 
+dnl ==================================================================
 dnl Checks for programs.
+dnl ==================================================================
+
 AC_PROG_CC
 AC_C_INLINE
 AC_PROG_INSTALL
@@ -21,26 +24,42 @@ AC_PROG_RANLIB
 AC_PATH_PROG(MAKEINFO, makeinfo)
 AC_PATH_PROG(GPERF, gperf)
 
+dnl ==================================================================
 dnl Checks for functions.
+dnl ==================================================================
+
 AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf)
 
+dnl ==================================================================
 dnl Checks for header files.
+dnl ==================================================================
+
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h limits.h)
 AC_CHECK_HEADER(curses.h,
          LIBS="$LIBS -lcurses",
          AC_MSG_FAILURE([cannot find curses.h]))
 
+dnl ==================================================================
 dnl Checks for typedefs, structures, and compiler characteristics.
+dnl ==================================================================
+
 AC_C_CONST
 AC_TYPE_SIZE_T
 
+dnl ==================================================================
 dnl Checks for library functions.
+dnl ==================================================================
+
 AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd strerror strstr)
+
+dnl ==================================================================
+dnl Debugging
+dnl ==================================================================
 
 AC_MSG_CHECKING([if the debugging code should be included])
 AC_ARG_ENABLE(debug,
@@ -55,6 +74,10 @@ fi
 ], [
 AC_MSG_RESULT(no)
 ])
+
+dnl ==================================================================
+dnl Editing modes
+dnl ==================================================================
 
 AC_MSG_CHECKING([if all features should be enabled])
 AC_ARG_ENABLE(all-modes,
@@ -198,6 +221,10 @@ else
 fi
 ])
 
+dnl ==================================================================
+dnl Lua
+dnl ==================================================================
+
 AC_MSG_CHECKING([if Lua scripting should be included])
 AC_ARG_ENABLE(lua,
 AC_HELP_STRING([--enable-lua], [Lua scripting]),
@@ -221,6 +248,34 @@ AC_MSG_RESULT(no)
 ])
 AM_CONDITIONAL(ENABLE_LUA, test x$enable_lua = xtrue)
 
+dnl ==================================================================
+dnl Check for GNU Regex library
+dnl ==================================================================
+
+AC_MSG_CHECKING([for GNU regex.h])
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <regex.h>
+], [
+struct re_pattern_buffer pattern;
+struct re_registers search_regs;
+re_set_syntax(RE_SYNTAX_EMACS);
+re_compile_pattern(".*", 2, &pattern);
+re_search(&pattern, "test", 4, 0, 4, &search_regs);
+], have_regex_h=true, have_regex_h=false)
+
+if test x$have_regex_h = xtrue ; then
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(HAVE_REGEX_H, 1, [Define this to use GNU regex.h.])
+else
+	AC_MSG_RESULT(no)
+fi
+
+AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
+
+dnl ==================================================================
+dnl Extra definitions for config.h
+dnl ==================================================================
 
 AH_BOTTOM([
 #include <stddef.h>
@@ -254,6 +309,10 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
 		   [The host of compilation.])
 
 rm -f src/paths.h
+
+dnl ==================================================================
+dnl Generate makefiles
+dnl ==================================================================
 
 AC_OUTPUT(Makefile \
 	  doc/Makefile \

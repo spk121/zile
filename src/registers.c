@@ -1,4 +1,4 @@
-/*	$Id: registers.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: registers.c,v 1.5 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -46,7 +46,7 @@ DEFUN("copy-to-register", copy_to_register)
 Copy region into the user specified register.
 +*/
 {
-	struct region r;
+	Region r;
 	char *p;
 	int reg;
 
@@ -61,21 +61,18 @@ Copy region into the user specified register.
 
 	calculate_region(&r);
 
-	p = copy_text_block(r.startn, r.starto, r.size);
+	p = copy_text_block(r.start.n, r.start.o, r.size);
 	if (regs[reg].text != NULL)
 		free(regs[reg].text);
 	regs[reg].text = p;
 	regs[reg].size = r.size;
-
-	cur_wp->bp->markp = NULL;
 
 	return TRUE;
 }
 
 static void insert_register(int reg)
 {
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo,
-		  regs[reg].size, 0);
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
 	undo_nosave = TRUE;
 	insert_nstring(regs[reg].text, regs[reg].size);
 	undo_nosave = FALSE;
@@ -103,12 +100,13 @@ Puts point before and mark after the inserted text.
 		return FALSE;
 	}
 
-	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < last_uniarg; ++uni)
 		insert_register(reg);
-	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	set_mark_command();
+	desactivate_mark();
 
 	return TRUE;
 }

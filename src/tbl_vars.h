@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: tbl_vars.h,v 1.5 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -174,8 +174,8 @@ The color used in Font Lock Mode for strings.")
 X("font-string-delimiters",		"c", "white", "\
 The color used in Font Lock Mode for string delimiters.")
 #endif /* ENABLE_NOTEXT_MODES */
-X("highlight-region",			"b", "true", "\
-If enabled, highlight the current region with reversed colors.")
+X("highlight-nonselected-windows",	"b", "false", "\
+If enabled, highlight region even in nonselected windows.")
 #if ENABLE_MAIL_MODE
 X("mail-mode-auto-fill",		"b", "false", "\
 If enabled, the Auto Fill Mode is automatically enabled in Mail Mode.")
@@ -201,9 +201,18 @@ X("show-eob-marker",			"b", "true", "\
 If enabled, a marker will be displayed at the end of the buffer.")
 X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
-X("status-line-color",			"c", "cyan", "\
+#if ENABLE_NONTEXT_MODES
+X("standard-indent",			"", "4", "\
+Default number of columns for margin-changing functions to indent.")
+#endif
+X("status-line-color",			"c", "white", "\
 The color of the status line.")
 X("tab-width",				"", "8", "\
 The default tabulation width.")
 X("text-mode-auto-fill",		"b", "false", "\
 If enabled, the Auto Fill Mode is automatically enabled in Text Mode.")
+X("transient-mark-mode",		"b", "true", "\
+If enabled, deactivates the mark when the buffer contents change.\n\
+Also enables highlighting of the region whenever the mark is active.\n\
+The variable `highlight-nonselected-windows' controls whether to\n\
+highlight all windows or just the selected window.")

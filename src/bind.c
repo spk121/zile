@@ -1,4 +1,4 @@
-/*	$Id: bind.c,v 1.7 2004/01/21 12:26:13 dacap Exp $	*/
+/*	$Id: bind.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -36,6 +36,8 @@
 #include "zile.h"
 #include "extern.h"
 
+static History functions_history;
+
 /*--------------------------------------------------------------------------
  * Key binding.
  *--------------------------------------------------------------------------*/
@@ -44,12 +46,12 @@ typedef struct leaf *leafp;
 
 struct leaf {
 	/* The key and the function associated with the leaf. */
-	int	key;
-	funcp	func;
+	int key;
+	Function func;
 
 	/* Leaf vector, number of items, max number of items. */
-	leafp	*vec;
-	int	vecnum, vecmax;
+	leafp *vec;
+	int vecnum, vecmax;
 };
 
 static leafp leaf_tree;
@@ -116,7 +118,7 @@ static void add_leaf(leafp tree, leafp p)
 	++tree->vecnum;
 }
 
-static int bind_key0(leafp tree, int *keys, int n, funcp func)
+static int bind_key0(leafp tree, int *keys, int n, Function func)
 {
 	leafp p, s;
 
@@ -135,7 +137,7 @@ static int bind_key0(leafp tree, int *keys, int n, funcp func)
 		return FALSE;
 }
 
-void bind_key(char *key, funcp func)
+void bind_key(char *key, Function func)
 {
 	int keys[64];
 	int i;
@@ -288,27 +290,29 @@ void process_key(int c)
 		/*
 		 * There are no bindings for the pressed key.
 		 */
-		undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 		for (uni = 0; uni < last_uniarg; ++uni) {
 			if (!self_insert_command(c)) {
 				char buf[64];
 				make_completion(buf, keys, numkeys);
 				buf[strlen(buf)-1] = '\0';
 				minibuf_error("%s not defined.", buf);
-				undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+				undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 				return;
 			}
 			if (thisflag & FLAG_DEFINING_MACRO)
-				add_kbd_macro(self_insert_command, c);
+				add_kbd_macro(self_insert_command, FALSE, c);
 		}
-		undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 	} else {
 		int oldflag = thisflag;
 		p->func(last_uniarg);
 		if ((oldflag & FLAG_DEFINING_MACRO)
 		    && (thisflag & FLAG_DEFINING_MACRO)
 		    && p->func != F_universal_argument)
-			add_kbd_macro(p->func, last_uniarg);
+			add_kbd_macro(p->func,
+				      lastflag & FLAG_SET_UNIARG,
+				      last_uniarg);
 	}
 }
 
@@ -318,15 +322,15 @@ void process_key(int c)
 
 struct fentry {
 	/* The function name. */
-	char	*name;
+	char *name;
 
 	/* The function pointer. */
-	funcp	func;
+	Function func;
 
 	/* The assigned keys. */
-	char	*key1;
-	char	*key2;
-	char	*key3;
+	char *key1;
+	char *key2;
+	char *key3;
 };
 
 typedef struct fentry *fentryp;
@@ -421,6 +425,7 @@ void free_bindings(void)
 		}
 	}
 
+	free_history_elements(&functions_history);
 }
 
 static struct fentry *bsearch_function(char *name)
@@ -435,33 +440,33 @@ char *minibuf_read_function_name(char *msg)
 	unsigned int i;
 	char *p, *ms;
 	fentryp entryp;
-	historyp hp;
+	Completion *cp;
 
-	hp = new_history(FALSE);
+	cp = new_completion(FALSE);
 	for (i = 0; i < fentry_table_size; ++i)
-		alist_append(hp->completions, zstrdup(fentry_table[i].name));
+		alist_append(cp->completions, zstrdup(fentry_table[i].name));
 
 	for (;;) {
-		ms = minibuf_read_history(msg, "", hp);
+		ms = minibuf_read_completion(msg, "", cp, &functions_history);
 
 		if (ms == NULL) {
-			free_history(hp);
+			free_completion(cp);
 			cancel();
 			return NULL;
 		}
 
 		if (ms[0] == '\0') {
-			free_history(hp);
+			free_completion(cp);
 			minibuf_error("No function name given");
 			return NULL;
 		} else {
                         astr as = astr_copy_cstr(ms);
 			/* Complete partial words if possible. */
-			if (hp->try(hp, as) == HISTORY_MATCHED)
-				ms = hp->match;
+			if (cp->try(cp, as) == COMPLETION_MATCHED)
+				ms = cp->match;
                         astr_delete(as);
-			for (p = alist_first(hp->completions); p != NULL;
-			     p = alist_next(hp->completions))
+			for (p = alist_first(cp->completions); p != NULL;
+			     p = alist_next(cp->completions))
 				if (!strcmp(ms, p)) {
 					ms = p;
 					break;
@@ -470,13 +475,17 @@ char *minibuf_read_function_name(char *msg)
 				minibuf_error("Undefined function name `@f%s@@'", ms);
 				waitkey(2 * 1000);
 			} else {
+				/* Add history element.  */
+				add_history_element(&functions_history,
+						    entryp->name);
+
 				minibuf_clear();
 				break;
 			}
 		}
 	}
 
-	free_history(hp);
+	free_completion(cp);
 
 	return entryp->name;
 }
@@ -513,7 +522,7 @@ Read function name, then read its arguments and call it.
 	return execute_function(name, last_uniarg);
 }
 
-static char *get_function_name(funcp p)
+static char *get_function_name(Function p)
 {
 	unsigned int i;
 	for (i = 0; i < fentry_table_size; ++i)

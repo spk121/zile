@@ -1,4 +1,4 @@
-/*	$Id: buffer.c,v 1.6 2004/02/04 02:53:55 dacap Exp $	*/
+/*	$Id: buffer.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -41,13 +41,13 @@
  * The allocation of the first empty line is done here to simplify
  * a lot the code.
  */
-bufferp new_buffer(void)
+static Buffer *new_buffer(void)
 {
-	bufferp bp;
+	Buffer *bp;
 	char *s;
 
-	bp = (bufferp)zmalloc(sizeof *bp);
-	memset(bp, 0, sizeof *bp);
+	bp = (Buffer *)zmalloc(sizeof(Buffer));
+	memset(bp, 0, sizeof(Buffer));
 
 	if ((s = get_variable("tab-width")) != NULL) {
 		bp->tab_width = atoi(s);
@@ -70,13 +70,18 @@ bufferp new_buffer(void)
 		bp->fill_column = 70;
 
 	/* Allocate a minimal space for a line. */
-	bp->save_pointp = new_line(1);
+	bp->pt.p = new_line(1);
+	bp->pt.n = 0;
+	bp->pt.o = 0;
 
 	/* Allocate a null line for the limit marker. */
 	bp->limitp = new_line(0);
 
-	bp->limitp->prev = bp->limitp->next = bp->save_pointp;
-	bp->save_pointp->prev = bp->save_pointp->next = bp->limitp;
+	bp->limitp->prev = bp->limitp->next = bp->pt.p;
+	bp->pt.p->prev = bp->pt.p->next = bp->limitp;
+
+	/* Markers.  */
+	bp->mark = bp->markers = NULL;
 
 	return bp;
 }
@@ -84,10 +89,10 @@ bufferp new_buffer(void)
 /*
  * Free the buffer allocated memory.
  */
-void free_buffer(bufferp bp)
+void free_buffer(Buffer *bp)
 {
-	linep lp, next_lp;
-	undop up, next_up;
+	Line *lp, *next_lp;
+	Undo *up, *next_up;
 
 	/*
 	 * Free all the lines.
@@ -113,6 +118,12 @@ void free_buffer(bufferp bp)
 		up = next_up;
 	}
 
+	/* 
+	 * Free markers.
+	 */
+	while (bp->markers)
+		free_marker(bp->markers);
+
 	/*
 	 * Free the name and the filename.
 	 */
@@ -128,7 +139,7 @@ void free_buffer(bufferp bp)
  */
 void free_buffers(void)
 {
-	bufferp bp, next;
+	Buffer *bp, *next;
 
 	for (bp = head_bp; bp != NULL; bp = next) {
 		next = bp->next;
@@ -139,9 +150,9 @@ void free_buffers(void)
 /*
  * Allocate a new buffer and insert it into the buffer list.
  */
-bufferp create_buffer(const char *name)
+Buffer *create_buffer(const char *name)
 {
-	bufferp bp;
+	Buffer *bp;
 
 	bp = new_buffer();
 	set_buffer_name(bp, name);
@@ -155,7 +166,7 @@ bufferp create_buffer(const char *name)
 /*
  * Set a new name for the buffer.
  */
-void set_buffer_name(bufferp bp, const char *name)
+void set_buffer_name(Buffer *bp, const char *name)
 {
 	if (bp->name != NULL)
 		free(bp->name);
@@ -165,7 +176,7 @@ void set_buffer_name(bufferp bp, const char *name)
 /*
  * Set a new filename (and a name) for the buffer.
  */
-void set_buffer_filename(bufferp bp, const char *filename)
+void set_buffer_filename(Buffer *bp, const char *filename)
 {
 	if (bp->filename != NULL)
 		free(bp->filename);
@@ -181,9 +192,9 @@ void set_buffer_filename(bufferp bp, const char *filename)
  * Search for a buffer named `name'.  If not buffer is found and
  * the `cflag' variable is set to `TRUE', create a new buffer.
  */
-bufferp find_buffer(const char *name, int cflag)
+Buffer *find_buffer(const char *name, int cflag)
 {
-	bufferp bp;
+	Buffer *bp;
 
 	for (bp = head_bp; bp != NULL; bp = bp->next)
 		if (!strcmp(bp->name, name))
@@ -207,7 +218,7 @@ bufferp find_buffer(const char *name, int cflag)
 /*
  * Find the next buffer in buffer list.
  */
-bufferp get_next_buffer(void)
+Buffer *get_next_buffer(void)
 {
 	if (cur_bp->next != NULL)
 		return cur_bp->next;
@@ -252,9 +263,9 @@ char *make_buffer_name(const char *filename)
 
 /* Move the selected buffer to head.  */
 
-static void move_buffer_to_head(bufferp bp)
+static void move_buffer_to_head(Buffer *bp)
 {
-        bufferp it, prev = NULL;
+        Buffer *it, *prev = NULL;
 
         for (it = head_bp; it; it = it->next) {
                 if (bp == it) {
@@ -272,56 +283,21 @@ static void move_buffer_to_head(bufferp bp)
 /*
  * Switch to the specified buffer.
  */
-void switch_to_buffer(bufferp bp)
+void switch_to_buffer(Buffer *bp)
 {
-	windowp wp;
-
 	assert(cur_wp->bp == cur_bp);
 
-	/*
-	 * The buffer is the current buffer; return safely.
-	 */
+	/* The buffer is the current buffer; return safely.  */
 	if (cur_bp == bp)
 		return;
 
-	thisflag |= FLAG_NEED_RESYNC;
-
-	if (--cur_bp->num_windows == 0) {
-		/*
-		 * This is the only window that displays the buffer.
-		 */
-		cur_bp->save_pointp = cur_wp->pointp;
-		cur_bp->save_pointn = cur_wp->pointn;
-		cur_bp->save_pointo = cur_wp->pointo;
-	}
-
-        /* Set current buffer.  */
+	/* Set current buffer.  */
 	cur_wp->bp = cur_bp = bp;
 
-	if (bp->num_windows++ == 0) {
-		/*
-		 * First use of buffer.
-		 */
-		cur_wp->pointp = bp->save_pointp;
-		cur_wp->pointn = bp->save_pointn;
-		cur_wp->pointo = bp->save_pointo;
+	/* Move the buffer to head.  */
+	move_buffer_to_head(bp);
 
-		return;
-	}
-
-	/*
-	 * The buffer is already displayed is another
-	 * windows.  Search for the first one.
-	 */
-	for (wp = head_wp; wp != NULL; wp = wp->next)
-		if (wp->bp == bp && wp != cur_wp) {
-			cur_wp->pointp = wp->pointp;
-			cur_wp->pointo = wp->pointo;
-			break;
-		}
-
-        /* Move the buffer to head.  */
-        move_buffer_to_head(bp);
+	thisflag |= FLAG_NEED_RESYNC;
 }
 
 /*
@@ -329,18 +305,28 @@ void switch_to_buffer(bufferp bp)
  */
 int zap_buffer_content(void)
 {
-	windowp wp;
-	linep new_lp, old_lp, next_lp;
+	Window *wp;
+	Line *new_lp, *old_lp, *next_lp;
 
 	new_lp = new_line(1);
 	new_lp->next = new_lp->prev = cur_bp->limitp;
 
 	old_lp = cur_bp->limitp->next;
 	cur_bp->limitp->next = cur_bp->limitp->prev = new_lp;
-	cur_bp->markp = NULL;
-	cur_bp->marko = 0;
+	cur_bp->pt.p = new_lp;
+	cur_bp->pt.n = 0;
+	cur_bp->pt.o = 0;
 	cur_bp->flags = 0;
 	cur_bp->num_lines = 0;
+
+	/* 
+	 * Free markers (remember that are windows pointing to some of
+	 * this markers).
+	 */
+	while (cur_bp->markers)
+		free_marker(cur_bp->markers);
+
+	cur_bp->mark = cur_bp->markers = NULL;
 
 	/*
 	 * Free all the old lines.
@@ -352,15 +338,12 @@ int zap_buffer_content(void)
 	} while (old_lp != cur_bp->limitp);
 
 	/*
-	 * Scan all the windows for finding the ones that point at the old
-	 * lines.
+	 * Scan all the windows that have markers to this buffers.
 	 */
 	for (wp = head_wp; wp != NULL; wp = wp->next)
 		if (wp->bp == cur_bp) {
 			wp->topdelta = 0;
-			wp->pointp = new_lp;
-			wp->pointo = 0;
-			wp->pointn = 0;
+			wp->saved_pt = NULL; /* It was freed.  */
 		}
 
 	return TRUE;
@@ -382,108 +365,39 @@ int warn_if_readonly_buffer(void)
 
 int warn_if_no_mark(void)
 {
-	if (cur_bp->markp == NULL) {
-		minibuf_error("The region is not active now");
+	if (!cur_bp->mark) {
+		minibuf_error("The mark is not set now");
 		return TRUE;
 	}
-
-	return FALSE;
+	else if (transient_mark_mode() && !cur_bp->mark_active) {
+		minibuf_error("The mark is not active now");
+		return TRUE;
+	}
+	else
+		return FALSE;
 }
 
 /*
  * Calculate the region size and set the region structure.
  */
-int calculate_region(regionp rp)
+int calculate_region(Region *rp)
 {
-	linep lpforw, lpback;
-	int forwsize = 0, forwlines = 0, backsize = 0, backlines = 0;
-
-	if (cur_bp->markp == NULL)
+	if (!is_mark_actived())
 		return FALSE;
 
-	if (cur_wp->pointp == cur_bp->markp) {
-		/*
-		 * The point and the mark are on the same line.
-		 */
-		if (cur_wp->pointo < cur_bp->marko) {
-			/*
-			 * The point is before the mark.
-			 */
-			rp->startp = cur_wp->pointp;
-			rp->startn = cur_wp->pointn;
-			rp->starto = cur_wp->pointo;
-			rp->endp = cur_bp->markp;
-			rp->endn = cur_wp->pointn;
-			rp->endo = cur_bp->marko;
-			rp->size = cur_bp->marko - cur_wp->pointo;
-			rp->num_lines = 0;
-		} else {
-			/*
-			 * The mark is before the point.
-			 */
-			rp->startp = cur_bp->markp;
-			rp->startn = cur_wp->pointn;
-			rp->starto = cur_bp->marko;
-			rp->endp = cur_wp->pointp;
-			rp->endn = cur_wp->pointn;
-			rp->endo = cur_wp->pointo;
-			rp->size = cur_wp->pointo - cur_bp->marko;
-			rp->num_lines = 0;
-		}
-
-		return TRUE;
+	/* The point is before the mark. */
+	if (cmp_point(cur_bp->pt, cur_bp->mark->pt) < 0) {
+		rp->start = cur_bp->pt;
+		rp->end = cur_bp->mark->pt;
+	}
+	/* The mark is before the point. */
+	else {
+		rp->start = cur_bp->mark->pt;
+		rp->end = cur_bp->pt;
 	}
 
-	/*
-	 * The point and the mark are on different lines.
-	 * Search forward and backward the point for the mark.
-	 */
-	lpforw = lpback = cur_wp->pointp;
-	while (lpforw != cur_bp->markp && lpback != cur_bp->markp) {
-		if (lpforw != cur_bp->limitp) {
-			if (lpforw != cur_wp->pointp)
-				forwsize += lpforw->size + 1;
-			else
-				forwsize += lpforw->size - cur_wp->pointo + 1;
-			lpforw = lpforw->next;
-			++forwlines;
-		}
-		if (lpback != cur_bp->limitp) {
-			if (lpback != cur_wp->pointp)
-				backsize += lpback->size + 1;
-			else
-				backsize += cur_wp->pointo + 1;
-			lpback = lpback->prev;
-			++backlines;
-		}
-	}
-
-	if (lpforw == cur_bp->markp) {
-		/*
-		 * The point is before the mark.
-		 */
-		rp->startp = cur_wp->pointp;
-		rp->startn = cur_wp->pointn;
-		rp->starto = cur_wp->pointo;
-		rp->endp = cur_bp->markp;
-		rp->endn = cur_wp->pointn + forwlines;
-		rp->endo = cur_bp->marko;
-		rp->size = forwsize + cur_bp->marko;
-		rp->num_lines = forwlines;
-	} else {
-		/*
-		 * The mark is before the point.
-		 */
-		rp->startp = cur_bp->markp;
-		rp->startn = cur_wp->pointn - backlines;
-		rp->starto = cur_bp->marko;
-		rp->endp = cur_wp->pointp;
-		rp->endn = cur_wp->pointn;
-		rp->endo = cur_wp->pointo;
-		rp->size = backsize + cur_bp->markp->size - cur_bp->marko;
-		rp->num_lines = backlines;
-	}
-
+	rp->size = point_dist(rp->start, rp->end);
+	rp->num_lines = count_lines(rp->start, rp->end);
 	return TRUE;
 }
 
@@ -491,9 +405,9 @@ int calculate_region(regionp rp)
  * Set the specified buffer temporary flag and move the buffer
  * at the end of the buffer list.
  */
-void set_temporary_buffer(bufferp bp)
+void set_temporary_buffer(Buffer *bp)
 {
-	bufferp bp0;
+	Buffer *bp0;
 
 	bp->flags |= BFLAG_TEMPORARY;
 
@@ -517,9 +431,9 @@ void set_temporary_buffer(bufferp bp)
 	bp->next = NULL;
 }
 
-int calculate_buffer_size(bufferp bp)
+int calculate_buffer_size(Buffer *bp)
 {
-	linep lp = bp->limitp->next;
+	Line *lp = bp->limitp->next;
 	int size = 0;
 
 	if (lp == bp->limitp)
@@ -534,4 +448,29 @@ int calculate_buffer_size(bufferp bp)
 	}
 
 	return size;
+}
+
+int transient_mark_mode(void)
+{
+	return lookup_bool_variable("transient-mark-mode");
+}
+
+void activate_mark(void)
+{
+	cur_bp->mark_active = TRUE;
+}
+
+void desactivate_mark(void)
+{
+	cur_bp->mark_active = FALSE;
+}
+
+int is_mark_actived(void)
+{
+	if (!cur_bp->mark)
+		return FALSE;
+	else if (transient_mark_mode())
+		return (cur_bp->mark_active) ? TRUE: FALSE;
+	else
+		return TRUE;
 }

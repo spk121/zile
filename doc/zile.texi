@@ -1017,9 +1017,9 @@ Default value is @samp{green}.
 @item font-string-delimiters
 The color used in @i{Font Lock Mode} for string delimiters.
 Default value is @samp{white}.
-@item highlight-region
-If enabled, highlight the current region with reversed colors.
-Default value is @samp{true}.
+@item highlight-nonselected-windows
+If enabled, highlight region even in nonselected windows.  Default
+value is @samp{false}.
 @item mail-mode-auto-fill
 If enabled, the @i{Auto Fill Mode} is automatically enabled in @i{Mail Mode}.
 Default value is @samp{false}.
@@ -1049,15 +1049,26 @@ Default value is @samp{true}.
 @item skip-splash-screen
 If enabled, the splash screen at startup will be avoided.
 Default value is @samp{false}.
+@item standard-indent
+Default number of columns for margin-changing functions to
+indent. Default values is @samp{4}.
 @item status-line-color
 The color of the status line.
-Default value is @samp{cyan}.
+Default value is @samp{white}.
 @item tab-width
 The default tabulation width.
 Default value is @samp{8}.
 @item text-mode-auto-fill
 If enabled, the @i{Auto Fill Mode} is automatically enabled in @i{Text Mode}.
 Default value is @samp{false}.
+
+@item transient-mark-mode
+If enabled, deactivates the mark when the buffer contents change.
+Also enables highlighting of the region whenever the mark is active.
+The variable `highlight-nonselected-windows' controls whether to
+highlight all windows or just the selected window.  Default value is
+@samp{true}.
+
 @end table
 @c LINT END VAR
 

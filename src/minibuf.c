@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.10 2003/12/08 21:48:44 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.11 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -26,25 +26,17 @@
 
 #include "config.h"
 
-#if HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
 #include <assert.h>
-#include <dirent.h>
-#if HAVE_LIMITS_H
-#include <limits.h>
-#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "zile.h"
 #include "extern.h"
 #include "agetcwd.h"
+
+static History files_history;
 
 /*--------------------------------------------------------------------------
  * Minibuffer wrapper functions.
@@ -152,6 +144,11 @@ static char *minibuf_format(const char *fmt, va_list ap, int error)
 	return buf;
 }
 
+void free_minibuf(void)
+{
+	free_history_elements(&files_history);
+}
+
 /*
  * Write the specified string in the minibuffer.
  */
@@ -199,9 +196,9 @@ char *minibuf_read(const char *fmt, const char *value, ...)
 	va_end(ap);
 
 	if (value != NULL)
-		p = cur_tp->minibuf_read(buf, value, NULL);
+		p = cur_tp->minibuf_read(buf, value, NULL, NULL);
 	else
-		p = cur_tp->minibuf_read(buf, "", NULL);
+		p = cur_tp->minibuf_read(buf, "", NULL, NULL);
 	free(buf);
 
 	return p;
@@ -212,7 +209,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 {
 	va_list ap;
 	char *buf, *p;
-	historyp hp;
+	Completion *cp;
 	astr dir, fname;
 	astr rbuf;
 
@@ -228,9 +225,9 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 	astr_append_cstr(dir, astr_cstr(fname));
 	compact_path(rbuf, astr_cstr(dir));
 
-	hp = new_history(TRUE);
-	p = cur_tp->minibuf_read(buf, astr_cstr(rbuf), hp);
-	free_history(hp);
+	cp = new_completion(TRUE);
+	p = cur_tp->minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
+	free_completion(cp);
 	free(buf);
 
 	if (p == NULL) {
@@ -239,6 +236,9 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 		astr_delete(rbuf);
 		return p;
 	}
+
+	/* Add history element.  */
+	add_history_element(&files_history, p);
 
 	agetcwd(rbuf);
         astr_clear(dir);
@@ -255,17 +255,17 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 }
 
 int minibuf_read_forced(const char *fmt, const char *errmsg,
-			historyp hp, ...)
+			Completion *cp, ...)
 {
 	va_list ap;
 	char *buf, *p;
 
-	va_start(ap, hp);
+	va_start(ap, cp);
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
 	for (;;) {
-		p = cur_tp->minibuf_read(buf, "", hp);
+		p = cur_tp->minibuf_read(buf, "", cp, NULL);
 		if (p == NULL) { /* Cancelled. */
 			free(buf);
 			return -1;
@@ -274,14 +274,14 @@ int minibuf_read_forced(const char *fmt, const char *errmsg,
                         astr as;
 			/* Complete partial words if possible. */
                         as = astr_copy_cstr(p);
-			if (hp->try(hp, as) == HISTORY_MATCHED)
-				p = hp->match;
+			if (cp->try(cp, as) == COMPLETION_MATCHED)
+				p = cp->match;
                         astr_delete(as);
-			for (s = alist_first(hp->completions); s != NULL;
-			     s = alist_next(hp->completions))
+			for (s = alist_first(cp->completions); s != NULL;
+			     s = alist_next(cp->completions))
 				if (!strcmp(p, s)) {
 					free(buf);
-					return alist_current_idx(hp->completions);
+					return alist_current_idx(cp->completions);
 				}
 			minibuf_error(errmsg);
 			waitkey(2 * 1000);
@@ -296,27 +296,27 @@ int minibuf_read_yesno(const char *fmt, ...)
 {
 	va_list ap;
 	char *buf;
-	historyp hp;
+	Completion *cp;
 	int retvalue;
 
 	va_start(ap, fmt);
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
-	hp = new_history(FALSE);
-	alist_append(hp->completions, zstrdup("yes"));
-	alist_append(hp->completions, zstrdup("no"));
+	cp = new_completion(FALSE);
+	alist_append(cp->completions, zstrdup("yes"));
+	alist_append(cp->completions, zstrdup("no"));
 
-	retvalue = minibuf_read_forced(buf, "Please answer yes or no.", hp);
+	retvalue = minibuf_read_forced(buf, "Please answer yes or no.", cp);
 	if (retvalue != -1) {
 		/* The completions may be sorted by the minibuf completion
 		   routines. */
-		if (!strcmp(alist_at(hp->completions, retvalue), "yes"))
+		if (!strcmp(alist_at(cp->completions, retvalue), "yes"))
 			retvalue = TRUE;
 		else
 			retvalue = FALSE;
 	}
-	free_history(hp);
+	free_completion(cp);
 	free(buf);
 
 	return retvalue;
@@ -326,27 +326,27 @@ int minibuf_read_boolean(const char *fmt, ...)
 {
 	va_list ap;
 	char *buf;
-	historyp hp;
+	Completion *cp;
 	int retvalue;
 
 	va_start(ap, fmt);
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
-	hp = new_history(FALSE);
-	alist_append(hp->completions, zstrdup("true"));
-	alist_append(hp->completions, zstrdup("false"));
+	cp = new_completion(FALSE);
+	alist_append(cp->completions, zstrdup("true"));
+	alist_append(cp->completions, zstrdup("false"));
 
-	retvalue = minibuf_read_forced(buf, "Please answer true or false.", hp);
+	retvalue = minibuf_read_forced(buf, "Please answer true or false.", cp);
 	if (retvalue != -1) {
 		/* The completions may be sorted by the minibuf completion
 		   routines. */
-		if (!strcmp(alist_at(hp->completions, retvalue), "true"))
+		if (!strcmp(alist_at(cp->completions, retvalue), "true"))
 			retvalue = TRUE;
 		else
 			retvalue = FALSE;
 	}
-	free_history(hp);
+	free_completion(cp);
 	free(buf);
 
 	return retvalue;
@@ -356,7 +356,7 @@ char *minibuf_read_color(const char *fmt, ...)
 {
 	va_list ap;
 	char *buf;
-	historyp hp;
+	Completion *cp;
 	int retvalue;
 	unsigned int i;
 	char *valid[] = {
@@ -370,21 +370,21 @@ char *minibuf_read_color(const char *fmt, ...)
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
-	hp = new_history(FALSE);
+	cp = new_completion(FALSE);
 	for (i = 0; i < sizeof valid / sizeof(char *); ++i)
-		alist_append(hp->completions, zstrdup(valid[i]));
+		alist_append(cp->completions, zstrdup(valid[i]));
 
-	retvalue = minibuf_read_forced(buf, "Invalid color name.", hp);
+	retvalue = minibuf_read_forced(buf, "Invalid color name.", cp);
 	if (retvalue != -1) {
 		/* The completions may be sorted by the minibuf completion
 		   routines. */
 		for (i = 0; i < sizeof valid / sizeof (char *); ++i)
-			if (!strcmp(alist_at(hp->completions, retvalue), valid[i])) {
+			if (!strcmp(alist_at(cp->completions, retvalue), valid[i])) {
 				retvalue = i;
 				break;
 			}
 	}
-	free_history(hp);
+	free_completion(cp);
 	free(buf);
 
 	if (retvalue == -1)
@@ -393,9 +393,9 @@ char *minibuf_read_color(const char *fmt, ...)
 }
 
 /*
- * Read a string from the minibuffer using a history.
+ * Read a string from the minibuffer using a completion.
  */
-char *minibuf_read_history(const char *fmt, char *value, historyp hp, ...)
+char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...)
 {
 	va_list ap;
 	char *buf, *p;
@@ -404,7 +404,7 @@ char *minibuf_read_history(const char *fmt, char *value, historyp hp, ...)
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
-	p = cur_tp->minibuf_read(buf, value, hp);
+	p = cur_tp->minibuf_read(buf, value, cp, hp);
 	free(buf);
 
 	return p;
@@ -416,314 +416,4 @@ char *minibuf_read_history(const char *fmt, char *value, historyp hp, ...)
 void minibuf_clear(void)
 {
 	cur_tp->minibuf_clear();
-}
-
-/*--------------------------------------------------------------------------
- * History functions.
- *--------------------------------------------------------------------------*/
-
-/* Forward declarations. */
-static void default_history_scroll_up(historyp hp);
-static void default_history_scroll_down(historyp hp);
-static int default_history_try(historyp hp, astr as);
-static int default_history_reread(historyp hp, astr as);
-
-/*
- * Allocate a new history structure.
- */
-historyp new_history(int fileflag)
-{
-	historyp hp;
-
-	hp = (historyp)zmalloc(sizeof *hp);
-	memset(hp, 0, sizeof *hp);
-
-	hp->completions = alist_new();
-	hp->matches = alist_new();
-	hp->try = default_history_try;
-	hp->scroll_up = default_history_scroll_up;
-	hp->scroll_down = default_history_scroll_down;
-	hp->reread = default_history_reread;
-
-	if (fileflag) {
-		hp->path = astr_new();
-		hp->fl_dir = TRUE;
-	}
-
-	return hp;
-}
-
-/*
- * Dispose an history structure.
- */
-void free_history(historyp hp)
-{
-	char *p;
-	for (p = alist_first(hp->completions); p != NULL; p = alist_next(hp->completions))
-		free(p);
-	alist_delete(hp->completions);
-	alist_delete(hp->matches);
-	if (hp->fl_dir)
-		astr_delete(hp->path);
-	free(hp);
-}
-
-/*
- * The default history scrolling function.
- */
-static void default_history_scroll_up(historyp hp)
-{
-	windowp wp, old_wp = cur_wp;
-
-	wp = find_window("*Completions*");
-	assert(wp != NULL);
-	cur_wp = wp;
-	cur_bp = wp->bp;
-	if (cur_wp->pointn == cur_bp->num_lines || !FUNCALL(scroll_up))
-		gotobob();
-	cur_wp = old_wp;
-	cur_bp = old_wp->bp;
-
-	cur_tp->redisplay();
-}
-
-/*
- * The default history scrolling function.
- */
-static void default_history_scroll_down(historyp hp)
-{
-	windowp wp, old_wp = cur_wp;
-
-	wp = find_window("*Completions*");
-	assert(wp != NULL);
-	cur_wp = wp;
-	cur_bp = wp->bp;
-	if (cur_wp->pointn == 0 || !FUNCALL(scroll_down)) {
-		gotoeob();
-		resync_redisplay();
-	}
-	cur_wp = old_wp;
-	cur_bp = old_wp->bp;
-
-	cur_tp->redisplay();
-}
-
-/*
- * Calculate the maximum length of the completions.
- */
-static int calculate_max_length(alist al, int size)
-{
-	int i, max = 0;
-	char *p;
-
-	for (p = alist_first(al); p != NULL; p = alist_next(al)) {
-		if (alist_current_idx(al) >= size)
-			break;
-		if ((i = strlen(p)) > max)
-			max = i;
-	}
-
-	return max;
-}
-
-/*
- * Print the list of completions in a set of columns.
- */
-static void history_print(alist al, int size)
-{
-	int i, col, max, numcols;
-	char *p;
-
-	max = calculate_max_length(al, size) + 5;
-	numcols = (cur_wp->ewidth - 1) / max;
-
-	bprintf("Possible completions are:\n");
-	for (p = alist_first(al), col = 0; p != NULL; p = alist_next(al)) {
-		if (alist_current_idx(al) >= size)
-			break;
-		if (col >= numcols) {
-			col = 0;
-			insert_newline();
-		}
-		insert_string(p);
-		for (i = max - strlen(p); i > 0; --i)
-			insert_char(' ');
-		++col;
-	}
-}
-
-/*
- * Popup the history window.
- */
-static void popup_history(historyp hp, int allflag, int num)
-{
-	windowp wp, old_wp = cur_wp;
-	bufferp bp;
-
-	hp->fl_poppedup = 1;
-
-	if ((wp = find_window("*Completions*")) == NULL) {
-		if (head_wp->next == NULL)
-			hp->fl_close = 1;
-		cur_wp = popup_window();
-		cur_bp = cur_wp->bp;
-		if (!hp->fl_close)
-			hp->old_bp = cur_bp;
-		bp = find_buffer("*Completions*", TRUE);
-		switch_to_buffer(bp);
-	} else {
-		cur_wp = wp;
-		cur_bp = wp->bp;
-	}
-
-	zap_buffer_content();
-	cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO
-		| BFLAG_NOEOB;
-	set_temporary_buffer(cur_bp);
-
-	if (allflag)
-		history_print(hp->completions, alist_count(hp->completions));
-	else
-		history_print(hp->matches, num);
-
-	gotobob();
-
-	cur_bp->flags |= BFLAG_READONLY;
-
-	cur_wp = old_wp;
-	cur_bp = old_wp->bp;
-
-	cur_tp->redisplay();
-}
-
-static int hcompar(const void *p1, const void *p2)
-{
-	return strcmp(*(const char **)p1, *(const char **)p2);
-}
-
-/*
- * The default history matching function.
- */
-static int default_history_try(historyp hp, astr search)
-{
-	int i, j, ssize, fullmatches = 0, partmatches = 0;
-	char *p, c;
-
-	alist_clear(hp->matches);
-
-	if (hp->fl_dir)
-		if (!hp->reread(hp, search))
-			return HISTORY_NOTMATCHED;
-
-	if (!hp->fl_sorted) {
-		alist_sort(hp->completions, hcompar);
-		hp->fl_sorted = 1;
-	}
-
-	ssize = astr_size(search);
-
-	if (ssize == 0) {
-		if (alist_count(hp->completions) > 1) {
-			hp->match = alist_first(hp->completions);
-			hp->matchsize = 0;
-			popup_history(hp, TRUE, 0);
-			return HISTORY_NONUNIQUE;
-		} else {
-			hp->match = alist_first(hp->completions);
-			hp->matchsize = strlen(hp->match);
-			return HISTORY_MATCHED;
-		}
-	}
-
-	for (p = alist_first(hp->completions); p != NULL;
-	     p = alist_next(hp->completions))
-		if (!strncmp(p, astr_cstr(search), ssize)) {
-			++partmatches;
-			alist_append(hp->matches, p);
-			if (!strcmp(p, astr_cstr(search)))
-				++fullmatches;
-		}
-
-	if (partmatches == 0)
-		return HISTORY_NOTMATCHED;
-	else if (partmatches == 1) {
-		hp->match = alist_first(hp->matches);
-		hp->matchsize = strlen(hp->match);
-		return HISTORY_MATCHED;
-	}
-
-	if (fullmatches == 1 && partmatches > 1) {
-		hp->match = alist_first(hp->matches);
-		hp->matchsize = strlen(hp->match);
-		popup_history(hp, FALSE, partmatches);
-		return HISTORY_MATCHEDNONUNIQUE;
-	}
-
-	for (j = ssize; ; ++j) {
-		char *s = alist_first(hp->matches);
-		c = s[j];
-		for (i = 1; i < partmatches; ++i) {
-			s = alist_at(hp->matches, i);
-			if (s[j] != c) {
-				hp->match = alist_first(hp->matches);
-				hp->matchsize = j;
-				popup_history(hp, FALSE, partmatches);
-				return HISTORY_NONUNIQUE;
-			}
-		}
-	}
-
-	assert(0);
-	return HISTORY_NOTMATCHED;
-}
-
-/*
- * The default history directory re-reading function.
- */
-static int default_history_reread(historyp hp, astr as)
-{
-	astr buf, pdir, fname;
-	DIR *dir;
-	struct dirent *d;
-	struct stat st;
-	char *p;
-
-	for (p = alist_first(hp->completions); p != NULL; p = alist_next(hp->completions))
-		free(p);
-
-	alist_clear(hp->completions);
-	hp->fl_sorted = 0;
-
-	buf = astr_new();
-	agetcwd(buf);
-	pdir = astr_new();
-	fname = astr_new();
-	if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
-		return FALSE;
-
-	if ((dir = opendir(astr_cstr(pdir))) == NULL)
-		return FALSE;
-
-	astr_assign(as, fname);
-
-	while ((d = readdir(dir)) != NULL) {
-		astr_assign_cstr(buf, astr_cstr(pdir));
-		astr_append_cstr(buf, d->d_name);
-		if (stat(astr_cstr(buf), &st) != -1) {
-			astr_assign_cstr(buf, d->d_name);
-			if (S_ISDIR(st.st_mode))
-				astr_append_cstr(buf, "/");
-		} else
-			astr_assign_cstr(buf, d->d_name);
-		alist_append(hp->completions, zstrdup(astr_cstr(buf)));
-	}
-	closedir(dir);
-
-	compact_path(hp->path, astr_cstr(pdir));
-
-	astr_delete(buf);
-	astr_delete(pdir);
-	astr_delete(fname);
-
-	return TRUE;
 }

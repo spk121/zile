@@ -1,4 +1,4 @@
-/*	$Id: macro.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: macro.c,v 1.5 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -35,24 +35,24 @@
 #include "zile.h"
 #include "extern.h"
 
-typedef struct macro *macrop;
+typedef struct Macro Macro; 
 
-struct macro {
-	funcp	func;
-	int	ndata;
-	int	*data;
-	macrop	next;
+struct Macro {
+	Function func;
+	int ndata;
+	int *data;
+	Macro *next;
 };
 
-static macrop head_mp, last_mp;
-static macrop running_mp, wait_mp = NULL;
+static Macro *head_mp, *last_mp;
+static Macro *running_mp, *wait_mp = NULL;
 static int macro_key;
 
-static macrop macro_new(void)
+static Macro *macro_new(void)
 {
-	macrop mp;
+	Macro *mp;
 
-	mp = (macrop)zmalloc(sizeof(*mp));
+	mp = (Macro *)zmalloc(sizeof(Macro));
 	mp->func = NULL;
 	mp->ndata = 0;
 	mp->data = NULL;
@@ -61,14 +61,14 @@ static macrop macro_new(void)
 	return mp;
 }
 
-static void macro_free(macrop mp)
+static void macro_free(Macro *mp)
 {
 	if (mp->data)
 		free(mp->data);
 	free(mp);
 }
 
-static void add_macro_data(macrop mp, int data)
+static void add_macro_data(Macro *mp, int data)
 {
 	int n = mp->ndata++;
 	mp->data = zrealloc(mp->data, sizeof(int)*mp->ndata);
@@ -77,7 +77,7 @@ static void add_macro_data(macrop mp, int data)
 
 void cancel_kbd_macro(void)
 {
-	macrop mp, next_mp;
+	Macro *mp, *next_mp;
 
 	for (mp = head_mp; mp != NULL; mp = next_mp) {
 		next_mp = mp->next;
@@ -89,11 +89,12 @@ void cancel_kbd_macro(void)
 	thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-void add_kbd_macro(funcp func, int uniarg)
+void add_kbd_macro(Function func, int set_uniarg, int uniarg)
 {
-	macrop mp = macro_new();
+	Macro *mp = macro_new();
 
 	mp->func = func;
+	add_macro_data(mp, set_uniarg);
 	add_macro_data(mp, uniarg);
 
 	if (wait_mp) {
@@ -167,7 +168,10 @@ The macro is now available for use via C-x e.
 
 static int call_last_kbd_macro(void)
 {
-	macrop mp;
+	int old_thisflag = thisflag;
+	int old_lastflag = lastflag;
+	int ret = TRUE;
+	Macro *mp;
 
 	if (head_mp == NULL) {
 		minibuf_error("Keyboard macro not defined");
@@ -179,17 +183,28 @@ static int call_last_kbd_macro(void)
 
 		running_mp = mp;
 		macro_key = 0;
+
+		if (get_macro_key_data())
+			lastflag |= FLAG_SET_UNIARG;
+		else
+			lastflag &= ~FLAG_SET_UNIARG;
+
 		(*mp->func)(get_macro_key_data());
 
 		thisflag &= ~FLAG_EXECUTING_MACRO;
 
-		if (lastflag & FLAG_GOT_ERROR)
-		  return FALSE;
+		if (lastflag & FLAG_GOT_ERROR) {
+			ret = FALSE;
+			break;
+		}
 
 		lastflag = thisflag;
 	}
 
-	return TRUE;
+	thisflag = old_thisflag;
+	lastflag = old_lastflag;
+
+	return ret;
 }
 
 DEFUN("call-last-kbd-macro", call_last_kbd_macro)
@@ -222,7 +237,7 @@ A prefix argument serves as a repeat count.  Zero means repeat until error.
  */
 void free_macros(void)
 {
-	macrop mp, next;
+	Macro *mp, *next;
 
 	for (mp = head_mp; mp != NULL; mp = next) {
 		next = mp->next;

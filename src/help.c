@@ -1,4 +1,4 @@
-/*	$Id: help.c,v 1.7 2004/01/29 07:23:10 rrt Exp $	*/
+/*	$Id: help.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -56,9 +56,9 @@ static int minihelp_page = 1;
 /*
  * Replace each occurrence of `C-h' in buffer with `M-h'.
  */
-static void fix_alternative_keys(bufferp bp)
+static void fix_alternative_keys(Buffer *bp)
 {
-	linep lp;
+	Line *lp;
 	char *p;
 	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next)
 		for (p = lp->text; p - lp->text < lp->size - 2; ++p)
@@ -70,7 +70,7 @@ static void fix_alternative_keys(bufferp bp)
  * Switch to the `bp' buffer and replace any contents with the current
  * Mini Help page (read from disk).
  */
-static int read_minihelp_page(bufferp bp)
+static int read_minihelp_page(Buffer *bp)
 {
 	astr fname;
 	int delta;
@@ -119,23 +119,18 @@ Toggle the mini help window.
 +*/
 {
 	const char *bname = "*Mini Help*";
-	bufferp bp;
-	windowp wp;
+	Window *wp;
 	int delta;
 
 	if ((wp = find_window(bname)) != NULL) {
-		cur_wp = wp;
-		cur_bp = wp->bp;
+		set_current_window(wp);
 		FUNCALL(delete_window);
 	} else {
 		FUNCALL(delete_other_windows);
 		FUNCALL(split_window);
-		cur_wp = head_wp;
-		if ((bp = find_buffer(bname, FALSE)) == NULL)
-			bp = find_buffer(bname, TRUE);
-		read_minihelp_page(bp);
-		cur_wp = head_wp->next;
-		cur_bp = head_wp->next->bp;
+		set_current_window(head_wp);
+		read_minihelp_page(find_buffer(bname, TRUE));
+		set_current_window(head_wp->next);
 		while ((delta = head_wp->eheight - head_wp->bp->num_lines) > 1) {
 			FUNCALL(enlarge_window);
 			/* Break if cannot enlarge further. */

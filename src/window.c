@@ -1,4 +1,4 @@
-/*	$Id: window.c,v 1.5 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: window.c,v 1.6 2004/02/08 04:39:26 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -35,12 +35,12 @@
 #include "zile.h"
 #include "extern.h"
 
-windowp new_window(void)
+Window *new_window(void)
 {
-	windowp wp;
+	Window *wp;
 
-	wp = (windowp)zmalloc(sizeof *wp);
-	memset(wp, 0, sizeof *wp);
+	wp = (Window *)zmalloc(sizeof(Window));
+	memset(wp, 0, sizeof(Window));
 
 	return wp;
 }
@@ -48,8 +48,11 @@ windowp new_window(void)
 /*
  * Free the window allocated memory.
  */
-void free_window(windowp wp)
+void free_window(Window *wp)
 {
+	if (wp->saved_pt)
+		free_marker(wp->saved_pt);
+
 	free(wp);
 }
 
@@ -58,11 +61,36 @@ void free_window(windowp wp)
  */
 void free_windows(void)
 {
-	windowp wp, next;
+	Window *wp, *next;
 
 	for (wp = head_wp; wp != NULL; wp = next) {
 		next = wp->next;
 		free_window(wp);
+	}
+}
+
+/* Set the current window and his buffer as the current buffer.  */
+
+void set_current_window(Window *wp)
+{
+	/* Save buffer's point in a new marker.  */
+	if (cur_wp->saved_pt)
+		free_marker(cur_wp->saved_pt);
+
+	cur_wp->saved_pt = point_marker();
+
+	/* Change the current window.  */
+	cur_wp = wp;
+
+	/* Change the current buffer.  */
+	cur_bp = wp->bp;
+
+	/* Update the buffer point with the window's saved point
+	   marker.  */
+	if (cur_wp->saved_pt) {
+		cur_bp->pt = cur_wp->saved_pt->pt;
+		free_marker(cur_wp->saved_pt);
+		cur_wp->saved_pt = NULL;
 	}
 }
 
@@ -72,7 +100,7 @@ Split current window into two windows, one above the other.
 Both windows display the same buffer now current.
 +*/
 {
-	windowp newwp;
+	Window *newwp;
 
 	/* Windows smaller than 4 lines cannot be split. */
 	if (cur_wp->fheight < 4) {
@@ -89,12 +117,8 @@ Both windows display the same buffer now current.
 	cur_wp->eheight = cur_wp->fheight - 1;
 	if (cur_wp->topdelta >= cur_wp->eheight)
 		recenter(cur_wp);
-	newwp->bp = cur_bp;
-	assert(cur_bp == cur_wp->bp);
-	++newwp->bp->num_windows;
-	newwp->pointp = cur_wp->pointp;
-	newwp->pointn = cur_wp->pointn;
-	newwp->pointo = cur_wp->pointo;
+	newwp->bp = cur_wp->bp;
+	newwp->saved_pt = point_marker();
 	newwp->next = cur_wp->next;
 	cur_wp->next = newwp;
 
@@ -106,21 +130,11 @@ DEFUN("delete-window", delete_window)
 Remove the current window from the screen.
 +*/
 {
-	windowp wp;
+	Window *wp, *del_wp = cur_wp;
 
 	if (cur_wp == head_wp && cur_wp->next == NULL) {
 		minibuf_error("Attempt to delete sole ordinary window");
 		return FALSE;
-	}
-
-	if (--cur_bp->num_windows == 0) {
-		/*
-		 * This is the only window that displays
-		 * the buffer.
-		 */
-		cur_bp->save_pointp = cur_wp->pointp;
-		cur_bp->save_pointn = cur_wp->pointn;
-		cur_bp->save_pointo = cur_wp->pointo;
 	}
 
 	if (cur_wp == head_wp)
@@ -134,9 +148,12 @@ Remove the current window from the screen.
 
 	wp->fheight += cur_wp->fheight;
 	wp->eheight += cur_wp->eheight + 1;
-	free_window(cur_wp);
-	cur_wp = wp;
-	cur_bp = cur_wp->bp;
+
+	/* Set current window. */
+	set_current_window(wp);
+
+	/* Destroy the window.  */
+	free_window(del_wp);
 
 	return TRUE;
 }
@@ -146,7 +163,7 @@ DEFUN("enlarge-window", enlarge_window)
 Make current window one line bigger.
 +*/
 {
-	windowp wp;
+	Window *wp;
 
 	if (cur_wp == head_wp && cur_wp->next == NULL)
 		return FALSE;
@@ -177,7 +194,7 @@ DEFUN("shrink-window", shrink_window)
 Make current window one line smaller.
 +*/
 {
-	windowp wp;
+	Window *wp;
 
 	if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
 		return FALSE;
@@ -199,7 +216,7 @@ Make current window one line smaller.
 	return TRUE;
 }
 
-windowp popup_window(void)
+Window *popup_window(void)
 {
 	if (head_wp->next == NULL) {
 		/* There is only one window on the screen, so split it. */
@@ -220,22 +237,12 @@ DEFUN("delete-other-windows", delete_other_windows)
 Make the selected window fill the screen.
 +*/
 {
-	windowp wp, nextwp;
+	Window *wp, *nextwp;
 
 	for (wp = head_wp; wp != NULL; wp = nextwp) {
 		nextwp = wp->next;
-		if (wp != cur_wp) {
-			if (--wp->bp->num_windows == 0) {
-				/*
-				 * This is the only window that displays
-				 * the buffer.
-				 */
-				wp->bp->save_pointp = wp->pointp;
-				wp->bp->save_pointn = wp->pointn;
-				wp->bp->save_pointo = wp->pointo;
-			}
+		if (wp != cur_wp)
 			free_window(wp);
-		}
 	}
 
 	cur_wp->fwidth = cur_wp->ewidth = cur_tp->width;
@@ -256,16 +263,11 @@ All windows are arranged in a cyclic order.
 This command selects the window one step away in that order.
 +*/
 {
-	if (cur_wp->next != NULL)
-		cur_wp = cur_wp->next;
-	else
-		cur_wp = head_wp;
-	cur_bp = cur_wp->bp;
-
+	set_current_window((cur_wp->next != NULL) ? cur_wp->next: head_wp);
 	return TRUE;
 }
 
-#if 0
+#if 0		/* XXX WARNING! this uses the old API .-dacap */
 void new_window_buffer(bufferp bp)
 {
 	if (--cur_bp->num_windows == 0) {
@@ -273,9 +275,9 @@ void new_window_buffer(bufferp bp)
 		 * This is the only window that displays
 		 * the buffer.
 		 */
-		cur_bp->pointp = cur_wp->pointp;
-		cur_bp->pointn = cur_wp->pointn;
-		cur_bp->pointo = cur_wp->pointo;
+		cur_bp->save_pointp = cur_wp->pointp;
+		cur_bp->save_pointn = cur_wp->pointn;
+		cur_bp->save_pointo = cur_wp->pointo;
 	}
 
 	cur_wp->bp = cur_bp = bp;
@@ -292,16 +294,15 @@ void new_window_buffer(bufferp bp)
  */
 void create_first_window(void)
 {
-	windowp wp;
-	bufferp bp;
+	Window *wp;
+	Buffer *bp;
 
 	/*
 	 * Create the scratch buffer.
 	 */
-	bp = new_buffer();
-	set_buffer_name(bp, "*scratch*");
+	bp = create_buffer("*scratch*");
 	bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
-	cur_bp = head_bp = bp;
+	cur_bp = bp;
 	if (lookup_bool_variable("text-mode-auto-fill"))
 		FUNCALL(auto_fill_mode);
 
@@ -313,19 +314,22 @@ void create_first_window(void)
 	/* Save space for status line. */
 	wp->eheight = wp->fheight - 1;
 	wp->bp = bp;
-	++bp->num_windows;
-	wp->pointp = bp->save_pointp;
-	wp->pointn = bp->save_pointn;
-	wp->pointo = bp->save_pointo;
 }
 
-windowp find_window(const char *name)
+Window *find_window(const char *name)
 {
-	windowp wp;
+	Window *wp;
 
 	for (wp = head_wp; wp != NULL; wp = wp->next)
 		if (!strcmp(wp->bp->name, name))
 			return wp;
 
 	return NULL;
+}
+
+Point window_pt(Window *wp)
+{
+	/* The current window uses the current buffer point, all other
+	   windows has a saved point.  */
+	return (!wp->saved_pt) ? cur_bp->pt: wp->saved_pt->pt;
 }
