@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.7 2004/01/21 01:34:45 dacap Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.8 2004/01/21 02:12:32 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -966,14 +966,15 @@ static void draw_status_line(int line, windowp wp)
 	}
 
 	move(line, 0);
-	printw("--%2s-Zile: %-18s (%s%s%s%s%s)--L%d/%d,C%d--%s",
+	printw("--%2s-Zile: %-18s (%s%s%s%s%s)--L%d--C%d--%s",
 	       make_mode_line_flags(wp),
 	       wp->bp->name, mode,
-	       (wp->bp->flags & BFLAG_FONTLOCK) ? " Font" : "",
+	       /* (wp->bp->flags & BFLAG_FONTLOCK) ? " Font" : "", */
 	       (wp->bp->flags & BFLAG_AUTOFILL) ? " Fill" : "",
 	       (wp->bp->flags & BFLAG_OVERWRITE) ? " Ovwrt" : "",
-	       (thisflag & FLAG_DEFINING_MACRO) ? " Macro" : "",
-	       wp->pointn+1, wp->bp->num_lines+1, get_text_goalc(wp)+1,
+	       (thisflag & FLAG_DEFINING_MACRO) ? " Def" : "",
+	       (wp->bp->flags & BFLAG_ISEARCH) ? " Isearch" : "",
+	       wp->pointn+1, get_text_goalc(wp),
 	       make_screen_pos(wp));
 
 	if (display_time) {
