@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.27 2005/01/23 18:39:03 rrt Exp $	*/
+/*	$Id: help.c,v 1.28 2005/01/26 23:04:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -193,12 +193,13 @@ static void write_variable_description(va_list ap)
 {
   char *name = va_arg(ap, char *);
   astr defval = va_arg(ap, astr);
+  char *curval = va_arg(ap, char *);
   astr doc = va_arg(ap, astr);
   bprintf("Variable: %s\n\n"
           "Default value: %s\n"
           "Current value: %s\n\n"
           "Documentation:\n%s",
-          name, astr_cstr(defval), get_variable(name), astr_cstr(doc));
+          name, astr_cstr(defval), curval, astr_cstr(doc));
 }
 
 DEFUN("describe-variable", describe_variable)
@@ -222,7 +223,7 @@ DEFUN("describe-variable", describe_variable)
   bufname = astr_new();
   astr_afmt(bufname, "*Help: variable `%s'*", name);
   write_temp_buffer(astr_cstr(bufname), write_variable_description,
-                    name, defval, doc);
+                    name, defval, get_variable(name), doc);
   astr_delete(bufname);
   astr_delete(doc);
   astr_delete(defval);

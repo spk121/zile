@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.28 2005/01/25 12:28:14 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.29 2005/01/26 23:04:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -46,40 +46,15 @@ static Buffer *buffer_new(void)
 
   bp = (Buffer *)zmalloc(sizeof(Buffer));
 
-  if ((s = get_variable("tab-width")) != NULL) {
-    bp->tab_width = atoi(s);
-    if (bp->tab_width < 1) {
-      minibuf_error("Warning: bad global tab-width value `%s'", s);
-      waitkey(WAITKEY_DEFAULT);
-      bp->tab_width = 8;
-    }
-  } else
-    bp->tab_width = 8;
-
-  if ((s = get_variable("fill-column")) != NULL) {
-    bp->fill_column = atoi(s);
-    if (bp->fill_column < 2) {
-      minibuf_error("Warning: bad global fill-column value `%s'", s);
-      waitkey(WAITKEY_DEFAULT);
-      bp->fill_column = 70;
-    }
-  } else
-    bp->fill_column = 70;
-
   /* Allocate a line. */
   bp->pt.p = list_new();
   bp->pt.p->item = astr_new();
-  bp->pt.n = 0;
-  bp->pt.o = 0;
 
   /* Allocate the limit marker. */
   bp->lines = list_new();
 
   list_prev(bp->lines) = list_next(bp->lines) = bp->pt.p;
   list_prev(bp->pt.p) = list_next(bp->pt.p) = bp->lines;
-
-  /* Markers. */
-  bp->mark = bp->markers = NULL;
 
   /* Set default EOL string. */
   bp->eol[0] = '\n';
@@ -421,4 +396,14 @@ int is_mark_actived(void)
     return (cur_bp->mark_active) ? TRUE : FALSE;
   else
     return TRUE;
+}
+
+/*
+ * Return a safe tab width for the given buffer.
+ */
+unsigned tab_width(Buffer *bp)
+{
+  unsigned t = get_variable_number_bp(bp, "tab-width");
+
+  return t ? t : 1;
 }

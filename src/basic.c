@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.20 2005/01/25 19:22:59 rrt Exp $	*/
+/*	$Id: basic.c,v 1.21 2005/01/26 23:04:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -72,7 +72,7 @@ DEFUN("end-of-line", end_of_line)
  */
 int get_goalc_bp(Buffer *bp, Point pt)
 {
-  int col = 0, t = bp->tab_width, i;
+  int col = 0, t = tab_width(bp), i;
   const char *sp = astr_cstr(pt.p->item);
 
   for (i = 0; i < pt.o; i++) {
@@ -100,7 +100,7 @@ int get_goalc(void)
  */
 static void goto_goalc(int goalc)
 {
-  int col = 0, t = cur_bp->tab_width, w, i;
+  int col = 0, t = tab_width(cur_bp), w, i;
   const char *sp = astr_cstr(cur_bp->pt.p->item);
 
   for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {

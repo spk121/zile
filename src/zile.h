@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.49 2005/01/23 18:39:03 rrt Exp $        */
+/*      $Id: zile.h,v 1.50 2005/01/26 23:04:48 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -170,9 +170,10 @@ struct Buffer {
 
   /* Buffer flags. */
   int flags;
-  int tab_width;
-  int fill_column;
   unsigned mark_active : 1;
+
+  /* Buffer-local variables. */
+  le *vars;
 
   /* The total number of lines in the buffer. */
   int num_lines;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.72 2005/01/26 00:03:18 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.73 2005/01/26 23:04:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -35,6 +35,8 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "vars.h"
+
 
 DEFUN("suspend-zile", suspend_zile)
   /*+
@@ -234,9 +236,9 @@ DEFUN("set-fill-column", set_fill_column)
     +*/
 {
   if (uniarg > 1)
-    cur_bp->fill_column = uniarg;
+    variableSetNumber(cur_bp, "fill-column", uniarg);
   else if (cur_bp->pt.o > 1)
-    cur_bp->fill_column = cur_bp->pt.o + 1;
+    variableSetNumber(cur_bp, "fill-column", cur_bp->pt.o + 1);
   else {
     minibuf_error("Invalid fill column");
     return FALSE;
@@ -438,13 +440,13 @@ DEFUN("universal-argument", universal_argument)
 static void edit_tab_line(Line **lp, int lineno, int offset, unsigned size, int action)
 {
   char *src, *dest;
-  int col, i;
+  int col, i, t = tab_width(cur_bp);
 
   if (size == 0)
     return;
 
   src = (char *)zmalloc(size + 1);
-  dest = (char *)zmalloc(size * cur_bp->tab_width + 1);
+  dest = (char *)zmalloc(size * t + 1);
   strncpy(src, astr_cstr((*lp)->item) + offset, size);
   src[size] = '\0';
 
@@ -452,21 +454,22 @@ static void edit_tab_line(Line **lp, int lineno, int offset, unsigned size, int 
   col = 0;
   for (i = 0; i < offset; i++) {
     if (*astr_char((*lp)->item, i) == '\t')
-      col |= cur_bp->tab_width - 1;
+      col |= t - 1;
     ++col;
   }
 
   /* Call un/tabify function.  */
   if (action == TAB_UNTABIFY)
-    untabify_string(dest, src, col, cur_bp->tab_width);
+    untabify_string(dest, src, col, t);
   else
-    tabify_string(dest, src, col, cur_bp->tab_width);
+    tabify_string(dest, src, col, t);
 
   if (strcmp(src, dest) != 0) {
     undo_save(UNDO_REPLACE_BLOCK, make_point(lineno, offset),
               size, strlen(dest));
     line_replace_text(lp, offset, size, dest, strlen(dest), FALSE);
   }
+
   free(src);
   free(dest);
 }
@@ -1176,7 +1179,7 @@ DEFUN("fill-paragraph", fill_paragraph)
   }
 
   FUNCALL(end_of_line);
-  while (get_goalc() > cur_bp->fill_column + 1)
+  while (get_goalc() > get_variable_number("fill-column") + 1)
     fill_break_line();
 
   thisflag &= ~FLAG_DONE_CPCN;

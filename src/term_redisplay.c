@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.32 2005/01/20 21:23:28 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.33 2005/01/26 23:04:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -157,7 +157,7 @@ static void draw_window(int topline, Window *wp)
        i > 0 && list_prev(lp) != wp->bp->lines; lp = list_prev(lp), --i, --lineno)
     ;
 
-  cur_tab_width = wp->bp->tab_width;
+  cur_tab_width = tab_width(wp->bp);
 
   /* Draw the window lines. */
   for (i = topline; i < wp->eheight + topline; ++i, ++lineno) {
@@ -205,7 +205,7 @@ static char *make_mode_line_flags(Window *wp)
  */
 static void calculate_start_column(Window *wp)
 {
-  int col = 0, lastcol = 0, t = wp->bp->tab_width;
+  int col = 0, lastcol = 0, t = tab_width(wp->bp);
   int rpfact, lpfact;
   char *buf, *rp, *lp, *p;
   Point pt = window_pt(wp);

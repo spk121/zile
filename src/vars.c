@@ -20,8 +20,9 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.7 2005/01/22 11:24:59 rrt Exp $	*/
+/*	$Id: vars.c,v 1.8 2005/01/26 23:04:48 rrt Exp $	*/
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "zile.h"
@@ -61,7 +62,7 @@ le *variableSet(le *varlist, char *key, le *value)
 
   return varlist;
 }
-    
+
 le *variableSetString(le *varlist, char *key, char *value)
 {
   if (key && value) {
@@ -71,22 +72,33 @@ le *variableSetString(le *varlist, char *key, char *value)
   }
   return varlist;
 }
-    
+
+le *variableSetNumber(le *varlist, char *key, int value)
+{
+  char *buf;
+  le *temp;
+
+  asprintf(&buf, "%d", value);
+  temp = variableSetString(varlist, key, buf);
+  free(buf);
+  return temp;
+}
+
 le *variableGet(le *varlist, char *key)
 {
   le *temp = variableFind(varlist, key);
   return temp ? temp->branch : NULL;
 }
-    
+
 char *variableGetString(le *varlist, char *key)
 {
   le *temp = variableFind(varlist, key);
   if (temp && temp->branch && temp->branch->data
       && countNodes(temp->branch) == 1)
     return temp->branch->data;
-  return "NIL";
+  return NULL;
 }
-    
+
 astr variableDump(le *varlist)
 {
   astr as = astr_new();

@@ -43,6 +43,7 @@ int transient_mark_mode(void);
 void activate_mark(void);
 void deactivate_mark(void);
 int is_mark_actived(void);
+unsigned tab_width(Buffer *bp);
 
 /* editfns.c -------------------------------------------------------------- */
 void push_mark(void);
@@ -236,7 +237,10 @@ int is_variable_equal(char *var, char *val);
 int lookup_bool_variable(char *var);
 char *minibuf_read_variable_name(char *msg);
 void set_variable(char *var, char *val);
+char *get_variable_bp(Buffer *bp, char *var);
 char *get_variable(char *var);
+int get_variable_number_bp(Buffer *bp, char *var);
+int get_variable_number(char *var);
 
 /* window.c --------------------------------------------------------------- */
 void create_first_window(void);

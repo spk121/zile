@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.27 2005/01/23 14:09:41 rrt Exp $	*/
+/*	$Id: variables.c,v 1.28 2005/01/26 23:04:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -61,9 +61,38 @@ void set_variable(char *var, char *val)
   mainVarList = variableSetString(mainVarList, var, val);
 }
 
+char *get_variable_bp(Buffer *bp, char *var)
+{
+  char *s = NULL;
+
+  if (bp)
+    s = variableGetString(bp->vars, var);
+
+  if (s == NULL)
+    s = variableGetString(mainVarList, var);
+
+  return s;
+}
+
 char *get_variable(char *var)
 {
-  return variableGetString(mainVarList, var);
+  return get_variable_bp(cur_bp, var);
+}
+
+int get_variable_number_bp(Buffer *bp, char *var)
+{
+  int t = 0;
+  char *s = get_variable_bp(bp, var);
+
+  if (s)
+    t = atoi(s);
+
+  return t;
+}
+
+int get_variable_number(char *var)
+{
+  return get_variable_number_bp(cur_bp, var);
 }
 
 int is_variable_equal(char *var, char *val)
@@ -130,7 +159,7 @@ static char *get_variable_format(char *var)
 
 DEFUN("set-variable", set_variable)
   /*+
-    Set a variable value to the user specified value.
+    Set a variable value to the user-specified value.
     +*/
 {
   char *var, *val, *fmt;
@@ -140,47 +169,25 @@ DEFUN("set-variable", set_variable)
   if (var == NULL)
     return FALSE;
 
-  /* `tab-width' and `fill-column' are local to buffers. */
-  if (!strcmp(var, "tab-width"))
-    astr_afmt(as, "%d", cur_bp->tab_width);
-  else if (!strcmp(var, "fill-column"))
-    astr_afmt(as, "%d", cur_bp->fill_column);
-  else
-    astr_cpy_cstr(as, get_variable(var));
+  astr_cpy_cstr(as, get_variable(var));
   fmt = get_variable_format(var);
   if (!strcmp(fmt, "b")) {
     int i;
     if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
       return cancel();
     val = (i == TRUE) ? "true" : "false";
-  } else { /* Non boolean or such fixed value variable. */
+  } else { /* Non-boolean variable. */
     if ((val = minibuf_read("Set %s to value: ", astr_cstr(as), var)) == NULL)
       return cancel();
   }
 
   astr_delete(as);
 
-  /*
-   * The `tab-width' and `fill-column' variables are local
-   * to the buffer (automatically becomes buffer-local when
-   * set in any fashion).
-   */
-  if (!strcmp(var, "tab-width")) {
-    int i = atoi(val);
-    if (i < 1) {
-      minibuf_error("Invalid tab-width value `%s'", val);
-      waitkey(WAITKEY_DEFAULT);
-    } else
-      cur_bp->tab_width = i;
-
-  } else if (!strcmp(var, "fill-column")) {
-    int i = atoi(val);
-    if (i < 2) {
-      minibuf_error("Invalid fill-column value `%s'", val);
-      waitkey(WAITKEY_DEFAULT);
-    } else
-      cur_bp->fill_column = i;
-  } else
+  /* `tab-width' and `fill-column' automatically become
+     buffer-local when set in any fashion. */
+  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
+    cur_bp->vars = variableSetString(cur_bp->vars, var, val);
+  else
     set_variable(var, val);
 
   return TRUE;

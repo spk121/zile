@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.52 2005/01/26 18:34:17 rrt Exp $	*/
+/*	$Id: line.c,v 1.53 2005/01/26 23:04:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -75,6 +75,8 @@ int intercalate_char(int c)
  */
 int insert_char(int c)
 {
+  int t = tab_width(cur_bp);
+
   if (warn_if_readonly_buffer())
     return FALSE;
 
@@ -85,10 +87,8 @@ int insert_char(int c)
        || current char is a \t && we are in the tab limit.  */
     if ((cur_bp->pt.o < astr_len(cur_bp->pt.p->item))
         && ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o) != '\t')
-            || (cur_bp->tab_width < 1)
             || ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o) == '\t')
-                && ((get_goalc() % cur_bp->tab_width)
-                    == cur_bp->tab_width-1)))) {
+                && ((get_goalc() % t) == t)))) {
       /* Replace the character.  */
       undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
                 *astr_char(cur_bp->pt.p->item, cur_bp->pt.o), 0);
@@ -130,7 +130,7 @@ int insert_char_in_insert_mode(int c)
 static void insert_expanded_tab(int (*inschr)(int chr))
 {
   int c = get_goalc();
-  int t = cur_bp->tab_width;
+  int t = tab_width(cur_bp);
 
   for (c = t - c % t; c > 0; --c)
     (*inschr)(' ');
@@ -282,8 +282,8 @@ void fill_break_line(void)
 {
   int break_col, last_col, excess = 0;
 
-  /* Move cursor back to fill_column */
-  while (get_goalc() > cur_bp->fill_column + 1) {
+  /* Move cursor back to fill column */
+  while (get_goalc() > get_variable_number("fill-column") + 1) {
     cur_bp->pt.o--;
     excess++;
   }
@@ -316,7 +316,7 @@ DEFUN("newline", newline)
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni) {
     if (cur_bp->flags & BFLAG_AUTOFILL &&
-        get_goalc() > cur_bp->fill_column)
+        get_goalc() > get_variable_number("fill-column"))
       fill_break_line();
     if (!insert_newline()) {
       ret = FALSE;
@@ -376,7 +376,7 @@ int self_insert_command(int c)
 
   if (c <= 255) {
     if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
-        get_goalc() > cur_bp->fill_column)
+        get_goalc() > get_variable_number("fill-column"))
       fill_break_line();
     insert_char(c);
     return TRUE;
@@ -664,7 +664,7 @@ static int indent_relative(void)
 
 DEFUN("indent-command", indent_command)
   /*+
-    Indent line in proper way for current major mode or insert a tab.
+    Indent line or insert a tab.
     +*/
 {
   return indent_relative();
@@ -672,7 +672,7 @@ DEFUN("indent-command", indent_command)
 
 DEFUN("newline-and-indent", newline_and_indent)
   /*+
-    Insert a newline, then indent according to major mode.
+    Insert a newline, then indent.
     Indentation is done using the `indent-command' function.
     +*/
 {

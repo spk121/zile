@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.h,v 1.4 2005/01/19 00:41:01 rrt Exp $	*/
+/*	$Id: vars.h,v 1.5 2005/01/26 23:04:48 rrt Exp $	*/
 
 #include <stdio.h>
 #include "lists.h"
@@ -35,6 +35,7 @@ le *variableFind(le *varlist, char *key);
 
 le *variableSet(le *varlist, char *key, le *value);
 le *variableSetString(le *varlist, char *key, char *value);
+le *variableSetNumber(le *varlist, char *key, int value);
 le *variableGet(le *varlist, char *key);
 char *variableGetString(le *varlist, char *key);
 
