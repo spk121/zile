@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.20 2004/10/13 21:12:25 rrt Exp $	*/
+/*	$Id: search.c,v 1.21 2004/10/14 21:06:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -45,10 +45,6 @@
 
 static History search_history;
 static History regexp_history;
-
-#ifdef DEBUG			/* Needed by regex.c */
-void printchar () { }
-#endif
 
 static char *find_substr(const char *s1, size_t s1size,
 			 const char *s2, size_t s2size)
