@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: zmalloc.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: zmalloc.c,v 1.2 2005/01/09 23:56:06 rrt Exp $	*/
 
 
 #include "config.h"
@@ -37,16 +37,16 @@
  */
 void *zmalloc(size_t size)
 {
-	void *ptr;
+  void *ptr;
 
-	assert(size > 0);
+  assert(size > 0);
 
-	if ((ptr = calloc(size, 1)) == NULL) {
-		fprintf(stderr, "zile: cannot allocate memory\n");
-		zile_exit(1);
-	}
+  if ((ptr = calloc(size, 1)) == NULL) {
+    fprintf(stderr, "zile: cannot allocate memory\n");
+    zile_exit(1);
+  }
 
-	return ptr;
+  return ptr;
 }
 
 /*
@@ -54,16 +54,16 @@ void *zmalloc(size_t size)
  */
 void *zrealloc(void *ptr, size_t size)
 {
-	void *newptr;
+  void *newptr;
 
-	assert(size > 0);
+  assert(size > 0);
 
-	if ((newptr = realloc(ptr, size)) == NULL) {
-		fprintf(stderr, "zile: cannot allocate memory\n");
-		zile_exit(1);
-	}
+  if ((newptr = realloc(ptr, size)) == NULL) {
+    fprintf(stderr, "zile: cannot allocate memory\n");
+    zile_exit(1);
+  }
 
-	return newptr;
+  return newptr;
 }
 
 /*
@@ -71,5 +71,5 @@ void *zrealloc(void *ptr, size_t size)
  */
 char *zstrdup(const char *s)
 {
-	return strcpy(zmalloc(strlen(s) + 1), s);
+  return strcpy(zmalloc(strlen(s) + 1), s);
 }

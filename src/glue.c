@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.17 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: glue.c,v 1.18 2005/01/09 23:56:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,13 +37,13 @@
  */
 void ding(void)
 {
-	if (thisflag & FLAG_DEFINING_MACRO)
-		cancel_kbd_macro();
+  if (thisflag & FLAG_DEFINING_MACRO)
+    cancel_kbd_macro();
 
-	if (lookup_bool_variable("beep"))
-		term_beep();
+  if (lookup_bool_variable("beep"))
+    term_beep();
 
-	thisflag |= FLAG_GOT_ERROR;
+  thisflag |= FLAG_GOT_ERROR;
 }
 
 /*
@@ -52,10 +52,10 @@ void ding(void)
  */
 void waitkey(void)
 {
-	int c;
+  int c;
 
-	if ((c = term_xgetkey(GETKEY_DELAYED, 20)) != KBD_NOKEY)
-		term_unget(c);
+  if ((c = term_xgetkey(GETKEY_DELAYED, 20)) != KBD_NOKEY)
+    term_unget(c);
 }
 
 /*
@@ -63,41 +63,41 @@ void waitkey(void)
  */
 char *copy_text_block(int startn, int starto, size_t size)
 {
-	char *buf, *dp;
-	int max_size, n, i;
-	Line *lp;
+  char *buf, *dp;
+  int max_size, n, i;
+  Line *lp;
 
-	max_size = 10;
-	dp = buf = (char *)zmalloc(max_size);
+  max_size = 10;
+  dp = buf = (char *)zmalloc(max_size);
 
-	lp = cur_bp->pt.p;
-	n = cur_bp->pt.n;
-	if (n > startn)
-		do
-			lp = lp->prev;
-		while (--n > startn);
-	else if (n < startn)
-		do
-			lp = lp->next;
-		while (++n < startn);
+  lp = cur_bp->pt.p;
+  n = cur_bp->pt.n;
+  if (n > startn)
+    do
+      lp = lp->prev;
+    while (--n > startn);
+  else if (n < startn)
+    do
+      lp = lp->next;
+    while (++n < startn);
 
-	for (i = starto; dp - buf < (int)size;) {
-		if (dp - buf + 1 > max_size) {
-			int save_off = dp - buf;
-			max_size += 10;
-			buf = (char *)zrealloc(buf, max_size);
-			dp = buf + save_off;
-		}
-		if (i < astr_len(lp->text))
-			*dp++ = *astr_char(lp->text, i++);
-		else {
-			*dp++ = '\n';
-			lp = lp->next;
-			i = 0;
-		}
-	}
+  for (i = starto; dp - buf < (int)size;) {
+    if (dp - buf + 1 > max_size) {
+      int save_off = dp - buf;
+      max_size += 10;
+      buf = (char *)zrealloc(buf, max_size);
+      dp = buf + save_off;
+    }
+    if (i < astr_len(lp->text))
+      *dp++ = *astr_char(lp->text, i++);
+    else {
+      *dp++ = '\n';
+      lp = lp->next;
+      i = 0;
+    }
+  }
 
-	return buf;
+  return buf;
 }
 
 /*
@@ -106,17 +106,17 @@ char *copy_text_block(int startn, int starto, size_t size)
  */
 astr shorten_string(char *s, int maxlen)
 {
-	int len;
-        astr as = astr_new();
+  int len;
+  astr as = astr_new();
 
-	if ((len = strlen(s)) <= maxlen)
-		astr_cpy_cstr(as, s);
-	else {
-		astr_cpy_cstr(as, "...");
-		astr_cat_cstr(as, s + len - maxlen + 3);
-	}
+  if ((len = strlen(s)) <= maxlen)
+    astr_cpy_cstr(as, s);
+  else {
+    astr_cpy_cstr(as, "...");
+    astr_cat_cstr(as, s + len - maxlen + 3);
+  }
 
-	return as;
+  return as;
 }
 
 /*
@@ -125,17 +125,17 @@ astr shorten_string(char *s, int maxlen)
  */
 char *replace_string(char *s, char *match, char *subst)
 {
-	char *sp = s, *p;
-	size_t slen = strlen(subst);
+  char *sp = s, *p;
+  size_t slen = strlen(subst);
 
-	if (strlen(match) != slen)
-		return NULL;
-	while ((p = strstr(sp, match)) != NULL) {
-		strncpy(p, subst, slen);
-		sp = p + slen;
-	}
+  if (strlen(match) != slen)
+    return NULL;
+  while ((p = strstr(sp, match)) != NULL) {
+    strncpy(p, subst, slen);
+    sp = p + slen;
+  }
 
-	return s;
+  return s;
 }
 
 /*
@@ -143,36 +143,36 @@ char *replace_string(char *s, char *match, char *subst)
  */
 void tabify_string(char *dest, char *src, int scol, int tw)
 {
-	char *sp, *dp;
-	int dcol = scol, ocol = scol;
+  char *sp, *dp;
+  int dcol = scol, ocol = scol;
 
-	for (sp = src, dp = dest;; ++sp)
-		switch (*sp) {
-		case ' ':
-			++dcol;
-			break;
-		case '\t':
-			dcol += tw;
-			dcol -= dcol % tw;
-			break;
-		default:
-			while (((ocol + tw) - (ocol + tw) % tw) <= dcol) {
-				if (ocol + 1 == dcol)
-					break;
-				*dp++ = '\t';
-				ocol += tw;
-				ocol -= ocol % tw;
-			}
-			while (ocol < dcol) {
-				*dp++ = ' ';
-				ocol++;
-			}
-			*dp++ = *sp;
-			if (*sp == '\0')
-				return;
-			++ocol;
-			++dcol;
-		}
+  for (sp = src, dp = dest;; ++sp)
+    switch (*sp) {
+    case ' ':
+      ++dcol;
+      break;
+    case '\t':
+      dcol += tw;
+      dcol -= dcol % tw;
+      break;
+    default:
+      while (((ocol + tw) - (ocol + tw) % tw) <= dcol) {
+        if (ocol + 1 == dcol)
+          break;
+        *dp++ = '\t';
+        ocol += tw;
+        ocol -= ocol % tw;
+      }
+      while (ocol < dcol) {
+        *dp++ = ' ';
+        ocol++;
+      }
+      *dp++ = *sp;
+      if (*sp == '\0')
+        return;
+      ++ocol;
+      ++dcol;
+    }
 }
 
 /*
@@ -182,18 +182,18 @@ void tabify_string(char *dest, char *src, int scol, int tw)
  */
 void untabify_string(char *dest, char *src, int scol, int tw)
 {
-	char *sp, *dp;
-	int col = scol;
+  char *sp, *dp;
+  int col = scol;
 
-	for (sp = src, dp = dest; *sp != '\0'; ++sp)
-		if (*sp == '\t') {
-			do
-				*dp++ = ' ', ++col;
-			while ((col%tw) > 0);
-		}
-		else
-			*dp++ = *sp, ++col;
-	*dp = '\0';
+  for (sp = src, dp = dest; *sp != '\0'; ++sp)
+    if (*sp == '\t') {
+      do
+        *dp++ = ' ', ++col;
+      while ((col%tw) > 0);
+    }
+    else
+      *dp++ = *sp, ++col;
+  *dp = '\0';
 }
 
 /*
@@ -201,23 +201,23 @@ void untabify_string(char *dest, char *src, int scol, int tw)
  */
 void goto_point(Point pt)
 {
-	if (cur_bp->pt.n > pt.n)
-		do
-			FUNCALL(previous_line);
-		while (cur_bp->pt.n > pt.n);
-	else if (cur_bp->pt.n < pt.n)
-		do
-			FUNCALL(next_line);
-		while (cur_bp->pt.n < pt.n);
+  if (cur_bp->pt.n > pt.n)
+    do
+      FUNCALL(previous_line);
+    while (cur_bp->pt.n > pt.n);
+  else if (cur_bp->pt.n < pt.n)
+    do
+      FUNCALL(next_line);
+    while (cur_bp->pt.n < pt.n);
 
-	if (cur_bp->pt.o > pt.o)
-		do
-			FUNCALL(backward_char);
-		while (cur_bp->pt.o > pt.o);
-	else if (cur_bp->pt.o < pt.o)
-		do
-			FUNCALL(forward_char);
-		while (cur_bp->pt.o < pt.o);
+  if (cur_bp->pt.o > pt.o)
+    do
+      FUNCALL(backward_char);
+    while (cur_bp->pt.o > pt.o);
+  else if (cur_bp->pt.o < pt.o)
+    do
+      FUNCALL(forward_char);
+    while (cur_bp->pt.o < pt.o);
 }
 
 #ifdef DEBUG
@@ -226,15 +226,15 @@ void goto_point(Point pt)
  */
 void ztrace(const char *fmt, ...)
 {
-	static FILE *dbgfile = NULL;
-	va_list ap;
-	if (dbgfile == NULL) {
-		if ((dbgfile = fopen("zile.dbg", "w")) == NULL)
-			return;
-	}
-	va_start(ap, fmt);
-	vfprintf(dbgfile, fmt, ap);
-	va_end(ap);
+  static FILE *dbgfile = NULL;
+  va_list ap;
+  if (dbgfile == NULL) {
+    if ((dbgfile = fopen("zile.dbg", "w")) == NULL)
+      return;
+  }
+  va_start(ap, fmt);
+  vfprintf(dbgfile, fmt, ap);
+  va_end(ap);
 }
 #endif
 
@@ -244,16 +244,16 @@ void ztrace(const char *fmt, ...)
 char *
 getln(FILE *fp)
 {
-        size_t len = 256;
-        int c;
-        char *l = zmalloc(len), *s = l;
+  size_t len = 256;
+  int c;
+  char *l = zmalloc(len), *s = l;
 
-        for (c = getc(fp); c != '\n' && c != EOF; c = getc(fp)) {
-                if (s == l + len)
-                        zrealloc(l, len *= 2);
-                *s++ = c;
-        }
-        *s = '\0';
+  for (c = getc(fp); c != '\n' && c != EOF; c = getc(fp)) {
+    if (s == l + len)
+      zrealloc(l, len *= 2);
+    *s++ = c;
+  }
+  *s = '\0';
 
-        return l;
+  return l;
 }

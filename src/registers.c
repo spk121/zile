@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.12 2004/10/13 16:04:06 rrt Exp $	*/
+/*	$Id: registers.c,v 1.13 2005/01/09 23:56:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -33,119 +33,119 @@
 #define NUM_REGISTERS	256
 
 static struct {
-	char	*text;
-	size_t	size;
+  char	*text;
+  size_t	size;
 } regs[NUM_REGISTERS];
 
 DEFUN("copy-to-register", copy_to_register)
-/*+
-Copy region into the user specified register.
-+*/
+  /*+
+    Copy region into the user specified register.
+    +*/
 {
-	Region r;
-	char *p;
-	int reg;
+  Region r;
+  char *p;
+  int reg;
 
-	minibuf_write("Copy to register: ");
-        term_refresh();
-	if ((reg = term_getkey()) == KBD_CANCEL)
-		return cancel();
-	minibuf_clear();
-	reg %= NUM_REGISTERS;
+  minibuf_write("Copy to register: ");
+  term_refresh();
+  if ((reg = term_getkey()) == KBD_CANCEL)
+    return cancel();
+  minibuf_clear();
+  reg %= NUM_REGISTERS;
 
-	if (warn_if_no_mark())
-		return FALSE;
+  if (warn_if_no_mark())
+    return FALSE;
 
-	calculate_region(&r);
+  calculate_region(&r);
 
-	p = copy_text_block(r.start.n, r.start.o, r.size);
-	if (regs[reg].text != NULL)
-		free(regs[reg].text);
-	regs[reg].text = p;
-	regs[reg].size = r.size;
+  p = copy_text_block(r.start.n, r.start.o, r.size);
+  if (regs[reg].text != NULL)
+    free(regs[reg].text);
+  regs[reg].text = p;
+  regs[reg].size = r.size;
 
-	return TRUE;
+  return TRUE;
 }
 
 static void insert_register(int reg)
 {
-	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
-	undo_nosave = TRUE;
-	insert_nstring(regs[reg].text, regs[reg].size);
-	undo_nosave = FALSE;
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
+  undo_nosave = TRUE;
+  insert_nstring(regs[reg].text, regs[reg].size);
+  undo_nosave = FALSE;
 }
 
 DEFUN("insert-register", insert_register)
-/*+
-Insert contents of the user specified register.
-Puts point before and mark after the inserted text.
-+*/
+  /*+
+    Insert contents of the user specified register.
+    Puts point before and mark after the inserted text.
+    +*/
 {
-	int reg, uni;
+  int reg, uni;
 
-	if (warn_if_readonly_buffer())
-		return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-	minibuf_write("Insert register: ");
-        term_refresh();
-	if ((reg = term_getkey()) == KBD_CANCEL)
-		return cancel();
-	minibuf_clear();
-	reg %= NUM_REGISTERS;
+  minibuf_write("Insert register: ");
+  term_refresh();
+  if ((reg = term_getkey()) == KBD_CANCEL)
+    return cancel();
+  minibuf_clear();
+  reg %= NUM_REGISTERS;
 
-	if (regs[reg].text == NULL) {
-		minibuf_error("Register does not contain text");
-		return FALSE;
-	}
+  if (regs[reg].text == NULL) {
+    minibuf_error("Register does not contain text");
+    return FALSE;
+  }
 
-	set_mark_command();
+  set_mark_command();
 
-	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-	for (uni = 0; uni < last_uniarg; ++uni)
-		insert_register(reg);
-	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  for (uni = 0; uni < last_uniarg; ++uni)
+    insert_register(reg);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-	exchange_point_and_mark();
-	deactivate_mark();
+  exchange_point_and_mark();
+  deactivate_mark();
 
-	return TRUE;
+  return TRUE;
 }
 
 static void write_registers_list(va_list ap)
 {
-	unsigned int i, count;
+  unsigned int i, count;
 
-        (void)ap;
-	bprintf("%-8s %8s\n", "Register", "Size");
-	bprintf("%-8s %8s\n", "--------", "----");
-	for (i = count = 0; i < NUM_REGISTERS; ++i)
-		if (regs[i].text != NULL) {
-			astr as = astr_new();
-			++count;
-			if (isprint(i))
-				astr_afmt(as, "`%c'", i);
-			else
-				astr_afmt(as, "`\\%o'", i);
-			bprintf("%-8s %8d\n", astr_cstr(as), regs[i].size);
-                        astr_delete(as);
-		}
-	if (!count)
-		bprintf("No registers defined\n");
+  (void)ap;
+  bprintf("%-8s %8s\n", "Register", "Size");
+  bprintf("%-8s %8s\n", "--------", "----");
+  for (i = count = 0; i < NUM_REGISTERS; ++i)
+    if (regs[i].text != NULL) {
+      astr as = astr_new();
+      ++count;
+      if (isprint(i))
+        astr_afmt(as, "`%c'", i);
+      else
+        astr_afmt(as, "`\\%o'", i);
+      bprintf("%-8s %8d\n", astr_cstr(as), regs[i].size);
+      astr_delete(as);
+    }
+  if (!count)
+    bprintf("No registers defined\n");
 }
 
 DEFUN("list-registers", list_registers)
-/*+
-List defined registers.
-+*/
+  /*+
+    List defined registers.
+    +*/
 {
-	write_temp_buffer("*Registers List*", write_registers_list);
-	return TRUE;
+  write_temp_buffer("*Registers List*", write_registers_list);
+  return TRUE;
 }
 
 void free_registers(void)
 {
-	int i;
-	for (i = 0; i < NUM_REGISTERS; ++i)
-		if (regs[i].text != NULL)
-			free(regs[i].text);
+  int i;
+  for (i = 0; i < NUM_REGISTERS; ++i)
+    if (regs[i].text != NULL)
+      free(regs[i].text);
 }

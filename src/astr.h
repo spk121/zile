@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: astr.h,v 1.1 2004/11/15 00:47:12 rrt Exp $        */
+/*      $Id: astr.h,v 1.2 2005/01/09 23:56:03 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -166,9 +166,9 @@ extern astr   astr_afmt(astr as, const char *fmt, ...);
  * You should never directly access the struct fields.
  */
 struct astr_s {
-        char *  text;
-        size_t  len;
-        size_t  maxlen;
+  char *  text;
+  size_t  len;
+  size_t  maxlen;
 };
 
 

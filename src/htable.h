@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.h,v 1.2 2005/01/09 18:11:13 rrt Exp $	*/
+/*	$Id: htable.h,v 1.3 2005/01/09 23:56:04 rrt Exp $	*/
 
 #ifndef HTABLE_H
 #define HTABLE_H
@@ -68,8 +68,8 @@ extern void * htable_fetch(htable ht, const char *key);
  * htable_list.
  */
 typedef struct hpair_s {
-	char *key;
-	void *val;
+  char *key;
+  void *val;
 } hpair;
 
 /*

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.23 2004/12/20 11:15:38 rrt Exp $	*/
+/*	$Id: help.c,v 1.24 2005/01/09 23:56:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,71 +39,71 @@
 #include "paths.h"
 
 DEFUN("zile-version", zile_version)
-/*+
-Show the zile version.
-+*/
+  /*+
+    Show the zile version.
+    +*/
 {
-	minibuf_write("Zile " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
+  minibuf_write("Zile " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 
-	return TRUE;
+  return TRUE;
 }
 
 static int show_file(char *filename)
 {
-	if (!exist_file(filename)) {
-		minibuf_error("Unable to read file `%s'", filename);
-		return FALSE;
-	}
+  if (!exist_file(filename)) {
+    minibuf_error("Unable to read file `%s'", filename);
+    return FALSE;
+  }
 
-	open_file(filename, 0);
-	cur_bp->flags = BFLAG_READONLY | BFLAG_NOSAVE | BFLAG_NEEDNAME
-		| BFLAG_NOUNDO;
+  open_file(filename, 0);
+  cur_bp->flags = BFLAG_READONLY | BFLAG_NOSAVE | BFLAG_NEEDNAME
+    | BFLAG_NOUNDO;
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("help", help)
-/*+
-Show a help window.
-+*/
+  /*+
+    Show a help window.
+    +*/
 {
-	return show_file(PATH_DATA "/HELP");
+  return show_file(PATH_DATA "/HELP");
 }
 
 DEFUN("help-config-sample", help_config_sample)
-/*+
-Show a configuration file sample.
-+*/
+  /*+
+    Show a configuration file sample.
+    +*/
 {
-	return show_file(PATH_DATA "/zilerc.sample");
+  return show_file(PATH_DATA "/zilerc.sample");
 }
 
 DEFUN("help-faq", help_faq)
-/*+
-Show the Zile Frequently Asked Questions (FAQ).
-+*/
+  /*+
+    Show the Zile Frequently Asked Questions (FAQ).
+    +*/
 {
-	return show_file(PATH_DATA "/FAQ");
+  return show_file(PATH_DATA "/FAQ");
 }
 
 DEFUN("help-tutorial", help_tutorial)
-/*+
-Show a tutorial window.
-+*/
+  /*+
+    Show a tutorial window.
+    +*/
 {
-	if (show_file(PATH_DATA "/TUTORIAL")) {
-		astr buf;
-		buf = astr_new();
-		cur_bp->flags = 0;
-		astr_cpy_cstr(buf, getenv("HOME"));
-		astr_cat_cstr(buf, "/TUTORIAL");
-		set_buffer_filename(cur_bp, astr_cstr(buf));
+  if (show_file(PATH_DATA "/TUTORIAL")) {
+    astr buf;
+    buf = astr_new();
+    cur_bp->flags = 0;
+    astr_cpy_cstr(buf, getenv("HOME"));
+    astr_cat_cstr(buf, "/TUTORIAL");
+    set_buffer_filename(cur_bp, astr_cstr(buf));
 
-		astr_delete(buf);
-		return TRUE;
-	}
+    astr_delete(buf);
+    return TRUE;
+  }
 
-	return FALSE;
+  return FALSE;
 }
 
 /*
@@ -112,153 +112,153 @@ Show a tutorial window.
  */
 static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 {
-	FILE *f;
-	astr buf, match, doc;
-	int reading_doc = 0;
+  FILE *f;
+  astr buf, match, doc;
+  int reading_doc = 0;
 
-	if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
-		minibuf_error("Unable to read file `%s'",
-			      PATH_DATA "/AUTODOC");
-		return NULL;
-	}
+  if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
+    minibuf_error("Unable to read file `%s'",
+                  PATH_DATA "/AUTODOC");
+    return NULL;
+  }
 
-	match = astr_new();
-	if (isfunc)
-		astr_afmt(match, "\fF_%s", name);
-	else
-		astr_afmt(match, "\fV_%s", name);
+  match = astr_new();
+  if (isfunc)
+    astr_afmt(match, "\fF_%s", name);
+  else
+    astr_afmt(match, "\fV_%s", name);
 
-	doc = astr_new();
-	while ((buf = astr_fgets(f)) != NULL) {
-                if (reading_doc) {
-                        if (*astr_char(buf, 0) == '\f') {
-                                astr_delete(buf);
-                                break;
-                        }
-			if (isfunc || astr_len(defval) > 0) {
-				astr_cat(doc, buf);
-				astr_cat_cstr(doc, "\n");
-			} else
-				astr_cpy(defval, buf);
-		} else if (!astr_cmp(buf, match))
-			reading_doc = 1;
-                astr_delete(buf);
-        }
+  doc = astr_new();
+  while ((buf = astr_fgets(f)) != NULL) {
+    if (reading_doc) {
+      if (*astr_char(buf, 0) == '\f') {
+        astr_delete(buf);
+        break;
+      }
+      if (isfunc || astr_len(defval) > 0) {
+        astr_cat(doc, buf);
+        astr_cat_cstr(doc, "\n");
+      } else
+        astr_cpy(defval, buf);
+    } else if (!astr_cmp(buf, match))
+      reading_doc = 1;
+    astr_delete(buf);
+  }
 
-	fclose(f);
-	astr_delete(match);
+  fclose(f);
+  astr_delete(match);
 
-	if (!reading_doc) {
-		minibuf_error("Cannot find documentation for `%s'", name);
-		astr_delete(doc);
-		return NULL;
-	}
+  if (!reading_doc) {
+    minibuf_error("Cannot find documentation for `%s'", name);
+    astr_delete(doc);
+    return NULL;
+  }
 
-	return doc;
+  return doc;
 }
 
 static void write_function_description(va_list ap)
 {
-	const char *name = va_arg(ap, const char *);
-	astr doc = va_arg(ap, astr);
+  const char *name = va_arg(ap, const char *);
+  astr doc = va_arg(ap, astr);
 
-	bprintf("Function: %s\n\n"
-		"Documentation:\n%s",
-		name, astr_cstr(doc));
+  bprintf("Function: %s\n\n"
+          "Documentation:\n%s",
+          name, astr_cstr(doc));
 }
 
 DEFUN("describe-function", describe_function)
-/*+
-Display the full documentation of a function.
-+*/
+  /*+
+    Display the full documentation of a function.
+    +*/
 {
-	char *name;
-	astr bufname, doc;
+  char *name;
+  astr bufname, doc;
 
-	name = minibuf_read_function_name("Describe function: ");
-	if (name == NULL)
-		return FALSE;
+  name = minibuf_read_function_name("Describe function: ");
+  if (name == NULL)
+    return FALSE;
 
-	if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
-		return FALSE;
+  if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
+    return FALSE;
 
-	bufname = astr_new();
-	astr_afmt(bufname, "*Help: function `%s'*", name);
-	write_temp_buffer(astr_cstr(bufname), write_function_description,
-			  name, doc);
-	astr_delete(bufname);
-	astr_delete(doc);
+  bufname = astr_new();
+  astr_afmt(bufname, "*Help: function `%s'*", name);
+  write_temp_buffer(astr_cstr(bufname), write_function_description,
+                    name, doc);
+  astr_delete(bufname);
+  astr_delete(doc);
 
-	return TRUE;
+  return TRUE;
 }
 
 static void write_variable_description(va_list ap)
 {
-	char *name = va_arg(ap, char *);
-	astr defval = va_arg(ap, astr);
-	astr doc = va_arg(ap, astr);
-	bprintf("Variable: %s\n\n"
-		"Default value: %s\n"
-		"Current value: %s\n\n"
-		"Documentation:\n%s",
-		name, astr_cstr(defval), get_variable(name), astr_cstr(doc));
+  char *name = va_arg(ap, char *);
+  astr defval = va_arg(ap, astr);
+  astr doc = va_arg(ap, astr);
+  bprintf("Variable: %s\n\n"
+          "Default value: %s\n"
+          "Current value: %s\n\n"
+          "Documentation:\n%s",
+          name, astr_cstr(defval), get_variable(name), astr_cstr(doc));
 }
 
 DEFUN("describe-variable", describe_variable)
-/*+
-Display the full documentation of a variable.
-+*/
+  /*+
+    Display the full documentation of a variable.
+    +*/
 {
-	char *name;
-	astr bufname, defval, doc;
+  char *name;
+  astr bufname, defval, doc;
 
-	name = minibuf_read_variable_name("Describe variable: ");
-	if (name == NULL)
-		return FALSE;
+  name = minibuf_read_variable_name("Describe variable: ");
+  if (name == NULL)
+    return FALSE;
 
-	defval = astr_new();
-	if ((doc = get_funcvar_doc(name, defval, FALSE)) == NULL) {
-                astr_delete(defval);
-		return FALSE;
-        }
+  defval = astr_new();
+  if ((doc = get_funcvar_doc(name, defval, FALSE)) == NULL) {
+    astr_delete(defval);
+    return FALSE;
+  }
 
-	bufname = astr_new();
-	astr_afmt(bufname, "*Help: variable `%s'*", name);
-	write_temp_buffer(astr_cstr(bufname), write_variable_description,
-			  name, defval, doc);
-	astr_delete(bufname);
-	astr_delete(doc);
-	astr_delete(defval);
+  bufname = astr_new();
+  astr_afmt(bufname, "*Help: variable `%s'*", name);
+  write_temp_buffer(astr_cstr(bufname), write_variable_description,
+                    name, defval, doc);
+  astr_delete(bufname);
+  astr_delete(doc);
+  astr_delete(defval);
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("describe-key", describe_key)
-/*+
-Display documentation of the command invoked by a key sequence.
-+*/
+  /*+
+    Display documentation of the command invoked by a key sequence.
+    +*/
 {
-	char *name;
-	astr bufname, doc;
+  char *name;
+  astr bufname, doc;
 
-	minibuf_write("Describe key:");
+  minibuf_write("Describe key:");
 
-        if ((name = get_function_by_key_sequence()) == NULL) {
-		minibuf_error("Key sequence is undefined");
-		return FALSE;
-	}
+  if ((name = get_function_by_key_sequence()) == NULL) {
+    minibuf_error("Key sequence is undefined");
+    return FALSE;
+  }
 
-	minibuf_write("Key sequence runs the command `%s'", name);
+  minibuf_write("Key sequence runs the command `%s'", name);
 
-	if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
-		return FALSE;
+  if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
+    return FALSE;
 
-	bufname = astr_new();
-	astr_afmt(bufname, "*Help: function `%s'*", name);
-	write_temp_buffer(astr_cstr(bufname), write_function_description,
-			  name, doc);
-	astr_delete(bufname);
-	astr_delete(doc);
+  bufname = astr_new();
+  astr_afmt(bufname, "*Help: function `%s'*", name);
+  write_temp_buffer(astr_cstr(bufname), write_function_description,
+                    name, doc);
+  astr_delete(bufname);
+  astr_delete(doc);
 
-	return TRUE;
+  return TRUE;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.14 2005/01/09 18:19:15 rrt Exp $	*/
+/*	$Id: basic.c,v 1.15 2005/01/09 23:56:03 rrt Exp $	*/
 
 #include "config.h"
 
@@ -40,33 +40,33 @@
 static int cur_goalc;
 
 DEFUN("beginning-of-line", beginning_of_line)
-/*+
-Move point to beginning of current line.
-+*/
+  /*+
+    Move point to beginning of current line.
+    +*/
 {
-	cur_bp->pt = line_beginning_position(uniarg);
+  cur_bp->pt = line_beginning_position(uniarg);
 
-	/* Change the `goalc' to the beginning of line for next
-	   `prev/next-line' calls.  */
-	thisflag |= FLAG_DONE_CPCN;
-	cur_goalc = 0;
+  /* Change the `goalc' to the beginning of line for next
+     `prev/next-line' calls.  */
+  thisflag |= FLAG_DONE_CPCN;
+  cur_goalc = 0;
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("end-of-line", end_of_line)
-/*+
-Move point to end of current line.
-+*/
+  /*+
+    Move point to end of current line.
+    +*/
 {
-	cur_bp->pt = line_end_position(uniarg);
+  cur_bp->pt = line_end_position(uniarg);
 
-	/* Change the `goalc' to the end of line for next
-	   `prev/next-line' calls.  */
-	thisflag |= FLAG_DONE_CPCN;
-	cur_goalc = INT_MAX;
+  /* Change the `goalc' to the end of line for next
+     `prev/next-line' calls.  */
+  thisflag |= FLAG_DONE_CPCN;
+  cur_goalc = INT_MAX;
 
-	return TRUE;
+  return TRUE;
 }
 
 /*
@@ -74,26 +74,26 @@ Move point to end of current line.
  */
 int get_goalc_bp(Buffer *bp, Point pt)
 {
-	int col = 0, t = bp->tab_width, i;
-	const char *sp = astr_cstr(pt.p->text);
+  int col = 0, t = bp->tab_width, i;
+  const char *sp = astr_cstr(pt.p->text);
 
-	for (i = 0; i < pt.o; i++) {
-		if (sp[i] == '\t')
-			col |= t - 1;
-		++col;
-	}
+  for (i = 0; i < pt.o; i++) {
+    if (sp[i] == '\t')
+      col |= t - 1;
+    ++col;
+  }
 
-	return col;
+  return col;
 }
 
 int get_goalc_wp(Window *wp)
 {
-	return get_goalc_bp(wp->bp, window_pt(wp));
+  return get_goalc_bp(wp->bp, window_pt(wp));
 }
 
 int get_goalc(void)
 {
-	return get_goalc_bp(cur_bp, cur_bp->pt);
+  return get_goalc_bp(cur_bp, cur_bp->pt);
 }
 
 /*
@@ -102,123 +102,123 @@ int get_goalc(void)
  */
 static void goto_goalc(int goalc)
 {
-	int col = 0, t = cur_bp->tab_width, w, i;
-	const char *sp = astr_cstr(cur_bp->pt.p->text);
+  int col = 0, t = cur_bp->tab_width, w, i;
+  const char *sp = astr_cstr(cur_bp->pt.p->text);
 
-	for (i = 0; i < astr_len(cur_bp->pt.p->text); i++) {
-                if (col == goalc)
-			break;
-		else if (sp[i] == '\t') {
-			for (w = t - col % t; w > 0; w--)
-				if (++col == goalc)
-					break;
-		} else
-			++col;
-	}
+  for (i = 0; i < astr_len(cur_bp->pt.p->text); i++) {
+    if (col == goalc)
+      break;
+    else if (sp[i] == '\t') {
+      for (w = t - col % t; w > 0; w--)
+        if (++col == goalc)
+          break;
+    } else
+      ++col;
+  }
 
-	cur_bp->pt.o = i;
+  cur_bp->pt.o = i;
 }
 
 int previous_line(void)
 {
-	if (cur_bp->pt.p->prev != cur_bp->limitp) {
-		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  if (cur_bp->pt.p->prev != cur_bp->limitp) {
+    thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
-		if (!(lastflag & FLAG_DONE_CPCN)) {
-			if (!bolp() && eolp())
-				cur_goalc = INT_MAX;
-			else
-				cur_goalc = get_goalc();
-		}
+    if (!(lastflag & FLAG_DONE_CPCN)) {
+      if (!bolp() && eolp())
+        cur_goalc = INT_MAX;
+      else
+        cur_goalc = get_goalc();
+    }
 
-		cur_bp->pt.p = cur_bp->pt.p->prev;
-		cur_bp->pt.n--;
+    cur_bp->pt.p = cur_bp->pt.p->prev;
+    cur_bp->pt.n--;
 
-		goto_goalc(cur_goalc);
+    goto_goalc(cur_goalc);
 
-		return TRUE;
-	}
+    return TRUE;
+  }
 
-	return FALSE;
+  return FALSE;
 }
 
 DEFUN("previous-line", previous_line)
-/*+
-Move cursor vertically up one line.
-If there is no character in the target line exactly over the current column,
-the cursor is positioned after the character in that line which spans this
-column, or at the end of the line if it is not long enough.
-+*/
+  /*+
+    Move cursor vertically up one line.
+    If there is no character in the target line exactly over the current column,
+    the cursor is positioned after the character in that line which spans this
+    column, or at the end of the line if it is not long enough.
+    +*/
 {
-	int uni;
+  int uni;
 
-	if (uniarg < 0)
-		return FUNCALL_ARG(next_line, -uniarg);
+  if (uniarg < 0)
+    return FUNCALL_ARG(next_line, -uniarg);
 
-	if (!bobp()) {
-		for (uni = 0; uni < uniarg; ++uni)
-			if (!previous_line()) {
-				thisflag |= FLAG_DONE_CPCN;
-				FUNCALL(beginning_of_line);
-				break;
-			}
-	}
-	else if (lastflag & FLAG_DONE_CPCN)
-		thisflag |= FLAG_DONE_CPCN;
+  if (!bobp()) {
+    for (uni = 0; uni < uniarg; ++uni)
+      if (!previous_line()) {
+        thisflag |= FLAG_DONE_CPCN;
+        FUNCALL(beginning_of_line);
+        break;
+      }
+  }
+  else if (lastflag & FLAG_DONE_CPCN)
+    thisflag |= FLAG_DONE_CPCN;
 
-	return TRUE;
+  return TRUE;
 }
 
 int next_line(void)
 {
-	if (cur_bp->pt.p->next != cur_bp->limitp) {
-		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  if (cur_bp->pt.p->next != cur_bp->limitp) {
+    thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
-		if (!(lastflag & FLAG_DONE_CPCN)) {
-			if (!bolp() && eolp())
-				cur_goalc = INT_MAX;
-			else
-				cur_goalc = get_goalc();
-		}
+    if (!(lastflag & FLAG_DONE_CPCN)) {
+      if (!bolp() && eolp())
+        cur_goalc = INT_MAX;
+      else
+        cur_goalc = get_goalc();
+    }
 
-		cur_bp->pt.p = cur_bp->pt.p->next;
-		cur_bp->pt.n++;
+    cur_bp->pt.p = cur_bp->pt.p->next;
+    cur_bp->pt.n++;
 
-		goto_goalc(cur_goalc);
+    goto_goalc(cur_goalc);
 
-		return TRUE;
-	}
+    return TRUE;
+  }
 
-	return FALSE;
+  return FALSE;
 }
 
 DEFUN("next-line", next_line)
-/*+
-Move cursor vertically down one line.
-If there is no character in the target line exactly under the current column,
-the cursor is positioned after the character in that line which spans this
-column, or at the end of the line if it is not long enough.
-+*/
+  /*+
+    Move cursor vertically down one line.
+    If there is no character in the target line exactly under the current column,
+    the cursor is positioned after the character in that line which spans this
+    column, or at the end of the line if it is not long enough.
+    +*/
 {
-	int uni;
+  int uni;
 
-	if (uniarg < 0)
-		return FUNCALL_ARG(previous_line, -uniarg);
+  if (uniarg < 0)
+    return FUNCALL_ARG(previous_line, -uniarg);
 
-	if (!eobp()) {
-		for (uni = 0; uni < uniarg; ++uni)
-			if (!next_line()) {
-				int old = cur_goalc;
-				thisflag |= FLAG_DONE_CPCN;
-				FUNCALL(end_of_line);
-				cur_goalc = old;
-				break;
-			}
-	}
-	else if (lastflag & FLAG_DONE_CPCN)
-		thisflag |= FLAG_DONE_CPCN;
+  if (!eobp()) {
+    for (uni = 0; uni < uniarg; ++uni)
+      if (!next_line()) {
+        int old = cur_goalc;
+        thisflag |= FLAG_DONE_CPCN;
+        FUNCALL(end_of_line);
+        cur_goalc = old;
+        break;
+      }
+  }
+  else if (lastflag & FLAG_DONE_CPCN)
+    thisflag |= FLAG_DONE_CPCN;
 
-	return TRUE;
+  return TRUE;
 }
 
 /*
@@ -227,56 +227,56 @@ column, or at the end of the line if it is not long enough.
  */
 void goto_line(int to_line)
 {
-	if (cur_bp->pt.n > to_line)
-		ngotoup(cur_bp->pt.n - to_line);
-	else if (cur_bp->pt.n < to_line)
-		ngotodown(to_line - cur_bp->pt.n);
+  if (cur_bp->pt.n > to_line)
+    ngotoup(cur_bp->pt.n - to_line);
+  else if (cur_bp->pt.n < to_line)
+    ngotodown(to_line - cur_bp->pt.n);
 }
 
 DEFUN("goto-char", goto_char)
-/*+
-Read a number N and move the cursor to character number N.
-Position 1 is the beginning of the buffer.
-+*/
+  /*+
+    Read a number N and move the cursor to character number N.
+    Position 1 is the beginning of the buffer.
+    +*/
 {
-	char *ms;
-	int to_char, count;
+  char *ms;
+  int to_char, count;
 
-	do {
-		if ((ms = minibuf_read("Goto char: ", "")) == NULL)
-			return cancel();
-		if ((to_char = atoi(ms)) < 0)
-			ding();
-	} while (to_char < 0);
+  do {
+    if ((ms = minibuf_read("Goto char: ", "")) == NULL)
+      return cancel();
+    if ((to_char = atoi(ms)) < 0)
+      ding();
+  } while (to_char < 0);
 
-	gotobob();
-	for (count = 1; count < to_char; ++count)
-		if (!forward_char())
-			break;
+  gotobob();
+  for (count = 1; count < to_char; ++count)
+    if (!forward_char())
+      break;
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("goto-line", goto_line)
-/*+
-Move cursor to the beginning of the specified line.
-Line 1 is the beginning of the buffer.
-+*/
+  /*+
+    Move cursor to the beginning of the specified line.
+    Line 1 is the beginning of the buffer.
+    +*/
 {
-	char *ms;
-	int to_line;
+  char *ms;
+  int to_line;
 
-	do {
-		if ((ms = minibuf_read("Goto line: ", "")) == NULL)
-			return cancel();
-		if ((to_line = atoi(ms)) < 0)
-			ding();
-	} while (to_line < 0);
+  do {
+    if ((ms = minibuf_read("Goto line: ", "")) == NULL)
+      return cancel();
+    if ((to_line = atoi(ms)) < 0)
+      ding();
+  } while (to_line < 0);
 
-	goto_line(to_line - 1);
-	cur_bp->pt.o = 0;
+  goto_line(to_line - 1);
+  cur_bp->pt.o = 0;
 
-	return TRUE;
+  return TRUE;
 }
 
 /*
@@ -284,18 +284,18 @@ Line 1 is the beginning of the buffer.
  */
 void gotobob(void)
 {
-	cur_bp->pt = point_min();
-	thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  cur_bp->pt = point_min();
+  thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
 DEFUN("beginning-of-buffer", beginning_of_buffer)
-/*+
-Move point to the beginning of the buffer; leave mark at previous position.
-+*/
+  /*+
+    Move point to the beginning of the buffer; leave mark at previous position.
+    +*/
 {
-	set_mark_command();
-	gotobob();
-	return TRUE;
+  set_mark_command();
+  gotobob();
+  return TRUE;
 }
 
 /*
@@ -303,116 +303,116 @@ Move point to the beginning of the buffer; leave mark at previous position.
  */
 void gotoeob(void)
 {
-	cur_bp->pt = point_max();
-	thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  cur_bp->pt = point_max();
+  thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
 DEFUN("end-of-buffer", end_of_buffer)
-/*+
-Move point to the end of the buffer; leave mark at previous position.
-+*/
+  /*+
+    Move point to the end of the buffer; leave mark at previous position.
+    +*/
 {
-	set_mark_command();
-	gotoeob();
-	return TRUE;
+  set_mark_command();
+  gotoeob();
+  return TRUE;
 }
 
 int backward_char(void)
 {
-	if (!bolp()) {
-		cur_bp->pt.o--;
+  if (!bolp()) {
+    cur_bp->pt.o--;
 
-		return TRUE;
-	} else if (!bobp()) {
-		thisflag |= FLAG_NEED_RESYNC;
-		cur_bp->pt.p = cur_bp->pt.p->prev;
-		cur_bp->pt.n--;
-		FUNCALL(end_of_line);
+    return TRUE;
+  } else if (!bobp()) {
+    thisflag |= FLAG_NEED_RESYNC;
+    cur_bp->pt.p = cur_bp->pt.p->prev;
+    cur_bp->pt.n--;
+    FUNCALL(end_of_line);
 
-		return TRUE;
-	}
+    return TRUE;
+  }
 
-	return FALSE;
+  return FALSE;
 }
 
 DEFUN("backward-char", backward_char)
-/*+
-Move point left one character.
-On attempt to pass beginning or end of buffer, stop and signal error.
-+*/
+  /*+
+    Move point left one character.
+    On attempt to pass beginning or end of buffer, stop and signal error.
+    +*/
 {
-	int uni;
+  int uni;
 
-	if (uniarg < 0)
-		return FUNCALL_ARG(forward_char, -uniarg);
+  if (uniarg < 0)
+    return FUNCALL_ARG(forward_char, -uniarg);
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!backward_char()) {
-			minibuf_error("Beginning of buffer");
-			return FALSE;
-		}
+  for (uni = 0; uni < uniarg; ++uni)
+    if (!backward_char()) {
+      minibuf_error("Beginning of buffer");
+      return FALSE;
+    }
 
-	return TRUE;
+  return TRUE;
 }
 
 int forward_char(void)
 {
-	if (!eolp()) {
-		cur_bp->pt.o++;
+  if (!eolp()) {
+    cur_bp->pt.o++;
 
-		return TRUE;
-	} else if (!eobp()) {
-		thisflag |= FLAG_NEED_RESYNC;
-		cur_bp->pt.p = cur_bp->pt.p->next;
-		cur_bp->pt.n++;
-		FUNCALL(beginning_of_line);
+    return TRUE;
+  } else if (!eobp()) {
+    thisflag |= FLAG_NEED_RESYNC;
+    cur_bp->pt.p = cur_bp->pt.p->next;
+    cur_bp->pt.n++;
+    FUNCALL(beginning_of_line);
 
-		return TRUE;
-	}
-	else
-		return FALSE;
+    return TRUE;
+  }
+  else
+    return FALSE;
 }
 
 DEFUN("forward-char", forward_char)
-/*+
-Move point right one character.
-On reaching end of buffer, stop and signal error.
-+*/
+  /*+
+    Move point right one character.
+    On reaching end of buffer, stop and signal error.
+    +*/
 {
-	int uni;
+  int uni;
 
-	if (uniarg < 0)
-		return FUNCALL_ARG(backward_char, -uniarg);
+  if (uniarg < 0)
+    return FUNCALL_ARG(backward_char, -uniarg);
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!forward_char()) {
-			minibuf_error("End of buffer");
-			return FALSE;
-		}
+  for (uni = 0; uni < uniarg; ++uni)
+    if (!forward_char()) {
+      minibuf_error("End of buffer");
+      return FALSE;
+    }
 
-	return TRUE;
+  return TRUE;
 }
 
 int ngotoup(int n)
 {
-	for (; n > 0; n--)
-		if (cur_bp->pt.p->prev != cur_bp->limitp)
-			FUNCALL(previous_line);
-		else
-			return FALSE;
+  for (; n > 0; n--)
+    if (cur_bp->pt.p->prev != cur_bp->limitp)
+      FUNCALL(previous_line);
+    else
+      return FALSE;
 
-	return TRUE;
+  return TRUE;
 }
 
 int ngotodown(int n)
 {
-	for (; n > 0; n--)
-		if (cur_bp->pt.p->next != cur_bp->limitp)
-			FUNCALL(next_line);
-		else
-			return FALSE;
+  for (; n > 0; n--)
+    if (cur_bp->pt.p->next != cur_bp->limitp)
+      FUNCALL(next_line);
+    else
+      return FALSE;
 
-	return TRUE;
+  return TRUE;
 }
 
 /* The number of lines to scroll down or up. */
@@ -420,66 +420,66 @@ int ngotodown(int n)
 
 int scroll_down(void)
 {
-	if (cur_bp->pt.n > 0) {
-		if (ngotoup(SCROLL_LINES)) {
-			/* XXX */
-			return TRUE;
-		} else
-			return FALSE;
-	} else {
-		minibuf_error("Beginning of buffer");
-		return FALSE;
-	}
+  if (cur_bp->pt.n > 0) {
+    if (ngotoup(SCROLL_LINES)) {
+      /* XXX */
+      return TRUE;
+    } else
+      return FALSE;
+  } else {
+    minibuf_error("Beginning of buffer");
+    return FALSE;
+  }
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("scroll-down", scroll_down)
-/*+
-Scroll text of current window downward near full screen.
-+*/
+  /*+
+    Scroll text of current window downward near full screen.
+    +*/
 {
-	int uni;
+  int uni;
 
-	if (uniarg < 0)
-		return FUNCALL_ARG(scroll_up, -uniarg);
+  if (uniarg < 0)
+    return FUNCALL_ARG(scroll_up, -uniarg);
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!scroll_down())
-			return FALSE;
+  for (uni = 0; uni < uniarg; ++uni)
+    if (!scroll_down())
+      return FALSE;
 
-	return TRUE;
+  return TRUE;
 }
 
 int scroll_up(void)
 {
-	if (cur_bp->pt.n < cur_bp->num_lines) {
-		if (ngotodown(SCROLL_LINES)) {
-			/* XXX */
-			return TRUE;
-		} else
-			return FALSE;
-	} else {
-		minibuf_error("End of buffer");
-		return FALSE;
-	}
+  if (cur_bp->pt.n < cur_bp->num_lines) {
+    if (ngotodown(SCROLL_LINES)) {
+      /* XXX */
+      return TRUE;
+    } else
+      return FALSE;
+  } else {
+    minibuf_error("End of buffer");
+    return FALSE;
+  }
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("scroll-up", scroll_up)
-/*+
-Scroll text of current window upward near full screen.
-+*/
+  /*+
+    Scroll text of current window upward near full screen.
+    +*/
 {
-	int uni;
+  int uni;
 
-	if (uniarg < 0)
-		return FUNCALL_ARG(scroll_down, -uniarg);
+  if (uniarg < 0)
+    return FUNCALL_ARG(scroll_down, -uniarg);
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!scroll_up())
-			return FALSE;
+  for (uni = 0; uni < uniarg; ++uni)
+    if (!scroll_up())
+      return FALSE;
 
-	return TRUE;
+  return TRUE;
 }

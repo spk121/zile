@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: agetcwd.c,v 1.2 2005/01/09 18:23:12 rrt Exp $	*/
+/*	$Id: agetcwd.c,v 1.3 2005/01/09 23:56:03 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <errno.h>
@@ -31,17 +31,17 @@
 
 astr agetcwd(astr as)
 {
-        size_t len = PATH_MAX;
-        char *buf = (char *)zmalloc(len);
-        char *res;
-        while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
-                len *= 2;
-                buf = zrealloc(buf, len);
-        }
-        /* If there was an error, return the empty string */
-        if (res == NULL)
-                *buf = '\0';
-	astr_cpy_cstr(as, buf);
-	free(buf);
-        return as;
+  size_t len = PATH_MAX;
+  char *buf = (char *)zmalloc(len);
+  char *res;
+  while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
+    len *= 2;
+    buf = zrealloc(buf, len);
+  }
+  /* If there was an error, return the empty string */
+  if (res == NULL)
+    *buf = '\0';
+  astr_cpy_cstr(as, buf);
+  free(buf);
+  return as;
 }

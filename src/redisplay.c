@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.10 2004/10/13 15:47:56 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.11 2005/01/09 23:56:05 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -28,86 +28,85 @@
 
 void resync_redisplay(void)
 {
-	/* Normal Emacs-like resyncing calculation. */
-	int delta = cur_bp->pt.n - cur_wp->lastpointn;
+  int delta = cur_bp->pt.n - cur_wp->lastpointn;
 
-	if (delta > 0) {
-		if (cur_wp->topdelta + delta < cur_wp->eheight)
-			cur_wp->topdelta += delta;
-		else if (cur_bp->pt.n > cur_wp->eheight / 2)
-			cur_wp->topdelta = cur_wp->eheight / 2;
-		else
-			cur_wp->topdelta = cur_bp->pt.n;
-	} else if (delta < 0) {
-		if (cur_wp->topdelta + delta >= 0)
-			cur_wp->topdelta += delta;
-		else if (cur_bp->pt.n > cur_wp->eheight / 2)
-			cur_wp->topdelta = cur_wp->eheight / 2;
-		else
-			cur_wp->topdelta = cur_bp->pt.n;
-	}
-	cur_wp->lastpointn = cur_bp->pt.n;
+  if (delta > 0) {
+    if (cur_wp->topdelta + delta < cur_wp->eheight)
+      cur_wp->topdelta += delta;
+    else if (cur_bp->pt.n > cur_wp->eheight / 2)
+      cur_wp->topdelta = cur_wp->eheight / 2;
+    else
+      cur_wp->topdelta = cur_bp->pt.n;
+  } else if (delta < 0) {
+    if (cur_wp->topdelta + delta >= 0)
+      cur_wp->topdelta += delta;
+    else if (cur_bp->pt.n > cur_wp->eheight / 2)
+      cur_wp->topdelta = cur_wp->eheight / 2;
+    else
+      cur_wp->topdelta = cur_bp->pt.n;
+  }
+  cur_wp->lastpointn = cur_bp->pt.n;
 }
 
 void resize_windows(void)
 {
-	Window *wp;
-	int hdelta = ZILE_LINES - termp->height;
+  Window *wp;
+  int hdelta = ZILE_LINES - termp->height;
 
-	/* Resize windows horizontally. */
-	for (wp = head_wp; wp != NULL; wp = wp->next)
-		wp->fwidth = wp->ewidth = ZILE_COLS;
+  /* Resize windows horizontally. */
+  for (wp = head_wp; wp != NULL; wp = wp->next)
+    wp->fwidth = wp->ewidth = ZILE_COLS;
 
-	/* Resize windows vertically. */
-	if (hdelta > 0) { /* Increase windows height. */
-		for (wp = head_wp; hdelta > 0; wp = wp->next) {
-			if (wp == NULL)
-				wp = head_wp;
-			++wp->fheight;
-			++wp->eheight;
-			--hdelta;
-		}
-	} else { /* Decrease windows height. */
-		int decreased = TRUE;
-		while (decreased) {
-			decreased = FALSE;
-			for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
-				if (wp->fheight > 2) {
-					--wp->fheight;
-					--wp->eheight;
-					++hdelta;
-					decreased = TRUE;
-				}
-		}
-	}
+  /* Resize windows vertically. */
+  if (hdelta > 0) { /* Increase windows height. */
+    for (wp = head_wp; hdelta > 0; wp = wp->next) {
+      if (wp == NULL)
+        wp = head_wp;
+      ++wp->fheight;
+      ++wp->eheight;
+      --hdelta;
+    }
+  } else { /* Decrease windows height. */
+    int decreased = TRUE;
+    while (decreased) {
+      decreased = FALSE;
+      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+        if (wp->fheight > 2) {
+          --wp->fheight;
+          --wp->eheight;
+          ++hdelta;
+          decreased = TRUE;
+        }
+    }
+  }
 
-	/*
-	 * Sometimes Zile cannot reduce the windows height to a certain
-	 * value (too small); take care of this case.
-	 */
-	termp->width = ZILE_COLS;
-	termp->height = ZILE_LINES - hdelta;
+  /*
+   * Sometimes Zile cannot reduce the windows height to a certain
+   * value (too small); take care of this case.
+   */
+  termp->width = ZILE_COLS;
+  termp->height = ZILE_LINES - hdelta;
 
-	FUNCALL(recenter);
+  FUNCALL(recenter);
 }
 
 void recenter(Window *wp)
 {
-	Point pt = window_pt(wp);
+  Point pt = window_pt(wp);
 
-	if (pt.n > wp->eheight / 2)
-		wp->topdelta = wp->eheight / 2;
-	else
-		wp->topdelta = pt.n;
+  if (pt.n > wp->eheight / 2)
+    wp->topdelta = wp->eheight / 2;
+  else
+    wp->topdelta = pt.n;
 }
 
 DEFUN("recenter", recenter)
-/*+
-Center point in window and redisplay screen.
-The desired position of point is always relative to the current window.
-+*/
+  /*+
+    Center point in window and redisplay screen.
+    The desired position of point is always relative to the current window.
+    +*/
 {
-	recenter(cur_wp);
-	term_full_redisplay();
-	return TRUE;
+  recenter(cur_wp);
+  term_full_redisplay();
+  return TRUE;
 }

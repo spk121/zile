@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: vector.c,v 1.2 2005/01/09 23:56:06 rrt Exp $	*/
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -32,39 +32,39 @@
 vector *
 vec_new(size_t itemsize)
 {
-        vector *v = zmalloc(sizeof(vector));
-        vec_itemsize(v) = itemsize;
-        vec_items(v) = 0;
-        v->size = 0;
-        v->array = NULL;
-        return v;
+  vector *v = zmalloc(sizeof(vector));
+  vec_itemsize(v) = itemsize;
+  vec_items(v) = 0;
+  v->size = 0;
+  v->array = NULL;
+  return v;
 }
 
 /* Free a vector v */
 void
 vec_delete(vector *v)
 {
-        free(v->array);
-        free(v);
+  free(v->array);
+  free(v);
 }
 
 /* Resize a vector v to items elements */
 static vector *
 resize(vector *v, size_t items)
 {
-        v->size = items;
-        v->array = zrealloc(v->array, items * vec_itemsize(v));
-        return v;
+  v->size = items;
+  v->array = zrealloc(v->array, items * vec_itemsize(v));
+  return v;
 }
 
 /* Convert a vector to an array */
 void *
 vec_toarray(vector *v) {
-        void *a;
-        resize(v, vec_items(v));
-        a = v->array;
-        free(v);
-        return a;
+  void *a;
+  resize(v, vec_items(v));
+  a = v->array;
+  free(v);
+  return a;
 }
 
 /* Return the address of a vector element, growing the array if
@@ -72,9 +72,9 @@ vec_toarray(vector *v) {
 void *
 vec_index(vector *v, size_t idx)
 {
-        if (idx >= v->size)
-                v = resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
-        if (idx >= vec_items(v))
-                vec_items(v) = idx + 1;
-        return (void *)((char *)v->array + idx * vec_itemsize(v));
+  if (idx >= v->size)
+    v = resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
+  if (idx >= vec_items(v))
+    vec_items(v) = idx + 1;
+  return (void *)((char *)v->array + idx * vec_itemsize(v));
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: strrstr.c,v 1.2 2004/12/20 18:23:22 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.3 2005/01/09 23:56:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -31,17 +31,17 @@
 char *strrstr(const char *s, const char *t);
 
 char *strrstr(const char *s, const char *t) {
-        int i, j, slen = strlen(s), tlen = strlen(t);
+  int i, j, slen = strlen(s), tlen = strlen(t);
 
-        if (slen < tlen)
-                return NULL;
+  if (slen < tlen)
+    return NULL;
 
-	for (i = slen - tlen; i > 0; i--) {
-		for (j = 0; j < tlen && s[i + j] == t[j]; j++);
-                if (j == tlen)
-                        return (char *)(s + i);
-        }
-	return NULL;
+  for (i = slen - tlen; i > 0; i--) {
+    for (j = 0; j < tlen && s[i + j] == t[j]; j++);
+    if (j == tlen)
+      return (char *)(s + i);
+  }
+  return NULL;
 }
 
 #endif

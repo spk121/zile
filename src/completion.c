@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.14 2005/01/09 18:11:13 rrt Exp $   */
+/*      $Id: completion.c,v 1.15 2005/01/09 23:56:03 rrt Exp $   */
 
 #include "config.h"
 
@@ -48,20 +48,20 @@
  */
 Completion *new_completion(int fileflag)
 {
-        Completion *cp;
+  Completion *cp;
 
-        cp = (Completion *)zmalloc(sizeof(Completion));
-        memset(cp, 0, sizeof(Completion));
+  cp = (Completion *)zmalloc(sizeof(Completion));
+  memset(cp, 0, sizeof(Completion));
 
-        cp->completions = list_new();
-        cp->matches = list_new();
+  cp->completions = list_new();
+  cp->matches = list_new();
 
-        if (fileflag) {
-                cp->path = astr_new();
-                cp->fl_dir = TRUE;
-        }
+  if (fileflag) {
+    cp->path = astr_new();
+    cp->fl_dir = TRUE;
+  }
 
-        return cp;
+  return cp;
 }
 
 /*
@@ -69,15 +69,15 @@ Completion *new_completion(int fileflag)
  */
 void free_completion(Completion *cp)
 {
-        list p;
+  list p;
         
-        for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-                free(p->item);
-        list_delete(cp->completions);
-        list_delete(cp->matches);
-        if (cp->fl_dir)
-                astr_delete(cp->path);
-        free(cp);
+  for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
+    free(p->item);
+  list_delete(cp->completions);
+  list_delete(cp->matches);
+  if (cp->fl_dir)
+    astr_delete(cp->path);
+  free(cp);
 }
 
 /*
@@ -85,17 +85,17 @@ void free_completion(Completion *cp)
  */
 void completion_scroll_up(Completion *cp)
 {
-        Window *wp, *old_wp = cur_wp;
+  Window *wp, *old_wp = cur_wp;
 
-        (void)cp;
-        wp = find_window("*Completions*");
-        assert(wp != NULL);
-        set_current_window(wp);
-        if (cur_bp->pt.n == cur_bp->num_lines || !FUNCALL(scroll_up))
-                gotobob();
-        set_current_window(old_wp);
+  (void)cp;
+  wp = find_window("*Completions*");
+  assert(wp != NULL);
+  set_current_window(wp);
+  if (cur_bp->pt.n == cur_bp->num_lines || !FUNCALL(scroll_up))
+    gotobob();
+  set_current_window(old_wp);
 
-        term_redisplay();
+  term_redisplay();
 }
 
 /*
@@ -103,19 +103,19 @@ void completion_scroll_up(Completion *cp)
  */
 void completion_scroll_down(Completion *cp)
 {
-        Window *wp, *old_wp = cur_wp;
+  Window *wp, *old_wp = cur_wp;
 
-        (void)cp;
-        wp = find_window("*Completions*");
-        assert(wp != NULL);
-        set_current_window(wp);
-        if (cur_bp->pt.n == 0 || !FUNCALL(scroll_down)) {
-                gotoeob();
-                resync_redisplay();
-        }
-        set_current_window(old_wp);
+  (void)cp;
+  wp = find_window("*Completions*");
+  assert(wp != NULL);
+  set_current_window(wp);
+  if (cur_bp->pt.n == 0 || !FUNCALL(scroll_down)) {
+    gotoeob();
+    resync_redisplay();
+  }
+  set_current_window(old_wp);
 
-        term_redisplay();
+  term_redisplay();
 }
 
 /*
@@ -123,14 +123,14 @@ void completion_scroll_down(Completion *cp)
  */
 static int calculate_max_length(list l, int size)
 {
-        int len, i, max = 0;
-        list p;
+  int len, i, max = 0;
+  list p;
 
-        for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++)
-                if ((len = strlen(p->item)) > max)
-                        max = len;
+  for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++)
+    if ((len = strlen(p->item)) > max)
+      max = len;
 
-        return max;
+  return max;
 }
 
 /*
@@ -138,23 +138,23 @@ static int calculate_max_length(list l, int size)
  */
 static void completion_print(list l, int size)
 {
-        int i, j, col, max, numcols;
-        list p;
+  int i, j, col, max, numcols;
+  list p;
 
-        max = calculate_max_length(l, size) + 5;
-        numcols = (cur_wp->ewidth - 1) / max;
+  max = calculate_max_length(l, size) + 5;
+  numcols = (cur_wp->ewidth - 1) / max;
 
-        bprintf("Possible completions are:\n");
-        for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
-                if (col >= numcols) {
-                        col = 0;
-                        insert_newline();
-                }
-                insert_string(p->item);
-                for (j = max - strlen(p->item); j > 0; --j)
-                        insert_char(' ');
-                ++col;
-        }
+  bprintf("Possible completions are:\n");
+  for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
+    if (col >= numcols) {
+      col = 0;
+      insert_newline();
+    }
+    insert_string(p->item);
+    for (j = max - strlen(p->item); j > 0; --j)
+      insert_char(' ');
+    ++col;
+  }
 }
 
 /*
@@ -162,44 +162,44 @@ static void completion_print(list l, int size)
  */
 static void popup_completion(Completion *cp, int allflag, int num)
 {
-        Window *wp, *old_wp = cur_wp;
-        Buffer *bp;
+  Window *wp, *old_wp = cur_wp;
+  Buffer *bp;
 
-        cp->fl_poppedup = 1;
+  cp->fl_poppedup = 1;
 
-        if ((wp = find_window("*Completions*")) == NULL) {
-                if (head_wp->next == NULL)
-                        cp->fl_close = 1;
-                set_current_window(popup_window ());
-                if (!cp->fl_close)
-                        cp->old_bp = cur_bp;
-                bp = find_buffer("*Completions*", TRUE);
-                switch_to_buffer(bp);
-        } else {
-                set_current_window(wp);
-        }
+  if ((wp = find_window("*Completions*")) == NULL) {
+    if (head_wp->next == NULL)
+      cp->fl_close = 1;
+    set_current_window(popup_window ());
+    if (!cp->fl_close)
+      cp->old_bp = cur_bp;
+    bp = find_buffer("*Completions*", TRUE);
+    switch_to_buffer(bp);
+  } else {
+    set_current_window(wp);
+  }
 
-        zap_buffer_content();
-        cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
-        set_temporary_buffer(cur_bp);
+  zap_buffer_content();
+  cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
+  set_temporary_buffer(cur_bp);
 
-        if (allflag)
-                completion_print(cp->completions, list_length(cp->completions));
-        else
-                completion_print(cp->matches, num);
+  if (allflag)
+    completion_print(cp->completions, list_length(cp->completions));
+  else
+    completion_print(cp->matches, num);
 
-        gotobob();
+  gotobob();
 
-        cur_bp->flags |= BFLAG_READONLY;
+  cur_bp->flags |= BFLAG_READONLY;
 
-        set_current_window(old_wp);
+  set_current_window(old_wp);
 
-        term_redisplay();
+  term_redisplay();
 }
 
 static int hcompar(const void *p1, const void *p2)
 {
-        return strcmp(*(const char **)p1, *(const char **)p2);
+  return strcmp(*(const char **)p1, *(const char **)p2);
 }
 
 /*
@@ -207,68 +207,68 @@ static int hcompar(const void *p1, const void *p2)
  */
 static int completion_reread(Completion *cp, astr as)
 {
-        astr buf, pdir, fname;
-        DIR *dir;
-        struct dirent *d;
-        struct stat st;
-        list p;
-        int i;
+  astr buf, pdir, fname;
+  DIR *dir;
+  struct dirent *d;
+  struct stat st;
+  list p;
+  int i;
 
-        for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-                free(p->item);
-        list_delete(cp->completions);
+  for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
+    free(p->item);
+  list_delete(cp->completions);
 
-        cp->completions = list_new();
-        cp->fl_sorted = 0;
+  cp->completions = list_new();
+  cp->fl_sorted = 0;
 
-        buf = astr_new();
-        pdir = astr_new();
-        fname = astr_new();
+  buf = astr_new();
+  pdir = astr_new();
+  fname = astr_new();
 
-        for (i = 0; i < astr_len(as); i++){
-                if (*astr_char(as, i) == '/') {
-                        if (*astr_char(as, i + 1) == '/') {
-                                /* Got `//'; restart from this point. */
-                                while (*astr_char(as, i + 1) == '/')
-                                        i++;
-                                astr_truncate(buf, 0);
-                                /* Final '/' remains to be copied below. */
-                        }
-                }
-                astr_cat_char(buf, *astr_char(as, i));
-        }
-        astr_cpy(as, buf);
+  for (i = 0; i < astr_len(as); i++){
+    if (*astr_char(as, i) == '/') {
+      if (*astr_char(as, i + 1) == '/') {
+        /* Got `//'; restart from this point. */
+        while (*astr_char(as, i + 1) == '/')
+          i++;
+        astr_truncate(buf, 0);
+        /* Final '/' remains to be copied below. */
+      }
+    }
+    astr_cat_char(buf, *astr_char(as, i));
+  }
+  astr_cpy(as, buf);
 
-        agetcwd(buf);
-        if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
-                return FALSE;
+  agetcwd(buf);
+  if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
+    return FALSE;
 
-        if ((dir = opendir(astr_cstr(pdir))) == NULL)
-                return FALSE;
+  if ((dir = opendir(astr_cstr(pdir))) == NULL)
+    return FALSE;
 
-        astr_cpy(as, fname);
+  astr_cpy(as, fname);
 
-        while ((d = readdir(dir)) != NULL) {
-                astr_cpy(buf, pdir);
-                astr_cat_cstr(buf, d->d_name);
-                if (stat(astr_cstr(buf), &st) != -1) {
-                        astr_cpy_cstr(buf, d->d_name);
-                        if (S_ISDIR(st.st_mode))
-                                astr_cat_cstr(buf, "/");
-                } else
-                        astr_cpy_cstr(buf, d->d_name);
-                list_append(cp->completions, zstrdup(astr_cstr(buf)));
-        }
-        closedir(dir);
+  while ((d = readdir(dir)) != NULL) {
+    astr_cpy(buf, pdir);
+    astr_cat_cstr(buf, d->d_name);
+    if (stat(astr_cstr(buf), &st) != -1) {
+      astr_cpy_cstr(buf, d->d_name);
+      if (S_ISDIR(st.st_mode))
+        astr_cat_cstr(buf, "/");
+    } else
+      astr_cpy_cstr(buf, d->d_name);
+    list_append(cp->completions, zstrdup(astr_cstr(buf)));
+  }
+  closedir(dir);
 
-        astr_delete(cp->path);
-        cp->path = compact_path(astr_cstr(pdir));
+  astr_delete(cp->path);
+  cp->path = compact_path(astr_cstr(pdir));
 
-        astr_delete(buf);
-        astr_delete(pdir);
-        astr_delete(fname);
+  astr_delete(buf);
+  astr_delete(pdir);
+  astr_delete(fname);
 
-        return TRUE;
+  return TRUE;
 }
 
 /*
@@ -276,77 +276,77 @@ static int completion_reread(Completion *cp, astr as)
  */
 int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
-        int i, j, ssize, fullmatches = 0, partmatches = 0;
-        char c;
-        list p;
+  int i, j, ssize, fullmatches = 0, partmatches = 0;
+  char c;
+  list p;
 
-        list_delete(cp->matches);
-        cp->matches = list_new();
+  list_delete(cp->matches);
+  cp->matches = list_new();
 
-        if (cp->fl_dir)
-                if (!completion_reread(cp, search))
-                        return COMPLETION_NOTMATCHED;
+  if (cp->fl_dir)
+    if (!completion_reread(cp, search))
+      return COMPLETION_NOTMATCHED;
 
-        if (!cp->fl_sorted) {
-                list_sort(cp->completions, hcompar);
-                cp->fl_sorted = 1;
-        }
+  if (!cp->fl_sorted) {
+    list_sort(cp->completions, hcompar);
+    cp->fl_sorted = 1;
+  }
 
-        ssize = astr_len(search);
+  ssize = astr_len(search);
 
-        if (ssize == 0) {
-                cp->match = list_first(cp->completions)->item;
-                if (list_length(cp->completions) > 1) {
-                        cp->matchsize = 0;
-                        popup_completion(cp, TRUE, 0);
-                        return COMPLETION_NONUNIQUE;
-                } else {
-                        cp->matchsize = strlen(cp->match);
-                        return COMPLETION_MATCHED;
-                }
-        }
+  if (ssize == 0) {
+    cp->match = list_first(cp->completions)->item;
+    if (list_length(cp->completions) > 1) {
+      cp->matchsize = 0;
+      popup_completion(cp, TRUE, 0);
+      return COMPLETION_NONUNIQUE;
+    } else {
+      cp->matchsize = strlen(cp->match);
+      return COMPLETION_MATCHED;
+    }
+  }
 
-        for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
-                if (!strncmp(p->item, astr_cstr(search), ssize)) {
-                        ++partmatches;
-                        list_append(cp->matches, p->item);
-                        if (!strcmp(p->item, astr_cstr(search)))
-                                ++fullmatches;
-                }
+  for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
+    if (!strncmp(p->item, astr_cstr(search), ssize)) {
+      ++partmatches;
+      list_append(cp->matches, p->item);
+      if (!strcmp(p->item, astr_cstr(search)))
+        ++fullmatches;
+    }
 
-        if (partmatches == 0)
-                return COMPLETION_NOTMATCHED;
-        else if (partmatches == 1) {
-                cp->match = list_first(cp->matches)->item;
-                cp->matchsize = strlen(cp->match);
-                return COMPLETION_MATCHED;
-        }
+  if (partmatches == 0)
+    return COMPLETION_NOTMATCHED;
+  else if (partmatches == 1) {
+    cp->match = list_first(cp->matches)->item;
+    cp->matchsize = strlen(cp->match);
+    return COMPLETION_MATCHED;
+  }
 
-        if (fullmatches == 1 && partmatches > 1) {
-                cp->match = list_first(cp->matches)->item;
-                cp->matchsize = strlen(cp->match);
-                if (popup_when_complete)
-                        popup_completion(cp, FALSE, partmatches);
-                return COMPLETION_MATCHEDNONUNIQUE;
-        }
+  if (fullmatches == 1 && partmatches > 1) {
+    cp->match = list_first(cp->matches)->item;
+    cp->matchsize = strlen(cp->match);
+    if (popup_when_complete)
+      popup_completion(cp, FALSE, partmatches);
+    return COMPLETION_MATCHEDNONUNIQUE;
+  }
 
-        for (j = ssize; ; ++j) {
-                list p = list_first(cp->matches);
-                char *s = p->item;
+  for (j = ssize; ; ++j) {
+    list p = list_first(cp->matches);
+    char *s = p->item;
                 
-                c = s[j];
-                for (i = 1; i < partmatches; ++i) {
-                        p = list_next(p);
-                        s = p->item;
-                        if (s[j] != c) {
-                                cp->match = list_first(cp->matches)->item;
-                                cp->matchsize = j;
-                                popup_completion(cp, FALSE, partmatches);
-                                return COMPLETION_NONUNIQUE;
-                        }
-                }
-        }
+    c = s[j];
+    for (i = 1; i < partmatches; ++i) {
+      p = list_next(p);
+      s = p->item;
+      if (s[j] != c) {
+        cp->match = list_first(cp->matches)->item;
+        cp->matchsize = j;
+        popup_completion(cp, FALSE, partmatches);
+        return COMPLETION_NONUNIQUE;
+      }
+    }
+  }
 
-        assert(0);
-        return COMPLETION_NOTMATCHED;
+  assert(0);
+  return COMPLETION_NOTMATCHED;
 }

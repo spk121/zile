@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.7 2005/01/09 18:19:15 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.8 2005/01/09 23:56:03 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,78 +34,78 @@ static list mark_ring = NULL;	/* Mark-ring.  */
 
 void push_mark(void)
 {
-	if (!mark_ring)
-		mark_ring = list_new();
+  if (!mark_ring)
+    mark_ring = list_new();
 
-	/* Save the mark.  */
-	if (cur_bp->mark)
-		list_append(mark_ring, copy_marker(cur_bp->mark));
-	/* Save an invalid mark.  */
-	else {
-		Marker *m = point_min_marker();
-		m->pt.p = NULL;
-		list_append(mark_ring, m);
-	}
+  /* Save the mark.  */
+  if (cur_bp->mark)
+    list_append(mark_ring, copy_marker(cur_bp->mark));
+  /* Save an invalid mark.  */
+  else {
+    Marker *m = point_min_marker();
+    m->pt.p = NULL;
+    list_append(mark_ring, m);
+  }
 }
 
 /* Pop a mark from the mark-ring a put it as current mark.  */
 
 void pop_mark(void)
 {
-	Marker *m = list_last(mark_ring)->item;
+  Marker *m = list_last(mark_ring)->item;
 
-	/* Replace the mark.  */
-	if (m->bp->mark)
-		free_marker(m->bp->mark);
+  /* Replace the mark.  */
+  if (m->bp->mark)
+    free_marker(m->bp->mark);
 
-	m->bp->mark = (m->pt.p) ? copy_marker(m) : NULL;
+  m->bp->mark = (m->pt.p) ? copy_marker(m) : NULL;
 
-	list_betail(mark_ring);
-	free_marker(m);
+  list_betail(mark_ring);
+  free_marker(m);
 }
 
 /* Set the mark to the point position.  */
 
 void set_mark(void)
 {
-	if (!cur_bp->mark)
-		cur_bp->mark = point_marker();
-	else
-		move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
+  if (!cur_bp->mark)
+    cur_bp->mark = point_marker();
+  else
+    move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
 }
 
 int is_empty_line(void)
 {
-	return astr_len(cur_bp->pt.p->text) == 0;
+  return astr_len(cur_bp->pt.p->text) == 0;
 }
 
 int is_blank_line(void)
 {
-	int c;
-	for (c = 0; c < astr_len(cur_bp->pt.p->text); c++)
-                if (!isspace(*astr_char(cur_bp->pt.p->text, c)))
-			return FALSE;
-	return TRUE;
+  int c;
+  for (c = 0; c < astr_len(cur_bp->pt.p->text); c++)
+    if (!isspace(*astr_char(cur_bp->pt.p->text, c)))
+      return FALSE;
+  return TRUE;
 }
 
 int char_after(Point *pt)
 {
-	if (eobp())
-		return 0;
-	else if (eolp())
-		return '\n';
-	else
-		return *astr_char(pt->p->text, pt->o);
+  if (eobp())
+    return 0;
+  else if (eolp())
+    return '\n';
+  else
+    return *astr_char(pt->p->text, pt->o);
 }
 
 int char_before(Point *pt)
 {
-	if (bobp())
-		return 0;
-	else if (bolp())
-		return '\n';
-	else
-		return *astr_char(pt->p->text, pt->o - 1);
+  if (bobp())
+    return 0;
+  else if (bolp())
+    return '\n';
+  else
+    return *astr_char(pt->p->text, pt->o - 1);
 }
 
 /* This function returns the character following point in the current
@@ -113,7 +113,7 @@ int char_before(Point *pt)
 
 int following_char(void)
 {
-	return char_after(&cur_bp->pt);
+  return char_after(&cur_bp->pt);
 }
 
 /* This function returns the character preceding point in the current
@@ -121,7 +121,7 @@ int following_char(void)
 
 int preceding_char(void)
 {
-	return char_before(&cur_bp->pt);
+  return char_before(&cur_bp->pt);
 }
 
 /* This function returns TRUE if point is at the beginning of the
@@ -129,8 +129,8 @@ int preceding_char(void)
 
 int bobp(void)
 {
-	return (cur_bp->pt.p->prev == cur_bp->limitp &&
-		cur_bp->pt.o == 0);
+  return (cur_bp->pt.p->prev == cur_bp->limitp &&
+          cur_bp->pt.o == 0);
 }
 
 /* This function returns TRUE if point is at the end of the
@@ -138,20 +138,20 @@ int bobp(void)
 
 int eobp(void)
 {
-	return (cur_bp->pt.p->next == cur_bp->limitp &&
-		cur_bp->pt.o == astr_len(cur_bp->pt.p->text));
+  return (cur_bp->pt.p->next == cur_bp->limitp &&
+          cur_bp->pt.o == astr_len(cur_bp->pt.p->text));
 }
 
 /* Returns TRUE if point is at the beginning of a line.  */
 
 int bolp(void)
 {
-	return cur_bp->pt.o == 0;
+  return cur_bp->pt.o == 0;
 }
 
 /* Returns TRUE if point is at the end of a line.  */
 
 int eolp(void)
 {
-	return cur_bp->pt.o == astr_len(cur_bp->pt.p->text);
+  return cur_bp->pt.o == astr_len(cur_bp->pt.p->text);
 }

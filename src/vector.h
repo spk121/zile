@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.h,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: vector.h,v 1.2 2005/01/09 23:56:06 rrt Exp $	*/
 
 #ifndef VECTOR_H
 #define VECTOR_H
@@ -27,10 +27,10 @@
 
 /* Unitialised vector elements are zeroed */
 typedef struct {
-        size_t itemsize;        /* size of each item in bytes */
-        size_t items;           /* number of items used */
-        size_t size;            /* number of items available */
-        void *array;            /* the array of contents */
+  size_t itemsize;        /* size of each item in bytes */
+  size_t items;           /* number of items used */
+  size_t size;            /* number of items available */
+  void *array;            /* the array of contents */
 } vector;
 
 vector *vec_new(size_t itemsize);

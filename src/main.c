@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.52 2005/01/09 18:23:12 rrt Exp $	*/
+/*	$Id: main.c,v 1.53 2005/01/09 23:56:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -65,56 +65,56 @@ int last_uniarg = 1;
  */
 static void check_list(Window *wp)
 {
-	Line *lp, *prevlp;
+  Line *lp, *prevlp;
 
-	prevlp = wp->bp->limitp;
-	for (lp = wp->bp->limitp->next;; lp = lp->next) {
-		if (lp->prev != prevlp || prevlp->next != lp) {
-			FILE *f = fopen("zile.abort", "a");
-			fprintf(f, "---------- buffer `%s' corruption\n", wp->bp->name);
-			fprintf(f, "limitp = %p, limitp->prev = %p, limitp->next = %p\n", wp->bp->limitp, wp->bp->limitp->prev, wp->bp->limitp->next);
-			fprintf(f, "prevlp = %p, prevlp->prev = %p, prevlp->next = %p\n", prevlp, prevlp->prev, prevlp->next);
-			fprintf(f, "pointp = %p, pointp->prev = %p, pointp->next = %p\n", wp->bp->pt.p, wp->bp->pt.p->prev, wp->bp->pt.p->next);
-			fprintf(f, "lp = %p, lp->prev = %p, lp->next = %p\n", lp, lp->prev, lp->next);
-			fclose(f);
-			term_close();
-			fprintf(stderr, "\aAborting due to internal buffer structure corruption\n");
-			fprintf(stderr, "\aFor more information read the `zile.abort' file\n");
-			abort();
-		}
-		if (lp == wp->bp->limitp)
-			break;
-		prevlp = lp;
-	}
+  prevlp = wp->bp->limitp;
+  for (lp = wp->bp->limitp->next;; lp = lp->next) {
+    if (lp->prev != prevlp || prevlp->next != lp) {
+      FILE *f = fopen("zile.abort", "a");
+      fprintf(f, "---------- buffer `%s' corruption\n", wp->bp->name);
+      fprintf(f, "limitp = %p, limitp->prev = %p, limitp->next = %p\n", wp->bp->limitp, wp->bp->limitp->prev, wp->bp->limitp->next);
+      fprintf(f, "prevlp = %p, prevlp->prev = %p, prevlp->next = %p\n", prevlp, prevlp->prev, prevlp->next);
+      fprintf(f, "pointp = %p, pointp->prev = %p, pointp->next = %p\n", wp->bp->pt.p, wp->bp->pt.p->prev, wp->bp->pt.p->next);
+      fprintf(f, "lp = %p, lp->prev = %p, lp->next = %p\n", lp, lp->prev, lp->next);
+      fclose(f);
+      term_close();
+      fprintf(stderr, "\aAborting due to internal buffer structure corruption\n");
+      fprintf(stderr, "\aFor more information read the `zile.abort' file\n");
+      abort();
+    }
+    if (lp == wp->bp->limitp)
+      break;
+    prevlp = lp;
+  }
 }
 #endif /* DEBUG */
 
 static void loop(void)
 {
-	for (;;) {
-		if (lastflag & FLAG_NEED_RESYNC)
-			resync_redisplay();
+  for (;;) {
+    if (lastflag & FLAG_NEED_RESYNC)
+      resync_redisplay();
 #if DEBUG
-		check_list(cur_wp);
+    check_list(cur_wp);
 #endif
-                term_redisplay();
-                term_refresh();
+    term_redisplay();
+    term_refresh();
 
-		minibuf_clear();
+    minibuf_clear();
 
-                thisflag = 0;
-		if (lastflag & FLAG_DEFINING_MACRO)
-			thisflag |= FLAG_DEFINING_MACRO;
+    thisflag = 0;
+    if (lastflag & FLAG_DEFINING_MACRO)
+      thisflag |= FLAG_DEFINING_MACRO;
 
-		process_key(term_getkey());
+    process_key(term_getkey());
 
-		if (thisflag & FLAG_QUIT_ZILE)
-			break;
-		if (!(thisflag & FLAG_SET_UNIARG))
-			last_uniarg = 1;
+    if (thisflag & FLAG_QUIT_ZILE)
+      break;
+    if (!(thisflag & FLAG_SET_UNIARG))
+      last_uniarg = 1;
 
-		lastflag = thisflag;
-	}
+    lastflag = thisflag;
+  }
 }
 
 static char about_splash_str[] = "\
@@ -143,15 +143,15 @@ static char about_minibuf_str[] =
 
 static void about_screen(void)
 {
-	/* I don't like this hack, but I don't know another way... */
-	if (lookup_bool_variable("alternative-bindings")) {
-		replace_string(about_splash_str, "C-h", "M-h");
-		replace_string(about_minibuf_str, "C-h", "M-h");
-	}
+  /* I don't like this hack, but I don't know another way... */
+  if (lookup_bool_variable("alternative-bindings")) {
+    replace_string(about_splash_str, "C-h", "M-h");
+    replace_string(about_minibuf_str, "C-h", "M-h");
+  }
 
-	if (!lookup_bool_variable("skip-splash-screen"))
-		show_splash_screen(about_splash_str);
-        minibuf_write(about_minibuf_str);
+  if (!lookup_bool_variable("skip-splash-screen"))
+    show_splash_screen(about_splash_str);
+  minibuf_write(about_minibuf_str);
 }
 
 /*
@@ -159,19 +159,19 @@ static void about_screen(void)
  */
 static void sanity_checks(void)
 {
-	/*
-	 * The functions `read_rc_file' and `help_tutorial' rely
-	 * on a usable `HOME' environment variable.
-	 */
-	if (getenv("HOME") == NULL) {
-		fprintf(stderr, "fatal error: please set `HOME' to point to your home-directory\n");
-		exit(1);
-	}
+  /*
+   * The functions `read_rc_file' and `help_tutorial' rely
+   * on a usable `HOME' environment variable.
+   */
+  if (getenv("HOME") == NULL) {
+    fprintf(stderr, "fatal error: please set `HOME' to point to your home-directory\n");
+    exit(1);
+  }
 
-        if (strlen(getenv("HOME")) + 12 > PATH_MAX) {
-		fprintf(stderr, "fatal error: `HOME' is longer than the longest pathname your system supports\n");
-		exit(1);
-	}
+  if (strlen(getenv("HOME")) + 12 > PATH_MAX) {
+    fprintf(stderr, "fatal error: `HOME' is longer than the longest pathname your system supports\n");
+    exit(1);
+  }
 }
 
 /*
@@ -179,152 +179,152 @@ static void sanity_checks(void)
  */
 static void usage(void)
 {
-	fprintf(stderr, "usage: zile [-hqV] [-f function] [-v variable=value] [-u rcfile]\n"
-			"	     [+number] [file ...]\n");
-	exit(1);
+  fprintf(stderr, "usage: zile [-hqV] [-f function] [-v variable=value] [-u rcfile]\n"
+          "	     [+number] [file ...]\n");
+  exit(1);
 }
 
 static void setup_main_screen(int argc)
 {
-	Buffer *bp, *last_bp = NULL;
-	int c = 0;
+  Buffer *bp, *last_bp = NULL;
+  int c = 0;
 
-	for (bp = head_bp; bp; bp = bp->next) {
-		/* Last buffer that isn't *scratch*.  */
-		if (bp->next && !bp->next->next)
-			last_bp = bp;
+  for (bp = head_bp; bp; bp = bp->next) {
+    /* Last buffer that isn't *scratch*.  */
+    if (bp->next && !bp->next->next)
+      last_bp = bp;
 
-		c++;
-	}
+    c++;
+  }
 
-	/* *scratch* and two files.  */
-	if (c == 3) {
-		FUNCALL(split_window);
-		switch_to_buffer(last_bp);
-		FUNCALL(other_window);
-	}
-	/* More than two files.  */
-	else if (c > 3) {
-		FUNCALL(list_buffers);
-	}
-	else {
-		if (argc < 1) {
-                        undo_nosave = TRUE;
-			insert_string("\
+  /* *scratch* and two files.  */
+  if (c == 3) {
+    FUNCALL(split_window);
+    switch_to_buffer(last_bp);
+    FUNCALL(other_window);
+  }
+  /* More than two files.  */
+  else if (c > 3) {
+    FUNCALL(list_buffers);
+  }
+  else {
+    if (argc < 1) {
+      undo_nosave = TRUE;
+      insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
-                        undo_nosave = FALSE;
-			cur_bp->flags &= ~BFLAG_MODIFIED;
-			resync_redisplay();
-		}
-	}
+      undo_nosave = FALSE;
+      cur_bp->flags &= ~BFLAG_MODIFIED;
+      resync_redisplay();
+    }
+  }
 }
 
 static void segv_sig_handler(int signo)
 {
-        (void)signo;
-	fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
-	zile_exit(2);
+  (void)signo;
+  fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+  zile_exit(2);
 }
 
 static void other_sig_handler(int signo)
 {
-        (void)signo;
-	fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
-	zile_exit(2);
+  (void)signo;
+  fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
+  zile_exit(2);
 }
 
 int main(int argc, char **argv)
 {
-	int c;
-	int qflag = 0;
-	char *uarg = NULL;
+  int c;
+  int qflag = 0;
+  char *uarg = NULL;
 
-	while ((c = getopt(argc, argv, "f:hqu:v:V")) != -1)
-		switch (c) {
-		case 'q':
-			qflag = 1;
-			break;
-		case 'u':
-			uarg = optarg;
-			break;
-		case 'V':
-			fprintf(stderr, ZILE_VERSION_STRING "\n");
-			return 0;
-		case '?':
-		default:
-			usage();
-			/* NOTREACHED */
-		}
-	argc -= optind;
-	argv += optind;
+  while ((c = getopt(argc, argv, "f:hqu:v:V")) != -1)
+    switch (c) {
+    case 'q':
+      qflag = 1;
+      break;
+    case 'u':
+      uarg = optarg;
+      break;
+    case 'V':
+      fprintf(stderr, ZILE_VERSION_STRING "\n");
+      return 0;
+    case '?':
+    default:
+      usage();
+      /* NOTREACHED */
+    }
+  argc -= optind;
+  argv += optind;
 
-	sanity_checks();
+  sanity_checks();
 
-        /*
-         * Set up signal handling
-         */
-        signal(SIGFPE, segv_sig_handler);
-        signal(SIGSEGV, segv_sig_handler);
-        signal(SIGHUP, other_sig_handler);
-        signal(SIGINT, other_sig_handler);
-        signal(SIGQUIT, other_sig_handler);
-        signal(SIGTERM, other_sig_handler);
+  /*
+   * Set up signal handling
+   */
+  signal(SIGFPE, segv_sig_handler);
+  signal(SIGSEGV, segv_sig_handler);
+  signal(SIGHUP, other_sig_handler);
+  signal(SIGINT, other_sig_handler);
+  signal(SIGQUIT, other_sig_handler);
+  signal(SIGTERM, other_sig_handler);
 
-	term_init();
+  term_init();
 
-	init_variables();
-	if (!qflag)
-		read_rc_file(uarg);
+  init_variables();
+  if (!qflag)
+    read_rc_file(uarg);
 
-	/* Create the `*scratch*' buffer and initialize key bindings. */
-	create_first_window();
-	term_redisplay();
-	init_bindings();
+  /* Create the `*scratch*' buffer and initialize key bindings. */
+  create_first_window();
+  term_redisplay();
+  init_bindings();
 
-	if (argc >= 1)
-		while (*argv) {
-			int line = 0;
-			if (**argv == '+')
-				line = atoi(*argv++ + 1);
-			if (*argv)
-				open_file(*argv++, line - 1);
-		}
-        else
-		/*
-		 * Show the splash screen only if there isn't any file
-		 * specified on command line.
-		 */
-                about_screen();
+  if (argc >= 1)
+    while (*argv) {
+      int line = 0;
+      if (**argv == '+')
+        line = atoi(*argv++ + 1);
+      if (*argv)
+        open_file(*argv++, line - 1);
+    }
+  else
+    /*
+     * Show the splash screen only if there isn't any file
+     * specified on command line.
+     */
+    about_screen();
 
-	setup_main_screen(argc);
+  setup_main_screen(argc);
 
-	/* Run the main Zile loop. */
-	loop();
+  /* Run the main Zile loop. */
+  loop();
 
-	/* Clear last line of display, and leave cursor there. */
-	term_move(ZILE_LINES - 1, 0);
-	term_clrtoeol();
-        term_attrset(1, ZILE_NORMAL); /* Make sure we end in normal font */
-	term_refresh();
+  /* Clear last line of display, and leave cursor there. */
+  term_move(ZILE_LINES - 1, 0);
+  term_clrtoeol();
+  term_attrset(1, ZILE_NORMAL); /* Make sure we end in normal font */
+  term_refresh();
 
-	/* Free all the memory allocated. */
-	free_kill_ring();
-	free_registers();
-	free_search_history();
-	free_macros();
-	free_windows();
-	free_buffers();
-	free_bindings();
-	free_variables();
-	free_minibuf();
-	free_rotation_buffers();
+  /* Free all the memory allocated. */
+  free_kill_ring();
+  free_registers();
+  free_search_history();
+  free_macros();
+  free_windows();
+  free_buffers();
+  free_bindings();
+  free_variables();
+  free_minibuf();
+  free_rotation_buffers();
 
-	term_close();
+  term_close();
 
-	return 0;
+  return 0;
 }
 
 #ifdef ALLEGRO

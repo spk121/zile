@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.50 2005/01/09 18:11:13 rrt Exp $        */
+/*      $Id: file.c,v 1.51 2005/01/09 23:56:03 rrt Exp $        */
 
 #include "config.h"
 
@@ -55,28 +55,28 @@
 
 int exist_file(const char *filename)
 {
-        struct stat st;
+  struct stat st;
 
-        if (stat(filename, &st) == -1)
-                if (errno == ENOENT)
-                        return FALSE;
+  if (stat(filename, &st) == -1)
+    if (errno == ENOENT)
+      return FALSE;
 
-        return TRUE;
+  return TRUE;
 }
 
 int is_regular_file(const char *filename)
 {
-        struct stat st;
+  struct stat st;
 
-        if (stat(filename, &st) == -1) {
-                if (errno == ENOENT)
-                        return TRUE;
-                return FALSE;
-        }
-        if (S_ISREG(st.st_mode))
-                return TRUE;
+  if (stat(filename, &st) == -1) {
+    if (errno == ENOENT)
+      return TRUE;
+    return FALSE;
+  }
+  if (S_ISREG(st.st_mode))
+    return TRUE;
 
-        return FALSE;
+  return FALSE;
 }
 
 /*
@@ -89,89 +89,89 @@ int is_regular_file(const char *filename)
  */
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 {
-        struct passwd *pw;
-        const char *sp = path;
+  struct passwd *pw;
+  const char *sp = path;
 
-        if (*sp != '/') {
-                astr_cat_cstr(dir, cwdir);
-                if (astr_len(dir) == 0 || *astr_char(dir, -1) != '/')
-                        astr_cat_cstr(dir, "/");
-        }
+  if (*sp != '/') {
+    astr_cat_cstr(dir, cwdir);
+    if (astr_len(dir) == 0 || *astr_char(dir, -1) != '/')
+      astr_cat_cstr(dir, "/");
+  }
 
-        while (*sp != '\0') {
-                if (*sp == '/') {
-                        /*
-                         * Remove all but one '/'.
-                         */
-                        while (*++sp == '/');
-                        astr_cat_char(dir, '/');
-                } else if (*sp == '~') {
-                        if (*(sp + 1) == '/') {
-                                /*
-                                 * Got `~/'.  Restart from this point
-                                 * and insert the user home directory.
-                                 */
-                                astr_truncate(dir, 0);
-                                if ((pw = getpwuid(getuid())) == NULL)
-                                        return FALSE;
-                                if (strcmp(pw->pw_dir, "/") != 0)
-                                        astr_cat_cstr(dir, pw->pw_dir);
-                                ++sp;
-                        } else {
-                                /*
-                                 * Got `~something'.  Restart from this point
-                                 * and insert that user home directory.
-                                 */
-                                astr as = astr_new();
-                                astr_truncate(dir, 0);
-                                ++sp;
-                                while (*sp != '\0' && *sp != '/')
-                                        astr_cat_char(as, *sp++);
-                                pw = getpwnam(astr_cstr(as));
-                                astr_delete(as);
-                                if (pw == NULL)
-                                        return FALSE;
-                                astr_cat_cstr(dir, pw->pw_dir);
-                        }
-                } else if (*sp == '.') {
-                        if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
-                                ++sp;
-                                if (*sp == '/' && *(sp + 1) != '/')
-                                        ++sp;
-                        } else if (*(sp + 1) == '.' &&
-                                   (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
-                            if (astr_len(dir) >= 1 && *astr_char(dir, -1) == '/')
-                                        astr_truncate(dir, astr_len(dir) - 1);
-                                while (*astr_char(dir, -1) != '/' &&
-                                       astr_len(dir) >= 1)
-                                        astr_truncate(dir, astr_len(dir) - 1);
-                                sp += 2;
-                                if (*sp == '/' && *(sp + 1) != '/')
-                                        ++sp;
-                        } else
-                                goto gotfname;
-                } else {
-                        const char *p;
-                gotfname:
-                        p = sp;
-                        while (*p != '\0' && *p != '/')
-                                p++;
-                        if (*p == '\0') {
-                                /* Final filename. */
-                                astr_cat_cstr(fname, sp);
-                                break;
-                        } else {
-                                /* Non-final directory. */
-                                while (*sp != '/')
-                                        astr_cat_char(dir, *sp++);
-                        }
-                }
-        }
+  while (*sp != '\0') {
+    if (*sp == '/') {
+      /*
+       * Remove all but one '/'.
+       */
+      while (*++sp == '/');
+      astr_cat_char(dir, '/');
+    } else if (*sp == '~') {
+      if (*(sp + 1) == '/') {
+        /*
+         * Got `~/'.  Restart from this point
+         * and insert the user home directory.
+         */
+        astr_truncate(dir, 0);
+        if ((pw = getpwuid(getuid())) == NULL)
+          return FALSE;
+        if (strcmp(pw->pw_dir, "/") != 0)
+          astr_cat_cstr(dir, pw->pw_dir);
+        ++sp;
+      } else {
+        /*
+         * Got `~something'.  Restart from this point
+         * and insert that user home directory.
+         */
+        astr as = astr_new();
+        astr_truncate(dir, 0);
+        ++sp;
+        while (*sp != '\0' && *sp != '/')
+          astr_cat_char(as, *sp++);
+        pw = getpwnam(astr_cstr(as));
+        astr_delete(as);
+        if (pw == NULL)
+          return FALSE;
+        astr_cat_cstr(dir, pw->pw_dir);
+      }
+    } else if (*sp == '.') {
+      if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
+        ++sp;
+        if (*sp == '/' && *(sp + 1) != '/')
+          ++sp;
+      } else if (*(sp + 1) == '.' &&
+                 (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
+        if (astr_len(dir) >= 1 && *astr_char(dir, -1) == '/')
+          astr_truncate(dir, astr_len(dir) - 1);
+        while (*astr_char(dir, -1) != '/' &&
+               astr_len(dir) >= 1)
+          astr_truncate(dir, astr_len(dir) - 1);
+        sp += 2;
+        if (*sp == '/' && *(sp + 1) != '/')
+          ++sp;
+      } else
+        goto gotfname;
+    } else {
+      const char *p;
+    gotfname:
+      p = sp;
+      while (*p != '\0' && *p != '/')
+        p++;
+      if (*p == '\0') {
+        /* Final filename. */
+        astr_cat_cstr(fname, sp);
+        break;
+      } else {
+        /* Non-final directory. */
+        while (*sp != '/')
+          astr_cat_char(dir, *sp++);
+      }
+    }
+  }
 
-        if (astr_len(dir) == 0)
-                astr_cat_cstr(dir, "/");
+  if (astr_len(dir) == 0)
+    astr_cat_cstr(dir, "/");
 
-        return TRUE;
+  return TRUE;
 }
 
 /*
@@ -181,30 +181,30 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
  */
 astr compact_path(const char *path)
 {
-        astr buf = astr_new();
-        struct passwd *pw;
-        int i;
+  astr buf = astr_new();
+  struct passwd *pw;
+  int i;
 
-        if ((pw = getpwuid(getuid())) == NULL) {
-                /* User not found in password file. */
-                astr_cpy_cstr(buf, path);
-                return buf;
-        }
+  if ((pw = getpwuid(getuid())) == NULL) {
+    /* User not found in password file. */
+    astr_cpy_cstr(buf, path);
+    return buf;
+  }
 
-        /*
-         * Replace `/userhome/' (if existent) with `~/'.
-         */
-        i = strlen(pw->pw_dir);
-        if (!strncmp(pw->pw_dir, path, i)) {
-                astr_cpy_cstr(buf, "~/");
-                if (!strcmp(pw->pw_dir, "/"))
-                        astr_cat_cstr(buf, path + 1);
-                else
-                        astr_cat_cstr(buf, path + i + 1);
-        } else
-                astr_cpy_cstr(buf, path);
+  /*
+   * Replace `/userhome/' (if existent) with `~/'.
+   */
+  i = strlen(pw->pw_dir);
+  if (!strncmp(pw->pw_dir, path, i)) {
+    astr_cpy_cstr(buf, "~/");
+    if (!strcmp(pw->pw_dir, "/"))
+      astr_cat_cstr(buf, path + 1);
+    else
+      astr_cat_cstr(buf, path + i + 1);
+  } else
+    astr_cpy_cstr(buf, path);
 
-        return buf;
+  return buf;
 }
 
 /*
@@ -212,54 +212,54 @@ astr compact_path(const char *path)
  */
 astr get_current_dir(astr buf, int interactive)
 {
-        if (interactive && cur_bp->filename != NULL) {
-                /*
-                 * If the current buffer has a filename, get the current
-                 * directory name from it.
-                 */
-                int p;
+  if (interactive && cur_bp->filename != NULL) {
+    /*
+     * If the current buffer has a filename, get the current
+     * directory name from it.
+     */
+    int p;
 
-                astr_cpy_cstr(buf, cur_bp->filename);
-                p = astr_rfind_cstr(buf, "/");
-                if (p != -1)
-                        astr_truncate(buf, p ? p : 1);
-                if (*astr_char(buf, -1) != '/')
-                        astr_cat_cstr(buf, "/");
-        } else {
-                /*
-                 * Get the current directory name from the system.
-                 */
-                agetcwd(buf);
-                astr_cat_cstr(buf, "/");
-        }
+    astr_cpy_cstr(buf, cur_bp->filename);
+    p = astr_rfind_cstr(buf, "/");
+    if (p != -1)
+      astr_truncate(buf, p ? p : 1);
+    if (*astr_char(buf, -1) != '/')
+      astr_cat_cstr(buf, "/");
+  } else {
+    /*
+     * Get the current directory name from the system.
+     */
+    agetcwd(buf);
+    astr_cat_cstr(buf, "/");
+  }
 
-        return buf;
+  return buf;
 }
 
 void open_file(char *path, int lineno)
 {
-        astr buf, dir, fname;
+  astr buf, dir, fname;
 
-        buf = astr_new();
-        dir = astr_new();
-        fname = astr_new();
-        get_current_dir(buf, FALSE);
-        ZTRACE(("original filename: %s, cwd: %s\n", path, astr_cstr(buf)));
-        if (!expand_path(path, astr_cstr(buf), dir, fname)) {
-                fprintf(stderr, "zile: %s: invalid filename or path\n", path);
-                zile_exit(1);
-        }
-        ZTRACE(("new filename: %s, dir: %s\n", astr_cstr(fname), astr_cstr(dir)));
-        astr_cpy_cstr(buf, astr_cstr(dir));
-        astr_cat_cstr(buf, astr_cstr(fname));
-        astr_delete(dir);
-        astr_delete(fname);
+  buf = astr_new();
+  dir = astr_new();
+  fname = astr_new();
+  get_current_dir(buf, FALSE);
+  ZTRACE(("original filename: %s, cwd: %s\n", path, astr_cstr(buf)));
+  if (!expand_path(path, astr_cstr(buf), dir, fname)) {
+    fprintf(stderr, "zile: %s: invalid filename or path\n", path);
+    zile_exit(1);
+  }
+  ZTRACE(("new filename: %s, dir: %s\n", astr_cstr(fname), astr_cstr(dir)));
+  astr_cpy_cstr(buf, astr_cstr(dir));
+  astr_cat_cstr(buf, astr_cstr(fname));
+  astr_delete(dir);
+  astr_delete(fname);
 
-        find_file(astr_cstr(buf));
-        astr_delete(buf);
-        if (lineno > 0)
-                ngotodown(lineno);
-        resync_redisplay();
+  find_file(astr_cstr(buf));
+  astr_delete(buf);
+  if (lineno > 0)
+    ngotodown(lineno);
+  resync_redisplay();
 }
 
 /*
@@ -267,17 +267,17 @@ void open_file(char *path, int lineno)
  */
 static Line *fadd_newline(Line *lp)
 {
-        Line *lp1;
+  Line *lp1;
 
-        lp1 = new_line();
-        lp1->next = lp->next;
-        lp1->next->prev = lp1;
-        lp->next = lp1;
-        lp1->prev = lp;
-        lp = lp1;
-        ++cur_bp->num_lines;
+  lp1 = new_line();
+  lp1->next = lp->next;
+  lp1->next->prev = lp1;
+  lp->next = lp1;
+  lp1->prev = lp;
+  lp = lp1;
+  ++cur_bp->num_lines;
 
-        return lp;
+  return lp;
 }
 
 /*
@@ -286,187 +286,187 @@ static Line *fadd_newline(Line *lp)
  */
 void read_from_disk(const char *filename)
 {
-        Line *lp;
-        FILE *fp;
-        int i, size, eol = FALSE;
-        char buf[BUFSIZ + 1];
+  Line *lp;
+  FILE *fp;
+  int i, size, eol = FALSE;
+  char buf[BUFSIZ + 1];
 
-        buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
+  buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
 
-        if ((fp = fopen(filename, "r")) == NULL) {
-                if (errno != ENOENT) {
-                        minibuf_write("%s: %s foo", filename, strerror(errno));
-                        cur_bp->flags |= BFLAG_READONLY;
-                }
-                return;
-        }
+  if ((fp = fopen(filename, "r")) == NULL) {
+    if (errno != ENOENT) {
+      minibuf_write("%s: %s foo", filename, strerror(errno));
+      cur_bp->flags |= BFLAG_READONLY;
+    }
+    return;
+  }
 
-        lp = cur_bp->pt.p;
+  lp = cur_bp->pt.p;
 
-        while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
-                for (i = 0; i < size; i++)
-                        if (buf[i] != '\n' && buf[i] != '\r')
-                                astr_cat_char(lp->text, buf[i]);
-                        else {
-                                lp = fadd_newline(lp);
+  while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
+    for (i = 0; i < size; i++)
+      if (buf[i] != '\n' && buf[i] != '\r')
+        astr_cat_char(lp->text, buf[i]);
+      else {
+        lp = fadd_newline(lp);
                                 
-                                if (i < size - 1 &&
-                                    buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
-                                                             buf[i + 1] == '\r')) {
-                                        if (!eol) {
-                                                cur_bp->eol[0] = buf[i];
-                                                cur_bp->eol[1] = buf[i + 1];
-                                                eol = TRUE;
-                                        }
-                                        i++;
-                                } else if (!eol) {
-                                        cur_bp->eol[0] = buf[i];
-                                        cur_bp->eol[1] = '\0';
-                                        eol = TRUE;
-                                }
-                        }
+        if (i < size - 1 &&
+            buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
+                                     buf[i + 1] == '\r')) {
+          if (!eol) {
+            cur_bp->eol[0] = buf[i];
+            cur_bp->eol[1] = buf[i + 1];
+            eol = TRUE;
+          }
+          i++;
+        } else if (!eol) {
+          cur_bp->eol[0] = buf[i];
+          cur_bp->eol[1] = '\0';
+          eol = TRUE;
+        }
+      }
                         
-        lp->next = cur_bp->limitp;
-        cur_bp->limitp->prev = lp;
-        cur_bp->pt.p = cur_bp->limitp->next;
+  lp->next = cur_bp->limitp;
+  cur_bp->limitp->prev = lp;
+  cur_bp->pt.p = cur_bp->limitp->next;
 
-        fclose(fp);
+  fclose(fp);
 }
 
 int find_file(const char *filename)
 {
-        Buffer *bp;
-        char *s;
+  Buffer *bp;
+  char *s;
 
-        for (bp = head_bp; bp != NULL; bp = bp->next)
-                if (bp->filename != NULL && !strcmp(bp->filename, filename)) {
-                        switch_to_buffer(bp);
-                        return TRUE;
-                }
+  for (bp = head_bp; bp != NULL; bp = bp->next)
+    if (bp->filename != NULL && !strcmp(bp->filename, filename)) {
+      switch_to_buffer(bp);
+      return TRUE;
+    }
 
-        s = make_buffer_name(filename);
-        if (strlen(s) < 1) {
-                free(s);
-                return FALSE;
-        }
+  s = make_buffer_name(filename);
+  if (strlen(s) < 1) {
+    free(s);
+    return FALSE;
+  }
 
-        if (!is_regular_file(filename)) {
-                minibuf_error("%s is not a regular file", filename);
-                waitkey();
-                return FALSE;
-        }
+  if (!is_regular_file(filename)) {
+    minibuf_error("%s is not a regular file", filename);
+    waitkey();
+    return FALSE;
+  }
 
-        bp = create_buffer(s);
-        free(s);
-        bp->filename = zstrdup(filename);
-        bp->flags = 0;
+  bp = create_buffer(s);
+  free(s);
+  bp->filename = zstrdup(filename);
+  bp->flags = 0;
 
-        switch_to_buffer(bp);
-        read_from_disk(filename);
+  switch_to_buffer(bp);
+  read_from_disk(filename);
 
-        thisflag |= FLAG_NEED_RESYNC;
+  thisflag |= FLAG_NEED_RESYNC;
 
-        return TRUE;
+  return TRUE;
 }
 
 Completion *make_buffer_completion(void)
 {
-        Buffer *bp;
-        Completion *cp;
+  Buffer *bp;
+  Completion *cp;
 
-        cp = new_completion(FALSE);
-        for (bp = head_bp; bp != NULL; bp = bp->next)
-                list_append(cp->completions, zstrdup(bp->name));
+  cp = new_completion(FALSE);
+  for (bp = head_bp; bp != NULL; bp = bp->next)
+    list_append(cp->completions, zstrdup(bp->name));
 
-        return cp;
+  return cp;
 }
 
 DEFUN("find-file", find_file)
-/*+
-Edit a file specified by the user.  Switch to a buffer visiting the file,
-creating one if none already exists.
-+*/
+  /*+
+    Edit a file specified by the user.  Switch to a buffer visiting the file,
+    creating one if none already exists.
+    +*/
 {
-        char *ms;
-        astr buf;
+  char *ms;
+  astr buf;
 
-        buf = astr_new();
-        get_current_dir(buf, TRUE);
-        if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL) {
-                astr_delete(buf);
-                return cancel();
-        }
-        astr_delete(buf);
+  buf = astr_new();
+  get_current_dir(buf, TRUE);
+  if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL) {
+    astr_delete(buf);
+    return cancel();
+  }
+  astr_delete(buf);
 
-        if (ms[0] != '\0') {
-                int ret_value = find_file(ms);
-                free(ms);
-                return ret_value;
-        }
+  if (ms[0] != '\0') {
+    int ret_value = find_file(ms);
+    free(ms);
+    return ret_value;
+  }
 
-        free(ms);
-        return FALSE;
+  free(ms);
+  return FALSE;
 }
 
 DEFUN("find-alternate-file", find_alternate_file)
-/*+
-Find the file specified by the user, select its buffer, kill previous buffer.
-If the current buffer now contains an empty file that you just visited
-(presumably by mistake), use this command to visit the file you really want.
-+*/
+  /*+
+    Find the file specified by the user, select its buffer, kill previous buffer.
+    If the current buffer now contains an empty file that you just visited
+    (presumably by mistake), use this command to visit the file you really want.
+    +*/
 {
-        char *ms;
-        astr buf;
+  char *ms;
+  astr buf;
 
-        buf = astr_new();
-        get_current_dir(buf, TRUE);
-        if ((ms = minibuf_read_dir("Find alternate: ", astr_cstr(buf)))
-            == NULL) {
-                astr_delete(buf);
-                return cancel();
-        }
-        astr_delete(buf);
+  buf = astr_new();
+  get_current_dir(buf, TRUE);
+  if ((ms = minibuf_read_dir("Find alternate: ", astr_cstr(buf)))
+      == NULL) {
+    astr_delete(buf);
+    return cancel();
+  }
+  astr_delete(buf);
 
-        if (ms[0] != '\0' && check_modified_buffer(cur_bp)) {
-                int ret_value;
-                kill_buffer(cur_bp);
-                ret_value = find_file(ms);
-                free(ms);
-                return ret_value;
-        }
+  if (ms[0] != '\0' && check_modified_buffer(cur_bp)) {
+    int ret_value;
+    kill_buffer(cur_bp);
+    ret_value = find_file(ms);
+    free(ms);
+    return ret_value;
+  }
 
-        free(ms);
-        return FALSE;
+  free(ms);
+  return FALSE;
 }
 
 DEFUN("switch-to-buffer", switch_to_buffer)
-/*+
-Select to the user specified buffer in the current window.
-+*/
+  /*+
+    Select to the user specified buffer in the current window.
+    +*/
 {
-        char *ms;
-        Buffer *swbuf;
-        Completion *cp;
+  char *ms;
+  Buffer *swbuf;
+  Completion *cp;
 
-        swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
+  swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
-        cp = make_buffer_completion();
-        ms = minibuf_read_completion("Switch to buffer (default %s): ",
-                                     "", cp, NULL, swbuf->name);
-        free_completion(cp);
-        if (ms == NULL)
-                return cancel();
+  cp = make_buffer_completion();
+  ms = minibuf_read_completion("Switch to buffer (default %s): ",
+                               "", cp, NULL, swbuf->name);
+  free_completion(cp);
+  if (ms == NULL)
+    return cancel();
 
-        if (ms[0] != '\0') {
-                if ((swbuf = find_buffer(ms, FALSE)) == NULL) {
-                        swbuf = find_buffer(ms, TRUE);
-                        swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
-                }
-        }
+  if (ms[0] != '\0') {
+    if ((swbuf = find_buffer(ms, FALSE)) == NULL) {
+      swbuf = find_buffer(ms, TRUE);
+      swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+    }
+  }
 
-        switch_to_buffer(swbuf);
+  switch_to_buffer(swbuf);
 
-        return TRUE;
+  return TRUE;
 }
 
 /*
@@ -476,18 +476,18 @@ Select to the user specified buffer in the current window.
  */
 int check_modified_buffer(Buffer *bp)
 {
-        int ans;
+  int ans;
 
-        if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
-                for (;;) {
-                        if ((ans = minibuf_read_yesno("Buffer %s modified; kill anyway? (yes or no) ", bp->name)) == -1)
-                                return cancel();
-                        else if (!ans)
-                                return FALSE;
-                        break;
-                }
+  if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
+    for (;;) {
+      if ((ans = minibuf_read_yesno("Buffer %s modified; kill anyway? (yes or no) ", bp->name)) == -1)
+        return cancel();
+      else if (!ans)
+        return FALSE;
+      break;
+    }
 
-        return TRUE;
+  return TRUE;
 }
 
 /*
@@ -497,219 +497,219 @@ int check_modified_buffer(Buffer *bp)
  */
 void kill_buffer(Buffer *kill_bp)
 {
-        Buffer *next_bp;
+  Buffer *next_bp;
 
-        if (kill_bp->next != NULL)
-                next_bp = kill_bp->next;
-        else
-                next_bp = head_bp;
+  if (kill_bp->next != NULL)
+    next_bp = kill_bp->next;
+  else
+    next_bp = head_bp;
 
-        if (next_bp == kill_bp) {
-                /*
-                 * This is the sole buffer available, then
-                 * remove the contents and set the name to `*scratch*'
-                 * if it is not already set.
-                 */
-                assert(cur_bp == kill_bp);
-                zap_buffer_content();
-                cur_bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
-                if (strcmp(cur_bp->name, "*scratch*") != 0) {
-                        set_buffer_name(cur_bp, "*scratch*");
-                        if (cur_bp->filename != NULL) {
-                                free(cur_bp->filename);
-                                cur_bp->filename = NULL;
-                        }
-                }
-        } else {
-                Buffer *bp;
-                Window *wp;
+  if (next_bp == kill_bp) {
+    /*
+     * This is the sole buffer available, then
+     * remove the contents and set the name to `*scratch*'
+     * if it is not already set.
+     */
+    assert(cur_bp == kill_bp);
+    zap_buffer_content();
+    cur_bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
+    if (strcmp(cur_bp->name, "*scratch*") != 0) {
+      set_buffer_name(cur_bp, "*scratch*");
+      if (cur_bp->filename != NULL) {
+        free(cur_bp->filename);
+        cur_bp->filename = NULL;
+      }
+    }
+  } else {
+    Buffer *bp;
+    Window *wp;
 
-                assert(kill_bp != next_bp);
+    assert(kill_bp != next_bp);
 
-                /*
-                 * Search for windows displaying the buffer to kill.
-                 */
-                for (wp = head_wp; wp != NULL; wp = wp->next)
-                        if (wp->bp == kill_bp) {
-                                wp->bp = next_bp;
-                                /* The marker will be free.  */
-                                wp->saved_pt = NULL;
-                        }
+    /*
+     * Search for windows displaying the buffer to kill.
+     */
+    for (wp = head_wp; wp != NULL; wp = wp->next)
+      if (wp->bp == kill_bp) {
+        wp->bp = next_bp;
+        /* The marker will be free.  */
+        wp->saved_pt = NULL;
+      }
 
-                /*
-                 * Remove the buffer from the buffer list.
-                 */
-                cur_bp = next_bp;
-                if (head_bp == kill_bp)
-                        head_bp = head_bp->next;
-                for (bp = head_bp; bp->next != NULL; bp = bp->next)
-                        if (bp->next == kill_bp) {
-                                bp->next = bp->next->next;
-                                break;
-                        }
+    /*
+     * Remove the buffer from the buffer list.
+     */
+    cur_bp = next_bp;
+    if (head_bp == kill_bp)
+      head_bp = head_bp->next;
+    for (bp = head_bp; bp->next != NULL; bp = bp->next)
+      if (bp->next == kill_bp) {
+        bp->next = bp->next->next;
+        break;
+      }
 
-                /* Free the buffer.  */
-                free_buffer(kill_bp);
+    /* Free the buffer.  */
+    free_buffer(kill_bp);
 
-                thisflag |= FLAG_NEED_RESYNC;
-        }
+    thisflag |= FLAG_NEED_RESYNC;
+  }
 }
 
 DEFUN("kill-buffer", kill_buffer)
-/*+
-Kill the current buffer or the user specified one.
-+*/
+  /*+
+    Kill the current buffer or the user specified one.
+    +*/
 {
-        Buffer *bp;
-        char *ms;
-        Completion *cp;
+  Buffer *bp;
+  char *ms;
+  Completion *cp;
 
-        cp = make_buffer_completion();
-        if ((ms = minibuf_read_completion("Kill buffer (default %s): ",
-                                          "", cp, NULL, cur_bp->name)) == NULL)
-                return cancel();
-        free_completion(cp);
-        if (ms[0] != '\0') {
-                if ((bp = find_buffer(ms, FALSE)) == NULL) {
-                        minibuf_error("Buffer `%s' not found", ms);
-                        return FALSE;
-                }
-        } else
-                bp = cur_bp;
+  cp = make_buffer_completion();
+  if ((ms = minibuf_read_completion("Kill buffer (default %s): ",
+                                    "", cp, NULL, cur_bp->name)) == NULL)
+    return cancel();
+  free_completion(cp);
+  if (ms[0] != '\0') {
+    if ((bp = find_buffer(ms, FALSE)) == NULL) {
+      minibuf_error("Buffer `%s' not found", ms);
+      return FALSE;
+    }
+  } else
+    bp = cur_bp;
 
-        if (check_modified_buffer(bp)) {
-                kill_buffer(bp);
-                return TRUE;
-        }
+  if (check_modified_buffer(bp)) {
+    kill_buffer(bp);
+    return TRUE;
+  }
 
-        return FALSE;
+  return FALSE;
 }
 
 static void insert_buffer(Buffer *bp)
 {
-        Line *lp;
-        int size = calculate_buffer_size(bp), i;
+  Line *lp;
+  int size = calculate_buffer_size(bp), i;
 
-        undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-        undo_nosave = TRUE;
-        for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                for (i = 0; i < astr_len(lp->text); i++)
-                        insert_char(*astr_char(lp->text, i));
-                if (lp->next != bp->limitp)
-                        insert_newline();
-        }
-        undo_nosave = FALSE;
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_nosave = TRUE;
+  for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
+    for (i = 0; i < astr_len(lp->text); i++)
+      insert_char(*astr_char(lp->text, i));
+    if (lp->next != bp->limitp)
+      insert_newline();
+  }
+  undo_nosave = FALSE;
 }
 
 DEFUN("insert-buffer", insert_buffer)
-/*+
-Insert after point the contents of the user specified buffer.
-Puts mark after the inserted text.
-+*/
+  /*+
+    Insert after point the contents of the user specified buffer.
+    Puts mark after the inserted text.
+    +*/
 {
-        Buffer *bp, *swbuf;
-        char *ms;
-        Completion *cp;
+  Buffer *bp, *swbuf;
+  char *ms;
+  Completion *cp;
 
-        if (warn_if_readonly_buffer())
-                return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-        swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
-        cp = make_buffer_completion();
-        if ((ms = minibuf_read_completion("Insert buffer (default %s): ",
-                                          "", cp, NULL, swbuf->name)) == NULL)
-                return cancel();
-        free_completion(cp);
-        if (ms[0] != '\0') {
-                if ((bp = find_buffer(ms, FALSE)) == NULL) {
-                        minibuf_error("Buffer `%s' not found", ms);
-                        return FALSE;
-                }
-        } else
-                bp = swbuf;
+  swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
+  cp = make_buffer_completion();
+  if ((ms = minibuf_read_completion("Insert buffer (default %s): ",
+                                    "", cp, NULL, swbuf->name)) == NULL)
+    return cancel();
+  free_completion(cp);
+  if (ms[0] != '\0') {
+    if ((bp = find_buffer(ms, FALSE)) == NULL) {
+      minibuf_error("Buffer `%s' not found", ms);
+      return FALSE;
+    }
+  } else
+    bp = swbuf;
 
-        if (bp == cur_bp) {
-                minibuf_error("Cannot insert the current buffer");
-                return FALSE;
-        }
+  if (bp == cur_bp) {
+    minibuf_error("Cannot insert the current buffer");
+    return FALSE;
+  }
 
-        insert_buffer(bp);
-        set_mark_command();
+  insert_buffer(bp);
+  set_mark_command();
 
-        return TRUE;
+  return TRUE;
 }
 
 static int insert_file(char *filename)
 {
-        int fd, i, size;
-        char buf[BUFSIZ];
+  int fd, i, size;
+  char buf[BUFSIZ];
 
-        if (!exist_file(filename)) {
-                minibuf_error("Unable to read file `%s'", filename);
-                return FALSE;
-        }
+  if (!exist_file(filename)) {
+    minibuf_error("Unable to read file `%s'", filename);
+    return FALSE;
+  }
 
-        if ((fd = open(filename, O_RDONLY)) < 0) {
-                minibuf_write("%s: %s", filename, strerror(errno));
-                return FALSE;
-        }
+  if ((fd = open(filename, O_RDONLY)) < 0) {
+    minibuf_write("%s: %s", filename, strerror(errno));
+    return FALSE;
+  }
 
-        size = lseek(fd, 0, SEEK_END);
-        if (size < 1) {
-                close(fd);
-                return TRUE;
-        }
+  size = lseek(fd, 0, SEEK_END);
+  if (size < 1) {
+    close(fd);
+    return TRUE;
+  }
 
-        lseek(fd, 0, SEEK_SET);
-        undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-        undo_nosave = TRUE;
-        while ((size = read(fd, buf, BUFSIZ)) > 0)
-                for (i = 0; i < size; i++)
-                        if (buf[i] != '\n')
-                                insert_char(buf[i]);
-                        else
-                                insert_newline();
-        undo_nosave = FALSE;
-        close(fd);
+  lseek(fd, 0, SEEK_SET);
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_nosave = TRUE;
+  while ((size = read(fd, buf, BUFSIZ)) > 0)
+    for (i = 0; i < size; i++)
+      if (buf[i] != '\n')
+        insert_char(buf[i]);
+      else
+        insert_newline();
+  undo_nosave = FALSE;
+  close(fd);
 
-        return TRUE;
+  return TRUE;
 }
 
 DEFUN("insert-file", insert_file)
-/*+
-Insert contents of the user specified file into buffer after point.
-Set mark after the inserted text.
-+*/
+  /*+
+    Insert contents of the user specified file into buffer after point.
+    Set mark after the inserted text.
+    +*/
 {
-        char *ms;
-        astr buf;
+  char *ms;
+  astr buf;
 
-        if (warn_if_readonly_buffer())
-                return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-        buf = astr_new();
-        get_current_dir(buf, TRUE);
-        if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf)))
-            == NULL) {
-                astr_delete(buf);
-                return cancel();
-        }
-        astr_delete(buf);
+  buf = astr_new();
+  get_current_dir(buf, TRUE);
+  if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf)))
+      == NULL) {
+    astr_delete(buf);
+    return cancel();
+  }
+  astr_delete(buf);
 
-        if (ms[0] == '\0') {
-                free(ms);
-                return FALSE;
-        }
+  if (ms[0] == '\0') {
+    free(ms);
+    return FALSE;
+  }
 
-        if (!insert_file(ms)) {
-                free(ms);
-                return FALSE;
-        }
+  if (!insert_file(ms)) {
+    free(ms);
+    return FALSE;
+  }
 
-        set_mark_command();
+  set_mark_command();
 
-        free(ms);
-        return TRUE;
+  free(ms);
+  return TRUE;
 }
 
 /*
@@ -718,46 +718,46 @@ Set mark after the inserted text.
 static astr create_backup_filename(const char *filename,
                                    int withdirectory)
 {
-        astr res;
+  astr res;
         
-        /* Add the backup directory path to the filename */
-        if (withdirectory) {
-                astr dir, fname, buf;
-                char *backupdir;
+  /* Add the backup directory path to the filename */
+  if (withdirectory) {
+    astr dir, fname, buf;
+    char *backupdir;
 
-                backupdir = get_variable("backup-directory");
-                buf = astr_new();
+    backupdir = get_variable("backup-directory");
+    buf = astr_new();
 
-                astr_cat_cstr(buf, backupdir);
-                if (*astr_char(buf, -1) != '/')
-                        astr_cat_cstr(buf, "/");
-                while (*filename != '\0') {
-                        if (*filename == '/')
-                                astr_cat_char(buf, '!');
-                        else
-                                astr_cat_char(buf, *filename);
-                        ++filename;
-                }
+    astr_cat_cstr(buf, backupdir);
+    if (*astr_char(buf, -1) != '/')
+      astr_cat_cstr(buf, "/");
+    while (*filename != '\0') {
+      if (*filename == '/')
+        astr_cat_char(buf, '!');
+      else
+        astr_cat_char(buf, *filename);
+      ++filename;
+    }
 
-                dir = astr_new();
-                fname = astr_new();
-                if (!expand_path(astr_cstr(buf), "", dir, fname)) {
-                        fprintf(stderr, "zile: %s: invalid backup directory\n", astr_cstr(dir));
-                        zile_exit(1);
-                }
-                astr_cpy_cstr(buf, astr_cstr(dir));
-                astr_cat_cstr(buf, astr_cstr(fname));
-                astr_delete(dir);
-                astr_delete(fname);
-                filename = astr_cstr(buf);
-                astr_delete(buf);
-        }
+    dir = astr_new();
+    fname = astr_new();
+    if (!expand_path(astr_cstr(buf), "", dir, fname)) {
+      fprintf(stderr, "zile: %s: invalid backup directory\n", astr_cstr(dir));
+      zile_exit(1);
+    }
+    astr_cpy_cstr(buf, astr_cstr(dir));
+    astr_cat_cstr(buf, astr_cstr(fname));
+    astr_delete(dir);
+    astr_delete(fname);
+    filename = astr_cstr(buf);
+    astr_delete(buf);
+  }
 
-        res = astr_new();
-        astr_cat_cstr(res, filename);
-        astr_cat_char(res, '~');
+  res = astr_new();
+  astr_cat_cstr(res, filename);
+  astr_cat_char(res, '~');
 
-        return res;
+  return res;
 }
 
 /*
@@ -765,78 +765,78 @@ static astr create_backup_filename(const char *filename,
  */
 static int copy_file(const char *source, const char *dest)
 {
-        char buf[BUFSIZ];
-        int ifd, ofd, len, stat_valid;
-        struct stat st;
+  char buf[BUFSIZ];
+  int ifd, ofd, len, stat_valid;
+  struct stat st;
 
-        ifd = open(source, O_RDONLY, 0);
-        if (ifd < 0) {
-                minibuf_error("%s: unable to backup", source);
-                return FALSE;
-        }
+  ifd = open(source, O_RDONLY, 0);
+  if (ifd < 0) {
+    minibuf_error("%s: unable to backup", source);
+    return FALSE;
+  }
 
-        ofd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-        if (ifd < 0) {
-                close(ifd);
-                minibuf_error("%s: unable to create backup", dest);
-                return FALSE;
-        }
+  ofd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+  if (ifd < 0) {
+    close(ifd);
+    minibuf_error("%s: unable to create backup", dest);
+    return FALSE;
+  }
 
-        while ((len = read(ifd, buf, sizeof buf)) > 0)
-                if (write(ofd, buf, len) < 0) {
-                        minibuf_error("unable to write to backup %s", dest);
-                        close(ifd);
-                        close(ofd);
-                        return FALSE;
-                }
+  while ((len = read(ifd, buf, sizeof buf)) > 0)
+    if (write(ofd, buf, len) < 0) {
+      minibuf_error("unable to write to backup %s", dest);
+      close(ifd);
+      close(ofd);
+      return FALSE;
+    }
 
-        stat_valid = fstat(ifd, &st) != -1;
+  stat_valid = fstat(ifd, &st) != -1;
 
 #if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
-        /* Recover file permissions and ownership. */
-        if (stat_valid) {
+  /* Recover file permissions and ownership. */
+  if (stat_valid) {
 #ifdef HAVE_FCHMOD
-                fchmod(ofd, st.st_mode);
+    fchmod(ofd, st.st_mode);
 #endif
 #ifdef HAVE_FCHOWN
-                fchown(ofd, st.st_uid, st.st_gid);
+    fchown(ofd, st.st_uid, st.st_gid);
 #endif
-        }
+  }
 #endif
 
-        close(ifd);
-        close(ofd);
+  close(ifd);
+  close(ofd);
 
-        /* Recover file modification time. */
-        if (stat_valid) {
-                struct utimbuf t;
-                t.actime = st.st_atime;
-                t.modtime = st.st_mtime;
-                utime(dest, &t);
-        }
+  /* Recover file modification time. */
+  if (stat_valid) {
+    struct utimbuf t;
+    t.actime = st.st_atime;
+    t.modtime = st.st_mtime;
+    utime(dest, &t);
+  }
 
-        return TRUE;
+  return TRUE;
 }
 
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
-        int fd, eol_len = strlen(bp->eol);
-        Line *lp;
+  int fd, eol_len = strlen(bp->eol);
+  Line *lp;
 
-        if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)
-                return FALSE;
+  if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)
+    return FALSE;
 
-        /* Save all the lines. */
-        for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                write(fd, astr_cstr(lp->text), astr_len(lp->text));
-                if (lp->next != bp->limitp)
-                        write(fd, bp->eol, eol_len);
-        }
+  /* Save all the lines. */
+  for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
+    write(fd, astr_cstr(lp->text), astr_len(lp->text));
+    if (lp->next != bp->limitp)
+      write(fd, bp->eol, eol_len);
+  }
 
-        if (close(fd) < 0)
-                return FALSE;
+  if (close(fd) < 0)
+    return FALSE;
 
-        return TRUE;
+  return TRUE;
 }
 
 /*
@@ -845,224 +845,224 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
  */
 static int write_to_disk(Buffer *bp, char *filename)
 {
-        int fd, backupsimple, backupwithdir;
+  int fd, backupsimple, backupwithdir;
 
-        backupsimple = is_variable_equal("backup-method", "simple");
-        backupwithdir = lookup_bool_variable("backup-with-directory");
+  backupsimple = is_variable_equal("backup-method", "simple");
+  backupwithdir = lookup_bool_variable("backup-with-directory");
 
-        /*
-         * Make backup of original file.
-         */
-        if (!(bp->flags & BFLAG_BACKUP) && backupsimple
-            && (fd = open(filename, O_RDWR, 0)) != -1) {
-                astr bfilename;
-                close(fd);
-                bfilename = create_backup_filename(filename, backupwithdir);
-                if (!copy_file(filename, astr_cstr(bfilename)))
-                        waitkey();
-                astr_delete(bfilename);
-                bp->flags |= BFLAG_BACKUP;
-        }
+  /*
+   * Make backup of original file.
+   */
+  if (!(bp->flags & BFLAG_BACKUP) && backupsimple
+      && (fd = open(filename, O_RDWR, 0)) != -1) {
+    astr bfilename;
+    close(fd);
+    bfilename = create_backup_filename(filename, backupwithdir);
+    if (!copy_file(filename, astr_cstr(bfilename)))
+      waitkey();
+    astr_delete(bfilename);
+    bp->flags |= BFLAG_BACKUP;
+  }
 
-        if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
-                minibuf_error("%s: %s", filename, strerror(errno));
-                return FALSE;
-        }
+  if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
+    minibuf_error("%s: %s", filename, strerror(errno));
+    return FALSE;
+  }
 
-        return TRUE;
+  return TRUE;
 }
 
 static int save_buffer(Buffer *bp)
 {
-        char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
-        int ms_is_from_minibuffer = 0;
+  char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
+  int ms_is_from_minibuffer = 0;
 
-        if (!(bp->flags & BFLAG_MODIFIED))
-                minibuf_write("(No changes need to be saved)");
-        else {
-                if (bp->flags & BFLAG_NEEDNAME) {
-                        if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
-                                return cancel();
-                        ms_is_from_minibuffer = 1;
-                        if (ms[0] == '\0') {
-                                free(ms);
-                                return FALSE;
-                        }
+  if (!(bp->flags & BFLAG_MODIFIED))
+    minibuf_write("(No changes need to be saved)");
+  else {
+    if (bp->flags & BFLAG_NEEDNAME) {
+      if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
+        return cancel();
+      ms_is_from_minibuffer = 1;
+      if (ms[0] == '\0') {
+        free(ms);
+        return FALSE;
+      }
 
-                        set_buffer_filename(bp, ms);
+      set_buffer_filename(bp, ms);
 
-                        bp->flags &= ~BFLAG_NEEDNAME;
-                } else
-                        ms = bp->filename;
+      bp->flags &= ~BFLAG_NEEDNAME;
+    } else
+      ms = bp->filename;
 
-                if (write_to_disk(bp, ms)) {
-                        Undo *up;
+    if (write_to_disk(bp, ms)) {
+      Undo *up;
                 
-                        minibuf_write("Wrote %s", ms);
-                        bp->flags &= ~BFLAG_MODIFIED;
+      minibuf_write("Wrote %s", ms);
+      bp->flags &= ~BFLAG_MODIFIED;
 
-                        /* Set unchanged flags to FALSE except for the
-                           last undo action, which is set to TRUE. */
-                        up = bp->last_undop;
-                        if (up)
-                                up->unchanged = TRUE;
-                        for (up = up->next; up; up = up->next)
-                                up->unchanged = FALSE;
-                }
+      /* Set unchanged flags to FALSE except for the
+         last undo action, which is set to TRUE. */
+      up = bp->last_undop;
+      if (up)
+        up->unchanged = TRUE;
+      for (up = up->next; up; up = up->next)
+        up->unchanged = FALSE;
+    }
 
-                bp->flags &= ~BFLAG_TEMPORARY;
+    bp->flags &= ~BFLAG_TEMPORARY;
 
-                if (ms_is_from_minibuffer)
-                        free(ms);
-        }
+    if (ms_is_from_minibuffer)
+      free(ms);
+  }
 
-        return TRUE;
+  return TRUE;
 }
 
 DEFUN("save-buffer", save_buffer)
-/*+
-Save current buffer in visited file if modified. By default, makes the
-previous version into a backup file if this is the first save.
-+*/
+  /*+
+    Save current buffer in visited file if modified. By default, makes the
+    previous version into a backup file if this is the first save.
+    +*/
 {
-        return save_buffer(cur_bp);
+  return save_buffer(cur_bp);
 }
 
 DEFUN("write-file", write_file)
-/*+
-Write current buffer into the user specified file.
-Makes buffer visit that file, and marks it not modified.
-+*/
+  /*+
+    Write current buffer into the user specified file.
+    Makes buffer visit that file, and marks it not modified.
+    +*/
 {
-        char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
-        char *ms;
+  char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
+  char *ms;
 
-        if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
-                return cancel();
-        if (ms[0] == '\0') {
-                free(ms);
-                return FALSE;
-        }
+  if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
+    return cancel();
+  if (ms[0] == '\0') {
+    free(ms);
+    return FALSE;
+  }
 
-        set_buffer_filename(cur_bp, ms);
+  set_buffer_filename(cur_bp, ms);
 
-        cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
+  cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
 
-        if (write_to_disk(cur_bp, ms)) {
-                minibuf_write("Wrote %s", ms);
-                cur_bp->flags &= ~BFLAG_MODIFIED;
-        }
+  if (write_to_disk(cur_bp, ms)) {
+    minibuf_write("Wrote %s", ms);
+    cur_bp->flags &= ~BFLAG_MODIFIED;
+  }
 
-        free(ms);
-        return TRUE;
+  free(ms);
+  return TRUE;
 }
 
 static int save_some_buffers(void)
 {
-        Buffer *bp;
-        int i = 0, noask = FALSE, c;
+  Buffer *bp;
+  int i = 0, noask = FALSE, c;
 
-        for (bp = head_bp; bp != NULL; bp = bp->next)
-                if (bp->flags & BFLAG_MODIFIED
-                    && !(bp->flags & BFLAG_NOSAVE)) {
-                        char *fname = bp->filename != NULL ? bp->filename : bp->name;
+  for (bp = head_bp; bp != NULL; bp = bp->next)
+    if (bp->flags & BFLAG_MODIFIED
+        && !(bp->flags & BFLAG_NOSAVE)) {
+      char *fname = bp->filename != NULL ? bp->filename : bp->name;
 
-                        ++i;
+      ++i;
 
-                        if (noask)
-                                save_buffer(bp);
-                        else {
-                                for (;;) {
-                                        minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
+      if (noask)
+        save_buffer(bp);
+      else {
+        for (;;) {
+          minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
 
-                                        c = term_getkey();
-                                        switch (c) {
-                                        case KBD_CANCEL:
-                                        case KBD_RET:
-                                        case ' ':
-                                        case 'y':
-                                        case 'n':
-                                        case 'q':
-                                        case '.':
-                                        case '!':
-                                                goto exitloop;
-                                        }
+          c = term_getkey();
+          switch (c) {
+          case KBD_CANCEL:
+          case KBD_RET:
+          case ' ':
+          case 'y':
+          case 'n':
+          case 'q':
+          case '.':
+          case '!':
+            goto exitloop;
+          }
 
-                                        minibuf_error("Please answer y, n, !, . or q.");
-                                        waitkey();
-                                }
+          minibuf_error("Please answer y, n, !, . or q.");
+          waitkey();
+        }
 
-                        exitloop:
-                                minibuf_clear();
+      exitloop:
+        minibuf_clear();
 
-                                switch (c) {
-                                case KBD_CANCEL: /* C-g */
-                                        return cancel();
-                                case 'q':
-                                        goto endoffunc;
-                                case '.':
-                                        save_buffer(bp);
-                                        ++i;
-                                        return TRUE;
-                                case '!':
-                                        noask = TRUE;
-                                        /* FALLTHROUGH */
-                                case ' ':
-                                case 'y':
-                                        save_buffer(bp);
-                                        ++i;
-                                        break;
-                                case 'n':
-                                case KBD_RET:
-                                case KBD_DEL:
-                                        break;
-                                }
-                        }
-                }
+        switch (c) {
+        case KBD_CANCEL: /* C-g */
+          return cancel();
+        case 'q':
+          goto endoffunc;
+        case '.':
+          save_buffer(bp);
+          ++i;
+          return TRUE;
+        case '!':
+          noask = TRUE;
+          /* FALLTHROUGH */
+        case ' ':
+        case 'y':
+          save_buffer(bp);
+          ++i;
+          break;
+        case 'n':
+        case KBD_RET:
+        case KBD_DEL:
+          break;
+        }
+      }
+    }
 
-endoffunc:
-        if (i == 0)
-                minibuf_write("(No files need saving)");
+ endoffunc:
+  if (i == 0)
+    minibuf_write("(No files need saving)");
 
-        return TRUE;
+  return TRUE;
 }
 
 
 DEFUN("save-some-buffers", save_some_buffers)
-/*+
-Save some modified file-visiting buffers.  Asks user about each one.
-+*/
+  /*+
+    Save some modified file-visiting buffers.  Asks user about each one.
+    +*/
 {
-        return save_some_buffers();
+  return save_some_buffers();
 }
 
 DEFUN("save-buffers-kill-zile", save_buffers_kill_zile)
-/*+
-Offer to save each buffer, then kill this Zile process.
-+*/
+  /*+
+    Offer to save each buffer, then kill this Zile process.
+    +*/
 {
-        Buffer *bp;
-        int ans, i = 0;
+  Buffer *bp;
+  int ans, i = 0;
 
-        if (!save_some_buffers())
-                return FALSE;
+  if (!save_some_buffers())
+    return FALSE;
 
-        for (bp = head_bp; bp != NULL; bp = bp->next)
-                if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
-                        ++i;
+  for (bp = head_bp; bp != NULL; bp = bp->next)
+    if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
+      ++i;
 
-        if (i > 0)
-                for (;;) {
-                        if ((ans = minibuf_read_yesno("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
-                                return cancel();
-                        else if (!ans)
-                                return FALSE;
-                        break;
-                }
+  if (i > 0)
+    for (;;) {
+      if ((ans = minibuf_read_yesno("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
+        return cancel();
+      else if (!ans)
+        return FALSE;
+      break;
+    }
 
-        thisflag |= FLAG_QUIT_ZILE;
+  thisflag |= FLAG_QUIT_ZILE;
 
-        return TRUE;
+  return TRUE;
 }
 
 /*
@@ -1071,61 +1071,61 @@ Offer to save each buffer, then kill this Zile process.
  */
 void zile_exit(int exitcode)
 {
-        Buffer *bp;
+  Buffer *bp;
 
-        fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
-        for (bp = head_bp; bp != NULL; bp = bp->next)
-                if (bp->flags & BFLAG_MODIFIED &&
-                    !(bp->flags & BFLAG_NOSAVE)) {
-                        astr buf;
-                        buf = astr_new();
-                        if (bp->filename != NULL)
-                                astr_cpy_cstr(buf, bp->filename);
-                        else
-                                astr_cpy_cstr(buf, bp->name);
-                        astr_cat_cstr(buf, ".ZILESAVE");
-                        fprintf(stderr, "Saving %s...\r\n",
-                                astr_cstr(buf));
-                        raw_write_to_disk(bp, astr_cstr(buf), 0600);
-                        astr_delete(buf);
-                }
-        exit(exitcode);
+  fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
+  for (bp = head_bp; bp != NULL; bp = bp->next)
+    if (bp->flags & BFLAG_MODIFIED &&
+        !(bp->flags & BFLAG_NOSAVE)) {
+      astr buf;
+      buf = astr_new();
+      if (bp->filename != NULL)
+        astr_cpy_cstr(buf, bp->filename);
+      else
+        astr_cpy_cstr(buf, bp->name);
+      astr_cat_cstr(buf, ".ZILESAVE");
+      fprintf(stderr, "Saving %s...\r\n",
+              astr_cstr(buf));
+      raw_write_to_disk(bp, astr_cstr(buf), 0600);
+      astr_delete(buf);
+    }
+  exit(exitcode);
 }
 
 DEFUN("cd", cd)
-/*+
-Make the user specified directory become the current buffer's default
-directory.
-+*/
+  /*+
+    Make the user specified directory become the current buffer's default
+    directory.
+    +*/
 {
-        char *ms;
-        astr buf;
-        struct stat st;
+  char *ms;
+  astr buf;
+  struct stat st;
 
-        buf = astr_new();
-        get_current_dir(buf, TRUE);
-        if ((ms = minibuf_read_dir("Change default directory: ",
-                                   astr_cstr(buf))) == NULL) {
-                astr_delete(buf);
-                return cancel();
-        }
-        astr_delete(buf);
+  buf = astr_new();
+  get_current_dir(buf, TRUE);
+  if ((ms = minibuf_read_dir("Change default directory: ",
+                             astr_cstr(buf))) == NULL) {
+    astr_delete(buf);
+    return cancel();
+  }
+  astr_delete(buf);
 
-        if (ms[0] != '\0') {
-                if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
-                        minibuf_error("`%s' is not a directory", ms);
-                        free(ms);
-                        return FALSE;
-                }
-                if (chdir(ms) == -1) {
-                        minibuf_write("%s: %s", ms, strerror(errno));
-                        free(ms);
-                        return FALSE;
-                }
-                free(ms);
-                return TRUE;
-        }
+  if (ms[0] != '\0') {
+    if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
+      minibuf_error("`%s' is not a directory", ms);
+      free(ms);
+      return FALSE;
+    }
+    if (chdir(ms) == -1) {
+      minibuf_write("%s: %s", ms, strerror(errno));
+      free(ms);
+      return FALSE;
+    }
+    free(ms);
+    return TRUE;
+  }
 
-        free(ms);
-        return FALSE;
+  free(ms);
+  return FALSE;
 }

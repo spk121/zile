@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.39 2005/01/09 18:23:12 rrt Exp $        */
+/*      $Id: zile.h,v 1.40 2005/01/09 23:56:06 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -67,74 +67,74 @@ typedef int (*Function)(int uniarg);
  * Point and Marker.
  */
 struct Point {
-        Line *p;                /* Line pointer. */
-        int n;                  /* Line number. */
-        int o;                  /* Offset. */
+  Line *p;                /* Line pointer. */
+  int n;                  /* Line number. */
+  int o;                  /* Offset. */
 };
 
 struct Marker {
-        Buffer *bp;             /* Buffer that points into. */
-        Point pt;               /* Point position. */
-        Marker *next;           /* Used to chain all markers in the buffer. */
-        unsigned type : 1;      /* Insertion type (1=after text). */
+  Buffer *bp;             /* Buffer that points into. */
+  Point pt;               /* Point position. */
+  Marker *next;           /* Used to chain all markers in the buffer. */
+  unsigned type : 1;      /* Insertion type (1=after text). */
 };
 
 struct Line {
-        Line *prev, *next;      /* The previous line and next line pointers. */
-        astr text;              /* The text. */
+  Line *prev, *next;      /* The previous line and next line pointers. */
+  astr text;              /* The text. */
 };
 
 /* Undo delta types. */
 enum {
-        UNDO_INSERT_CHAR,       /* Insert a character. */
-        UNDO_INSERT_BLOCK,      /* Insert a block of characters. */
-        UNDO_REMOVE_CHAR,       /* Remove a character. */
-        UNDO_REMOVE_BLOCK,      /* Remove a block of characters. */
-        UNDO_REPLACE_CHAR,      /* Replace a character. */
-        UNDO_REPLACE_BLOCK,     /* Replace a block of characters. */
-        UNDO_START_SEQUENCE,    /* Start a multi operation sequence. */
-        UNDO_END_SEQUENCE,      /* End a multi operation sequence. */
-        UNDO_INTERCALATE_CHAR   /* Insert a char without moving the
-                                   current pointer. */
+  UNDO_INSERT_CHAR,       /* Insert a character. */
+  UNDO_INSERT_BLOCK,      /* Insert a block of characters. */
+  UNDO_REMOVE_CHAR,       /* Remove a character. */
+  UNDO_REMOVE_BLOCK,      /* Remove a block of characters. */
+  UNDO_REPLACE_CHAR,      /* Replace a character. */
+  UNDO_REPLACE_BLOCK,     /* Replace a block of characters. */
+  UNDO_START_SEQUENCE,    /* Start a multi operation sequence. */
+  UNDO_END_SEQUENCE,      /* End a multi operation sequence. */
+  UNDO_INTERCALATE_CHAR   /* Insert a char without moving the
+                             current pointer. */
 };
 
 struct Undo {
-        /* Next undo delta in list. */
-        Undo *next;
+  /* Next undo delta in list. */
+  Undo *next;
 
-        /* The type of undo delta. */
-        int type;
+  /* The type of undo delta. */
+  int type;
 
-        /* Where the undo delta need to be applied.
-           Warning!: Do not use the "pt.p" field.
-         */
-        Point pt;
+  /* Where the undo delta need to be applied.
+     Warning!: Do not use the "pt.p" field.
+  */
+  Point pt;
 
-        /* Flag indicating that reverting this undo leaves the buffer
-           in an unchanged state. */
-        int unchanged;
+  /* Flag indicating that reverting this undo leaves the buffer
+     in an unchanged state. */
+  int unchanged;
 
-        /* The undo delta. */
-        union {
-                /* The character to insert or replace. */
-                int c;
+  /* The undo delta. */
+  union {
+    /* The character to insert or replace. */
+    int c;
 
-                /* The block to insert. */
-                struct {
-                        char *text;
-                        int osize;      /* Original size; only for replace. */
-                        int size;       /* New block size. */
-                } block;
-        } delta;
+    /* The block to insert. */
+    struct {
+      char *text;
+      int osize;      /* Original size; only for replace. */
+      int size;       /* New block size. */
+    } block;
+  } delta;
 };
 
 struct Region {
-        Point start;            /* The region start. */
-        Point end;              /* The region end. */
-        int size;               /* The region size. */
+  Point start;            /* The region start. */
+  Point end;              /* The region end. */
+  int size;               /* The region size. */
 
-        /* The total number of lines ('\n' newlines) in region. */
-        int num_lines;
+  /* The total number of lines ('\n' newlines) in region. */
+  int num_lines;
 };
 
 /* Buffer flags or minor modes. */
@@ -152,103 +152,103 @@ struct Region {
 #define BFLAG_ISEARCH   (0001000) /* The buffer is in Isearch loop. */
 
 struct Buffer {
-        /* The next buffer in buffer list. */
-        Buffer *next;
+  /* The next buffer in buffer list. */
+  Buffer *next;
 
-        /* limitp->next == first line; limitp->prev == last line. */
-        Line *limitp;
+  /* limitp->next == first line; limitp->prev == last line. */
+  Line *limitp;
 
-        /* The point. */
-        Point pt;
+  /* The point. */
+  Point pt;
 
-        /* The mark. */
-        Marker *mark;
+  /* The mark. */
+  Marker *mark;
 
-        /* Markers (points that are updated when text is modified).  */
-        Marker *markers;
+  /* Markers (points that are updated when text is modified).  */
+  Marker *markers;
 
-        /* The undo deltas recorded for this buffer. */
-        Undo *next_undop;
-        Undo *last_undop;
+  /* The undo deltas recorded for this buffer. */
+  Undo *next_undop;
+  Undo *last_undop;
 
-        /* Buffer flags. */
-        int flags;
-        int tab_width;
-        int fill_column;
-        unsigned mark_active : 1;
+  /* Buffer flags. */
+  int flags;
+  int tab_width;
+  int fill_column;
+  unsigned mark_active : 1;
 
-        /* The total number of lines ('\n' newlines) in buffer. */
-        int num_lines;
+  /* The total number of lines ('\n' newlines) in buffer. */
+  int num_lines;
 
-        /* The name of the buffer and the file name. */
-        char *name;
-        char *filename;
+  /* The name of the buffer and the file name. */
+  char *name;
+  char *filename;
 
-        /* EOL string (up to 2 chars) for this buffer. */
-        char eol[3];
+  /* EOL string (up to 2 chars) for this buffer. */
+  char eol[3];
 };
 
 struct Window {
-        /* The next window in window list. */
-        Window *next;
+  /* The next window in window list. */
+  Window *next;
 
-        /* The buffer displayed in window. */
-        Buffer *bp;
+  /* The buffer displayed in window. */
+  Buffer *bp;
 
-        /* The top line delta and last point line number. */
-        int topdelta;
-        int lastpointn;
+  /* The top line delta and last point line number. */
+  int topdelta;
+  int lastpointn;
 
-        /* The point line pointer, line number and offset (used to
-           hold the point in non-current windows). */
-        Marker *saved_pt;
+  /* The point line pointer, line number and offset (used to
+     hold the point in non-current windows). */
+  Marker *saved_pt;
 
-        /* The formal and effective width and height of window. */
-        int fwidth, fheight;
-        int ewidth, eheight;
+  /* The formal and effective width and height of window. */
+  int fwidth, fheight;
+  int ewidth, eheight;
 };
 
 enum {
-        COMPLETION_NOTMATCHED,
-        COMPLETION_MATCHED,
-        COMPLETION_MATCHEDNONUNIQUE,
-        COMPLETION_NONUNIQUE
+  COMPLETION_NOTMATCHED,
+  COMPLETION_MATCHED,
+  COMPLETION_MATCHEDNONUNIQUE,
+  COMPLETION_NONUNIQUE
 };
 
 struct Completion {
-        /* This flag is set when the vector is sorted. */
-        int fl_sorted;
-        /* This flag is set when a completion window has been popped up. */
-        int fl_poppedup;
+  /* This flag is set when the vector is sorted. */
+  int fl_sorted;
+  /* This flag is set when a completion window has been popped up. */
+  int fl_poppedup;
 
-        /* This flag is set when the completion window should be closed. */
-        int fl_close;
-        /* The old buffer. */
-        Buffer *old_bp;
+  /* This flag is set when the completion window should be closed. */
+  int fl_close;
+  /* The old buffer. */
+  Buffer *old_bp;
 
-        /* This flag is set when this is a filename completion. */
-        int fl_dir;
-        astr path;
+  /* This flag is set when this is a filename completion. */
+  int fl_dir;
+  astr path;
 
-        /* This flag is set when the space character is allowed. */
-        int fl_space;
+  /* This flag is set when the space character is allowed. */
+  int fl_space;
 
-        list completions;       /* The completions list. */
+  list completions;       /* The completions list. */
 
-        list matches;           /* The matches list. */
-        char *match;            /* The match buffer. */
-        int matchsize;          /* The match buffer size. */
+  list matches;           /* The matches list. */
+  char *match;            /* The match buffer. */
+  int matchsize;          /* The match buffer size. */
 };
 
 struct History {
-        list elements;          /* Elements (strings).  */
-        list sel;
+  list elements;          /* Elements (strings).  */
+  list sel;
 };
 
 struct Terminal {
-        void *screen; /* The real type of this pointer depends on the
-                         terminal back-end. */
-        int width, height;
+  void *screen; /* The real type of this pointer depends on the
+                   terminal back-end. */
+  int width, height;
 };
 
 /* The actual number of lines and columns on the screen, which may

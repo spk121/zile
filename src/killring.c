@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.12 2005/01/09 18:19:15 rrt Exp $	*/
+/*	$Id: killring.c,v 1.13 2005/01/09 23:56:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,281 +38,281 @@ static int kill_ring_maxsize;
 
 static void flush_kill_ring(void)
 {
-	kill_ring_size = 0;
-	if (kill_ring_maxsize > 1024) {
-		/*
-		 * Deallocate memory area, since is big enough.
-		 */
-		kill_ring_maxsize = 0;
-		free(kill_ring_text);
-		kill_ring_text = NULL;
-	}
+  kill_ring_size = 0;
+  if (kill_ring_maxsize > 1024) {
+    /*
+     * Deallocate memory area, since is big enough.
+     */
+    kill_ring_maxsize = 0;
+    free(kill_ring_text);
+    kill_ring_text = NULL;
+  }
 }
 
 static void kill_ring_push(char c)
 {
-	if (kill_ring_text == NULL) {
-		kill_ring_maxsize = 16;
-		kill_ring_text = (char *)zmalloc(kill_ring_maxsize);
-	} else if (kill_ring_size + 1 >= kill_ring_maxsize) {
-		kill_ring_maxsize += 16;
-		kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
-	}
-	kill_ring_text[kill_ring_size++] = c;
+  if (kill_ring_text == NULL) {
+    kill_ring_maxsize = 16;
+    kill_ring_text = (char *)zmalloc(kill_ring_maxsize);
+  } else if (kill_ring_size + 1 >= kill_ring_maxsize) {
+    kill_ring_maxsize += 16;
+    kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
+  }
+  kill_ring_text[kill_ring_size++] = c;
 }
 
 static void kill_ring_push_nstring(char *s, size_t size)
 {
-	if (kill_ring_text == NULL) {
-		kill_ring_maxsize = size;
-		kill_ring_text = (char *)zmalloc(size);
-	} else if (kill_ring_size + (int)size >= kill_ring_maxsize) {
-		kill_ring_maxsize += size;
-		kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
-	}
-	memcpy(kill_ring_text + kill_ring_size, s, size);
-	kill_ring_size += size;
+  if (kill_ring_text == NULL) {
+    kill_ring_maxsize = size;
+    kill_ring_text = (char *)zmalloc(size);
+  } else if (kill_ring_size + (int)size >= kill_ring_maxsize) {
+    kill_ring_maxsize += size;
+    kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
+  }
+  memcpy(kill_ring_text + kill_ring_size, s, size);
+  kill_ring_size += size;
 }
 
 static int kill_line(int literally)
 {
-	if (!eolp()) {
-		if (warn_if_readonly_buffer())
-			return FALSE;
+  if (!eolp()) {
+    if (warn_if_readonly_buffer())
+      return FALSE;
 
-		undo_save(UNDO_INSERT_BLOCK, cur_bp->pt,
-			  astr_len(cur_bp->pt.p->text) - cur_bp->pt.o, 0);
-		undo_nosave = TRUE;
-		while (!eolp()) {
-			kill_ring_push(following_char());
-			FUNCALL(delete_char);
-		}
-		undo_nosave = FALSE;
+    undo_save(UNDO_INSERT_BLOCK, cur_bp->pt,
+              astr_len(cur_bp->pt.p->text) - cur_bp->pt.o, 0);
+    undo_nosave = TRUE;
+    while (!eolp()) {
+      kill_ring_push(following_char());
+      FUNCALL(delete_char);
+    }
+    undo_nosave = FALSE;
 
-		thisflag |= FLAG_DONE_KILL;
+    thisflag |= FLAG_DONE_KILL;
 
-		if (!literally)
-		  return TRUE;
-	}
+    if (!literally)
+      return TRUE;
+  }
 
-	if (cur_bp->pt.p->next != cur_bp->limitp) {
-		if (!FUNCALL(delete_char))
-			return FALSE;
+  if (cur_bp->pt.p->next != cur_bp->limitp) {
+    if (!FUNCALL(delete_char))
+      return FALSE;
 
-		kill_ring_push('\n');
+    kill_ring_push('\n');
 
-		thisflag |= FLAG_DONE_KILL;
+    thisflag |= FLAG_DONE_KILL;
 
-		return TRUE;
-	}
+    return TRUE;
+  }
 
-	minibuf_error("End of buffer");
+  minibuf_error("End of buffer");
 
-	return FALSE;
+  return FALSE;
 }
 
 DEFUN("kill-line", kill_line)
-/*+
-Kill the rest of the current line; if no nonblanks there, kill thru newline.
-+*/
+  /*+
+    Kill the rest of the current line; if no nonblanks there, kill thru newline.
+    +*/
 {
-	int uni, ret = TRUE;
+  int uni, ret = TRUE;
 
-	if (!(lastflag & FLAG_DONE_KILL))
-		flush_kill_ring();
+  if (!(lastflag & FLAG_DONE_KILL))
+    flush_kill_ring();
 
-	if (uniarg == 1) {
-		kill_line(FALSE);
-	}
-	else {
-		undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-		for (uni = 0; uni < uniarg; ++uni)
-			if (!kill_line(TRUE)) {
-				ret = FALSE;
-				break;
-			}
-		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-	}
+  if (uniarg == 1) {
+    kill_line(FALSE);
+  }
+  else {
+    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    for (uni = 0; uni < uniarg; ++uni)
+      if (!kill_line(TRUE)) {
+        ret = FALSE;
+        break;
+      }
+    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  }
 
-	deactivate_mark();
-	return ret;
+  deactivate_mark();
+  return ret;
 }
 
 DEFUN("kill-region", kill_region)
-/*+
-Kill between point and mark.
-The text is deleted but saved in the kill ring.
-The command C-y (yank) can retrieve it from there.
-If the buffer is read-only, Zile will beep and refrain from deleting
-the text, but put the text in the kill ring anyway.  This means that
-you can use the killing commands to copy text from a read-only buffer.
-If the previous command was also a kill command,
-the text killed this time appends to the text killed last time
-to make one entry in the kill ring.
-+*/
+  /*+
+    Kill between point and mark.
+    The text is deleted but saved in the kill ring.
+    The command C-y (yank) can retrieve it from there.
+    If the buffer is read-only, Zile will beep and refrain from deleting
+    the text, but put the text in the kill ring anyway.  This means that
+    you can use the killing commands to copy text from a read-only buffer.
+    If the previous command was also a kill command,
+    the text killed this time appends to the text killed last time
+    to make one entry in the kill ring.
+    +*/
 {
-	Region r;
+  Region r;
 
-	if (!(lastflag & FLAG_DONE_KILL))
-		flush_kill_ring();
+  if (!(lastflag & FLAG_DONE_KILL))
+    flush_kill_ring();
 
-	if (warn_if_no_mark())
-		return FALSE;
+  if (warn_if_no_mark())
+    return FALSE;
 
-	calculate_region(&r);
+  calculate_region(&r);
 
-	if (cur_bp->flags & BFLAG_READONLY) {
-		/*
-		 * The buffer is readonly; save only in the kill buffer
-		 * and complain.
-		 */
-		char *p;
+  if (cur_bp->flags & BFLAG_READONLY) {
+    /*
+     * The buffer is readonly; save only in the kill buffer
+     * and complain.
+     */
+    char *p;
 
-		p = copy_text_block(r.start.n, r.start.o, r.size);
-		kill_ring_push_nstring(p, r.size);
-		free(p);
+    p = copy_text_block(r.start.n, r.start.o, r.size);
+    kill_ring_push_nstring(p, r.size);
+    free(p);
 
-		warn_if_readonly_buffer();
-	} else {
-		int size = r.size;
+    warn_if_readonly_buffer();
+  } else {
+    int size = r.size;
 
-		if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-			FUNCALL(exchange_point_and_mark);
-		undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
-		undo_nosave = TRUE;
-		while (size--) {
-			if (!eolp())
-				kill_ring_push(following_char());
-			else
-				kill_ring_push('\n');
-			FUNCALL(delete_char);
-		}
-		undo_nosave = FALSE;
-	}
+    if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
+      FUNCALL(exchange_point_and_mark);
+    undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
+    undo_nosave = TRUE;
+    while (size--) {
+      if (!eolp())
+        kill_ring_push(following_char());
+      else
+        kill_ring_push('\n');
+      FUNCALL(delete_char);
+    }
+    undo_nosave = FALSE;
+  }
 
-	thisflag |= FLAG_DONE_KILL;
-	deactivate_mark();
+  thisflag |= FLAG_DONE_KILL;
+  deactivate_mark();
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("copy-region-as-kill", copy_region_as_kill)
-/*+
-Save the region as if killed, but don't kill it.
-+*/
+  /*+
+    Save the region as if killed, but don't kill it.
+    +*/
 {
-	Region r;
-	char *p;
+  Region r;
+  char *p;
 
-	if (!(lastflag & FLAG_DONE_KILL))
-		flush_kill_ring();
+  if (!(lastflag & FLAG_DONE_KILL))
+    flush_kill_ring();
 
-	if (warn_if_no_mark())
-		return FALSE;
+  if (warn_if_no_mark())
+    return FALSE;
 
-	calculate_region(&r);
+  calculate_region(&r);
 
-	p = copy_text_block(r.start.n, r.start.o, r.size);
-	kill_ring_push_nstring(p, r.size);
-	free(p);
+  p = copy_text_block(r.start.n, r.start.o, r.size);
+  kill_ring_push_nstring(p, r.size);
+  free(p);
 
-	thisflag |= FLAG_DONE_KILL;
-	deactivate_mark();
+  thisflag |= FLAG_DONE_KILL;
+  deactivate_mark();
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("kill-word", kill_word)
-/*+
-Kill characters forward until encountering the end of a word.
-With argument, do this that many times.
-+*/
+  /*+
+    Kill characters forward until encountering the end of a word.
+    With argument, do this that many times.
+    +*/
 {
-	if (!(lastflag & FLAG_DONE_KILL))
-		flush_kill_ring();
+  if (!(lastflag & FLAG_DONE_KILL))
+    flush_kill_ring();
 
-	if (warn_if_readonly_buffer())
-		return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-	push_mark();
-	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-	FUNCALL_ARG(mark_word, uniarg);
-	FUNCALL(kill_region);
-	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-	pop_mark();
+  push_mark();
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  FUNCALL_ARG(mark_word, uniarg);
+  FUNCALL(kill_region);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  pop_mark();
 
-	thisflag |= FLAG_DONE_KILL;
+  thisflag |= FLAG_DONE_KILL;
 
-	minibuf_write("");	/* Don't write "Set mark" message.  */
+  minibuf_write("");	/* Don't write "Set mark" message.  */
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("backward-kill-word", backward_kill_word)
-/*+
-Kill characters backward until encountering the end of a word.
-With argument, do this that many times.
-+*/
+  /*+
+    Kill characters backward until encountering the end of a word.
+    With argument, do this that many times.
+    +*/
 {
-	return FUNCALL_ARG(kill_word, !uniarg? -1: -uniarg);
+  return FUNCALL_ARG(kill_word, !uniarg? -1: -uniarg);
 }
 
 DEFUN("kill-sexp", kill_sexp)
-/*+
-Kill the sexp (balanced expression) following the cursor.
-With ARG, kill that many sexps after the cursor.
-Negative arg -N means kill N sexps before the cursor.
-+*/
+  /*+
+    Kill the sexp (balanced expression) following the cursor.
+    With ARG, kill that many sexps after the cursor.
+    Negative arg -N means kill N sexps before the cursor.
+    +*/
 {
-	if (!(lastflag & FLAG_DONE_KILL))
-		flush_kill_ring();
+  if (!(lastflag & FLAG_DONE_KILL))
+    flush_kill_ring();
 
-	if (warn_if_readonly_buffer())
-		return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-	push_mark();
-	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-	FUNCALL_ARG(mark_sexp, uniarg);
-	FUNCALL(kill_region);
-	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-	pop_mark();
+  push_mark();
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  FUNCALL_ARG(mark_sexp, uniarg);
+  FUNCALL(kill_region);
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  pop_mark();
 
-	thisflag |= FLAG_DONE_KILL;
+  thisflag |= FLAG_DONE_KILL;
 
-	minibuf_write("");	/* Don't write "Set mark" message.  */
+  minibuf_write("");	/* Don't write "Set mark" message.  */
 
-	return TRUE;
+  return TRUE;
 }
 
 DEFUN("yank", yank)
-/*+
-Reinsert the last stretch of killed text.
-More precisely, reinsert the stretch of killed text most recently
-killed OR yanked.  Put point at end, and set mark at beginning.
-+*/
+  /*+
+    Reinsert the last stretch of killed text.
+    More precisely, reinsert the stretch of killed text most recently
+    killed OR yanked.  Put point at end, and set mark at beginning.
+    +*/
 {
-	if (kill_ring_size == 0) {
-		minibuf_error("Kill ring is empty");
-		return FALSE;
-	}
+  if (kill_ring_size == 0) {
+    minibuf_error("Kill ring is empty");
+    return FALSE;
+  }
 
-	if (warn_if_readonly_buffer())
-		return FALSE;
+  if (warn_if_readonly_buffer())
+    return FALSE;
 
-	set_mark_command();
+  set_mark_command();
 
-	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, kill_ring_size, 0);
-	undo_nosave = TRUE;
-	insert_nstring(kill_ring_text, kill_ring_size);
-	undo_nosave = FALSE;
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, kill_ring_size, 0);
+  undo_nosave = TRUE;
+  insert_nstring(kill_ring_text, kill_ring_size);
+  undo_nosave = FALSE;
 
-	deactivate_mark();
+  deactivate_mark();
 
-	return TRUE;
+  return TRUE;
 }
 
 void free_kill_ring(void)
 {
-	if (kill_ring_text != NULL)
-		free(kill_ring_text);
+  if (kill_ring_text != NULL)
+    free(kill_ring_text);
 }
