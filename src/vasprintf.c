@@ -1,10 +1,10 @@
 /*###########################################################################
-#                                                                           #
-#                                vasprintf                                  #
-#                                                                           #
-#               Copyright (c) 2002-2003 David TAILLANDIER                   #
-#                                                                           #
-###########################################################################*/
+  #                                                                           #
+  #                                vasprintf                                  #
+  #                                                                           #
+  #               Copyright (c) 2002-2003 David TAILLANDIER                   #
+  #                                                                           #
+  ###########################################################################*/
 
 /*
 
@@ -37,17 +37,17 @@ vasprintf by Reuben Thomas <rrt@sc3d.org> for Zile.
 
 'printf' function family use the following format string:
 
-   %[flag][width][.prec][modifier]type
+%[flag][width][.prec][modifier]type
 
-   %% is the escape sequence to print a '%'
-   %  followed by an unknown format will print the characters without
-      trying to do any interpretation
+%% is the escape sequence to print a '%'
+%  followed by an unknown format will print the characters without
+trying to do any interpretation
 
-   flag:   none   +     -     #     (blank)
-   width:  n    0n    *
-   prec:   none   .0    .n     .*
-   modifier:    F N L h l    ('F' and 'N' are ms-dos/16-bit specific)
-   type:  d i o u x X f e g E G c s p n
+flag:   none   +     -     #     (blank)
+width:  n    0n    *
+prec:   none   .0    .n     .*
+modifier:    F N L h l    ('F' and 'N' are ms-dos/16-bit specific)
+type:  d i o u x X f e g E G c s p n
 
 
 The function needs to allocate memory to store the full text before to
@@ -289,228 +289,235 @@ getint( const char * * string )
  *  Return value:  0 = ok
  *                 EOF = error
  */
-static
-int
-dispatch( xprintf_struct * s )
+static int dispatch(xprintf_struct *s)
 {
-     const char * initial_ptr;
-     char   format_string[24];        /* max length may be something like  "% +-#032768.32768Ld" */
-     char * format_ptr;
-     int    flag_plus, flag_minus, flag_space, flag_sharp, flag_zero;
-     int    width;
-     int    prec;
-     int    modifier;
-     char   type;
-     int    approx_width;
-     /* most of those variables are here to rewrite the format string */
+  const char *initial_ptr;
+  char format_string[24]; /* max length may be something like  "% +-#032768.32768Ld" */
+  char *format_ptr;
+  int flag_plus, flag_minus, flag_space, flag_sharp, flag_zero;
+  int width, prec, modifier, approx_width;
+  char type;
+  /* most of those variables are here to rewrite the format string */
 
 #define SRCTXT  (s->src_string)
 #define DESTTXT (s->dest_string)
 
-/* incoherent format string. Characters after the '%' will be printed with the next call */
+  /* incoherent format string. Characters after the '%' will be printed with the next call */
 #define INCOHERENT()         do {SRCTXT=initial_ptr; return 0;} while (0)     /* do/while to avoid */
 #define INCOHERENT_TEST()    do {if(*SRCTXT==0)   INCOHERENT();} while (0)    /* a null statement  */
 
-/* 'normal' text */
-     if ( *SRCTXT != '%' )
-          return usual_char( s );
+  /* 'normal' text */
+  if (*SRCTXT != '%')
+    return usual_char(s);
 
-/* we then have a '%' */
-     SRCTXT++;
-     /* don't check for end-of-string ; this is done later */
+  /* we then have a '%' */
+  SRCTXT++;
+  /* don't check for end-of-string ; this is done later */
 
-/* '%%' escape sequence */
-     if ( *SRCTXT == '%' )
-       {
-          if ( realloc_buff(s,1) == EOF )   /* because we can have "%%%%%%%%..." */
-               return EOF;
-          *DESTTXT = '%';
-          DESTTXT++;
-          SRCTXT++;
-          (s->real_len)++;
-          (s->pseudo_len)++;
-          return 0;
-       }
+  /* '%%' escape sequence */
+  if (*SRCTXT == '%') {
+    if (realloc_buff(s,1) == EOF) /* because we can have "%%%%%%%%..." */
+      return EOF;
+    *DESTTXT = '%';
+    DESTTXT++;
+    SRCTXT++;
+    (s->real_len)++;
+    (s->pseudo_len)++;
+    return 0;
+  }
 
-/* '%' managing */
-     initial_ptr = SRCTXT;   /* save current pointer in case of incorrect        */
-                             /* 'decoding'. Points just after the '%' so the '%' */
-                             /* won't be printed in any case, as required.       */
-     /* flag */
-     flag_plus  = 0;     flag_minus = 0;     flag_space = 0;
-     flag_sharp = 0;     flag_zero  = 0;
+  /* '%' managing */
+  initial_ptr = SRCTXT;   /* save current pointer in case of incorrect */
+  /* 'decoding'. Points just after the '%' so the '%' */
+  /* won't be printed in any case, as required. */
 
-     for ( /*none*/; /*none*/; SRCTXT++ )
-       {
-          if ( *SRCTXT == ' ' ) { flag_space = 1;  continue; }
-          if ( *SRCTXT == '+' ) { flag_plus  = 1;  continue; }
-          if ( *SRCTXT == '-' ) { flag_minus = 1;  continue; }
-          if ( *SRCTXT == '#' ) { flag_sharp = 1;  continue; }
-          if ( *SRCTXT == '0' ) { flag_zero  = 1;  continue; }
-          break;
-       }
+  /* flag */
+  flag_plus = flag_minus = flag_space = flag_sharp = flag_zero = 0;
 
-     INCOHERENT_TEST();     /* here is the first test for end of string */
+  for (;; SRCTXT++) {
+    if (*SRCTXT == ' ')
+      flag_space = 1;
+    else if (*SRCTXT == '+')
+      flag_plus = 1;
+    else if (*SRCTXT == '-')
+      flag_minus = 1;
+    else if (*SRCTXT == '#')
+      flag_sharp = 1;
+    else if (*SRCTXT == '0')
+      flag_zero = 1;
+    else
+      break;
+  }
 
-     /* width */
-     if ( *SRCTXT == '*' )      /* width given by next argument */
-       {
-          SRCTXT++;
-          width = va_arg( s->vargs, int );
-          if ( (unsigned int)width > 0x3fffU )    /* 'unsigned' to check against negative values too */
-               width = 0x3fff;
-       }
-     else if ( isdigit(*SRCTXT) != 0 )      /* width given as ASCII number */
-       {
-          width = getint( &SRCTXT );
-       }
-     else
-          width = -1;       /* no width specified */
+  INCOHERENT_TEST();    /* here is the first test for end of string */
 
-     INCOHERENT_TEST();
+  /* width */
+  if (*SRCTXT == '*') {         /* width given by next argument */
+    SRCTXT++;
+    width = va_arg( s->vargs, int );
+    if ( (unsigned int)width > 0x3fffU ) /* 'unsigned' to check against negative values too */
+      width = 0x3fff;
+  } else if (isdigit(*SRCTXT)) /* width given as ASCII number */
+    width = getint( &SRCTXT );
+  else
+    width = -1;                 /* no width specified */
 
-     /* .prec */
-     if ( *SRCTXT == '.' )
-       {
-          SRCTXT++;
-          if ( *SRCTXT == '*' )     /* .prec given by next argument */
-            {
-               prec = va_arg( s->vargs, int );
-               if ( (unsigned int)prec >= 0x3fffU )    /* 'unsigned' to check against negative values too */
-                    prec = 0x3fff;
-            }
-          else
-            {       /* .prec given as ASCII number */
-               if ( isdigit(*SRCTXT) == 0 )
-                    INCOHERENT();
-               prec = getint( &SRCTXT );
-            }
-          INCOHERENT_TEST();
-       }
-     else
-          prec = -1;        /* no .prec specified */
+  INCOHERENT_TEST();
 
-     /* modifier */
-     if ( *SRCTXT == 'L' || *SRCTXT == 'h' || *SRCTXT == 'l')
-       {
-          modifier = *SRCTXT;
-          SRCTXT++;
-          if ( modifier=='l' && *SRCTXT=='l' )
-            {
-               SRCTXT++;
-               modifier = 'L';      /* 'll' == 'L'      long long == long double */
-            }                       /* only for compatibility ; not portable     */
-          INCOHERENT_TEST();
-       }
-     else
-       {
-          modifier = -1;    /* no modifier specified */
-       }
+  /* .prec */
+  if (*SRCTXT == '.') {
+    SRCTXT++;
+    if (*SRCTXT == '*') {       /* .prec given by next argument */
+      prec = va_arg( s->vargs, int );
+      if ((unsigned int)prec >= 0x3fffU) /* 'unsigned' to check against negative values too */
+        prec = 0x3fff;
+    } else {                    /* .prec given as ASCII number */
+      if (isdigit(*SRCTXT) == 0)
+        INCOHERENT();
+      prec = getint(&SRCTXT);
+    }
+    INCOHERENT_TEST();
+  } else
+    prec = -1;                  /* no .prec specified */
 
-     /* type */
-     type = *SRCTXT;
-     if ( strchr("diouxXfegEGcspn",type) == NULL )
-          INCOHERENT();    /* unknown type */
-     SRCTXT++;
+  /* modifier */
+  if (*SRCTXT == 'L' || *SRCTXT == 'h' || *SRCTXT == 'l') {
+    modifier = *SRCTXT;
+    SRCTXT++;
+    if (modifier=='l' && *SRCTXT=='l') {
+      SRCTXT++;
+      modifier = 'L';  /* 'll' == 'L'      long long == long double */
+    } /* only for compatibility ; not portable */
+    INCOHERENT_TEST();
+  } else
+    modifier = -1;              /* no modifier specified */
 
-     /* rewrite format-string */
-     format_string[0] = '%';
-     format_ptr = &(format_string[1]);
+  /* type */
+  type = *SRCTXT;
+  if (strchr("diouxXfegEGcspn",type) == NULL)
+    INCOHERENT();               /* unknown type */
+  SRCTXT++;
 
-     if ( flag_plus  != 0 )    {   *format_ptr = '+';    format_ptr++;   }
-     if ( flag_minus != 0 )    {   *format_ptr = '-';    format_ptr++;   }
-     if ( flag_space != 0 )    {   *format_ptr = ' ';    format_ptr++;   }
-     if ( flag_sharp != 0 )    {   *format_ptr = '#';    format_ptr++;   }
-     if ( flag_zero  != 0 )    {   *format_ptr = '0';    format_ptr++;   }    /* '0' *must* be the last one */
+  /* rewrite format-string */
+  format_string[0] = '%';
+  format_ptr = &(format_string[1]);
 
-     if ( width != -1 )
-       {
-          sprintf( format_ptr, "%i", width );   /* itoa() may be better but not ANSI nor POSIX */
-          format_ptr += strlen( format_ptr );
-       }
+  if (flag_plus) {
+    *format_ptr = '+';
+    format_ptr++;
+  }
+  if (flag_minus) {
+    *format_ptr = '-';
+    format_ptr++;
+  }
+  if (flag_space) {
+    *format_ptr = ' ';
+    format_ptr++;
+  }
+  if (flag_sharp) {
+    *format_ptr = '#';
+    format_ptr++;
+  }
+  if (flag_zero) {
+    *format_ptr = '0';
+    format_ptr++;
+  } /* '0' *must* be the last one */
 
-     if ( prec != -1 )
-       {
-          *format_ptr = '.';
-          format_ptr++;
-          sprintf( format_ptr, "%i", prec );
-          format_ptr += strlen( format_ptr );
-       }
+  if (width != -1) {
+    sprintf(format_ptr, "%i", width);
+    format_ptr += strlen(format_ptr);
+  }
 
-     if ( modifier != -1 )
-       {
-          *format_ptr = modifier;
-          format_ptr++;
-       }
+  if (prec != -1) {
+    *format_ptr = '.';
+    format_ptr++;
+    sprintf(format_ptr, "%i", prec);
+    format_ptr += strlen(format_ptr);
+  }
 
-     *format_ptr = type;
-     format_ptr++;
-     *format_ptr = 0;
+  if (modifier != -1) {
+    *format_ptr = modifier;
+    format_ptr++;
+  }
 
-     /* vague approximation of minimal length if width or prec are specified */
-     approx_width = width + prec;
-     if ( approx_width < 0 )    /* because  width == -1   and/or   prec == -1 */
-          approx_width = 0;
+  *format_ptr = type;
+  format_ptr++;
+  *format_ptr = 0;
 
-     switch ( type )
-       {
-          /* int */
-          case 'd':
-          case 'i':
-          case 'o':
-          case 'u':
-          case 'x':
-          case 'X':   switch ( modifier )
-                        {
-                           case -1 :   return print_it( s, approx_width, format_string, va_arg(s->vargs,int) );
-                           case 'l':   return print_it( s, approx_width, format_string, va_arg(s->vargs,long int) );
-                           case 'h':   return print_it( s, approx_width, format_string, va_arg(s->vargs, /*short*/ int) );
-                           default :   INCOHERENT();                             /* 'int' instead of 'short int' because  */
-                        }                                                        /* of default promotion is 'int'         */
+  /* vague approximation of minimal length if width or prec are specified */
+  approx_width = width + prec;
+  if (approx_width < 0) /* because width == -1 and/or prec == -1 */
+    approx_width = 0;
 
-          /* char */
-          case 'c':   if ( modifier != -1 )
-                           if ( print_it(s,approx_width,format_string,va_arg(s->vargs,int)) != EOF )
-                      INCOHERENT();                         /* note: because of default promotion */
-                                                            /* 'int' is used instead of 'char'    */
-          /* math */
-          case 'e':
-          case 'f':
-          case 'g':
-          case 'E':
-          case 'G':   switch ( modifier )
-                        {
-                           case -1 :   /* because of default promotion, no modifier means 'l' */
-                           case 'l':   return print_it( s, approx_width, format_string, va_arg(s->vargs,double) );
-                           case 'L':   return print_it( s, approx_width, format_string, va_arg(s->vargs,long double) );
-                           default:    INCOHERENT();
-                        }
+  switch (type) {
+    /* int */
+  case 'd':
+  case 'i':
+  case 'o':
+  case 'u':
+  case 'x':
+  case 'X':
+    switch (modifier) {
+    case -1 :
+      return print_it(s, approx_width, format_string, va_arg(s->vargs, int));
+    case 'l':
+      return print_it(s, approx_width, format_string, va_arg(s->vargs, long int));
+    case 'h':
+      return print_it(s, approx_width, format_string, va_arg(s->vargs, int));
+      /* 'int' instead of 'short int' because default promotion is 'int' */
+    default:
+      INCOHERENT();
+    }
 
-          /* string */
-          case 's':   return type_s( s, width, prec, format_string, va_arg(s->vargs,const char*) );
+    /* char */
+  case 'c':
+    if (modifier != -1)
+      return print_it(s,approx_width,format_string,va_arg(s->vargs, int));
+    INCOHERENT();
+    /* 'int' instead of 'char' because default promotion is 'int' */
 
-          /* pointer */
-          case 'p':   if ( modifier == -1 )
-                           return print_it( s, approx_width, format_string, va_arg(s->vargs,void *) );
-                      INCOHERENT();
+    /* math */
+  case 'e':
+  case 'f':
+  case 'g':
+  case 'E':
+  case 'G':
+    switch (modifier) {
+    case -1 : /* because of default promotion, no modifier means 'l' */
+    case 'l':
+      return print_it(s, approx_width, format_string, va_arg(s->vargs, double));
+    case 'L':
+      return print_it(s, approx_width, format_string, va_arg(s->vargs, long double));
+    default:
+      INCOHERENT();
+    }
 
-          /* store */
-          case 'n':   if ( modifier == -1 )
-                        {
-                           int * p;
-                           p = va_arg( s->vargs, int * );
-                           if ( p != NULL )
-                             {
-                                *p = s->pseudo_len;
-                                return 0;
-                             }
-                           return EOF;
-                        }
-                      INCOHERENT();
+    /* string */
+  case 's':
+    return type_s(s, width, prec, format_string, va_arg(s->vargs, const char*));
 
-       }  /* switch */
+    /* pointer */
+  case 'p':
+    if (modifier == -1)
+      return print_it(s, approx_width, format_string, va_arg(s->vargs, void *));
+    INCOHERENT();
 
-     INCOHERENT();  /* unknown type */
+    /* store */
+  case 'n':
+    if (modifier == -1) {
+      int * p;
+      p = va_arg( s->vargs, int * );
+      if ( p != NULL ) {
+        *p = s->pseudo_len;
+        return 0;
+      }
+      return EOF;
+    }
+    INCOHERENT();
+
+  } /* switch */
+
+  INCOHERENT();                 /* unknown type */
 
 #undef INCOHERENT
 #undef INCOHERENT_TEST
@@ -523,128 +530,112 @@ dispatch( xprintf_struct * s )
  *  Return value: number of *virtualy* written characters
  *                EOF = error
  */
-static
-int
-core( xprintf_struct * s )
+static int core(xprintf_struct *s)
 {
-     size_t len, save_len;
-     char * dummy_base;
+  size_t len, save_len;
+  char * dummy_base;
 
-     /* basic checks */
-     if ( (int)(s->maxlen) <= 0 )       /* 'int' to check against some convertion */
-          return EOF;                   /* error for example if value is (int)-10 */
-     s->maxlen--;      /* because initial maxlen counts final 0 */
-     /* note: now 'maxlen' _can_ be zero */
+  /* basic checks */
+  if ((int)(s->maxlen) <= 0) /* 'int' to check against some convertion */
+    return EOF;           /* error for example if value is (int)-10 */
+  s->maxlen--;      /* because initial maxlen counts final 0 */
+  /* note: now 'maxlen' _can_ be zero */
 
-     if ( s->src_string == NULL )
-          s->src_string = "(null)";
+  if (s->src_string == NULL)
+    s->src_string = "(null)";
 
-     /* struct init and memory allocation */
-     s->buffer_base = NULL;
-     s->buffer_len = 0;
-     s->real_len = 0;
-     s->pseudo_len = 0;
-     if ( realloc_buff(s,0) == EOF )
-          return EOF;
-     s->dest_string = s->buffer_base;
+  /* struct init and memory allocation */
+  s->buffer_base = NULL;
+  s->buffer_len = 0;
+  s->real_len = 0;
+  s->pseudo_len = 0;
+  if (realloc_buff(s,0) == EOF)
+    return EOF;
+  s->dest_string = s->buffer_base;
 
-     /* process source string */
-     for (;;)
-       {
-          /* up to end of source string */
-          if ( *(s->src_string) == 0 )
-            {
-               *(s->dest_string) = 0;              /* final 0 */
-               len = s->real_len + 1;
-               break;
-            }
+  /* process source string */
+  for (;;) {
+    /* up to end of source string */
+    if (*(s->src_string) == 0) {
+      *(s->dest_string) = 0;    /* final 0 */
+      len = s->real_len + 1;
+      break;
+    }
 
-          if ( dispatch(s) == EOF )
-               goto free_EOF;
+    if (dispatch(s) == EOF)
+      goto free_EOF;
 
-          /* up to end of dest string */
-          if ( s->real_len >= s->maxlen )
-            {
-               (s->buffer_base)[s->maxlen] = 0;    /* final 0 */
-               len = s->maxlen + 1;
-               break;
-            }
-       }
+    /* up to end of dest string */
+    if (s->real_len >= s->maxlen) {
+      (s->buffer_base)[s->maxlen] = 0; /* final 0 */
+      len = s->maxlen + 1;
+      break;
+    }
+  }
 
-     /* for (v)asnprintf */
-     dummy_base = s->buffer_base;
-     save_len = 0;                     /* just to avoid a compiler warning */
+  /* for (v)asnprintf */
+  dummy_base = s->buffer_base;
+  save_len = 0;                 /* just to avoid a compiler warning */
 
-     dummy_base = (s->buffer_base) + (s->real_len);
-     save_len = s->real_len;
+  dummy_base = s->buffer_base + s->real_len;
+  save_len = s->real_len;
 
-     /*
-      * process the remaining of source string to compute 'pseudo_len'. We
-      * overwrite again and again, starting at 'dummy_base' because we don't
-      * need the text, only char count.
-      */
-     while( *(s->src_string) != 0 )     /* up to end of source string */
-       {
-          s->real_len = 0;
-          s->dest_string = dummy_base;
-          if ( dispatch(s) == EOF )
-               goto free_EOF;
-       }
+  /* process the remaining of source string to compute 'pseudo_len'. We
+   * overwrite again and again, starting at 'dummy_base' because we don't
+   * need the text, only char count. */
+  while(*(s->src_string) != 0) { /* up to end of source string */
+    s->real_len = 0;
+    s->dest_string = dummy_base;
+    if (dispatch(s) == EOF)
+      goto free_EOF;
+  }
 
-     s->buffer_base = (char *)realloc( (void *)(s->buffer_base), save_len+1 );
-     if ( s->buffer_base == NULL )
-       return EOF;     /* should rarely happen because we shrink the buffer */
-     return s->pseudo_len;
+  s->buffer_base = (char *)realloc((void *)(s->buffer_base), save_len + 1);
+  if (s->buffer_base == NULL)
+    return EOF; /* should rarely happen because we shrink the buffer */
+  return s->pseudo_len;
 
-     free( s->buffer_base );
-     return s->pseudo_len;
+  free(s->buffer_base);
+  return s->pseudo_len;
 
-free_EOF:
-     if ( s->buffer_base != NULL )
-          free( s->buffer_base );
-     return EOF;
+ free_EOF:
+  if (s->buffer_base != NULL)
+    free(s->buffer_base);
+  return EOF;
 }
 
 /*############################## asprintf ################################*/
-int
-asprintf( char **      ptr,
-           const char * format_string,
-           ...
-         )
+int asprintf(char **ptr, const char * format_string, ...)
 {
-     va_list        vargs;
-     int            retval;
+  va_list vargs;
+  int retval;
 
-     va_start( vargs, format_string );
-     retval = vasprintf( ptr, format_string, vargs );
-     va_end( vargs );
+  va_start(vargs, format_string);
+  retval = vasprintf(ptr, format_string, vargs);
+  va_end(vargs);
 
-     return retval;
+  return retval;
 }
 
 /*############################# vasprintf ################################*/
-int
-vasprintf( char **      ptr,
-            const char * format_string,
-            va_list      vargs
-          )
+int vasprintf(char **ptr, const char *format_string, va_list vargs)
 {
-     xprintf_struct s;
-     int            retval;
+  xprintf_struct s;
+  int retval;
 
-     s.src_string = format_string;
-     s.vargs = vargs;
-     s.maxlen = (size_t)INT_MAX;
+  s.src_string = format_string;
+  va_copy(s.vargs, vargs);
+  s.maxlen = (size_t)INT_MAX;
 
-     retval = core( &s );
-     if ( retval == EOF )
-       {
-          *ptr = NULL;
-          return EOF;
-       }
+  retval = core(&s);
+  va_end(s.vargs);
+  if (retval == EOF) {
+    *ptr = NULL;
+    return EOF;
+  }
 
-     *ptr = s.buffer_base;
-     return retval;
+  *ptr = s.buffer_base;
+  return retval;
 }
 
 #endif /* ! HAVE_VASPRINTF */
