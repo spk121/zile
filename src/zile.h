@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.34 2004/12/09 00:51:13 rrt Exp $        */
+/*      $Id: zile.h,v 1.35 2004/12/17 11:53:53 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -181,6 +181,9 @@ struct Buffer {
         /* The name of the buffer and the file name. */
         char *name;
         char *filename;
+
+        /* EOL string (up to 2 chars) for this buffer. */
+        char eol[3];
 };
 
 struct Window {

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.15 2004/11/14 23:57:54 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.16 2004/12/17 11:53:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -78,10 +78,13 @@ static Buffer *new_buffer(void)
 	bp->limitp->prev = bp->limitp->next = bp->pt.p;
 	bp->pt.p->prev = bp->pt.p->next = bp->limitp;
 
-	/* Markers.  */
+	/* Markers. */
 	bp->mark = bp->markers = NULL;
 
-	return bp;
+        /* Set default EOL string. */
+        strcpy(bp->eol, "\n");
+
+        return bp;
 }
 
 /*

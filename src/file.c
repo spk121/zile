@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.45 2004/11/15 22:01:31 rrt Exp $        */
+/*      $Id: file.c,v 1.46 2004/12/17 11:53:53 rrt Exp $        */
 
 #include "config.h"
 
@@ -287,12 +287,16 @@ static Line *fadd_newline(Line *lp)
 void read_from_disk(const char *filename)
 {
         Line *lp;
-        int fd, i, size;
-        char buf[BUFSIZ];
+        FILE *fp;
+        int i, size;
+        char buf[BUFSIZ + 1];
 
-        if ((fd = open(filename, O_RDONLY)) < 0) {
+        buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
+        memset(cur_bp->eol, '\0', 3); /* Blank the EOL string. */
+
+        if ((fp = fopen(filename, "r")) == NULL) {
                 if (errno != ENOENT) {
-                        minibuf_write("%s: %s", filename, strerror(errno));
+                        minibuf_write("%s: %s foo", filename, strerror(errno));
                         cur_bp->flags |= BFLAG_READONLY;
                 }
                 return;
@@ -300,18 +304,29 @@ void read_from_disk(const char *filename)
 
         lp = cur_bp->pt.p;
 
-        while ((size = read(fd, buf, BUFSIZ)) > 0)
+        while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
                 for (i = 0; i < size; i++)
-                        if (buf[i] != '\n')
+                        if (buf[i] != '\n' && buf[i] != '\r')
                                 astr_cat_char(lp->text, buf[i]);
-                        else
+                        else {
                                 lp = fadd_newline(lp);
+                                
+                                if (buf[i + 1] != buf[i] && (buf[i + 1] == '\n' || buf[i + 1] == '\r')) {
+                                        if (cur_bp->eol[0] == '\0') {
+                                                cur_bp->eol[0] = buf[i];
+                                                cur_bp->eol[1] = buf[i + 1];
+                                        }
+                                        i++;
+                                } else if (cur_bp->eol[0] == '\0')
+                                        cur_bp->eol[0] = buf[i];
+
+                        }
 
         lp->next = cur_bp->limitp;
         cur_bp->limitp->prev = lp;
         cur_bp->pt.p = cur_bp->limitp->next;
 
-        close(fd);
+        fclose(fp);
 }
 
 int find_file(const char *filename)
@@ -801,7 +816,7 @@ static int copy_file(const char *source, const char *dest)
 
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
-        int fd;
+        int fd, eol_len = strlen(bp->eol);
         Line *lp;
 
         if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)
@@ -811,7 +826,7 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
         for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
                 write(fd, astr_cstr(lp->text), astr_len(lp->text));
                 if (lp->next != bp->limitp)
-                        write(fd, "\n", 1);
+                        write(fd, bp->eol, eol_len);
         }
 
         if (close(fd) < 0)
