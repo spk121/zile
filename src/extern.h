@@ -93,6 +93,7 @@ extern void	tabify_string(char *dest, char *src, int scol, int tw);
 extern void	untabify_string(char *dest, char *src, int scol, int tw);
 extern int	get_text_goalc(windowp wp);
 extern int	calculate_mark_lineno(windowp wp);
+extern void	goto_point (int pointn, int pointo);
 extern void *	zmalloc(size_t size);
 extern void *	zrealloc(void *ptr, size_t size);
 extern char *	zstrdup(const char *s);
