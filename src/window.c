@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.13 2005/01/13 00:16:16 rrt Exp $	*/
+/*	$Id: window.c,v 1.14 2005/01/13 07:32:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -304,10 +304,14 @@ Window *find_window(const char *name)
 
 Point window_pt(Window *wp)
 {
-  /* The current window uses the current buffer point, all other
+  /* The current window uses the current buffer point; all other
      windows have a saved point.  */
-  if (wp->saved_pt == NULL)
+  if (wp == cur_wp) {
+    assert(wp->bp == cur_bp);
+    assert(wp->saved_pt == NULL);
     return cur_bp->pt;
-  else
+  } else {
+    assert(wp->saved_pt != NULL);
     return wp->saved_pt->pt;
+  }
 }
