@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.16 2005/01/10 01:31:53 rrt Exp $        */
+/*      $Id: undo.c,v 1.17 2005/01/26 23:52:43 rrt Exp $        */
 
 #include "config.h"
 
@@ -64,16 +64,16 @@ void undo_save(int type, Point pt, int arg1, int arg2)
     up->delta.c = arg1;
     break;
   case UNDO_INSERT_BLOCK:
-    up->delta.block.size = arg1;
-    up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
+    up->delta.block.size = (unsigned)arg1;
+    up->delta.block.text = copy_text_block(pt.n, pt.o, (unsigned)arg1);
     break;
   case UNDO_REPLACE_BLOCK:
-    up->delta.block.osize = arg1;
-    up->delta.block.size = arg2;
-    up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
+    up->delta.block.osize = (unsigned)arg1;
+    up->delta.block.size = (unsigned)arg2;
+    up->delta.block.text = copy_text_block(pt.n, pt.o, (unsigned)arg1);
     break;
   case UNDO_REMOVE_BLOCK:
-    up->delta.block.size = arg1;
+    up->delta.block.size = (unsigned)arg1;
     break;
   case UNDO_START_SEQUENCE:
   case UNDO_END_SEQUENCE:
