@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.30 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: line.c,v 1.31 2004/09/25 02:06:47 dacap Exp $	*/
 
 #include "config.h"
 
@@ -101,8 +101,6 @@ Line *resize_line(Line *lp, int maxsize)
  */
 void free_line(Line *lp)
 {
-	if (lp->anchors != NULL)
-		free(lp->anchors);
 	free(lp);
 }
 

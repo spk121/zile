@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.28 2004/09/20 13:38:14 rrt Exp $        */
+/*      $Id: zile.h,v 1.29 2004/09/25 02:06:01 dacap Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -56,9 +56,6 @@ typedef struct Window Window;
 typedef struct Completion Completion;
 typedef struct History History;
 typedef struct Terminal Terminal;
-/* We could define an enum "Anchor", but sizeof(enum)==2,
-   while sizeof(char)==1. */
-typedef unsigned char Anchor;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
@@ -82,17 +79,6 @@ struct Marker {
         unsigned type : 1;      /* Insertion type (1=after text).  */
 };
 
-/* Font lock anchors. */
-enum {
-        ANCHOR_NULL,            /* No anchor. */
-        ANCHOR_BEGIN_COMMENT,   /* Begin a comment. */
-        ANCHOR_END_COMMENT,     /* End of comment. */
-        ANCHOR_BEGIN_STRING,    /* Begin of string. */
-        ANCHOR_END_STRING,      /* End of string. */
-        ANCHOR_BEGIN_HEREDOC,   /* Begin of `<<EOF' like here-document. */
-        ANCHOR_END_HEREDOC      /* End of here-document. */
-};
-
 struct Line {
         /* The previous line and next line pointers. */
         Line *prev, *next;
@@ -100,9 +86,6 @@ struct Line {
         /* The used size and the allocated space size. */
         int size;
         int maxsize;
-
-        /* Pointer to anchors for font lock. */
-        Anchor *anchors;
 
         /*
          * The text space label; must be the last entry of the structure!
