@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.57 2005/01/10 14:09:46 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.58 2005/01/11 23:02:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1134,42 +1134,6 @@ DEFUN("forward-line", forward_line)
   }
 
   return TRUE;
-}
-
-DEFUN("backward-sentence", backward_sentence)
-  /*+
-    Move backward to start of sentence.  With argument N, do it N times.
-    +*/
-{
-  /* XXX */
-  return FALSE;
-}
-
-DEFUN("forward-sentence", forward_sentence)
-  /*+
-    Move forward to next sentence end.  With argument N, do it N times.
-    +*/
-{
-  /* XXX */
-  return FALSE;
-}
-
-DEFUN("kill-sentence", kill_sentence)
-  /*+
-    Kill from point to end of sentence.  With argument N, do it N times.
-    +*/
-{
-  /* XXX */
-  return FALSE;
-}
-
-DEFUN("backward-kill-sentence", backward_kill_sentence)
-  /*+
-    Kill back from point to start of sentence.  With argument N, do it N times.
-    +*/
-{
-  /* XXX */
-  return FALSE;
 }
 
 DEFUN("backward-paragraph", backward_paragraph)

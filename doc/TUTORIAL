@@ -128,27 +128,16 @@ following word.  M-b works likewise in the opposite direction.
 
 Notice the parallel between C-f and C-b on the one hand, and M-f and
 M-b on the other hand.  Very often Meta characters are used for
-operations related to the units defined by language (words, sentences,
+operations related to the units defined by language (words,
 paragraphs), while Control characters operate on basic units that are
 independent of what you are editing (characters, lines, etc).
-
-This parallel applies between lines and sentences: C-a and C-e move to
-the beginning or end of a line, and M-a and M-e move to the beginning
-or end of a sentence.
-
->> Try a couple of C-a's, and then a couple of C-e's.
-   Try a couple of M-a's, and then a couple of M-e's.
-
-See how repeated C-a's do nothing, but repeated M-a's keep moving one
-more sentence.  Although these are not quite analogous, each one seems
-natural.
 
 The location of the cursor in the text is also called "point".  To
 paraphrase, the cursor shows on the screen where point is located in
 the text.
 
 Here is a summary of simple cursor-moving operations, including the
-word and sentence moving commands:
+word moving commands:
 
 	C-f	Move forward a character
 	C-b	Move backward a character
@@ -161,9 +150,6 @@ word and sentence moving commands:
 
 	C-a	Move to beginning of line
 	C-e	Move to end of line
-
-	M-a	Move back to beginning of sentence
-	M-e	Move forward to end of sentence
 
 >> Try all of these commands now a few times for practice.
    These are the most often used commands.
@@ -305,12 +291,10 @@ as well.  Here is a summary of the delete operations:
 	M-d	     kill the next word after the cursor
 
 	C-k	     kill from the cursor position to end of line
-	M-k	     kill to the end of the current sentence
 
 Notice that <Delete> and C-d vs M-<Delete> and M-d extend the parallel
 started by C-f and M-f (well, <Delete> is not really a control
-character, but let's not worry about that).  C-k and M-k are like C-e
-and M-e, sort of, in that lines are opposite sentences.
+character, but let's not worry about that).
 
 When you delete more than one character at a time, Zile saves the
 deleted text so that you can bring it back.  Bringing back killed text

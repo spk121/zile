@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.23 2004/12/17 11:31:10 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.24 2005/01/11 23:02:08 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -12,10 +12,8 @@ X0("auto-fill-mode", auto_fill_mode)
 X1("back-to-indentation", back_to_indentation,		"\\M-m")
 X2("backward-char", backward_char,			"\\C-b", "\\LEFT")
 X1("backward-delete-char", backward_delete_char,	"\\BS")
-X1("backward-kill-sentence", backward_kill_sentence,	"\\C-x\\DEL")
 X2("backward-kill-word", backward_kill_word,		"\\M-\\DEL", "\\M-\\BS")
 X1("backward-paragraph", backward_paragraph,		"\\M-{")
-X1("backward-sentence", backward_sentence,		"\\M-a")
 X1("backward-sexp", backward_sexp,			"\\C-\\M-b")
 X1("backward-word", backward_word,			"\\M-b")
 X1("beginning-of-buffer", beginning_of_buffer,		"\\M-<")
@@ -49,7 +47,6 @@ X2("find-file", find_file,				"\\C-x\\C-f", "\\F2")
 X2("forward-char", forward_char,			"\\C-f", "\\RIGHT")
 X0("forward-line", forward_line)
 X1("forward-paragraph", forward_paragraph,		"\\M-}")
-X1("forward-sentence", forward_sentence,		"\\M-e")
 X1("forward-sexp", forward_sexp,			"\\C-\\M-f")
 X1("forward-word", forward_word,			"\\M-f")
 X0("global-set-key", global_set_key)
@@ -71,7 +68,6 @@ X1("keyboard-quit", keyboard_quit,			"\\C-g")
 X1("kill-buffer", kill_buffer,				"\\C-xk")
 X2("kill-line", kill_line,				"\\C-k", "\\F6")
 X2("kill-region", kill_region,				"\\C-w", "\\F7")
-X1("kill-sentence", kill_sentence,			"\\M-k")
 X1("kill-sexp", kill_sexp,				"\\C-\\M-k")
 X1("kill-word", kill_word,				"\\M-d")
 X1("list-bindings", list_bindings,			"\\C-hlb")
