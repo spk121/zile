@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: zile.h,v 1.19 2004/03/14 14:36:05 rrt Exp $	*/
+/*	$Id: zile.h,v 1.20 2004/04/04 21:01:50 rrt Exp $	*/
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -173,13 +173,11 @@ struct Region {
 #define BFLAG_OVERWRITE	(0000040) /* The buffer is in overwrite mode. */
 #define BFLAG_BACKUP	(0000100) /* The old file has already been
 				     backed up. */
-#define BFLAG_FONTLOCK	(0000200) /* The buffer has font lock mode
-				     turned on. */
-#define BFLAG_NOUNDO	(0000400) /* Do not record undo informations. */
-#define BFLAG_AUTOFILL	(0001000) /* The buffer is in Auto Fill mode. */
-#define BFLAG_NOEOB	(0002000) /* Do not display the EOB marker in
+#define BFLAG_NOUNDO	(0000200) /* Do not record undo informations. */
+#define BFLAG_AUTOFILL	(0000400) /* The buffer is in Auto Fill mode. */
+#define BFLAG_NOEOB	(0001000) /* Do not display the EOB marker in
 				     this buffer. */
-#define BFLAG_ISEARCH	(0004000) /* The buffer is in Isearch loop. */
+#define BFLAG_ISEARCH	(0002000) /* The buffer is in Isearch loop. */
 
 /* Mutually exclusive buffer major modes. */
 enum {

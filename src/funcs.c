@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.33 2004/04/04 20:33:12 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.34 2004/04/04 21:01:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -100,17 +100,9 @@ static char *make_buffer_flags(Buffer *bp, int iscurrent)
 	return buf;
 }
 
-static astr make_buffer_mode(Buffer *bp)
+static astr make_buffer_modeline(Buffer *bp)
 {
 	astr as = astr_new();
-
-	switch (bp->mode) {
-	default:
-		astr_cpy_cstr(as, "Text");
-	}
-
-	if (bp->flags & BFLAG_FONTLOCK)
-		astr_cat_cstr(as, " Font");
 
 	if (bp->flags & BFLAG_AUTOFILL)
 		astr_cat_cstr(as, " Fill");
@@ -120,7 +112,7 @@ static astr make_buffer_mode(Buffer *bp)
 
 static void print_buf(Buffer *old_bp, Buffer *bp)
 {
-        astr mode = make_buffer_mode(bp);
+        astr mode = make_buffer_modeline(bp);
 
 	if (bp->name[0] == ' ')
 		return;
