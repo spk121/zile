@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.6 2004/01/20 12:29:28 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.7 2004/01/21 01:34:45 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -275,6 +275,8 @@ void ncurses_refresh_cached_variables(void)
 	displayable_characters = get_variable("displayable-characters");
 	parse_displayable_chars(displayable_characters);
 	show_eob_marker = lookup_bool_variable("show-eob-marker");
+
+	refresh_clock_timeout ();
 }
 
 static int make_char_printable(char *buf, unsigned int c)
