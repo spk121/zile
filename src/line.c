@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.31 2004/09/25 02:06:47 dacap Exp $	*/
+/*	$Id: line.c,v 1.32 2004/10/05 19:32:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -157,7 +157,7 @@ int insert_char(int c)
 			|| ((cur_bp->pt.p->text[cur_bp->pt.o] == '\t')
 			    && ((get_goalc() % cur_bp->tab_width)
 				== cur_bp->tab_width-1)))) {
-			/* Replace the charater.  */
+			/* Replace the character.  */
 			undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
 				  cur_bp->pt.p->text[cur_bp->pt.o], 0);
 			cur_bp->pt.p->text[cur_bp->pt.o] = c;
@@ -455,12 +455,11 @@ int self_insert_command(int c)
                     get_goalc() > cur_bp->fill_column)
                         auto_fill_break_line();
 		insert_char(c);
+                return TRUE;
 	} else {
 		ding();
 		return FALSE;
 	}
-
-	return TRUE;
 }
 
 DEFUN("self-insert-command", self_insert_command)
