@@ -23,8 +23,6 @@ transpose-words
 transpose-sexps
 transpose-lines
 
-* Strip binary during make install.
-
 ------------------------------------------------------------------------------
 
 MEDIUM PRIORITY
