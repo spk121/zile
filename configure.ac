@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(src/main.c)
 dnl Every other copy of the package version number gets its value from here
-AM_INIT_AUTOMAKE(zile, 1.7)
+AM_INIT_AUTOMAKE(zile, 1.7b3)
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(config.h)
 
@@ -21,18 +21,15 @@ AC_PROG_RANLIB
 AC_PATH_PROG(MAKEINFO, makeinfo)
 AC_PATH_PROG(GPERF, gperf)
 
-dnl Checks for libraries.
+dnl Checks for functions.
 AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf)
-AC_CHECK_LIB(ncurses, initscr,
-    AC_DEFINE(HAVE_LIBCURSES, 1,
-	      [Define if you have the ncurses library (-lncurses).])
-    LIBS="$LIBS -lncurses",
-    AC_CHECK_LIB(curses, curses_version,
-	AC_DEFINE(HAVE_LIBCURSES) LIBS="$LIBS -lcurses"))
 
 dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h limits.h)
+AC_CHECK_HEADER(curses.h,
+         LIBS="$LIBS -lcurses",
+         AC_MSG_FAILURE([cannot find curses.h]))
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -62,18 +59,18 @@ AC_DEFINE(NDEBUG, 1, [Define this to remove the debugging assertions.])
 ])
 
 AC_MSG_CHECKING([if all features should be enabled])
-AC_ARG_ENABLE(all-features,
-AC_HELP_STRING([--enable-all-features], [enable all features below]),
+AC_ARG_ENABLE(all-modes,
+AC_HELP_STRING([--enable-all-modes], [enable all editing modes]),
 [
 if test $enableval = yes; then
-	allfeatures=yes
+	allmodes=yes
 	AC_MSG_RESULT(yes)
 else
-	allfeatures=no
+	allmodes=no
 	AC_MSG_RESULT(no)
 fi
 ], [
-allfeatures=no
+allmodes=no
 AC_MSG_RESULT(no)
 ])
 
@@ -89,7 +86,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 ], [
-if test $allfeatures = yes; then
+if test $allmodes = yes; then
 	enable_c_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_C_MODE, 1, [Define this to include C Mode.])
@@ -111,7 +108,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 ], [
-if test $allfeatures = yes; then
+if test $allmodes = yes; then
 	enable_cpp_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_CPP_MODE, 1, [Define this to include C++ Mode.])
@@ -132,7 +129,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 ], [
-if test $allfeatures = yes; then
+if test $allmodes = yes; then
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_SHELL_MODE, 1, [Define this to include Shell Mode.])
 else
@@ -152,7 +149,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 ], [
-if test $allfeatures = yes; then
+if test $allmodes = yes; then
 	enable_csharp_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_CSHARP_MODE, 1, [Define this to include C# Mode.])
@@ -174,7 +171,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 ], [
-if test $allfeatures = yes; then
+if test $allmodes = yes; then
 	enable_java_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_JAVA_MODE, 1, [Define this to include Java Mode.])
@@ -195,7 +192,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 ], [
-if test $allfeatures = yes; then
+if test $allmodes = yes; then
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_MAIL_MODE, 1, [Define this to include Mail Mode.])
 else
@@ -203,11 +200,35 @@ else
 fi
 ])
 
-AH_BOTTOM([
-#ifndef HAVE_LIBCURSES
-#error curses or ncurses is required for compilation.
-#endif
+AC_MSG_CHECKING([if Lua scripting should be included])
+AC_ARG_ENABLE(lua,
+AC_HELP_STRING([--enable-lua], [Lua scripting]),
+[
+if test $enableval = yes; then
+	enable_lua=true
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(ENABLE_LUA, 1, [Define this to enable Lua scripting (EXPERIMENTAL).])
+        AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl")
+        AC_CHECK_LIB(lua, lua_open,
+            AC_DEFINE(HAVE_LUA, 1,
+	      [Define if you have the lua library (-llua).])
+                  LIBS="$LIBS -llua")
+        AC_CHECK_LIB(lualib, luaopen_base,
+            AC_DEFINE(HAVE_LUALIB, 1,
+              [Define if you have the lualib library (-llualib).])
+                  LIBS="$LIBS -llualib")
+else
+        enable_lua=false
+	AC_MSG_RESULT(no)
+fi
+],[
+enable_lua=false
+AC_MSG_RESULT(no)
+])
+AM_CONDITIONAL(ENABLE_LUA, test x$enable_lua = xtrue)
 
+
+AH_BOTTOM([
 #include <stddef.h>
 
 #ifndef HAVE_XMALLOC
