@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.18 2005/01/09 23:56:03 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.19 2005/01/10 01:31:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -73,10 +73,10 @@ static Buffer *new_buffer(void)
   bp->pt.o = 0;
 
   /* Allocate the limit marker. */
-  bp->limitp = new_line();
+  bp->lines = new_line();
 
-  bp->limitp->prev = bp->limitp->next = bp->pt.p;
-  bp->pt.p->prev = bp->pt.p->next = bp->limitp;
+  bp->lines->prev = bp->lines->next = bp->pt.p;
+  bp->pt.p->prev = bp->pt.p->next = bp->lines;
 
   /* Markers. */
   bp->mark = bp->markers = NULL;
@@ -98,14 +98,14 @@ void free_buffer(Buffer *bp)
   /*
    * Free all the lines.
    */
-  lp = bp->limitp->next;
-  while (lp != bp->limitp) {
+  lp = bp->lines->next;
+  while (lp != bp->lines) {
     next_lp = lp->next;
     free_line(lp);
     lp = next_lp;
   }
 
-  free_line(bp->limitp);
+  free_line(bp->lines);
 
   /*
    * Free all the undo operations.
@@ -310,10 +310,10 @@ int zap_buffer_content(void)
   Line *new_lp, *old_lp, *next_lp;
 
   new_lp = new_line();
-  new_lp->next = new_lp->prev = cur_bp->limitp;
+  new_lp->next = new_lp->prev = cur_bp->lines;
 
-  old_lp = cur_bp->limitp->next;
-  cur_bp->limitp->next = cur_bp->limitp->prev = new_lp;
+  old_lp = cur_bp->lines->next;
+  cur_bp->lines->next = cur_bp->lines->prev = new_lp;
   cur_bp->pt.p = new_lp;
   cur_bp->pt.n = 0;
   cur_bp->pt.o = 0;
@@ -336,7 +336,7 @@ int zap_buffer_content(void)
     next_lp = old_lp->next;
     free_line(old_lp);
     old_lp = next_lp;
-  } while (old_lp != cur_bp->limitp);
+  } while (old_lp != cur_bp->lines);
 
   /*
    * Scan all the windows that have markers to this buffers.
@@ -434,16 +434,16 @@ void set_temporary_buffer(Buffer *bp)
 
 int calculate_buffer_size(Buffer *bp)
 {
-  Line *lp = bp->limitp->next;
+  Line *lp = bp->lines->next;
   int size = 0;
 
-  if (lp == bp->limitp)
+  if (lp == bp->lines)
     return 0;
 
   for (;;) {
-    size += astr_len(lp->text);
+    size += astr_len(lp->item);
     lp = lp->next;
-    if (lp == bp->limitp)
+    if (lp == bp->lines)
       break;
     ++size;
   }

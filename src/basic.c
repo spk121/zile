@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.15 2005/01/09 23:56:03 rrt Exp $	*/
+/*	$Id: basic.c,v 1.16 2005/01/10 01:31:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -75,7 +75,7 @@ DEFUN("end-of-line", end_of_line)
 int get_goalc_bp(Buffer *bp, Point pt)
 {
   int col = 0, t = bp->tab_width, i;
-  const char *sp = astr_cstr(pt.p->text);
+  const char *sp = astr_cstr(pt.p->item);
 
   for (i = 0; i < pt.o; i++) {
     if (sp[i] == '\t')
@@ -103,9 +103,9 @@ int get_goalc(void)
 static void goto_goalc(int goalc)
 {
   int col = 0, t = cur_bp->tab_width, w, i;
-  const char *sp = astr_cstr(cur_bp->pt.p->text);
+  const char *sp = astr_cstr(cur_bp->pt.p->item);
 
-  for (i = 0; i < astr_len(cur_bp->pt.p->text); i++) {
+  for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {
     if (col == goalc)
       break;
     else if (sp[i] == '\t') {
@@ -121,7 +121,7 @@ static void goto_goalc(int goalc)
 
 int previous_line(void)
 {
-  if (cur_bp->pt.p->prev != cur_bp->limitp) {
+  if (cur_bp->pt.p->prev != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
     if (!(lastflag & FLAG_DONE_CPCN)) {
@@ -171,7 +171,7 @@ DEFUN("previous-line", previous_line)
 
 int next_line(void)
 {
-  if (cur_bp->pt.p->next != cur_bp->limitp) {
+  if (cur_bp->pt.p->next != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
     if (!(lastflag & FLAG_DONE_CPCN)) {
@@ -396,7 +396,7 @@ DEFUN("forward-char", forward_char)
 int ngotoup(int n)
 {
   for (; n > 0; n--)
-    if (cur_bp->pt.p->prev != cur_bp->limitp)
+    if (cur_bp->pt.p->prev != cur_bp->lines)
       FUNCALL(previous_line);
     else
       return FALSE;
@@ -407,7 +407,7 @@ int ngotoup(int n)
 int ngotodown(int n)
 {
   for (; n > 0; n--)
-    if (cur_bp->pt.p->next != cur_bp->limitp)
+    if (cur_bp->pt.p->next != cur_bp->lines)
       FUNCALL(next_line);
     else
       return FALSE;

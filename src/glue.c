@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.18 2005/01/09 23:56:04 rrt Exp $	*/
+/*	$Id: glue.c,v 1.19 2005/01/10 01:31:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -88,8 +88,8 @@ char *copy_text_block(int startn, int starto, size_t size)
       buf = (char *)zrealloc(buf, max_size);
       dp = buf + save_off;
     }
-    if (i < astr_len(lp->text))
-      *dp++ = *astr_char(lp->text, i++);
+    if (i < astr_len(lp->item))
+      *dp++ = *astr_char(lp->item, i++);
     else {
       *dp++ = '\n';
       lp = lp->next;

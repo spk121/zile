@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.15 2005/01/09 23:56:06 rrt Exp $        */
+/*      $Id: undo.c,v 1.16 2005/01/10 01:31:53 rrt Exp $        */
 
 #include "config.h"
 
@@ -144,8 +144,8 @@ static Undo *revert_action(Undo *up)
     break;
   case UNDO_REPLACE_CHAR:
     undo_save(UNDO_REPLACE_CHAR, up->pt,
-              *astr_char(cur_bp->pt.p->text, up->pt.o), 0);
-    *astr_char(cur_bp->pt.p->text, up->pt.o) = up->delta.c;
+              *astr_char(cur_bp->pt.p->item, up->pt.o), 0);
+    *astr_char(cur_bp->pt.p->item, up->pt.o) = up->delta.c;
     cur_bp->flags |= BFLAG_MODIFIED;
     break;
   case UNDO_REPLACE_BLOCK:

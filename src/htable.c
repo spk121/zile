@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.4 2005/01/09 23:56:04 rrt Exp $	*/
+/*	$Id: htable.c,v 1.5 2005/01/10 01:31:53 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -35,8 +35,8 @@
 typedef struct hbucket_s *hbucket;
 
 struct hbucket_s {
-  hpair	pair;
-  hbucket	next;
+  hpair	  pair;
+  hbucket next;
 };
 
 struct htable_s {

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.27 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: search.c,v 1.28 2005/01/10 01:31:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -165,26 +165,26 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
   if (s2size < 1)
     return FALSE;
 
-  for (lp = startp; lp != cur_bp->limitp; lp = lp->next) {
+  for (lp = startp; lp != cur_bp->lines; lp = lp->next) {
     if (lp == startp) {
-      sp = astr_char(lp->text, starto);
-      s1size = astr_len(lp->text) - starto;
+      sp = astr_char(lp->item, starto);
+      s1size = astr_len(lp->item) - starto;
     } else {
-      sp = astr_cstr(lp->text);
-      s1size = astr_len(lp->text);
+      sp = astr_cstr(lp->item);
+      s1size = astr_len(lp->item);
     }
     if (s1size < 1)
       continue;
 
     if (regexp)
       sp2 = re_find_substr(sp, s1size, s, s2size,
-                           sp == astr_cstr(lp->text), TRUE, FALSE);
+                           sp == astr_cstr(lp->item), TRUE, FALSE);
     else
       sp2 = find_substr(sp, s1size, s, s2size);
                         
     if (sp2 != NULL) {
       goto_linep(lp);
-      cur_bp->pt.o = sp2 - astr_cstr(lp->text) + s2size;
+      cur_bp->pt.o = sp2 - astr_cstr(lp->item) + s2size;
       return TRUE;
     }
   }
@@ -201,24 +201,24 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
   if (s2size < 1)
     return FALSE;
 
-  for (lp = startp; lp != cur_bp->limitp; lp = lp->prev) {
-    sp = astr_cstr(lp->text);
+  for (lp = startp; lp != cur_bp->lines; lp = lp->prev) {
+    sp = astr_cstr(lp->item);
     if (lp == startp)
       s1size = starto;
     else
-      s1size = astr_len(lp->text);
+      s1size = astr_len(lp->item);
     if (s1size < 1)
       continue;
 
     if (regexp)
       sp2 = re_find_substr(sp, s1size, s, s2size,
-                           TRUE, s1size == (size_t)astr_len(lp->text), TRUE);
+                           TRUE, s1size == (size_t)astr_len(lp->item), TRUE);
     else
       sp2 = rfind_substr(sp, s1size, s, s2size);
 
     if (sp2 != NULL) {
       goto_linep(lp);
-      cur_bp->pt.o = sp2 - astr_cstr(lp->text);
+      cur_bp->pt.o = sp2 - astr_cstr(lp->item);
       return TRUE;
     }
   }

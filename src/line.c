@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.40 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: line.c,v 1.41 2005/01/10 01:31:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -47,10 +47,8 @@ static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len);
  */
 Line *new_line(void)
 {
-  Line *lp = (Line *)zmalloc(sizeof(Line));
-
-  lp->text = astr_new();
-
+  Line *lp = list_new();
+  lp->item = astr_new();
   return lp;
 }
 
@@ -59,7 +57,7 @@ Line *new_line(void)
  */
 void free_line(Line *lp)
 {
-  astr_delete(lp->text);
+  astr_delete(lp->item);
   free(lp);
 }
 
@@ -74,7 +72,7 @@ int intercalate_char(int c)
 
   undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
 
-  astr_insert_char(cur_bp->pt.p->text, cur_bp->pt.o, c);
+  astr_insert_char(cur_bp->pt.p->item, cur_bp->pt.o, c);
 
   cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -95,16 +93,16 @@ int insert_char(int c)
        && isn't a \t
        || tab width isn't correct
        || current char is a \t && we are in the tab limit.  */
-    if ((cur_bp->pt.o < astr_len(cur_bp->pt.p->text))
-        && ((*astr_char(cur_bp->pt.p->text, cur_bp->pt.o) != '\t')
+    if ((cur_bp->pt.o < astr_len(cur_bp->pt.p->item))
+        && ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o) != '\t')
             || (cur_bp->tab_width < 1)
-            || ((*astr_char(cur_bp->pt.p->text, cur_bp->pt.o) == '\t')
+            || ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o) == '\t')
                 && ((get_goalc() % cur_bp->tab_width)
                     == cur_bp->tab_width-1)))) {
       /* Replace the character.  */
       undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
-                *astr_char(cur_bp->pt.p->text, cur_bp->pt.o), 0);
-      *astr_char(cur_bp->pt.p->text, cur_bp->pt.o) = c;
+                *astr_char(cur_bp->pt.p->item, cur_bp->pt.o), 0);
+      *astr_char(cur_bp->pt.p->item, cur_bp->pt.o) = c;
       ++cur_bp->pt.o;
 
       cur_bp->flags |= BFLAG_MODIFIED;
@@ -199,14 +197,14 @@ static int common_insert_newline(int move_pt)
 
   /* Calculate the two line lengths. */
   lp1len = cur_bp->pt.o;
-  lp2len = astr_len(cur_bp->pt.p->text) - lp1len;
+  lp2len = astr_len(cur_bp->pt.p->item) - lp1len;
 
   lp1 = cur_bp->pt.p;
   lp2 = new_line();
 
   /* Move the text after the point into the new line. */
-  astr_cpy(lp2->text, astr_substr(lp1->text, lp1len, lp2len));
-  astr_truncate(lp1->text, lp1len);
+  astr_cpy(lp2->item, astr_substr(lp1->item, lp1len, lp2len));
+  astr_truncate(lp1->item, lp1len);
 
   /* Update line linked list. */
   lp2->next = lp1->next;
@@ -265,16 +263,16 @@ void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext,
 
   if (replace_case) {
     newtext = strdup(newtext);
-    recase((char *)newtext, astr_char((*lp)->text, offset), min(orgsize, newsize));
+    recase((char *)newtext, astr_char((*lp)->item, offset), min(orgsize, newsize));
   }
 
   if (newsize != orgsize) {
     cur_bp->flags |= BFLAG_MODIFIED;
-    astr_replace_cstr((*lp)->text, offset, orgsize, newtext);
+    astr_replace_cstr((*lp)->item, offset, orgsize, newtext);
     adjust_markers_for_offset(*lp, offset, newsize - orgsize);
   } else {
-    if (memcmp(astr_char((*lp)->text, offset), newtext, newsize) != 0) {
-      memcpy(astr_char((*lp)->text, offset), newtext, newsize);
+    if (memcmp(astr_char((*lp)->item, offset), newtext, newsize) != 0) {
+      memcpy(astr_char((*lp)->item, offset), newtext, newsize);
       cur_bp->flags |= BFLAG_MODIFIED;
     }
   }
@@ -299,7 +297,7 @@ void fill_break_line(void)
 
   /* Find break point moving left from fill-column. */
   for (break_col = cur_bp->pt.o; break_col > 0; --break_col) {
-    int c = *astr_char(cur_bp->pt.p->text, break_col - 1);
+    int c = *astr_char(cur_bp->pt.p->item, break_col - 1);
     if (isspace(c))
       break;
   }
@@ -435,14 +433,14 @@ int delete_char(void)
       return FALSE;
 
     undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
-              *astr_char(cur_bp->pt.p->text, cur_bp->pt.o), 0);
+              *astr_char(cur_bp->pt.p->item, cur_bp->pt.o), 0);
 
     /*
      * Move the text one position backward after the point,
      * if required.
      * This code assumes that memmove(d, s, 0) does nothing.
      */
-    astr_remove(cur_bp->pt.p->text, cur_bp->pt.o, 1);
+    astr_remove(cur_bp->pt.p->item, cur_bp->pt.o, 1);
 
     adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, -1);
 
@@ -460,10 +458,10 @@ int delete_char(void)
 
     lp1 = cur_bp->pt.p;
     lp2 = cur_bp->pt.p->next;
-    lp1len = astr_len(lp1->text);
+    lp1len = astr_len(lp1->item);
 
     /* Move the next line text into the current line. */
-    astr_cat(lp1->text, lp2->text);
+    astr_cat(lp1->item, lp2->item);
 
     /*
      * Update line linked list.

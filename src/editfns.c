@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.8 2005/01/09 23:56:03 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.9 2005/01/10 01:31:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -76,14 +76,14 @@ void set_mark(void)
 
 int is_empty_line(void)
 {
-  return astr_len(cur_bp->pt.p->text) == 0;
+  return astr_len(cur_bp->pt.p->item) == 0;
 }
 
 int is_blank_line(void)
 {
   int c;
-  for (c = 0; c < astr_len(cur_bp->pt.p->text); c++)
-    if (!isspace(*astr_char(cur_bp->pt.p->text, c)))
+  for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
+    if (!isspace(*astr_char(cur_bp->pt.p->item, c)))
       return FALSE;
   return TRUE;
 }
@@ -95,7 +95,7 @@ int char_after(Point *pt)
   else if (eolp())
     return '\n';
   else
-    return *astr_char(pt->p->text, pt->o);
+    return *astr_char(pt->p->item, pt->o);
 }
 
 int char_before(Point *pt)
@@ -105,7 +105,7 @@ int char_before(Point *pt)
   else if (bolp())
     return '\n';
   else
-    return *astr_char(pt->p->text, pt->o - 1);
+    return *astr_char(pt->p->item, pt->o - 1);
 }
 
 /* This function returns the character following point in the current
@@ -129,7 +129,7 @@ int preceding_char(void)
 
 int bobp(void)
 {
-  return (cur_bp->pt.p->prev == cur_bp->limitp &&
+  return (cur_bp->pt.p->prev == cur_bp->lines &&
           cur_bp->pt.o == 0);
 }
 
@@ -138,8 +138,8 @@ int bobp(void)
 
 int eobp(void)
 {
-  return (cur_bp->pt.p->next == cur_bp->limitp &&
-          cur_bp->pt.o == astr_len(cur_bp->pt.p->text));
+  return (cur_bp->pt.p->next == cur_bp->lines &&
+          cur_bp->pt.o == astr_len(cur_bp->pt.p->item));
 }
 
 /* Returns TRUE if point is at the beginning of a line.  */
@@ -153,5 +153,5 @@ int bolp(void)
 
 int eolp(void)
 {
-  return cur_bp->pt.o == astr_len(cur_bp->pt.p->text);
+  return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
 }

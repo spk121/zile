@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.55 2005/01/09 23:56:04 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.56 2005/01/10 01:31:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -480,13 +480,13 @@ static void edit_tab_line(Line **lp, int lineno, int offset, int size, int actio
 
   src = (char *)zmalloc(size + 1);
   dest = (char *)zmalloc(size * cur_bp->tab_width + 1);
-  strncpy(src, astr_cstr((*lp)->text) + offset, size);
+  strncpy(src, astr_cstr((*lp)->item) + offset, size);
   src[size] = '\0';
 
   /* Get offset's column.  */
   col = 0;
   for (i = 0; i < offset; i++) {
-    if (*astr_char((*lp)->text, i) == '\t')
+    if (*astr_char((*lp)->item, i) == '\t')
       col |= cur_bp->tab_width - 1;
     ++col;
   }
@@ -533,14 +533,14 @@ static int edit_tab_region(int action)
       /* Region is multi-line. */
       else
         edit_tab_line(&lp, lineno, r.start.o,
-                      astr_len(lp->text) - r.start.o, action);
+                      astr_len(lp->item) - r.start.o, action);
     }
     /* Last line of multi-line region. */
     else if (lineno == r.end.n)
       edit_tab_line(&lp, lineno, 0, r.end.o, action);
     /* Middle line of multi-line region. */
     else
-      edit_tab_line(&lp, lineno, 0, astr_len(lp->text), action);
+      edit_tab_line(&lp, lineno, 0, astr_len(lp->item), action);
     /* Done?  */
     if (lineno == r.end.n)
       break;
@@ -627,7 +627,7 @@ static int transpose_subr(Function f)
   /* For transpose-lines. */
   else if (f == F_forward_line) {
     /* If we are in first line, go to next line. */
-    if (cur_bp->pt.p->prev == cur_bp->limitp) {
+    if (cur_bp->pt.p->prev == cur_bp->lines) {
       f(1);
     }
   }
@@ -837,7 +837,7 @@ static int forward_word(void)
     }
     if (gotword)
       return TRUE;
-    cur_bp->pt.o = astr_len(cur_bp->pt.p->text);
+    cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
     if (!next_line())
       break;
     cur_bp->pt.o = 0;
@@ -870,7 +870,7 @@ static int backward_word(void)
     if (bolp()) {
       if (!previous_line())
         break;
-      cur_bp->pt.o = astr_len(cur_bp->pt.p->text);
+      cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
     }
     while (!bolp()) {
       int c = preceding_char();
@@ -962,9 +962,9 @@ static int forward_sexp(void)
 
       /* Jump quotes that doesn't are sexp separators.  */
       if (c == '\\'
-          && cur_bp->pt.o+1 < astr_len(cur_bp->pt.p->text)
-          && ((*astr_char(cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\"')
-              || (*astr_char(cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\''))) {
+          && cur_bp->pt.o+1 < astr_len(cur_bp->pt.p->item)
+          && ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o + 1) == '\"')
+              || (*astr_char(cur_bp->pt.p->item, cur_bp->pt.o + 1) == '\''))) {
         cur_bp->pt.o++;
         c = 'a'; /* Convert \' and \" like a
                     word char */
@@ -987,7 +987,7 @@ static int forward_sexp(void)
     }
     if (gotsexp && level == 0)
       return TRUE;
-    cur_bp->pt.o = astr_len(cur_bp->pt.p->text);
+    cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
     if (!next_line()) {
       if (level != 0)
         minibuf_error("Scan error: \"Unbalanced parentheses\"");
@@ -1031,7 +1031,7 @@ static int backward_sexp(void)
           minibuf_error("Scan error: \"Unbalanced parentheses\"");
         break;
       }
-      cur_bp->pt.o = astr_len(cur_bp->pt.p->text);
+      cur_bp->pt.o = astr_len(cur_bp->pt.p->item);
     }
     while (!bolp()) {
       int c = preceding_char();
@@ -1039,7 +1039,7 @@ static int backward_sexp(void)
       /* Jump quotes that doesn't are sexp separators.  */
       if (((c == '\'') || (c == '\"'))
           && cur_bp->pt.o-1 > 0
-          && (*astr_char(cur_bp->pt.p->text, cur_bp->pt.o - 2) == '\\')) {
+          && (*astr_char(cur_bp->pt.p->item, cur_bp->pt.o - 2) == '\\')) {
         cur_bp->pt.o--;
         c = 'a'; /* Convert \' and \" like a
                     word char */
@@ -1278,8 +1278,8 @@ static int setcase_word(int rcase)
     return FALSE;
 
   i = cur_bp->pt.o;
-  while (i < astr_len(cur_bp->pt.p->text)) {
-    if (!ISWORDCHAR(*astr_char(cur_bp->pt.p->text, i)))
+  while (i < astr_len(cur_bp->pt.p->item)) {
+    if (!ISWORDCHAR(*astr_char(cur_bp->pt.p->item, i)))
       break;
     ++i;
   }
@@ -1288,8 +1288,8 @@ static int setcase_word(int rcase)
     undo_save(UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
 
   gotword = FALSE;
-  while (cur_bp->pt.o < astr_len(cur_bp->pt.p->text)) {
-    char *p = astr_char(cur_bp->pt.p->text, cur_bp->pt.o);
+  while (cur_bp->pt.o < astr_len(cur_bp->pt.p->item)) {
+    char *p = astr_char(cur_bp->pt.p->item, cur_bp->pt.o);
     if (!ISWORDCHAR(*p))
       break;
     if (isalpha(*p)) {
@@ -1393,11 +1393,11 @@ static int setcase_region(int rcase)
   lp = r.start.p;
   i = r.start.o;
   while (size--) {
-    if (i < astr_len(lp->text)) {
+    if (i < astr_len(lp->item)) {
       if (rcase == UPPERCASE)
-        *astr_char(lp->text, i) = toupper(*astr_char(lp->text, i));
+        *astr_char(lp->item, i) = toupper(*astr_char(lp->item, i));
       else
-        *astr_char(lp->text, i) = tolower(*astr_char(lp->text, i));
+        *astr_char(lp->item, i) = tolower(*astr_char(lp->item, i));
       ++i;
     } else {
       lp = lp->next;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.52 2005/01/10 00:24:59 rrt Exp $        */
+/*      $Id: file.c,v 1.53 2005/01/10 01:31:52 rrt Exp $        */
 
 #include "config.h"
 
@@ -323,7 +323,7 @@ void read_from_disk(const char *filename)
   while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
     for (i = 0; i < size; i++)
       if (buf[i] != '\n' && buf[i] != '\r')
-        astr_cat_char(lp->text, buf[i]);
+        astr_cat_char(lp->item, buf[i]);
       else {
         lp = fadd_newline(lp);
                                 
@@ -343,9 +343,9 @@ void read_from_disk(const char *filename)
         }
       }
                         
-  lp->next = cur_bp->limitp;
-  cur_bp->limitp->prev = lp;
-  cur_bp->pt.p = cur_bp->limitp->next;
+  lp->next = cur_bp->lines;
+  cur_bp->lines->prev = lp;
+  cur_bp->pt.p = cur_bp->lines->next;
 
   fclose(fp);
 }
@@ -609,10 +609,10 @@ static void insert_buffer(Buffer *bp)
 
   undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = TRUE;
-  for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-    for (i = 0; i < astr_len(lp->text); i++)
-      insert_char(*astr_char(lp->text, i));
-    if (lp->next != bp->limitp)
+  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next) {
+    for (i = 0; i < astr_len(lp->item); i++)
+      insert_char(*astr_char(lp->item, i));
+    if (lp->next != bp->lines)
       insert_newline();
   }
   undo_nosave = FALSE;
@@ -844,9 +844,9 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
     return FALSE;
 
   /* Save all the lines. */
-  for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-    write(fd, astr_cstr(lp->text), astr_len(lp->text));
-    if (lp->next != bp->limitp)
+  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next) {
+    write(fd, astr_cstr(lp->item), astr_len(lp->item));
+    if (lp->next != bp->lines)
       write(fd, bp->eol, eol_len);
   }
 

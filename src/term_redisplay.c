@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.21 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.22 2005/01/10 01:31:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -114,11 +114,11 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
   int x, j;
 
   term_move(line, 0);
-  for (x = 0, j = startcol; j < astr_len(lp->text) && x < wp->ewidth; ++j) {
+  for (x = 0, j = startcol; j < astr_len(lp->item) && x < wp->ewidth; ++j) {
     if (highlight && in_region(lineno, j, r))
-      outch(*astr_char(lp->text, j), ZILE_REVERSE, &x);
+      outch(*astr_char(lp->item, j), ZILE_REVERSE, &x);
     else
-      outch(*astr_char(lp->text, j), ZILE_NORMAL, &x);
+      outch(*astr_char(lp->item, j), ZILE_NORMAL, &x);
   }
 
   draw_end_of_line(line, wp, lineno, r, highlight, x, j);
@@ -156,7 +156,7 @@ static void draw_window(int topline, Window *wp)
    * Find the first line to display on the first screen line.
    */
   for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && lp->prev != wp->bp->limitp; lp = lp->prev, --i, --lineno)
+       i > 0 && lp->prev != wp->bp->lines; lp = lp->prev, --i, --lineno)
     ;
 
   cur_tab_width = wp->bp->tab_width;
@@ -169,7 +169,7 @@ static void draw_window(int topline, Window *wp)
     term_move(i, 0);
     term_clrtoeol();
     /* If at the end of the buffer, don't write any text. */
-    if (lp == wp->bp->limitp)
+    if (lp == wp->bp->lines)
       continue;
 
     startcol = point_start_column;
@@ -213,10 +213,10 @@ static void calculate_start_column(Window *wp)
   char *buf, *rp, *lp, *p;
   Point pt = window_pt(wp);
 
-  rp = astr_char(pt.p->text, pt.o);
+  rp = astr_char(pt.p->item, pt.o);
   rpfact = pt.o / (wp->ewidth / 3);
 
-  for (lp = rp; lp >= astr_cstr(pt.p->text); --lp) {
+  for (lp = rp; lp >= astr_cstr(pt.p->item); --lp) {
     for (col = 0, p = lp; p < rp; ++p)
       if (*p == '\t') {
         col |= t - 1;
@@ -228,10 +228,10 @@ static void calculate_start_column(Window *wp)
         free(buf);
       }
 
-    lpfact = (lp - astr_cstr(pt.p->text)) / (wp->ewidth / 3);
+    lpfact = (lp - astr_cstr(pt.p->item)) / (wp->ewidth / 3);
 
     if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2)) {
-      point_start_column = lp + 1 - astr_cstr(pt.p->text);
+      point_start_column = lp + 1 - astr_cstr(pt.p->item);
       point_screen_column = lastcol;
       return;
     }
