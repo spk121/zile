@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.16 2005/01/14 22:31:34 rrt Exp $	*/
+/*	$Id: killring.c,v 1.17 2005/01/23 18:43:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -313,6 +313,5 @@ DEFUN("yank", yank)
 
 void free_kill_ring(void)
 {
-  if (kill_ring_text != NULL)
-    free(kill_ring_text);
+  free(kill_ring_text);
 }
