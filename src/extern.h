@@ -113,7 +113,7 @@ void ztrace(const char *fmt, ...);
 char *keytostr(char *buf, int key, int *len);
 char *keytostr_nobs(char *buf, int key, int *len);
 int strtokey(char *buf, int *len);
-int keytovec(char *key, int *keyvec);
+int keytovec(char *key, int **keyvec);
 char *simplify_key(char *dest, char *key);
 
 /* line.c ----------------------------------------------------------------- */

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.6 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: keys.c,v 1.7 2004/03/08 15:34:11 rrt Exp $	*/
 
 #include "config.h"
 
@@ -405,17 +405,23 @@ int strtokey(char *buf, int *len)
 /*
  * Convert a key sequence into the right key code sequence.
  */
-int keytovec(char *key, int *keyvec)
+int keytovec(char *key, int **keys)
 {
-	char *p = key;
-	int len, size = 0;
+        vector *v = vec_new(sizeof(int));
+	int size;
 
-	while (*p != '\0') {
-		if ((keyvec[size++] = strtokey(p, &len)) == -1)
+	for (size = 0; *key != '\0'; size++) {
+                int len;
+                int keycode = strtokey(key, &len);
+                vec_item(v, size, int) = keycode;
+		if ((vec_item(v, size, int) = keycode) == -1) {
+                        vec_delete(v);
 			return -1;
-		p += len;
+                }
+		key += len;
 	}
 
+        *keys = vec_toarray(v);
 	return size;
 }
 
@@ -425,19 +431,20 @@ int keytovec(char *key, int *keyvec)
 char *simplify_key(char *dest, char *key)
 {
 	char buf[128];
-	int keys[64];
-	int i, j, l;
+	int i, j, l, *keys;
 
 	dest[0] = '\0';
 	if (key == NULL)
 		return dest;
-	i = keytovec(key, keys);
-	for (j = 0; j < i; ++j) {
+	i = keytovec(key, &keys);
+	for (j = 0; j < i; j++) {
 		if (j > 0)
 			strcat(dest, " ");
 		keytostr_nobs(buf, keys[j], &l);
 		strcat(dest, buf);
 	}
+        if (i > 0)
+                free(keys);
 
 	return dest;
 }

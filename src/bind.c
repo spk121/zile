@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.12 2004/02/23 02:05:10 dacap Exp $	*/
+/*	$Id: bind.c,v 1.13 2004/03/08 15:34:11 rrt Exp $	*/
 
 #include "config.h"
 
@@ -137,16 +137,16 @@ static int bind_key0(leafp tree, int *keys, int n, Function func)
 
 void bind_key(char *key, Function func)
 {
-	int keys[64];
-	int i;
+	int i, *keys;
 
-	if ((i = keytovec(key, keys)) > 0) {
+	if ((i = keytovec(key, &keys)) > 0) {
 		if (leaf_tree == NULL)
 			leaf_tree = new_leaf(10);
 		if (!bind_key0(leaf_tree, keys, i, func)) {
 			minibuf_error("Error: key %s already bound", key);
 			waitkey(2 * 1000);
 		}
+                free(keys);
 	}
 }
 
