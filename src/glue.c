@@ -1,4 +1,4 @@
-/*	$Id: glue.c,v 1.4 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: glue.c,v 1.5 2004/01/21 01:50:05 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -255,6 +255,29 @@ int calculate_mark_lineno(windowp wp)
 
 	assert(0); /* Cannot happen */
 	return 0;
+}
+
+/*
+ * Jump to the specified line number and offset.
+ */
+void goto_point (int pointn, int pointo)
+{
+	if (cur_wp->pointn > pointn)
+		do 
+			FUNCALL(previous_line);
+		while (cur_wp->pointn > pointn);
+	else if (cur_wp->pointn < pointn)
+		do
+			FUNCALL(next_line);
+		while (cur_wp->pointn < pointn);
+	if (cur_wp->pointo > pointo)
+		do
+			FUNCALL(backward_char);
+		while (cur_wp->pointo > pointo);
+	else if (cur_wp->pointo < pointo)
+		do
+			FUNCALL(forward_char);
+		while (cur_wp->pointo < pointo);
 }
 
 /*
