@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.19 2004/10/13 15:47:56 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.20 2004/11/12 23:50:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -96,7 +96,7 @@ static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
                              int highlight, int x, int i)
 {
 	if (x >= ZILE_COLS) {
-		term_move(line, ZILE_COLS-1);
+		term_move(line, ZILE_COLS - 1);
                 term_addch('$');
 	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
