@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.6 2005/01/18 12:06:15 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.7 2005/01/18 12:25:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -185,13 +185,6 @@ void term_addch(int c)
   }
 }
 
-void term_addnstr(const char *s, int len)
-{
-  int i;
-  for (i = 0; i < len; i++)
-    term_addch(*s++);
-}
-
 void term_attrset(int attrs, ...)
 {
   int i;
@@ -299,6 +292,16 @@ void term_close(void)
   free(tcap_ptr);
   astr_delete(norm_string);
   fflush(stdout);
+}
+
+/* Suspend the term ready to go back to the shell */
+void term_suspend(void)
+{
+}
+
+/* Set up the term again */
+void term_resume(void)
+{
 }
 
 /* cursor keys */

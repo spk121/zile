@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.47 2005/01/18 12:06:15 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.48 2005/01/18 12:25:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -208,13 +208,6 @@ void term_addch(int c)
   }
 }
 
-void term_addnstr(const char *s, int len)
-{
-  int i;
-  for (i = 0; i < len; i++)
-    term_addch(*s++);
-}
-
 void term_attrset(int attrs, ...)
 {
   int i;
@@ -367,6 +360,17 @@ void term_close(void)
     fprintf(stderr, "Can't restore terminal flags\n");
     zile_exit(1);
   }
+}
+
+/* Suspend the term ready to go back to the shell */
+void term_suspend(void)
+{
+}
+
+/* Set up the term again */
+void term_resume(void)
+{
+  /* XXX need to call tcsetattr and winch handler */
 }
 
 static int translate_key(char *s, int nbytes)
@@ -535,17 +539,4 @@ void term_unget(int c)
     *--keyp = c & 0xff;
   if (c & KBD_META)
     *--keyp = '\033';
-}
-
-/* Suspend the term ready to go back to the shell */
-void term_suspend(void)
-{
-  term_tidy();
-}
-
-/* Set up the term again */
-void term_resume(void)
-{
-  term_full_redisplay();
-  /* XXX need to call tcsetattr and winch handler */
 }

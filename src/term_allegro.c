@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.16 2005/01/18 12:06:15 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.17 2005/01/18 12:25:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -177,13 +177,6 @@ void term_addch(int c)
   cur_x++;
 }
 
-void term_addnstr(const char *s, int len)
-{
-  int c;
-  for (c=0; c<len && *s; c++)
-    term_addch(*(s++));
-}
-
 void term_attrset(int attrs, ...)
 {
   int i;
@@ -240,6 +233,16 @@ void term_close(void)
 
   set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
   allegro_exit ();
+}
+
+/* Suspend the term ready to go back to the shell */
+void term_suspend(void)
+{
+}
+
+/* Set up the term again */
+void term_resume(void)
+{
 }
 
 static int translate_key(int c)
