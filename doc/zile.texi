@@ -289,7 +289,7 @@ Move cursor to the next char.  Bound to @code{forward-char}.
 @item C-g
 Cancel current command.  Bound to @code{keyboard-quit}.
 @item C-h F
-Show the FAQ.  Bound to @code{help-faq}.
+Show the FAQ.  Bound to @code{view-zile-FAQ}.
 @item C-h c
 Describe briefly a key sequence.  Bound to @code{describe-key-briefly}.
 @item C-h d, C-h f
@@ -309,7 +309,7 @@ List defined variables.  Bound to @code{list-variables}.
 @item C-h s
 Show a sample configuration file.  Bound to @code{help-config-sample}.
 @item C-h t
-Show a tutorial window.  Bound to @code{help-tutorial}.
+Show a tutorial window.  Bound to @code{help-with-tutorial}.
 @item C-h v
 Describe a variable.  Bound to @code{describe-variable}.
 @item C-h C-d
@@ -601,7 +601,7 @@ Line 1 is the beginning of the buffer.
 Show a help window.
 @item help-config-sample
 Show a configuration file sample.
-@item help-faq
+@item view-zile-FAQ
 Show the Zile @i{Frequently Asked Questions} (FAQ).
 @item help-latest-version
 Show informations about getting the latest version.
