@@ -72,6 +72,8 @@ you use strange formats.
 /*#########################################################################*/
 
 
+#include "config.h"
+
 #ifndef HAVE_VASPRINTF
 
 #include <stdio.h>
@@ -80,8 +82,6 @@ you use strange formats.
 #include <stdarg.h>
 #include <ctype.h>
 #include <limits.h>
-
-#include "config.h"
 
 #define ALLOC_CHUNK 2048
 #define ALLOC_SECURITY_MARGIN 1024   /* big value because some platforms have very big 'G' exponant */

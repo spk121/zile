@@ -1,8 +1,10 @@
-/* $Id: xstrdup.c,v 1.3 2003/05/06 22:28:41 rrt Exp $ */
-
-#include <string.h>
+/* $Id: xstrdup.c,v 1.4 2004/03/10 12:59:32 rrt Exp $ */
 
 #include "config.h"
+
+#ifndef HAVE_XSTRDUP
+
+#include <string.h>
 
 /*
  * Duplicate a string.
@@ -11,3 +13,5 @@ char *(xstrdup)(const char *s)
 {
 	return strcpy(xmalloc(strlen(s) + 1), s);
 }
+
+#endif

@@ -1,4 +1,6 @@
-/* $Id: xmalloc.c,v 1.3 2003/05/06 22:28:41 rrt Exp $ */
+/* $Id: xmalloc.c,v 1.4 2004/03/10 12:59:32 rrt Exp $ */
+
+#ifndef HAVE_XMALLOC
 
 #include <assert.h>
 #include <stdio.h>
@@ -22,3 +24,5 @@ void *(xmalloc)(size_t size)
 
 	return ptr;
 }
+
+#endif

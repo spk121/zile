@@ -1,4 +1,6 @@
-/* $Id: xrealloc.c,v 1.5 2004/03/08 14:32:50 rrt Exp $ */
+/* $Id: xrealloc.c,v 1.6 2004/03/10 12:59:32 rrt Exp $ */
+
+#ifndef HAVE_XREALLOC
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,3 +21,5 @@ void *(xrealloc)(void *ptr, size_t size)
 
 	return newptr;
 }
+
+#endif
