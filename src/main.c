@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.5 2003/05/06 23:05:04 rrt Exp $	*/
+/*	$Id: main.c,v 1.6 2003/05/15 10:02:44 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -137,10 +137,8 @@ static void loop(void)
  */
 static void select_terminal(void)
 {
-#if USE_NCURSES
 	/* Only the ncurses terminal is available for now. */
 	cur_tp = ncurses_tp;
-#endif
 }
 
 static char about_splash_str[] = "\
