@@ -1,6 +1,6 @@
 /* Exported terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.68 2005/02/27 17:47:54 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.69 2005/04/04 11:35:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -388,6 +388,22 @@ void term_resume(void)
   winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
 }
 
+static size_t find_fun_key(char *s, size_t nbytes, size_t *len)
+{
+  size_t i, key = KBD_NOKEY;
+
+  for (i = 0; i < KEYS; i++) {
+    if (key_len[i] > 0 && key_len[i] <= nbytes &&
+        strncmp(s, key_cap[i], key_len[i]) == 0) {
+      key = key_code[i];
+      *len = key_len[i];
+      break;
+    }
+  }
+
+  return key;
+}
+
 static size_t translate_key(char *s, size_t nbytes)
 {
   size_t i, key = KBD_NOKEY, used = 0;
@@ -409,6 +425,11 @@ static size_t translate_key(char *s, size_t nbytes)
       return KBD_RET;
     case '\33':		/* META */
       return KBD_META;
+    case '\34':
+      /* The Linux console sends single \34 bytes preceding cursor key
+         codes (not on all systems, apparently, but this should be
+         harmless). */
+      return KBD_NOKEY;
     case '\37':
       return KBD_CTL | '_';
     case 0177:		/* BS */
@@ -417,14 +438,7 @@ static size_t translate_key(char *s, size_t nbytes)
       return *s;
     }
   } else {
-    for (i = 0; i < KEYS; i++) {
-      if (key_len[i] > 0 && key_len[i] <= nbytes &&
-          strncmp(s, key_cap[i], key_len[i]) == 0) {
-        key = key_code[i];
-        used = key_len[i];
-        break;
-      }
-    }
+    key = find_fun_key(s, nbytes, &used);
     if (used == 0 && nbytes > 1) {
 #ifdef DEBUG
       int i;
@@ -445,9 +459,31 @@ static size_t translate_key(char *s, size_t nbytes)
   return key;
 }
 
+/*
+ * Keep getting characters until either we have the maximum
+ * needed for a keystroke or we don't receive any more.
+ */
+static size_t getchars(char *keys, size_t nbytes)
+{
+  int nread = 1;
+
+  while (nread >= 0 && nbytes < max_key_chars && nread) {
+    nread = read(STDIN_FILENO, keys + nbytes, max_key_chars);
+    if (nread >= 0)
+      nbytes += nread;
+
+    /* Don't wait or require any characters on second and subsequent requests. */
+    nstate.c_cc[VTIME] = 0;
+    nstate.c_cc[VMIN] = 0;
+    setattr(TCSANOW, &nstate);
+  }
+
+  return nbytes;
+}
+
 static size_t _xgetkey(int mode, size_t dsecs)
 {
-  size_t nbytes;
+  size_t nbytes = 0;
   char *keys;
   size_t key = KBD_NOKEY;
 
@@ -466,9 +502,23 @@ static size_t _xgetkey(int mode, size_t dsecs)
     nstate.c_cc[VMIN] = 1;      /* ...for at least one character. */
   }
 
-  setattr(TCSANOW, &nstate); /* Set waiting period and number of characters. */
+  setattr(TCSANOW, &nstate);
+  nbytes = getchars(keys, nbytes);
 
-  nbytes = read(STDIN_FILENO, keys, max_key_chars);
+  /* If there might be more characters on a slow terminal, try
+     again with a 1ds delay for the first read. */
+  if (nbytes < max_key_chars) {
+    size_t len;
+    char *ptr = strrchr(keys, '\33');
+
+    if (ptr && find_fun_key(ptr, nbytes, &len) == KBD_NOKEY) {
+      nstate.c_cc[VTIME] = 1;
+      nstate.c_cc[VMIN] = 0; /* This is strictly unnecessary. */
+      setattr(TCSANOW, &nstate);
+
+      getchars(keys, nbytes);
+    }
+  }
 
   if (mode & GETKEY_UNFILTERED) {
     int i;
