@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.47 2004/12/20 18:51:29 rrt Exp $        */
+/*      $Id: file.c,v 1.48 2004/12/24 13:52:04 rrt Exp $        */
 
 #include "config.h"
 
@@ -310,7 +310,9 @@ void read_from_disk(const char *filename)
                         else {
                                 lp = fadd_newline(lp);
                                 
-                                if (buf[i + 1] != buf[i] && (buf[i + 1] == '\n' || buf[i + 1] == '\r')) {
+                                if (i < size - 1 &&
+                                    buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
+                                                             buf[i + 1] == '\r')) {
                                         if (!eol) {
                                                 cur_bp->eol[0] = buf[i];
                                                 cur_bp->eol[1] = buf[i + 1];
