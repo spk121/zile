@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.43 2005/02/05 01:49:15 rrt Exp $	*/
+/*	$Id: search.c,v 1.44 2005/02/07 01:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -176,7 +176,7 @@ static int search_backward(Line *startp, size_t starto, const char *s)
 
 static char *last_search = NULL;
 
-DEFUN("search-forward-regexp", search_forward_regexp)
+DEFUN_INT("search-forward-regexp", search_forward_regexp)
   /*+
     Search forward from point for regular expression REGEXP.
     +*/
@@ -199,8 +199,9 @@ DEFUN("search-forward-regexp", search_forward_regexp)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("search-backward-regexp", search_backward_regexp)
+DEFUN_INT("search-backward-regexp", search_backward_regexp)
   /*+
     Search backward from point for match for regular expression REGEXP.
     +*/
@@ -223,6 +224,7 @@ DEFUN("search-backward-regexp", search_backward_regexp)
 
   return TRUE;
 }
+END_DEFUN
 
 #define ISEARCH_FORWARD		1
 #define ISEARCH_BACKWARD	2
@@ -356,7 +358,7 @@ static int isearch(int dir)
   return TRUE;
 }
 
-DEFUN("isearch-forward-regexp", isearch_forward_regexp)
+DEFUN_INT("isearch-forward-regexp", isearch_forward_regexp)
   /*+
     Do incremental search forward for regular expression.
     As you type characters, they add to the search string and are found.
@@ -367,8 +369,9 @@ DEFUN("isearch-forward-regexp", isearch_forward_regexp)
 {
   return isearch(ISEARCH_FORWARD);
 }
+END_DEFUN
 
-DEFUN("isearch-backward-regexp", isearch_backward_regexp)
+DEFUN_INT("isearch-backward-regexp", isearch_backward_regexp)
   /*+
     Do incremental search forward for regular expression.
     As you type characters, they add to the search string and are found.
@@ -379,6 +382,7 @@ DEFUN("isearch-backward-regexp", isearch_backward_regexp)
 {
   return isearch(ISEARCH_BACKWARD);
 }
+END_DEFUN
 
 void free_search_history(void)
 {
@@ -396,7 +400,7 @@ static int no_upper(const char *s, size_t len)
   return TRUE;
 }
 
-DEFUN("replace-regexp", replace_regexp)
+DEFUN_INT("replace-regexp", replace_regexp)
   /*+
     Replace occurrences of a regexp with other text.
     +*/
@@ -434,8 +438,9 @@ DEFUN("replace-regexp", replace_regexp)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("query-replace-regexp", query_replace_regexp)
+DEFUN_INT("query-replace-regexp", query_replace_regexp)
   /*+
     Replace occurrences of a regexp with other text.
     As each match is found, the user must type a character saying
@@ -519,3 +524,4 @@ DEFUN("query-replace-regexp", query_replace_regexp)
 
   return TRUE;
 }
+END_DEFUN

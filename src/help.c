@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.29 2005/01/30 23:24:34 rrt Exp $	*/
+/*	$Id: help.c,v 1.30 2005/02/07 01:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,7 @@
 #include "extern.h"
 #include "paths.h"
 
-DEFUN("zile-version", zile_version)
+DEFUN_INT("zile-version", zile_version)
   /*+
     Show the zile version.
     +*/
@@ -45,6 +45,7 @@ DEFUN("zile-version", zile_version)
 
   return TRUE;
 }
+END_DEFUN
 
 static int show_file(char *filename)
 {
@@ -60,31 +61,34 @@ static int show_file(char *filename)
   return TRUE;
 }
 
-DEFUN("help", help)
+DEFUN_INT("help", help)
   /*+
     Show a help window.
     +*/
 {
   return show_file(PATH_DATA "/HELP");
 }
+END_DEFUN
 
-DEFUN("help-config-sample", help_config_sample)
+DEFUN_INT("help-config-sample", help_config_sample)
   /*+
     Show a configuration file sample.
     +*/
 {
   return show_file(PATH_DATA "/zilerc.sample");
 }
+END_DEFUN
 
-DEFUN("view-zile-FAQ", view_zile_FAQ)
+DEFUN_INT("view-zile-FAQ", view_zile_FAQ)
   /*+
     Show the Zile Frequently Asked Questions (FAQ).
     +*/
 {
   return show_file(PATH_DATA "/FAQ");
 }
+END_DEFUN
 
-DEFUN("help-with-tutorial", help_with_tutorial)
+DEFUN_INT("help-with-tutorial", help_with_tutorial)
   /*+
     Show a tutorial window.
     +*/
@@ -102,6 +106,7 @@ DEFUN("help-with-tutorial", help_with_tutorial)
 
   return FALSE;
 }
+END_DEFUN
 
 /*
  * Fetch the documentation of a function or variable from the
@@ -164,7 +169,7 @@ static void write_function_description(va_list ap)
           name, astr_cstr(doc));
 }
 
-DEFUN("describe-function", describe_function)
+DEFUN_INT("describe-function", describe_function)
   /*+
     Display the full documentation of a function.
     +*/
@@ -189,6 +194,7 @@ DEFUN("describe-function", describe_function)
 
   return TRUE;
 }
+END_DEFUN
 
 static void write_variable_description(va_list ap)
 {
@@ -203,7 +209,7 @@ static void write_variable_description(va_list ap)
           name, astr_cstr(defval), curval, astr_cstr(doc));
 }
 
-DEFUN("describe-variable", describe_variable)
+DEFUN_INT("describe-variable", describe_variable)
   /*+
     Display the full documentation of a variable.
     +*/
@@ -231,8 +237,9 @@ DEFUN("describe-variable", describe_variable)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("describe-key", describe_key)
+DEFUN_INT("describe-key", describe_key)
   /*+
     Display documentation of the command invoked by a key sequence.
     +*/
@@ -261,3 +268,4 @@ DEFUN("describe-key", describe_key)
 
   return TRUE;
 }
+END_DEFUN

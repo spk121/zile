@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.20 2005/01/29 12:21:32 rrt Exp $        */
+/*      $Id: undo.c,v 1.21 2005/02/07 01:36:44 rrt Exp $        */
 
 #include "config.h"
 
@@ -56,7 +56,7 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
   /* If the buffer is currently unchanged, record the fact. */
   if (!(cur_bp->flags & BFLAG_MODIFIED))
     up->unchanged = TRUE;
-        
+
   switch (type) {
   case UNDO_INSERT_CHAR:
   case UNDO_REPLACE_CHAR:
@@ -170,11 +170,11 @@ static Undo *revert_action(Undo *up)
      unset the modified flag. */
   if (up->unchanged)
     cur_bp->flags &= ~BFLAG_MODIFIED;
-        
+
   return up->next;
 }
 
-DEFUN("undo", undo)
+DEFUN_INT("undo", undo)
   /*+
     Undo some previous changes.
     Repeat this command to undo more changes.
@@ -200,3 +200,4 @@ DEFUN("undo", undo)
 
   return TRUE;
 }
+END_DEFUN

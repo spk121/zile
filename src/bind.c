@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.60 2005/02/06 20:21:05 rrt Exp $	*/
+/*	$Id: bind.c,v 1.61 2005/02/07 01:36:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -215,7 +215,7 @@ void process_key(size_t key)
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     } else {
-      p->func(lastflag & FLAG_SET_UNIARG, last_uniarg);
+      p->func((lastflag & FLAG_SET_UNIARG) != 0, evalCastIntToLe(last_uniarg));
       _last_command = p->func;
     }
 
@@ -435,14 +435,14 @@ static int execute_function(char *name, int uniarg)
   Macro *mp;
 
   if ((func = get_function(name)))
-    return func(uniarg ? TRUE : FALSE, uniarg);
+    return func(uniarg ? 1 : 0, evalCastIntToLe(uniarg));
   else if ((mp = get_macro(name)))
     return call_macro(mp);
   else
     return FALSE;
 }
 
-DEFUN("execute-extended-command", execute_extended_command)
+DEFUN_INT("execute-extended-command", execute_extended_command)
   /*+
     Read function name, then read its arguments and call it.
     +*/
@@ -451,8 +451,8 @@ DEFUN("execute-extended-command", execute_extended_command)
   char *name;
   astr msg = astr_new();
 
-  if (lastflag & FLAG_SET_UNIARG && last_uniarg != 0)
-    astr_afmt(msg, "%d M-x ", last_uniarg);
+  if (uniused && uniarg != 0)
+    astr_afmt(msg, "%d M-x ", uniarg);
   else
     astr_cat_cstr(msg, "M-x ");
 
@@ -461,13 +461,14 @@ DEFUN("execute-extended-command", execute_extended_command)
   if (name == NULL)
     return FALSE;
 
-  res = execute_function(name, last_uniarg);
+  res = execute_function(name, uniarg);
   free(name);
 
   return res;
 }
+END_DEFUN
 
-DEFUN("global-set-key", global_set_key)
+DEFUN_INT("global-set-key", global_set_key)
   /*+
     Bind a command to a key sequence.
     Read key sequence and function name, and bind the function to the key
@@ -502,8 +503,9 @@ DEFUN("global-set-key", global_set_key)
   free(keys);
   return ok;
 }
+END_DEFUN
 
-DEFUN("where-is", where_is)
+DEFUN_INT("where-is", where_is)
   /*+
     Print message listing key sequences that invoke the command DEFINITION.
     Argument is a command definition, usually a symbol with a function definition.
@@ -523,7 +525,7 @@ DEFUN("where-is", where_is)
     astr as = astr_new();
 
     astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
-    if (lastflag & FLAG_SET_UNIARG)
+    if (uniused)
       bprintf("%s", astr_cstr(as));
     else
       minibuf_write("%s", astr_cstr(as));
@@ -535,6 +537,7 @@ DEFUN("where-is", where_is)
 
   return TRUE;
 }
+END_DEFUN
 
 char *get_function_by_key_sequence(void)
 {
@@ -599,7 +602,7 @@ static void write_bindings_list(va_list ap)
   list_delete(l);
 }
 
-DEFUN("list-bindings", list_bindings)
+DEFUN_INT("list-bindings", list_bindings)
   /*+
     List defined bindings.
     +*/
@@ -607,3 +610,4 @@ DEFUN("list-bindings", list_bindings)
   write_temp_buffer("*Bindings List*", write_bindings_list);
   return TRUE;
 }
+END_DEFUN

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.70 2005/02/05 13:49:04 rrt Exp $        */
+/*      $Id: file.c,v 1.71 2005/02/07 01:36:43 rrt Exp $        */
 
 #include "config.h"
 
@@ -386,7 +386,7 @@ Completion *make_buffer_completion(void)
   return cp;
 }
 
-DEFUN("find-file", find_file)
+DEFUN_INT("find-file", find_file)
   /*+
     Edit a file specified by the user.  Switch to a buffer visiting the file,
     creating one if none already exists.
@@ -411,8 +411,9 @@ DEFUN("find-file", find_file)
   free(ms);
   return FALSE;
 }
+END_DEFUN
 
-DEFUN("find-alternate-file", find_alternate_file)
+DEFUN_INT("find-alternate-file", find_alternate_file)
   /*+
     Find the file specified by the user, select its buffer, kill previous buffer.
     If the current buffer now contains an empty file that you just visited
@@ -441,8 +442,9 @@ DEFUN("find-alternate-file", find_alternate_file)
   free(ms);
   return FALSE;
 }
+END_DEFUN
 
-DEFUN("switch-to-buffer", switch_to_buffer)
+DEFUN_INT("switch-to-buffer", switch_to_buffer)
   /*+
     Select to the user specified buffer in the current window.
     +*/
@@ -471,6 +473,7 @@ DEFUN("switch-to-buffer", switch_to_buffer)
 
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Check if the buffer has been modified.  If so, asks the user if
@@ -561,7 +564,7 @@ void kill_buffer(Buffer *kill_bp)
   }
 }
 
-DEFUN("kill-buffer", kill_buffer)
+DEFUN_INT("kill-buffer", kill_buffer)
   /*+
     Kill the current buffer or the user specified one.
     +*/
@@ -590,6 +593,7 @@ DEFUN("kill-buffer", kill_buffer)
 
   return FALSE;
 }
+END_DEFUN
 
 static void insert_buffer(Buffer *bp)
 {
@@ -607,7 +611,7 @@ static void insert_buffer(Buffer *bp)
   undo_nosave = FALSE;
 }
 
-DEFUN("insert-buffer", insert_buffer)
+DEFUN_INT("insert-buffer", insert_buffer)
   /*+
     Insert after point the contents of the user specified buffer.
     Puts mark after the inserted text.
@@ -644,6 +648,7 @@ DEFUN("insert-buffer", insert_buffer)
 
   return TRUE;
 }
+END_DEFUN
 
 static int insert_file(char *filename)
 {
@@ -682,7 +687,7 @@ static int insert_file(char *filename)
   return TRUE;
 }
 
-DEFUN("insert-file", insert_file)
+DEFUN_INT("insert-file", insert_file)
   /*+
     Insert contents of the user specified file into buffer after point.
     Set mark after the inserted text.
@@ -717,6 +722,7 @@ DEFUN("insert-file", insert_file)
   free(ms);
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Create a backup filename according to user specified variables.
@@ -950,7 +956,7 @@ static int save_buffer(Buffer *bp)
   return TRUE;
 }
 
-DEFUN("save-buffer", save_buffer)
+DEFUN_INT("save-buffer", save_buffer)
   /*+
     Save current buffer in visited file if modified. By default, makes the
     previous version into a backup file if this is the first save.
@@ -958,8 +964,9 @@ DEFUN("save-buffer", save_buffer)
 {
   return save_buffer(cur_bp);
 }
+END_DEFUN
 
-DEFUN("write-file", write_file)
+DEFUN_INT("write-file", write_file)
   /*+
     Write current buffer into the user specified file.
     Makes buffer visit that file, and marks it not modified.
@@ -987,6 +994,7 @@ DEFUN("write-file", write_file)
   free(ms);
   return TRUE;
 }
+END_DEFUN
 
 static int save_some_buffers(void)
 {
@@ -1059,15 +1067,16 @@ static int save_some_buffers(void)
 }
 
 
-DEFUN("save-some-buffers", save_some_buffers)
+DEFUN_INT("save-some-buffers", save_some_buffers)
   /*+
     Save some modified file-visiting buffers.  Asks user about each one.
     +*/
 {
   return save_some_buffers();
 }
+END_DEFUN
 
-DEFUN("save-buffers-kill-zile", save_buffers_kill_zile)
+DEFUN_INT("save-buffers-kill-zile", save_buffers_kill_zile)
   /*+
     Offer to save each buffer, then kill this Zile process.
     +*/
@@ -1095,6 +1104,7 @@ DEFUN("save-buffers-kill-zile", save_buffers_kill_zile)
 
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Function called on unexpected error or Zile crash (SIGSEGV).
@@ -1123,7 +1133,7 @@ void zile_exit(int exitcode)
   exit(exitcode);
 }
 
-DEFUN("cd", cd)
+DEFUN_INT("cd", cd)
   /*+
     Make the user specified directory become the current buffer's default
     directory.
@@ -1159,3 +1169,4 @@ DEFUN("cd", cd)
   free(ms);
   return FALSE;
 }
+END_DEFUN

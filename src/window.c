@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.16 2005/01/17 18:09:23 rrt Exp $	*/
+/*	$Id: window.c,v 1.17 2005/02/07 01:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -90,7 +90,7 @@ void set_current_window(Window *wp)
   }
 }
 
-DEFUN("split-window", split_window)
+DEFUN_INT("split-window", split_window)
   /*+
     Split current window into two windows, one above the other.
     Both windows display the same buffer now current.
@@ -120,8 +120,9 @@ DEFUN("split-window", split_window)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("delete-window", delete_window)
+DEFUN_INT("delete-window", delete_window)
   /*+
     Remove the current window from the screen.
     +*/
@@ -153,8 +154,9 @@ DEFUN("delete-window", delete_window)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("enlarge-window", enlarge_window)
+DEFUN_INT("enlarge-window", enlarge_window)
   /*+
     Make current window one line bigger.
     +*/
@@ -184,8 +186,9 @@ DEFUN("enlarge-window", enlarge_window)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("shrink-window", shrink_window)
+DEFUN_INT("shrink-window", shrink_window)
   /*+
     Make current window one line smaller.
     +*/
@@ -211,6 +214,7 @@ DEFUN("shrink-window", shrink_window)
 
   return TRUE;
 }
+END_DEFUN
 
 Window *popup_window(void)
 {
@@ -228,7 +232,7 @@ Window *popup_window(void)
   return head_wp;
 }
 
-DEFUN("delete-other-windows", delete_other_windows)
+DEFUN_INT("delete-other-windows", delete_other_windows)
   /*+
     Make the selected window fill the screen.
     +*/
@@ -251,8 +255,9 @@ DEFUN("delete-other-windows", delete_other_windows)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("other-window", other_window)
+DEFUN_INT("other-window", other_window)
   /*+
     Select the first different window on the screen.
     All windows are arranged in a cyclic order.
@@ -262,6 +267,7 @@ DEFUN("other-window", other_window)
   set_current_window((cur_wp->next != NULL) ? cur_wp->next : head_wp);
   return TRUE;
 }
+END_DEFUN
 
 /*
  * This function is called once in main(), for creating

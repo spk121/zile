@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.20 2005/02/06 20:21:06 rrt Exp $	*/
+/*	$Id: eval.c,v 1.21 2005/02/07 01:36:43 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -35,14 +35,7 @@
 
 static le *eval_cb_command_helper(Function f, int argc, le *branch)
 {
-  int uniarg = 0, ret = FALSE;
-  if (argc == 2) {
-    le *value_le = evaluateNode(branch);
-    uniarg = evalCastLeToInt(value_le);
-    leWipe(value_le);
-  }
-  if (argc < 3)
-    f(argc == 1, (argc == 1) ? 1 : uniarg);
+  int ret = f(argc, branch);
   return ret ? leT : leNIL;
 }
 
@@ -970,7 +963,8 @@ static le *eval_expression(char *expr)
   return list;
 }
 
-DEFUN("eval-expression", eval_expression)
+DEFUN_INT("eval-expression", eval_expression)
+{
   /*+
     Evaluate EVAL-EXPRESSION-ARG and print value in the minibuffer.
     Value is also consed on to front of the variable `values'.
@@ -978,7 +972,6 @@ DEFUN("eval-expression", eval_expression)
     insert the result into the current buffer instead of printing it in
     the minibuffer.
     +*/
-{
   char *expr;
   le *list;
 
@@ -991,8 +984,9 @@ DEFUN("eval-expression", eval_expression)
 
   return list == NULL;
 }
+END_DEFUN
 
-DEFUN("eval-last-sexp", eval_last_sexp)
+DEFUN_INT("eval-last-sexp", eval_last_sexp)
   /*+
     Evaluate sexp before point; print value in minibuffer.
     Interactively, with prefix argument, print output into current buffer.
@@ -1014,3 +1008,4 @@ DEFUN("eval-last-sexp", eval_last_sexp)
 
   return list == NULL;
 }
+END_DEFUN

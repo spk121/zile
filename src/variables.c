@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.29 2005/01/28 02:38:32 rrt Exp $	*/
+/*	$Id: variables.c,v 1.30 2005/02/07 01:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -116,7 +116,7 @@ char *minibuf_read_variable_name(char *msg)
   char *ms;
   Completion *cp = completion_new(FALSE);
   le *lp;
-  
+
   for (lp = mainVarList; lp != NULL; lp = lp->list_next)
     list_append(cp->completions, zstrdup(lp->data));
 
@@ -157,7 +157,7 @@ static char *get_variable_format(char *var)
   return "";
 }
 
-DEFUN("set-variable", set_variable)
+DEFUN_INT("set-variable", set_variable)
   /*+
     Set a variable value to the user-specified value.
     +*/
@@ -188,3 +188,4 @@ DEFUN("set-variable", set_variable)
 
   return TRUE;
 }
+END_DEFUN

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: macro.c,v 1.13 2005/02/04 02:10:08 rrt Exp $	*/
+/*	$Id: macro.c,v 1.14 2005/02/07 01:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -73,7 +73,7 @@ void cancel_kbd_macro(void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEFUN("start-kbd-macro", start_kbd_macro)
+DEFUN_INT("start-kbd-macro", start_kbd_macro)
   /*+
     Record subsequent keyboard input, defining a keyboard macro.
     The commands are recorded even as they are executed.
@@ -95,8 +95,9 @@ DEFUN("start-kbd-macro", start_kbd_macro)
   cur_mp = zmalloc(sizeof(Macro));
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("end-kbd-macro", end_kbd_macro)
+DEFUN_INT("end-kbd-macro", end_kbd_macro)
   /*+
     Finish defining a keyboard macro.
     The definition was started by C-x (.
@@ -111,8 +112,9 @@ DEFUN("end-kbd-macro", end_kbd_macro)
   thisflag &= ~FLAG_DEFINING_MACRO;
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("name-last-kbd-macro", name_last_kbd_macro)
+DEFUN_INT("name-last-kbd-macro", name_last_kbd_macro)
   /*+
     Assign a name to the last keyboard macro defined.
     Argument SYMBOL is the name to define.
@@ -153,6 +155,7 @@ DEFUN("name-last-kbd-macro", name_last_kbd_macro)
 
   return TRUE;
 }
+END_DEFUN
 
 int call_macro(Macro *mp)
 {
@@ -173,7 +176,7 @@ int call_macro(Macro *mp)
   return ret;
 }
 
-DEFUN("call-last-kbd-macro", call_last_kbd_macro)
+DEFUN_INT("call-last-kbd-macro", call_last_kbd_macro)
   /*+
     Call the last keyboard macro that you defined with C-x (.
     A prefix argument serves as a repeat count.  Zero means repeat until error.
@@ -203,6 +206,7 @@ DEFUN("call-last-kbd-macro", call_last_kbd_macro)
 
   return ret;
 }
+END_DEFUN
 
 /*
  * Free all the macros (used at Zile exit).

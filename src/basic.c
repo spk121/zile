@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.25 2005/01/28 02:38:31 rrt Exp $	*/
+/*	$Id: basic.c,v 1.26 2005/02/07 01:36:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,7 @@
 /* Goal-column to arrive when `prev/next-line' functions are used.  */
 static int cur_goalc;
 
-DEFUN("beginning-of-line", beginning_of_line)
+DEFUN_INT("beginning-of-line", beginning_of_line)
   /*+
     Move point to beginning of current line.
     +*/
@@ -51,8 +51,9 @@ DEFUN("beginning-of-line", beginning_of_line)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("end-of-line", end_of_line)
+DEFUN_INT("end-of-line", end_of_line)
   /*+
     Move point to end of current line.
     +*/
@@ -66,6 +67,7 @@ DEFUN("end-of-line", end_of_line)
 
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Get the goal column.  Take care of expanding tabulations.
@@ -137,7 +139,7 @@ int previous_line(void)
   return FALSE;
 }
 
-DEFUN("previous-line", previous_line)
+DEFUN_INT("previous-line", previous_line)
   /*+
     Move cursor vertically up one line.
     If there is no character in the target line exactly over the current column,
@@ -163,6 +165,7 @@ DEFUN("previous-line", previous_line)
 
   return TRUE;
 }
+END_DEFUN
 
 int next_line(void)
 {
@@ -183,7 +186,7 @@ int next_line(void)
   return FALSE;
 }
 
-DEFUN("next-line", next_line)
+DEFUN_INT("next-line", next_line)
   /*+
     Move cursor vertically down one line.
     If there is no character in the target line exactly under the current column,
@@ -211,6 +214,7 @@ DEFUN("next-line", next_line)
 
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Go to the line `to_line', counting from 0.  Point will end up in
@@ -224,7 +228,7 @@ void goto_line(size_t to_line)
     ngotodown(to_line - cur_bp->pt.n);
 }
 
-DEFUN("goto-char", goto_char)
+DEFUN_INT("goto-char", goto_char)
   /*+
     Read a number N and move the cursor to character number N.
     Position 1 is the beginning of the buffer.
@@ -247,8 +251,9 @@ DEFUN("goto-char", goto_char)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("goto-line", goto_line)
+DEFUN_INT("goto-line", goto_line)
   /*+
     Move cursor to the beginning of the specified line.
     Line 1 is the beginning of the buffer.
@@ -269,6 +274,7 @@ DEFUN("goto-line", goto_line)
 
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Move point to the beginning of the buffer; do not touch the mark.
@@ -279,7 +285,7 @@ void gotobob(void)
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
-DEFUN("beginning-of-buffer", beginning_of_buffer)
+DEFUN_INT("beginning-of-buffer", beginning_of_buffer)
   /*+
     Move point to the beginning of the buffer; leave mark at previous position.
     +*/
@@ -288,6 +294,7 @@ DEFUN("beginning-of-buffer", beginning_of_buffer)
   gotobob();
   return TRUE;
 }
+END_DEFUN
 
 /*
  * Move point to the end of the buffer; do not touch the mark.
@@ -298,7 +305,7 @@ void gotoeob(void)
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
-DEFUN("end-of-buffer", end_of_buffer)
+DEFUN_INT("end-of-buffer", end_of_buffer)
   /*+
     Move point to the end of the buffer; leave mark at previous position.
     +*/
@@ -307,6 +314,7 @@ DEFUN("end-of-buffer", end_of_buffer)
   gotoeob();
   return TRUE;
 }
+END_DEFUN
 
 int backward_char(void)
 {
@@ -324,7 +332,7 @@ int backward_char(void)
   return FALSE;
 }
 
-DEFUN("backward-char", backward_char)
+DEFUN_INT("backward-char", backward_char)
   /*+
     Move point left N characters (right if N is negative).
     On attempt to pass beginning or end of buffer, stop and signal error.
@@ -343,6 +351,7 @@ DEFUN("backward-char", backward_char)
 
   return TRUE;
 }
+END_DEFUN
 
 int forward_char(void)
 {
@@ -360,7 +369,7 @@ int forward_char(void)
   return FALSE;
 }
 
-DEFUN("forward-char", forward_char)
+DEFUN_INT("forward-char", forward_char)
   /*+
     Move point right N characters (left if N is negative).
     On reaching end of buffer, stop and signal error.
@@ -379,6 +388,7 @@ DEFUN("forward-char", forward_char)
 
   return TRUE;
 }
+END_DEFUN
 
 int ngotoup(size_t n)
 {
@@ -412,7 +422,7 @@ int scroll_down(void)
   }
 }
 
-DEFUN("scroll-down", scroll_down)
+DEFUN_INT("scroll-down", scroll_down)
   /*+
     Scroll text of current window downward near full screen.
     +*/
@@ -428,6 +438,7 @@ DEFUN("scroll-down", scroll_down)
 
   return TRUE;
 }
+END_DEFUN
 
 int scroll_up(void)
 {
@@ -439,7 +450,7 @@ int scroll_up(void)
   }
 }
 
-DEFUN("scroll-up", scroll_up)
+DEFUN_INT("scroll-up", scroll_up)
   /*+
     Scroll text of current window upward near full screen.
     +*/
@@ -455,3 +466,4 @@ DEFUN("scroll-up", scroll_up)
 
   return TRUE;
 }
+END_DEFUN

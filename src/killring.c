@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.21 2005/02/06 20:09:32 rrt Exp $	*/
+/*	$Id: killring.c,v 1.22 2005/02/07 01:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -111,7 +111,7 @@ static int kill_line(int literally)
   return FALSE;
 }
 
-DEFUN("kill-line", kill_line)
+DEFUN_INT("kill-line", kill_line)
   /*+
     Kill the rest of the current line; if no nonblanks there, kill thru newline.
     With prefix argument, kill that many lines from point.
@@ -137,8 +137,9 @@ DEFUN("kill-line", kill_line)
   deactivate_mark();
   return ret;
 }
+END_DEFUN
 
-DEFUN("kill-region", kill_region)
+DEFUN_INT("kill-region", kill_region)
   /*+
     Kill between point and mark.
     The text is deleted but saved in the kill ring.
@@ -195,8 +196,9 @@ DEFUN("kill-region", kill_region)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("copy-region-as-kill", copy_region_as_kill)
+DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
   /*+
     Save the region as if killed, but don't kill it.
     +*/
@@ -221,8 +223,9 @@ DEFUN("copy-region-as-kill", copy_region_as_kill)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("kill-word", kill_word)
+DEFUN_INT("kill-word", kill_word)
   /*+
     Kill characters forward until encountering the end of a word.
     With argument, do this that many times.
@@ -247,8 +250,9 @@ DEFUN("kill-word", kill_word)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("backward-kill-word", backward_kill_word)
+DEFUN_INT("backward-kill-word", backward_kill_word)
   /*+
     Kill characters backward until encountering the end of a word.
     With argument, do this that many times.
@@ -256,8 +260,9 @@ DEFUN("backward-kill-word", backward_kill_word)
 {
   return FUNCALL_ARG(kill_word, !uniarg ? -1 : -uniarg);
 }
+END_DEFUN
 
-DEFUN("kill-sexp", kill_sexp)
+DEFUN_INT("kill-sexp", kill_sexp)
   /*+
     Kill the sexp (balanced expression) following the cursor.
     With ARG, kill that many sexps after the cursor.
@@ -283,8 +288,9 @@ DEFUN("kill-sexp", kill_sexp)
 
   return TRUE;
 }
+END_DEFUN
 
-DEFUN("yank", yank)
+DEFUN_INT("yank", yank)
   /*+
     Reinsert the last stretch of killed text.
     More precisely, reinsert the stretch of killed text most recently
@@ -310,6 +316,7 @@ DEFUN("yank", yank)
 
   return TRUE;
 }
+END_DEFUN
 
 void free_kill_ring(void)
 {
