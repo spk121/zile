@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.4 2005/01/19 00:41:01 rrt Exp $	*/
+/*	$Id: vars.c,v 1.5 2005/01/22 00:13:27 rrt Exp $	*/
 
 #include <string.h>
 
@@ -83,8 +83,8 @@ char *variableGetString(le *varlist, char *key)
   le *temp = variableFind(varlist, key);
   if (temp && temp->branch && temp->branch->data
       && countNodes(temp->branch) == 1)
-    return zstrdup(temp->branch->data);
-  return zstrdup("-1");
+    return temp->branch->data;
+  return "-1";
 }
     
 astr variableDump(le *varlist)
