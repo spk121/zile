@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.32 2004/10/24 23:52:46 rrt Exp $	*/
+/*	$Id: bind.c,v 1.33 2004/11/14 20:52:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -310,6 +310,10 @@ void init_bindings(void)
 			for (j = 0; j < 3; ++j)
 				if (fentry_table[i].key[j] != NULL) {
 					fentry_table[i].key[j] = zstrdup(fentry_table[i].key[j]);
+                                        if (strcmp(fentry_table[i].key[j], "\\M-h") == 0) {
+                                                free(fentry_table[i].key[j]);
+                                                fentry_table[i].key[j] = "\\M-h\\M-h";
+                                        }
 					replace_string(fentry_table[i].key[j], "C-h", "M-h");
 				}
 	}
