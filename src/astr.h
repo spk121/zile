@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: astr.h,v 1.4 2005/01/19 00:37:20 rrt Exp $        */
+/*      $Id: astr.h,v 1.5 2005/01/26 00:22:57 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -67,7 +67,7 @@ extern void   astr_delete(astr as);
 /*
  * Return the length of the argument string as.
  */
-#define astr_len(as)            ((const int)(((astr)(as))->len))
+#define astr_len(as)            ((const size_t)(((astr)(as))->len))
 
 /*
  * Return the address of the pos'th character of as. If pos is >= 0,
