@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: completion.c,v 1.2 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: completion.c,v 1.3 2004/03/09 16:16:11 rrt Exp $	*/
 
 #include "config.h"
 
@@ -96,6 +96,7 @@ static void default_completion_scroll_up(Completion *cp)
 {
 	Window *wp, *old_wp = cur_wp;
 
+        (void)cp;
 	wp = find_window("*Completions*");
 	assert(wp != NULL);
 	set_current_window(wp);
@@ -113,6 +114,7 @@ static void default_completion_scroll_down(Completion *cp)
 {
 	Window *wp, *old_wp = cur_wp;
 
+        (void)cp;
 	wp = find_window("*Completions*");
 	assert(wp != NULL);
 	set_current_window(wp);
