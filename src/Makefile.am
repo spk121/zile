@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.3 2004/02/04 02:49:31 dacap Exp $
+## $Id: Makefile.am,v 1.4 2004/02/05 02:38:27 dacap Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -40,6 +40,8 @@ zile_SOURCES =					\
 	minibuf.c				\
 	rc.c					\
 	redisplay.c				\
+	regex.c					\
+	regex.h					\
 	registers.c				\
 	search.c				\
 	tbl_funcs.h				\
