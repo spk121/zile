@@ -24,11 +24,11 @@ cat >$TMPFILE1 <<EOF
 #define ENABLE_CSHARP_MODE 1
 #define ENABLE_JAVA_MODE 1
 #define ENABLE_MAIL_MODE 1
-#define X0(z, c)     			z
-#define X1(z, c, k1) 			z
-#define X2(z, c, k1, k2) 		z
-#define X3(z, c, k1, k2, k3) 		z
-#define X4(z, c, k1, k2, k3, k4) 	z
+#define X0(z, c)			z
+#define X1(z, c, k1)			z
+#define X2(z, c, k1, k2)		z
+#define X3(z, c, k1, k2, k3)		z
+#define X4(z, c, k1, k2, k3, k4)	z
 EOF
 
 cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
