@@ -310,8 +310,8 @@ extern int asprintf(char **strp, const char *fmt, ...);
 extern int vasprintf(char **strp, const char *fmt, va_list ap);
 #endif
 
-#ifndef HAVE_STRRCHR
-extern char *strrchar(const char *, const char *);
+#ifndef HAVE_STRRSTR
+extern char *strrstr(const char *, const char *);
 #endif
 
 #if defined(ENABLE_C_MODE) || defined(ENABLE_CPP_MODE) || \
