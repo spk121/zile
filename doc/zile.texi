@@ -118,16 +118,10 @@ Edit file @file{file}.
 @item +number
 For the first file the cursor will be positioned on the line specified by
 @samp{number} (do not insert a space between the @samp{+} sign and the number).
-@item -f function
-Invoke the named internal function with no arguments.
-For example, @samp{-f auto-fill-mode} turns on @i{Auto Fill Mode}.
 @item -q
 Do not load the user's initialization file.
 @item -u rcfile
 Load @file{rcfile} instead of the default initialization file.
-@item -v variable=value
-Set a Zile variable to the specified value
-(this overrides the value specified in the initialization file).
 @item -V
 Print version information on standard output then exit.
 @end table

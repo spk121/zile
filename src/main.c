@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.50 2004/12/27 13:25:38 rrt Exp $	*/
+/*	$Id: main.c,v 1.51 2005/01/08 23:20:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -41,8 +41,6 @@
 #include <allegro.h>
 #endif
 #endif
-
-#include "alist.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -186,55 +184,6 @@ static void sanity_checks(void)
 #endif
 }
 
-static void execute_functions(alist al)
-{
-	char *func;
-	for (func = alist_first(al); func != NULL; func = alist_next(al)) {
-		term_redisplay();
-		if (!execute_function(func, 1))
-			minibuf_error("Function `%s' not defined", func);
-		lastflag |= FLAG_NEED_RESYNC;
-	}
-}
-
-/*
- * Return the number of occurrences of c into s.
- */
-static int countchr(const char *s, int c)
-{
-	int count = 0;
-	for (; *s != '\0'; ++s)
-		if (*s == c)
-			++count;
-	return count;
-}
-
-/*
- * Check the `variable=expression' syntax correctness.
- */
-static void check_var_syntax(const char *expr)
-{
-	if (strlen(expr) < 3 || countchr(expr, '=') != 1 ||
-	    strchr(expr, '=') == expr ||
-	    strchr(expr, '=') == expr + strlen(expr) - 1) {
-		fprintf(stderr, "zile: invalid `variable=expression' syntax\n");
-		exit(1);
-	}
-}
-
-static void set_variables(alist al)
-{
-	char *expr;
-	for (expr = alist_first(al); expr != NULL; expr = alist_next(al)) {
-		char *var = expr;
-		char *eq = strchr(expr, '=');
-		char *val = eq + 1;
-		*eq = '\0';
-		fprintf(stderr, "'%s' = '%s'\n", var, val);
-		set_variable(var, val);
-	}
-}
-
 /*
  * Output the program syntax then exit.
  */
@@ -302,23 +251,14 @@ int main(int argc, char **argv)
 	int c;
 	int qflag = 0;
 	char *uarg = NULL;
-	alist fargs = alist_new();
-	alist vargs = alist_new();
 
 	while ((c = getopt(argc, argv, "f:hqu:v:V")) != -1)
 		switch (c) {
-		case 'f':
-			alist_append(fargs, optarg);
-			break;
 		case 'q':
 			qflag = 1;
 			break;
 		case 'u':
 			uarg = optarg;
-			break;
-		case 'v':
-			check_var_syntax(optarg);
-			alist_append(vargs, optarg);
 			break;
 		case 'V':
 			fprintf(stderr, ZILE_VERSION_STRING "\n");
@@ -348,7 +288,6 @@ int main(int argc, char **argv)
 	init_variables();
 	if (!qflag)
 		read_rc_file(uarg);
-	set_variables(vargs);
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */
 	create_first_window();
@@ -366,15 +305,11 @@ int main(int argc, char **argv)
         else
 		/*
 		 * Show the splash screen only if there isn't any file
-		 * specified on command line and no function was specified
-		 * with the `-f' flag.
+		 * specified on command line.
 		 */
-		if (alist_count(fargs) == 0)
-			about_screen();
+                about_screen();
 
 	setup_main_screen(argc);
-
-	execute_functions(fargs);
 
 	/* Run the main Zile loop. */
 	loop();
@@ -386,8 +321,6 @@ int main(int argc, char **argv)
 	term_refresh();
 
 	/* Free all the memory allocated. */
-	alist_delete(fargs);
-	alist_delete(vargs);
 	free_kill_ring();
 	free_registers();
 	free_search_history();
