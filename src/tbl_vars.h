@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.9 2004/04/04 20:33:12 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.10 2004/04/05 17:18:14 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -140,8 +140,8 @@ X("status-line-color",			"c", "white", "\
 The color of the status line.")
 X("tab-width",				"", "8", "\
 The default tabulation width.")
-X("text-mode-auto-fill",		"b", "false", "\
-If enabled, the Auto Fill Mode is automatically enabled in Text Mode.")
+X("auto-fill-mode",			"b", "false", "\
+If enabled, the Auto Fill Mode is automatically enabled.")
 X("transient-mark-mode",		"b", "true", "\
 If enabled, deactivates the mark when the buffer contents change.\n\
 Also enables highlighting of the region whenever the mark is active.\n\

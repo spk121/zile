@@ -26,9 +26,8 @@ tab-width = 8
 # The default fill column (in Auto Fill Mode) [default: 72]
 fill-column = 72
 
-# Automatically enable the Auto Fill Mode in Text Mode and/or Mail Mode
-text-mode-auto-fill = false		# [default: false]
-mail-mode-auto-fill = false		# [default: false]
+# Automatically enable the Auto Fill Mode [default: false]
+auto-fill-mode = false
 
 # Display time in status line [default: true]
 display-time = true
@@ -74,10 +73,6 @@ colors = true
 #     light-black, light-blue, light-cyan, light-green, light-magenta,
 #     light-red, light-white, light-yellow
 status-line-color = white
-
-# The character prepended to quoted text in mails [default: ">"]
-# Used by Font Lock in Mail Mode (if Mail Mode was compiled-in).
-mail-quoting-char = ">"
 
 # Enable beep [default: true]
 # If enabled, a sound will be emitted on any error.

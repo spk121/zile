@@ -16,8 +16,8 @@
 @titlepage
 @title The Zile Manual
 @subtitle Edition 1.7 for Zile version 1.7
-@subtitle Feb 2004
-@author Sandro Sigala
+@subtitle April 2004
+@author Sandro Sigala and Reuben Thomas
 
 @dircategory Text editors
 @direntry
@@ -26,7 +26,7 @@
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1997-2003 Sandro Sigala @email{sandro@@sigala.it}.
+Copyright @copyright{} 1997-2004 Sandro Sigala @email{zile-devel@lists.sourceforge.net}.
 @end titlepage
 
 @c ---------------------------------------------------------------------------
@@ -101,8 +101,6 @@ under Zile.
 This works for @kbd{M-x} commands and for file names.
 @item Colors.
 Zile makes use of the color capatibilities of the terminal if available.
-@item Source highlighting (``C'', ``C++'', ``C#'', Java, shell scripts, email).
-Zile can highlight source files and scripts for better reading.
 @item Auto fill (word wrap).
 Zile automatically breaks the lines when they become too wide (if the
 @i{Auto Fill Mode} is enabled).
@@ -709,8 +707,6 @@ List defined functions.
 List defined registers.
 @item list-variables
 List defined variables.
-@item mail-mode
-Turn on the @i{Mail Mode} for editing mails.
 @item mark-whole-buffer
 Put point at beginning and mark at end of buffer.
 @item mark-sexp
@@ -1050,65 +1046,9 @@ Default value is @samp{false}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
-@item font-character
-The color used in @i{Font Lock Mode} for characters.
-Default value is @samp{green}.
-@item font-character-delimiters
-The color used in @i{Font Lock Mode} for character delimiters.
-Default value is @samp{white}.
-@item font-comment
-The color used in @i{Font Lock Mode} for comments.
-Default value is @samp{red}.
-@item font-directive
-The color used in @i{Font Lock Mode} for preprocessor directives.
-Default value is @samp{blue}.
-@item font-here-document
-The color used in @i{Font Lock} and @i{Shell-script} modes for
-@i{here-document} (e.g.: @samp{<<EOF}) blocks.
-Default value is @samp{green}.
-@item font-identifier
-The color used in @i{Font Lock Mode} for identifiers.
-Default value is @samp{white}.
-@item font-keyword
-The color used in @i{Font Lock Mode} for keywords.
-Default value is @samp{magenta}.
-@item font-mail1
-The color used in @i{Mail Mode} for quoted text (level 1).
-Default value is @samp{green}.
-@item font-mail2
-The color used in @i{Mail Mode} for quoted text (level 2).
-Default value is @samp{red}.
-@item font-mail3
-The color used in @i{Mail Mode} for quoted text (level 3).
-Default value is @samp{cyan}.
-@item font-mail4
-The color used in @i{Mail Mode} for quoted text (level 4).
-Default value is @samp{magenta}.
-@item font-mail5
-The color used in @i{Mail Mode} for quoted text (level 5).
-Default value is @samp{blue}.
-@item font-number
-The color used in @i{Font Lock Mode} for numbers.
-Default value is @samp{cyan}.
-@item font-other
-The color used in @i{Font Lock Mode} for the text.
-Default value is @samp{white}.
-@item font-string
-The color used in @i{Font Lock Mode} for strings.
-Default value is @samp{green}.
-@item font-string-delimiters
-The color used in @i{Font Lock Mode} for string delimiters.
-Default value is @samp{white}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
 value is @samp{false}.
-@item mail-mode-auto-fill
-If enabled, the @i{Auto Fill Mode} is automatically enabled in @i{Mail Mode}.
-Default value is @samp{false}.
-@item mail-quoting-char
-The character prepended to quoted text in mails.
-Used by @i{Font Lock} in @i{Mail Mode}.
-Default value is @samp{>}.
 @item novice-level
 Enable this if you are novice to Emacs in general.
 Disabling this variable the @i{Mini Help}
@@ -1129,9 +1069,9 @@ Default value is @samp{white}.
 @item tab-width
 The default tabulation width.
 Default value is @samp{8}.
-@item text-mode-auto-fill
-If enabled, the @i{Auto Fill Mode} is automatically enabled in @i{Text Mode}.
-Default value is @samp{false}.
+@item auto-fill-mode
+If enabled, the @i{Auto Fill Mode} is automatically enabled.  Default
+value is @samp{false}.
 
 @item transient-mark-mode
 If enabled, deactivates the mark when the buffer contents change.
@@ -1148,7 +1088,7 @@ highlight all windows or just the selected window.  Default value is
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the
-maintainers at @email{zile-devel@@lists.sourceforge.net}.
+developers at @email{zile-devel@@lists.sourceforge.net}.
 Please take a look at the @file{KNOWNBUGS} file in the source package
 before posting a bug report.
 

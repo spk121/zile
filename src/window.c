@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.8 2004/03/13 19:59:51 rrt Exp $	*/
+/*	$Id: window.c,v 1.9 2004/04/05 17:18:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -278,7 +278,7 @@ void create_first_window(void)
 	bp = create_buffer("*scratch*");
 	bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
 	cur_bp = bp;
-	if (lookup_bool_variable("text-mode-auto-fill"))
+	if (lookup_bool_variable("auto-fill-mode"))
 		FUNCALL(auto_fill_mode);
 
 	wp = new_window();

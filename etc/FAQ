@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/04/04 20:33:12 $
+		   Last updated: $Date: 2004/04/05 17:18:14 $
 
 ------------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ INDEX
    2.8. How to display non-English characters?
    2.9. Zile doesn't handle filenames with non-English characters.
    2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
-   2.11. How to enable Auto Fill Mode in Text Mode at startup?
+   2.11. How to enable Auto Fill Mode at startup?
    2.12. How to change the binding of a function?
    2.13. The Zile screen is not resized in a X Window terminal.
 
@@ -179,11 +179,15 @@ INDEX
 
     and using the alternative key sequences (`M-h' instead of `C-h').
 
-2.11. How to change the binding of a function?
+2.11. How to enable Auto Fill Mode at startup?
 
-    Unfortunately no run-time option exists, yet. If you would like to
-    change a key binding of Zile, you have to edit the
-    `src/tbl_funcs.h' file and recompile the sources.
+    Add the following line to your `~/.zilerc' file:
+
+	auto-fill-mode = true
+
+2.12. How to change the binding of a function?
+
+    Use global-set-key.
 
 2.13. The Zile screen is not resized in a X Window terminal.
 
