@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.12 2004/01/21 02:04:04 dacap Exp $	*/
+/*	$Id: line.c,v 1.13 2004/01/28 10:37:07 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -437,7 +437,7 @@ the current buffer.
 	return ret;
 }
 
-void insert_string(char *s)
+void insert_string(const char *s)
 {
 	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, strlen(s), 0);
 	undo_nosave = TRUE;
@@ -907,4 +907,3 @@ DEFUN ("just-one-space", just_one_space)
 	undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	return TRUE;
 }
-
