@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.6 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: funcs.c,v 1.7 2003/11/28 23:07:02 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -615,9 +615,9 @@ static void edit_tab_line(linep *lp, int lineno, int offset, int size, int actio
 	src[size] = '\0';
 
 	if (action == TAB_UNTABIFY)
-		untabify_string(dest, src, offset, cur_bp->tab_width); 
-	else 
-		tabify_string(dest, src, offset, cur_bp->tab_width); 
+		untabify_string(dest, src, offset, cur_bp->tab_width);
+	else
+		tabify_string(dest, src, offset, cur_bp->tab_width);
 
 	if (strcmp(src, dest) != 0) {
 		undo_save(UNDO_REPLACE_BLOCK, lineno, offset, size, strlen(dest));
@@ -1138,7 +1138,7 @@ to execute the line as a command; passes the contents of the region as
 input to the shell command.
 If the shell command produces any output, the output goes to a Zile buffer
 named `*Shell Command Output*', which is displayed in another window
-but not selected.  
+but not selected.
 If the output is one line, it is displayed in the echo area.
 A numeric argument, as in `M-1 M-|' or `C-u M-|', directs output to the
 current buffer, then the old region is deleted first and the output replaces
