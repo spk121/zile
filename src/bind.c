@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.19 2004/03/09 19:06:35 rrt Exp $	*/
+/*	$Id: bind.c,v 1.20 2004/03/09 22:38:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -152,42 +152,6 @@ static leafp search_key(leafp tree, int *keys, int n)
 	return NULL;
 }
 
-#if DEBUG
-static void prspaces(int i)
-{
-	int x;
-	for (x = 0; x < i; x++)
-		fputc(' ', stderr);
-}
-
-static void show_tree0(leafp tree)
-{
-	char buf[128];
-	static int s;
-	int i, l;
-
-	prspaces(s);
-	fprintf(stderr, "==> key %s\r\n", keytostr(buf, tree->key, &l));
-	s += 4;
-	for (i = 0; i < tree->vecnum; ++i) {
-		if (tree->vec[i]->func != NULL) {
-			prspaces(s);
-			fprintf(stderr, "key %s\r\n",
-				keytostr(buf, tree->vec[i]->key, &l));
-		} else
-			show_tree0(tree->vec[i]);
-	}
-	s -= 4;
-	prspaces(s);
-	fprintf(stderr, "<== key %s\r\n", keytostr(buf, tree->key, &l));
-}
-
-void show_tree(void)
-{
-	show_tree0(leaf_tree);
-}
-#endif /* DEBUG */
-
 int do_completion(astr as, int *compl)
 {
 	int c;
@@ -306,7 +270,7 @@ struct fentry {
 	/* The function pointer. */
 	Function func;
 
-	/* The assigned keys. */
+	/* The assigned keys.  XXX use a list */
 	char *key[3];
 };
 
@@ -544,29 +508,32 @@ List defined functions.
 	return TRUE;
 }
 
-static void write_bindings_tree(leafp tree, int level)
+static void write_bindings_tree(leafp tree, alist keys)
 {
-	char key[128];
-	static astr keys[8];
-	int i, j;
+	int i;
 
-	keys[level] = chordtostr(tree->key);
+	alist_append(keys, chordtostr(tree->key));
 	for (i = 0; i < tree->vecnum; ++i) {
-                astr as;
 		leafp p = tree->vec[i];
 		if (p->func != NULL) {
-			key[0] = '\0';
-			for (j = 1; j <= level; ++j) {
-				strcat(key, astr_cstr(keys[j]));
-				strcat(key, " ");
+                        astr key = astr_new();
+                        astr as = chordtostr(p->key);
+			for (alist_first(keys), alist_next(keys);
+                             alist_current_idx(keys) != -1;
+                             alist_next(keys)) {
+				astr_append(key, alist_current(keys));
+				astr_append_char(key, ' ');
 			}
-			as = chordtostr(p->key);
-			strcat(key, astr_cstr(as));
+			astr_append(key, as);
                         astr_delete(as);
-			bprintf("%-15s %s\n", key, get_function_name(p->func));
+			bprintf("%-15s %s\n", astr_cstr(key),
+                                get_function_name(p->func));
+                        astr_delete(key);
 		} else
-			write_bindings_tree(p, level + 1);
+			write_bindings_tree(p, keys);
 	}
+        alist_last(keys);
+        alist_remove(keys);
 }
 
 static void write_bindings_list(va_list ap)
@@ -576,7 +543,7 @@ static void write_bindings_list(va_list ap)
         bprintf("%-15s %s\n", "Binding", "Function");
 	bprintf("%-15s %s\n", "-------", "--------");
 
-	write_bindings_tree(leaf_tree, 0);
+	write_bindings_tree(leaf_tree, alist_new());
 }
 
 DEFUN("list-bindings", list_bindings)
