@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.53 2005/01/25 18:01:28 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.54 2005/01/25 20:04:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -497,9 +497,9 @@ int term_xgetkey(int mode, int arg)
   int key;
   struct sigaction winch_sig;
 
-/* The SIGWINCH handler is only active in this routine so that we know
-   the data structures are in a consistent state, and here is where Zile
-   spends most of its time. */
+/* The SIGWINCH handler is only active in this routine, so that we
+   know the data structures are in a consistent state. Here is where
+   Zile typically spends most of its time. */
   winch_sig.sa_handler = winch_sig_handler;
   sigemptyset(&winch_sig.sa_mask);
   winch_sig.sa_flags = SA_RESTART;
