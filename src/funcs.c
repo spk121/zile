@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.39 2004/05/09 18:01:57 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.40 2004/05/09 19:34:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -325,12 +325,8 @@ Put point at beginning and mark at end of buffer.
 static int quoted_insert_octal(int c1)
 {
 	int c2, c3;
-	do {
-		c2 = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
-		if (c2 == KBD_CANCEL)
-			return FALSE;
-		minibuf_write("C-q %d-", c1 - '0');
-	} while (c2 == KBD_NOKEY);
+        minibuf_write("C-q %d-", c1 - '0');
+        c2 = cur_tp->getkey();
 
 	if (!isdigit(c2) || c2 - '0' >= 8) {
 		insert_char_in_insert_mode(c1 - '0');
@@ -338,12 +334,8 @@ static int quoted_insert_octal(int c1)
 		return TRUE;
 	}
 
-	do {
-		c3 = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
-		if (c3 == KBD_CANCEL)
-			return FALSE;
-		minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
-	} while (c3 == KBD_NOKEY);
+        minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
+        c3 = cur_tp->getkey();
 
 	if (!isdigit(c3) || c3 - '0' >= 8) {
 		insert_char_in_insert_mode((c1 - '0') * 8 + (c2 - '0'));
@@ -365,10 +357,8 @@ You may also type up to 3 octal digits, to insert a character with that code.
 {
 	int c;
 
-	do {
-		c = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
-		minibuf_write("C-q-");
-	} while (c == KBD_NOKEY);
+        minibuf_write("C-q-");
+        c = cur_tp->xgetkey(GETKEY_NONFILTERED, 0);
 
 	if (isdigit(c) && c - '0' < 8)
 		quoted_insert_octal(c);
