@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.29 2004/04/23 20:42:39 rrt Exp $        */
+/*      $Id: file.c,v 1.30 2004/04/23 21:18:54 rrt Exp $        */
 
 #include "config.h"
 
@@ -998,6 +998,8 @@ static int save_buffer(Buffer *bp)
 
                 if (ms_is_from_minibuffer)
                         free(ms);
+
+                bp->save_undop = bp->next_undop;
         }
 
         return TRUE;
