@@ -1,12 +1,11 @@
-/*	$Id: tbl_funcs.h,v 1.19 2004/10/16 20:36:50 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.20 2004/11/14 20:35:48 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
  * X0 means no key binding, X1 means one key binding, etc.
  *
  * Please remember to keep in sync with the Texinfo documentation
- * `../doc/zile.texi', the manual page `zile.1.in' and the reference card
- * `../etc/refcard.tex'.
+ * `../doc/zile.texi' and the manual page `zile.1.in'.
  */
 
 X0("auto-fill-mode", auto_fill_mode)
