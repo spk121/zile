@@ -67,8 +67,8 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
-void waitkey(int msecs);
-int waitkey_discard(int msecs);
+void waitkey(int dsecs);
+int waitkey_discard(int dsecs);
 char *copy_text_block(int startn, int starto, size_t size);
 astr shorten_string(char *s, int maxlen);
 char *replace_string(char *s, char *match, char *subst);
@@ -200,7 +200,7 @@ int term_printw(const char *fmt, ...);
 void term_beep(void);
 int term_getkey(void);
 int term_xgetkey(int mode, int arg);
-int term_ungetkey(int c);
+int term_unget_char(char c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 void free_rotation_buffers(void);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.24 2004/10/14 23:32:11 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.25 2004/10/16 20:19:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -60,12 +60,15 @@ static Screen screen;
 
 Terminal *termp = &thisterm;
 
-int ZILE_COLS;
-int ZILE_LINES;
+static int max_key_chars = 0; /* Length of longest key code. */
+
+int ZILE_COLS;   /* Current number of columns on screen. */
+int ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string;
 static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
+static int kl_string_len, kr_string_len, ku_string_len, kd_string_len;
 astr norm_string;
 static struct termios ostate, nstate;
 
@@ -258,13 +261,26 @@ static void term_init_screen(void)
         term_clear(); /* Ensure the first call to term_refresh will update the screen. */
 }
 
+static char *tgetstr_note_len(const char *cap, char **tcap)
+{
+        char *s = tgetstr(cap, tcap);
+        max_key_chars = max(max_key_chars, strlen(s));
+        return s;
+}
+
+static void setattr(int flags)
+{
+        if (tcsetattr(0, flags, &nstate) < 0) {
+                fprintf(stderr, "Can't set terminal mode\n");
+                zile_exit(1);
+        }
+}
+
 void term_init(void)
 {
         char *tcap;
 
         tcap_ptr = tcap = get_tcap();
-
-        fprintf(stderr, "tcap %p\n", tcap);
 
         read_screen_size();
         termp->width = ZILE_COLS;
@@ -285,28 +301,28 @@ void term_init(void)
         nstate.c_oflag &= ~OPOST;
         nstate.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
         nstate.c_cflag &= ~(CSIZE|PARENB);
-        nstate.c_cc[VMIN] = 1;
         nstate.c_cflag |= CS8;
-        if (tcsetattr(0, TCSADRAIN, &nstate) < 0) {
-                fprintf(stderr, "Can't set terminal mode\n");
-                zile_exit(1);
-        }
+        setattr(TCSADRAIN);
 
         /* Unbuffered I/O so screen is always up-to-date. */
         setvbuf(stdout, NULL, _IONBF, 0);
 
         /* Extract information we will use. */
-        ks_string = tgetstr("ks", &tcap);
-        ke_string = tgetstr("ke", &tcap);
-        cm_string = tgetstr("cm", &tcap);
-        so_string = tgetstr("so", &tcap);
-        se_string = tgetstr("se", &tcap);
-	mr_string = tgetstr("mr", &tcap);
-	me_string = tgetstr("me", &tcap);
-        kl_string = tgetstr("kl", &tcap);
-        kr_string = tgetstr("kr", &tcap);
-        ku_string = tgetstr("ku", &tcap);
-        kd_string = tgetstr("kd", &tcap);
+        ks_string = tgetstr_note_len("ks", &tcap);
+        ke_string = tgetstr_note_len("ke", &tcap);
+        cm_string = tgetstr_note_len("cm", &tcap);
+        so_string = tgetstr_note_len("so", &tcap);
+        se_string = tgetstr_note_len("se", &tcap);
+	mr_string = tgetstr_note_len("mr", &tcap);
+	me_string = tgetstr_note_len("me", &tcap);
+        kl_string = tgetstr_note_len("kl", &tcap);
+        kl_string_len = strlen(kl_string);
+        kr_string = tgetstr_note_len("kr", &tcap);
+        kr_string_len = strlen(kr_string);
+        ku_string = tgetstr_note_len("ku", &tcap);
+        ku_string_len = strlen(ku_string);
+        kd_string = tgetstr_note_len("kd", &tcap);
+        kd_string_len = strlen(kd_string);
         /* We assume the Meta key is present and on. */
 
         norm_string = astr_new();
@@ -342,6 +358,8 @@ void term_close(void)
 
 static int translate_key(char *s, int nbytes)
 {
+        int key = KBD_NOKEY, i, used = 0;
+
         if (nbytes == 1) {
                 switch (*s) {
                 case '\0':		/* C-@ */
@@ -403,63 +421,84 @@ static int translate_key(char *s, int nbytes)
                 default:
                         return *s;
                 }
-        } else if (strcmp(s, kl_string) == 0)
-                return KBD_LEFT;
-        else if (strcmp(s, kr_string) == 0)
-                return KBD_RIGHT;
-        else if (strcmp(s, ku_string) == 0)
-                return KBD_UP;
-        else if (strcmp(s, kd_string) == 0)
-                return KBD_DOWN;
-        else if (nbytes > 1) {
-                int i;
-                for (i = nbytes - 1; i > 0; i--)
-                        term_ungetkey(s[i]);
-                return translate_key(s, 1);
+        } else if (strncmp(s, kl_string, min(kl_string_len, nbytes)) == 0) {
+                key = KBD_LEFT;
+                used = kl_string_len;
+        } else if (strncmp(s, kr_string, min(kr_string_len, nbytes)) == 0) {
+                key = KBD_RIGHT;
+                used = kr_string_len;
+        } else if (strncmp(s, ku_string, min(ku_string_len, nbytes)) == 0) {
+                key = KBD_UP;
+                used = ku_string_len;
+        } else if (strncmp(s, kd_string, min(kd_string_len, nbytes)) == 0) {
+                key = KBD_DOWN;
+                used = kd_string_len;
+        } else if (nbytes > 1) {
+                key = translate_key(s, 1);
+                used = 1;
         }
 
-        return KBD_NOKEY;
+        for (i = nbytes - 1; i >= used; i--)
+                term_unget_char(s[i]);
+
+        return key;
 }
 
-#define MAX_KEY_CHARS 16 /* Hopefully more than the longest keycode sequence. */
+#define MAX_KEY_BUF	64
 
-static int xgetkey(int mode, int arg)
+static char key_buf[MAX_KEY_BUF];
+static char *keyp = key_buf + MAX_KEY_BUF;
+
+static int xgetkey(int mode, int dsecs)
 {
-        int ret = 0;
         size_t nbytes;
-        char keys[MAX_KEY_CHARS];
+        char keys[MAX_KEY_BUF + max_key_chars];
+        int len = MAX_KEY_BUF - (keyp - key_buf);
 
-        if (mode & GETKEY_DELAYED)
-                nstate.c_cc[VTIME] = 0;	 /* Wait indefinitely for at least one character. */
-        else {
-                if (arg == 0)  /* If we want to wait no time at all, wait the minimum. */
-                        arg = 1;
-                nstate.c_cc[VTIME] = arg / 100;  /* Wait up to arg/100 10ths of a second. */
-        }                
+        if (mode & GETKEY_DELAYED) {
+                nstate.c_cc[VTIME] = dsecs;  /* Wait up to arg deciseconds... */
+                nstate.c_cc[VMIN] = 0;       /* ...but don't require any characters. */
+        } else {
+                nstate.c_cc[VTIME] = 0;	 /* Wait indefinitely... */
+                nstate.c_cc[VMIN] = 1;   /* ...for at least one character. */
+        }
 
-        nbytes = read(STDIN_FILENO, keys, MAX_KEY_CHARS);
-        keys[nbytes] = '\0';
+        if (keyp < key_buf + MAX_KEY_BUF) {
+                nstate.c_cc[VMIN] = 0; /* We already have characters; don't wait for more. */
+                nstate.c_cc[VTIME] = 0;
+                memcpy(keys, keyp, len);
+                keyp = key_buf + MAX_KEY_BUF;
+        }
+
+        setattr(TCSANOW); /* Set waiting period and number of characters. */
+
+        nbytes = len;
+        if (len < max_key_chars)  /* Don't get more chars if we already have the maximum for a keystroke. */
+                nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
+
+        {
+                int i;
+                fprintf(stderr, "\n!");
+                for (i = 0; i < nbytes; i++)
+                        fprintf(stderr, "%d ", keys[i]);
+                fprintf(stderr, "\n");
+        }
         
-	if (ret < 0)
+	if (nbytes < 0)
 		return KBD_NOKEY;
 
-        if (mode & GETKEY_NONFILTERED)
+        if (mode & GETKEY_NONFILTERED) {
+                int i;
+                for (i = nbytes - 1; i >= 0; i--)
+                        term_unget_char(keys[i]);
                 return keys[nbytes - 1];
-        else {
+        } else {
                 int key = translate_key(keys, nbytes);
-                while (key == KBD_META) {
-                        char c = term_getkey();
-                        key = translate_key(&c, 1);
-                        key |= KBD_META;
-                }
+                while (key == KBD_META)
+                        key = term_getkey() | KBD_META;
                 return key;
         }
 }
-
-#define MAX_UNGETKEY_BUF	16
-
-static int ungetkey_buf[MAX_UNGETKEY_BUF];
-static int *ungetkey_p = ungetkey_buf;
 
 static void winch_sig_handler(int signo)
 {
@@ -476,9 +515,6 @@ int term_xgetkey(int mode, int arg)
 {
         int key;
         struct sigaction winch_sig;
-
-	if (ungetkey_p > ungetkey_buf)
-		return *--ungetkey_p;
 
         winch_sig.sa_handler = winch_sig_handler;
         sigemptyset(&winch_sig.sa_mask);
@@ -498,12 +534,12 @@ int term_getkey(void)
         return term_xgetkey(0, 0);
 }
 
-int term_ungetkey(int key)
+int term_unget_char(char c)
 {
-	if (ungetkey_p - ungetkey_buf >= MAX_UNGETKEY_BUF)
+	if (keyp == key_buf)
 		return FALSE;
 
-	*ungetkey_p++ = key;
+	*--keyp = c;
 
 	return TRUE;
 }
