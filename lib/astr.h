@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.13 2004/03/13 16:31:20 rrt Exp $	*/
+/*	$Id: astr.h,v 1.14 2004/03/13 16:44:46 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -38,6 +38,13 @@
  * Negative values are also allowed, and count from the end of the
  * string. In particular, -1 refers to the last character of the
  * string.
+ *
+ * Where not otherwise specified, the functions return the first
+ * argument string, usually named as in the function prototype.
+ */
+
+/*
+ * The dynamic string type
  */
 typedef struct astr_s *astr;
 
@@ -98,40 +105,24 @@ extern astr   astr_append_char(astr as, int c);
  */
 extern astr   astr_truncate(astr as, size_t size);
 
-/* .Pp */
-/* The */
-/* .Fn astr_find */
-/* and */
-/* .Fn astr_find_cstr */
-/* functions find the first occurrence of the argument string or character */
-/* into the argument */
-/* .Fa as , */
-/* returning the position starting from the beginning of the string. */
-/* .Pp */
-/* The */
-/* .Fn astr_rfind */
-/* and */
-/* .Fn astr_rfind_cstr */
-/* functions find the first occurrence of the argument string or character */
-/* into the argument */
-/* .Fa as , */
-/* returning the position starting from the end of the string. */
-/* .Pp */
-/* The */
-/* .Fn astr_replace , */
-/* and */
-/* .Fn astr_replace_cstr */
-/* functions replace up to */
-/* .Fa size */
-/* characters of the argument string */
-/* .Fa as , */
-/* starting from the position */
-/* .Fa pos , */
-/* with the argument string or character. */
+/*
+ * Find the first occurrence of the argument string in as, returning
+ * the position starting from the beginning of the string.
+ */
 extern int    astr_find(const astr as, const astr src);
 extern int    astr_find_cstr(const astr as, const char *s);
+
+/*
+ * Find the last occurrence of the argument string in as, returning
+ * the position starting from the end of the string.
+ */
 extern int    astr_rfind(const astr as, const astr src);
 extern int    astr_rfind_cstr(const astr as, const char *s);
+
+/*
+ * Replace up to size characters of as with the argument string,
+ * starting from position pos.
+ */
 extern astr   astr_replace(astr as, int pos, size_t size, const astr src);
 extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 
@@ -149,11 +140,15 @@ extern astr   astr_vafmt(astr as, const char *fmt, va_list ap);
 extern astr   astr_afmt(astr as, const char *fmt, ...);
 
 /*
- * Internal data structures
+ * Internal data structure
  *
- * You should never access directly to the following data.
+ * Internally, each string has three fields: a buffer that contains
+ * the C string, the buffer size and the size of the string. Each time
+ * the string is enlarged beyond the current size of the buffer it is
+ * reallocated with realloc.
+ *
+ * You should never directly access the struct fields.
  */
-
 struct astr_s {
 	char *	text;
 	size_t	size;
