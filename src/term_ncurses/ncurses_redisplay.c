@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.17 2004/02/17 23:20:32 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.18 2004/03/03 01:50:34 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -273,24 +273,14 @@ void ncurses_refresh_cached_variables(void)
 	show_eob_marker = lookup_bool_variable("show-eob-marker");
 }
 
-static int make_char_printable(char *buf, unsigned int c)
+static int make_char_printable(char **buf, unsigned int c)
 {
-	if (c == '\0') {
-		strcpy(buf, "^@");
-		return 2;
-	}
-
-	if (c <= '\32')
-		sprintf(buf, "^%c", 'A' + c - 1);
+	if (c == '\0')
+                return asprintf(buf, "^@");
+	else if (c <= '\32')
+		return asprintf(buf, "^%c", 'A' + c - 1);
 	else
-		sprintf(buf, "\\%o", c & 255);
-
-	/*
-	 * We could use the returned value of sprintf to get the length
-	 * of the string, but on some platforms the sprintf function is
-	 * broken and the returned value is not correct.
-	 */
-	return strlen(buf);
+		return asprintf(buf, "\\%o", c & 255);
 }
 
 static int pc_to_ascii[256] =
@@ -332,7 +322,7 @@ static int pc_to_ascii[256] =
 static void outch(int c, chtype font, int *x)
 {
 	int j, w;
-	char buf[16];
+	char *buf;
 
 	if (*x >= COLS)
 		return;
@@ -343,9 +333,10 @@ static void outch(int c, chtype font, int *x)
 	else if (is_displayable[(unsigned char)c])
 		addch(pc_to_ascii[(unsigned char)c] | font), ++(*x);
 	else {
-		j = make_char_printable(buf, c);
+		j = make_char_printable(&buf, c);
 		for (w = 0; w < j && *x < COLS; ++w)
 			addch(buf[w] | font), ++(*x);
+                free(buf);
 	}
 }
 
@@ -825,7 +816,7 @@ static void calculate_start_column(Window *wp)
 {
 	int col = 0, lastcol = 0, t = wp->bp->tab_width;
 	int rpfact, lpfact;
-	char buf[16], *rp, *lp, *p;
+	char *buf, *rp, *lp, *p;
 	Point pt = window_pt(wp);
 
 	rp = pt.p->text + pt.o;
@@ -838,8 +829,10 @@ static void calculate_start_column(Window *wp)
 				++col;
 			} else if (is_displayable[(unsigned char)*p])
 				++col;
-			else
-				col += make_char_printable(buf, *p);
+			else {
+				col += make_char_printable(&buf, *p);
+                                free(buf);
+                        }
 
 		lpfact = (lp - pt.p->text) / (wp->ewidth / 3);
 
@@ -856,41 +849,42 @@ static void calculate_start_column(Window *wp)
 	point_screen_column = col;
 }
 
-static char *make_screen_pos(Window *wp)
+static char *make_screen_pos(Window *wp, char **buf)
 {
-	static char buf[16];
 	Point pt = window_pt(wp);
 
 	if (wp->bp->num_lines <= wp->eheight && wp->topdelta == pt.n)
-		strcpy(buf, "All");
+		asprintf(buf, "All");
 	else if (pt.n == wp->topdelta)
-		strcpy(buf, "Top");
+		asprintf(buf, "Top");
 	else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
-		strcpy(buf, "Bot");
+		asprintf(buf, "Bot");
 	else
-		sprintf(buf, "%2d%%", (int)((float)pt.n / wp->bp->num_lines * 100));
+		asprintf(buf, "%2d%%", (int)((float)pt.n / wp->bp->num_lines * 100));
 
-	return buf;
+	return *buf;
 }
 
 /*
  * Format the time section of status line.
  */
-static char *make_time_str(char *buf)
+#define TIME_STR_LEN 80
+static char *make_time_str(void)
 {
 	const char *fmt;
+        char *buf = zmalloc(TIME_STR_LEN);
 	time_t t;
 	if ((fmt = display_time_format) == NULL)
 		fmt = "%I:%M:%p";
 	time(&t);
-	strftime(buf, 80, fmt, localtime(&t));
+	strftime(buf, TIME_STR_LEN, fmt, localtime(&t));
 	return buf;
 }
 
 static void draw_status_line(int line, Window *wp)
 {
 	int i;
-	char *mode;
+	char *mode, *buf;
 	Point pt = window_pt(wp);
 
 	attrset(A_REVERSE | status_line_color);
@@ -943,12 +937,13 @@ static void draw_status_line(int line, Window *wp)
 	       (thisflag & FLAG_DEFINING_MACRO) ? " Def" : "",
 	       (wp->bp->flags & BFLAG_ISEARCH) ? " Isearch" : "",
 	       pt.n+1, get_goalc_wp(wp),
-	       make_screen_pos(wp));
+	       make_screen_pos(wp, &buf));
+        free(buf);
 
 	if (display_time) {
-		char buf[64];
-		make_time_str(buf);
+		buf = make_time_str();
 		mvaddstr(line, wp->ewidth - strlen(buf) - 2, buf);
+                free(buf);
 	}
 
 	attrset(0);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.10 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: rc.c,v 1.11 2004/03/03 01:50:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -44,19 +44,20 @@ static void error(char *fmt, ...)
 {
 	va_list ap;
 	astr msg1;
-	char msg2[50];
+	char *msg2;
 
 	msg1 = astr_new();
 	astr_fmt(msg1, "zile:%s:%d: ", rc_name, lineno);
 
 	va_start(ap, fmt);
-	vsprintf(msg2, fmt, ap);
+	vasprintf(&msg2, fmt, ap);
 	va_end(ap);
 
 	minibuf_error("%s%s", astr_cstr(msg1), msg2);
 
 	waitkey_discard(3 * 1000);
 	astr_delete(msg1);
+        free(msg2);
 }
 
 static int skip_ws(int c)
