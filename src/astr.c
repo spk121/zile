@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.5 2005/01/03 12:10:39 rrt Exp $	*/
+/*	$Id: astr.c,v 1.6 2005/01/03 12:29:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -377,7 +377,7 @@ int main(void)
 	assert_eq(as1, "5 * 3 = 15");
 	astr_delete(as1);
 
-        assert(fp = fopen("astr.c", "r"));
+        assert(fp = fopen(SRCPATH "/astr.c", "r"));
 	as1 = astr_fgets(fp);
 	printf("The first line of astr.c is: \"%s\"\n", astr_cstr(as1));
         assert(fclose(fp) == 0);

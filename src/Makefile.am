@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.21 2005/01/03 12:09:20 rrt Exp $
+## $Id: Makefile.am,v 1.22 2005/01/03 12:29:39 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -13,7 +13,7 @@ check_PROGRAMS = alist astr htable
 alist_CPPFLAGS = -DTEST
 alist_LDADD = zmalloc.o
 
-astr_CPPFLAGS = -DTEST
+astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
 
 htable_CPPFLAGS = -DTEST
