@@ -1,4 +1,4 @@
-/*	$Id: killring.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: killring.c,v 1.4 2003/06/24 14:00:52 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -29,6 +29,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "zile.h"
 #include "extern.h"

@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.8 2003/06/24 12:22:39 rrt Exp $	*/
+/*	$Id: file.c,v 1.9 2003/06/24 14:00:52 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -387,7 +387,6 @@ static int have_extension(const char *filename, const char *exts[])
 
 static int exists_corr_file(char *dest, char *src, const char *ext)
 {
-	int retvalue;
 	char *p;
 	strcpy(dest, src);
 	if ((p = strrchr(dest, '.')) != NULL)
@@ -947,7 +946,8 @@ static int ask_delete_old_revisions(const char *filename)
 
 static int get_new_revision(const char *filename)
 {
-	int i, fd, first, latest, count, maxrev;
+	int i, fd, first, latest, maxrev;
+        int count = 0;
 	char *buf = (char *)zmalloc(strlen(filename) + 10);
 
 	/* Find the latest existing revision. */

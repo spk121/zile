@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.4 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.5 2003/06/24 14:00:52 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "zile.h"
 #include "extern.h"
@@ -837,6 +838,7 @@ DEFUN("mark-word", mark_word)
 Set mark argument words away from point.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("backward-sentence", backward_sentence)
@@ -844,6 +846,7 @@ DEFUN("backward-sentence", backward_sentence)
 Move backward to start of sentence.  With argument N, do it N times.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("forward-sentence", forward_sentence)
@@ -852,6 +855,7 @@ Move forward to next sentence end.  With argument, repeat.
 With negative argument, move backward repeatedly to sentence beginning.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("kill-sentence", kill_sentence)
@@ -861,6 +865,7 @@ With argument, repeat; negative argument -N means kill back to Nth start
 of sentence.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("backward-kill-sentence", backward_kill_sentence)
@@ -870,6 +875,7 @@ With argument N, do it N times; negative argument -N means kill forward
 to Nth end of sentence.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("backward-paragraph", backward_paragraph)
@@ -879,6 +885,7 @@ With argument N, do it N times; negative argument -N means move forward
 N paragraphs.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("forward-paragraph", forward_paragraph)
@@ -888,6 +895,7 @@ With argument N, do it N times; negative argument -N means move backward
 N paragraphs.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("mark-paragraph", mark_paragraph)
@@ -896,6 +904,7 @@ Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
 +*/
 {
+        return FALSE;
 }
 
 DEFUN("fill-paragraph", fill_paragraph)
@@ -903,6 +912,7 @@ DEFUN("fill-paragraph", fill_paragraph)
 Fill paragraph at or after point.
 +*/
 {
+        return FALSE;
 }
 
 #define UPPERCASE		1

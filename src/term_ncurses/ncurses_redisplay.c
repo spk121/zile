@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.4 2003/06/24 14:00:52 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -233,8 +233,10 @@ static void parse_displayable_chars(void)
 
 void ncurses_refresh_cached_variables(void)
 {
-	char *p;
 #if ENABLE_NONTEXT_MODES
+#if ENABLE_MAIL_MODE
+	char *p;
+#endif
 	/*
 	 * Refresh the font cache.
 	 */
@@ -747,7 +749,10 @@ static void calculate_highlight_region(windowp wp, struct highlight_region *tdat
 
 static void draw_window(int topline, windowp wp)
 {
-	int i, lastanchor, startcol, lineno;
+	int i, startcol, lineno;
+#if ENABLE_NONTEXT_MODES
+        int lastanchor;
+#endif
 	linep lp;
 	struct highlight_region tdata;
 
