@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.6 2004/12/20 18:23:20 rrt Exp $
+## $Id: Makefile.am,v 1.7 2005/01/03 03:39:53 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -16,7 +16,8 @@ EXTRA_DIST =					\
 	TUTORIAL				\
 	zilerc.sample				\
 	zlint					\
-	zilerc.texi
+	zilerc.texi				\
+	mkdoc.c
 
 HELP: $(top_srcdir)/doc/zile.texi
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
