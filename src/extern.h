@@ -144,7 +144,7 @@ extern void	free_macros(void);
 
 /* main.c ----------------------------------------------------------------- */
 extern windowp	cur_wp, head_wp;
-extern bufferp	cur_bp, prev_bp, head_bp;
+extern bufferp	cur_bp, head_bp;
 extern terminalp cur_tp;
 extern int	thisflag, lastflag, last_uniarg;
 

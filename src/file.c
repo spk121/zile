@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.13 2003/12/08 21:48:15 rrt Exp $	*/
+/*	$Id: file.c,v 1.14 2004/02/04 02:56:21 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -635,7 +635,7 @@ Select to the user specified buffer in the current window.
 	bufferp swbuf;
 	historyp hp;
 
-	swbuf = (prev_bp != NULL) ? prev_bp : ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
+	swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
 	hp = make_buffer_history();
 	ms = minibuf_read_history("Switch to buffer (default @b%s@@): ", "", hp, swbuf->name);
@@ -650,7 +650,6 @@ Select to the user specified buffer in the current window.
 		}
 	}
 
-	prev_bp = cur_bp;
 	switch_to_buffer(swbuf);
 
 	return TRUE;
@@ -685,9 +684,6 @@ int check_modified_buffer(bufferp bp)
 void kill_buffer(bufferp kill_bp)
 {
 	bufferp next_bp;
-
-	if (kill_bp == prev_bp)
-		prev_bp = NULL;
 
 	if (kill_bp->next != NULL)
 		next_bp = kill_bp->next;
@@ -825,7 +821,7 @@ Puts mark after the inserted text.
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	swbuf = prev_bp != NULL ? prev_bp : cur_bp->next != NULL ? cur_bp->next : head_bp;
+	swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 	hp = make_buffer_history();
 	if ((ms = minibuf_read_history("Insert buffer (default @b%s@@): ", "", hp, swbuf->name)) == NULL)
 		return cancel();

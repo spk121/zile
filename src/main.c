@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.12 2004/01/29 10:40:22 rrt Exp $	*/
+/*	$Id: main.c,v 1.13 2004/02/04 02:50:29 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -51,8 +51,8 @@
 
 /* The current window; the first window in list. */
 windowp cur_wp = NULL, head_wp = NULL;
-/* The current buffer; the previous buffer; the first buffer in list. */
-bufferp cur_bp = NULL, prev_bp = NULL, head_bp = NULL;
+/* The current buffer; the first buffer in list. */
+bufferp cur_bp = NULL, head_bp = NULL;
 /* The current output terminal. */
 terminalp cur_tp = NULL;
 
