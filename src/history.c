@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: history.c,v 1.4 2004/03/09 16:19:11 rrt Exp $	*/
+/*	$Id: history.c,v 1.5 2005/01/08 22:41:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -33,8 +33,8 @@ void free_history_elements(History *hp)
 	if (hp->elements) {
 		char *s;
 
-		for (s=alist_first(hp->elements); s != NULL;
-		     s=alist_next(hp->elements))
+		for (s = alist_first(hp->elements); s != NULL;
+		     s = alist_next(hp->elements))
 			free(s);
 
 		alist_delete(hp->elements);
