@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.20 2005/01/14 01:03:02 rrt Exp $   */
+/*      $Id: completion.c,v 1.21 2005/01/14 17:15:02 rrt Exp $   */
 
 #include "config.h"
 
@@ -223,8 +223,9 @@ static int completion_reread(Completion *cp, astr as)
     astr_cat_char(buf, *astr_char(as, i));
   }
   astr_cpy(as, buf);
+  astr_delete(buf);
 
-  agetcwd(buf);
+  buf = agetcwd();
   if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
     return FALSE;
 

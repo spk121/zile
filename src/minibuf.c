@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.31 2005/01/13 00:16:16 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.32 2005/01/14 17:15:06 rrt Exp $     */
 
 #include "config.h"
 
@@ -125,8 +125,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  rbuf = astr_new();
-  agetcwd(rbuf);
+  rbuf = agetcwd();
   dir = astr_new();
   fname = astr_new();
   expand_path(value, astr_cstr(rbuf), dir, fname);
@@ -146,8 +145,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
     /* Add history element. */
     add_history_element(&files_history, p);
 
-    rbuf = astr_new();
-    agetcwd(rbuf);
+    rbuf = agetcwd();
     dir = astr_new();
     fname = astr_new();
 

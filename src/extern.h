@@ -61,11 +61,11 @@ int eolp(void);
 /* file.c ----------------------------------------------------------------- */
 int exist_file(const char *filename);
 int is_regular_file(const char *filename);
-astr agetcwd(astr dest);
+astr agetcwd(void);
 astr get_home_dir(void);
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
 astr compact_path(const char *path);
-astr get_current_dir(astr buf, int interactive);
+astr get_current_dir(int interactive);
 void open_file(char *path, int lineno);
 void read_from_disk(const char *filename);
 int find_file(const char *filename);

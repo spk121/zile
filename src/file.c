@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.58 2005/01/14 16:56:56 rrt Exp $        */
+/*      $Id: file.c,v 1.59 2005/01/14 17:15:06 rrt Exp $        */
 
 #include "config.h"
 
@@ -79,11 +79,12 @@ int is_regular_file(const char *filename)
 }
 
 /* Safe getcwd */
-astr agetcwd(astr as)
+astr agetcwd(void)
 {
   size_t len = PATH_MAX;
   char *buf = (char *)zmalloc(len);
   char *res;
+  astr as;
   while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
     len *= 2;
     buf = zrealloc(buf, len);
@@ -91,7 +92,7 @@ astr agetcwd(astr as)
   /* If there was an error, return the empty string */
   if (res == NULL)
     *buf = '\0';
-  astr_cpy_cstr(as, buf);
+  as = astr_cpy_cstr(astr_new(), buf);
   free(buf);
   return as;
 }
@@ -223,14 +224,16 @@ astr compact_path(const char *path)
 /*
  * Return the current directory.
  */
-astr get_current_dir(astr buf, int interactive)
+astr get_current_dir(int interactive)
 {
+  astr buf;
+  
   if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
     int p;
 
-    astr_cpy_cstr(buf, cur_bp->filename);
+    buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
     p = astr_rfind_cstr(buf, "/");
     if (p != -1)
       astr_truncate(buf, p ? p : 1);
@@ -238,7 +241,7 @@ astr get_current_dir(astr buf, int interactive)
       astr_cat_cstr(buf, "/");
   } else {
     /* Get the current directory name from the system. */
-    agetcwd(buf);
+    buf = agetcwd();
     astr_cat_cstr(buf, "/");
   }
 
@@ -255,7 +258,7 @@ astr get_home_dir(void)
   if (s != NULL && strlen(s) < PATH_MAX)
     as = astr_cat_cstr(astr_new(), s);
   else
-    as = agetcwd(as);
+    as = agetcwd();
   return as;
 }
 
@@ -263,10 +266,9 @@ void open_file(char *path, int lineno)
 {
   astr buf, dir, fname;
 
-  buf = astr_new();
   dir = astr_new();
   fname = astr_new();
-  get_current_dir(buf, FALSE);
+  buf = get_current_dir(FALSE);
   ZTRACE(("original filename: %s, cwd: %s\n", path, astr_cstr(buf)));
   if (!expand_path(path, astr_cstr(buf), dir, fname)) {
     fprintf(stderr, "zile: %s: invalid filename or path\n", path);
@@ -396,8 +398,7 @@ DEFUN("find-file", find_file)
   char *ms;
   astr buf;
 
-  buf = astr_new();
-  get_current_dir(buf, TRUE);
+  buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL) {
     astr_delete(buf);
     return cancel();
@@ -424,8 +425,7 @@ DEFUN("find-alternate-file", find_alternate_file)
   char *ms;
   astr buf;
 
-  buf = astr_new();
-  get_current_dir(buf, TRUE);
+  buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Find alternate: ", astr_cstr(buf)))
       == NULL) {
     astr_delete(buf);
@@ -696,8 +696,7 @@ DEFUN("insert-file", insert_file)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  buf = astr_new();
-  get_current_dir(buf, TRUE);
+  buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf)))
       == NULL) {
     astr_delete(buf);
@@ -1111,8 +1110,7 @@ DEFUN("cd", cd)
   astr buf;
   struct stat st;
 
-  buf = astr_new();
-  get_current_dir(buf, TRUE);
+  buf = get_current_dir(TRUE);
   if ((ms = minibuf_read_dir("Change default directory: ",
                              astr_cstr(buf))) == NULL) {
     astr_delete(buf);
