@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.32 2004/05/10 16:00:32 rrt Exp $        */
+/*      $Id: file.c,v 1.33 2004/05/20 22:34:50 rrt Exp $        */
 
 #include "config.h"
 
@@ -1061,7 +1061,7 @@ static int save_some_buffers(void)
                                 for (;;) {
                                         minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
 
-                                        c = cur_tp->getkey();
+                                        c = term_getkey();
                                         switch (c) {
                                         case KBD_CANCEL:
                                         case KBD_RET:

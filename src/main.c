@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.27 2004/05/20 22:13:53 rrt Exp $	*/
+/*	$Id: main.c,v 1.28 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -82,7 +82,7 @@ static void check_list(Window *wp)
 			fprintf(f, "pointp = %p, pointp->prev = %p, pointp->next = %p\n", wp->bp->pt.p, wp->bp->pt.p->prev, wp->bp->pt.p->next);
 			fprintf(f, "lp = %p, lp->prev = %p, lp->next = %p\n", lp, lp->prev, lp->next);
 			fclose(f);
-			cur_tp->close();
+			term_close();
 			fprintf(stderr, "\aAborting due to internal buffer structure corruption\n");
 			fprintf(stderr, "\aFor more information read the `zile.abort' file\n");
 			abort();
@@ -106,7 +106,7 @@ static void loop(void)
 #endif
 		/* Redisplay every second to update clock */
 		do {
-			cur_tp->redisplay();
+			term_redisplay();
 			c = waitkey_discard(1000);
 		} while (c == KBD_NOKEY);
 
@@ -212,7 +212,7 @@ static void execute_functions(alist al)
 {
 	char *func;
 	for (func = alist_first(al); func != NULL; func = alist_next(al)) {
-		cur_tp->redisplay();
+		term_redisplay();
 		if (!execute_function(func, 1))
 			minibuf_error("Function `%s' not defined", func);
 		lastflag |= FLAG_NEED_RESYNC;
@@ -394,7 +394,7 @@ int main(int argc, char **argv)
          * Initialise terminal.
          */
 	select_terminal(0);
-	cur_tp->init();
+	term_init();
 
 	init_variables();
 	if (!qflag)
@@ -403,11 +403,11 @@ int main(int argc, char **argv)
 
 	/* Force refresh of cached variables. */
 	refresh_cached_variables();
-	cur_tp->open();
+	term_open();
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */
 	create_first_window();
-	cur_tp->redisplay();
+	term_redisplay();
 	init_bindings();
 
 	if (argc < 1) {
@@ -448,7 +448,7 @@ int main(int argc, char **argv)
 	free_variables();
 	free_minibuf();
 
-	cur_tp->close();
+	term_close();
 
 	return 0;
 }

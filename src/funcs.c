@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.40 2004/05/09 19:34:12 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.41 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -326,7 +326,7 @@ static int quoted_insert_octal(int c1)
 {
 	int c2, c3;
         minibuf_write("C-q %d-", c1 - '0');
-        c2 = cur_tp->getkey();
+        c2 = term_getkey();
 
 	if (!isdigit(c2) || c2 - '0' >= 8) {
 		insert_char_in_insert_mode(c1 - '0');
@@ -335,7 +335,7 @@ static int quoted_insert_octal(int c1)
 	}
 
         minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
-        c3 = cur_tp->getkey();
+        c3 = term_getkey();
 
 	if (!isdigit(c3) || c3 - '0' >= 8) {
 		insert_char_in_insert_mode((c1 - '0') * 8 + (c2 - '0'));
@@ -358,7 +358,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 	int c;
 
         minibuf_write("C-q-");
-        c = cur_tp->xgetkey(GETKEY_NONFILTERED, 0);
+        c = term_xgetkey(GETKEY_NONFILTERED, 0);
 
 	if (isdigit(c) && c - '0' < 8)
 		quoted_insert_octal(c);
@@ -385,7 +385,7 @@ int universal_argument(int keytype, int xarg)
 
 	if (keytype == KBD_META) {
 		astr_cpy_cstr(as, "ESC");
-		cur_tp->ungetkey(xarg + '0');
+		term_ungetkey(xarg + '0');
 	}
 	else
 		astr_cpy_cstr(as, "C-u");
@@ -436,13 +436,13 @@ int universal_argument(int keytype, int xarg)
 					   back to normal state).  */
 				}
 				else {
-					cur_tp->ungetkey(c);
+					term_ungetkey(c);
 					break;
 				}
 			}
 		}
 		else {
-			cur_tp->ungetkey(c);
+			term_ungetkey(c);
 			break;
 		}
 	}

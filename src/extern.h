@@ -114,10 +114,6 @@ int backward_delete_char(void);
 void free_registers(void);
 void free_kill_ring(void);
 
-/* lua.c ------------------------------------------------------------------ */
-int zlua_do(const char *s, astr *out);
-void zlua_open(void);
-
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
 void add_kbd_macro(Function func, int set_uniarg, int uniarg);
@@ -187,6 +183,29 @@ void resync_redisplay(void);
 
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);
+
+/* term.c ----------------------------------------------------------------- */
+void term_init(void);
+int term_open(void);
+int term_close(void);
+void term_getyx(int *y, int *x);
+void term_move(int y, int x);
+void term_clrtoeol(void);
+void term_refresh(void);
+void term_redisplay(void);
+void full_redisplay(void);
+void term_clear(void);
+void term_addch(char c);
+void term_addnstr(const char *s, int len);
+void term_attrset(Font f);
+int term_printw(const char *fmt, ...);
+void term_beep(void);
+int term_getkey(void);
+int term_xgetkey(int mode, int arg);
+int term_ungetkey(int c);
+void term_minibuf_write(const char *fmt);
+char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
+void term_minibuf_clear(void);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

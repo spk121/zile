@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.19 2004/05/10 16:00:36 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.20 2004/05/20 22:34:50 rrt Exp $     */
 
 #include "config.h"
 
@@ -63,7 +63,7 @@ void minibuf_write(const char *fmt, ...)
         buf = minibuf_format(fmt, ap);
         va_end(ap);
 
-        cur_tp->minibuf_write(buf);
+        term_minibuf_write(buf);
         free(buf);
 }
 
@@ -79,7 +79,7 @@ void minibuf_error(const char *fmt, ...)
         buf = minibuf_format(fmt, ap);
         va_end(ap);
 
-        cur_tp->minibuf_write(buf);
+        term_minibuf_write(buf);
         free(buf);
 
         ding();
@@ -98,9 +98,9 @@ char *minibuf_read(const char *fmt, const char *value, ...)
         va_end(ap);
 
         if (value != NULL)
-                p = cur_tp->minibuf_read(buf, value, NULL, NULL);
+                p = term_minibuf_read(buf, value, NULL, NULL);
         else
-                p = cur_tp->minibuf_read(buf, "", NULL, NULL);
+                p = term_minibuf_read(buf, "", NULL, NULL);
         free(buf);
 
         return p;
@@ -133,7 +133,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
         astr_delete(fname);
 
         cp = new_completion(TRUE);
-        p = cur_tp->minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
+        p = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
         free_completion(cp);
         astr_delete(rbuf);
         free(buf);
@@ -171,7 +171,7 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
         va_end(ap);
 
         for (;;) {
-                p = cur_tp->minibuf_read(buf, "", cp, NULL);
+                p = term_minibuf_read(buf, "", cp, NULL);
                 if (p == NULL) { /* Cancelled. */
                         free(buf);
                         return -1;
@@ -310,7 +310,7 @@ char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, Hist
         buf = minibuf_format(fmt, ap);
         va_end(ap);
 
-        p = cur_tp->minibuf_read(buf, value, cp, hp);
+        p = term_minibuf_read(buf, value, cp, hp);
         free(buf);
 
         return p;
@@ -321,5 +321,5 @@ char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, Hist
  */
 void minibuf_clear(void)
 {
-        cur_tp->minibuf_clear();
+        term_minibuf_clear();
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.26 2004/05/20 22:13:53 rrt Exp $        */
+/*      $Id: zile.h,v 1.27 2004/05/20 22:34:50 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -59,6 +59,9 @@ typedef struct Terminal Terminal;
 /* We could define an enum "Anchor", but sizeof(enum)==2,
    while sizeof(char)==1. */
 typedef unsigned char Anchor;
+
+/* Font type, really terminal dependent, but needed in extern.h XXX */
+typedef unsigned long Font;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
@@ -279,22 +282,6 @@ struct Terminal {
         void *screen; /* Really a SCREEN *, but we don't want
                          ncurses-specific code or data here. */
         int width, height;
-
-        void (*init)(void);
-        int (*open)(void);
-        int (*close)(void);
-        int (*getkey)(void);
-        int (*xgetkey)(int mode, int arg);
-        int (*ungetkey)(int c);
-        void (*refresh)(void);
-        void (*redisplay)(void);
-        void (*full_redisplay)(void);
-        void (*clear)(void);
-        void (*beep)(void);
-        void (*minibuf_write)(const char *fmt);
-        char *(*minibuf_read)(const char *prompt, const char *value,
-                              Completion *cp, History *hp);
-        void (*minibuf_clear)(void);
 };
 
 /*--------------------------------------------------------------------------

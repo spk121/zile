@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.4 2004/05/20 22:13:53 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.5 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -139,7 +139,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 
 		thistab = -1;
 
-		switch (c = cur_tp->getkey()) {
+		switch (c = term_getkey()) {
 		case KBD_NOKEY:
 			break;
 		case KBD_CTL | 'z':

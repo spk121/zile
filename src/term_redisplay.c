@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.5 2004/05/20 22:13:53 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.6 2004/05/20 22:34:50 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -534,7 +534,7 @@ static void draw_status_line(int line, Window *wp)
 	term_attrset(0);
 }
 
-void do_redisplay(void)
+void term_redisplay(void)
 {
 	int topline, cur_topline = 0;
 	Window *wp;
@@ -570,10 +570,10 @@ void do_redisplay(void)
 	term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
-void full_redisplay(void)
+void term_full_redisplay(void)
 {
 	term_clear();
-	do_redisplay();
+	term_redisplay();
 }
 
 void resize_windows(void)

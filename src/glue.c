@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.11 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: glue.c,v 1.12 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -41,21 +41,21 @@ void ding(void)
 		cancel_kbd_macro();
 
 	if (lookup_bool_variable("beep"))
-		cur_tp->beep();
+		term_beep();
 
 	thisflag |= FLAG_GOT_ERROR;
 }
 
 /*
  * Wait for `msecs' milliseconds or until a key is pressed.
- * The key is then available with cur_tp->getkey().
+ * The key is then available with term_getkey().
  */
 void waitkey(int msecs)
 {
 	int c;
 
-	if ((c = cur_tp->xgetkey(GETKEY_DELAYED, msecs)) != KBD_NOKEY)
-		cur_tp->ungetkey(c);
+	if ((c = term_xgetkey(GETKEY_DELAYED, msecs)) != KBD_NOKEY)
+		term_ungetkey(c);
 }
 
 /*
@@ -64,7 +64,7 @@ void waitkey(int msecs)
  */
 int waitkey_discard(int msecs)
 {
-	return cur_tp->xgetkey(GETKEY_DELAYED, msecs);
+	return term_xgetkey(GETKEY_DELAYED, msecs);
 }
 
 /*

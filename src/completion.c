@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.7 2004/05/09 18:01:57 rrt Exp $   */
+/*      $Id: completion.c,v 1.8 2004/05/20 22:34:50 rrt Exp $   */
 
 #include "config.h"
 
@@ -104,7 +104,7 @@ static void default_completion_scroll_up(Completion *cp)
                 gotobob();
         set_current_window(old_wp);
 
-        cur_tp->redisplay();
+        term_redisplay();
 }
 
 /*
@@ -124,7 +124,7 @@ static void default_completion_scroll_down(Completion *cp)
         }
         set_current_window(old_wp);
 
-        cur_tp->redisplay();
+        term_redisplay();
 }
 
 /*
@@ -208,7 +208,7 @@ static void popup_completion(Completion *cp, int allflag, int num)
 
         set_current_window(old_wp);
 
-        cur_tp->redisplay();
+        term_redisplay();
 }
 
 static int hcompar(const void *p1, const void *p2)

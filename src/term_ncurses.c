@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.3 2004/05/20 22:13:53 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.4 2004/05/20 22:34:50 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -46,22 +46,6 @@ static Terminal thisterm = {
 
 	/* Uninitialized width and height. */
 	-1, -1,
-
-	/* Pointers to ncurses terminal functions. */
-	term_init,
-	term_open,
-        term_close,
-	ncurses_getkey,
-	ncurses_xgetkey,
-	ncurses_ungetkey,
-	term_refresh,
-	do_redisplay,
-	full_redisplay,
-	term_clear,
-	term_beep,
-	term_minibuf_write,
-	term_minibuf_read,
-	term_minibuf_clear,
 };
 
 Terminal *ncurses_tp = &thisterm;
@@ -294,7 +278,7 @@ static int translate_key(int c)
 static int ungetkey_buf[MAX_UNGETKEY_BUF];
 static int *ungetkey_p = ungetkey_buf;
 
-int ncurses_getkey(void)
+int term_getkey(void)
 {
 	int c, key;
 
@@ -335,7 +319,7 @@ static int xgetkey(int mode, int arg)
 		break;
 	case GETKEY_DELAYED:
                 wtimeout(stdscr, arg);
-		c = ncurses_getkey();
+		c = term_getkey();
                 wtimeout(stdscr, -1);
 		break;
 	case GETKEY_NONFILTERED|GETKEY_DELAYED:
@@ -347,7 +331,7 @@ static int xgetkey(int mode, int arg)
 	return c;
 }
 
-int ncurses_xgetkey(int mode, int arg)
+int term_xgetkey(int mode, int arg)
 {
 	int c;
 
@@ -368,7 +352,7 @@ int ncurses_xgetkey(int mode, int arg)
 	return c;
 }
 
-int ncurses_ungetkey(int key)
+int term_ungetkey(int key)
 {
 	if (ungetkey_p - ungetkey_buf >= MAX_UNGETKEY_BUF)
 		return FALSE;

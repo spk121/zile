@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.3 2004/05/20 22:13:53 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.4 2004/05/20 22:34:50 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -37,8 +37,6 @@ extern int LINES, COLS;
 
 extern Terminal *ncurses_tp;
 
-typedef unsigned long Font;
-
 extern Font ZILE_REVERSE, ZILE_BOLD;
 extern Font C_FG_BLACK;
 extern Font C_FG_RED;
@@ -50,31 +48,7 @@ extern Font C_FG_CYAN;
 extern Font C_FG_WHITE;
 extern Font C_FG_WHITE_BG_BLUE;
 
-extern void term_init(void);
-extern int term_open(void);
-extern int term_close(void);
-extern void term_getyx(int *y, int *x);
-extern void term_move(int y, int x);
-extern void term_clrtoeol(void);
-extern void term_refresh(void);
-extern void term_clear(void);
-extern void term_addch(char c);
-extern void term_addnstr(const char *s, int len);
-extern void term_attrset(Font f);
-extern int term_printw(const char *fmt, ...);
-extern void term_beep(void);
-
-extern int ncurses_getkey(void);
-extern int ncurses_xgetkey(int mode, int arg);
-extern int ncurses_ungetkey(int c);
-extern void ncurses_refresh(void);
-
 extern void show_splash_screen(const char *splash);
 extern void refresh_cached_variables(void);
-extern void do_redisplay(void);
-extern void full_redisplay(void);
 extern void resize_windows(void);
-extern void term_minibuf_write(const char *fmt);
-extern char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-extern void term_minibuf_clear(void);
 extern void free_rotation_buffers(void);

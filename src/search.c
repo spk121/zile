@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.15 2004/04/23 20:34:56 rrt Exp $	*/
+/*	$Id: search.c,v 1.16 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -364,7 +364,7 @@ static int isearch(int dir, int regexp)
 	cur_wp->bp->flags |= BFLAG_ISEARCH;
 
 	for (;;) {
-		cur_tp->redisplay();
+		term_redisplay();
 		/* Make the minibuf message.  */
                 astr_truncate(buf, 0);
 		astr_afmt(buf, "%sI-search%s: %s",
@@ -394,7 +394,7 @@ static int isearch(int dir, int regexp)
 				break;
 			}
 		} else {
-			c = cur_tp->getkey();
+			c = term_getkey();
 			if (thisflag & FLAG_DEFINING_MACRO)
 				add_macro_key_data(c);
 		}
@@ -579,7 +579,7 @@ Replace occurrences of a string with other text.
 
 	if (thisflag & FLAG_NEED_RESYNC)
 		resync_redisplay();
-	cur_tp->redisplay();
+	term_redisplay();
 
 	minibuf_write("Replaced %d occurrences", count);
 
@@ -617,10 +617,10 @@ what to do with it.
 			int c;
 			if (thisflag & FLAG_NEED_RESYNC)
 				resync_redisplay();
-			cur_tp->redisplay();
+			term_redisplay();
 			for (;;) {
 				minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
-				c = cur_tp->getkey();
+				c = term_getkey();
 				switch (c) {
 				case KBD_CANCEL:
 				case KBD_RET:
@@ -676,7 +676,7 @@ what to do with it.
 endoffunc:
 	if (thisflag & FLAG_NEED_RESYNC)
 		resync_redisplay();
-	cur_tp->redisplay();
+	term_redisplay();
 
 	minibuf_write("Replaced %d occurrences", count);
 

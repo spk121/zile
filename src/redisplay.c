@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.7 2004/04/04 20:33:12 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.8 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -74,6 +74,6 @@ The desired position of point is always relative to the current window.
 +*/
 {
 	recenter(cur_wp);
-	cur_tp->full_redisplay();
+	term_full_redisplay();
 	return TRUE;
 }

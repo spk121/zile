@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.27 2004/04/23 20:34:56 rrt Exp $	*/
+/*	$Id: bind.c,v 1.28 2004/05/20 22:34:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -152,15 +152,15 @@ int do_completion(astr as, int *compl)
 	int c;
 
 	if (!*compl) {
-		c = cur_tp->xgetkey(GETKEY_DELAYED, 500);
+		c = term_xgetkey(GETKEY_DELAYED, 500);
 		if (c == KBD_NOKEY) {
 			minibuf_write("%s", astr_cstr(as));
-			c = cur_tp->getkey();
+			c = term_getkey();
 			*compl = 1;
 		}
 	} else {
 		minibuf_write("%s", astr_cstr(as));
-		c = cur_tp->getkey();
+		c = term_getkey();
 	}
 	minibuf_clear();
 
@@ -485,7 +485,7 @@ sequence.
         astr as;
 
         minibuf_write("Set key globally:");
-        c = cur_tp->getkey();
+        c = term_getkey();
         p = completion_scan(c, &keys, &numkeys);
 
         as = keyvectostr(keys, numkeys);
@@ -508,7 +508,7 @@ sequence.
 char *get_function_by_key_sequence(void)
 {
 	leafp p;
-	int c = cur_tp->getkey();
+	int c = term_getkey();
 	int *keys, numkeys;
 
 	if (c & KBD_META && isdigit(c & 255))
