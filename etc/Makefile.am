@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.9 2004/11/15 01:01:20 rrt Exp $
+## $Id: Makefile.am,v 1.10 2004/12/18 21:54:03 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
@@ -16,7 +16,6 @@ zile_DATA =					\
 
 EXTRA_DIST =					\
 	FAQ					\
-	rationale				\
 	TUTORIAL				\
 	zilerc.sample				\
 	zlint
