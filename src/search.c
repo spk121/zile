@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.22 2004/10/16 20:17:04 rrt Exp $	*/
+/*	$Id: search.c,v 1.23 2004/11/14 23:17:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -603,9 +603,10 @@ what to do with it.
 			int c;
 			if (thisflag & FLAG_NEED_RESYNC)
 				resync_redisplay();
-			term_redisplay();
 			for (;;) {
 				minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
+                                term_redisplay();
+                                term_refresh();
 				c = term_getkey();
 				switch (c) {
 				case KBD_CANCEL:
