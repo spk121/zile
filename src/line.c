@@ -1,6 +1,8 @@
 /* Line-oriented editing functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
-   Copyright (c) 2004 David A. Capello.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2004 David A. Capello.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -19,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.22 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: line.c,v 1.23 2004/02/17 23:20:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -501,7 +503,7 @@ Insert the character you type.
 		if (!self_insert_command(c)) {
 			ret = FALSE;
 			break;
- 		}
+		}
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;

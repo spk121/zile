@@ -1,5 +1,7 @@
 /* Miscellaneous functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_misc.c,v 1.15 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.16 2004/02/17 23:20:32 rrt Exp $	*/
 
 #include "config.h"
 

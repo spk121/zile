@@ -1,5 +1,7 @@
 /* Disk file handling
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.17 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: file.c,v 1.18 2004/02/17 23:20:33 rrt Exp $	*/
 
 #include "config.h"
 

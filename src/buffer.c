@@ -1,5 +1,7 @@
 /* Buffer-oriented functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.9 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: buffer.c,v 1.10 2004/02/17 23:20:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -114,7 +116,7 @@ void free_buffer(Buffer *bp)
 		up = next_up;
 	}
 
-	/* 
+	/*
 	 * Free markers.
 	 */
 	while (bp->markers)
@@ -315,7 +317,7 @@ int zap_buffer_content(void)
 	cur_bp->flags = 0;
 	cur_bp->num_lines = 0;
 
-	/* 
+	/*
 	 * Free markers (remember that are windows pointing to some of
 	 * this markers).
 	 */

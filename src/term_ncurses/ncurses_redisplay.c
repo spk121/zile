@@ -1,5 +1,7 @@
 /* Redisplay engine
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.16 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.17 2004/02/17 23:20:32 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -48,8 +50,8 @@
 
 #ifdef __FreeBSD__
 /*
- * XXX a redundant refresh() call fixes a refresh bug under
- * FreeBSD with ncurses 1.8.6 (may be also required under others OSs).
+ * A redundant refresh() call fixes a refresh bug under FreeBSD with
+ * ncurses 1.8.6 (may be also required under others OSs).
  */
 #define NEED_REDUNDANT_REFRESH
 #endif

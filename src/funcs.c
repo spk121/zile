@@ -1,7 +1,7 @@
 /* Miscellaneous Emacs functions reimplementation
    Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 2003-2004 Reuben Thomas.  All rights reserved.
    Copyright (c) 2004 David A. Capello.  All rights reserved.
-   Copyright (c) 2004 Reuben Thomas.  All rights reserved.
 
    This file is part of Zile.
 
@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.21 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: funcs.c,v 1.22 2004/02/17 23:20:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1620,7 +1620,7 @@ it as the contents of the region.
 		return FALSE;
 
 	cmd = astr_new();
-/* 	if (cur_bp->mark != NULL) { /\* Region selected; filter text. *\/ */
+/*	if (cur_bp->mark != NULL) { /\* Region selected; filter text. *\/ */
 	{
 		Region r;
 		char *p;
@@ -1641,8 +1641,8 @@ it as the contents of the region.
 
 		astr_fmt(cmd, "%s 2>&1 <%s", ms, tempfile);
 	}
-/* 	else */
-/* 		astr_fmt(cmd, "%s 2>&1 </dev/null", ms); */
+/*	else */
+/*		astr_fmt(cmd, "%s 2>&1 </dev/null", ms); */
 
 	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
 		minibuf_error("Cannot open pipe to process");
@@ -1659,7 +1659,7 @@ it as the contents of the region.
 	}
 	astr_delete(s);
 	pclose(pipe);
-/* 	if (cur_bp->mark != NULL) */
+/*	if (cur_bp->mark != NULL) */
 		remove(tempfile);
 
 	if (lines == 0)
@@ -1671,7 +1671,7 @@ it as the contents of the region.
 			{
 				Region r;
 				calculate_region(&r);
-				if (cur_bp->pt.p != r.start.p 
+				if (cur_bp->pt.p != r.start.p
 				    || r.start.o != cur_bp->pt.o)
 					FUNCALL(exchange_point_and_mark);
 				undo_save(UNDO_INSERT_BLOCK, cur_bp->pt, r.size, 0);
