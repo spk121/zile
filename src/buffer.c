@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.12 2004/10/06 16:32:19 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.13 2004/10/14 23:26:42 rrt Exp $	*/
 
 #include "config.h"
 
@@ -102,7 +102,7 @@ void free_buffer(Buffer *bp)
 		lp = next_lp;
 	}
 
-	free(bp->limitp);
+	free_line(bp->limitp);
 
 	/*
 	 * Free all the undo operations.
