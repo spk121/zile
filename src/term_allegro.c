@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.21 2005/01/27 01:33:18 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.22 2005/01/30 02:43:25 dacap Exp $	*/
 
 #include "config.h"
 
@@ -51,11 +51,12 @@ Terminal *termp = &thisterm;
 size_t ZILE_LINES, ZILE_COLS;
 
 /* current position and color */
-static int cur_x = 0, cur_y = 0;
+static size_t cur_x = 0;
+static size_t cur_y = 0;
 static Font cur_color = 0;
 
-static size_t short *cur_scr = NULL;
-static size_t short *new_scr = NULL;
+static short *cur_scr = NULL;
+static short *new_scr = NULL;
 
 static void _get_color(int c, int *_fg, int *_bg)
 {
@@ -84,14 +85,14 @@ static void control_blink_state(void)
   blink_state ^= 1;
 }
 
-END_OF_STATIC_FUNCTION(control_blink_state);
+END_OF_STATIC_FUNCTION(control_blink_state)
 
 static void inc_cur_time(void)
 {
   cur_time++;
 }
 
-END_OF_STATIC_FUNCTION(inc_cur_time);
+END_OF_STATIC_FUNCTION(inc_cur_time)
 
 static void draw_cursor(int state)
 {
@@ -114,7 +115,7 @@ static void draw_cursor(int state)
   }
 }
 
-void term_move(int y, int x)
+void term_move(size_t y, size_t x)
 {
   cur_x = x;
   cur_y = y;
@@ -151,7 +152,7 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(size_t short)*ZILE_COLS*ZILE_LINES);
+  memset(new_scr, 0, sizeof(short)*ZILE_COLS*ZILE_LINES);
 }
 
 void term_addch(int c)
@@ -165,7 +166,7 @@ void term_addch(int c)
     else if (cur_color & 0x0f00)
       color |= cur_color & 0x0f00;
     else
-      color |= C_FG_WHITE;
+      color |= ZILE_NORMAL;
                 
     if (c & 0xf000)
       color |= c & 0xf000;
@@ -177,7 +178,7 @@ void term_addch(int c)
   cur_x++;
 }
 
-void term_attrset(int attrs, ...)
+void term_attrset(size_t attrs, ...)
 {
   int i;
   size_t a = 0;
@@ -220,8 +221,8 @@ void term_init(void)
   termp->width = ZILE_COLS;
   termp->height = ZILE_LINES;
 
-  cur_scr = calloc(1, sizeof(size_t short)*ZILE_COLS*ZILE_LINES);
-  new_scr = calloc(1, sizeof(size_t short)*ZILE_COLS*ZILE_LINES);
+  cur_scr = calloc(1, sizeof(short)*ZILE_COLS*ZILE_LINES);
+  new_scr = calloc(1, sizeof(short)*ZILE_COLS*ZILE_LINES);
 }
 
 void term_close(void)
@@ -251,7 +252,7 @@ static int translate_key(int c)
   int scancode = c >> 8;
 
   if (!ascii && key_shifts & KB_ALT_FLAG) {
-    ascii = scancode_to_ascii (scancode);
+    ascii = scancode_to_ascii(scancode);
     if (ascii)
       return KBD_META | ascii |
         ((key_shifts & KB_CTRL_FLAG) ? KBD_CTL : 0);
