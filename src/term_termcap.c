@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.41 2004/12/20 13:27:08 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.42 2005/01/05 22:52:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -146,7 +146,7 @@ void term_refresh(void)
                  * all zeros).
                  */
                 astr_cat_cstr(as, tgoto(cm_string, 0, i));
-                skipped = FALSE;
+		skipped = FALSE;
 
                 for (j = 0; j < termp->width; j++) {
                         int offset = i * termp->width + j;
@@ -157,6 +157,7 @@ void term_refresh(void)
                         if (screen.oarray[offset] != n) {
                                 if (skipped)
                                         astr_cat_cstr(as, tgoto(cm_string, j, i));
+				skipped = FALSE;
         
                                 screen.oarray[offset] = n;
 
@@ -164,10 +165,9 @@ void term_refresh(void)
                                         astr_cat_cstr(as, getattr(f));
                                 of = f;
 
-                                if (c) {
+                                if (c)
                                         astr_cat_char(as, c);
-                                        skipped = FALSE;
-                                } else {
+                                else {
                                         if (!eol) {
                                                 astr_cat_cstr(as, ce_string);
                                                 eol = TRUE;
