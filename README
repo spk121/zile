@@ -7,11 +7,11 @@ systems (a typical binary is about 100Kb) and quick editing sessions
 (it starts up and shuts down instantly).
 
 Zile is written in C; its only external dependency is a terminal
-library, either termcap or allegro.
+library, either termcap, Allegro or epocemx.
 
-See INSTALL for installation instructions.
+See INSTALL for installation instructions (on EPOC, just install the
+SIS file).
 
-------------------------------------------------------------------------------
 
 Zile is hosted on SourceForge at:
 
