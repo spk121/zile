@@ -1,4 +1,4 @@
-/*	$Id: buffer.c,v 1.5 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: buffer.c,v 1.6 2004/02/04 02:53:55 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -250,6 +250,25 @@ char *make_buffer_name(const char *filename)
 	return NULL;
 }
 
+/* Move the selected buffer to head.  */
+
+static void move_buffer_to_head(bufferp bp)
+{
+        bufferp it, prev = NULL;
+
+        for (it = head_bp; it; it = it->next) {
+                if (bp == it) {
+                        if (prev) {
+                                prev->next = bp->next;
+                                bp->next = head_bp;
+                                head_bp = bp;
+                        }
+                        break;
+                }
+                prev = it;
+        }
+}
+
 /*
  * Switch to the specified buffer.
  */
@@ -276,6 +295,7 @@ void switch_to_buffer(bufferp bp)
 		cur_bp->save_pointo = cur_wp->pointo;
 	}
 
+        /* Set current buffer.  */
 	cur_wp->bp = cur_bp = bp;
 
 	if (bp->num_windows++ == 0) {
@@ -299,6 +319,9 @@ void switch_to_buffer(bufferp bp)
 			cur_wp->pointo = wp->pointo;
 			break;
 		}
+
+        /* Move the buffer to head.  */
+        move_buffer_to_head(bp);
 }
 
 /*
