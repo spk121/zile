@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.55 2005/01/25 20:19:40 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.56 2005/01/26 23:10:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -59,7 +59,7 @@ static astr key_buf;
 static Screen screen;
 Terminal *termp = &thisterm;
 
-static int max_key_chars = 0; /* Length of longest key code. */
+static size_t max_key_chars = 0; /* Length of longest key code. */
 
 int ZILE_COLS;   /* Current number of columns on screen. */
 int ZILE_LINES;  /* Current number of rows on screen. */
@@ -86,7 +86,7 @@ static char *key_cap_name[KEYS] = {
 };
 
 static char *key_cap[KEYS];
-static int key_len[KEYS];
+static size_t key_len[KEYS];
 
 astr norm_string;
 static struct termios ostate, nstate;
@@ -144,7 +144,7 @@ void term_refresh(void)
      * rest of the line to be updated in the array (it should be
      * all zeros).
      */
-    astr_cat_cstr(as, tgoto(cm_string, 0, i));
+    astr_cat_cstr(as, tgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
     for (j = 0; j < termp->width; j++) {
@@ -155,7 +155,7 @@ void term_refresh(void)
 
       if (screen.oarray[offset] != n) {
         if (skipped)
-          astr_cat_cstr(as, tgoto(cm_string, j, i));
+          astr_cat_cstr(as, tgoto(cm_string, (int)j, (int)i));
         skipped = FALSE;
         
         screen.oarray[offset] = n;
@@ -179,7 +179,7 @@ void term_refresh(void)
   }
 
   /* Put the cursor back where it should be. */
-  astr_cat_cstr(as, tgoto(cm_string, screen.curx, screen.cury));
+  astr_cat_cstr(as, tgoto(cm_string, (int)screen.curx, (int)screen.cury));
 
   /* Display the output. */
   write(STDOUT_FILENO, astr_cstr(as), astr_len(as));
@@ -192,7 +192,7 @@ void term_clear(void)
   term_move(0, 0);
   for (i = 0; i < termp->width * termp->height; i++) {
     screen.array[i] = 0;
-    screen.oarray[i] = -1;
+    screen.oarray[i] = 1;
   }
 }
 
@@ -392,7 +392,7 @@ void term_resume(void)
   winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
 }
 
-static int translate_key(char *s, int nbytes)
+static int translate_key(char *s, unsigned nbytes)
 {
   int key = KBD_NOKEY, i, used = 0;
 
@@ -451,7 +451,7 @@ static int translate_key(char *s, int nbytes)
 static int xgetkey(int mode, int dsecs)
 {
   size_t nbytes;
-  int len = astr_len(key_buf);
+  size_t len = astr_len(key_buf);
   char *keys = zmalloc(len + max_key_chars);
   int key = KBD_NOKEY;
 
