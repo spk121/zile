@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.11 2005/01/24 13:56:14 rrt Exp $	*/
+/*	$Id: lists.c,v 1.12 2005/01/24 22:49:26 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -195,9 +195,9 @@ astr leDump(le *list, int indent)
   int c;
   astr as = astr_new();
 
-  for (; list; list=list->list_next) {
+  for (; list; list = list->list_next) {
     if (list->data) {
-      for (c = 0; c<indent; c++)
+      for (c = 0; c < indent; c++)
         astr_cat_char(as, ' ');
       astr_afmt(as, "%s%s\n", list->data,
              list->quoted == 1 ? " quoted" : "");
