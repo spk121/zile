@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.40 2004/12/09 00:53:10 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.41 2004/12/20 13:27:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -500,7 +500,7 @@ static int xgetkey(int mode, int dsecs)
 
 static void winch_sig_handler(int signo)
 {
-        (void)signo;
+        assert(signo == SIGWINCH);
         read_screen_size();
         resize_windows();
         termp->width = ZILE_COLS;
