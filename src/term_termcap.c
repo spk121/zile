@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.10 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.11 2004/10/08 23:56:03 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 /* TODO: Sort out use of select */
@@ -53,6 +53,7 @@ static Terminal thisterm = {
 
 typedef struct {
         int curx, cury;  /* cursor x and y. */
+        Font font;       /* current font. */
         int *array;      /* contents of screen (8 low bits is
                             character, rest is Zile font code. */
 } Screen;
@@ -92,7 +93,17 @@ void term_refresh(void)
         
         for (i = 0; i < termp->height; i++)
                 for (j = 0; j < termp->width; j++) {
-                        char c = screen.array[i * termp->width + j];
+                        int n = screen.array[i * termp->width + j];
+                        char c = n & 0xff;
+                        Font f = n & ~0xff;
+
+                        if (f == ZILE_NORMAL)
+                                printf("%s%s", se_string, me_string);
+                        if (f & ZILE_BOLD)
+                                printf("%s", so_string);
+                        if (f & ZILE_REVERSE)
+                                printf("%s", mr_string);
+
                         putchar(c ? c : ' ');
                 }
 
@@ -109,7 +120,7 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-        screen.array[screen.cury * termp->width + screen.curx] = c;
+        screen.array[screen.cury * termp->width + screen.curx] = c | screen.font;
         screen.curx++;
         if (screen.curx == termp->width) {
                 if (screen.cury < termp->height - 1) {
@@ -132,8 +143,18 @@ void term_attrset(int attrs, ...)
 	int i;
 	va_list valist;
 	va_start(valist, attrs);
-	for (i = 0; i < attrs; i++);
-/* 		printf(va_arg(valist, Font)); */
+	for (i = 0; i < attrs; i++) {
+ 		Font f = va_arg(valist, Font);
+                switch (f) {
+                case ZILE_NORMAL:
+                        screen.font = ZILE_NORMAL;
+                        break;
+                case ZILE_REVERSE:
+                case ZILE_BOLD:
+                        screen.font |= f;
+                        break;
+                }
+        }
 	va_end(valist);
 }
 
