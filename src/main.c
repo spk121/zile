@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.42 2004/11/01 21:24:45 rrt Exp $	*/
+/*	$Id: main.c,v 1.43 2004/11/14 21:34:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -248,7 +248,7 @@ static void usage(void)
 	exit(1);
 }
 
-static void setup_main_screen(int argc, int hflag)
+static void setup_main_screen(int argc)
 {
 	Buffer *bp, *last_bp = NULL;
 	int c = 0;
@@ -276,9 +276,6 @@ static void setup_main_screen(int argc, int hflag)
 		 * Show the Mini Help window if the `-h' flag was specified
 		 * on command line or the novice level is enabled.
 		 */
-		if (hflag || lookup_bool_variable("novice-level"))
-			FUNCALL(minihelp_toggle_window);
-
 		if (argc < 1 && lookup_bool_variable("novice-level")) {
 			insert_string("\
 This buffer is for notes you don't want to save.\n\
@@ -308,7 +305,7 @@ static void other_sig_handler(int signo)
 int main(int argc, char **argv)
 {
 	int c;
-	int hflag = 0, qflag = 0;
+	int qflag = 0;
 	char *uarg = NULL;
 	struct sigaction segv_sig;
 	struct sigaction other_sig;
@@ -319,9 +316,6 @@ int main(int argc, char **argv)
 		switch (c) {
 		case 'f':
 			alist_append(fargs, optarg);
-			break;
-		case 'h':
-			hflag = 1;
 			break;
 		case 'q':
 			qflag = 1;
@@ -390,10 +384,10 @@ int main(int argc, char **argv)
 		 * specified on command line and no function was specified
 		 * with the `-f' flag.
 		 */
-		if (!hflag && alist_count(fargs) == 0)
+		if (alist_count(fargs) == 0)
 			about_screen();
 
-	setup_main_screen(argc, hflag);
+	setup_main_screen(argc);
 
 	execute_functions(fargs);
 
