@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.17 2004/10/12 11:36:41 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.18 2004/10/12 12:07:34 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
@@ -62,7 +62,7 @@ Terminal *termp = &thisterm;
 int ZILE_COLS;
 int ZILE_LINES;
 
-static char *ti_string, *te_string, *cm_string;
+static char *ks_string, *ke_string, *cm_string;
 static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
 astr norm_string;
@@ -223,8 +223,6 @@ static void term_init_screen(void)
         /* Make the first call to term_refresh will update the screen */
         for (i = 0; i < size; i++)
                 screen.oarray[i] = 1;
-
-        printf(ti_string); /* Enter full-screen mode. */
 }
 
 void term_init(void)
@@ -276,8 +274,8 @@ void term_init(void)
         setvbuf(stdout, NULL, _IONBF, 0);
 
         /* Extract information we will use. */
-        ti_string = tgetstr("ti", &tcap);
-        te_string = tgetstr("te", &tcap);
+        ks_string = tgetstr("ks", &tcap);
+        ke_string = tgetstr("ke", &tcap);
         cm_string = tgetstr("cm", &tcap);
         so_string = tgetstr("so", &tcap);
         se_string = tgetstr("se", &tcap);
@@ -293,6 +291,7 @@ void term_init(void)
         astr_cat_cstr(norm_string, se_string);
         astr_cat_cstr(norm_string, me_string);
 
+        printf("%s", ks_string); /* Activate keypad (including cursor keys). */
 }
 
 void term_close(void)
@@ -302,7 +301,7 @@ void term_close(void)
 	term_clrtoeol();
 	term_refresh();
         printf(getattr(ZILE_NORMAL));
-        printf(te_string); /* Leave full-screen mode. */
+        printf("%s", ke_string); /* Put keypad back in normal mode. */
 
 	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
