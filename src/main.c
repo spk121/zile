@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.33 2004/10/05 18:51:12 rrt Exp $	*/
+/*	$Id: main.c,v 1.34 2004/10/05 21:00:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -107,9 +107,9 @@ static void loop(void)
 #if DEBUG
 		check_list(cur_wp);
 #endif
-                term_redisplay();
-
 		minibuf_clear();
+
+                term_redisplay();
 
 		thisflag = 0;
 		if (lastflag & FLAG_DEFINING_MACRO)
