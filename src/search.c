@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.35 2005/01/26 00:52:55 rrt Exp $	*/
+/*	$Id: search.c,v 1.36 2005/01/26 18:26:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -42,54 +42,7 @@
 #include "regex.h"
 #endif
 
-static History search_history;
 static History regexp_history;
-
-static char *find_substr(int (*f)(int c),
-                         const char *s1, size_t s1size,
-			 const char *s2, size_t s2size)
-{
-  const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
-  const char *sp1, *sp2;
-
-  for (; s1 <= e1 - s2size + 1; ++s1) {
-    if (f(*s1) != f(*s2))
-      continue;
-    sp1 = s1; sp2 = s2;
-    for (;;) {
-      ++sp1, ++sp2;
-      if (sp2 > e2)
-        return (char *)s1;
-      else if (f(*sp1) != f(*sp2))
-        break;
-    }
-  }
-
-  return NULL;
-}
-
-static char *rfind_substr(int (*f)(int c),
-                          const char *s1, size_t s1size,
-			  const char *s2, size_t s2size)
-{
-  const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
-  const char *sp1, *sp2;
-
-  for (; e1 >= s1 + s2size - 1; --e1) {
-    if (f(*e1) != f(*e2))
-      continue;
-    sp1 = e1; sp2 = e2;
-    for (;;) {
-      --sp1, --sp2;
-      if (sp2 < s2)
-        return (char *)(sp1 + 1);
-      else if (f(*sp1) != f(*sp2))
-        break;
-    }
-  }
-
-  return NULL;
-}
 
 static const char *re_find_err = NULL;
 
@@ -116,8 +69,8 @@ static char *re_find_substr(const char *s1, size_t s1size,
 
   re_find_err = re_compile_pattern(s2, s2size, &pattern);
   if (!re_find_err) {
-    if (!bol) pattern.not_bol = TRUE;
-    if (!eol) pattern.not_eol = TRUE;
+    pattern.not_bol = !bol;
+    pattern.not_eol = !eol;
 
     if (!backward)
       index = re_search(&pattern, s1, s1size, 0, s1size,
@@ -127,9 +80,9 @@ static char *re_find_substr(const char *s1, size_t s1size,
                         &search_regs);
 
     if (index >= 0) {
-      if (!backward)
-        ret = ((char *)s1) + search_regs.end[0];
-      else
+/*       if (!backward) */
+/*         ret = ((char *)s1) + search_regs.end[0]; */
+/*       else */
         ret = ((char *)s1) + search_regs.start[0];
     }
     else if (index == -1) {
@@ -157,15 +110,7 @@ static void goto_linep(Line *lp)
     next_line();
 }
 
-/* Avoid macros */
-#undef tolower
-
-static int id(int c)
-{
-  return c;
-}
-
-static int search_forward(Line *startp, int starto, const char *s, int regexp)
+static int search_forward(Line *startp, int starto, const char *s)
 {
   Line *lp;
   const char *sp, *sp2;
@@ -185,13 +130,8 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
     if (s1size < 1)
       continue;
 
-    if (regexp)
-      sp2 = re_find_substr(sp, s1size, s, s2size,
-                           sp == astr_cstr(lp->item), TRUE, FALSE);
-    else if (lookup_bool_variable("case-fold-search"))
-      sp2 = find_substr(tolower, sp, s1size, s, s2size);
-    else
-      sp2 = find_substr(id, sp, s1size, s, s2size);
+    sp2 = re_find_substr(sp, s1size, s, s2size,
+                         sp == astr_cstr(lp->item), TRUE, FALSE);
                         
     if (sp2 != NULL) {
       goto_linep(lp);
@@ -203,7 +143,7 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
   return FALSE;
 }
 
-static int search_backward(Line *startp, int starto, const char *s, int regexp)
+static int search_backward(Line *startp, int starto, const char *s)
 {
   Line *lp;
   const char *sp, *sp2;
@@ -221,13 +161,8 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
     if (s1size < 1)
       continue;
 
-    if (regexp)
-      sp2 = re_find_substr(sp, s1size, s, ssize,
-                           TRUE, s1size == astr_len(lp->item), TRUE);
-    else if (lookup_bool_variable("case-fold-search"))
-      sp2 = rfind_substr(tolower, sp, s1size, s, ssize);
-    else
-      sp2 = rfind_substr(id, sp, s1size, s, ssize);
+    sp2 = re_find_substr(sp, s1size, s, ssize,
+                         TRUE, s1size == astr_len(lp->item), TRUE);
 
     if (sp2 != NULL) {
       goto_linep(lp);
@@ -240,54 +175,6 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
 }
 
 static char *last_search = NULL;
-
-DEFUN("search-forward", search_forward)
-  /*+
-    Search forward from point for the user specified text.
-    +*/
-{
-  char *ms;
-
-  if ((ms = minibuf_read("Search: ", last_search)) == NULL)
-    return cancel();
-  if (ms[0] == '\0')
-    return FALSE;
-
-  if (last_search != NULL)
-    free(last_search);
-  last_search = zstrdup(ms);
-
-  if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms, FALSE)) {
-    minibuf_error("Failing search: `%s'", ms);
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
-DEFUN("search-backward", search_backward)
-  /*+
-    Search backward from point for the user specified text.
-    +*/
-{
-  char *ms;
-
-  if ((ms = minibuf_read("Search backward: ", last_search)) == NULL)
-    return cancel();
-  if (ms[0] == '\0')
-    return FALSE;
-
-  if (last_search != NULL)
-    free(last_search);
-  last_search = zstrdup(ms);
-
-  if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms, FALSE)) {
-    minibuf_error("Failing search: `%s'", ms);
-    return FALSE;
-  }
-
-  return TRUE;
-}
 
 DEFUN("search-forward-regexp", search_forward_regexp)
   /*+
@@ -305,7 +192,7 @@ DEFUN("search-forward-regexp", search_forward_regexp)
     free(last_search);
   last_search = zstrdup(ms);
 
-  if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms, TRUE)) {
+  if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
     minibuf_error("Failing regexp search: `%s'", ms);
     return FALSE;
   }
@@ -329,7 +216,7 @@ DEFUN("search-backward-regexp", search_backward_regexp)
     free(last_search);
   last_search = zstrdup(ms);
 
-  if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms, TRUE)) {
+  if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms)) {
     minibuf_error("Failing regexp search backward: `%s'", ms);
     return FALSE;
   }
@@ -343,7 +230,7 @@ DEFUN("search-backward-regexp", search_backward_regexp)
 /*
  * Incremental search engine.
  */
-static int isearch(int dir, int regexp)
+static int isearch(int dir)
 {
   int c;
   int last = TRUE;
@@ -356,19 +243,18 @@ static int isearch(int dir, int regexp)
   start = cur_bp->pt;
   cur = cur_bp->pt;
 
-  /* I-search mode.  */
+  /* I-search mode. */
   cur_wp->bp->flags |= BFLAG_ISEARCH;
 
   for (;;) {
-    /* Make the minibuf message.  */
+    /* Make the minibuf message. */
     astr_truncate(buf, 0);
     astr_afmt(buf, "%sI-search%s: %s",
-              (last ?
-               (regexp ? "Regexp " : "") :
-               (regexp ? "Failing regexp " : "Failing ")),
+              (last ? "Regexp " : "Failing regexp "),
               (dir == ISEARCH_FORWARD) ? "" : " backward",
               astr_cstr(pattern));
-    /* Regex error.  */
+
+    /* Regex error. */
     if (re_find_err) {
       if ((strncmp(re_find_err, "Premature ", 10) == 0) ||
           (strncmp(re_find_err, "Unmatched ", 10) == 0) ||
@@ -378,7 +264,7 @@ static int isearch(int dir, int regexp)
       astr_afmt(buf, " [%s]", re_find_err);
       re_find_err = NULL;
     }
-    /* Write in minibuf.  */
+
     minibuf_write("%s", astr_cstr(buf));
 
     if (thisflag & FLAG_EXECUTING_MACRO) {
@@ -399,10 +285,10 @@ static int isearch(int dir, int regexp)
       thisflag |= FLAG_NEED_RESYNC;
 
       /* "Quit" (also it calls ding() and stops
-         recording macros).  */
+         recording macros). */
       cancel();
 
-      /* Restore old mark position.  */
+      /* Restore old mark position. */
       if (cur_bp->mark)
         free_marker(cur_bp->mark);
 
@@ -418,11 +304,11 @@ static int isearch(int dir, int regexp)
         thisflag |= FLAG_NEED_RESYNC;
       } else
         ding();
-    } else if (c & KBD_CTL && ((c&255) == 'r' || (c&255) == 's')) {
+    } else if (c & KBD_CTL && ((c & 0xff) == 'r' || (c & 0xff) == 's')) {
       /* Invert direction. */
-      if ((c & 255) == 'r' && dir == ISEARCH_FORWARD)
+      if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)
         dir = ISEARCH_BACKWARD;
-      else if ((c & 255) == 's' && dir == ISEARCH_BACKWARD)
+      else if ((c & 0xff) == 's' && dir == ISEARCH_BACKWARD)
         dir = ISEARCH_FORWARD;
       if (astr_len(pattern) > 0) {
         /* Find next match. */
@@ -435,20 +321,12 @@ static int isearch(int dir, int regexp)
       else if (last_search != NULL)
         astr_cpy_cstr(pattern, last_search);
     } else if (c & KBD_META || c & KBD_CTL || c > KBD_TAB) {
-      if (c == KBD_RET && astr_len(pattern) == 0) {
-        if (dir == ISEARCH_FORWARD) {
-          if (regexp)
-            FUNCALL(search_forward_regexp);
-          else
-            FUNCALL(search_forward);
-        }
-        else {
-          if (regexp)
-            FUNCALL(search_backward_regexp);
-          else
-            FUNCALL(search_backward);
-        }
-      } else if (astr_len(pattern) > 0) {
+      if (c == KBD_RET && astr_len(pattern) == 0)
+        if (dir == ISEARCH_FORWARD)
+          FUNCALL(search_forward_regexp);
+        else 
+          FUNCALL(search_backward_regexp);
+      else if (astr_len(pattern) > 0) {
         /* Save mark. */
         set_mark();
         cur_bp->mark->pt = start;
@@ -464,13 +342,15 @@ static int isearch(int dir, int regexp)
       break;
     } else
       astr_cat_char(pattern, c);
+
     if (astr_len(pattern) > 0) {
       if (dir == ISEARCH_FORWARD)
-        last = search_forward(cur.p, cur.o, astr_cstr(pattern), regexp);
+        last = search_forward(cur.p, cur.o, astr_cstr(pattern));
       else
-        last = search_backward(cur.p, cur.o, astr_cstr(pattern), regexp);
+        last = search_backward(cur.p, cur.o, astr_cstr(pattern));
     } else
       last = TRUE;
+
     if (thisflag & FLAG_NEED_RESYNC)
       resync_redisplay();
   }
@@ -487,57 +367,32 @@ static int isearch(int dir, int regexp)
   return TRUE;
 }
 
-DEFUN("isearch-forward", isearch_forward)
+DEFUN("isearch-forward-regexp", isearch_forward_regexp)
   /*+
-    Do incremental search forward.
-    With a prefix argument, do an incremental regular expression search instead.
+    Do incremental search forward for regular expression.
     As you type characters, they add to the search string and are found.
     Type return to exit, leaving point at location found.
     Type C-s to search again forward, C-r to search again backward.
     C-g when search is successful aborts and moves point to starting point.
     +*/
 {
-  return isearch(ISEARCH_FORWARD, (lastflag & FLAG_SET_UNIARG));
+  return isearch(ISEARCH_FORWARD);
 }
 
-DEFUN("isearch-backward", isearch_backward)
+DEFUN("isearch-backward-regexp", isearch_backward_regexp)
   /*+
-    Do incremental search backward.
-    With a prefix argument, do a regular expression search instead.
+    Do incremental search forward for regular expression.
     As you type characters, they add to the search string and are found.
     Type return to exit, leaving point at location found.
     Type C-r to search again backward, C-s to search again forward.
     C-g when search is successful aborts and moves point to starting point.
     +*/
 {
-  return isearch(ISEARCH_BACKWARD, (lastflag & FLAG_SET_UNIARG));
-}
-
-DEFUN("isearch-forward-regexp", isearch_forward_regexp)
-  /*+
-    Do incremental search forward for regular expression.
-    With a prefix argument, do a regular string search instead.
-    Like ordinary incremental search except that your input
-    is treated as a regexp.  See C-s for more info.
-    +*/
-{
-  return isearch(ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
-}
-
-DEFUN("isearch-backward-regexp", isearch_backward_regexp)
-  /*+
-    Do incremental search forward for regular expression.
-    With a prefix argument, do a regular string search instead.
-    Like ordinary incremental search except that your input
-    is treated as a regexp.  See C-s for more info.
-    +*/
-{
-  return isearch(ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
+  return isearch(ISEARCH_BACKWARD);
 }
 
 void free_search_history(void)
 {
-  free_history_elements(&search_history);
   free_history_elements(&regexp_history);
 }
 
@@ -552,9 +407,9 @@ static int no_upper(const char *s, size_t len)
   return TRUE;
 }
 
-DEFUN("replace-string", replace_string)
+DEFUN("replace-regexp", replace_regexp)
   /*+
-    Replace occurrences of a string with other text.
+    Replace occurrences of a regexp with other text.
     +*/
 {
   char *find, *repl;
@@ -572,7 +427,7 @@ DEFUN("replace-string", replace_string)
     return cancel();
   repl_len = strlen(repl);
   
-  while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
+  while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
     ++count;
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
@@ -591,9 +446,9 @@ DEFUN("replace-string", replace_string)
   return TRUE;
 }
 
-DEFUN("query-replace", query_replace)
+DEFUN("query-replace-regexp", query_replace_regexp)
   /*+
-    Replace occurrences of a string with other text.
+    Replace occurrences of a regexp with other text.
     As each match is found, the user must type a character saying
     what to do with it.
     +*/
@@ -614,7 +469,7 @@ DEFUN("query-replace", query_replace)
   repl_len = strlen(repl);
   
   /* Spaghetti code follows... :-( */
-  while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
+  while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
     if (!noask) {
       int c;
       if (thisflag & FLAG_NEED_RESYNC)
