@@ -8,11 +8,10 @@
 
 /*
 
-This software is distributed under the "general public licence (GPL)".
+This software is distributed under the GNU General Public Licence.
 
-This software is also released under the modified BSD licence in another
-file (same source-code, only license differ).
-
+This software is also released under the modified BSD licence in
+another file (same source-code, only license differ).
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -74,8 +73,7 @@ you use strange formats.
 
 #include "config.h"
 
-#ifndef HAVE_VASPRINTF
-
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -95,16 +93,16 @@ you use strange formats.
  *  structure, which is passed among nearly every sub-functions.
  */
 typedef struct {
-     const char * src_string;        /* current position into intput string */
-     char *       buffer_base;       /* output buffer */
-     char *       dest_string;       /* current position into output string */
-     size_t       buffer_len;        /* length of output buffer */
-     size_t       real_len;          /* real current length of output text */
-     size_t       pseudo_len;        /* total length of output text if it where not limited in size */
-     size_t       maxlen;
-     va_list      vargs;             /* pointer to current position into vargs */
-     char *       sprintf_string;
-     FILE *       fprintf_file;
+  const char * src_string;        /* current position into intput string */
+  char *       buffer_base;       /* output buffer */
+  char *       dest_string;       /* current position into output string */
+  size_t       buffer_len;        /* length of output buffer */
+  size_t       real_len;          /* real current length of output text */
+  size_t       pseudo_len;        /* total length of output text if it where not limited in size */
+  size_t       maxlen;
+  va_list      vargs;             /* pointer to current position into vargs */
+  char *       sprintf_string;
+  FILE *       fprintf_file;
 } xprintf_struct;
 
 /*########################### realloc_buff ################################*/
@@ -113,32 +111,26 @@ typedef struct {
  *  Return value:  0 = ok
  *               EOF = not enought memory
  */
-static
-int
-realloc_buff( xprintf_struct * s,
-              size_t len
-            )
+static int realloc_buff(xprintf_struct *s, size_t len)
 {
-     char * ptr;
+  char * ptr;
 
-     if ( len + ALLOC_SECURITY_MARGIN + s->real_len   >   s->buffer_len )
-       {
-          len += s->real_len + ALLOC_CHUNK;
-          ptr = (char *)realloc( (void *)(s->buffer_base), len );
-          if ( ptr == NULL )
-            {
-               s->buffer_base = NULL;
-               return EOF;
-            }
+  if (len + ALLOC_SECURITY_MARGIN + s->real_len > s->buffer_len) {
+    len += s->real_len + ALLOC_CHUNK;
+    ptr = (char *)realloc((void *)(s->buffer_base), len);
+    if (ptr == NULL) {
+      s->buffer_base = NULL;
+      return EOF;
+    }
 
-          s->dest_string = ptr + (size_t)( s->dest_string - s->buffer_base );
-          s->buffer_base = ptr;
-          s->buffer_len = len;
+    s->dest_string = ptr + (size_t)(s->dest_string - s->buffer_base);
+    s->buffer_base = ptr;
+    s->buffer_len = len;
 
-          (s->buffer_base)[(s->buffer_len)-1] = 1;        /* overflow marquer */
-       }
+    (s->buffer_base)[s->buffer_len - 1] = 1; /* overflow marker */
+  }
 
-     return 0;
+  return 0;
 }
 
 /*############################ usual_char #################################*/
@@ -146,26 +138,24 @@ realloc_buff( xprintf_struct * s,
  *  Prints 'usual' characters    up to next '%'
  *                            or up to end of text
  */
-static
-int
-usual_char( xprintf_struct * s )
+static int usual_char(xprintf_struct * s)
 {
-     size_t len;
+  size_t len;
 
-     len = strcspn( s->src_string, "%" );     /* reachs the next '%' or end of input string */
-     /* note: 'len' is never 0 because the presence of '%' */
-     /* or end-of-line is checked in the calling function  */
+  len = strcspn(s->src_string, "%");     /* reachs the next '%' or end of input string */
+  /* note: 'len' is never 0 because the presence of '%' */
+  /* or end-of-line is checked in the calling function  */
 
-     if ( realloc_buff(s,len) == EOF )
-          return EOF;
+  if (realloc_buff(s,len) == EOF)
+    return EOF;
 
-     memcpy( s->dest_string, s->src_string, len );
-     s->src_string  += len;
-     s->dest_string += len;
-     s->real_len    += len;
-     s->pseudo_len  += len;
+  memcpy(s->dest_string, s->src_string, len);
+  s->src_string += len;
+  s->dest_string += len;
+  s->real_len += len;
+  s->pseudo_len += len;
 
-     return 0;
+  return 0;
 }
 
 /*############################ print_it ###################################*/
@@ -173,40 +163,32 @@ usual_char( xprintf_struct * s )
  *  Return value: 0 = ok
  *                EOF = error
  */
-static
-int
-print_it( xprintf_struct * s,
-          size_t           approx_len,
-          const char *     format_string,
-          ...
-        )
+static int print_it(xprintf_struct *s, size_t approx_len,
+                    const char *format_string, ...)
 {
-     va_list varg;
-     int     vsprintf_len;
-     size_t  len;
+  va_list varg;
+  int vsprintf_len;
+  size_t len;
 
-     if ( realloc_buff(s,approx_len) == EOF )
-          return EOF;
+  if (realloc_buff(s,approx_len) == EOF)
+    return EOF;
 
-     va_start( varg, format_string );
-     vsprintf_len = vsprintf( s->dest_string, format_string, varg );
-     va_end( varg );
+  va_start(varg, format_string);
+  vsprintf_len = vsprintf(s->dest_string, format_string, varg);
+  va_end(varg);
 
-     if ( (s->buffer_base)[(s->buffer_len)-1] != 1 ) /* check for overflow */
-       {
-          fprintf( stderr, "ERROR in xnprintf library: overflow" );
-          exit( -1 );           /* ... sorry ... what else to do ?    */
-       }
+  /* Check for overflow */
+  assert((s->buffer_base)[s->buffer_len - 1] != 1);
 
-     if ( vsprintf_len == EOF ) /* must be done *after* overflow-check */
-          return EOF;
+  if (vsprintf_len == EOF) /* must be done *after* overflow-check */
+    return EOF;
 
-     s->pseudo_len  += vsprintf_len;
-     len = strlen( s->dest_string );
-     s->real_len    += len;
-     s->dest_string += len;
+  s->pseudo_len += vsprintf_len;
+  len = strlen(s->dest_string);
+  s->real_len += len;
+  s->dest_string += len;
 
-     return 0;
+  return 0;
 }
 
 /*############################## type_s ###################################*/
@@ -221,31 +203,24 @@ print_it( xprintf_struct * s,
  *  Return value: 0 = ok
  *                EOF = error
  */
-static
-int
-type_s( xprintf_struct * s,
-        int              width,
-        int              prec,
-        const char *     format_string,
-        const char *     arg_string
-      )
+static int type_s(xprintf_struct *s, int width, int prec,
+                  const char *format_string, const char *arg_string)
 {
-     size_t       string_len;
+  size_t string_len;
 
-     if ( arg_string == NULL )
-          return print_it( s, 6, "(null)", 0 );
+  if (arg_string == NULL)
+    return print_it(s, 6, "(null)", 0);
 
-     /* hand-made strlen() whitch stops when 'prec' is reached. */
-     /* if 'prec' is -1 then it is never reached.               */
-     string_len = 0;
-     while ( arg_string[string_len]!=0 && (size_t)prec!=string_len )
-          string_len++;
+  /* hand-made strlen() whitch stops when 'prec' is reached. */
+  /* if 'prec' is -1 then it is never reached. */
+  string_len = 0;
+  while (arg_string[string_len] != 0 && (size_t)prec != string_len)
+    string_len++;
 
-     if ( width != -1 )
-          if ( string_len < (size_t)width )
-               string_len = (size_t)width;
+  if (width != -1 && string_len < (size_t)width)
+    string_len = (size_t)width;
 
-     return print_it( s, string_len, format_string, arg_string );
+  return print_it(s, string_len, format_string, arg_string);
 }
 
 /*############################### getint ##################################*/
@@ -256,24 +231,19 @@ type_s( xprintf_struct * s,
  *  number, then the return value won't be what we want (but, in this case,
  *  the programmer don't know whatr he wants, then no problem).
  */
-static
-int
-getint( const char * * string )
+static int getint(const char **string)
 {
-     int i;
+  int i = 0;
 
-     i = 0;
+  while (isdigit(**string) != 0) {
+    i = i * 10 + (**string - '0');
+    (*string)++;
+  }
 
-     while ( isdigit(**string) != 0 )
-       {
-          i = (i*10) + (**string-'0');
-          (*string)++;
-       }
-
-     if ( i<0 || i>32767 )
-          i = 32767;      /* if we have i==-10 this is not because the number is */
-                          /* negative ; This is because the number is biiiig     */
-     return i;
+  if (i < 0 || i > 32767)
+    i = 32767; /* if we have i==-10 this is not because the number is */
+  /* negative; this is because the number is big */
+  return i;
 }
 
 /*############################## dispatch #################################*/
@@ -354,11 +324,11 @@ static int dispatch(xprintf_struct *s)
   /* width */
   if (*SRCTXT == '*') {         /* width given by next argument */
     SRCTXT++;
-    width = va_arg( s->vargs, int );
-    if ( (size_t)width > 0x3fffU ) /* 'size_t' to check against negative values too */
+    width = va_arg(s->vargs, int);
+    if ((size_t)width > 0x3fffU) /* 'size_t' to check against negative values too */
       width = 0x3fff;
   } else if (isdigit(*SRCTXT)) /* width given as ASCII number */
-    width = getint( &SRCTXT );
+    width = getint(&SRCTXT);
   else
     width = -1;                 /* no width specified */
 
@@ -368,7 +338,7 @@ static int dispatch(xprintf_struct *s)
   if (*SRCTXT == '.') {
     SRCTXT++;
     if (*SRCTXT == '*') {       /* .prec given by next argument */
-      prec = va_arg( s->vargs, int );
+      prec = va_arg(s->vargs, int);
       if ((size_t)prec >= 0x3fffU) /* 'size_t' to check against negative values too */
         prec = 0x3fff;
     } else {                    /* .prec given as ASCII number */
@@ -506,8 +476,8 @@ static int dispatch(xprintf_struct *s)
   case 'n':
     if (modifier == -1) {
       int * p;
-      p = va_arg( s->vargs, int * );
-      if ( p != NULL ) {
+      p = va_arg(s->vargs, int *);
+      if (p != NULL) {
         *p = s->pseudo_len;
         return 0;
       }
@@ -624,5 +594,3 @@ int vasprintf(char **ptr, const char *format_string, va_list vargs)
   *ptr = s.buffer_base;
   return retval;
 }
-
-#endif /* ! HAVE_VASPRINTF */
