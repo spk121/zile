@@ -2,15 +2,17 @@ The Zile team would like to thank:
 
 * Richard M. Stallman <rms@gnu.ai.mit.edu> for creating the powerful
   Emacs editor
+* Nicolas Duboc <nicolas@duboc.net> for maintaining the Debian
+  package, and fixing and reporting several bugs
+* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
+  `goto-line' function, Debian package and continuous support
+* Scott "Jerry" Lawrence <jsl@absynth.com> for lithp, on version 0.6
+  of which the Lisp interpreter is based.
 * Daniel Sobral <Daniel_Sobral@voga.com.br> for suggestions
 * Mikael Karpberg <karpen@ocean.campus.luth.se> for bug reports, fixes
   and suggestions
 * George Young <gryoung@nortel.ca> for bug reports
 * Jim Buchanan <c22jrb@dawg.delcoelect.com> for suggestions
-* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
-  `goto-line' function, Debian package and continuous support
-* Nicolas Duboc <nicolas@duboc.net> for maintaining the Debian
-  package, and fixing and reporting several bugs
 * Tim Middelkoop <mtim@arranvale.com> for the backup directory feature
 * Jeff Sheinberg <jeffsh@erols.com> for bug reports
 * Christian Weisgerber <naddy@mips.inka.de> for bug reports and fixes
