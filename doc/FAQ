@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/12/20 13:53:58 $
+		   Last updated: $Date: 2005/01/22 12:31:52 $
 
 ------------------------------------------------------------------------------
 
@@ -146,9 +146,6 @@ INDEX
 
     Check out the `zilerc.sample' file (type `C-h s') for a full list
     of modifiable variables.
-
-    You might also see the list of defined variables with the command
-    `list-variables' (or the key sequence `C-h l v').
 
 2.7. How to display non-English characters?
 

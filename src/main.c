@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.71 2005/01/19 01:20:22 rrt Exp $	*/
+/*	$Id: main.c,v 1.72 2005/01/22 12:32:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -51,6 +51,8 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "eval.h"
+#include "vars.h"
 
 #define ZILE_VERSION_STRING	"Zile " VERSION
 
@@ -256,8 +258,9 @@ int main(int argc, char **argv)
   int bflag = FALSE, qflag = FALSE, eflag = FALSE;
   astr as = astr_new();
 
-  /* Set up variables now so they're available to files and expressions
-     specified on the command-line. */
+  /* Set up Lisp environment now so it's available to files and
+     expressions specified on the command-line. */
+  eval_init();
   init_variables();
   
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
@@ -354,6 +357,11 @@ int main(int argc, char **argv)
     free_bindings();
   }
 
+  /* Free Lisp state. */
+  variableFree(mainVarList);
+  variableFree(defunList);
+  eval_finalise();
+
   /* Free all the memory allocated. */
   astr_delete(as);
   free_kill_ring();
@@ -362,7 +370,6 @@ int main(int argc, char **argv)
   free_macros();
   free_windows();
   free_buffers();
-  free_variables();
   free_minibuf();
   free_rotation_buffers();
 

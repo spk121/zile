@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.12 2005/01/22 01:00:55 rrt Exp $
+## $Id: Makefile.am,v 1.13 2005/01/22 12:31:53 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -9,14 +9,14 @@ zile_DATA =					\
 	FAQ					\
 	HELP					\
 	TUTORIAL				\
-	zilerc.sample
+	dotzile.sample
 
 EXTRA_DIST =					\
 	FAQ					\
 	TUTORIAL				\
-	zilerc.sample				\
+	dotzile.sample				\
+	dotzile.texi				\
 	zlint					\
-	zilerc.texi				\
 	zile.1.in				\
 	mkdoc.c					\
 	config.h
@@ -38,11 +38,11 @@ mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_va
 AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
-zile.info: zilerc.texi
+zile.info: dotzile.texi
 
-zilerc.texi: zilerc.sample
+dotzile.texi: dotzile.sample
 	@echo "@c Automatically generated file: NO DOT EDIT!" >$@
-	@echo "@setfilename zilerc.info" >>$@
+	@echo "@setfilename dotzile.info" >>$@
 	@echo "@example" >>$@
 	expand $< >>$@
 	@echo "@end example" >>$@

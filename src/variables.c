@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.25 2005/01/22 11:27:17 rrt Exp $	*/
+/*	$Id: variables.c,v 1.26 2005/01/22 12:32:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -54,11 +54,6 @@ void init_variables(void)
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
     set_variable(p->var, p->val);
-}
-
-void free_variables(void)
-{
-  variableFree(mainVarList);
 }
 
 void set_variable(char *var, char *val)

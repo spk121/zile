@@ -1,0 +1,61 @@
+; .zilerc sample configuration
+
+; Do not display the splash screen at startup [default: false]
+(setq skip-splash-screen false)
+
+; Enable alternative key bindings [default: false]
+; Remap the help functions (bound by default to `C-h') to `M-h'.
+; This may be useful when `C-h' is already bound to Backspace or Delete.
+(setq alternative-bindings false)
+
+; The default tabulation width [default: 8]
+(setq tab-width 8)
+
+; The default fill column (in Auto Fill Mode) [default: 72]
+(setq fill-column 72)
+
+; Automatically enable the Auto Fill Mode [default: false]
+(setq auto-fill-mode false)
+
+; Specify the file backup method [default: simple]
+;
+; Possible values are: none and simple.
+;
+; * If `none' is specified, Zile will not create backup files.
+; * If `simple' is specified, Zile will create a backup file with a
+;   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
+;   create the backup `foo.c~').
+(setq backup-method simple)
+
+; Enable backup directory for backup files [default: false]
+; If enabled Zile will backup files to a user specified directory;
+; the directory must exist and must be specified in the
+; variable `backup-directory' (see below).
+(setq backup-with-directory false)
+
+; Specify target backup directory [default: "~/.backup"]
+; Directory must exist.
+(setq backup-directory "~/.backup")
+
+; Expand tabs [default: false]
+; If disabled, Zile will insert hard tabs (the character \t),
+; otherwise it will insert spaces.
+(setq expand-tabs false)
+
+; Enable beep [default: true]
+; If enabled, a sound will be emitted on any error.
+(setq beep true)
+
+; Standard indentation level [default: 4]
+; Default number of columns for margin-changing functions to indent.
+(setq standard-indent 4)
+
+; If enabled, deactivates the mark when the buffer contents change.
+; Also enables highlighting of the region whenever the mark is active.
+; The variable `highlight-nonselected-windows' controls whether to
+; highlight all windows or just the selected window. [default: true]
+(setq transient-mark-mode true)
+
+; If enabled, highlight region even in nonselected windows.
+; [default: false]
+(setq highlight-nonselected-windows false)

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.1 2005/01/19 00:40:52 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.2 2005/01/22 12:32:04 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -30,7 +30,7 @@
 #include "eval.h"
 
 
-char *s;
+static char *s;
 
 astr lisp_read(getcCallback getcp, ungetcCallback ungetcp)
 {
@@ -38,24 +38,17 @@ astr lisp_read(getcCallback getcp, ungetcCallback ungetcp)
   int lineno = 0;
   struct le *list = NULL;
 
-  eval_init();
-    
   list = parseInFile(getcp, ungetcp, list, &lineno);
 
-  /* evaluate the read-in lists, display the result, and the variables
-     and defuns */
+  /* Evaluate the read-in lists and add the result, variables and
+     defuns to the output string. */
   astr_cat_delete(as, leDumpEval(list, 0));
   astr_cat_cstr(as, "Variables:\n");
   astr_cat_delete(as, variableDump(mainVarList));
   astr_cat_cstr(as, "defuns:\n");
   astr_cat_delete(as, variableDump(defunList));
 
-  /* Free the state */
   leWipe(list);
-  variableFree(mainVarList);
-  variableFree(defunList);
-
-  eval_finalise();
 
   return as;
 }
@@ -79,7 +72,7 @@ astr lisp_read_string(char *string)
 }
 
 
-FILE *fp = NULL;
+static FILE *fp = NULL;
 
 static int getc_file(void)
 {
