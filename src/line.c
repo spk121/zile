@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.33 2004/10/06 16:32:19 rrt Exp $	*/
+/*	$Id: line.c,v 1.34 2004/10/06 17:28:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -434,7 +434,7 @@ int delete_char(void)
 		return TRUE;
 	} else if (!eobp()) {
 		Line *lp1, *lp2;
-		int lp1len, lp2len;
+		int lp1len;
 
 		if (warn_if_readonly_buffer())
 			return FALSE;
@@ -445,9 +445,8 @@ int delete_char(void)
 		lp2 = cur_bp->pt.p->next;
 		lp1len = astr_len(lp1->text);
 
-		if (lp2len > 0)
-			/* Move the next line text into the current line. */
-			astr_cat(lp1->text, lp2->text);
+                /* Move the next line text into the current line. */
+                astr_cat(lp1->text, lp2->text);
 
 		/*
 		 * Update line linked list.
