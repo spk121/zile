@@ -33,19 +33,6 @@
 #include "config.h"
 #endif
 
-/* The `emacs' switch turns on certain matching commands
-   that make sense only in Emacs. */
-#ifdef emacs
-
-#include "lisp.h"
-#include "buffer.h"
-#include "syntax.h"
-
-/* Emacs uses `NULL' as a predicate.  */
-#undef NULL
-
-#else  /* not emacs */
-
 /* We used to test for `BSTRING' here, but only GCC and Emacs define
    `BSTRING', as far as I know, and neither of them use this code.  */
 #if HAVE_STRING_H || STDC_HEADERS
@@ -119,7 +106,6 @@ init_syntax_once ()
 
 #define SYNTAX(c) re_syntax_table[c]
 
-#endif /* not emacs */
 
 /* Get the interface, including the syntax bits.  */
 #include "regex.h"
@@ -363,18 +349,6 @@ typedef enum
   wordbound,	/* Succeeds if at a word boundary.  */
   notwordbound	/* Succeeds if not at a word boundary.  */
 
-#ifdef emacs
-  ,before_dot,	/* Succeeds if before point.  */
-  at_dot,	/* Succeeds if at point.  */
-  after_dot,	/* Succeeds if after point.  */
-
-	/* Matches any character whose syntax is specified.  Followed by
-           a byte which contains a syntax code, e.g., Sword.  */
-  syntaxspec,
-
-	/* Matches any character whose syntax is not that specified.  */
-  notsyntaxspec
-#endif /* emacs */
 } re_opcode_t;
 
 /* Common operations on the compiled pattern.  */
@@ -671,32 +645,6 @@ print_partial_compiled_pattern (start, end)
 
 	case wordend:
 	  printf ("/wordend");
-
-#ifdef emacs
-	case before_dot:
-	  printf ("/before_dot");
-          break;
-
-	case at_dot:
-	  printf ("/at_dot");
-          break;
-
-	case after_dot:
-	  printf ("/after_dot");
-          break;
-
-	case syntaxspec:
-          printf ("/syntaxspec");
-	  mcnt = *p++;
-	  printf ("/%d", mcnt);
-          break;
-
-	case notsyntaxspec:
-          printf ("/notsyntaxspec");
-	  mcnt = *p++;
-	  printf ("/%d", mcnt);
-	  break;
-#endif /* emacs */
 
 	case wordchar:
 	  printf ("/wordchar");
@@ -1900,27 +1848,6 @@ regex_compile (pattern, size, syntax, bufp)
                  }
                goto normal_char;
 
-#ifdef emacs
-            /* There is no way to specify the before_dot and after_dot
-               operators.  rms says this is ok.  --karl  */
-            case '=':
-              BUF_PUSH (at_dot);
-              break;
-
-            case 's':
-              laststart = b;
-              PATFETCH (c);
-              BUF_PUSH_2 (syntaxspec, syntax_spec_code[c]);
-              break;
-
-            case 'S':
-              laststart = b;
-              PATFETCH (c);
-              BUF_PUSH_2 (notsyntaxspec, syntax_spec_code[c]);
-              break;
-#endif /* emacs */
-
-
             case 'w':
               laststart = b;
               BUF_PUSH (wordchar);
@@ -2650,34 +2577,6 @@ re_compile_fastmap (bufp)
 
           /* Otherwise, have to check alternative paths.  */
 	  break;
-
-
-#ifdef emacs
-        case syntaxspec:
-	  k = *p++;
-	  for (j = 0; j < (1 << BYTEWIDTH); j++)
-	    if (SYNTAX (j) == (enum syntaxcode) k)
-	      fastmap[j] = 1;
-	  break;
-
-
-	case notsyntaxspec:
-	  k = *p++;
-	  for (j = 0; j < (1 << BYTEWIDTH); j++)
-	    if (SYNTAX (j) != (enum syntaxcode) k)
-	      fastmap[j] = 1;
-	  break;
-
-
-      /* All cases after this match the empty string.  These end with
-         `continue'.  */
-
-
-	case before_dot:
-	case at_dot:
-	case after_dot:
-          continue;
-#endif /* not emacs */
 
 
         case no_op:
@@ -4200,32 +4099,11 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
 	    break;
           goto fail;
 
-#ifdef emacs
-#ifdef emacs19
-	case before_dot:
-          DEBUG_PRINT1 ("EXECUTING before_dot.\n");
-	  if (PTR_CHAR_POS ((unsigned char *) d) >= point)
-	    goto fail;
-	  break;
-
-	case at_dot:
-          DEBUG_PRINT1 ("EXECUTING at_dot.\n");
-	  if (PTR_CHAR_POS ((unsigned char *) d) != point)
-	    goto fail;
-	  break;
-
-	case after_dot:
-          DEBUG_PRINT1 ("EXECUTING after_dot.\n");
-          if (PTR_CHAR_POS ((unsigned char *) d) <= point)
-	    goto fail;
-	  break;
-#else /* not emacs19 */
 	case at_dot:
           DEBUG_PRINT1 ("EXECUTING at_dot.\n");
 	  if (PTR_CHAR_POS ((unsigned char *) d) + 1 != point)
 	    goto fail;
 	  break;
-#endif /* not emacs19 */
 
 	case syntaxspec:
           DEBUG_PRINT2 ("EXECUTING syntaxspec %d.\n", mcnt);
@@ -4520,11 +4398,6 @@ common_op_match_null_string_p (p, end, reg_info)
     case wordend:
     case wordbound:
     case notwordbound:
-#ifdef emacs
-    case before_dot:
-    case at_dot:
-    case after_dot:
-#endif
       break;
 
     case start_memory:

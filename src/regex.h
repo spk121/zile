@@ -480,11 +480,3 @@ extern size_t regerror
 extern void regfree _RE_ARGS ((regex_t *preg));
 
 #endif /* not __REGEXP_LIBRARY_H__ */
-
-/*
-Local variables:
-make-backup-files: t
-version-control: t
-trim-versions-without-asking: nil
-End:
-*/
