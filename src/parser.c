@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.c,v 1.7 2005/01/25 00:52:05 rrt Exp $	*/
+/*	$Id: parser.c,v 1.8 2005/01/25 00:54:45 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -112,7 +112,7 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
 struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct le *list, int *line)
 {
   astr tok;
-  enum tokenname tokenid = T_NONE;
+  enum tokenname tokenid;
   int isquoted = 0;
 
   assert(getachar && ungetachar);
@@ -121,9 +121,6 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
     tok = snagAToken(getachar, ungetachar, &tokenid);
 
     switch (tokenid) {
-    case T_NONE:
-      break;
-
     case T_QUOTE:
       isquoted = 1;
       break;

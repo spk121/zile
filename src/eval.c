@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.11 2005/01/24 22:50:47 rrt Exp $	*/
+/*	$Id: eval.c,v 1.12 2005/01/25 00:54:40 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -274,8 +274,6 @@ int eval_cume_helper(enum cumefcn function, int value, le *branch)
     leWipe(value_le);
 
     switch (function) {
-    case C_NONE:
-      break;
     case C_ADD:
       value += newvalue;
       break;

@@ -20,19 +20,18 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.h,v 1.3 2005/01/25 00:28:39 rrt Exp $	*/
+/*	$Id: parser.h,v 1.4 2005/01/25 00:54:45 rrt Exp $	*/
 
 #include <stdio.h>
 #include "lists.h"
 
 enum tokenname { 
-  T_NONE, 
+  T_EOF,
   T_CLOSEPAREN, 
   T_OPENPAREN, 
   T_NEWLINE, 
   T_QUOTE,
-  T_WORD, 
-  T_EOF
+  T_WORD
 };
 
 typedef int (*getcCallback)(void);

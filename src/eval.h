@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.h,v 1.7 2005/01/24 13:56:14 rrt Exp $	*/
+/*	$Id: eval.h,v 1.8 2005/01/25 00:54:42 rrt Exp $	*/
 
 #include "lists.h"
 
@@ -40,7 +40,6 @@ int evalCastLeToInt(const le *levalue);
 le *evalCastIntToLe(int intvalue);
 
 enum cumefcn {
-  C_NONE,
   C_ADD,
   C_SUBTRACT,
   C_MULTIPLY,
