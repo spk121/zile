@@ -1,4 +1,4 @@
-/*	$Id: basic.c,v 1.5 2004/01/27 16:54:35 rrt Exp $	*/
+/*	$Id: basic.c,v 1.6 2004/02/03 01:22:01 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -27,6 +27,9 @@
 #include "config.h"
 
 #include <assert.h>
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,8 +111,12 @@ int previous_line(void)
 	if (cur_wp->pointp->prev != cur_bp->limitp) {
 		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
-		if (!(lastflag & FLAG_DONE_CPCN))
-			cur_goalc = get_goalc();
+		if (!(lastflag & FLAG_DONE_CPCN)) {
+                        if (cur_wp->pointo == cur_wp->pointp->size)
+                                cur_goalc = INT_MAX;
+                        else
+                                cur_goalc = get_goalc();
+		}
 
 		cur_wp->pointp = cur_wp->pointp->prev;
 		--cur_wp->pointn;
@@ -137,11 +144,18 @@ column, or at the end of the line if it is not long enough.
 	if (uniarg < 0)
 		return FUNCALL_ARG(next_line, -uniarg);
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!previous_line()) {
-			minibuf_error("Beginning of buffer");
-			return FALSE;
-		}
+	/* if (!bobp()) */
+        if (!(cur_wp->pointp->prev == cur_bp->limitp &&
+	      cur_wp->pointo == 0)) {
+		for (uni = 0; uni < uniarg; ++uni)
+			if (!previous_line()) {
+                                thisflag |= FLAG_DONE_CPCN;
+                                FUNCALL(beginning_of_line);
+                                break;
+			}
+	}
+        else if (lastflag & FLAG_DONE_CPCN)
+                thisflag |= FLAG_DONE_CPCN;
 
 	return TRUE;
 }
@@ -151,8 +165,12 @@ int next_line(void)
 	if (cur_wp->pointp->next != cur_bp->limitp) {
 		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
-		if (!(lastflag & FLAG_DONE_CPCN))
-			cur_goalc = get_goalc();
+		if (!(lastflag & FLAG_DONE_CPCN)) {
+                        if (cur_wp->pointo == cur_wp->pointp->size)
+                                cur_goalc = INT_MAX;
+                        else
+                                cur_goalc = get_goalc();
+		}
 
 		cur_wp->pointp = cur_wp->pointp->next;
 		++cur_wp->pointn;
@@ -180,11 +198,18 @@ column, or at the end of the line if it is not long enough.
 	if (uniarg < 0)
 		return FUNCALL_ARG(previous_line, -uniarg);
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!next_line()) {
-			minibuf_error("End of buffer");
-			return FALSE;
-		}
+	/* if (!eobp()) */
+	if (!(cur_wp->pointp->next == cur_bp->limitp &&
+	      cur_wp->pointo == cur_wp->pointp->size)) {
+		for (uni = 0; uni < uniarg; ++uni)
+			if (!next_line()) {
+                                thisflag |= FLAG_DONE_CPCN;
+                                FUNCALL(end_of_line);
+				break;
+			}
+	}
+        else if (lastflag & FLAG_DONE_CPCN)
+                thisflag |= FLAG_DONE_CPCN;
 
 	return TRUE;
 }

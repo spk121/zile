@@ -1,6 +1,7 @@
 Changes between Zile 1.7 BETA 2 - Zile 1.7
 
 * Patches provided by David A. Capello <dacap@users.sourceforge.net>:
+    * Modified `previous-line' and `next-line' to Emacs behavior.
     * Added `forward-sexp', `backward-sexp', `transpose-sexp', and
       `mark-sexp'.
     * Added `forward-line' and `transpose-lines'.
