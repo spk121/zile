@@ -1,4 +1,4 @@
-/*	$Id: glue.c,v 1.5 2004/01/21 01:50:05 dacap Exp $	*/
+/*	$Id: glue.c,v 1.6 2004/01/28 10:47:33 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -263,7 +263,7 @@ int calculate_mark_lineno(windowp wp)
 void goto_point (int pointn, int pointo)
 {
 	if (cur_wp->pointn > pointn)
-		do 
+		do
 			FUNCALL(previous_line);
 		while (cur_wp->pointn > pointn);
 	else if (cur_wp->pointn < pointn)
