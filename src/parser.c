@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.c,v 1.4 2005/01/21 23:51:08 rrt Exp $	*/
+/*	$Id: parser.c,v 1.5 2005/01/24 23:13:24 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -32,7 +32,7 @@
     
 struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct le *list, int *line)
 {
-  char * temp = NULL;
+  char *tok = NULL;
   enum tokenname tokenid = T_NONE;
   int isquoted = 0;
 
@@ -40,7 +40,7 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
     return NULL;
 
   while (1) {	    
-    temp = snagAToken(getachar, ungetachar, &tokenid);
+    tok = snagAToken(getachar, ungetachar, &tokenid);
 
     switch (tokenid) {
     case (T_NONE):
@@ -63,8 +63,8 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
       break;
 
     case (T_WORD):
-      list = leAddDataElement(list, temp, isquoted);
-      free(temp);
+      list = leAddDataElement(list, tok, isquoted);
+      free(tok);
       isquoted = 0;
       break;
 	    
@@ -88,19 +88,15 @@ char *snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokennam
   *tokenid = T_EOF;
 
   /* Chew space to next token */
-  while (1) {
+  do {
     c = getachar();
 
     /* Munch comments */
     if (c == ';')
       do {
         c = getachar();
-      } while (c != '\n');
-		
-    if ((c == '(' || c == ')' || c == '\n' || c == '\"' || c == '\'' || c == EOF || c > '-' || c <= 'z') &&
-        c != ' ' && c != '\t')
-      break;
-  }
+      } while (c != EOF && c != '\n');
+  } while (c == ' ' || c == '\t');
 
   /* Snag token */
   if (c == '(') {
@@ -130,7 +126,7 @@ char *snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokennam
     temp[pos++] = (char)c;
 
     if (!doublequotes) { 
-      if (c == ')' || c == '(' || c == ';' || c == '#' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
+      if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
         ungetachar(c);
         temp[pos-1] = '\0';
 
@@ -159,5 +155,6 @@ char *snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum tokennam
 
     c = getachar();
   }
+
   return NULL;
 }
