@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.67 2005/02/02 02:17:40 rrt Exp $        */
+/*      $Id: file.c,v 1.68 2005/02/03 01:00:00 rrt Exp $        */
 
 #include "config.h"
 
@@ -784,7 +784,7 @@ static int copy_file(const char *source, const char *dest)
   }
 
   if (asprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
-    minibuf_error("Can't allocate temp file name : %s",
+    minibuf_error("Cannot allocate temporary file name `%s'",
                   strerror(errno));
     return FALSE;
   }
@@ -829,6 +829,7 @@ static int copy_file(const char *source, const char *dest)
     if (rename(tname, dest) == -1) {
       minibuf_error("Cannot rename temporary file `%s'", strerror(errno));
       (void)unlink(tname);
+      stat_valid = FALSE;
     }
   } else if (unlink(tname) == -1)
     minibuf_error("Cannot remove temporary file `%s'", strerror(errno));
@@ -844,7 +845,7 @@ static int copy_file(const char *source, const char *dest)
     utime(dest, &t);
   }
 
-  return stat_valid ? FALSE : TRUE;
+  return stat_valid;
 }
 
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
