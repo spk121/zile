@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.20 2004/10/16 20:36:50 rrt Exp $	*/
+/*	$Id: help.c,v 1.21 2004/11/14 21:05:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -61,7 +61,7 @@ static void fix_alternative_keys(Buffer *bp)
 		for (i = 0; i < astr_len(lp->text) - 2; i++)
 			if (*astr_char(lp->text, i) == 'C' && *astr_char(lp->text, i + 1) == '-' &&
                             *astr_char(lp->text, i + 2) == 'h')
-                                *astr_char(lp->text, 0) = 'M', i += 2;
+                                *astr_char(lp->text, i) = 'M', i += 2;
 }
 
 /*
