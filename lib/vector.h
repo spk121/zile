@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.h,v 1.1 2004/03/08 15:26:52 rrt Exp $	*/
+/*	$Id: vector.h,v 1.2 2004/03/09 12:52:17 rrt Exp $	*/
 
 #ifndef VECTOR_H
 #define VECTOR_H
@@ -41,5 +41,6 @@ void *vec_index(vector *v, size_t idx);
 #define vec_item(v, idx, ty)         (*(ty *)vec_index((v), (idx)))
 #define vec_itemsize(v) (v)->itemsize
 #define vec_items(v)    (v)->items
+#define vec_array(v)    (v)->array
 
 #endif
