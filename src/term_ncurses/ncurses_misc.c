@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.7 2004/01/21 01:22:52 dacap Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.8 2004/01/28 10:05:14 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -117,7 +117,7 @@ int ncurses_init(void)
 	other_sig.sa_flags = SA_RESTART;
 
 	ncurses_tp->screen = newterm(NULL, stdout, stdin);
-	set_term(ncurses_tp->screen);	
+	set_term(ncurses_tp->screen);
 
 	ncurses_tp->width = COLS;
 	ncurses_tp->height = LINES;
