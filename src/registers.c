@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.13 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: registers.c,v 1.14 2005/01/25 12:28:29 rrt Exp $	*/
 
 #include "config.h"
 
@@ -56,7 +56,7 @@ DEFUN("copy-to-register", copy_to_register)
   if (warn_if_no_mark())
     return FALSE;
 
-  calculate_region(&r);
+  calculate_the_region(&r);
 
   p = copy_text_block(r.start.n, r.start.o, r.size);
   if (regs[reg].text != NULL)

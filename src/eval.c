@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.12 2005/01/25 00:54:40 rrt Exp $	*/
+/*	$Id: eval.c,v 1.13 2005/01/25 12:28:28 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -941,13 +941,27 @@ void eval_finalise(void)
 }
 
 
+static le *eval_expression(char *expr)
+{
+  le *list = lisp_read_string(expr);
+  astr as = leDumpEval(list, 0);
+  
+  if (lastflag & FLAG_SET_UNIARG)
+    insert_string(astr_cstr(as));
+  else
+    term_minibuf_write(astr_cstr(as));
+  astr_delete(as);
+
+  return list;
+}
+
 DEFUN("eval-expression", eval_expression)
   /*+
-    Evaluate EVAL-EXPRESSION-ARG and print value in the echo area.
+    Evaluate EVAL-EXPRESSION-ARG and print value in the minibuffer.
     Value is also consed on to front of the variable `values'.
     Optional argument EVAL-EXPRESSION-INSERT-VALUE, if non-nil, means
     insert the result into the current buffer instead of printing it in
-    the echo area.
+    the minibuffer.
     +*/
 {
   char *expr;
@@ -956,8 +970,31 @@ DEFUN("eval-expression", eval_expression)
   if ((expr = minibuf_read("Eval: ", "")) == NULL)
     return FALSE;
 
-  list = lisp_read_string(expr);
-  astr_delete(leDumpEval(list, 0));
+  list = eval_expression(expr);
+  /* XXX cons value on to front of values */
+  leWipe(list);
+
+  return list == NULL;
+}
+
+DEFUN("eval-last-sexp", eval_last_sexp)
+  /*+
+    Evaluate sexp before point; print value in minibuffer.
+    Interactively, with prefix argument, print output into current buffer.
+    +*/
+{
+  char *expr;
+  le *list;
+  Marker *m = point_marker();
+  Region r;
+
+  backward_sexp();
+  calculate_region(&r, cur_bp->pt, m->pt);
+  expr = copy_text_block(r.start.n, r.start.o, r.size);
+  cur_bp->pt = m->pt;
+
+  list = eval_expression(expr);
+  free(expr);
   leWipe(list);
 
   return list == NULL;

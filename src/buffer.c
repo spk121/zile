@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.27 2005/01/17 18:09:21 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.28 2005/01/25 12:28:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -318,26 +318,34 @@ int warn_if_no_mark(void)
 }
 
 /*
- * Calculate the region size and set the region structure.
+ * Calculate a region size and set the region structure.
  */
-int calculate_region(Region *rp)
+void calculate_region(Region *rp, Point from, Point to)
 {
-  if (!is_mark_actived())
-    return FALSE;
-
-  /* The point is before the mark. */
-  if (cmp_point(cur_bp->pt, cur_bp->mark->pt) < 0) {
-    rp->start = cur_bp->pt;
-    rp->end = cur_bp->mark->pt;
-  }
-  /* The mark is before the point. */
-  else {
-    rp->start = cur_bp->mark->pt;
-    rp->end = cur_bp->pt;
+  if (cmp_point(from, to) < 0) {
+    /* The point is before the mark. */
+    rp->start = from;
+    rp->end = to;
+  } else {
+    /* The mark is before the point. */
+    rp->start = to;
+    rp->end = from;
   }
 
   rp->size = point_dist(rp->start, rp->end);
   rp->num_lines = count_lines(rp->start, rp->end);
+}
+
+/*
+ * Calculate the region size between point and mark and set the region
+   structure.
+ */
+int calculate_the_region(Region *rp)
+{
+  if (!is_mark_actived())
+    return FALSE;
+
+  calculate_region(rp, cur_bp->pt, cur_bp->mark->pt);
   return TRUE;
 }
 

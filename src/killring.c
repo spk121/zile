@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.17 2005/01/23 18:43:52 rrt Exp $	*/
+/*	$Id: killring.c,v 1.18 2005/01/25 12:28:29 rrt Exp $	*/
 
 #include "config.h"
 
@@ -159,7 +159,7 @@ DEFUN("kill-region", kill_region)
   if (warn_if_no_mark())
     return FALSE;
 
-  calculate_region(&r);
+  calculate_the_region(&r);
 
   if (cur_bp->flags & BFLAG_READONLY) {
     /*
@@ -210,7 +210,7 @@ DEFUN("copy-region-as-kill", copy_region_as_kill)
   if (warn_if_no_mark())
     return FALSE;
 
-  calculate_region(&r);
+  calculate_the_region(&r);
 
   p = copy_text_block(r.start.n, r.start.o, r.size);
   kill_ring_push_nstring(p, r.size);

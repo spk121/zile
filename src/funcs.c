@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.69 2005/01/22 13:13:14 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.70 2005/01/25 12:28:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -482,7 +482,7 @@ static int edit_tab_region(int action)
   if (warn_if_readonly_buffer() || warn_if_no_mark())
     return FALSE;
 
-  calculate_region(&r);
+  calculate_the_region(&r);
   if (r.size == 0)
     return TRUE;
 
@@ -564,7 +564,7 @@ static void astr_append_region(astr s)
   int c;
 
   activate_mark();
-  calculate_region(&r);
+  calculate_the_region(&r);
 
   if (r.size > 0) {
     t = copy_text_block(r.start.n, r.start.o, r.size);
@@ -913,7 +913,7 @@ DEFUN("backward-word", backward_word)
 		}							\
 	}
 
-static int forward_sexp(void)
+int forward_sexp(void)
 {
   int gotsexp = FALSE;
   int level = 0;
@@ -980,7 +980,7 @@ DEFUN("forward-sexp", forward_sexp)
   return TRUE;
 }
 
-static int backward_sexp(void)
+int backward_sexp(void)
 {
   int gotsexp = FALSE;
   int level = 0;
@@ -1312,7 +1312,7 @@ static int setcase_region(int rcase)
   if (warn_if_readonly_buffer() || warn_if_no_mark())
     return FALSE;
 
-  calculate_region(&r);
+  calculate_the_region(&r);
   size = r.size;
 
   undo_save(UNDO_REPLACE_BLOCK, r.start, size, size);
@@ -1461,7 +1461,7 @@ DEFUN("shell-command-on-region", shell_command_on_region)
       return FALSE;
     }
 
-    calculate_region(&r);
+    calculate_the_region(&r);
     p = copy_text_block(r.start.n, r.start.o, r.size);
     write(fd, p, r.size);
     free(p);
@@ -1495,7 +1495,7 @@ DEFUN("shell-command-on-region", shell_command_on_region)
       undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       {
         Region r;
-        calculate_region(&r);
+        calculate_the_region(&r);
         if (cur_bp->pt.p != r.start.p
             || r.start.o != cur_bp->pt.o)
           FUNCALL(exchange_point_and_mark);
@@ -1530,7 +1530,7 @@ DEFUN("delete-region", delete_region)
   if (warn_if_no_mark())
     return FALSE;
 
-  calculate_region(&r);
+  calculate_the_region(&r);
 
   if (cur_bp->flags & BFLAG_READONLY) {
     warn_if_readonly_buffer();

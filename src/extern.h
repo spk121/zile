@@ -24,7 +24,8 @@ void init_bindings(void);
 void process_key(int c);
 
 /* buffer.c --------------------------------------------------------------- */
-int calculate_region(Region *rp);
+void calculate_region(Region *rp, Point from, Point to);
+int calculate_the_region(Region *rp);
 Buffer *create_buffer(const char *name);
 void free_buffer(Buffer *bp);
 void free_buffers(void);
@@ -80,6 +81,8 @@ int set_mark_command(void);
 int exchange_point_and_mark(void);
 int universal_argument(int keytype, int xarg);
 void write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
+int forward_sexp(void);
+int backward_sexp(void);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
