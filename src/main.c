@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.30 2004/06/30 22:52:41 rrt Exp $	*/
+/*	$Id: main.c,v 1.31 2004/07/10 23:52:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -104,7 +104,7 @@ static void loop(void)
 #if DEBUG
 		check_list(cur_wp);
 #endif
-		/* Redisplay every second to update clock */
+		/* Redisplay every second to update clock. */
 		do {
 			term_redisplay();
 			c = waitkey_discard(1000);

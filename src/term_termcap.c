@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.2 2004/07/10 22:49:16 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.3 2004/07/10 23:52:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -31,7 +31,7 @@
 #include <termios.h>
 #include <term.h>
 
-/* Avoid clash with zile function */
+/* Avoid clash with zile function. */
 #undef newline
 
 #include "zile.h"
@@ -39,7 +39,7 @@
 #include "zterm.h"
 
 static Terminal thisterm = {
-	/* Unitialised screen pointer */
+	/* Unitialised screen pointer. */
 	NULL,
 
 	/* Uninitialized width and height. */
@@ -48,6 +48,7 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
+/* XXX TODO */
 Font ZILE_REVERSE = 0, ZILE_BOLD = 0;
 
 Font C_FG_BLACK;
@@ -64,8 +65,8 @@ static char *cl_string, *cm_string, *ce_string, *se_string, *so_string;
 static int auto_wrap;
 static struct termios ostate, nstate;
 
-static char PC;   /* For tputs.  */
-static char *BC;  /* For tgoto.  */
+static char PC;   /* For tputs. */
+static char *BC;  /* For tgoto. */
 static char *UP;
 
 void term_getyx(int *y, int *x)
@@ -84,6 +85,7 @@ void term_clrtoeol(void)
 
 void term_refresh(void)
 {
+        /* Termcap has no refresh function; all updates are immediate. */
 }
 
 void term_clear(void)
@@ -103,6 +105,7 @@ void term_addnstr(const char *s, int len)
 
 void term_attrset(Font f)
 {
+        /* XXX TODO */
 }
 
 int term_printw(const char *fmt, ...)
@@ -122,7 +125,7 @@ void term_beep(void)
 
 void term_init(void)
 {
-        /* termcap buffer, conventionally big enough */
+        /* termcap buffer, conventionally big enough. */
         char *tcap = (char *)malloc(2048);
         char *term = getenv("TERM");
         int res;
@@ -145,7 +148,7 @@ void term_init(void)
 	termp->width = tgetnum("co");
 	termp->height = tgetnum("li");
 
-        /* Extract information we will use.  */
+        /* Extract information we will use. */
         cl_string = tgetstr("cl", &tcap);
         cm_string = tgetstr("cm", &tcap);
         auto_wrap = tgetflag("am");
@@ -153,13 +156,13 @@ void term_init(void)
         se_string = tgetstr("se", &tcap);
         so_string = tgetstr("so", &tcap);
 
-        /* Extract information that termcap functions use.  */
+        /* Extract information that termcap functions use. */
         temp = tgetstr("pc", &tcap);
         PC = temp ? *temp : 0;
         BC = tgetstr("le", &tcap);
         UP = tgetstr("up", &tcap);
 
-        /* save terminal flags */
+        /* Save terminal flags. */
         if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
                 fprintf(stderr, "Can't read terminal capabilites\n");
                 zile_exit(1);
@@ -171,13 +174,13 @@ void term_init(void)
         nstate.c_cflag &= ~(CSIZE|PARENB);
         nstate.c_cflag |= CS8;
         nstate.c_cc[VMIN] = 1;
-        nstate.c_cc[VTIME] = 0;	/* block indefinitely for a single char */
+        nstate.c_cc[VTIME] = 0;	/* Block indefinitely for a single char. */
         if (tcsetattr(0, TCSADRAIN, &nstate) < 0) {
                 fprintf(stderr, "Can't set terminal mode\n");
                 zile_exit(1);
         }
-        /* provide a smaller terminal output buffer so that the type ahead
-         * detection works better (more often) */
+        /* Provide a smaller terminal output buffer so that the type-ahead
+           detection works better (more often). */
 /*         setbuffer (stdout, &tobuf[0], TBUFSIZ); */
         signal (SIGTSTP, SIG_DFL);
 }
@@ -194,12 +197,12 @@ int term_open(void)
 
 int term_close(void)
 {
-	/* Clear last line.  */
+	/* Clear last line. */
 	term_move(ZILE_LINES - 1, 0);
 	term_clrtoeol();
 	term_refresh();
 
-	/* Free memory and finish with termcap.  */
+	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
 	termp->screen = NULL;
         tcdrain (0);
