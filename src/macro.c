@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: macro.c,v 1.12 2005/01/30 23:24:34 rrt Exp $	*/
+/*	$Id: macro.c,v 1.13 2005/02/04 02:10:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,18 +32,44 @@
 #include "extern.h"
 
 
-static Macro *cur_mp, *head_mp = NULL;
+static Macro *cur_mp, *cmd_mp = NULL, *head_mp = NULL;
 
-void add_macro_key(size_t key)
+static void macro_delete(Macro *mp)
 {
-  cur_mp->keys = zrealloc(cur_mp->keys, sizeof(size_t) * ++cur_mp->nkeys);
-  cur_mp->keys[cur_mp->nkeys - 1] = key;
+  if (mp) {
+    free(mp->keys);
+    free(mp);
+  }
+}
+
+static void add_macro_key(Macro *mp, size_t key)
+{
+  mp->keys = zrealloc(mp->keys, sizeof(size_t) * ++mp->nkeys);
+  mp->keys[mp->nkeys - 1] = key;
+}
+
+void add_cmd_to_macro(void)
+{
+  size_t i;
+  for (i = 0; i < cmd_mp->nkeys; i++)
+    add_macro_key(cur_mp, cmd_mp->keys[i]);
+  macro_delete(cmd_mp);
+  cmd_mp = NULL;
+}
+
+void add_key_to_cmd(size_t key)
+{
+  if (cmd_mp == NULL)
+    cmd_mp = zmalloc(sizeof(Macro));
+
+  add_macro_key(cmd_mp, key);
 }
 
 void cancel_kbd_macro(void)
 {
-  free_macros();
-  cur_mp = NULL;
+  macro_delete(cmd_mp);
+  macro_delete(cur_mp);
+  cmd_mp = cur_mp = NULL;
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
@@ -66,7 +92,7 @@ DEFUN("start-kbd-macro", start_kbd_macro)
   minibuf_write("Defining keyboard macro...");
 
   thisflag |= FLAG_DEFINING_MACRO;
-  cur_mp = (Macro *)zmalloc(sizeof(Macro));
+  cur_mp = zmalloc(sizeof(Macro));
   return TRUE;
 }
 
@@ -178,13 +204,6 @@ DEFUN("call-last-kbd-macro", call_last_kbd_macro)
   return ret;
 }
 
-static void macro_delete(Macro *mp)
-{
-  assert(mp);
-  free(mp->keys);
-  free(mp);
-}
-
 /*
  * Free all the macros (used at Zile exit).
  */
@@ -192,8 +211,7 @@ void free_macros(void)
 {
   Macro *mp, *next;
 
-  if (cur_mp)
-    macro_delete(cur_mp);
+  macro_delete(cur_mp);
 
   for (mp = head_mp; mp; mp = next) {
     next = mp->next;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.62 2005/01/30 20:24:13 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.63 2005/02/04 02:10:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ typedef struct {
 } Screen;
 
 static char *tcap_ptr;
-static astr key_buf;
+static size_t *key_buf, nkeys;
 static Screen screen;
 Terminal *termp = &thisterm;
 
@@ -301,7 +301,6 @@ void term_init(void)
   size_t i;
   char *tcap;
 
-  key_buf = astr_new();
   tcap_ptr = tcap = get_tcap();
 
   read_screen_size();
@@ -365,7 +364,6 @@ void term_close(void)
   tcdrain(0);
   fflush(stdout);
   term_suspend();
-  astr_delete(key_buf);
 }
 
 /* Suspend the term ready to go back to the shell */
@@ -452,9 +450,13 @@ static size_t translate_key(char *s, size_t nbytes)
 static size_t xgetkey(int mode, size_t dsecs)
 {
   size_t nbytes;
-  size_t len = astr_len(key_buf);
-  char *keys = zmalloc(len + max_key_chars);
+  char *keys = zmalloc(max_key_chars);
   size_t key = KBD_NOKEY;
+
+  if (nkeys > 0) {
+    nkeys--;
+    return key_buf[nkeys];
+  }
 
   if (mode & GETKEY_DELAYED) {
     nstate.c_cc[VTIME] = dsecs; /* Wait up to dsecs deciseconds... */
@@ -464,18 +466,9 @@ static size_t xgetkey(int mode, size_t dsecs)
     nstate.c_cc[VMIN] = 1;      /* ...for at least one character. */
   }
 
-  if (len > 0) {
-    nstate.c_cc[VMIN] = 0; /* We already have characters; don't wait for more. */
-    nstate.c_cc[VTIME] = 0;
-    memcpy(keys, astr_cstr(key_buf), len);
-    astr_truncate(key_buf, 0);
-  }
-
   setattr(TCSANOW, &nstate); /* Set waiting period and number of characters. */
 
-  nbytes = len;
-  if (len < max_key_chars) /* Get more chars if we might not already have enough for a keystroke. */
-    nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
+  nbytes = read(STDIN_FILENO, keys, max_key_chars);
 
   if (mode & GETKEY_NONFILTERED) {
     int i;
@@ -497,15 +490,18 @@ size_t term_xgetkey(int mode, size_t timeout)
   size_t key;
   struct sigaction winch_sig;
 
-/* The SIGWINCH handler is only active in this routine, so that we
-   know the data structures are in a consistent state. Here is where
-   Zile typically spends most of its time. */
+  /* The SIGWINCH handler is only active in this routine, so that we
+     know the data structures are in a consistent state. Here is where
+     Zile typically spends most of its time. */
   winch_sig.sa_handler = winch_sig_handler;
   sigemptyset(&winch_sig.sa_mask);
   winch_sig.sa_flags = SA_RESTART;
   sigaction(SIGWINCH, &winch_sig, NULL);
 
   key = xgetkey(mode, timeout);
+
+  if (thisflag & FLAG_DEFINING_MACRO)
+    add_key_to_cmd(key);
 
   winch_sig.sa_handler = SIG_DFL;
   sigaction(SIGWINCH, &winch_sig, NULL);
@@ -518,34 +514,9 @@ size_t term_getkey(void)
   return term_xgetkey(0, 0);
 }
 
+/* XXX Use macro routines for this, suitably pulled out into keys.c */
 void term_ungetkey(size_t key)
 {
-  if (key != KBD_NOKEY) {
-    char c = 0;
-
-    if (key & KBD_CTL)
-      switch (key & 0xff) {
-      case '@':
-        c = '\0';
-        break;
-      case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
-      case 'f':  case 'g':  case 'h':             case 'j':
-      case 'k':  case 'l':             case 'n':  case 'o':
-      case 'p':  case 'q':  case 'r':  case 's':  case 't':
-      case 'u':  case 'v':  case 'w':  case 'x':  case 'y':
-      case 'z':
-        c = (key & 0xff) - 'a' + 1;
-        break;
-      case '_':
-        c = '\37';
-        break;
-      }
-    else
-      c = key & 0xff;
-
-    astr_insert_char(key_buf, 0, c);
-
-    if (key & KBD_META)
-      astr_insert_char(key_buf, 0, '\033');
-  }
+  key_buf = zrealloc(key_buf, sizeof(size_t) * ++nkeys);
+  key_buf[nkeys - 1] = key;
 }

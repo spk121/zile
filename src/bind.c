@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.56 2005/01/30 23:24:33 rrt Exp $	*/
+/*	$Id: bind.c,v 1.57 2005/02/04 02:10:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -203,41 +203,29 @@ void process_key(size_t key)
   if (key == KBD_NOKEY)
     return;
 
-  if (key & KBD_META && isdigit(key & 255)) {
+  if (key & KBD_META && isdigit(key & 255))
     /* Got an ESC x sequence where `x' is a digit. */
-    if (universal_argument(KBD_META, (int)((key & 0xff) - '0')) &&
-        thisflag & FLAG_DEFINING_MACRO)
-      add_macro_key(key);
-  } else if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
-    /* There are no bindings for the pressed key. */
-    undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-    for (uni = 0; uni < last_uniarg; ++uni)
-      if (!self_insert_command((ptrdiff_t)key)) {
-        astr as = make_completion(keys, numkeys);
-        astr_truncate(as, -1);
-        minibuf_error("%s not defined.", astr_cstr(as));
-        astr_delete(as);
-        undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-        free(keys);
-        return;
-      } else if (thisflag & FLAG_DEFINING_MACRO)
-        add_macro_key(key);
-    undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  } else {
-    size_t i;
+    universal_argument(KBD_META, (int)((key & 0xff) - '0'));
+  else {
+    if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
+      /* There are no bindings for the pressed key. */
+      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+      for (uni = 0;
+           uni < last_uniarg && self_insert_command((ptrdiff_t)key);
+           ++uni);
+      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    } else {
+      p->func(last_uniarg);
+      _last_command = p->func;
+    }
 
-    /* Only add keystrokes if we're already in macro defining mode
-       before the function call, to cope with start-kbd-macro. */
-    if (p->func(last_uniarg) && lastflag & FLAG_DEFINING_MACRO &&
-        thisflag & FLAG_DEFINING_MACRO)
-      for (uni = 0; uni < last_uniarg; ++uni)
-        for (i = 0; i < numkeys; i++)
-          add_macro_key(keys[i]);
-    _last_command = p->func;
+    free(keys);
   }
 
-  if (keys)
-    free(keys);
+  /* Only add keystrokes if we're already in macro defining mode
+     before the function call, to cope with start-kbd-macro. */
+  if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
+    add_cmd_to_macro();
 }
 
 Function last_command(void)

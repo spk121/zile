@@ -146,7 +146,8 @@ astr lisp_dump(le *list);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
-void add_macro_key(size_t key);
+void add_cmd_to_macro(void);
+void add_key_to_cmd(size_t key);
 int call_macro(Macro *mp);
 void free_macros(void);
 Macro *get_macro(char *name);
