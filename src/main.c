@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.8 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: main.c,v 1.9 2004/01/21 01:24:46 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -39,6 +39,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <time.h>
 
 #include "alist.h"
 
@@ -61,6 +62,9 @@ terminalp cur_tp = NULL;
 int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
+
+/* Time (seconds) to refresh the clock on the screen.  */
+static int clock_timeout = 0;
 
 #if DEBUG
 /*
@@ -106,7 +110,7 @@ static void loop(void)
 #endif
 		cur_tp->redisplay();
 
-		c = cur_tp->getkey();
+		c = getkey_safe ();
 		minibuf_clear();
 
 		thisflag = 0;
@@ -376,3 +380,76 @@ then enter the text in that file's own buffer.\n\
 
 	return 0;
 }
+
+int getkey_safe (void)
+{
+	int c;
+
+	if (clock_timeout > 0) {
+		clock_t clk = clock ();
+
+		do {
+			c = cur_tp->xgetkey (GETKEY_NONBLOCKING,
+					     clock_timeout*1000);
+
+			/* One second timeout.  */
+			if (clock ()-clk > clock_timeout*CLOCKS_PER_SEC) {
+				clk = clock ();
+
+				/* Update clock.  */
+				if (lookup_bool_variable ("display-time"))
+					cur_tp->redisplay ();
+			}
+		} while (c == KBD_NOKEY);
+	}
+	else {
+		c = cur_tp->getkey ();
+	}
+
+	return c;
+}
+
+/* This routine updates the "clock_timeout" variable looking in the
+   `display-time-format' strings like %S to update every second, or %M
+   to update every minute (Reuben Thomas idea).  */
+
+void refresh_clock_timeout (void)
+{
+	int display_time = lookup_bool_variable ("display-time");
+	char *display_time_format = get_variable ("display-time-format");
+
+	/* Check time to update clock.  */
+	clock_timeout = 0;
+
+	if (display_time && display_time_format) {
+		char *s;
+		int sec;
+
+		for (s = display_time_format; *s; s++) {
+			if (*s == '%') {
+				s++;
+
+				switch (*s) {
+				case 'S': /* seconds */
+				case 's':
+				case 'r': /* %I:%M:%S %p */
+				case 'T': /* %H:%M:%S */
+					sec = 1;
+					break;
+				case 'M': /* minutes */
+				case 'R': /* %H:%M */
+					sec = 60;
+					break;
+				default:
+					sec = 0;
+					break;
+				}
+
+				if (sec && (clock_timeout == 0
+					    || clock_timeout > sec))
+					clock_timeout = sec;
+			}
+		}
+	}
+}
+
