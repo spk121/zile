@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.9 2004/01/21 01:24:46 dacap Exp $	*/
+/*	$Id: main.c,v 1.10 2004/01/28 14:38:05 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -39,7 +39,6 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <time.h>
 
 #include "alist.h"
 
@@ -49,7 +48,7 @@
 #include "term_ncurses/term_ncurses.h"
 
 #define ZILE_VERSION_STRING \
-	"Zile " ZILE_VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST
+	"Zile " ZILE_VERSION
 
 /* The current window; the first window in list. */
 windowp cur_wp = NULL, head_wp = NULL;
@@ -62,9 +61,6 @@ terminalp cur_tp = NULL;
 int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
-
-/* Time (seconds) to refresh the clock on the screen.  */
-static int clock_timeout = 0;
 
 #if DEBUG
 /*
@@ -108,9 +104,12 @@ static void loop(void)
 #if DEBUG
 		check_list(cur_wp);
 #endif
-		cur_tp->redisplay();
+		/* Redisplay every second to update clock */
+		do {
+			cur_tp->redisplay();
+			c = waitkey_discard(1000);
+		} while (c == KBD_NOKEY);
 
-		c = getkey_safe ();
 		minibuf_clear();
 
 		thisflag = 0;
@@ -149,7 +148,8 @@ static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
 %Copyright (C) 1997-2003 Sandro Sigala <sandro@sigala.it>%\n\
-%Copyright (C) 2003 Reuben Thomas <rrt@sc3d.org>%\n\
+%Copyright (C) 2003-2004 Reuben Thomas <rrt@sc3d.org>%\n\
+%Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>%\n\
 \n\
 Type %C-x C-c% to exit Zile.\n\
 Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\
@@ -258,7 +258,7 @@ static void set_variables(alist al)
 static void usage(void)
 {
 	fprintf(stderr, "usage: zile [-hqV] [-f function] [-v variable=value] [-u rcfile]\n"
-			"            [+number] [file ...]\n");
+			"	     [+number] [file ...]\n");
 	exit(1);
 }
 
@@ -314,6 +314,7 @@ int main(int argc, char **argv)
 	if (!qflag)
 		read_rc_file(uarg);
 	set_variables(vargs);
+
 	/* Force refresh of cached variables. */
 	cur_tp->refresh_cached_variables();
 	cur_tp->open();
@@ -380,76 +381,3 @@ then enter the text in that file's own buffer.\n\
 
 	return 0;
 }
-
-int getkey_safe (void)
-{
-	int c;
-
-	if (clock_timeout > 0) {
-		clock_t clk = clock ();
-
-		do {
-			c = cur_tp->xgetkey (GETKEY_NONBLOCKING,
-					     clock_timeout*1000);
-
-			/* One second timeout.  */
-			if (clock ()-clk > clock_timeout*CLOCKS_PER_SEC) {
-				clk = clock ();
-
-				/* Update clock.  */
-				if (lookup_bool_variable ("display-time"))
-					cur_tp->redisplay ();
-			}
-		} while (c == KBD_NOKEY);
-	}
-	else {
-		c = cur_tp->getkey ();
-	}
-
-	return c;
-}
-
-/* This routine updates the "clock_timeout" variable looking in the
-   `display-time-format' strings like %S to update every second, or %M
-   to update every minute (Reuben Thomas idea).  */
-
-void refresh_clock_timeout (void)
-{
-	int display_time = lookup_bool_variable ("display-time");
-	char *display_time_format = get_variable ("display-time-format");
-
-	/* Check time to update clock.  */
-	clock_timeout = 0;
-
-	if (display_time && display_time_format) {
-		char *s;
-		int sec;
-
-		for (s = display_time_format; *s; s++) {
-			if (*s == '%') {
-				s++;
-
-				switch (*s) {
-				case 'S': /* seconds */
-				case 's':
-				case 'r': /* %I:%M:%S %p */
-				case 'T': /* %H:%M:%S */
-					sec = 1;
-					break;
-				case 'M': /* minutes */
-				case 'R': /* %H:%M */
-					sec = 60;
-					break;
-				default:
-					sec = 0;
-					break;
-				}
-
-				if (sec && (clock_timeout == 0
-					    || clock_timeout > sec))
-					clock_timeout = sec;
-			}
-		}
-	}
-}
-
