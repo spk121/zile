@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.1 2004/01/23 01:46:25 dacap Exp $
+## $Id: Makefile.am,v 1.2 2004/01/29 10:37:00 rrt Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -34,6 +34,7 @@ zile_SOURCES =					\
 	keys.c					\
 	killring.c				\
 	line.c					\
+	lua.c					\
 	macro.c					\
 	main.c					\
 	minibuf.c				\
@@ -45,7 +46,6 @@ zile_SOURCES =					\
 	tbl_vars.h				\
 	undo.c					\
 	variables.c				\
-	version.h				\
 	window.c				\
 	zile.h
 
@@ -55,7 +55,8 @@ zile_LDADD =					\
 	$(fontlock_c)				\
 	$(fontlock_cpp)				\
 	$(fontlock_csharp)			\
-	$(fontlock_java)
+	$(fontlock_java)			\
+	$(lua)
 
 man_MANS = zile.1
 
