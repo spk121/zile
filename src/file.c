@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.15 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: file.c,v 1.16 2004/02/14 10:07:00 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -339,7 +339,7 @@ void read_from_disk(const char *filename)
 
 	if ((fd = open(filename, O_RDONLY)) < 0) {
 		if (errno != ENOENT) {
-			minibuf_write("@b%s@@: %s", filename, strerror(errno));
+			minibuf_write("%s: %s", filename, strerror(errno));
 			cur_bp->flags |= BFLAG_READONLY;
 		}
 		return;
@@ -536,7 +536,7 @@ int find_file(const char *filename)
 	}
 
 	if (!is_regular_file(filename)) {
-		minibuf_error("@b%s@@ is not a regular file", filename);
+		minibuf_error("%s is not a regular file", filename);
 		waitkey(1 * 1000);
 		return FALSE;
 	}
@@ -638,7 +638,7 @@ Select to the user specified buffer in the current window.
 	swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
 	cp = make_buffer_completion();
-	ms = minibuf_read_completion("Switch to buffer (default @b%s@@): ",
+	ms = minibuf_read_completion("Switch to buffer (default %s): ",
 				     "", cp, NULL, swbuf->name);
 	free_completion(cp);
 	if (ms == NULL)
@@ -667,7 +667,7 @@ int check_modified_buffer(Buffer *bp)
 
 	if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
 		for (;;) {
-			if ((ans = minibuf_read_yesno("Buffer @b%s@@ modified; kill anyway? (yes or no) ", bp->name)) == -1)
+			if ((ans = minibuf_read_yesno("Buffer %s modified; kill anyway? (yes or no) ", bp->name)) == -1)
 				return cancel();
 			else if (!ans)
 				return FALSE;
@@ -752,13 +752,13 @@ Kill the current buffer or the user specified one.
 	Completion *cp;
 
 	cp = make_buffer_completion();
-	if ((ms = minibuf_read_completion("Kill buffer (default @b%s@@): ",
+	if ((ms = minibuf_read_completion("Kill buffer (default %s): ",
 					  "", cp, NULL, cur_bp->name)) == NULL)
 		return cancel();
 	free_completion(cp);
 	if (ms[0] != '\0') {
 		if ((bp = find_buffer(ms, FALSE)) == NULL) {
-			minibuf_error("Buffer `@b%s@@' not found", ms);
+			minibuf_error("Buffer `%s' not found", ms);
 			return FALSE;
 		}
 	} else
@@ -804,13 +804,13 @@ Puts mark after the inserted text.
 
 	swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 	cp = make_buffer_completion();
-	if ((ms = minibuf_read_completion("Insert buffer (default @b%s@@): ",
+	if ((ms = minibuf_read_completion("Insert buffer (default %s): ",
 					  "", cp, NULL, swbuf->name)) == NULL)
 		return cancel();
 	free_completion(cp);
 	if (ms[0] != '\0') {
 		if ((bp = find_buffer(ms, FALSE)) == NULL) {
-			minibuf_error("Buffer `@b%s@@' not found", ms);
+			minibuf_error("Buffer `%s' not found", ms);
 			return FALSE;
 		}
 	} else
@@ -833,12 +833,12 @@ static int insert_file(char *filename)
 	char buf[BUFSIZ];
 
 	if (!exist_file(filename)) {
-		minibuf_error("Unable to read file `@b%s@@'", filename);
+		minibuf_error("Unable to read file `%s'", filename);
 		return FALSE;
 	}
 
 	if ((fd = open(filename, O_RDONLY)) < 0) {
-		minibuf_write("@b%s@@: %s", filename, strerror(errno));
+		minibuf_write("%s: %s", filename, strerror(errno));
 		return FALSE;
 	}
 
@@ -903,12 +903,12 @@ Set mark after the inserted text.
 static int ask_delete_old_revisions(const char *filename)
 {
 	int c;
-	minibuf_write("Delete excess backup versions of @b%s@@? (y or n) ", filename);
+	minibuf_write("Delete excess backup versions of %s? (y or n) ", filename);
 	c = cur_tp->getkey();
 	while (c != 'y') {
 		if (c == 'n' || c == 'q' || c == KBD_CANCEL)
 			return FALSE;
-		minibuf_write("Please answer y or n.  Delete excess backup versions of @b%s@@? (y or n) ", filename);
+		minibuf_write("Please answer y or n.  Delete excess backup versions of %s? (y or n) ", filename);
 		c = cur_tp->getkey();
 	}
 	return TRUE;
@@ -1037,20 +1037,20 @@ static int copy_file(char *source, char *dest)
 
 	ifd = open(source, O_RDONLY, 0);
 	if (ifd < 0) {
-		minibuf_error("@b%s@@: unable to backup", source);
+		minibuf_error("%s: unable to backup", source);
 		return FALSE;
 	}
 
 	ofd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (ifd < 0) {
 		close(ifd);
-		minibuf_error("@b%s@@: unable to create backup", dest);
+		minibuf_error("%s: unable to create backup", dest);
 		return FALSE;
 	}
 
 	while ((len = read(ifd, buf, sizeof buf)) > 0)
 		if(write(ofd, buf, len) < 0) {
-			minibuf_error("unable to write to backup @b%s@@", dest);
+			minibuf_error("unable to write to backup %s", dest);
 			close(ifd);
 			close(ofd);
 			return FALSE;
@@ -1127,7 +1127,7 @@ static int write_to_disk(Buffer *bp, char *filename)
 	}
 
 	if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0) {
-		minibuf_error("@b%s@@: %s", filename, strerror(errno));
+		minibuf_error("%s: %s", filename, strerror(errno));
 		return FALSE;
 	}
 
@@ -1166,7 +1166,7 @@ static int save_buffer(Buffer *bp)
 		} else
 			ms = bp->filename;
 		if (write_to_disk(bp, ms)) {
-			minibuf_write("Wrote @b%s@@", ms);
+			minibuf_write("Wrote %s", ms);
 			bp->flags &= ~BFLAG_MODIFIED;
 		}
 		bp->flags &= ~BFLAG_TEMPORARY;
@@ -1208,7 +1208,7 @@ Makes buffer visit that file, and marks it not modified.
 	cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
 
 	if (write_to_disk(cur_bp, ms)) {
-		minibuf_write("Wrote @b%s@@", ms);
+		minibuf_write("Wrote %s", ms);
 		cur_bp->flags &= ~BFLAG_MODIFIED;
 	}
 
@@ -1232,7 +1232,7 @@ static int save_some_buffers(void)
 				save_buffer(bp);
 			else {
 				for (;;) {
-					minibuf_write("Save file @b%s@@? (y, n, !, ., q) ", fname);
+					minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
 
 					c = cur_tp->getkey();
 					switch (c) {
@@ -1372,12 +1372,12 @@ directory.
 
 	if (ms[0] != '\0') {
 		if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
-			minibuf_error("`@b%s@@' is not a directory", ms);
+			minibuf_error("`%s' is not a directory", ms);
 			free(ms);
 			return FALSE;
 		}
 		if (chdir(ms) == -1) {
-			minibuf_write("@b%s@@: %s", ms, strerror(errno));
+			minibuf_write("%s: %s", ms, strerror(errno));
 			free(ms);
 			return FALSE;
 		}
