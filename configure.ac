@@ -8,19 +8,22 @@ AC_PROG_CC
 AC_C_INLINE
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-
-dnl This is enabled by default, since only ncurses is supported yet.
-AC_DEFINE(USE_NCURSES, 1, [Default terminal.])
+AC_CHECK_PROG(MAKEINFO, makeinfo, yes, no)
+if test $MAKEINFO = yes; then
+	MAKEINFO='makeinfo'
+else
+	# for silly people without texinfo
+	MAKEINFO='@echo'
+fi
 
 dnl Checks for libraries.
 AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup)
-dnl The following check should depend on the `USE_NCURSES' definition.
 AC_CHECK_LIB(ncurses, initscr,
-    AC_DEFINE(HAVE_LIBNCURSES, 1,
+    AC_DEFINE(HAVE_LIBCURSES, 1,
 	      [Define if you have the ncurses library (-lncurses).])
     LIBS="$LIBS -lncurses",
     AC_CHECK_LIB(curses, curses_version,
-	AC_DEFINE(HAVE_LIBNCURSES) LIBS="$LIBS -lcurses"))
+	AC_DEFINE(HAVE_LIBCURSES) LIBS="$LIBS -lcurses"))
 
 dnl Checks for header files.
 AC_HEADER_STDC
@@ -184,10 +187,8 @@ fi
 ])
 
 AH_BOTTOM([
-#ifdef USE_NCURSES
-#ifndef HAVE_LIBNCURSES
-#error ncurses is required for compilation.
-#endif
+#ifndef HAVE_LIBCURSES
+#error curses or ncurses is required for compilation.
 #endif
 
 #include <stddef.h>

@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: main.c,v 1.5 2003/05/06 23:05:04 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -45,11 +45,7 @@
 #include "zile.h"
 #include "extern.h"
 #include "version.h"
-#if USE_NCURSES
 #include "term_ncurses/term_ncurses.h"
-#else
-#error "One terminal should be defined."
-#endif
 
 #define ZILE_VERSION_STRING \
 	"Zile " ZILE_VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST

@@ -33,11 +33,8 @@
 /* Define this to include debugging code.  */
 #undef DEBUG
 
-/* Define if you have the ncurses library (-lncurses).  */
-#undef HAVE_LIBNCURSES
-
-/* Define this to use the ncurses screen handling library.  */
-#undef USE_NCURSES
+/* Define if you have the (n)curses library.  */
+#undef HAVE_LIBCURSES
 
 /* The date of compilation.  */
 #undef CONFIGURE_DATE
@@ -81,10 +78,8 @@
 /* Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
-#ifdef USE_NCURSES
-#ifndef HAVE_LIBNCURSES
-#error ncurses is required for compilation.
-#endif
+#ifndef HAVE_LIBCURSES
+#error (n)curses is required for compilation.
 #endif
 
 #include <stddef.h>

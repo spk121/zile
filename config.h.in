@@ -39,8 +39,8 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define if you have the ncurses library (-lncurses). */
-#undef HAVE_LIBNCURSES
+/* Define if you have the (n)curses library. */
+#undef HAVE_LIBCURSES
 
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
@@ -117,9 +117,6 @@
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Default terminal. */
-#undef USE_NCURSES
-
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
 
@@ -131,10 +128,8 @@
 #undef size_t
 
 
-#ifdef USE_NCURSES
-#ifndef HAVE_LIBNCURSES
-#error ncurses is required for compilation.
-#endif
+#ifndef HAVE_LIBCURSES
+#error (n)curses is required for compilation.
 #endif
 
 #include <stddef.h>
