@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.7 2004/03/14 14:36:06 rrt Exp $
+## $Id: Makefile.am,v 1.8 2004/03/20 17:50:20 rrt Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -22,7 +22,6 @@ zile_SOURCES =					\
 	keys.c					\
 	killring.c				\
 	line.c					\
-	lua.c					\
 	macro.c					\
 	main.c					\
 	marker.c				\
