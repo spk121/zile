@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.25 2005/01/12 00:27:18 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.26 2005/01/12 12:53:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -355,5 +355,16 @@ void show_splash_screen(const char *splash)
       term_addch(*p);
     }
 
+  term_refresh();
+}
+
+/*
+ * Tidy up the term ready to leave Zile (temporarily or permanently!).
+ */
+void term_tidy(void)
+{
+  term_move(ZILE_LINES - 1, 0);
+  term_clrtoeol();
+  term_attrset(1, ZILE_NORMAL);
   term_refresh();
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.58 2005/01/12 10:55:34 rrt Exp $	*/
+/*	$Id: main.c,v 1.59 2005/01/12 12:53:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -268,11 +268,9 @@ int main(int argc, char **argv)
   /* Run the main Zile loop. */
   loop();
 
-  /* Clear last line of display, and leave cursor there. */
-  term_move(ZILE_LINES - 1, 0);
-  term_clrtoeol();
-  term_attrset(1, ZILE_NORMAL); /* Make sure we end in normal font */
-  term_refresh();
+  /* Tidy and close the terminal. */
+  term_tidy();
+  term_close();
 
   /* Free all the memory allocated. */
   free_kill_ring();
@@ -285,8 +283,6 @@ int main(int argc, char **argv)
   free_variables();
   free_minibuf();
   free_rotation_buffers();
-
-  term_close();
 
   return 0;
 }

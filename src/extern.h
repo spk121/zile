@@ -202,7 +202,7 @@ void recenter(Window *wp);
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);
 
-/* term.c ----------------------------------------------------------------- */
+/* term_*.c --------------------------------------------------------------- */
 void term_init(void);
 void term_close(void);
 void term_move(int y, int x);
@@ -223,6 +223,7 @@ void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 void free_rotation_buffers(void);
 void show_splash_screen(const char *splash);
+void term_tidy(void);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;
