@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.11 2004/01/27 16:55:16 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.12 2004/01/31 02:21:59 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -1057,6 +1057,8 @@ With argument, do this that many times.
 /* Move through balanced expressions (sexp) */
 /**********************************************************************/
 
+#define ISSEXPCHAR(c)	      (isalnum(c) || c == '$' || c == '_')
+
 #define ISOPENBRACKETCHAR(c)  ((c=='(') || (c=='[') || (c=='{')	||	\
 			       ((c=='\"') && !double_quote) ||		\
 			       ((c=='\'') && !single_quote))
@@ -1065,7 +1067,7 @@ With argument, do this that many times.
 			       ((c=='\"') && double_quote) ||		\
 			       ((c=='\'') && single_quote))
 
-#define ISSEXPSEPCHAR(c)      (ISOPENBRACKETCHAR (c) ||	\
+#define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
 			       ISCLOSEBRACKETCHAR (c))
 
 #define CONTROL_SEXP_LEVEL(open, close)					 \
@@ -1119,9 +1121,9 @@ static int forward_sexp (void)
 
 			cur_wp->pointo++;
 
-			if (!ISWORDCHAR (c)) {
+			if (!ISSEXPCHAR (c)) {
 				if (gotsexp && level == 0) {
-					if (!ISSEXPSEPCHAR (c))
+					if (!ISSEXPSEPARATOR (c))
 						cur_wp->pointo--;
 					return TRUE;
 				}
@@ -1195,9 +1197,9 @@ static int backward_sexp(void)
 
 			--cur_wp->pointo;
 
-			if (!ISWORDCHAR (c)) {
+			if (!ISSEXPCHAR (c)) {
 				if (gotsexp && level == 0) {
-					if (!ISSEXPSEPCHAR (c))
+					if (!ISSEXPSEPARATOR (c))
 						cur_wp->pointo++;
 					return TRUE;
 				}
