@@ -18,12 +18,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: marker.c,v 1.2 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: marker.c,v 1.3 2004/03/09 16:20:28 rrt Exp $	*/
 
 #include "config.h"
 
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "zile.h"
 #include "extern.h"

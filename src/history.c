@@ -18,11 +18,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: history.c,v 1.3 2004/02/18 16:21:54 ssigala Exp $	*/
+/*	$Id: history.c,v 1.4 2004/03/09 16:19:11 rrt Exp $	*/
 
 #include "config.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "zile.h"
 #include "extern.h"
