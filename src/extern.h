@@ -16,7 +16,7 @@ int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
 void bind_key(char *key, Function func);
-int do_completion(char *s, int *compl);
+int do_completion(astr as, int *compl);
 int execute_function(char *name, int uniarg);
 void free_bindings(void);
 char *get_function_by_key_sequence(void);
@@ -110,8 +110,7 @@ void ztrace(const char *fmt, ...);
 #endif
 
 /* keys.c ----------------------------------------------------------------- */
-char *keytostr(char *buf, int key, int *len);
-char *keytostr_nobs(char *buf, int key, int *len);
+astr keytostr(int key);
 int strtokey(char *buf, int *len);
 int keytovec(char *key, int **keyvec);
 char *simplify_key(char *dest, char *key);

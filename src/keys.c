@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.7 2004/03/08 15:34:11 rrt Exp $	*/
+/*	$Id: keys.c,v 1.8 2004/03/09 16:30:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -31,215 +31,100 @@
 #include "zile.h"
 #include "extern.h"
 
-#define ADDNSTR(p, s, n)			\
-	do {					\
-		strncpy(p, s, n);		\
-		p += n;				\
-	} while (0)
-
 /*
- * Convert a key into his ASCII representation.
+ * Convert a key into its ASCII representation
  */
-char *keytostr(char *buf, int key, int *len)
+astr keytostr(int key)
 {
-	char *p = buf;
+	astr as = astr_new();
 
 	if (key & KBD_CTL)
-		ADDNSTR(p, "\\C-", 3);
+		astr_append_cstr(as, "C-");
 	if (key & KBD_META)
-		ADDNSTR(p, "\\M-", 3);
+		astr_append_cstr(as, "M-");
 	key &= ~(KBD_CTL | KBD_META);
 
 	switch (key) {
 	case KBD_PGUP:
-		ADDNSTR(p, "\\PGUP", 5);
+		astr_append_cstr(as, "PGUP");
 		break;
 	case KBD_PGDN:
-		ADDNSTR(p, "\\PGDN", 5);
+		astr_append_cstr(as, "PGDN");
 		break;
 	case KBD_HOME:
-		ADDNSTR(p, "\\HOME", 5);
+		astr_append_cstr(as, "HOME");
 		break;
 	case KBD_END:
-		ADDNSTR(p, "\\END", 4);
+		astr_append_cstr(as, "END");
 		break;
 	case KBD_DEL:
-		ADDNSTR(p, "\\DEL", 4);
+		astr_append_cstr(as, "DEL");
 		break;
 	case KBD_BS:
-		ADDNSTR(p, "\\BS", 3);
+		astr_append_cstr(as, "BS");
 		break;
 	case KBD_INS:
-		ADDNSTR(p, "\\INS", 4);
+		astr_append_cstr(as, "INS");
 		break;
 	case KBD_LEFT:
-		ADDNSTR(p, "\\LEFT", 5);
+		astr_append_cstr(as, "LEFT");
 		break;
 	case KBD_RIGHT:
-		ADDNSTR(p, "\\RIGHT", 6);
+		astr_append_cstr(as, "RIGHT");
 		break;
 	case KBD_UP:
-		ADDNSTR(p, "\\UP", 3);
+		astr_append_cstr(as, "UP");
 		break;
 	case KBD_DOWN:
-		ADDNSTR(p, "\\DOWN", 5);
+		astr_append_cstr(as, "DOWN");
 		break;
 	case KBD_RET:
-		ADDNSTR(p, "\\RET", 4);
+		astr_append_cstr(as, "RET");
 		break;
 	case KBD_TAB:
-		ADDNSTR(p, "\\TAB", 4);
+		astr_append_cstr(as, "TAB");
 		break;
 	case KBD_F1:
-		ADDNSTR(p, "\\F1", 3);
+		astr_append_cstr(as, "F1");
 		break;
 	case KBD_F2:
-		ADDNSTR(p, "\\F2", 3);
+		astr_append_cstr(as, "F2");
 		break;
 	case KBD_F3:
-		ADDNSTR(p, "\\F3", 3);
+		astr_append_cstr(as, "F3");
 		break;
 	case KBD_F4:
-		ADDNSTR(p, "\\F4", 3);
+		astr_append_cstr(as, "F4");
 		break;
 	case KBD_F5:
-		ADDNSTR(p, "\\F5", 3);
+		astr_append_cstr(as, "F5");
 		break;
 	case KBD_F6:
-		ADDNSTR(p, "\\F6", 3);
+		astr_append_cstr(as, "F6");
 		break;
 	case KBD_F7:
-		ADDNSTR(p, "\\F7", 3);
+		astr_append_cstr(as, "F7");
 		break;
 	case KBD_F8:
-		ADDNSTR(p, "\\F8", 3);
+		astr_append_cstr(as, "F8");
 		break;
 	case KBD_F9:
-		ADDNSTR(p, "\\F9", 3);
+		astr_append_cstr(as, "F9");
 		break;
 	case KBD_F10:
-		ADDNSTR(p, "\\F10", 4);
+		astr_append_cstr(as, "F10");
 		break;
 	case KBD_F11:
-		ADDNSTR(p, "\\F11", 4);
+		astr_append_cstr(as, "F11");
 		break;
 	case KBD_F12:
-		ADDNSTR(p, "\\F12", 4);
+		astr_append_cstr(as, "F12");
 		break;
 	default:
-		key &= 255;
-		if (key == '\\')
-			ADDNSTR(p, "\\\\", 2);
-		else
-			*p++ = key;
+                astr_append_char(as, key & 255);
 	}
 
-	*p++ = '\0';
-
-	*len = p - buf;
-
-	return buf;
-}
-
-/*
- * Convert a key into his ASCII representation.  Do not put
- * backslashes in the output.
- */
-char *keytostr_nobs(char *buf, int key, int *len)
-{
-	char *p = buf;
-
-	if (key & KBD_CTL)
-		ADDNSTR(p, "C-", 2);
-	if (key & KBD_META)
-		ADDNSTR(p, "M-", 2);
-	key &= ~(KBD_CTL | KBD_META);
-
-	switch (key) {
-	case KBD_PGUP:
-		ADDNSTR(p, "PGUP", 4);
-		break;
-	case KBD_PGDN:
-		ADDNSTR(p, "PGDN", 4);
-		break;
-	case KBD_HOME:
-		ADDNSTR(p, "HOME", 4);
-		break;
-	case KBD_END:
-		ADDNSTR(p, "END", 3);
-		break;
-	case KBD_DEL:
-		ADDNSTR(p, "DEL", 3);
-		break;
-	case KBD_BS:
-		ADDNSTR(p, "BS", 2);
-		break;
-	case KBD_INS:
-		ADDNSTR(p, "INS", 3);
-		break;
-	case KBD_LEFT:
-		ADDNSTR(p, "LEFT", 4);
-		break;
-	case KBD_RIGHT:
-		ADDNSTR(p, "RIGHT", 5);
-		break;
-	case KBD_UP:
-		ADDNSTR(p, "UP", 2);
-		break;
-	case KBD_DOWN:
-		ADDNSTR(p, "DOWN", 4);
-		break;
-	case KBD_RET:
-		ADDNSTR(p, "RET", 3);
-		break;
-	case KBD_TAB:
-		ADDNSTR(p, "TAB", 3);
-		break;
-	case KBD_F1:
-		ADDNSTR(p, "F1", 2);
-		break;
-	case KBD_F2:
-		ADDNSTR(p, "F2", 2);
-		break;
-	case KBD_F3:
-		ADDNSTR(p, "F3", 2);
-		break;
-	case KBD_F4:
-		ADDNSTR(p, "F4", 2);
-		break;
-	case KBD_F5:
-		ADDNSTR(p, "F5", 2);
-		break;
-	case KBD_F6:
-		ADDNSTR(p, "F6", 2);
-		break;
-	case KBD_F7:
-		ADDNSTR(p, "F7", 2);
-		break;
-	case KBD_F8:
-		ADDNSTR(p, "F8", 2);
-		break;
-	case KBD_F9:
-		ADDNSTR(p, "F9", 2);
-		break;
-	case KBD_F10:
-		ADDNSTR(p, "F10", 3);
-		break;
-	case KBD_F11:
-		ADDNSTR(p, "F11", 3);
-		break;
-	case KBD_F12:
-		ADDNSTR(p, "F12", 3);
-		break;
-	default:
-		*p++ = key & 255;
-	}
-
-	*p++ = '\0';
-
-	*len = p - buf;
-
-	return buf;
+	return as;
 }
 
 /*
@@ -430,18 +315,19 @@ int keytovec(char *key, int **keys)
  */
 char *simplify_key(char *dest, char *key)
 {
-	char buf[128];
-	int i, j, l, *keys;
+	int i, j, *keys;
 
 	dest[0] = '\0';
 	if (key == NULL)
 		return dest;
 	i = keytovec(key, &keys);
 	for (j = 0; j < i; j++) {
+                astr as;
 		if (j > 0)
 			strcat(dest, " ");
-		keytostr_nobs(buf, keys[j], &l);
-		strcat(dest, buf);
+		as = keytostr(keys[j]);
+		strcat(dest, astr_cstr(as));
+                astr_delete(as);
 	}
         if (i > 0)
                 free(keys);

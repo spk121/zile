@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.16 2004/03/08 15:43:21 rrt Exp $	*/
+/*	$Id: bind.c,v 1.17 2004/03/09 16:30:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -188,19 +188,19 @@ void show_tree(void)
 }
 #endif /* DEBUG */
 
-int do_completion(char *s, int *compl)
+int do_completion(astr as, int *compl)
 {
 	int c;
 
 	if (!*compl) {
 		c = cur_tp->xgetkey(GETKEY_DELAYED, 500);
 		if (c == KBD_NOKEY) {
-			minibuf_write("%s", s);
+			minibuf_write("%s", astr_cstr(as));
 			c = cur_tp->getkey();
 			*compl = 1;
 		}
 	} else {
-		minibuf_write("%s", s);
+		minibuf_write("%s", astr_cstr(as));
 		c = cur_tp->getkey();
 	}
 	minibuf_clear();
@@ -208,46 +208,50 @@ int do_completion(char *s, int *compl)
 	return c;
 }
 
-static char *make_completion(char *buf, int *keys, int numkeys)
+static astr make_completion(int *keys, int numkeys)
 {
-	int i, l, len = 0;
+        astr as = astr_new(), key;
+	int i, len = 0;
 
 	for (i = 0; i < numkeys; i++) {
-		if (i > 0)
-			buf[len] = ' ', len++;
-		keytostr_nobs(buf + len, keys[i], &l);
-		len += l - 1;
+		if (i > 0) {
+			astr_append_char(as, ' ');
+                        len++;
+                }
+                key = keytostr(keys[i]);
+		astr_append(as, key);
+                astr_delete(key);
 	}
 
-	buf[len] = '-';
-	buf[len+1] = '\0';
-
-	return buf;
+	return astr_append_char(as, '-');
 }
 
-static leafp completion_scan(int c, int keys[], int *numkeys)
+static leafp completion_scan(int c, int **keys, int *numkeys)
 {
 	int compl = 0;
 	leafp p;
-	keys[0] = c;
+        vector *v = vec_new(sizeof(int));
+
+	vec_item(v, 0, int) = c;
 	*numkeys = 1;
 
-	for (;;) {
-		if ((p = search_key(leaf_tree, keys, *numkeys)) == NULL)
-			return NULL;
+        do {
+		if ((p = search_key(leaf_tree, vec_array(v), *numkeys)) == NULL)
+			break;
 		if (p->func == NULL) {
-			char buf[64];
-			make_completion(buf, keys, *numkeys);
-			keys[(*numkeys)++] = do_completion(buf, &compl);
-			continue;
-		} else
-			return p;
-	}
+			astr as = make_completion(vec_array(v), *numkeys);
+			vec_item(v, (*numkeys)++, int) = do_completion(as, &compl);
+                        astr_delete(as);
+		}
+	} while (p->func == NULL);
+
+        *keys = vec_toarray(v);
+        return p;
 }
 
 void process_key(int c)
 {
-	int uni, keys[64], numkeys;
+	int uni, *keys = NULL, numkeys;
 	leafp p;
 
 	if (c == KBD_NOKEY)
@@ -255,21 +259,22 @@ void process_key(int c)
 
 	if (c & KBD_META && isdigit(c & 255)) {
 		/*
-		 * Got a ESC x sequence where `x' is a digit.
+		 * Got an ESC x sequence where `x' is a digit.
 		 */
 		universal_argument(KBD_META, (c & 255) - '0');
-	} else if ((p = completion_scan(c, keys, &numkeys)) == NULL) {
+	} else if ((p = completion_scan(c, &keys, &numkeys)) == NULL) {
 		/*
 		 * There are no bindings for the pressed key.
 		 */
 		undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 		for (uni = 0; uni < last_uniarg; ++uni) {
 			if (!self_insert_command(c)) {
-				char buf[64];
-				make_completion(buf, keys, numkeys);
-				buf[strlen(buf)-1] = '\0';
-				minibuf_error("%s not defined.", buf);
+				astr as = make_completion(keys, numkeys);
+				astr_truncate(as, astr_size(as) - 1);
+				minibuf_error("%s not defined.", astr_cstr(as));
+                                astr_delete(as);
 				undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+                                free(keys);
 				return;
 			}
 			if (thisflag & FLAG_DEFINING_MACRO)
@@ -286,6 +291,8 @@ void process_key(int c)
 				      lastflag & FLAG_SET_UNIARG,
 				      last_uniarg);
 	}
+        if (keys)
+                free(keys);
 }
 
 /*--------------------------------------------------------------------------
@@ -490,19 +497,20 @@ char *get_function_by_key_sequence(void)
 {
 	leafp p;
 	int c = cur_tp->getkey();
-	int keys[64], numkeys;
+	int *keys, numkeys;
 
 	if (c & KBD_META && isdigit(c & 255))
 		return "universal-argument";
-	else if ((p = completion_scan(c, keys, &numkeys)) == NULL) {
-		if (c == KBD_RET || c == KBD_TAB || c <= 255)
-			return "self-insert-command";
-		else
-			return NULL;
-	} else
-		return get_function_name(p->func);
 
-	return NULL;
+        p = completion_scan(c, &keys, &numkeys);
+        free(keys);
+        if (p == NULL) {
+                if (c == KBD_RET || c == KBD_TAB || c <= 255)
+                        return "self-insert-command";
+                else
+                        return NULL;
+        } else
+                return get_function_name(p->func);
 }
 
 static void write_functions_list(va_list ap)
@@ -510,6 +518,7 @@ static void write_functions_list(va_list ap)
 	unsigned int i, j;
 	char key[64];
 
+        (void)ap;
 	bprintf("%-30s%s\n", "Function", "Bindings");
 	bprintf("%-30s%s\n", "--------", "--------");
 	for (i = 0; i < fentry_table_size; ++i) {
@@ -534,21 +543,23 @@ List defined functions.
 
 static void write_bindings_tree(leafp tree, int level)
 {
-	char key[128], buf[128];
-	static char keys[8][128];
-	int i, j, l;
+	char key[128];
+	static astr keys[8];
+	int i, j;
 
-	keytostr_nobs(keys[level], tree->key, &l);
+	keys[level] = keytostr(tree->key);
 	for (i = 0; i < tree->vecnum; ++i) {
+                astr as;
 		leafp p = tree->vec[i];
 		if (p->func != NULL) {
 			key[0] = '\0';
 			for (j = 1; j <= level; ++j) {
-				strcat(key, keys[j]);
+				strcat(key, astr_cstr(keys[j]));
 				strcat(key, " ");
 			}
-			keytostr_nobs(buf, p->key, &l);
-			strcat(key, buf);
+			as = keytostr(p->key);
+			strcat(key, astr_cstr(as));
+                        astr_delete(as);
 			bprintf("%-15s %s\n", key, get_function_name(p->func));
 		} else
 			write_bindings_tree(p, level + 1);
@@ -557,7 +568,9 @@ static void write_bindings_tree(leafp tree, int level)
 
 static void write_bindings_list(va_list ap)
 {
-	bprintf("%-15s %s\n", "Binding", "Function");
+        (void)ap;
+
+        bprintf("%-15s %s\n", "Binding", "Function");
 	bprintf("%-15s %s\n", "-------", "--------");
 
 	write_bindings_tree(leaf_tree, 0);
