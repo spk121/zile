@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.49 2004/11/15 22:19:44 rrt Exp $	*/
+/*	$Id: main.c,v 1.50 2004/12/27 13:25:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -270,11 +270,13 @@ static void setup_main_screen(int argc)
 	}
 	else {
 		if (argc < 1) {
+                        undo_nosave = TRUE;
 			insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
+                        undo_nosave = FALSE;
 			cur_bp->flags &= ~BFLAG_MODIFIED;
 			resync_redisplay();
 		}
