@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.12 2004/05/10 16:49:50 rrt Exp $
+## $Id: Makefile.am,v 1.13 2004/05/20 21:41:05 rrt Exp $
 
 INCLUDES = -I$(top_srcdir)/lib
 
@@ -41,9 +41,7 @@ zile_SOURCES =					\
 	zile.h
 
 zile_LDADD =					\
-	$(top_srcdir)/lib/libzile.a		\
-	term_ncurses/libterm_ncurses.a
-
+	$(top_srcdir)/lib/libzile.a
 man_MANS = zile.1
 
 EXTRA_DIST = zile.1.in

@@ -159,5 +159,4 @@ AC_OUTPUT(Makefile \
 	  doc/Makefile \
 	  lib/Makefile \
 	  etc/Makefile \
-	  src/Makefile \
-	  src/term_ncurses/Makefile)
+	  src/Makefile)
