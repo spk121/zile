@@ -1,1 +1,0 @@
-#define ZILE_VERSION "1.7 BETA 2"

@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.10 2004/01/28 14:38:05 rrt Exp $	*/
+/*	$Id: main.c,v 1.11 2004/01/29 07:23:10 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -44,11 +44,10 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "version.h"
 #include "term_ncurses/term_ncurses.h"
 
 #define ZILE_VERSION_STRING \
-	"Zile " ZILE_VERSION
+	"Zile " VERSION
 
 /* The current window; the first window in list. */
 windowp cur_wp = NULL, head_wp = NULL;

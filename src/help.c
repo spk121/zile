@@ -1,4 +1,4 @@
-/*	$Id: help.c,v 1.6 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: help.c,v 1.7 2004/01/29 07:23:10 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -39,7 +39,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "paths.h"
-#include "version.h"
 #include "astr.h"
 
 DEFUN("zile-version", zile_version)
@@ -47,7 +46,7 @@ DEFUN("zile-version", zile_version)
 Show the zile version.
 +*/
 {
-	minibuf_write("Zile " ZILE_VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
+	minibuf_write("Zile " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 
 	return TRUE;
 }
@@ -279,7 +278,7 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 		astr_delete(doc);
 		return NULL;
 	}
-		
+
 	return doc;
 }
 
