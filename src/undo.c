@@ -1,4 +1,4 @@
-/*	$Id: undo.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: undo.c,v 1.3 2003/04/24 15:47:40 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -85,6 +85,7 @@ void undo_save(int type, int startn, int starto, int arg1, int arg2)
 	switch (type) {
 	case UNDO_INSERT_CHAR:
 	case UNDO_REPLACE_CHAR:
+	case UNDO_INTERCALATE_CHAR:
 		up->delta.c = arg1;
 		break;
 	case UNDO_INSERT_BLOCK:
@@ -138,7 +139,13 @@ static undop revert_action(undop up)
 		if (up->delta.c == '\n')
 			insert_newline();
 		else
-			insert_char(up->delta.c);
+			insert_char_in_insert_mode(up->delta.c);
+		break;
+	case UNDO_INTERCALATE_CHAR:
+		if (up->delta.c == '\n')
+			intercalate_newline();
+		else
+			intercalate_char(up->delta.c);
 		break;
 	case UNDO_INSERT_BLOCK:
 		undo_save(UNDO_REMOVE_BLOCK, up->pointn, up->pointo, up->delta.block.size, 0);

@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.3 2003/04/24 15:43:51 rrt Exp $	*/
+/*	$Id: line.c,v 1.4 2003/04/24 15:47:40 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -112,6 +112,43 @@ void free_line(linep lp)
 	free(lp);
 }
 
+/* Insert the character at the current position and move the text at its right
+ * whatever the insert/overwrite mode is.
+ * This function doesn't change the current position of the pointer.
+ */
+int intercalate_char(int c)
+{
+	if (warn_if_readonly_buffer())
+		return FALSE;
+
+	/*
+	 * Resize the line if required.
+	 */
+	if (cur_wp->pointp->size + 1 >= cur_wp->pointp->maxsize)
+		resize_line(cur_wp, cur_wp->pointp,
+			    cur_wp->pointp->maxsize + 10);
+	/*
+	 * Move the line text one position forward after the
+	 * point if required.
+	 * This code assumes that memmove(d, s, 0) does nothing.
+	 */
+	memmove(cur_wp->pointp->text + cur_wp->pointo + 1,
+		cur_wp->pointp->text + cur_wp->pointo,
+		cur_wp->pointp->size - cur_wp->pointo);
+
+	undo_save(UNDO_REMOVE_CHAR, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	cur_wp->pointp->text[cur_wp->pointo] = c;
+
+	++cur_wp->pointp->size;
+
+	cur_bp->flags |= BFLAG_MODIFIED;
+
+	if (cur_bp->flags & BFLAG_FONTLOCK)
+		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+
+	return TRUE;
+}
+
 /*
  * Insert the character `c' at the current point position
  * into the current buffer.
@@ -151,24 +188,7 @@ int insert_char(int c)
 		 */
 	}
 
-	/*
-	 * Resize the line if required.
-	 */
-	if (cur_wp->pointp->size + 1 >= cur_wp->pointp->maxsize)
-		resize_line(cur_wp, cur_wp->pointp,
-			    cur_wp->pointp->maxsize + 10);
-
-	/*
-	 * Move the line text one position forward after the
-	 * point if required.
-	 * This code assumes that memmove(d, s, 0) does nothing.
-	 */
-	memmove(cur_wp->pointp->text + cur_wp->pointo + 1,
-		cur_wp->pointp->text + cur_wp->pointo,
-		cur_wp->pointp->size - cur_wp->pointo);
-
-	undo_save(UNDO_REMOVE_CHAR, cur_wp->pointn, cur_wp->pointo, 0, 0);
-	cur_wp->pointp->text[cur_wp->pointo] = c;
+	(void)intercalate_char(c);
 
 	pointo = cur_wp->pointo;
 
@@ -183,14 +203,28 @@ int insert_char(int c)
 	if (cur_bp->markp == cur_wp->pointp && cur_bp->marko >= pointo)
 		++cur_bp->marko;
 
-	++cur_wp->pointp->size;
-
-	cur_bp->flags |= BFLAG_MODIFIED;
-
-	if (cur_bp->flags & BFLAG_FONTLOCK)
-		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
-
 	return TRUE;
+}
+
+/* Insert a character at the current position in the insert mode
+ * whetever the current insert mode is.
+ */
+int insert_char_in_insert_mode(int c)
+{
+	int overwrite_mode_save, ret_value;
+
+	/* save current mode */
+	overwrite_mode_save = cur_bp->flags & BFLAG_OVERWRITE;
+	
+	/* force insert mode */
+	cur_bp->flags &= ~BFLAG_OVERWRITE;
+
+	ret_value = insert_char(c);
+
+	/* restore previous mode */
+	cur_bp->flags |= overwrite_mode_save;
+
+	return ret_value;
 }
 
 static void insert_expanded_tab(void)
@@ -237,7 +271,7 @@ if the `expand-tabs' variable is bound and set to true.
 	return TRUE;
 }
 
-int insert_newline(void)
+static int common_insert_newline(int undo_mode)
 {
 	linep lp1, lp2;
         int lp1len, lp2len, cur_pointn;
@@ -283,7 +317,9 @@ int insert_newline(void)
 	for (wp = head_wp; wp != NULL; wp = wp->next) {
 		if (wp->bp != cur_bp)
 			continue;
-		if (wp->pointp == lp1 && wp->pointo >= lp1len) {
+		if (wp->pointp == lp1 && 
+		    ((undo_mode && wp->pointo > lp1len)
+		     || (!undo_mode && wp->pointo >= lp1len))) {
 			wp->pointp = lp2;
 			wp->pointo -= lp1len;
 			++wp->pointn;
@@ -306,6 +342,19 @@ int insert_newline(void)
 	thisflag |= FLAG_NEED_RESYNC;
 
 	return TRUE;
+}
+
+int insert_newline(void)
+{
+	return common_insert_newline(0);
+}
+
+/* Insert a newline at the current position without moving the cursor.
+ * Update all other cursors if they point on the splitted line.
+ */
+int intercalate_newline(void)
+{
+	return common_insert_newline(1);
 }
 
 void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
@@ -496,7 +545,7 @@ int delete_char(void)
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		undo_save(UNDO_INSERT_CHAR, cur_wp->pointn, cur_wp->pointo,
+		undo_save(UNDO_INTERCALATE_CHAR, cur_wp->pointn, cur_wp->pointo,
 			  cur_wp->pointp->text[cur_wp->pointo], 0);
 
 		/*
@@ -535,7 +584,8 @@ int delete_char(void)
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		undo_save(UNDO_INSERT_CHAR, cur_wp->pointn, cur_wp->pointo, '\n', 0);
+		undo_save(UNDO_INTERCALATE_CHAR, cur_wp->pointn, cur_wp->pointo,
+			  '\n', 0);
 
 		lp1 = cur_wp->pointp;
 		lp2 = cur_wp->pointp->next;
