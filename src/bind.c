@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.13 2004/03/08 15:34:11 rrt Exp $	*/
+/*	$Id: bind.c,v 1.14 2004/03/08 15:37:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -67,19 +67,8 @@ static leafp new_leaf(int vecmax)
 	return p;
 }
 
-#if 0
-static int search_compar(const void *p1, const void *p2)
-{
-	return ((leafp)p2)->key - ((leafp)p1)->key;
-}
-#endif
-
 static leafp search_leaf(leafp tree, int key)
 {
-#if 0
-	struct leaf skey = { key };
-	return bsearch(&skey, tree->vec, tree->vecnum, sizeof tree->vec[0], search_compar);
-#else
 	int i;
 
 	for (i = 0; i < tree->vecnum; ++i)
@@ -87,7 +76,6 @@ static leafp search_leaf(leafp tree, int key)
 			return tree->vec[i];
 
 	return NULL;
-#endif
 }
 
 static void add_leaf(leafp tree, leafp p)
