@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.44 2004/10/12 22:03:19 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.45 2004/10/12 22:06:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1209,8 +1209,10 @@ Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
 +*/
 {
-	/* XXX */
-	return FALSE;
+        FUNCALL(forward_paragraph);
+        FUNCALL(set_mark_command);
+        FUNCALL(backward_paragraph);
+	return TRUE;
 }
 
 DEFUN("fill-paragraph", fill_paragraph)
