@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.9 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.10 2004/02/18 16:21:54 ssigala Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -21,17 +21,14 @@ X1("backward-sexp", backward_sexp,			"\\C-\\M-b")
 X1("backward-word", backward_word,			"\\M-b")
 X1("beginning-of-buffer", beginning_of_buffer,		"\\M-<")
 X2("beginning-of-line", beginning_of_line,		"\\C-a", "\\HOME")
-#if ENABLE_LUA
-X0("lua", lua)
-#endif
-#if ENABLE_C_MODE
-X0("c-mode", c_mode)
+#if ENABLE_CSHARP_MODE
+X0("c#-mode", csharp_mode)
 #endif
 #if ENABLE_CPP_MODE
 X0("c++-mode", cpp_mode)
 #endif
-#if ENABLE_CSHARP_MODE
-X0("c#-mode", csharp_mode)
+#if ENABLE_C_MODE
+X0("c-mode", c_mode)
 #endif
 X2("call-last-kbd-macro", call_last_kbd_macro,		"\\C-xe", "\\F12")
 X1("capitalize-word", capitalize_word,			"\\M-c")
@@ -98,6 +95,9 @@ X1("list-buffers", list_buffers,			"\\C-x\\C-b")
 X1("list-functions", list_functions,			"\\C-hlf")
 X1("list-registers", list_registers,			"\\C-hlr")
 X1("list-variables", list_variables,			"\\C-hlv")
+#if ENABLE_LUA
+X0("lua", lua)
+#endif
 #if ENABLE_MAIL_MODE
 X0("mail-mode", mail_mode)
 #endif

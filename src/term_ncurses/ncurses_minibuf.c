@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_minibuf.c,v 1.15 2004/02/17 23:20:32 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.16 2004/02/18 16:21:54 ssigala Exp $	*/
 
 #include "config.h"
 
@@ -227,6 +227,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 				thistab = lasttab;
 			}
 			break;
+		case KBD_UP:
 		case KBD_META | 'p':
 			if (hp) {
 				const char *elem = previous_history_element(hp);
@@ -239,11 +240,14 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 					*p = zrealloc(*p, *max);
 					strcpy(*p, elem);
 				}
-/*				else { */
-/*					minibuf_error("Beginning of history; no preceding item"); */
-/*				} */
+#if 0
+				else {
+					minibuf_error("Beginning of history; no preceding item");
+				}
+#endif
 			}
 			break;
+		case KBD_DOWN:
 		case KBD_META | 'n':
 			if (hp) {
 				const char *elem = next_history_element(hp);
@@ -262,9 +266,11 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 					free(saved);
 					saved = NULL;
 				}
-/*				else { */
-/*					minibuf_error("End of history; no default item"); */
-/*				} */
+#if 0
+				else {
+					minibuf_error("End of history; no default item");
+				}
+#endif
 			}
 			break;
 		case KBD_TAB:

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.22 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.23 2004/02/18 16:21:54 ssigala Exp $	*/
 
 #include "config.h"
 
@@ -1295,6 +1295,7 @@ DEFUN("backward-sentence", backward_sentence)
 Move backward to start of sentence.  With argument N, do it N times.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1303,6 +1304,7 @@ DEFUN("forward-sentence", forward_sentence)
 Move forward to next sentence end.  With argument N, do it N times.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1311,6 +1313,7 @@ DEFUN("kill-sentence", kill_sentence)
 Kill from point to end of sentence.  With argument N, do it N times.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1319,6 +1322,7 @@ DEFUN("backward-kill-sentence", backward_kill_sentence)
 Kill back from point to start of sentence.  With argument N, do it N times.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1327,6 +1331,7 @@ DEFUN("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.  With argument N, do it N times.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1335,6 +1340,7 @@ DEFUN("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1344,6 +1350,7 @@ Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
@@ -1352,6 +1359,7 @@ DEFUN("fill-paragraph", fill_paragraph)
 Fill paragraph at or after point.
 +*/
 {
+	/* XXX */
 	return FALSE;
 }
 
