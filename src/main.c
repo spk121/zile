@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.69 2005/01/18 22:44:29 rrt Exp $	*/
+/*	$Id: main.c,v 1.70 2005/01/19 00:40:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -131,7 +131,7 @@ static void about_screen(void)
   waitkey(20 * 10);
 }
 
-static void setup_main_screen(int argc)
+static void setup_main_screen(int argc, astr as)
 {
   Buffer *bp, *last_bp = NULL;
   int c = 0;
@@ -156,11 +156,16 @@ static void setup_main_screen(int argc)
   else {
     if (argc < 1) {
       undo_nosave = TRUE;
-      insert_string("\
+
+      if (astr_len(as) > 0)
+        insert_string(astr_cstr(as));
+      else
+        insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
+
       undo_nosave = FALSE;
       cur_bp->flags &= ~BFLAG_MODIFIED;
       resync_redisplay();
@@ -234,32 +239,6 @@ static void signal_init(void)
   sigaction(SIGCONT, &act, NULL);
 }
 
-/*
- * Output the command line syntax.
- */
-static void usage(void)
-{
-  fprintf(stderr,
-          "Usage: zile [OPTION-OR-FILENAME]...\n"
-          "\n"
-          "Run Zile, the lightweight Emacs clone.\n"
-          "\n"
-          "Initialization options:\n"
-          "\n"
-          "--batch                do not do interactive display; implies -q\n"
-          "--help                 display this help message and exit\n"
-          "--no-init-file, -q     do not load ~/.zile\n"
-          "--version              display version information and exit\n"
-          "\n"
-          "Action options:\n"
-          "\n"
-          "FILE                   visit FILE using find-file\n"
-          "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
-          "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
-          "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
-          );
-}
-
 /* Options table */
 struct option longopts[] = {
     { "batch",        0, NULL, 'b' },
@@ -274,9 +253,13 @@ struct option longopts[] = {
 int main(int argc, char **argv)
 {
   int c;
-  int bflag = 0, qflag = 0;
-  char *earg = NULL, *larg = NULL;
+  int bflag = FALSE, qflag = FALSE, eflag = FALSE;
+  astr as = astr_new();
 
+  /* Set up variables now so they're available to files and expressions
+     specified on the command-line. */
+  init_variables();
+  
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
     case 'b':
@@ -284,10 +267,12 @@ int main(int argc, char **argv)
       qflag = TRUE;
       break;
     case 'e':
-      earg = optarg;
+      astr_cat_delete(as, lisp_read_string(optarg));
+      eflag = TRUE;
       break;
     case 'l':
-      larg = optarg;
+      astr_cat_delete(as, lisp_read_file(optarg));
+      eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
     case 'q':
       qflag = TRUE;
@@ -303,8 +288,26 @@ int main(int argc, char **argv)
               );
       return 0;
     case 'h':
-      usage();
-      exit(0);
+      fprintf(stderr,
+              "Usage: zile [OPTION-OR-FILENAME]...\n"
+              "\n"
+              "Run Zile, the lightweight Emacs clone.\n"
+              "\n"
+              "Initialization options:\n"
+              "\n"
+              "--batch                do not do interactive display; implies -q\n"
+              "--help                 display this help message and exit\n"
+              "--no-init-file, -q     do not load ~/.zile\n"
+              "--version              display version information and exit\n"
+              "\n"
+              "Action options:\n"
+              "\n"
+              "FILE                   visit FILE using find-file\n"
+              "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+              "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
+              "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
+              );
+      return 0;
     }
   argc -= optind;
   argv += optind;
@@ -313,52 +316,52 @@ int main(int argc, char **argv)
 
   setlocale(LC_ALL, "");
 
-  if (larg) {
-    lithp(larg);
-    exit(0);
+  if (bflag)
+    printf(astr_cstr(as));
+  else {
+    if (!qflag)
+      read_rc_file();
+
+    term_init();
+
+    /* Create the `*scratch*' buffer and initialize key bindings. */
+    create_first_window();
+    term_redisplay();
+    init_bindings();
+
+    if (argc >= 1)
+      while (*argv) {
+        int line = 0;
+        if (**argv == '+')
+          line = atoi(*argv++ + 1);
+        if (*argv)
+          open_file(*argv++, line - 1);
+      }
+    else if (eflag == FALSE)
+      /* Show the splash screen only if no files and no Lisp expression
+         or load file is specified on the command line. */
+      about_screen();
+
+    setup_main_screen(argc, as);
+
+    /* Run the main Zile loop. */
+    loop();
+
+    /* Tidy and close the terminal. */
+    term_tidy();
+    term_close();
+
+    free_bindings();
   }
 
-  term_init();
-
-  init_variables();
-  if (!qflag)
-    read_rc_file();
-
-  /* Create the `*scratch*' buffer and initialize key bindings. */
-  create_first_window();
-  term_redisplay();
-  init_bindings();
-
-  if (argc >= 1)
-    while (*argv) {
-      int line = 0;
-      if (**argv == '+')
-        line = atoi(*argv++ + 1);
-      if (*argv)
-        open_file(*argv++, line - 1);
-    }
-   else if (earg == NULL && larg == NULL)
-     /* Show the splash screen only if no files and no Lisp expression
-        or load file is specified on the command line. */
-     about_screen();
-
-  setup_main_screen(argc);
-
-  /* Run the main Zile loop. */
-  loop();
-
-  /* Tidy and close the terminal. */
-  term_tidy();
-  term_close();
-
   /* Free all the memory allocated. */
+  astr_delete(as);
   free_kill_ring();
   free_registers();
   free_search_history();
   free_macros();
   free_windows();
   free_buffers();
-  free_bindings();
   free_variables();
   free_minibuf();
   free_rotation_buffers();

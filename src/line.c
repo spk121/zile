@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.45 2005/01/14 22:31:34 rrt Exp $	*/
+/*	$Id: line.c,v 1.46 2005/01/19 00:40:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -236,7 +236,7 @@ void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext,
   assert(orgsize > 0);
 
   if (replace_case) {
-    newtext = strdup(newtext);
+    newtext = zstrdup(newtext);
     recase((char *)newtext, astr_char((*lp)->item, offset), min(orgsize, newsize));
   }
 

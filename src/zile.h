@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.46 2005/01/17 18:15:34 rrt Exp $        */
+/*      $Id: zile.h,v 1.47 2005/01/19 00:41:01 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -28,6 +28,7 @@
 #include "list.h"
 #include "astr.h"
 #include "vector.h"
+#include "parser.h"
 
 #undef TRUE
 #define TRUE                            1

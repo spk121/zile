@@ -20,11 +20,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
+/*	$Id: vars.c,v 1.4 2005/01/19 00:41:01 rrt Exp $	*/
 
+#include <string.h>
+
+#include "zile.h"
+#include "extern.h"
 #include "vars.h"
 #include "eval.h"
-#include <string.h>
 
 
 le *mainVarList = NULL;
@@ -46,14 +49,14 @@ le *variableSet(le *varlist, char *key, le *value)
   if (key && value) {
     le *temp = variableFind(varlist, key);
 
-    if (temp) {
+    if (temp)
       leWipe(temp->branch);
-      temp->branch = leDup(value);
-    } else {
+    else {
       temp = leNew(key);
-      temp->branch = leDup(value);
       varlist = leAddHead(varlist, temp);
     }
+
+    temp->branch = leDup(value);
   }
 
   return varlist;
@@ -80,8 +83,8 @@ char *variableGetString(le *varlist, char *key)
   le *temp = variableFind(varlist, key);
   if (temp && temp->branch && temp->branch->data
       && countNodes(temp->branch) == 1)
-    return strdup(temp->branch->data);
-  return strdup("-1");
+    return zstrdup(temp->branch->data);
+  return zstrdup("-1");
 }
     
 astr variableDump(le *varlist)
@@ -91,7 +94,7 @@ astr variableDump(le *varlist)
   for (; varlist; varlist = varlist->list_next) {
     if (varlist->branch && varlist->data) {
       astr_afmt(as, "%s \t", varlist->data);
-      astr_cat(as, leDumpReformat(varlist->branch));
+      astr_cat_delete(as, leDumpReformat(varlist->branch));
       astr_cat_char(as, '\n');
     }
   }

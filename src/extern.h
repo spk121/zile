@@ -126,8 +126,10 @@ int backward_delete_char(void);
 void free_registers(void);
 void free_kill_ring(void);
 
-/* lithp.c ---------------------------------------------------------------- */
-void lithp(char* file);
+/* lisp.c ----------------------------------------------------------------- */
+astr lisp_read(getcCallback getcp, ungetcCallback ungetcp);
+astr lisp_read_string(char *string);
+astr lisp_read_file(char *file);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);

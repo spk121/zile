@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.29 2005/01/17 22:43:13 rrt Exp $
+## $Id: Makefile.am,v 1.30 2005/01/19 00:40:49 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -41,7 +41,7 @@ zile_base_SOURCES =				\
 	parser.h				\
 	vars.c					\
 	vars.h					\
-	lithp.c					\
+	lisp.c					\
 	basic.c					\
 	bind.c					\
 	buffer.c				\

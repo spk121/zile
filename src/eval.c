@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.3 2005/01/14 23:45:27 rrt Exp $	*/
+/*	$Id: eval.c,v 1.4 2005/01/19 00:40:49 rrt Exp $	*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,7 +101,7 @@ le * evaluateBranch(le * trybranch)
   if (!keyword->data)
     {
       leWipe( keyword );
-      return( leNew( "NIL" ));
+      return( leNIL);
     }
 
   for ( tryit=0 ; evalTable[tryit].word ; tryit++)
@@ -120,39 +120,33 @@ le * evaluateBranch(le * trybranch)
   return( evaluateNode( trybranch ));
 }
     
-le * evaluateNode(le * node)
+le *evaluateNode(le *node)
 {
-  le * temp;
-  le * value;
+  le *temp;
+  le *value;
 
-  if (node->branch)
-    {
-      if( node->quoted )
-        {
-          value = leDup( node->branch );
-        } else {
-          value = evaluateBranch( node->branch );
-        }
-    } else {
-      temp = variableGet( defunList, node->data );
+  if (node->branch) {
+      if (node->quoted)
+        value = leDup(node->branch);
+      else
+        value = evaluateBranch(node->branch);
+        
+  } else {
+    temp = variableGet(defunList, node->data);
+
+    if (temp)
+      value = evaluateDefun(temp, node->list_next);
+    else {
+      temp = variableGet(mainVarList, node->data);
 
       if (temp)
-        {
-          value = evaluateDefun( temp, node->list_next );
-        } else {
-          temp = variableGet( mainVarList, node->data );
-
-          if (temp)
-            {
-              value = leDup( temp );
-            } else {
-
-              value = leNew( node->data );
-            }
-        }
+        value = leDup(temp);
+      else
+        value = leNew(node->data);
     }
+  }
 
-  return( value );
+  return value;
 }
     
 le * evaluateDefun( le * fcn, le * params )
@@ -163,11 +157,11 @@ le * evaluateDefun( le * fcn, le * params )
   int count;
 
   /* make sure both lists exist */
-  if (!fcn)  return( leNew( "NIL" ));
+  if (!fcn)  return( leNIL);
 
   /* check for the correct number of parameters */
   if (countNodes(fcn->branch) > countNodes(params))
-    return( leNew( "NIL" ));
+    return( leNIL);
 
   /* allocate another function definition, since we're gonna hack it */
   function = leDup(fcn);
@@ -295,7 +289,7 @@ eval_cume_helper(
     
 le * eval_cb_add( int argc, le * branch )
 {
-  if (!branch || argc < 2) return( leNew( "NIL" ) );
+  if (!branch || argc < 2) return( leNIL );
 
   return( evalCastIntToLe(
                           eval_cume_helper( 
@@ -312,7 +306,7 @@ le * eval_cb_subtract( int argc, le * branch )
   int firstitem = 0;
   le * lefirst;
 
-  if (!branch || argc < 2) return( leNew( "NIL" ) );
+  if (!branch || argc < 2) return( leNIL );
 
   lefirst = evaluateNode( branch->list_next );
   firstitem = evalCastLeToInt( lefirst );
@@ -335,7 +329,7 @@ le * eval_cb_subtract( int argc, le * branch )
     
 le * eval_cb_multiply( int argc, le * branch )
 {
-  if (!branch || argc < 2) return( leNew( "NIL" ) );
+  if (!branch || argc < 2) return( leNIL );
 
   return( evalCastIntToLe(
                           eval_cume_helper( 
@@ -351,7 +345,7 @@ le * eval_cb_divide( int argc, le * branch )
 {
   int firstitem = 0;
   le * lefirst;
-  if (!branch || argc < 2) return( leNew( "NIL" ) );
+  if (!branch || argc < 2) return( leNIL );
 
   lefirst = evaluateNode( branch->list_next );
   firstitem = evalCastLeToInt( lefirst );
@@ -372,7 +366,7 @@ le * eval_cb_oneplus( int argc, le * branch )
   le * retle;
   int value;
 
-  if (!branch || argc < 2) return( leNew( "NIL" ) );
+  if (!branch || argc < 2) return( leNIL );
 
   retle = evaluateNode( branch->list_next ); 
   value = evalCastLeToInt( retle );
@@ -386,7 +380,7 @@ le * eval_cb_oneminus( int argc, le * branch )
   le * retle;
   int value;
 
-  if (!branch || argc < 2) return( leNew( "NIL" ) );
+  if (!branch || argc < 2) return( leNIL );
 
   retle = evaluateNode( branch->list_next ); 
   value = evalCastLeToInt( retle );
@@ -401,7 +395,7 @@ le * eval_cb_modulus( int argc, le * branch )
   le * letemp;
   int value1, value2;
 
-  if (!branch || argc != 3) return( leNew( "NIL" ) );
+  if (!branch || argc != 3) return( leNIL );
 
   letemp = evaluateNode( branch->list_next );
   value1 = evalCastLeToInt( letemp );
@@ -420,7 +414,7 @@ le * eval_cb_lt( int argc, le * branch )
   le * letemp;
   int value1, value2;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ) );
+  if (!branch || argc != 3 ) return( leNIL );
 
   letemp = evaluateNode( branch->list_next );
   value1 = evalCastLeToInt( letemp );
@@ -438,7 +432,7 @@ le * eval_cb_lt_eq( int argc, le * branch )
   le * letemp;
   int value1, value2;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ) );
+  if (!branch || argc != 3 ) return( leNIL );
 
   letemp = evaluateNode( branch->list_next );
   value1 = evalCastLeToInt( letemp );
@@ -456,7 +450,7 @@ le * eval_cb_gt( int argc, le * branch )
   le * letemp;
   int value1, value2;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ) );
+  if (!branch || argc != 3 ) return( leNIL );
 
   letemp = evaluateNode( branch->list_next );
   value1 = evalCastLeToInt( letemp );
@@ -474,7 +468,7 @@ le * eval_cb_gt_eq( int argc, le * branch )
   le * letemp;
   int value1, value2;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ) );
+  if (!branch || argc != 3 ) return( leNIL );
 
   letemp = evaluateNode( branch->list_next );
   value1 = evalCastLeToInt( letemp );
@@ -492,7 +486,7 @@ le * eval_cb_eqsign( int argc, le * branch )
   le * letemp;
   int value1, value2;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ) );
+  if (!branch || argc != 3 ) return( leNIL );
 
   letemp = evaluateNode( branch->list_next );
   value1 = evalCastLeToInt( letemp );
@@ -510,7 +504,7 @@ le * eval_cb_and( int argc, le * branch )
 {
   le * temp;
   le * result = NULL;
-  if (!branch || argc < 2 ) return( leNew( "NIL" ));
+  if (!branch || argc < 2 ) return( leNIL);
 
   temp = branch->list_next;
   while( temp )
@@ -534,7 +528,7 @@ le * eval_cb_or( int argc, le * branch )
 {
   le * temp;
   le * result = NULL;
-  if (!branch || argc < 2 ) return( leNew( "NIL" ));
+  if (!branch || argc < 2 ) return( leNIL);
 
   temp = branch->list_next;
   while( temp )
@@ -557,7 +551,7 @@ le * eval_cb_or( int argc, le * branch )
 le * eval_cb_not( int argc, le * branch )
 {
   le * result = NULL;
-  if (!branch || argc != 2 ) return( leNew( "NIL" ));
+  if (!branch || argc != 2 ) return( leNIL);
 
   result = evaluateNode(branch->list_next);
 
@@ -569,11 +563,11 @@ le * eval_cb_not( int argc, le * branch )
           return( leNew( "T" ) );
         } else {
           leWipe( result );
-          return( leNew( "NIL" ) );
+          return( leNIL );
         }
     } else if (result->branch) {
       leWipe( result );
-      return( leNew( "NIL" ) );
+      return( leNIL );
     }
 	
   leWipe( result );
@@ -584,7 +578,7 @@ le * eval_cb_not( int argc, le * branch )
 le * eval_cb_atom( int argc, le * branch )
 {
   le * result = NULL;
-  if (!branch || argc != 2 ) return( leNew( "NIL" ));
+  if (!branch || argc != 2 ) return( leNIL);
 
   result = evaluateNode(branch->list_next);
 
@@ -593,18 +587,18 @@ le * eval_cb_atom( int argc, le * branch )
       leWipe( result );
       return( leNew( "T" ) );
     }
-  return( leNew( "NIL" ) );
+  return( leNIL );
 }
     
 le * eval_cb_car( int argc, le * branch )
 {
   le * result = NULL;
   le * temp = NULL;
-  if (!branch || argc != 2 ) return( leNew( "NIL" ));
+  if (!branch || argc != 2 ) return( leNIL);
 
   result = evaluateNode(branch->list_next);
 
-  if( result == NULL )  return( leNew( "NIL" ) );
+  if( result == NULL )  return( leNIL );
 
   if (countNodes(result) <= 1)
     {
@@ -637,15 +631,15 @@ le * eval_cb_cdr( int argc, le * branch )
 {
   le * result = NULL;
   le * temp = NULL;
-  if (!branch || argc != 2 ) return( leNew( "NIL" ));
+  if (!branch || argc != 2 ) return( leNIL);
 
   result = evaluateNode(branch->list_next);
 
-  if( result == NULL )  return( leNew( "NIL" ) );
+  if( result == NULL )  return( leNIL );
 
   if (result == NULL  || countNodes(result) == 1)
     {
-      return( leNew( "NIL" ) );
+      return( leNIL );
     }
 
   temp = result;
@@ -664,16 +658,16 @@ le * eval_cb_cons( int argc, le * branch )
   le * result1 = NULL;
   le * result2 = NULL;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ));
+  if (!branch || argc != 3 ) return( leNIL);
 
   result1 = evaluateNode(branch->list_next);
-  if ( result1 == NULL ) return( leNew( "NIL" ));
+  if ( result1 == NULL ) return( leNIL);
 
   result2 = evaluateNode(branch->list_next->list_next);
   if ( result2 == NULL )
     {
       leWipe( result1 );
-      return( leNew( "NIL" ));
+      return( leNIL);
     }
 
   if ( countNodes(result1) > 1 )
@@ -695,7 +689,7 @@ le * eval_cb_list( int argc, le * branch )
   le * lastadded = NULL;
   le * result = NULL;
 
-  if (!branch) return( leNew( "NIL" ));
+  if (!branch) return( leNIL);
 
   currelement = branch->list_next;
   while (currelement)
@@ -704,7 +698,7 @@ le * eval_cb_list( int argc, le * branch )
       if ( result == NULL )
         {
           leWipe( finaltree );
-          return( leNew( "NIL" ));
+          return( leNIL);
         }
 
       if( countNodes(result) > 1)
@@ -730,7 +724,7 @@ le * eval_cb_list( int argc, le * branch )
 
   if (!finaltree)
     {
-      return( leNew( "NIL" ));
+      return( leNIL);
     }
   return( finaltree );
 }
@@ -795,7 +789,7 @@ le * eval_cb_equal( int argc, le * branch )
   le * list2 = NULL;
   int retval = 0;
 
-  if (!branch || argc != 3 ) return( leNew( "NIL" ) );
+  if (!branch || argc != 3 ) return( leNIL );
 
   list1 = evaluateNode( branch->list_next );
   list2 = evaluateNode( branch->list_next->list_next );
@@ -813,7 +807,7 @@ le * eval_cb_if( int argc, le * branch )
 {
   le * retcond = NULL;
 
-  if (!branch || argc < 3 || argc > 4) return( leNew( "NIL" ));
+  if (!branch || argc < 3 || argc > 4) return( leNIL);
 
   /* if */
   retcond = evaluateNode(branch->list_next);
@@ -843,7 +837,7 @@ eval_cb_whenunless_helper(
   le * retval = NULL;
   le * trythis = NULL;
 
-  if (!branch || argc < 3 ) return( leNew( "NIL" ));
+  if (!branch || argc < 3 ) return( leNIL);
 
   /* conditional */
   retval = evaluateNode(branch->list_next);
@@ -854,7 +848,7 @@ eval_cb_whenunless_helper(
       if ( strcmp( retval->data, "NIL" ))
         {
           leWipe( retval );
-          return( leNew( "NIL" ) );
+          return( leNIL );
         }
     } else {
       /* when:   it wasn't false... bail */
@@ -899,7 +893,7 @@ le * eval_cb_cond( int argc, le * branch )
   le * tryblock = NULL;
   int newargc;
 
-  if (!branch || argc < 2 ) return( leNew( "NIL" ));
+  if (!branch || argc < 2 ) return( leNIL);
 
   trythis = branch->list_next;
   while (trythis)
@@ -939,7 +933,7 @@ le * eval_cb_select( int argc, le * branch )
 {
   le * result;
 
-  if (argc < 2)  return( leNew( "NIL" ));
+  if (argc < 2)  return( leNIL);
 
   branch = branch->list_next;
   result = evaluateNode(branch);
@@ -993,7 +987,7 @@ le *eval_cb_terpri(int argc, le *branch)
 {
   if (branch != NULL && argc == 1)
     printf("\n");
-  return leNew("NIL");
+  return leNIL;
 }
 
     
@@ -1001,7 +995,7 @@ le * eval_cb_eval( int argc, le * branch )
 {
   le * temp;
   le * retval;
-  if (!branch || argc != 2 ) return( leNew( "NIL" ));
+  if (!branch || argc != 2 ) return( leNIL);
 
   temp = evaluateNode(branch->list_next);
   retval = evaluateBranch(temp);
@@ -1015,7 +1009,7 @@ le * eval_cb_prog( int argc, le * branch, int returnit )
   le * retval = NULL;
   le * tempval = NULL;
   int current = 0;
-  if (!branch || argc < (returnit +1) ) return( leNew( "NIL" ));
+  if (!branch || argc < (returnit +1) ) return( leNIL);
 
   curr = branch->list_next;
   while (curr)
@@ -1052,22 +1046,23 @@ le * eval_cb_progn( int argc, le * branch )
 }
 
     
-le *eval_cb_set_helper(enum setfcn function,
-                       int argc, 
-                       le * branch)
+le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
 {
-  le *newkey, *newvalue = leNew("NIL"), *current;
+  le *newkey, *newvalue = leNIL, *current;
 
   if (branch && argc >= 3) {
     current = branch->list_next;
     while (current) {
+      if (newvalue != leNIL)
+        leWipe(newvalue);
+      
       if (!current->list_next)
-        newvalue = leNew( "NIL" );
+        newvalue = leNIL;
       else
         newvalue = evaluateNode(current->list_next);
 
       mainVarList = variableSet(mainVarList,
-                                (function == S_SET) ? (newkey = evaluateNode(current))->data : current->data,
+                                function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
                                 newvalue);
 
       if (function == S_SET)
@@ -1080,17 +1075,17 @@ le *eval_cb_set_helper(enum setfcn function,
     }
   }
 
-  return leDup(newvalue);
+  return newvalue;
 }
     
-le * eval_cb_set( int argc, le * branch )
+le* eval_cb_set(int argc, le *branch)
 {
-  return( eval_cb_set_helper( S_SET, argc, branch ) );
+  return eval_cb_set_helper(S_SET, argc, branch);
 }
     
-le * eval_cb_setq( int argc, le * branch )
+le *eval_cb_setq(int argc, le *branch)
 {
-  return( eval_cb_set_helper( S_SETQ, argc, branch ) );
+  return eval_cb_set_helper(S_SETQ, argc, branch);
 }
     
 le * eval_cb_enum( int argc, le * branch )
@@ -1099,7 +1094,7 @@ le * eval_cb_enum( int argc, le * branch )
   int count = -1;
   char value[16];
 
-  if (!branch || argc < 2)  return( leNew( "NIL" ) );
+  if (!branch || argc < 2)  return( leNIL );
 
   current = branch->list_next;
   while ( current )
@@ -1118,7 +1113,7 @@ le * eval_cb_enum( int argc, le * branch )
     }
 
   if (count == -1)
-    return( leNew( "NIL" ) );
+    return( leNIL );
   else
     return( evalCastIntToLe(count) );
 }
@@ -1127,14 +1122,26 @@ le * eval_cb_enum( int argc, le * branch )
 le *eval_cb_defun(int argc, le * branch)
 {
   if (!branch || argc < 4)
-    return leNew("NIL");
+    return leNIL;
 
   if (!branch->list_next->data)
-    return leNew("NIL");
+    return leNIL;
 
   defunList = variableSet(defunList,
                           branch->list_next->data,
                           branch->list_next->list_next);
 
   return leNew(branch->list_next->data);
+}
+
+
+void eval_init(void)
+{
+  leNIL = leNew("NIL");
+}
+
+
+void eval_finalise(void)
+{
+  leWipe(leNIL);
 }

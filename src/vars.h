@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.h,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
+/*	$Id: vars.h,v 1.4 2005/01/19 00:41:01 rrt Exp $	*/
 
 #include <stdio.h>
 #include "lists.h"
@@ -31,7 +31,7 @@ extern le *defunList;
 
 le *variableFind(le *varlist, char *key);
 #define variableFree(L) \
-  leWipe(L);
+  leWipe(L)
 
 le *variableSet(le *varlist, char *key, le *value);
 le *variableSetString(le *varlist, char *key, char *value);

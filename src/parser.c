@@ -20,12 +20,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.c,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: parser.c,v 1.3 2005/01/19 00:41:01 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
 
-#include "parser.h"
+#include "zile.h"
+#include "extern.h"
 
     
 struct le *
@@ -204,7 +205,7 @@ snagAToken(
                   return( NULL );
                 }
               *tokenid = T_WORD;
-              return( strdup(temp) );
+              return( zstrdup(temp) );
             }
         } else {
           switch (c)
@@ -217,7 +218,7 @@ snagAToken(
             case ( '\"' ):
               temp[pos-1] = '\0';
               *tokenid = T_WORD;
-              return( strdup(temp) );
+              return( zstrdup(temp) );
     
             }
         }

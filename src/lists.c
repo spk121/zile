@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.5 2005/01/17 00:28:43 rrt Exp $	*/
+/*	$Id: lists.c,v 1.6 2005/01/19 00:40:52 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +37,7 @@ le *leNew(char *text)
   le *new = (le *)zmalloc(sizeof(le));
 
   new->branch = NULL;
-  new->data = text ? strdup(text) : NULL;
+  new->data = text ? zstrdup(text) : NULL;
   new->quoted = 0;
   new->tag = -1;
   new->list_prev = NULL;
@@ -63,7 +63,8 @@ void leWipe(le *list)
     leWipe(list->list_next);
 
     /* free ourself */
-    if (list->data) free(list->data);
+    if (list->data)
+      free(list->data);
     free(list);
   }
 }
@@ -174,7 +175,7 @@ void leTagReplace(le *list, int tagval, le *newinfo)
         list->quoted = 1;
       } 
       else if (newinfo->data)
-        list->data = strdup(newinfo->data);
+        list->data = zstrdup(newinfo->data);
     }
     leTagReplace(list->branch, tagval, newinfo);
 
@@ -215,7 +216,7 @@ astr leDumpEvalTree(le *list, int indent)
     else {
       le *le_value = evaluateBranch(list->branch);
       astr_afmt(as, "B: %s", list->quoted ? "quoted " : "");
-      astr_cat(as, leDumpReformat(le_value));
+      astr_cat_delete(as, leDumpReformat(le_value));
       astr_cat_cstr(as, "\n");
       leWipe(le_value);
 
@@ -228,17 +229,18 @@ astr leDumpEvalTree(le *list, int indent)
     
 astr leDumpEval(le *list, int indent)
 {
-  le *le_value = NULL;
   astr as = astr_new();
 
   for (; list; list = list->list_next) {
     if (list->branch) {
+      le *le_value = NULL;
+
       astr_cat_cstr(as, "\n");
-      astr_cat(as, leDumpReformat(list->branch));
+      astr_cat_delete(as, leDumpReformat(list->branch));
 
       astr_cat_cstr(as, "\n==> ");
-      le_value = evaluateBranch(list->branch) ;
-      astr_cat(as, leDumpReformat(le_value));
+      le_value = evaluateBranch(list->branch);
+      astr_cat_delete(as, leDumpReformat(le_value));
       leWipe(le_value);
       astr_cat_cstr(as, "\n");
     }
@@ -264,7 +266,7 @@ astr leDumpReformat(le *tree)
 
       if (tree->branch) {
         astr_afmt(as, " %s", tree->quoted ? "\'" : "");
-        astr_cat(as, leDumpReformat(tree->branch));
+        astr_cat_delete(as, leDumpReformat(tree->branch));
       }
     }
 
