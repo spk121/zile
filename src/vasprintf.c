@@ -95,7 +95,7 @@ typedef struct {
   char *       dest_string;       /* current position into output string */
   size_t       buffer_len;        /* length of output buffer */
   size_t       real_len;          /* real current length of output text */
-  size_t       pseudo_len;        /* total length of output text if it where not limited in size */
+  size_t       pseudo_len;        /* total length of output text if it were not limited in size */
   size_t       maxlen;
   va_list      vargs;             /* pointer to current position into vargs */
   char *       sprintf_string;
@@ -493,10 +493,10 @@ static int dispatch(xprintf_struct *s)
 static int core(xprintf_struct *s)
 {
   size_t len, save_len;
-  char * dummy_base;
+  char *dummy_base;
 
   /* basic checks */
-  if ((int)(s->maxlen) <= 0) /* 'int' to check against some convertion */
+  if ((int)(s->maxlen) <= 0) /* 'int' to check against some conversion */
     return EOF;           /* error for example if value is (int)-10 */
   s->maxlen--;      /* because initial maxlen counts final 0 */
   /* note: now 'maxlen' _can_ be zero */
@@ -533,7 +533,7 @@ static int core(xprintf_struct *s)
     }
   }
 
-  /* XXX for (v)asnprintf */
+  /* for (v)asnprintf */
   dummy_base = s->buffer_base;
   save_len = 0;                 /* just to avoid a compiler warning */
 
