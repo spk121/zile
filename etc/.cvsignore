@@ -1,3 +1,7 @@
+.deps
 Makefile
+Makefile.in
 mkdoc
 AUTODOC
+HELP
+*.log *.aux *.dvi *.ps
