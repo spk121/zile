@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.c,v 1.2 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: vector.c,v 1.3 2005/02/04 02:08:06 rrt Exp $	*/
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -29,8 +29,7 @@
 #include "extern.h"
 
 /* Create a vector whose items' size is size */
-vector *
-vec_new(size_t itemsize)
+vector *vec_new(size_t itemsize)
 {
   vector *v = zmalloc(sizeof(vector));
   vec_itemsize(v) = itemsize;
@@ -41,16 +40,14 @@ vec_new(size_t itemsize)
 }
 
 /* Free a vector v */
-void
-vec_delete(vector *v)
+void vec_delete(vector *v)
 {
   free(v->array);
   free(v);
 }
 
 /* Resize a vector v to items elements */
-static vector *
-resize(vector *v, size_t items)
+static vector *resize(vector *v, size_t items)
 {
   v->size = items;
   v->array = zrealloc(v->array, items * vec_itemsize(v));
@@ -58,8 +55,7 @@ resize(vector *v, size_t items)
 }
 
 /* Convert a vector to an array */
-void *
-vec_toarray(vector *v) {
+void *vec_toarray(vector *v) {
   void *a;
   resize(v, vec_items(v));
   a = v->array;
@@ -69,8 +65,7 @@ vec_toarray(vector *v) {
 
 /* Return the address of a vector element, growing the array if
    needed */
-void *
-vec_index(vector *v, size_t idx)
+void *vec_index(vector *v, size_t idx)
 {
   if (idx >= v->size)
     v = resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
