@@ -639,7 +639,7 @@ of most editors, in that it is "incremental".  This means that the
 search happens while you type in the string to search for.
 
 The command to initiate a search is C-s for forward search, and C-r
-for reverse search.  BUT WAIT!  Don't try them now.
+for reverse search.  BUT WAIT!  Don't try them yet!
 
 When you type C-s you'll notice that the string "I-search" appears as
 a prompt in the echo area.  This tells you that Zile is in what is
