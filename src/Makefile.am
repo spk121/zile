@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.35 2005/01/22 13:13:14 rrt Exp $
+## $Id: Makefile.am,v 1.36 2005/01/25 16:02:23 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -83,7 +83,7 @@ endif
 zile_LDADD =					\
 	$(regex)
 
-EXTRA_DIST = regex.c regex.h
+EXTRA_DIST = regex.c regex.h tests
 
 distclean-local:
 	rm -f paths.h
