@@ -108,7 +108,7 @@ dnl ==================================================================
 dnl Allegro
 dnl ==================================================================
 
-AC_DEFUN(zile_CHECK_ALLEGRO,
+AC_DEFUN([zile_CHECK_ALLEGRO],
 [
         AC_CHECK_HEADER(allegro.h,
 			AC_DEFINE(HAVE_ALLEGRO_H, 1, [We have the allegro.h header.]),
@@ -139,7 +139,7 @@ dnl ==================================================================
 dnl Curses
 dnl ==================================================================
 
-AC_DEFUN(zile_CHECK_CURSES,
+AC_DEFUN([zile_CHECK_CURSES],
 [
         AC_MSG_RESULT(yes)
         AC_DEFINE(CURSES, 1, [Define this to use curses.])
