@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.47 2004/10/16 21:04:39 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.48 2004/11/13 23:57:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1275,6 +1275,7 @@ Fill paragraph at or after point.
                 }
 
         cur_bp->pt = pt;
+        thisflag &= ~(FLAG_DONE_CPCN | FLAG_NEED_RESYNC);
 
         return TRUE;
 }
