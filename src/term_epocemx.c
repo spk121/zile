@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.9 2005/01/26 23:45:00 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.10 2005/01/26 23:58:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -384,7 +384,7 @@ static int xgetkey(int mode)
   }
 }
 
-int term_xgetkey(int mode, int arg)
+int term_xgetkey(int mode, unsigned timeout)
 {
   return xgetkey(mode);
 }

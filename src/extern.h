@@ -221,7 +221,7 @@ void term_addch(int c);
 void term_attrset(unsigned attrs, ...);
 void term_beep(void);
 int term_getkey(void);
-int term_xgetkey(int mode, int arg);
+int term_xgetkey(int mode, unsigned timeout);
 void term_ungetkey(int key);
 
 /* undo.c ----------------------------------------------------------------- */

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.57 2005/01/26 23:45:00 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.58 2005/01/26 23:58:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -448,7 +448,7 @@ static int translate_key(char *s, unsigned nbytes)
   return key;
 }
 
-static int xgetkey(int mode, int dsecs)
+static int xgetkey(int mode, unsigned dsecs)
 {
   size_t nbytes;
   size_t len = astr_len(key_buf);
@@ -493,7 +493,7 @@ static int xgetkey(int mode, int dsecs)
   return key;
 }
 
-int term_xgetkey(int mode, int arg)
+int term_xgetkey(int mode, unsigned timeout)
 {
   int key;
   struct sigaction winch_sig;
@@ -506,7 +506,7 @@ int term_xgetkey(int mode, int arg)
   winch_sig.sa_flags = SA_RESTART;
   sigaction(SIGWINCH, &winch_sig, NULL);
 
-  key = xgetkey(mode, arg);
+  key = xgetkey(mode, timeout);
 
   winch_sig.sa_handler = SIG_DFL;
   sigaction(SIGWINCH, &winch_sig, NULL);
