@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.50 2004/11/14 16:29:07 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.51 2004/12/24 13:53:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1229,55 +1229,34 @@ DEFUN("fill-paragraph", fill_paragraph)
 Fill paragraph at or after point.
 +*/
 {
-        Point pt = cur_bp->pt;
-        Line *end_lp;
+        int i, start, end;
         
 	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
         FUNCALL(forward_paragraph);
-        end_lp = cur_bp->pt.p;
+        end = cur_bp->pt.n;
+        if (is_empty_line())
+                end--;
+
         FUNCALL(backward_paragraph);
+        start = cur_bp->pt.n;
+        if (is_empty_line()) {  /* Move to next line if between two paragraphs. */
+                next_line();
+                start++;
+        }
+        
+        for (i = start; i < end; i++) {
+                FUNCALL(end_of_line);
+                delete_char();
+                FUNCALL(delete_horizontal_space);
+                insert_char_in_insert_mode(' ');
+        }
 
-        if (cur_bp->pt.p != end_lp)
-                while (1) {
-                        FUNCALL(end_of_line);
-                        if (get_goalc() > cur_bp->fill_column) {
-                                int moving = cur_bp->pt.p == pt.p;
-                                fill_break_line();
+        FUNCALL(end_of_line);
+        while (get_goalc() > cur_bp->fill_column + 1)
+                fill_break_line();
 
-                                /* Relocate point if it may have moved. */
-                                if (moving)
-                                        while (pt.o > astr_len(pt.p->text)) {
-                                                pt.o -= astr_len(pt.p->text);
-                                                pt.p = pt.p->next;
-                                                pt.n++;
-                                        }
-                        } else {
-                                next_line();
-                                FUNCALL(end_of_line);
-                        }
-
-                        if (cur_bp->pt.p == end_lp)
-                                break;
-
-                        if (cur_bp->pt.p->next != end_lp) {
-                                int moving = cur_bp->pt.p->next == pt.p;
-                                int cur_len = astr_len(cur_bp->pt.p->text);
-                                
-                                insert_char(' ');
-                                delete_char();
-
-                                /* Relocate point if it moved. */
-                                if (moving) {
-                                        pt.p = cur_bp->pt.p;
-                                        pt.o += cur_len;
-                                        pt.n--;
-                                }
-                        }
-                }
-
-        cur_bp->pt = pt;
-        thisflag &= ~(FLAG_DONE_CPCN | FLAG_NEED_RESYNC);
+        thisflag &= ~FLAG_DONE_CPCN;
 
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
