@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.79 2005/01/30 02:48:18 dacap Exp $	*/
+/*	$Id: main.c,v 1.80 2005/01/30 14:35:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -74,10 +74,10 @@ static void loop(void)
   for (;;) {
     if (lastflag & FLAG_NEED_RESYNC)
       resync_redisplay();
-
-    minibuf_clear();
     term_redisplay();
     term_refresh();
+
+    minibuf_clear();
 
     thisflag = 0;
     if (lastflag & FLAG_DEFINING_MACRO)
