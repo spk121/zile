@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.41 2005/01/29 12:22:12 rrt Exp $	*/
+/*	$Id: search.c,v 1.42 2005/01/30 17:46:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -267,18 +267,7 @@ static int isearch(int dir)
 
     minibuf_write("%s", astr_cstr(buf));
 
-    if (thisflag & FLAG_EXECUTING_MACRO) {
-      c = get_macro_key_data();
-      if (c == KBD_RET && !last) {
-        thisflag ^= FLAG_EXECUTING_MACRO;
-        lastflag |= FLAG_GOT_ERROR;
-        break;
-      }
-    } else {
-      c = term_getkey();
-      if (thisflag & FLAG_DEFINING_MACRO)
-        add_macro_key_data(c);
-    }
+    c = term_getkey();
 
     if (c == KBD_CANCEL) {
       cur_bp->pt = start;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.60 2005/01/29 00:36:58 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.61 2005/01/30 17:46:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -493,7 +493,7 @@ static size_t xgetkey(int mode, size_t dsecs)
 
 size_t term_xgetkey(int mode, size_t timeout)
 {
-  int key;
+  size_t key;
   struct sigaction winch_sig;
 
 /* The SIGWINCH handler is only active in this routine, so that we

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.54 2005/01/30 02:25:16 dacap Exp $	*/
+/*	$Id: bind.c,v 1.55 2005/01/30 17:46:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -205,11 +205,13 @@ void process_key(size_t key)
 
   if (key & KBD_META && isdigit(key & 255)) {
     /* Got an ESC x sequence where `x' is a digit. */
-    universal_argument(KBD_META, (int)((key & 0xff) - '0'));
+    if (universal_argument(KBD_META, (int)((key & 0xff) - '0')) &&
+        thisflag & FLAG_DEFINING_MACRO)
+      add_macro_key(key);
   } else if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
     /* There are no bindings for the pressed key. */
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-    for (uni = 0; uni < last_uniarg; ++uni) {
+    for (uni = 0; uni < last_uniarg; ++uni)
       if (!self_insert_command((ptrdiff_t)key)) {
         astr as = make_completion(keys, numkeys);
         astr_truncate(as, -1);
@@ -218,22 +220,19 @@ void process_key(size_t key)
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
         free(keys);
         return;
-      }
-      if (thisflag & FLAG_DEFINING_MACRO)
-        add_kbd_macro(self_insert_command, FALSE, (ptrdiff_t)key);
-    }
+      } else if (thisflag & FLAG_DEFINING_MACRO)
+        add_macro_key(key);
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   } else {
-    int oldflag = thisflag;
-    p->func(last_uniarg);
+    size_t i;
+    
+    if (p->func(last_uniarg) && thisflag & FLAG_DEFINING_MACRO)
+      for (uni = 0; uni < last_uniarg; ++uni)
+        for (i = 0; i < numkeys; i++)
+          add_macro_key(keys[i]);
     _last_command = p->func;
-    if ((oldflag & FLAG_DEFINING_MACRO)
-        && (thisflag & FLAG_DEFINING_MACRO)
-        && p->func != F_universal_argument)
-      add_kbd_macro(p->func,
-                    lastflag & FLAG_SET_UNIARG,
-                    last_uniarg);
   }
+
   if (keys)
     free(keys);
 }
@@ -283,16 +282,13 @@ static int bind_compar(const void *p1, const void *p2)
   return strcmp(((fentryp)p1)->name, ((fentryp)p2)->name);
 }
 
-static int alternative_bindings = 0;
-
 void init_bindings(void)
 {
   size_t i, j;
 
   leaf_tree = leaf_new(10);
 
-  if (lookup_bool_variable("alternative-bindings")) {
-    alternative_bindings = 1;
+  if (lookup_bool_variable("alternative-bindings"))
     for (i = 0; i < fentry_table_size; ++i)
       for (j = 0; j < 3; ++j)
         if (fentry_table[i].key[j] != NULL) {
@@ -303,10 +299,9 @@ void init_bindings(void)
             fentry_table[i].key[j][1] = 'M';
           }
         }
-  }
 
   /* Sort the array for better searching later. */
-  qsort(fentry_table, fentry_table_size, sizeof fentry_table[0], bind_compar);
+  qsort(fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
 
   /* Bind all the default functions. */
   for (i = 0; i < fentry_table_size; i++)
@@ -466,7 +461,7 @@ DEFUN("global-set-key", global_set_key)
   char *name;
   astr as;
 
-  minibuf_write("Set key globally:");
+  minibuf_write("Set key globally: ");
   key = term_getkey();
   p = completion_scan(key, &keys, &numkeys);
 

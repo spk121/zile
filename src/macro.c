@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: macro.c,v 1.10 2005/01/29 13:15:39 rrt Exp $	*/
+/*	$Id: macro.c,v 1.11 2005/01/30 17:46:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -35,93 +35,23 @@
 typedef struct Macro Macro;
 
 struct Macro {
-  Function func;
-  int ndata;
-  int *data;
-  Macro *next;
+  size_t nkeys;
+  size_t *keys;
 };
 
-static Macro *head_mp, *last_mp;
-static Macro *running_mp, *wait_mp = NULL;
-static int macro_key;
+static Macro *head_mp;
 
-static Macro *macro_new(void)
+void add_macro_key(size_t key)
 {
-  Macro *mp;
-
-  mp = (Macro *)zmalloc(sizeof(Macro));
-  mp->func = NULL;
-  mp->ndata = 0;
-  mp->data = NULL;
-  mp->next = NULL;
-
-  return mp;
-}
-
-static void macro_free(Macro *mp)
-{
-  if (mp->data)
-    free(mp->data);
-  free(mp);
-}
-
-static void add_macro_data(Macro *mp, int data)
-{
-  int n = mp->ndata++;
-  mp->data = zrealloc(mp->data, sizeof(int)*mp->ndata);
-  mp->data[n] = data;
+  head_mp->keys = zrealloc(head_mp->keys, sizeof(size_t) * ++head_mp->nkeys);
+  head_mp->keys[head_mp->nkeys - 1] = key;
 }
 
 void cancel_kbd_macro(void)
 {
-  Macro *mp, *next_mp;
-
-  for (mp = head_mp; mp != NULL; mp = next_mp) {
-    next_mp = mp->next;
-    macro_free(mp);
-  }
-
-  head_mp = last_mp = NULL;
-
+  free_macros();
+  head_mp = NULL;
   thisflag &= ~FLAG_DEFINING_MACRO;
-}
-
-void add_kbd_macro(Function func, int set_uniarg, int uniarg)
-{
-  Macro *mp = macro_new();
-
-  mp->func = func;
-  add_macro_data(mp, set_uniarg);
-  add_macro_data(mp, uniarg);
-
-  if (wait_mp) {
-    int c;
-    for (c = 0; c < wait_mp->ndata; ++c)
-      add_macro_data(mp, wait_mp->data[c]);
-    macro_free(wait_mp);
-    wait_mp = NULL;
-  }
-
-  if (head_mp == NULL)
-    head_mp = last_mp = mp;
-  else {
-    last_mp->next = mp;
-    last_mp = mp;
-  }
-}
-
-void add_macro_key_data(int key)
-{
-  if (!wait_mp)
-    wait_mp = macro_new();
-  add_macro_data(wait_mp, key);
-}
-
-int get_macro_key_data(void)
-{
-  if (macro_key < running_mp->ndata)
-    return running_mp->data[macro_key++];
-  return 0;
 }
 
 DEFUN("start-kbd-macro", start_kbd_macro)
@@ -136,13 +66,13 @@ DEFUN("start-kbd-macro", start_kbd_macro)
     return FALSE;
   }
 
-  if (head_mp != NULL)
+  if (head_mp)
     cancel_kbd_macro();
 
   minibuf_write("Defining keyboard macro...");
 
   thisflag |= FLAG_DEFINING_MACRO;
-
+  head_mp = (Macro *)zmalloc(sizeof(Macro));
   return TRUE;
 }
 
@@ -159,7 +89,6 @@ DEFUN("end-kbd-macro", end_kbd_macro)
   }
 
   thisflag &= ~FLAG_DEFINING_MACRO;
-
   return TRUE;
 }
 
@@ -177,35 +106,18 @@ static int call_last_kbd_macro(void)
   int old_thisflag = thisflag;
   int old_lastflag = lastflag;
   int ret = TRUE;
-  Macro *mp;
+  size_t i;
 
   if (head_mp == NULL) {
     minibuf_error("Keyboard macro not defined");
     return FALSE;
   }
 
-  for (mp = head_mp; mp != NULL; mp = mp->next) {
-    thisflag = FLAG_EXECUTING_MACRO;
+  for (i = head_mp->nkeys - 1; i < head_mp->nkeys ; i--)
+    term_ungetkey(head_mp->keys[i]);
 
-    running_mp = mp;
-    macro_key = 0;
-
-    if (get_macro_key_data())
-      lastflag |= FLAG_SET_UNIARG;
-    else
-      lastflag &= ~FLAG_SET_UNIARG;
-
-    (*mp->func)(get_macro_key_data());
-
-    thisflag &= ~FLAG_EXECUTING_MACRO;
-
-    if (lastflag & FLAG_GOT_ERROR) {
-      ret = FALSE;
-      break;
-    }
-
-    lastflag = thisflag;
-  }
+  if (lastflag & FLAG_GOT_ERROR)
+    ret = FALSE;
 
   thisflag = old_thisflag;
   lastflag = old_lastflag;
@@ -243,10 +155,8 @@ DEFUN("call-last-kbd-macro", call_last_kbd_macro)
  */
 void free_macros(void)
 {
-  Macro *mp, *next;
-
-  for (mp = head_mp; mp != NULL; mp = next) {
-    next = mp->next;
-    macro_free(mp);
+  if (head_mp) {
+    free(head_mp->keys);
+    free(head_mp);
   }
 }

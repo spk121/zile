@@ -132,9 +132,7 @@ astr lisp_dump(le *list);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
-void add_kbd_macro(Function func, int set_uniarg, int uniarg);
-void add_macro_key_data(int key);
-int get_macro_key_data(void);
+void add_macro_key(size_t key);
 void free_macros(void);
 
 /* main.c ----------------------------------------------------------------- */
