@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.36 2005/01/26 18:26:48 rrt Exp $	*/
+/*	$Id: search.c,v 1.37 2005/01/26 18:46:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -80,9 +80,9 @@ static char *re_find_substr(const char *s1, size_t s1size,
                         &search_regs);
 
     if (index >= 0) {
-/*       if (!backward) */
-/*         ret = ((char *)s1) + search_regs.end[0]; */
-/*       else */
+      if (!backward)
+        ret = ((char *)s1) + search_regs.end[0];
+      else
         ret = ((char *)s1) + search_regs.start[0];
     }
     else if (index == -1) {
@@ -132,10 +132,10 @@ static int search_forward(Line *startp, int starto, const char *s)
 
     sp2 = re_find_substr(sp, s1size, s, s2size,
                          sp == astr_cstr(lp->item), TRUE, FALSE);
-                        
+
     if (sp2 != NULL) {
       goto_linep(lp);
-      cur_bp->pt.o = sp2 - astr_cstr(lp->item) + s2size;
+      cur_bp->pt.o = sp2 - astr_cstr(lp->item);
       return TRUE;
     }
   }
@@ -324,7 +324,7 @@ static int isearch(int dir)
       if (c == KBD_RET && astr_len(pattern) == 0)
         if (dir == ISEARCH_FORWARD)
           FUNCALL(search_forward_regexp);
-        else 
+        else
           FUNCALL(search_backward_regexp);
       else if (astr_len(pattern) > 0) {
         /* Save mark. */
@@ -426,7 +426,7 @@ DEFUN("replace-regexp", replace_regexp)
   if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
     return cancel();
   repl_len = strlen(repl);
-  
+
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
     ++count;
     undo_save(UNDO_REPLACE_BLOCK,
@@ -467,7 +467,7 @@ DEFUN("query-replace-regexp", query_replace_regexp)
   if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
     return cancel();
   repl_len = strlen(repl);
-  
+
   /* Spaghetti code follows... :-( */
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find)) {
     if (!noask) {
