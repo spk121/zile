@@ -3,8 +3,6 @@ HIGH PRIORITY
 * Functions/bindings to implement and document (dummy functions
   already exist):
 
-X1("mark-paragraph", mark_paragraph,                    "M-h")
-  (forward-paragraph, set-mark-command, backward-paragraph)
 X1("fill-paragraph", fill_paragraph,                    "M-q")   
 X1("name-last-kbd-macro", name_last_kbd_macro,          "")
 
