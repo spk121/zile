@@ -42,5 +42,6 @@ The Zile team would like to thank:
 * Richard Smith <richard@ex-parrot.com> for autotools code (mostly
   stolen from binutils) to build mkdoc for the build platform when
   cross-compiling
+* Han Boethes for a security fix
 
 and everyone else who has reported bugs and made suggestions.
