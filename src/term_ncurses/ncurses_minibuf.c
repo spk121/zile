@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_minibuf.c,v 1.16 2004/02/18 16:21:54 ssigala Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.17 2004/03/09 16:25:54 rrt Exp $	*/
 
 #include "config.h"
 
@@ -52,7 +52,7 @@ void ncurses_minibuf_clear(void)
 
 static void xminibuf_write(const char *fmt)
 {
-	int y, x, bold;
+	int y, x;
 	const unsigned char *p = fmt;
 
 	getyx(stdscr, y, x);
