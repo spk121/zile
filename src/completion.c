@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: completion.c,v 1.3 2004/03/09 16:16:11 rrt Exp $	*/
+/*	$Id: completion.c,v 1.4 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -320,17 +320,17 @@ static int default_completion_reread(Completion *cp, astr as)
 	if ((dir = opendir(astr_cstr(pdir))) == NULL)
 		return FALSE;
 
-	astr_assign(as, fname);
+	astr_cpy(as, fname);
 
 	while ((d = readdir(dir)) != NULL) {
-		astr_assign_cstr(buf, astr_cstr(pdir));
-		astr_append_cstr(buf, d->d_name);
+		astr_cpy_cstr(buf, astr_cstr(pdir));
+		astr_cat_cstr(buf, d->d_name);
 		if (stat(astr_cstr(buf), &st) != -1) {
-			astr_assign_cstr(buf, d->d_name);
+			astr_cpy_cstr(buf, d->d_name);
 			if (S_ISDIR(st.st_mode))
-				astr_append_cstr(buf, "/");
+				astr_cat_cstr(buf, "/");
 		} else
-			astr_assign_cstr(buf, d->d_name);
+			astr_cpy_cstr(buf, d->d_name);
 		alist_append(cp->completions, zstrdup(astr_cstr(buf)));
 	}
 	closedir(dir);

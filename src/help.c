@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.14 2004/03/13 16:31:20 rrt Exp $	*/
+/*	$Id: help.c,v 1.15 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -214,8 +214,8 @@ Show a tutorial window.
 		astr buf;
 		buf = astr_new();
 		cur_bp->flags = 0;
-		astr_assign_cstr(buf, getenv("HOME"));
-		astr_append_cstr(buf, "/TUTORIAL");
+		astr_cpy_cstr(buf, getenv("HOME"));
+		astr_cat_cstr(buf, "/TUTORIAL");
 		set_buffer_filename(cur_bp, astr_cstr(buf));
 
 		astr_delete(buf);
@@ -255,10 +255,10 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
                                 break;
                         }
 			if (isfunc || astr_size(defval) > 0) {
-				astr_append(doc, buf);
-				astr_append_cstr(doc, "\n");
+				astr_cat(doc, buf);
+				astr_cat_cstr(doc, "\n");
 			} else
-				astr_assign(defval, buf);
+				astr_cpy(defval, buf);
 		} else if (!astr_cmp(buf, match))
 			reading_doc = 1;
                 astr_delete(buf);

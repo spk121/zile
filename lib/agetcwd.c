@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: agetcwd.c,v 1.4 2004/02/17 20:21:17 ssigala Exp $	*/
+/*	$Id: agetcwd.c,v 1.5 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <errno.h>
@@ -43,7 +43,7 @@ astr agetcwd(astr as)
         /* If there was an error, return the empty string */
         if (res == NULL)
                 *buf = '\0';
-	astr_assign_cstr(as, buf);
+	astr_cpy_cstr(as, buf);
 	free(buf);
         return as;
 }

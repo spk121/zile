@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.31 2004/03/14 14:36:05 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.32 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -106,14 +106,14 @@ static astr make_buffer_mode(Buffer *bp)
 
 	switch (bp->mode) {
 	default:
-		astr_assign_cstr(as, "Text");
+		astr_cpy_cstr(as, "Text");
 	}
 
 	if (bp->flags & BFLAG_FONTLOCK)
-		astr_append_cstr(as, " Font");
+		astr_cat_cstr(as, " Font");
 
 	if (bp->flags & BFLAG_AUTOFILL)
-		astr_append_cstr(as, " Fill");
+		astr_cat_cstr(as, " Fill");
 
 	return as;
 }
@@ -417,14 +417,14 @@ int universal_argument(int keytype, int xarg)
 	compl = 0;
 
 	if (keytype == KBD_META) {
-		astr_assign_cstr(as, "ESC");
+		astr_cpy_cstr(as, "ESC");
 		cur_tp->ungetkey(xarg + '0');
 	}
 	else
-		astr_assign_cstr(as, "C-u");
+		astr_cpy_cstr(as, "C-u");
 
 	for (;;) {
-		astr_append_cstr(as, "-"); /* Add the '-' character. */
+		astr_cat_cstr(as, "-"); /* Add the '-' character. */
 		c = do_completion(as, &compl);
 		astr_truncate(as, astr_size(as) - 1); /* Remove the '-' character. */
 
@@ -436,7 +436,7 @@ int universal_argument(int keytype, int xarg)
 			digit = (c & 0xff) - '0';
 
 			if (c & KBD_META)
-				astr_append_cstr(as, " ESC");
+				astr_cat_cstr(as, " ESC");
 
 			astr_afmt(as, " %d", digit);
 
@@ -448,7 +448,7 @@ int universal_argument(int keytype, int xarg)
 			i++;
 		}
 		else if (c == (KBD_CTL | 'u')) {
-			astr_append_cstr(as, " C-u");
+			astr_cat_cstr(as, " C-u");
 			if (i == 0)
 				arg *= 4;
 		}
@@ -456,7 +456,7 @@ int universal_argument(int keytype, int xarg)
 			/* After any number && if sign doesn't change */
 			if (i == 0 && sgn > 0) {
 				sgn = -sgn;
-				astr_append_cstr(as, " -");
+				astr_cat_cstr(as, " -");
 				/* The default "arg" isn't -4, is -1 */
 				arg = 1;
 			}
@@ -640,7 +640,7 @@ static void astr_append_region(astr s)
 		t = copy_text_block(r.start.n, r.start.o, r.size);
 		if (t) {
 			for (c = 0; c < r.size; c++)
-				astr_append_char(s, t[c]);
+				astr_cat_char(s, t[c]);
 			free(t);
 		}
 	}
@@ -1449,8 +1449,8 @@ command to insert any output into the current buffer.
 	out = astr_new();
 	while ((s = astr_fgets(pipe)) != NULL) {
 		++lines;
-		astr_append(out, s);
-		astr_append_cstr(out, "\n");
+		astr_cat(out, s);
+		astr_cat_cstr(out, "\n");
                 astr_delete(s);
 	}
 	pclose(pipe);
@@ -1536,8 +1536,8 @@ it as the contents of the region.
 	out = astr_new();
 	while (astr_size(s = astr_fgets(pipe)) > 0) {
 		++lines;
-		astr_append(out, s);
-		astr_append_cstr(out, "\n");
+		astr_cat(out, s);
+		astr_cat_cstr(out, "\n");
                 astr_delete(s);
 	}
 	astr_delete(s);

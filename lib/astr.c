@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.18 2004/03/13 20:07:00 rrt Exp $	*/
+/*	$Id: astr.c,v 1.19 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -76,7 +76,7 @@ void astr_delete(astr as)
 	free(as);
 }
 
-static astr astr_assign_x(astr as, const char *s, size_t csize)
+static astr astr_cpy_x(astr as, const char *s, size_t csize)
 {
 	astr_resize(as, csize);
 	strcpy(as->text, s);
@@ -84,19 +84,19 @@ static astr astr_assign_x(astr as, const char *s, size_t csize)
 	return as;
 }
 
-astr astr_assign(astr as, const astr src)
+astr astr_cpy(astr as, const astr src)
 {
 	assert(as != NULL && src != NULL);
-	return astr_assign_x(as, src->text, src->size);
+	return astr_cpy_x(as, src->text, src->size);
 }
 
-astr astr_assign_cstr(astr as, const char *s)
+astr astr_cpy_cstr(astr as, const char *s)
 {
 	assert(as != NULL && s != NULL);
-	return astr_assign_x(as, s, strlen(s));
+	return astr_cpy_x(as, s, strlen(s));
 }
 
-static astr astr_append_x(astr as, const char *s, size_t csize)
+static astr astr_cat_x(astr as, const char *s, size_t csize)
 {
 	astr_resize(as, as->size + csize);
 	strcpy(as->text + as->size, s);
@@ -104,19 +104,24 @@ static astr astr_append_x(astr as, const char *s, size_t csize)
 	return as;
 }
 
-astr astr_append(astr as, const astr src)
+astr astr_cat(astr as, const astr src)
 {
 	assert(as != NULL && src != NULL);
-	return astr_append_x(as, src->text, src->size);
+	return astr_cat_x(as, src->text, src->size);
 }
 
-astr astr_append_cstr(astr as, const char *s)
+astr astr_ncat_cstr(astr as, const char *s, size_t len)
 {
 	assert(as != NULL && s != NULL);
-	return astr_append_x(as, s, strlen(s));
+	return astr_cat_x(as, s, len);
 }
 
-astr astr_append_char(astr as, int c)
+astr astr_cat_cstr(astr as, const char *s)
+{
+	return astr_ncat_cstr(as, s, strlen(s));
+}
+
+astr astr_cat_char(astr as, int c)
 {
 	assert(as != NULL);
 	astr_resize(as, as->size + 1);
@@ -221,7 +226,7 @@ astr astr_fgets(FILE *f)
                 return NULL;
         as = astr_new();
 	while ((c = fgetc(f)) != EOF && c != '\n')
-		astr_append_char(as, c);
+		astr_cat_char(as, c);
 	return as;
 }
 
@@ -229,7 +234,7 @@ astr astr_vafmt(astr as, const char *fmt, va_list ap)
 {
 	char *buf;
 	vasprintf(&buf, fmt, ap);
-	astr_append_cstr(as, buf);
+	astr_cat_cstr(as, buf);
 	free(buf);
         return as;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.25 2004/03/14 14:36:05 rrt Exp $	*/
+/*	$Id: file.c,v 1.26 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -93,9 +93,9 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 	const char *sp = path;
 
 	if (*sp != '/') {
-                astr_append_cstr(dir, cwdir);
+                astr_cat_cstr(dir, cwdir);
 		if (*astr_char(dir, -1) != '/')
-			astr_append_cstr(dir, "/");
+			astr_cat_cstr(dir, "/");
 	}
 
 	while (*sp != '\0') {
@@ -108,7 +108,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 					sp++;
                                 astr_truncate(dir, 0);
 			}
-                        astr_append_cstr(dir, "/");
+                        astr_cat_cstr(dir, "/");
 		} else if (*sp == '~') {
 			if (*(sp + 1) == '/') {
 				/*
@@ -119,7 +119,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 				if ((pw = getpwuid(getuid())) == NULL)
 					return FALSE;
 				if (strcmp(pw->pw_dir, "/") != 0)
-                                        astr_append_cstr(dir, pw->pw_dir);
+                                        astr_cat_cstr(dir, pw->pw_dir);
 				++sp;
 			} else {
 				/*
@@ -130,12 +130,12 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 				astr_truncate(dir, 0);
 				++sp;
 				while (*sp != '\0' && *sp != '/')
-					astr_append_char(as, *sp++);
+					astr_cat_char(as, *sp++);
 				pw = getpwnam(astr_cstr(as));
                                 astr_delete(as);
 				if (pw == NULL)
 					return FALSE;
-                                astr_append_cstr(dir, pw->pw_dir);
+                                astr_cat_cstr(dir, pw->pw_dir);
 			}
 		} else if (*sp == '.') {
 			if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
@@ -162,18 +162,18 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 				p++;
 			if (*p == '\0') {
 				/* Final filename. */
-				astr_append_cstr(fname, sp);
+				astr_cat_cstr(fname, sp);
 				break;
 			} else {
 				/* Non-final directory. */
 				while (*sp != '/')
-					astr_append_char(dir, *sp++);
+					astr_cat_char(dir, *sp++);
 			}
 		}
 	}
 
 	if (astr_size(dir) == 0)
-		astr_append_cstr(dir, "/");
+		astr_cat_cstr(dir, "/");
 
 	return TRUE;
 }
@@ -189,7 +189,7 @@ astr compact_path(astr buf, const char *path)
 
 	if ((pw = getpwuid(getuid())) == NULL) {
 		/* User not found in password file. */
-		astr_assign_cstr(buf, path);
+		astr_cpy_cstr(buf, path);
 		return buf;
 	}
 
@@ -198,13 +198,13 @@ astr compact_path(astr buf, const char *path)
 	 */
 	i = strlen(pw->pw_dir);
 	if (!strncmp(pw->pw_dir, path, i)) {
-		astr_assign_cstr(buf, "~/");
+		astr_cpy_cstr(buf, "~/");
 		if (!strcmp(pw->pw_dir, "/"))
-			astr_append_cstr(buf, path + 1);
+			astr_cat_cstr(buf, path + 1);
 		else
-			astr_append_cstr(buf, path + i + 1);
+			astr_cat_cstr(buf, path + i + 1);
 	} else
-		astr_assign_cstr(buf, path);
+		astr_cpy_cstr(buf, path);
 
 	return buf;
 }
@@ -221,18 +221,18 @@ astr get_current_dir(astr buf, int interactive)
 		 */
 		int p;
 
-		astr_assign_cstr(buf, cur_bp->filename);
+		astr_cpy_cstr(buf, cur_bp->filename);
                 p = astr_rfind_cstr(buf, "/");
                 if (p != -1)
                         astr_truncate(buf, p ? p : 1);
 		if (*astr_char(buf, -1) != '/')
-			astr_append_cstr(buf, "/");
+			astr_cat_cstr(buf, "/");
 	} else {
 		/*
 		 * Get the current directory name from the system.
 		 */
 		agetcwd(buf);
-		astr_append_cstr(buf, "/");
+		astr_cat_cstr(buf, "/");
 	}
 
 	return buf;
@@ -252,8 +252,8 @@ void open_file(char *path, int lineno)
 		zile_exit(1);
 	}
 	ZTRACE(("new filename: %s, dir: %s\n", astr_cstr(fname), astr_cstr(dir)));
-	astr_assign_cstr(buf, astr_cstr(dir));
-	astr_append_cstr(buf, astr_cstr(fname));
+	astr_cpy_cstr(buf, astr_cstr(dir));
+	astr_cat_cstr(buf, astr_cstr(fname));
 	astr_delete(dir);
 	astr_delete(fname);
 
@@ -894,14 +894,14 @@ static char *create_backup_filename(const char *filename, int withrevs,
 		backupdir = get_variable("backup-directory");
 		buf = astr_new();
 
-                astr_append_cstr(buf, backupdir);
+                astr_cat_cstr(buf, backupdir);
 		if (*astr_char(buf, -1) != '/')
-			astr_append_cstr(buf, "/");
+			astr_cat_cstr(buf, "/");
 		while (*filename != '\0') {
 			if (*filename == '/')
-				astr_append_char(buf, '!');
+				astr_cat_char(buf, '!');
 			else
-				astr_append_char(buf, *filename);
+				astr_cat_char(buf, *filename);
 			++filename;
 		}
 
@@ -911,8 +911,8 @@ static char *create_backup_filename(const char *filename, int withrevs,
 			fprintf(stderr, "zile: %s: invalid backup directory\n", astr_cstr(dir));
 			zile_exit(1);
 		}
-		astr_assign_cstr(buf, astr_cstr(dir));
-		astr_append_cstr(buf, astr_cstr(fname));
+		astr_cpy_cstr(buf, astr_cstr(dir));
+		astr_cat_cstr(buf, astr_cstr(fname));
 		astr_delete(dir);
 		astr_delete(fname);
 		filename = astr_cstr(buf);
@@ -1247,10 +1247,10 @@ void zile_exit(int exitcode)
 			astr buf;
 			buf = astr_new();
 			if (bp->filename != NULL)
-				astr_assign_cstr(buf, bp->filename);
+				astr_cpy_cstr(buf, bp->filename);
 			else
-				astr_assign_cstr(buf, bp->name);
-			astr_append_cstr(buf, ".ZILESAVE");
+				astr_cpy_cstr(buf, bp->name);
+			astr_cat_cstr(buf, ".ZILESAVE");
 			fprintf(stderr, "Saving %s...\r\n",
 				astr_cstr(buf));
 			raw_write_to_disk(bp, astr_cstr(buf));

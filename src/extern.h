@@ -90,6 +90,7 @@ void ztrace(const char *fmt, ...);
 #else
 #define ZTRACE(arg)	(void)0
 #endif
+char *getln(FILE *fp);
 
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(int key);

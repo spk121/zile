@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.13 2004/03/13 20:32:25 rrt Exp $	*/
+/*	$Id: variables.c,v 1.14 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -184,7 +184,7 @@ Set a variable value to the user specified value.
 	else if (!strcmp(var, "fill-column"))
 		astr_afmt(as, "%d", cur_bp->fill_column);
 	else
-		astr_assign_cstr(as, get_variable(var));
+		astr_cpy_cstr(as, get_variable(var));
 	fmt = get_variable_format(var);
 	if (!strcmp(fmt, "c")) {
 		if ((val = minibuf_read_color("Set %s to value: ", var)) == NULL)

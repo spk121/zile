@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.15 2004/03/13 17:26:40 rrt Exp $	*/
+/*	$Id: astr.h,v 1.16 2004/03/29 22:47:01 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -90,15 +90,16 @@ extern astr   astr_substr(const astr as, int pos, size_t size);
 /*
  * Assign the contents of the argument string or to the string as.
  */
-extern astr   astr_assign(astr as, const astr src);
-extern astr   astr_assign_cstr(astr as, const char *s);
+extern astr   astr_cpy(astr as, const astr src);
+extern astr   astr_cpy_cstr(astr as, const char *s);
 
-/* Append the contents of the argument string or character at the end
- * of the string as.
+/*
+ * Append the contents of the argument string or character to as.
  */
-extern astr   astr_append(astr as, const astr src);
-extern astr   astr_append_cstr(astr as, const char *s);
-extern astr   astr_append_char(astr as, int c);
+extern astr   astr_cat(astr as, const astr src);
+extern astr   astr_cat_cstr(astr as, const char *s);
+extern astr   astr_ncat_cstr(astr as, const char *s, size_t len);
+extern astr   astr_cat_char(astr as, int c);
 
 /*
  * Truncate as to given length.

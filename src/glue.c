@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.10 2004/03/09 23:10:45 rrt Exp $	*/
+/*	$Id: glue.c,v 1.11 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -121,10 +121,10 @@ astr shorten_string(char *s, int maxlen)
         astr as = astr_new();
 
 	if ((len = strlen(s)) <= maxlen)
-		astr_assign_cstr(as, s);
+		astr_cpy_cstr(as, s);
 	else {
-		astr_assign_cstr(as, "...");
-		astr_append_cstr(as, s + len - maxlen + 3);
+		astr_cpy_cstr(as, "...");
+		astr_cat_cstr(as, s + len - maxlen + 3);
 	}
 
 	return as;
@@ -232,7 +232,7 @@ void goto_point(Point pt)
 }
 
 /*
- * Return an allocated memory area.
+ * Return a zeroed allocated memory area.
  */
 void *zmalloc(size_t size)
 {
@@ -240,7 +240,7 @@ void *zmalloc(size_t size)
 
 	assert(size > 0);
 
-	if ((ptr = malloc(size)) == NULL) {
+	if ((ptr = calloc(size, 1)) == NULL) {
 		fprintf(stderr, "zile: cannot allocate memory\n");
 		zile_exit(1);
 	}
@@ -290,3 +290,23 @@ void ztrace(const char *fmt, ...)
 	va_end(ap);
 }
 #endif
+
+/*
+ * Read an arbitrary length string.
+ */
+char *
+getln(FILE *fp)
+{
+        size_t len = 256;
+        int c;
+        char *l = zmalloc(len), *s = l;
+
+        for (c = getc(fp); c != '\n' && c != EOF; c = getc(fp)) {
+                if (s == l + len)
+                        zrealloc(l, len *= 2);
+                *s++ = c;
+        }
+        *s = '\0';
+
+        return l;
+}

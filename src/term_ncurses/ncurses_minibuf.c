@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_minibuf.c,v 1.19 2004/03/13 19:59:50 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.20 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -276,7 +276,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 				thistab = lasttab;
 			} else {
                                 astr as = astr_new();
-                                astr_assign_cstr(as, *p);
+                                astr_cpy_cstr(as, *p);
 				thistab = cp->try(cp, as);
                                 astr_delete(as);
 				switch (thistab) {

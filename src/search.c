@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.13 2004/03/13 16:31:20 rrt Exp $	*/
+/*	$Id: search.c,v 1.14 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -438,7 +438,7 @@ static int isearch(int dir, int regexp)
 				last_search = zstrdup(astr_cstr(pattern));
 			}
 			else if (last_search != NULL)
-				astr_assign_cstr(pattern, last_search);
+				astr_cpy_cstr(pattern, last_search);
 		} else if (c & KBD_META || c & KBD_CTL || c > KBD_TAB) {
 			if (c == KBD_RET && astr_size(pattern) == 0) {
 				if (dir == ISEARCH_FORWARD) {
@@ -468,7 +468,7 @@ static int isearch(int dir, int regexp)
 				minibuf_clear();
 			break;
 		} else
-			astr_append_char(pattern, c);
+			astr_cat_char(pattern, c);
 		if (astr_size(pattern) > 0) {
 			if (dir == ISEARCH_FORWARD)
 				last = search_forward(cur.p, cur.o, astr_cstr(pattern), regexp);

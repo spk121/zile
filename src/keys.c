@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.10 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: keys.c,v 1.11 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,89 +39,89 @@ astr chordtostr(int key)
 	astr as = astr_new();
 
 	if (key & KBD_CTL)
-		astr_append_cstr(as, "C-");
+		astr_cat_cstr(as, "C-");
 	if (key & KBD_META)
-		astr_append_cstr(as, "M-");
+		astr_cat_cstr(as, "M-");
 	key &= ~(KBD_CTL | KBD_META);
 
 	switch (key) {
 	case KBD_PGUP:
-		astr_append_cstr(as, "PGUP");
+		astr_cat_cstr(as, "PGUP");
 		break;
 	case KBD_PGDN:
-		astr_append_cstr(as, "PGDN");
+		astr_cat_cstr(as, "PGDN");
 		break;
 	case KBD_HOME:
-		astr_append_cstr(as, "HOME");
+		astr_cat_cstr(as, "HOME");
 		break;
 	case KBD_END:
-		astr_append_cstr(as, "END");
+		astr_cat_cstr(as, "END");
 		break;
 	case KBD_DEL:
-		astr_append_cstr(as, "DEL");
+		astr_cat_cstr(as, "DEL");
 		break;
 	case KBD_BS:
-		astr_append_cstr(as, "BS");
+		astr_cat_cstr(as, "BS");
 		break;
 	case KBD_INS:
-		astr_append_cstr(as, "INS");
+		astr_cat_cstr(as, "INS");
 		break;
 	case KBD_LEFT:
-		astr_append_cstr(as, "LEFT");
+		astr_cat_cstr(as, "LEFT");
 		break;
 	case KBD_RIGHT:
-		astr_append_cstr(as, "RIGHT");
+		astr_cat_cstr(as, "RIGHT");
 		break;
 	case KBD_UP:
-		astr_append_cstr(as, "UP");
+		astr_cat_cstr(as, "UP");
 		break;
 	case KBD_DOWN:
-		astr_append_cstr(as, "DOWN");
+		astr_cat_cstr(as, "DOWN");
 		break;
 	case KBD_RET:
-		astr_append_cstr(as, "RET");
+		astr_cat_cstr(as, "RET");
 		break;
 	case KBD_TAB:
-		astr_append_cstr(as, "TAB");
+		astr_cat_cstr(as, "TAB");
 		break;
 	case KBD_F1:
-		astr_append_cstr(as, "F1");
+		astr_cat_cstr(as, "F1");
 		break;
 	case KBD_F2:
-		astr_append_cstr(as, "F2");
+		astr_cat_cstr(as, "F2");
 		break;
 	case KBD_F3:
-		astr_append_cstr(as, "F3");
+		astr_cat_cstr(as, "F3");
 		break;
 	case KBD_F4:
-		astr_append_cstr(as, "F4");
+		astr_cat_cstr(as, "F4");
 		break;
 	case KBD_F5:
-		astr_append_cstr(as, "F5");
+		astr_cat_cstr(as, "F5");
 		break;
 	case KBD_F6:
-		astr_append_cstr(as, "F6");
+		astr_cat_cstr(as, "F6");
 		break;
 	case KBD_F7:
-		astr_append_cstr(as, "F7");
+		astr_cat_cstr(as, "F7");
 		break;
 	case KBD_F8:
-		astr_append_cstr(as, "F8");
+		astr_cat_cstr(as, "F8");
 		break;
 	case KBD_F9:
-		astr_append_cstr(as, "F9");
+		astr_cat_cstr(as, "F9");
 		break;
 	case KBD_F10:
-		astr_append_cstr(as, "F10");
+		astr_cat_cstr(as, "F10");
 		break;
 	case KBD_F11:
-		astr_append_cstr(as, "F11");
+		astr_cat_cstr(as, "F11");
 		break;
 	case KBD_F12:
-		astr_append_cstr(as, "F12");
+		astr_cat_cstr(as, "F12");
 		break;
 	default:
-                astr_append_char(as, key & 255);
+                astr_cat_char(as, key & 255);
 	}
 
 	return as;
@@ -293,9 +293,9 @@ astr simplify_key(char *key)
 	for (j = 0; j < i; j++) {
                 astr as;
 		if (j > 0)
-			astr_append_cstr(dest, " ");
+			astr_cat_cstr(dest, " ");
 		as = chordtostr(keys[j]);
-                astr_append(dest, as);
+                astr_cat(dest, as);
                 astr_delete(as);
 	}
         if (i > 0)

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.22 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: bind.c,v 1.23 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -179,15 +179,15 @@ static astr make_completion(int *keys, int numkeys)
 
 	for (i = 0; i < numkeys; i++) {
 		if (i > 0) {
-			astr_append_cstr(as, " ");
+			astr_cat_cstr(as, " ");
                         len++;
                 }
                 key = chordtostr(keys[i]);
-		astr_append(as, key);
+		astr_cat(as, key);
                 astr_delete(key);
 	}
 
-	return astr_append_cstr(as, "-");
+	return astr_cat_cstr(as, "-");
 }
 
 static leafp completion_scan(int c, int **keys, int *numkeys)
@@ -387,7 +387,7 @@ char *minibuf_read_function_name(const char *msg)
 			return NULL;
 		} else {
                         astr as = astr_new();
-                        astr_assign_cstr(as, ms);
+                        astr_cpy_cstr(as, ms);
 			/* Complete partial words if possible. */
 			if (cp->try(cp, as) == COMPLETION_MATCHED)
 				ms = cp->match;
@@ -441,7 +441,7 @@ Read function name, then read its arguments and call it.
 	if (lastflag & FLAG_SET_UNIARG && last_uniarg != 0)
 		astr_afmt(msg, "%d M-x ", last_uniarg);
 	else
-		astr_append_cstr(msg, "M-x ");
+		astr_cat_cstr(msg, "M-x ");
 
 	name = minibuf_read_function_name(astr_cstr(msg));
         astr_delete(msg);
@@ -522,10 +522,10 @@ static void write_bindings_tree(leafp tree, alist keys)
 			for (alist_first(keys), alist_next(keys);
                              alist_current_idx(keys) != -1;
                              alist_next(keys)) {
-				astr_append(key, alist_current(keys));
-				astr_append_cstr(key, " ");
+				astr_cat(key, alist_current(keys));
+				astr_cat_cstr(key, " ");
 			}
-			astr_append(key, as);
+			astr_cat(key, as);
                         astr_delete(as);
 			bprintf("%-15s %s\n", astr_cstr(key),
                                 get_function_name(p->func));

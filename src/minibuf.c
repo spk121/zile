@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: minibuf.c,v 1.15 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.16 2004/03/29 22:47:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -124,7 +124,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 	dir = astr_new();
 	fname = astr_new();
 	expand_path(value, astr_cstr(rbuf), dir, fname);
-	astr_append_cstr(dir, astr_cstr(fname));
+	astr_cat_cstr(dir, astr_cstr(fname));
 	compact_path(rbuf, astr_cstr(dir));
         astr_delete(dir);
         astr_delete(fname);
@@ -145,8 +145,8 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
                 fname = astr_new();
 
                 expand_path(p, astr_cstr(rbuf), dir, fname);
-                astr_assign(rbuf, dir);
-                astr_append(rbuf, fname);
+                astr_cpy(rbuf, dir);
+                astr_cat(rbuf, fname);
 
                 astr_delete(dir);
                 astr_delete(fname);
@@ -176,7 +176,7 @@ int minibuf_read_forced(const char *fmt, const char *errmsg,
 			char *s;
                         astr as = astr_new();
 			/* Complete partial words if possible. */
-                        astr_assign_cstr(as, p);
+                        astr_cpy_cstr(as, p);
 			if (cp->try(cp, as) == COMPLETION_MATCHED)
 				p = cp->match;
                         astr_delete(as);
