@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.8 2004/07/11 00:29:37 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.9 2004/10/08 13:30:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,7 +32,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "zterm.h"
 
 /* Write minibuf prompt, assuming cursor starts at column 0. */
 static void xminibuf_write(const char *s)
@@ -286,7 +285,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 		case ' ':
 			if (cp != NULL && !cp->fl_space)
 				goto got_tab;
-			/* FALLTROUGH */
+			/* FALLTHROUGH */
 		default:
 			if (c > 255 || !isprint(c)) {
 				ding();
@@ -316,8 +315,8 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 /*
  * Rotation of text buffer prevents trashing of the returned string
  * when doing less or equal `MAX_ROTATIONS' sequential calls.
- * This means that the returned string by `minibuf_read()' need
- * not to be deallocated by the user.
+ * This means that the string returned by `minibuf_read()' need
+ * not be deallocated by the user.
  */
 #define MAX_ROTATIONS	5
 

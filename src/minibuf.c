@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.21 2004/07/11 00:29:37 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.22 2004/10/08 13:30:45 rrt Exp $     */
 
 #include "config.h"
 
@@ -256,46 +256,6 @@ int minibuf_read_boolean(const char *fmt, ...)
         free(buf);
 
         return retvalue;
-}
-
-char *minibuf_read_color(const char *fmt, ...)
-{
-        va_list ap;
-        char *buf;
-        Completion *cp;
-        int retvalue;
-        unsigned int i;
-        char *valid[] = {
-                "black", "blue", "cyan", "green",
-                "magenta", "red", "white", "yellow",
-                "light-black", "light-blue", "light-cyan", "light-green",
-                "light-magenta", "light-red", "light-white", "light-yellow"
-        };
-
-        va_start(ap, fmt);
-        buf = minibuf_format(fmt, ap);
-        va_end(ap);
-
-        cp = new_completion(FALSE);
-        for (i = 0; i < sizeof valid / sizeof(char *); ++i)
-                alist_append(cp->completions, zstrdup(valid[i]));
-
-        retvalue = minibuf_read_forced(buf, "Invalid color name.", cp);
-        if (retvalue != -1) {
-                /* The completions may be sorted by the minibuf completion
-                   routines. */
-                for (i = 0; i < sizeof valid / sizeof (char *); ++i)
-                        if (!strcmp(alist_at(cp->completions, retvalue), valid[i])) {
-                                retvalue = i;
-                                break;
-                        }
-        }
-        free_completion(cp);
-        free(buf);
-
-        if (retvalue == -1)
-                return NULL;
-        return valid[retvalue];
 }
 
 /*

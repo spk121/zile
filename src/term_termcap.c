@@ -20,13 +20,17 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.9 2004/10/06 16:32:22 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.10 2004/10/08 13:30:45 rrt Exp $	*/
+
+/* TODO: signal handler resize_windows(); */
+/* TODO: Sort out use of select */
 
 #include "config.h"
 
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <termcap.h>
 #include <termios.h>
 #include <unistd.h>
@@ -38,7 +42,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "zterm.h"
 
 static Terminal thisterm = {
 	/* Unitialised screen pointer. */
@@ -48,56 +51,80 @@ static Terminal thisterm = {
 	-1, -1,
 };
 
+typedef struct {
+        int curx, cury;  /* cursor x and y. */
+        int *array;      /* contents of screen (8 low bits is
+                            character, rest is Zile font code. */
+} Screen;
+
+static Screen screen;
+
 Terminal *termp = &thisterm;
 
-Font ZILE_NORMAL;
-Font ZILE_REVERSE;
-Font ZILE_BOLD;
+int ZILE_COLS;
+int ZILE_LINES;
 
-Font C_FG_BLACK;
-Font C_FG_RED;
-Font C_FG_GREEN;
-Font C_FG_YELLOW;
-Font C_FG_BLUE;
-Font C_FG_MAGENTA;
-Font C_FG_CYAN;
-Font C_FG_WHITE;
-Font C_FG_WHITE_BG_BLUE;
-
-static char *cl_string, *cm_string, *ce_string;
-static char *so_string, *se_string;
+static char *cm_string;
+static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
 static int auto_wrap;
 static struct termios ostate, nstate;
 
 void term_move(int y, int x)
 {
-        tputs(tgoto(cm_string, x, y), 1, putchar);
+        screen.curx = x;
+        screen.cury = y;
 }
 
 void term_clrtoeol(void)
 {
-        tputs(ce_string, 1, putchar);
+        int i, x = screen.curx;
+        for (i = screen.curx; i < termp->width; i++)
+                term_addch(0);
+        screen.curx = x;
 }
 
 void term_refresh(void)
 {
-        /* termcap has no refresh function; all updates are immediate. */
+        int i, j;
+
+        tputs(tgoto(cm_string, 0, 0), 1, putchar);
+        
+        for (i = 0; i < termp->height; i++)
+                for (j = 0; j < termp->width; j++) {
+                        char c = screen.array[i * termp->width + j];
+                        putchar(c ? c : ' ');
+                }
+
+        tputs(tgoto(cm_string, screen.curx, screen.cury), 1, putchar);        
 }
 
 void term_clear(void)
 {
-        tputs(cl_string, 1, putchar);
+        int i;
+        term_move(0, 0);
+        for (i = 0; i < termp->width * termp->height; i++)
+                term_addch(0);
 }
 
 void term_addch(int c)
 {
-        putchar(c);
+        screen.array[screen.cury * termp->width + screen.curx] = c;
+        screen.curx++;
+        if (screen.curx == termp->width) {
+                if (screen.cury < termp->height - 1) {
+                        screen.curx = 0;
+                        screen.cury++;
+                } else
+                        screen.curx--;
+        }
 }
 
 void term_addnstr(const char *s, int len)
 {
-        printf("%.*s", len, s);
+        int i;
+        for (i = 0; i < len; i++)
+                term_addch(*s++);
 }
 
 void term_attrset(int attrs, ...)
@@ -105,24 +132,36 @@ void term_attrset(int attrs, ...)
 	int i;
 	va_list valist;
 	va_start(valist, attrs);
-	for (i = 0; i < attrs; i++)
-		printf(va_arg(valist, Font));
+	for (i = 0; i < attrs; i++);
+/* 		printf(va_arg(valist, Font)); */
 	va_end(valist);
 }
 
 int term_printw(const char *fmt, ...)
 {
+	char *buf;
         int res = 0;
-        va_list valist;
-        va_start(valist, fmt);
-        res = vprintf(fmt, valist);
-        va_end(valist);
+        va_list ap;
+        va_start(ap, fmt);
+	res = vasprintf(&buf, fmt, ap);
+        va_end(ap);
+        term_addnstr(buf, strlen(buf));
+        free(buf);
         return res;
 }
 
 void term_beep(void)
 {
         putchar('\a');
+}
+
+static void term_init_screen(void)
+{
+        if (screen.array)
+                free(screen.array);
+
+        screen.array = zmalloc(termp->width * termp->height * sizeof(int));
+        screen.curx = screen.cury = 0;
 }
 
 void term_init(void)
@@ -146,23 +185,24 @@ void term_init(void)
                 zile_exit(1);
         }
 
-	termp->width = tgetnum("co");
-	termp->height = tgetnum("li");
+	ZILE_COLS = termp->width = tgetnum("co");
+	ZILE_LINES = termp->height = tgetnum("li");
+        
+        term_init_screen();
+        termp->screen = &screen;
 
         /* Extract information we will use. */
-        cl_string = tgetstr("cl", &tcap);
         cm_string = tgetstr("cm", &tcap);
         auto_wrap = tgetflag("am");
-        ce_string = tgetstr("ce", &tcap);
         so_string = tgetstr("so", &tcap);
         se_string = tgetstr("se", &tcap);
-	C_FG_WHITE_BG_BLUE = ZILE_REVERSE = tgetstr("mr", &tcap);
-	ZILE_NORMAL = tgetstr("me", &tcap);
+	mr_string = tgetstr("mr", &tcap);
+	me_string = tgetstr("me", &tcap);
         kl_string = tgetstr("kl", &tcap);
         kr_string = tgetstr("ku", &tcap);
         ku_string = tgetstr("kr", &tcap);
         kd_string = tgetstr("kd", &tcap);
-        /* Use km, mm, mo for Meta key */
+        /* TODO: Use km, mm, mo for Meta key */
 
         /* Save terminal flags. */
         if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
@@ -197,12 +237,11 @@ void term_init(void)
 /*         } */
 }
 
-int term_open(void)
+void term_open(void)
 {
-	return TRUE;
 }
 
-int term_close(void)
+void term_close(void)
 {
 	/* Clear last line. */
 	term_move(ZILE_LINES - 1, 0);
@@ -212,15 +251,12 @@ int term_close(void)
 	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
 	termp->screen = NULL;
-        tcdrain (0);
-        fflush (stdout);
-        if (tcsetattr(0, TCSADRAIN, &ostate) < 0)
-        {
+        tcdrain(0);
+        fflush(stdout);
+        if (tcsetattr(0, TCSADRAIN, &ostate) < 0) {
                 fprintf(stderr, "Can't restore terminal flags\n");
                 zile_exit(1);
         }
-
-	return TRUE;
 }
 
 static int translate_key(char *s, int bytes)
@@ -297,7 +333,7 @@ static int translate_key(char *s, int bytes)
 
 static int xgetkey(int mode, int arg)
 {
-        int ret;
+        int ret = 0;
         size_t nbytes;
         fd_set rfds;
         char keys[16];          /* Array hopefully larger than the longest keycode sequence. */
@@ -345,7 +381,6 @@ int term_xgetkey(int mode, int arg)
 	if (ungetkey_p > ungetkey_buf)
 		return *--ungetkey_p;
 
-        /* TODO: signal handler resize_windows(); */
 	return xgetkey(mode, arg);
 }
 

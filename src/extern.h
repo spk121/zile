@@ -39,7 +39,6 @@ int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 void set_temporary_buffer(Buffer *bp);
 int calculate_buffer_size(Buffer *bp);
-
 int transient_mark_mode(void);
 void activate_mark(void);
 void deactivate_mark(void);
@@ -146,7 +145,6 @@ void minibuf_write(const char *fmt, ...);
 char *minibuf_read(const char *fmt, const char *value, ...);
 int minibuf_read_yesno(const char *fmt, ...);
 int minibuf_read_boolean(const char *fmt, ...);
-char *minibuf_read_color(const char *fmt, ...);
 char *minibuf_read_dir(const char *fmt, const char *value, ...);
 char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
 void minibuf_clear(void);
@@ -185,8 +183,8 @@ void free_search_history(void);
 
 /* term.c ----------------------------------------------------------------- */
 void term_init(void);
-int term_open(void);
-int term_close(void);
+void term_open(void);
+void term_close(void);
 void term_move(int y, int x);
 void term_clrtoeol(void);
 void term_refresh(void);
@@ -204,6 +202,9 @@ int term_ungetkey(int c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 void term_refresh_cached_variables(void);
+void resize_windows(void);
+void free_rotation_buffers(void);
+void show_splash_screen(const char *splash);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

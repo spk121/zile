@@ -54,17 +54,6 @@ backup-directory = "~/.backup"
 # otherwise it will insert spaces.
 expand-tabs = false
 
-# Display colors [default: true]
-# If your terminal supports colors, you should leave this enabled.
-colors = true
-
-# The color of the status line [default: white]
-# Available colors are:
-#     black, blue, cyan, green, magenta, red, white, yellow,
-#     light-black, light-blue, light-cyan, light-green, light-magenta,
-#     light-red, light-white, light-yellow
-status-line-color = white
-
 # Enable beep [default: true]
 # If enabled, a sound will be emitted on any error.
 beep = true

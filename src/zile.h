@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.31 2004/10/06 17:26:57 rrt Exp $        */
+/*      $Id: zile.h,v 1.32 2004/10/08 13:30:45 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -247,10 +247,25 @@ struct History {
 };
 
 struct Terminal {
-        void *screen; /* Really a SCREEN *, but we don't want
-                         ncurses-specific code or data here. */
+        void *screen; /* The real type of this pointer depends on the
+                         terminal back-end. */
         int width, height;
 };
+
+/* The actual number of lines and columns on the screen, which may
+   differ from the Terminal's settings after a SIGWINCH. */
+extern int ZILE_LINES, ZILE_COLS;
+
+extern Terminal *termp; /* The global Terminal. */
+
+/* Type of font attributes */
+typedef unsigned long Font;
+
+/* Zile font codes
+ * Designed to fit in an int, leaving room for a char underneath. */
+#define ZILE_NORMAL		0x000
+#define ZILE_REVERSE		0x100
+#define ZILE_BOLD		0x200
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
@@ -338,7 +353,5 @@ struct Terminal {
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
         F_ ## c_func(uniarg)
-
-#include "zterm.h" /* for Font type */
 
 #endif /* !ZILE_H */

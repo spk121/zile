@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.10 2004/09/20 14:22:07 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.11 2004/10/08 13:30:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,7 +34,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "zterm.h"
 
 static Terminal thisterm = {
 	/* Unitialised screen pointer */
@@ -46,19 +45,8 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-Font ZILE_NORMAL = 0;
-Font ZILE_REVERSE = A_REVERSE;
-Font ZILE_BOLD = A_BOLD;
-
-Font C_FG_BLACK;
-Font C_FG_RED;
-Font C_FG_GREEN;
-Font C_FG_YELLOW;
-Font C_FG_BLUE;
-Font C_FG_MAGENTA;
-Font C_FG_CYAN;
-Font C_FG_WHITE;
-Font C_FG_WHITE_BG_BLUE;
+int ZILE_COLS;
+int ZILE_LINES;
 
 void term_move(int y, int x)
 {
@@ -94,10 +82,22 @@ void term_attrset(int attrs, ...)
 {
 	int i;
 	unsigned long a = 0;
-	va_list valist;
-	va_start(valist, attrs);
-	for (i = 0; i < attrs; i++)
-		a |= va_arg(valist, Font);
+	va_list ap;
+	va_start(ap, attrs);
+	for (i = 0; i < attrs; i++) {
+                Font f = va_arg(ap, Font);
+                switch (f) {
+                case ZILE_NORMAL:
+                        a = 0;
+                        break;
+                case ZILE_REVERSE:
+                        a |= A_REVERSE;
+                        break;
+                case ZILE_BOLD:
+                        a |= A_BOLD;
+                        break;
+                }
+        }
 	va_end(valist);
         attrset(a);
 }
@@ -119,67 +119,25 @@ void term_beep(void)
 
 void term_init(void)
 {
-        C_FG_BLACK = COLOR_PAIR(ZILE_COLOR_BLACK);
-        C_FG_RED = COLOR_PAIR(ZILE_COLOR_RED);
-        C_FG_GREEN = COLOR_PAIR(ZILE_COLOR_GREEN);
-        C_FG_YELLOW = COLOR_PAIR(ZILE_COLOR_YELLOW);
-        C_FG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUE);
-        C_FG_MAGENTA = COLOR_PAIR(ZILE_COLOR_MAGENTA);
-        C_FG_CYAN = COLOR_PAIR(ZILE_COLOR_CYAN);
-        C_FG_WHITE = COLOR_PAIR(ZILE_COLOR_WHITE);
-        C_FG_WHITE_BG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUEBG);
-
         termp->screen = newterm(NULL, stdout, stdin);
 	set_term(termp->screen);
 
+        ZILE_LINES = LINES;
+        ZILE_COLS = COLS;
 	termp->width = ZILE_COLS;
 	termp->height = ZILE_LINES;
 }
 
-static void init_colors(void)
+void term_open(void)
 {
-	int fg = COLOR_WHITE;
-	int bg = COLOR_BLACK;
-
-#ifdef NCURSES_VERSION
-	if (use_default_colors() == OK) {
-		fg = -1;
-		bg = -1;
-	}
-#endif
-
-	/* "WHITE" is used as synonym of "DEFAULT". */
-	init_pair(ZILE_COLOR_WHITE, fg, bg);
-
-	init_pair(ZILE_COLOR_BLACK,   COLOR_BLACK,   bg);
-	init_pair(ZILE_COLOR_RED,     COLOR_RED,     bg);
-	init_pair(ZILE_COLOR_GREEN,   COLOR_GREEN,   bg);
-	init_pair(ZILE_COLOR_YELLOW,  COLOR_YELLOW,  bg);
-	init_pair(ZILE_COLOR_BLUE,    COLOR_BLUE,    bg);
-	init_pair(ZILE_COLOR_MAGENTA, COLOR_MAGENTA, bg);
-	init_pair(ZILE_COLOR_CYAN,    COLOR_CYAN,    bg);
-
-	init_pair(ZILE_COLOR_BLUEBG,  COLOR_CYAN,    COLOR_BLUE);
-}
-
-int term_open(void)
-{
-	int colors = lookup_bool_variable("colors") && has_colors();
-
-	if (colors)
-		start_color();
 	noecho();
 	nonl();
 	raw();
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
-	if (colors)
-		init_colors();
-
-	return TRUE;
 }
 
-int term_close(void)
+void term_close(void)
 {
 	/* Clear last line.  */
 	term_move(ZILE_LINES - 1, 0);
@@ -191,8 +149,6 @@ int term_close(void)
 	endwin();
 	delscreen(termp->screen);
 	termp->screen = NULL;
-
-	return TRUE;
 }
 
 static int translate_key(int c)
@@ -290,6 +246,8 @@ int term_getkey(void)
 		c = getch();
 		if (c != KEY_RESIZE)
 			break;
+                ZILE_COLS = COLS;
+                ZILE_LINES = LINES;
 		resize_windows();
 	}
 #else
@@ -343,6 +301,8 @@ int term_xgetkey(int mode, int arg)
 		c = xgetkey(mode, arg);
 		if (c != KEY_RESIZE)
 			break;
+                ZILE_COLS = COLS;
+                ZILE_LINES = LINES;
 		resize_windows();
 	}
 #else

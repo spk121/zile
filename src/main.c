@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.34 2004/10/05 21:00:56 rrt Exp $	*/
+/*	$Id: main.c,v 1.35 2004/10/08 13:30:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -46,7 +46,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "zterm.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX	_POSIX_PATH_MAX
@@ -107,11 +106,12 @@ static void loop(void)
 #if DEBUG
 		check_list(cur_wp);
 #endif
+                term_redisplay();
+                term_refresh();
+
 		minibuf_clear();
 
-                term_redisplay();
-
-		thisflag = 0;
+                thisflag = 0;
 		if (lastflag & FLAG_DEFINING_MACRO)
 			thisflag |= FLAG_DEFINING_MACRO;
 
@@ -161,8 +161,8 @@ Type %C-g% at any time to cancel the current operation.\n\
 If there is no META, EDIT or ALT key, instead press and release\n\
 the ESC key and then type %x%.\n\
 Combinations like %C-h t% mean first do %C-h%, then press %t%.\n\
-$For tips and answers to frequently asked questions, see the Zile FAQ.$\n\
-$(Type C-h F [a capital F!].)$\
+For tips and answers to frequently asked questions, see the Zile FAQ.\n\
+(Type C-h F [a capital F!].)\
 ";
 
 static char about_minibuf_str[] =

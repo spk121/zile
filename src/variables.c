@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.16 2004/05/29 16:38:43 rrt Exp $	*/
+/*	$Id: variables.c,v 1.17 2004/10/08 13:30:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,7 +39,7 @@
  */
 static struct var_entry {
 	char *var;	/* Variable name. */
-	char *fmt;	/* Variable format (boolean, color, etc.). */
+	char *fmt;	/* Variable format (boolean, etc.). */
 	char *val;	/* Default value. */
 } def_vars[] = {
 #define X(zile_var, fmt, val, doc) { zile_var, fmt, val },
@@ -186,15 +186,12 @@ Set a variable value to the user specified value.
 	else
 		astr_cpy_cstr(as, get_variable(var));
 	fmt = get_variable_format(var);
-	if (!strcmp(fmt, "c")) {
-		if ((val = minibuf_read_color("Set %s to value: ", var)) == NULL)
-			return cancel();
-	} else if (!strcmp(fmt, "b")) {
+	if (!strcmp(fmt, "b")) {
 		int i;
 		if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
 			return cancel();
 		val = (i == TRUE) ? "true" : "false";
-	} else { /* Non color, boolean or such fixed value variable. */
+	} else { /* Non boolean or such fixed value variable. */
 		if ((val = minibuf_read("Set %s to value: ", astr_cstr(as), var)) == NULL)
 			return cancel();
 	}

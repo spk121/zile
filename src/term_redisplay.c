@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.13 2004/10/06 16:32:22 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.14 2004/10/08 13:30:45 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -34,67 +34,16 @@
 #include "zile.h"
 #include "config.h"
 #include "extern.h"
-#include "zterm.h"
 
 /*
  * The cached variables.
  */
-static Font status_line_color;
 static char *displayable_characters;
 
 static int is_displayable[256];
 static int cur_tab_width;
 static int point_start_column;
 static int point_screen_column;
-
-static Font strtochtype(char *s)
-{
-	switch (*s) {
-	case 'b':
-		if (!strcmp(s, "black"))
-			return C_FG_BLACK;
-		else if (!strcmp(s, "blue"))
-			return C_FG_BLUE;
-		return C_FG_WHITE;
-	case 'c':
-		if (!strcmp(s, "cyan"))
-			return C_FG_CYAN;
-		return C_FG_WHITE;
-	case 'g':
-		if (!strcmp(s, "green"))
-			return C_FG_GREEN;
-		return C_FG_WHITE;
-	case 'l':
-		if (!strncmp(s, "light-", 6))
-			return strtochtype(s + 6); /* |ZILE_BOLD; */
-		return C_FG_WHITE;
-	case 'm':
-		if (!strcmp(s, "magenta"))
-			return C_FG_MAGENTA;
-		return C_FG_WHITE;
-	case 'r':
-		if (!strcmp(s, "red"))
-			return C_FG_RED;
-		return C_FG_WHITE;
-	case 'y':
-		if (!strcmp(s, "yellow"))
-			return C_FG_YELLOW;
-		return C_FG_WHITE;
-	}
-
-	return C_FG_WHITE;
-}
-
-/*
- * Get the font color value from the user specified variables.
- */
-static Font get_font(char *font)
-{
-	char *s;
-	if ((s = get_variable(font)) == NULL)
-		return C_FG_WHITE;
-	return strtochtype(s);
-}
 
 /*
  * Parse the `displayable-characters' variable and set accordingly the
@@ -195,7 +144,6 @@ void term_refresh_cached_variables(void)
 	/*
 	 * Refresh the font cache.
 	 */
-	status_line_color = get_font("status-line-color");
 	displayable_characters = get_variable("displayable-characters");
 	parse_displayable_chars(displayable_characters);
 }
@@ -300,7 +248,7 @@ static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
 	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
 			if (in_region(lineno, i, r))
-				outch(' ', C_FG_WHITE_BG_BLUE, &x);
+				outch(' ', ZILE_REVERSE, &x);
 			else
 				x++;
 		}
@@ -315,9 +263,9 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 	term_move(line, 0);
 	for (x = 0, j = startcol; j < astr_len(lp->text) && x < wp->ewidth; ++j) {
 		if (highlight && in_region(lineno, j, r))
-			outch(*astr_char(lp->text, j), C_FG_WHITE_BG_BLUE, &x);
+			outch(*astr_char(lp->text, j), ZILE_REVERSE, &x);
 		else
-			outch(*astr_char(lp->text, j), C_FG_WHITE, &x);
+			outch(*astr_char(lp->text, j), ZILE_NORMAL, &x);
 	}
 
 	draw_end_of_line(line, wp, lineno, r, highlight, x, j);
@@ -470,7 +418,7 @@ static void draw_status_line(int line, Window *wp)
 	char *buf;
 	Point pt = window_pt(wp);
 
-	term_attrset(2, ZILE_REVERSE, status_line_color);
+	term_attrset(1, ZILE_REVERSE);
 
 	term_move(line, 0);
 	for (i = 0; i < wp->ewidth; ++i)
@@ -533,7 +481,8 @@ void term_redisplay(void)
                 term_addch('$');
         }
 #endif
-	term_move(cur_topline + cur_wp->topdelta, point_screen_column);
+
+        term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
 void term_full_redisplay(void)
@@ -586,7 +535,7 @@ void resize_windows(void)
 
 void show_splash_screen(const char *splash)
 {
-	int i, bold = 0, red = 0;
+	int i, bold = 0;
 	const char *p;
 
 	for (i = 0; i < ZILE_LINES - 2; ++i) {
@@ -601,12 +550,6 @@ void show_splash_screen(const char *splash)
 			if (!bold)
 				term_attrset(1, ZILE_BOLD);
 			bold ^= 1;
-			break;
-		case '$':
-		     	if (!red) {
-				term_attrset(2, ZILE_BOLD, C_FG_RED);
-			}
-			red ^= 1;
 			break;
 		case  '\n':
 			term_move(++i, 0);

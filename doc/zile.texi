@@ -99,8 +99,6 @@ The killing, yanking and register features of Emacs are available
 under Zile.
 @item Minibuffer completion.
 This works for @kbd{M-x} commands and for file names.
-@item Colors.
-Zile makes use of the color capatibilities of the terminal if available.
 @item Auto fill (word wrap).
 Zile automatically breaks the lines when they become too wide (if the
 @i{Auto Fill Mode} is enabled).
@@ -170,7 +168,6 @@ Some examples:
 @example
 # This is a comment.
 expand-tabs = false
-colors = true
 tab-width = 8    # This is another comment.
 @end example
 
@@ -941,12 +938,6 @@ Default value is @samp{false}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{true}.
-@item colors
-Enable colors. If your terminal supports colors, you should leave this enabled.
-Please note that changing this variable at run-time has no effect; you
-need instead to modify your @file{~/.zilerc} configuration file and
-restart Zile.
-Default value is @samp{true}.
 @item displayable-characters
 Specify the set of characters that can be shown as-is on the screen.
 The characters not included in this set are shown as octal
@@ -995,9 +986,6 @@ Default value is @samp{false}.
 @item standard-indent
 Default number of columns for margin-changing functions to
 indent. Default values is @samp{4}.
-@item status-line-color
-The color of the status line.
-Default value is @samp{white}.
 @item tab-width
 The default tabulation width.
 Default value is @samp{8}.

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.42 2004/10/06 16:32:19 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.43 2004/10/08 13:30:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -620,37 +620,37 @@ static int transpose_subr(Function f)
 
 	p0 = point_marker();
 
-	/* For transpose-chars.  */
+	/* For transpose-chars. */
 	if (f == F_forward_char) {
 		if (eolp())
 			f(-1);
 	}
-	/* For transpose-lines.  */
+	/* For transpose-lines. */
 	else if (f == F_forward_line) {
-		/* If we are in first line, go to next line.  */
+		/* If we are in first line, go to next line. */
 		if (cur_bp->pt.p->prev == cur_bp->limitp) {
 			f(1);
 		}
 	}
 
-	/* Backward.  */
+	/* Backward. */
 	if (!f(-1)) {
-		minibuf_error("Beginning of buffer");
+                minibuf_error("Beginning of buffer");
 		free_marker(p0);
 		return FALSE;
 	}
 
-	/* Save mark.  */
+	/* Save mark. */
 	push_mark();
 
-	/* Mark the beginning of first string.  */
+	/* Mark the beginning of first string. */
 	set_mark();
 	p1 = point_marker();
 
 	/* Check end of buffer (only to check if we could make the
-	   operation).  */
+	   operation). */
 	if (!f(2)) {
-		/* For transpose-lines.  */
+		/* For transpose-lines. */
 		if (f == F_forward_line) {
 			if (!seq_started) {
 				seq_started = TRUE;
@@ -660,10 +660,10 @@ static int transpose_subr(Function f)
 			/* When last line has characters. */
 			if (!is_empty_line())
 				/* We must insert the '\n' in the end
-				   of line (not in the beginning) */
+				   of line (not in the beginning). */
 				FUNCALL(end_of_line);
 
-			/* Insert a newline */
+			/* Insert a newline. */
 			FUNCALL(newline);
 		}
 		else {
@@ -679,10 +679,10 @@ static int transpose_subr(Function f)
 
 	goto_point(p1->pt);
 
-	/* Forward.  */
+	/* Forward. */
 	f(1);
 
-	/* Save and delete 1st marked region.  */
+	/* Save and delete 1st marked region. */
 	s1 = astr_new();
 	astr_append_region(s1);
 
@@ -693,22 +693,22 @@ static int transpose_subr(Function f)
 
 	FUNCALL(delete_region);
 
-	/* Forward.  */
+	/* Forward. */
 	f(1);
 
-	/* For transpose-lines.  */
+	/* For transpose-lines. */
 	if (f == F_forward_line) {
 		p2 = point_marker();
 	}
 	else {
-		/* Mark the end of second string.  */
+		/* Mark the end of second string. */
 		set_mark();
 
-		/* Backward.  */
+		/* Backward. */
 		f(-1);
 		p2 = point_marker();
 
-		/* Save and delete the marked region.  */
+		/* Save and delete the marked region. */
 		s2 = astr_new();
 		astr_append_region(s2);
 		FUNCALL(delete_region);
@@ -716,14 +716,14 @@ static int transpose_subr(Function f)
 
 	set_marker_insertion_type(p2, TRUE);
 
-	/* Insert the second string in the first position.  */
+	/* Insert the second string in the first position. */
 	if (s2) {
 		goto_point(p1->pt);
 		if (astr_len(s2) > 0)
 			insert_string(astr_cstr(s2));
 	}
 
-	/* Insert the first string in the second position.  */
+	/* Insert the first string in the second position. */
 	if (s1) {
 		goto_point(p2->pt);
 		if (astr_len(s1) > 0)
@@ -733,16 +733,16 @@ static int transpose_subr(Function f)
 	if (seq_started)
 		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-	/* Delete temporary strings.  */
+	/* Delete temporary strings. */
 	if (s1) astr_delete(s1);
 	if (s2) astr_delete(s2);
 
-	/* Restore mark.  */
+	/* Restore mark. */
 	pop_mark();
 
 	deactivate_mark();
 
-	/* Free markers.  */
+	/* Free markers. */
 	free_marker(p0);
 	free_marker(p1);
 	free_marker(p2);
@@ -752,7 +752,9 @@ static int transpose_subr(Function f)
 DEFUN("transpose-chars", transpose_chars)
 /*+
 Interchange characters around point, moving forward one character.
-If at end of line, the previous two chars are exchanged.
+With prefix arg ARG, effect is to take character before point
+and drag it forward past ARG other characters.  If no argument and at
+end of line, the previous two chars are exchanged. 
 +*/
 {
 	if (warn_if_readonly_buffer())
@@ -768,6 +770,9 @@ If at end of line, the previous two chars are exchanged.
 DEFUN("transpose-words", transpose_words)
 /*+
 Interchange words around point, leaving point at end of them.
+With prefix arg ARG, effect is to take word before or around point
+and drag it forward past ARG other words. If ARG is zero, the words
+around or after point and around or after mark are interchanged.
 +*/
 {
 	if (warn_if_readonly_buffer())

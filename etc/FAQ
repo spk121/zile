@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/04/05 17:30:35 $
+		   Last updated: $Date: 2004/10/08 13:30:45 $
 
 ------------------------------------------------------------------------------
 
@@ -23,14 +23,13 @@ INDEX
    2.3. Zile is hung.
    2.4. How to undo the previous command?
    2.5. What does `C-something' or `M-something' mean?
-   2.6. The colors are not displayed on my screen.
-   2.7. What are the available variables that can be modified?
-   2.8. How to display non-English characters?
-   2.9. Zile doesn't handle filenames with non-English characters.
-   2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
-   2.11. How to enable Auto Fill Mode at startup?
-   2.12. How to change the binding of a function?
-   2.13. The Zile screen is not resized in a X Window terminal.
+   2.6. What are the available variables that can be modified?
+   2.7. How to display non-English characters?
+   2.8. Zile doesn't handle filenames with non-English characters.
+   2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   2.10. How to enable Auto Fill Mode at startup?
+   2.11. How to change the binding of a function?
+   2.12. The Zile screen is not resized in a X Window terminal.
 
 3. Compiling
    3.1. Can I compile Zile with the old Berkeley curses?
@@ -139,16 +138,7 @@ INDEX
 	     press and release the ESC key and then type <chr>. We
 	     write <ESC> for the ESC key.
 
-2.6. The colors are not displayed on my screen.
-
-    Enable the `colors' variable into your `~/.zilerc' file. If it is
-    already enabled, check your `TERM' environment variable and the
-    ncurses manual.
-
-    If you are using Zile under xterm, you might need to set the
-    `TERM' variable to `xterm-color' or something like.
-
-2.7. What are the available variables that can be modified?
+2.6. What are the available variables that can be modified?
 
     Check out the `zilerc.sample' file (type `C-h s') for a full list
     of modifiable variables.
@@ -156,13 +146,13 @@ INDEX
     You might also see the list of defined variables with the command
     `list-variables' (or the key sequence `C-h l v').
 
-2.8. How to display non-English characters?
+2.7. How to display non-English characters?
 
     Put the following line in your `~/.zilerc' file:
 
     	displayable-characters = "0x20-0x7e,0xa1-0xff"
 
-2.9. Zile doesn't handle filenames with non-English characters.
+2.8. Zile doesn't handle filenames with non-English characters.
 
     Try to set the LANG environment variable according to your locale,
     before running Zile. For example, for a French environment, try:
@@ -171,7 +161,7 @@ INDEX
 
 	setenv LANG fr_FR	(with a C-like shell).
 
-2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
     You might try adding the following line to your `~/.zilerc' file:
 
@@ -179,17 +169,17 @@ INDEX
 
     and using the alternative key sequences (`M-h' instead of `C-h').
 
-2.11. How to enable Auto Fill Mode at startup?
+2.10. How to enable Auto Fill Mode at startup?
 
     Add the following line to your `~/.zilerc' file:
 
 	auto-fill-mode = true
 
-2.12. How to change the binding of a function?
+2.11. How to change the binding of a function?
 
     Use global-set-key.
 
-2.13. The Zile screen is not resized in a X Window terminal.
+2.12. The Zile screen is not resized in a X Window terminal.
 
     There are two possibilities:
 

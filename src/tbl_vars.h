@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.13 2004/10/05 18:51:12 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.14 2004/10/08 13:30:45 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -9,7 +9,6 @@
  * The first column specifies the variable name.
  * The second column specifies the variable type.
  *   - "b" for boolean ("true" or "false");
- *   - "c" for color ("black", "white", "yellow", etc.);
  *   - "" (empty string) for non-fixed format.
  * The third column specifies the default value.
  * The forth column specifies the variable documentation.
@@ -39,8 +38,6 @@ the directory must exist and must be specified in the\n\
 variable `backup-directory'.")
 X("beep",				"b", "true", "\
 If enabled, a sound will be emitted on any error.")
-X("colors",				"b", "true", "\
-If your terminal supports colors, you should leave this enabled.")
 X("displayable-characters",		"", "0x20-0x7e", "\
 Specify the set of characters that can be shown as-is on the screen.\n\
 The characters not included in this set are shown as octal\n\
@@ -76,8 +73,6 @@ X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\
 Default number of columns for margin-changing functions to indent.")
-X("status-line-color",			"c", "white", "\
-The color of the status line.")
 X("tab-width",				"", "8", "\
 The default tabulation width.")
 X("auto-fill-mode",			"b", "false", "\

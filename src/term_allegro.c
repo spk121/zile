@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.2 2004/09/20 14:22:07 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.3 2004/10/08 13:30:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -33,11 +33,15 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "zterm.h"
 
-/* font width and height */
+/* Font width and height */
 #define FW		(8)	/* font_length (font, ...) */
 #define FH		(8)	/* font_height (font) */
+
+/* Font codes */
+#define ZA_NORMAL		0x0000
+#define ZA_REVERSE		0x1000
+#define ZA_BOLD			0x2000
 
 static Terminal thisterm = {
 	/* Unitialised screen pointer */
@@ -49,7 +53,7 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-int al_LINES, al_COLS;
+int ZILE_LINES, ZILE_COLS;
 
 /* current position and color */
 static int cur_x = 0, cur_y = 0;
@@ -64,51 +68,6 @@ static void _get_color(int c, int *_fg, int *_bg)
 
 	fg = makecol(170, 170, 170);
 	bg = makecol(0, 0, 0);
-
-	switch (c & 0x0f00) {
-	case C_FG_BLACK:
-		fg = makecol(0, 0, 0);
-		break;
-	case C_FG_RED:
-		fg = (c & ZILE_BOLD) ?
-			makecol(255, 85, 85):
-			makecol(170, 0, 0);
-		break;
-	case C_FG_GREEN:
-		fg = (c & ZILE_BOLD) ?
-			makecol(85, 255, 85):
-			makecol(0, 170, 0);
-		break;
-	case C_FG_YELLOW:
-		/* XXX */
-/* 		fg = (c & ZILE_BOLD) ? */
-/* 			makecol(255, 255, 85): */
-/* 			makecol(170, 85, 0); */
-		fg = makecol(255, 255, 85);
-		break;
-	case C_FG_BLUE:
-		fg = makecol(0, 0, 170);
-		break;
-	case C_FG_MAGENTA:
-		fg = (c & ZILE_BOLD) ?
-			makecol(255, 85, 255):
-			makecol(170, 0, 170);
-		break;
-	case C_FG_CYAN:
-		fg = (c & ZILE_BOLD) ?
-			makecol(85, 255, 255):
-			makecol(0, 170, 170);
-		break;
-	case C_FG_WHITE:
-		fg = (c & ZILE_BOLD) ?
-			makecol(255, 255, 255):
-			makecol(170, 170, 170);
-		break;
-	case C_FG_WHITE_BG_BLUE:
-		fg = makecol(170, 170, 170);
-		bg = makecol(0, 0, 170);
-		break;
-	}
 
 	if (c & ZILE_REVERSE) {
 		int aux = fg;
@@ -202,23 +161,23 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-	if (cur_x >= 0 && cur_x < ZILE_COLS &&
+        if (cur_x >= 0 && cur_x < ZILE_COLS &&
 	    cur_y >= 0 && cur_y < ZILE_LINES) {
-	  int color = 0;
+                int color = 0;
 
-	  if (c & 0x0f00)
-	    color |= c & 0x0f00;
-	  else if (cur_color & 0x0f00)
-	    color |= cur_color & 0x0f00;
-	  else
-	    color |= C_FG_WHITE;
+                if (c & 0x0f00)
+                        color |= c & 0x0f00;
+                else if (cur_color & 0x0f00)
+                        color |= cur_color & 0x0f00;
+                else
+                        color |= C_FG_WHITE;
+                
+                if (c & 0xf000)
+                        color |= c & 0xf000;
+                else
+                        color |= cur_color & 0xf000;
 
-	  if (c & 0xf000)
-	    color |= c & 0xf000;
-	  else
-	    color |= cur_color & 0xf000;
-
-	  new_scr[cur_y*ZILE_COLS+cur_x] = (c & 0x00ff) | color;
+                new_scr[cur_y*ZILE_COLS+cur_x] = (c & 0x00ff) | color;
 	}
 	cur_x++;
 }
@@ -278,8 +237,8 @@ void term_init(void)
 	LOCK_FUNCTION(inc_cur_time);
 	install_int_ex(inc_cur_time, BPS_TO_TIMER(1000));
 
-	al_COLS = SCREEN_W/FW;
-	al_LINES = SCREEN_H/FH;
+	ZILE_COLS = SCREEN_W/FW;
+	ZILE_LINES = SCREEN_H/FH;
 
         termp->screen = screen;
 	termp->width = ZILE_COLS;
@@ -289,38 +248,26 @@ void term_init(void)
 	new_scr = calloc(1, sizeof(unsigned short)*ZILE_COLS*ZILE_LINES);
 }
 
-static void init_colors(void)
-{
-	/* XXX */
-}
-
 int term_open(void)
 {
-	int colors = lookup_bool_variable("colors");
-
-	if (colors)
-		init_colors();
-
 	return TRUE;
 }
 
-int term_close(void)
+void term_close(void)
 {
-	/* Clear last line.  */
+	/* Clear last line. */
 	term_move(ZILE_LINES - 1, 0);
 	term_clrtoeol();
 	term_refresh();
 
-	/* Free memory and finish with ncurses.  */
+	/* Free memory and finish with allegro. */
 	free_rotation_buffers();
 	termp->screen = NULL;
-	free (cur_scr);
-	free (new_scr);
+	free(cur_scr);
+	free(new_scr);
 
 	set_gfx_mode (GFX_TEXT, 0, 0, 0, 0);
 	allegro_exit ();
-
-	return TRUE;
 }
 
 static int translate_key(int c)
