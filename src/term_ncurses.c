@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.7 2004/06/30 22:52:41 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.8 2004/07/11 00:29:37 rrt Exp $	*/
 
 #include "config.h"
 
@@ -57,11 +57,6 @@ Font C_FG_MAGENTA;
 Font C_FG_CYAN;
 Font C_FG_WHITE;
 Font C_FG_WHITE_BG_BLUE;
-
-void term_getyx(int *y, int *x)
-{
-        getyx(stdscr, *y, *x);
-}
 
 void term_move(int y, int x)
 {

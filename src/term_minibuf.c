@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.7 2004/07/10 23:52:45 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.8 2004/07/11 00:29:37 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,22 +34,10 @@
 #include "extern.h"
 #include "zterm.h"
 
-void term_minibuf_clear(void)
-{
-	int y, x;
-
-        term_getyx(&y, &x);
-	term_move(ZILE_LINES - 1, 0);
-	term_clrtoeol();
-	term_move(y, x);
-	term_refresh();
-}
-
+/* Write minibuf prompt, assuming cursor starts at column 0. */
 static void xminibuf_write(const char *s)
 {
-	int y, x;
-
-	term_getyx(&y, &x);
+	int x = 0;
 
 	for (; *s != '\0' && x < ZILE_COLS; s++) {
 		term_addch(*(unsigned char *)s);
@@ -59,17 +47,9 @@ static void xminibuf_write(const char *s)
 
 void term_minibuf_write(const char *s)
 {
-	int y, x;
-
-	/* Save the current cursor position. */
-	term_getyx(&y, &x);
-
 	term_move(ZILE_LINES - 1, 0);
 	xminibuf_write(s);
 	term_clrtoeol();
-
-	/* Restore the previous cursor position. */
-	term_move(y, x);
 }
 
 static void draw_minibuf_read(const char *prompt, const char *value, int prompt_len,
@@ -350,7 +330,7 @@ char *term_minibuf_read(const char *prompt, const char *value,
 	Window *wp, *old_wp = cur_wp;
 	char **p = rotation_buffers, *s;
 
-	/* Prepare the history.  */
+	/* Prepare the history. */
 	if (hp) prepare_history(hp);
 
 	/* Rotate text buffer. */

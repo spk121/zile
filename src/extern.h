@@ -142,7 +142,6 @@ int marker_insertion_type(Marker *marker);
 /* minibuf.c -------------------------------------------------------------- */
 char *minibuf_format(const char *fmt, va_list ap);
 void free_minibuf(void);
-void minibuf_clear(void);
 void minibuf_error(const char *fmt, ...);
 void minibuf_write(const char *fmt, ...);
 char *minibuf_read(const char *fmt, const char *value, ...);
@@ -188,7 +187,6 @@ void free_search_history(void);
 void term_init(void);
 int term_open(void);
 int term_close(void);
-void term_getyx(int *y, int *x);
 void term_move(int y, int x);
 void term_clrtoeol(void);
 void term_refresh(void);

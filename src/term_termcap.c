@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.3 2004/07/10 23:52:55 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.4 2004/07/11 00:29:37 rrt Exp $	*/
 
 #include "config.h"
 
@@ -69,10 +69,6 @@ static char PC;   /* For tputs. */
 static char *BC;  /* For tgoto. */
 static char *UP;
 
-void term_getyx(int *y, int *x)
-{
-}
-
 void term_move(int y, int x)
 {
         tputs(tgoto(cm_string, x, y), 1, putchar);
@@ -100,7 +96,7 @@ void term_addch(int c)
 
 void term_addnstr(const char *s, int len)
 {
-        printf("%*s", len, s);
+        printf("%.*s", len, s);
 }
 
 void term_attrset(Font f)

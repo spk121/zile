@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.33 2004/05/20 22:34:50 rrt Exp $        */
+/*      $Id: file.c,v 1.34 2004/07/11 00:29:37 rrt Exp $        */
 
 #include "config.h"
 
@@ -479,8 +479,7 @@ creating one if none already exists.
 
         buf = astr_new();
         get_current_dir(buf, TRUE);
-        if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf)))
-            == NULL) {
+        if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL) {
                 astr_delete(buf);
                 return cancel();
         }
