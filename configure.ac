@@ -58,6 +58,31 @@ AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd strerror strstr)
 
 dnl ==================================================================
+dnl Check for GNU Regex library
+dnl ==================================================================
+
+AC_MSG_CHECKING([for GNU regex.h])
+AC_TRY_COMPILE([
+#include <sys/types.h>
+#include <regex.h>
+], [
+struct re_pattern_buffer pattern;
+struct re_registers search_regs;
+re_set_syntax(RE_SYNTAX_EMACS);
+re_compile_pattern(".*", 2, &pattern);
+re_search(&pattern, "test", 4, 0, 4, &search_regs);
+], have_regex_h=true, have_regex_h=false)
+
+if test x$have_regex_h = xtrue ; then
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(HAVE_REGEX_H, 1, [Define this to use GNU regex.h.])
+else
+	AC_MSG_RESULT(no)
+fi
+
+AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
+
+dnl ==================================================================
 dnl Debugging
 dnl ==================================================================
 
@@ -247,31 +272,6 @@ enable_lua=false
 AC_MSG_RESULT(no)
 ])
 AM_CONDITIONAL(ENABLE_LUA, test x$enable_lua = xtrue)
-
-dnl ==================================================================
-dnl Check for GNU Regex library
-dnl ==================================================================
-
-AC_MSG_CHECKING([for GNU regex.h])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <regex.h>
-], [
-struct re_pattern_buffer pattern;
-struct re_registers search_regs;
-re_set_syntax(RE_SYNTAX_EMACS);
-re_compile_pattern(".*", 2, &pattern);
-re_search(&pattern, "test", 4, 0, 4, &search_regs);
-], have_regex_h=true, have_regex_h=false)
-
-if test x$have_regex_h = xtrue ; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_REGEX_H, 1, [Define this to use GNU regex.h.])
-else
-	AC_MSG_RESULT(no)
-fi
-
-AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
 
 dnl ==================================================================
 dnl Extra definitions for config.h
