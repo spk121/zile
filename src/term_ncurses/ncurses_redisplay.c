@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.14 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.15 2004/02/14 10:25:02 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -30,6 +30,8 @@
  * This redisplay engine is simple since ncurses does all the work of
  * finding what is changed on the screen and updating when is needed.
  */
+
+#define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
 #include "config.h"
 
@@ -371,7 +373,7 @@ static void draw_end_of_line(int line, Window *wp, Line *lp,
 			     int x, int i)
 {
 	if (x >= COLS) {
-		mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
+		mvaddch(line, COLS-1, '$');
 	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
 			if (in_region(wp, lp, lineno, i, r))
@@ -551,9 +553,6 @@ static char *my_strnchr(const char *text, int size, int chr)
 /*
  * Draw a line on the screen with font lock color.
  * Shell Mode.
- *
- * Identifiers hightlighting contributed by
- * David A. Capello <dacap@users.sourceforge.net>
  */
 static void draw_line_shell(int line, int startcol, Window *wp, Line *lp,
 			    int lineno, Region *r, int highlight,
@@ -674,7 +673,7 @@ static void draw_line_mail(int line, int startcol, Window *wp, Line *lp,
 			OUTCH(lp->text[i], font_other);
 	}
 	if (x >= COLS)
-		mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
+		mvaddch(line, COLS-1, '$');
 }
 #endif /* ENABLE_MAIL_MODE */
 
@@ -733,10 +732,14 @@ static void draw_window(int topline, Window *wp)
 		/* If at the end of the buffer, don't write any text. */
 		if (lp == wp->bp->limitp)
 			continue;
+#ifdef ENABLE_FULL_HSCROLL
+		startcol = point_start_column;
+#else
 		if (lp == pt.p)
 			startcol = point_start_column;
 		else
 			startcol = 0;
+#endif
 #if ENABLE_NONTEXT_MODES
 		if (wp->bp->flags & BFLAG_FONTLOCK && lp->anchors != NULL) {
 			switch (wp->bp->mode) {
@@ -788,7 +791,10 @@ static void draw_window(int topline, Window *wp)
 			getyx(stdscr, y, x);
 			addchnstr(eob_str, COLS-x > 5 ? 5 : COLS-x);
 		}
-
+#ifdef ENABLE_FULL_HSCROLL
+		if (point_start_column > 0)
+			mvaddch(i, 0, '$');
+#endif
 		lp = lp->next;
 	}
 }
@@ -976,8 +982,10 @@ static void do_redisplay(void)
 		topline += wp->fheight;
 	}
 
+#ifndef ENABLE_FULL_HSCROLL
 	if (point_start_column > 0)
-		mvaddch(cur_topline + cur_wp->topdelta, 0, '<' | C_FG_GREEN | A_BOLD);
+		mvaddch(cur_topline + cur_wp->topdelta, 0, '$');
+#endif
 	move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
