@@ -1,9 +1,15 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.1 2004/01/23 01:46:12 dacap Exp $
+## $Id: Makefile.am,v 1.2 2004/02/14 22:19:02 ssigala Exp $
 
 noinst_MANS = alist.3 astr.3 htable.3
 
-EXTRA_DIST = alist.3 astr.3 htable.3
+EXTRA_DIST = alist.3 astr.3 htable.3 regex.c regex.h
+
+if HAVE_REGEX_H
+regex =
+else
+regex = regex.o
+endif
 
 noinst_LIBRARIES = libzile.a
 libzile_a_SOURCES =				\
@@ -22,3 +28,6 @@ libzile_a_SOURCES =				\
 	xmalloc.c				\
 	xrealloc.c				\
 	xstrdup.c
+
+libzile_a_LIBADD =				\
+	$(regex)

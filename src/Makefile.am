@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.5 2004/02/08 04:39:26 dacap Exp $
+## $Id: Makefile.am,v 1.6 2004/02/14 22:19:03 ssigala Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -18,12 +18,6 @@ endif
 
 if ENABLE_JAVA_MODE
 fontlock_java = fontlock_java.o
-endif
-
-if HAVE_REGEX_H
-regex =
-else
-regex = regex.o
 endif
 
 bin_PROGRAMS = zile
@@ -67,8 +61,7 @@ zile_LDADD =					\
 	$(fontlock_c)				\
 	$(fontlock_cpp)				\
 	$(fontlock_csharp)			\
-	$(fontlock_java)			\
-	$(regex)
+	$(fontlock_java)
 
 man_MANS = zile.1
 
@@ -77,8 +70,6 @@ EXTRA_DIST =					\
 	fontlock_cpp.gperf			\
 	fontlock_csharp.gperf			\
 	fontlock_java.gperf			\
-	regex.c					\
-	regex.h					\
 	zile.1.in
 
 zile.1: zile.1.in

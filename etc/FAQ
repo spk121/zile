@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2003/10/24 23:32:08 $
+		   Last updated: $Date: 2004/02/14 22:19:02 $
 
 ------------------------------------------------------------------------------
 
@@ -328,7 +328,7 @@ INDEX
 3.1. Can I compile Zile with the old Berkeley curses?
 
     No, you can't.  The 4.4BSD or prior versions of curses are obsolete.
-    Zile supports only ncurses (tested with version 5.2).
+    Zile supports only ncurses (tested with version 5.3).
 
 3.2. Zile doesn't compile correctly under the Foobar operating system.
 
