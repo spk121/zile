@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.5 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.6 2004/01/20 12:29:28 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -51,7 +51,7 @@
 #include "term_ncurses.h"
 
 #ifdef __FreeBSD__
-/* 
+/*
  * XXX a redundant refresh() call fixes a refresh bug under
  * FreeBSD with ncurses 1.8.6 (may be also required under others OSs).
  */
@@ -410,7 +410,7 @@ static void draw_end_of_line(int line, windowp wp, linep lp,
 		}
 	}
 }
-  
+
 static void draw_line(int line, int startcol, windowp wp, linep lp,
 		      int lineno, struct highlight_region *d)
 {
@@ -913,7 +913,7 @@ static char *make_time_str(char *buf)
 	if ((fmt = display_time_format) == NULL)
 		fmt = "%I:%M:%p";
 	time(&t);
-	strftime(buf, 80, fmt, localtime(&t)); 
+	strftime(buf, 80, fmt, localtime(&t));
 	return buf;
 }
 
