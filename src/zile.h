@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.40 2005/01/09 23:56:06 rrt Exp $        */
+/*      $Id: zile.h,v 1.41 2005/01/10 01:30:31 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -48,7 +48,7 @@
  */
 typedef struct Point Point;
 typedef struct Marker Marker;
-typedef struct Line Line;
+typedef struct list_s Line;   /* This is evil! */
 typedef struct Undo Undo;
 typedef struct Region Region;
 typedef struct Buffer Buffer;
@@ -77,11 +77,6 @@ struct Marker {
   Point pt;               /* Point position. */
   Marker *next;           /* Used to chain all markers in the buffer. */
   unsigned type : 1;      /* Insertion type (1=after text). */
-};
-
-struct Line {
-  Line *prev, *next;      /* The previous line and next line pointers. */
-  astr text;              /* The text. */
 };
 
 /* Undo delta types. */
@@ -156,7 +151,7 @@ struct Buffer {
   Buffer *next;
 
   /* limitp->next == first line; limitp->prev == last line. */
-  Line *limitp;
+  Line *lines;
 
   /* The point. */
   Point pt;
