@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.36 2005/01/25 16:02:23 rrt Exp $
+## $Id: Makefile.am,v 1.37 2005/01/26 15:21:14 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -22,8 +22,6 @@ zile_base_SOURCES =				\
 	astr.h					\
 	vector.c				\
 	vector.h				\
-	strrstr.c				\
-	vasprintf.c				\
 	zmalloc.c				\
 	eval.c					\
 	eval.h					\
@@ -66,24 +64,19 @@ zile_base_SOURCES =				\
 	zile.h
 
 if ALLEGRO
-zile_SOURCES = $(zile_base_SOURCES)		\
-	term_allegro.c
-
+zile_SOURCES = $(zile_base_SOURCES) term_allegro.c
 zile_LDFLAGS = `allegro-config --libs`
 else
 if EPOCEMX
-zile_SOURCES = $(zile_base_SOURCES)		\
-	term_epocemx.c
+zile_SOURCES = $(zile_base_SOURCES) term_epocemx.c
 else
-zile_SOURCES = $(zile_base_SOURCES)		\
-	term_termcap.c
+zile_SOURCES = $(zile_base_SOURCES) term_termcap.c
 endif
 endif
 
-zile_LDADD =					\
-	$(regex)
+zile_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h tests
+EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c
 
 distclean-local:
 	rm -f paths.h
