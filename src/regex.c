@@ -2264,12 +2264,7 @@ re_set_registers (bufp, regs, num_regs, starts, ends)
 /* Like re_search_2, below, but only one string is specified, and
    doesn't let you say where to stop matching. */
 
-int
-re_search (bufp, string, size, startpos, range, regs)
-     struct re_pattern_buffer *bufp;
-     const char *string;
-     int size, startpos, range;
-     struct re_registers *regs;
+int re_search(struct re_pattern_buffer *bufp, const char *string, int size, int startpos, int range, struct re_registers *regs)
 {
   return re_search_2 (bufp, NULL, 0, string, size, startpos, range,
 		      regs, size);
