@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.65 2005/01/17 01:09:55 rrt Exp $	*/
+/*	$Id: main.c,v 1.66 2005/01/17 22:43:24 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if HAVE_GETOPT_H
+#if HAVE_GETOPT_LONG_ONLY
 #include <getopt.h>
 #else
 #include "getopt.h"
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
   int bflag = 0, qflag = 0;
   char *earg = NULL, *larg = NULL;
 
-  while ((c = getopt_long(argc, argv, "l:q", longopts, NULL)) != -1)
+  while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
     case 'b':
       bflag = TRUE;
