@@ -1,6 +1,13 @@
 Changes between Zile 1.7 BETA 2 - Zile 1.7
 
 * Patches provided by David A. Capello <dacap@users.sourceforge.net>:
+    * The `prev_bp' was removed.
+    * Now the `exchange-point-and-mark' activates the mark.
+    * Fixed `insert_char' to don't move the mark when insert a
+      character in the same mark position (this fix the
+      `exchange-point-and-mark' after a `yank').
+    * Fixed `insert_nstring' (used by `yank' for example) when is used
+      in overwrite-mode.
     * Modified `previous-line' and `next-line' to Emacs behavior.
     * Added `forward-sexp', `backward-sexp', `transpose-sexp', and
       `mark-sexp'.
