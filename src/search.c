@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.37 2005/01/26 18:46:43 rrt Exp $	*/
+/*	$Id: search.c,v 1.38 2005/01/27 00:21:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -54,7 +54,7 @@ static char *re_find_substr(const char *s1, size_t s1size,
   struct re_registers search_regs;
   char *ret = NULL;
   int index;
-  int old_syntax;
+  reg_syntax_t old_syntax;
 
   old_syntax = re_set_syntax(RE_SYNTAX_EMACS);
 
@@ -67,16 +67,16 @@ static char *re_find_substr(const char *s1, size_t s1size,
   pattern.buffer = NULL;
   pattern.allocated = 0;
 
-  re_find_err = re_compile_pattern(s2, s2size, &pattern);
+  re_find_err = re_compile_pattern(s2, (int)s2size, &pattern);
   if (!re_find_err) {
     pattern.not_bol = !bol;
     pattern.not_eol = !eol;
 
     if (!backward)
-      index = re_search(&pattern, s1, s1size, 0, s1size,
+      index = re_search(&pattern, s1, (int)s1size, 0, (int)s1size,
                         &search_regs);
     else
-      index = re_search(&pattern, s1, s1size, s1size, -s1size,
+      index = re_search(&pattern, s1, (int)s1size, (int)s1size, -(int)s1size,
                         &search_regs);
 
     if (index >= 0) {
@@ -110,7 +110,7 @@ static void goto_linep(Line *lp)
     next_line();
 }
 
-static int search_forward(Line *startp, int starto, const char *s)
+static int search_forward(Line *startp, unsigned starto, const char *s)
 {
   Line *lp;
   const char *sp, *sp2;
@@ -143,7 +143,7 @@ static int search_forward(Line *startp, int starto, const char *s)
   return FALSE;
 }
 
-static int search_backward(Line *startp, int starto, const char *s)
+static int search_backward(Line *startp, unsigned starto, const char *s)
 {
   Line *lp;
   const char *sp, *sp2;
@@ -432,7 +432,7 @@ DEFUN("replace-regexp", replace_regexp)
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
                          cur_bp->pt.o - find_len),
-              strlen(find), strlen(repl));
+              (int)strlen(find), (int)strlen(repl));
     line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
                       find_len, repl, repl_len, find_no_upper);
   }
@@ -513,7 +513,7 @@ DEFUN("query-replace-regexp", query_replace_regexp)
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
                          cur_bp->pt.o - find_len),
-              find_len, repl_len);
+              (int)find_len, (int)repl_len);
     line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
                       find_len, repl, repl_len, find_no_upper);
   nextmatch:

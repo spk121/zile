@@ -104,7 +104,7 @@ astr keyvectostr(int *keys, int numkeys);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
-void line_replace_text(Line **lp, int offset, size_t oldlen, char *newtext, size_t newlen, int replace_case);
+void line_replace_text(Line **lp, size_t offset, size_t oldlen, char *newtext, size_t newlen, int replace_case);
 int insert_char(int c);
 int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);
@@ -177,7 +177,7 @@ const char *previous_history_element(History *hp);
 const char *next_history_element(History *hp);
 
 /* point.c ---------------------------------------------------------------- */
-Point make_point(int lineno, int offset);
+Point make_point(unsigned lineno, unsigned offset);
 int cmp_point(Point pt1, Point pt2);
 int point_dist(Point pt1, Point pt2);
 int count_lines(Point pt1, Point pt2);

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.53 2005/01/26 23:04:47 rrt Exp $	*/
+/*	$Id: line.c,v 1.54 2005/01/27 00:21:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -250,7 +250,7 @@ static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
  * Replace text in the line "lp" with "newtext". If "replace_case" is
  * TRUE then the new characters will be the same case as the old.
  */
-void line_replace_text(Line **lp, int offset, size_t oldlen,
+void line_replace_text(Line **lp, size_t offset, size_t oldlen,
                        char *newtext, size_t newlen, int replace_case)
 {
   if (oldlen == 0)

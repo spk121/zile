@@ -18,14 +18,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: point.c,v 1.8 2005/01/14 22:31:49 rrt Exp $	*/
+/*	$Id: point.c,v 1.9 2005/01/27 00:21:25 rrt Exp $	*/
 
 #include "config.h"
 
 #include "zile.h"
 #include "extern.h"
 
-Point make_point(int lineno, int offset)
+Point make_point(unsigned lineno, unsigned offset)
 {
   Point pt;
   pt.p = list_next(cur_bp->lines);
