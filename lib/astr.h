@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.9 2004/03/10 13:27:12 rrt Exp $	*/
+/*	$Id: astr.h,v 1.10 2004/03/10 15:15:46 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -44,7 +44,6 @@ extern astr   astr_assign(astr as, castr src);
 extern astr   astr_assign_cstr(astr as, const char *s);
 extern astr   astr_insert(astr as, int pos, castr src);
 extern astr   astr_insert_cstr(astr as, int pos, const char *s);
-extern astr   astr_insert_char(astr as, int pos, int c);
 extern astr   astr_append(astr as, castr src);
 extern astr   astr_append_cstr(astr as, const char *s);
 extern astr   astr_append_char(astr as, int c);
@@ -58,9 +57,7 @@ extern int    astr_rfind(castr as, castr src);
 extern int    astr_rfind_cstr(castr as, const char *s);
 extern astr   astr_replace(astr as, int pos, size_t size, castr src);
 extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
-extern astr   astr_replace_char(astr as, int pos, size_t size, int c);
 extern astr   astr_fgets(astr as, FILE *f);
-extern void   astr_fputs(castr as, FILE *f);
 extern astr   astr_vfmt(astr as, const char *fmt, va_list ap);
 extern astr   astr_vafmt(astr as, const char *fmt, va_list ap);
 extern astr   astr_fmt(astr as, const char *fmt, ...);
@@ -88,8 +85,6 @@ struct astr_s {
 #define astr_size(as)		((const int)as->size)
 #define astr_last_char(as)	(as->text[as->size - 1])
 #define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
-#define astr_eq(s1, s2)		(!strcmp(s1->text, s2->text))
-#define astr_eq_cstr(s1, s2)	(!strcmp(s1->text, s2))
 
 #endif /* !ASTR_NO_MACRO_DEFS */
 

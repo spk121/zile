@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: astr.3,v 1.8 2004/03/10 13:27:12 rrt Exp $
+.\" $Id: astr.3,v 1.9 2004/03/10 15:15:43 rrt Exp $
 .Dd May 17, 2003
 .Os
 .Dt ASTR 3
@@ -26,7 +26,6 @@ astr   astr_assign(astr as, castr src);
 astr   astr_assign_cstr(astr as, const char *s);
 astr   astr_insert(astr as, int pos, castr src);
 astr   astr_insert_cstr(astr as, int pos, const char *s);
-astr   astr_insert_char(astr as, int pos, int c);
 astr   astr_append(astr as, castr src);
 astr   astr_append_cstr(astr as, const char *s);
 astr   astr_append_char(astr as, int c);
@@ -40,9 +39,7 @@ int    astr_rfind(castr as, castr src);
 int    astr_rfind_cstr(castr as, const char *s);
 astr   astr_replace(astr as, int pos, size_t size, castr src);
 astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
-astr   astr_replace_char(astr as, int pos, size_t size, int c);
 astr   astr_fgets(astr as, FILE *f);
-void   astr_fputs(castr as, FILE *f);
 astr   astr_vfmt(astr as, const char *fmt, va_list ap);
 astr   astr_vafmt(astr as, const char *fmt, va_list ap);
 astr   astr_fmt(astr as, const char *fmt, ...);
@@ -137,9 +134,8 @@ overwritting any previously existing text.
 .Pp
 The
 .Fn astr_insert ,
-.Fn astr_insert_cstr ,
 and
-.Fn astr_insert_char
+.Fn astr_insert_cstr
 functions insert the contents of the argument string or character
 into the string
 .Fa as
@@ -209,9 +205,8 @@ returning the position starting from the end of the string.
 .Pp
 The
 .Fn astr_replace ,
-.Fn astr_replace_cstr ,
 and
-.Fn astr_replace_char
+.Fn astr_replace_cstr
 functions replace up to
 .Fa size
 characters of the argument string
@@ -234,14 +229,6 @@ function returns the argument
 string, and
 .Fa NULL
 when end of file occurs while no characters have been read.
-.Pp
-The
-.Fn astr_fputs
-functions writes the argument string
-.Fa as
-into the file
-.Fa f .
-Please note that no trailing newline is written after the string.
 .Pp
 The
 .Fn astr_fmt
@@ -277,9 +264,7 @@ code faster but debugging harder:
 .Fn astr_cstr ,
 .Fn astr_size ,
 .Fn astr_last_char ,
-.Fn astr_cmp ,
-.Fn astr_eq ,
-.Fn astr_eq_cstr .
+.Fn astr_cmp .
 Side effects (like incrementing the argument) in parameters of these macros
 should be avoided.
 .Sh IMPLEMENTATION
@@ -338,7 +323,6 @@ astr s;
 s = astr_new();
 astr_assign_cstr(s, "world");
 astr_prepend_cstr(s, "hello");
-astr_insert_char(s, astr_find_char(s, 'w'), ' ');
 astr_append_char(s, '!');
 printf("s: '%s'\\n", astr_cstr(s));
 astr_delete(s);
