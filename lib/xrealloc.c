@@ -1,4 +1,4 @@
-/* $Id: xrealloc.c,v 1.3 2003/05/06 22:28:41 rrt Exp $ */
+/* $Id: xrealloc.c,v 1.4 2004/03/08 14:32:18 rrt Exp $ */
 
 #include <assert.h>
 #include <stdio.h>
@@ -13,11 +13,8 @@ void *(xrealloc)(void *ptr, size_t size)
 {
 	void *newptr;
 
-	assert(ptr != NULL);
-	assert(size > 0);
-
 	if ((newptr = realloc(ptr, size)) == NULL) {
-		fprintf(stderr, "zile: cannot allocate memory\n");
+		fprintf(stderr, "zile: cannot reallocate memory\n");
 		exit(1);
 	}
 
