@@ -15,6 +15,9 @@ AC_SUBST(ISODATE)
 
 AC_CANONICAL_HOST
 
+dnl Allow GNU functions to be used if present (e.g. vasprintf)
+AC_GNU_SOURCE
+
 dnl ==================================================================
 dnl Checks for programs.
 dnl ==================================================================
@@ -288,6 +291,7 @@ dnl ==================================================================
 
 AH_BOTTOM([
 #include <stddef.h>
+#include <stdarg.h>
 
 #ifndef HAVE_XMALLOC
 extern void *xmalloc(size_t);
@@ -299,6 +303,11 @@ extern void *xrealloc(void *, size_t);
 
 #ifndef HAVE_XSTRDUP
 extern char *xstrdup(const char *);
+#endif
+
+#ifndef HAVE_VASPRINTF
+extern int asprintf(char **strp, const char *fmt, ...);
+extern int vasprintf(char **strp, const char *fmt, va_list ap);
 #endif
 
 #if defined(ENABLE_C_MODE) || defined(ENABLE_CPP_MODE) || \
