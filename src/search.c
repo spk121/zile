@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.33 2005/01/26 00:03:47 rrt Exp $	*/
+/*	$Id: search.c,v 1.34 2005/01/26 00:25:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -126,9 +126,9 @@ static char *re_find_substr(const char *s1, size_t s1size,
 
     if (index >= 0) {
       if (!backward)
-        ret = ((char *)s1)+search_regs.end[0];
+        ret = ((char *)s1) + search_regs.end[0];
       else
-        ret = ((char *)s1)+search_regs.start[0];
+        ret = ((char *)s1) + search_regs.start[0];
     }
     else if (index == -1) {
       /* no match */
@@ -195,9 +195,9 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
 {
   Line *lp;
   const char *sp, *sp2;
-  size_t s1size, s2size = strlen(s);
+  size_t s1size, ssize = strlen(s);
 
-  if (s2size < 1)
+  if (ssize < 1)
     return FALSE;
 
   for (lp = startp; lp != cur_bp->lines; lp = list_prev(lp)) {
@@ -210,10 +210,10 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
       continue;
 
     if (regexp)
-      sp2 = re_find_substr(sp, s1size, s, s2size,
-                           TRUE, s1size == (size_t)astr_len(lp->item), TRUE);
+      sp2 = re_find_substr(sp, s1size, s, ssize,
+                           TRUE, s1size == astr_len(lp->item), TRUE);
     else
-      sp2 = rfind_substr(sp, s1size, s, s2size);
+      sp2 = rfind_substr(sp, s1size, s, ssize);
 
     if (sp2 != NULL) {
       goto_linep(lp);
@@ -527,7 +527,7 @@ void free_search_history(void)
   free_history_elements(&regexp_history);
 }
 
-static int no_upper(const char *s, unsigned len)
+static int no_upper(const char *s, size_t len)
 {
   int i;
 
@@ -545,18 +545,18 @@ DEFUN("replace-string", replace_string)
 {
   char *find, *repl;
   int count = 0, find_no_upper;
-  unsigned find_len, repl_len;
+  size_t find_len, repl_len;
 
   if ((find = minibuf_read("Replace string: ", "")) == NULL)
     return cancel();
   if (find[0] == '\0')
     return FALSE;
-  find_len = (unsigned)strlen(find);
+  find_len = strlen(find);
   find_no_upper = no_upper(find, find_len);
 
   if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
     return cancel();
-  repl_len = (unsigned)strlen(repl);
+  repl_len = strlen(repl);
   
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
     ++count;
@@ -586,18 +586,18 @@ DEFUN("query-replace", query_replace)
 {
   char *find, *repl;
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
-  unsigned find_len, repl_len;
+  size_t find_len, repl_len;
 
   if ((find = minibuf_read("Query replace string: ", "")) == NULL)
     return cancel();
   if (*find == '\0')
     return FALSE;
-  find_len = (unsigned)strlen(find);
+  find_len = strlen(find);
   find_no_upper = no_upper(find, find_len);
 
   if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
     return cancel();
-  repl_len = (unsigned)strlen(repl);
+  repl_len = strlen(repl);
   
   /* Spaghetti code follows... :-( */
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {

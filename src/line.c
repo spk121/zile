@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.50 2005/01/26 00:03:30 rrt Exp $	*/
+/*	$Id: line.c,v 1.51 2005/01/26 00:25:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -216,7 +216,7 @@ int insert_newline(void)
  * Returns 2 if it is all upper case, 1 if just the first letter is,
  * and 0 otherwise.
  */
-static int check_case(const char *s, unsigned len)
+static int check_case(const char *s, size_t len)
 {
   int i;
 
@@ -233,7 +233,7 @@ static int check_case(const char *s, unsigned len)
 /*
  * Recase str according to case of tmpl.
  */
-static void recase(char *str, unsigned len, const char *tmpl, unsigned tmpl_len)
+static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
 {
   int i;
   int tmpl_case = check_case(tmpl, tmpl_len);
@@ -250,13 +250,14 @@ static void recase(char *str, unsigned len, const char *tmpl, unsigned tmpl_len)
  * Replace text in the line "lp" with "newtext". If "replace_case" is
  * TRUE then the new characters will be the same case as the old.
  */
-void line_replace_text(Line **lp, int offset, unsigned oldlen,
-                       char *newtext, unsigned newlen, int replace_case)
+void line_replace_text(Line **lp, int offset, size_t oldlen,
+                       char *newtext, size_t newlen, int replace_case)
 {
   if (oldlen == 0)
     return;
 
-  if (replace_case) {
+  if (replace_case && lookup_bool_variable("case-fold-search") &&
+      lookup_bool_variable("case-replace")) {
     newtext = zstrdup(newtext);
     recase(newtext, newlen, astr_char((*lp)->item, offset), oldlen);
   }
