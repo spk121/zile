@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.9 2003/06/24 14:00:52 rrt Exp $	*/
+/*	$Id: file.c,v 1.10 2003/09/07 23:13:54 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -193,9 +193,6 @@ int expand_path(const char *path, const char *cwdir, astr dir,
 
 	if (astr_size(dir) == 0)
 		astr_append_char(dir, '/');
-
-	astr_append_char(dir, '\0');
-	astr_append_char(fname, '\0');
 
 	return TRUE;
 }
@@ -1026,7 +1023,6 @@ static char *create_backup_filename(const char *filename, int withrevs,
 				astr_append_char(buf, *filename);
 			++filename;
 		}
-		astr_append_char(buf, '\0');
 
 		dir = astr_new();
 		fname = astr_new();
