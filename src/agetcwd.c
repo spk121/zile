@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: agetcwd.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: agetcwd.c,v 1.2 2005/01/09 18:23:12 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <errno.h>
@@ -28,10 +28,6 @@
 #include "agetcwd.h"
 #include "zile.h"
 #include "extern.h"
-
-#ifndef PATH_MAX
-#define PATH_MAX 256
-#endif
 
 astr agetcwd(astr as)
 {

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.38 2005/01/09 18:11:14 rrt Exp $        */
+/*      $Id: zile.h,v 1.39 2005/01/09 18:23:12 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -332,6 +332,16 @@ typedef unsigned long Font;
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.
  *--------------------------------------------------------------------------*/
+
+/* Ensure PATH_MAX is defined */
+#ifndef PATH_MAX
+#ifdef _POSIX_PATH_MAX
+#define PATH_MAX	_POSIX_PATH_MAX
+#else
+/* Guess if all else fails */
+#define PATH_MAX	254
+#endif
+#endif
 
 /* Avoid warnings about unused `uniarg' parameters. */
 #undef GCC_UNUSED
