@@ -1,4 +1,4 @@
-/*	$Id: variables.c,v 1.1 2001/01/19 22:02:55 ssigala Exp $	*/
+/*	$Id: variables.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,33 +24,38 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
-#include "hash.h"
+#include "htable.h"
 
 /*
  * Default variables values table.
  */
-static struct var_entry { char *var; char *fmt; char *val; } def_vars[] = {
+static struct var_entry {
+	char *var;	/* Variable name. */
+	char *fmt;	/* Variable format (boolean, color, etc.). */
+	char *val;	/* Default value. */
+} def_vars[] = {
 #define X(zile_var, fmt, val, doc) { zile_var, fmt, val },
 #include "tbl_vars.h"
 #undef X
 };
 
-static htablep var_table;
+static htable var_table;
 
 void init_variables(void)
 {
 	struct var_entry *p;
 
-	var_table = hash_table_build_default();
+	var_table = htable_new();
 
 	for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
 		set_variable(p->var, p->val);
@@ -58,12 +63,12 @@ void init_variables(void)
 
 void free_variables(void)
 {
-	hash_table_free(var_table);
+	htable_delete(var_table);
 }
 
 void set_variable(char *var, char *val)
 {
-	hash_table_store(var_table, var, xstrdup(val));
+	htable_store(var_table, var, zstrdup(val));
 
 	/* Force refresh of cached variables. */
 	cur_tp->refresh_cached_variables();
@@ -71,17 +76,19 @@ void set_variable(char *var, char *val)
 
 void unset_variable(char *var)
 {
-	hash_table_delete(var_table, var);
+	char *p = htable_fetch(var_table, var);
+	htable_remove(var_table, var);
+	free(p);
 }
 
 char *get_variable(char *var)
 {
-	return hash_table_fetch(var_table, var);
+	return htable_fetch(var_table, var);
 }
 
 int is_variable_equal(char *var, char *val)
 {
-	char *v = hash_table_fetch(var_table, var);
+	char *v = htable_fetch(var_table, var);
 	return v != NULL && !strcmp(v, val);
 }
 
@@ -89,11 +96,11 @@ int lookup_bool_variable(char *var)
 {
 	char *p;
 
-	if ((p = hash_table_fetch(var_table, var)) != NULL)
+	if ((p = htable_fetch(var_table, var)) != NULL)
 		return !strcmp(p, "true");
 
 #if 0
-	minibuf_error("%FCWarning: used uninitialized variable %FY`%s'%E", var);
+	minibuf_error("Warning: used uninitialized variable `@v%s@@'", var);
 	waitkey(2 * 1000);
 #endif
 
@@ -102,17 +109,15 @@ int lookup_bool_variable(char *var)
 
 static historyp make_variable_history(void)
 {
-	unsigned int i, n;
-	bucketp bucket;
+	alist al;
 	historyp hp;
+	hpair *pair;
 
-	for (i = n = 0; i < var_table->size; ++i)
-		for (bucket = var_table->table[i]; bucket != NULL; bucket = bucket->next)
-			++n;
-	hp = new_history(n, FALSE);
-	for (i = n = 0; i < var_table->size; ++i)
-		for (bucket = var_table->table[i]; bucket != NULL; bucket = bucket->next)
-			hp->completions[n++] = xstrdup(bucket->key);
+	al = htable_list(var_table);
+	hp = new_history(FALSE);
+	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
+		alist_append(hp->completions, zstrdup(pair->key));
+	alist_delete(al);
 
 	return hp;
 }
@@ -135,10 +140,10 @@ char *minibuf_read_variable_name(char *msg)
 
 		if (ms[0] == '\0') {
 			free_history(hp);
-			minibuf_error("%FCNo variable name given%E");
+			minibuf_error("No variable name given");
 			return NULL;
 		} else if (get_variable(ms) == NULL) {
-			minibuf_error("%FCUndefined variable name%E");
+			minibuf_error("Undefined variable name");
 			waitkey(2 * 1000);
 		} else {
 			minibuf_clear();
@@ -201,7 +206,7 @@ Set a variable value to the user specified value.
 	if (!strcmp(var, "tab-width")) {
 		int i = atoi(val);
 		if (i < 1) {
-			minibuf_error("%FCInvalid tab-width value %FY`%s'%E", val);
+			minibuf_error("Invalid tab-width value `@v%s@@'", val);
 			waitkey(2 * 1000);
 		} else
 			cur_bp->tab_width = i;
@@ -209,7 +214,7 @@ Set a variable value to the user specified value.
 	} else if (!strcmp(var, "fill-column")) {
 		int i = atoi(val);
 		if (i < 2) {
-			minibuf_error("%FCInvalid fill-column value %FY`%s'%E", val);
+			minibuf_error("Invalid fill-column value `@v%s@@'", val);
 			waitkey(2 * 1000);
 		} else
 			cur_bp->fill_column = i;
@@ -219,54 +224,27 @@ Set a variable value to the user specified value.
 	return TRUE;
 }
 
-static int sort_func(const void *ptr1, const void *ptr2)
+static int sorter(const void *p1, const void *p2)
 {
-	return strcmp((*(bucketp *)ptr1)->key, (*(bucketp *)ptr2)->key);
+	return strcmp((*(hpair **)p1)->key, (*(hpair **)p2)->key);
 }
 
-static void write_variables_list(void *p1, void *p2, void *p3, void *p4)
+static void write_variables_list(va_list ap)
 {
-	windowp old_wp = (windowp)p1;
-	bucketp bucket, *sorted_table;
-	unsigned int i, j, n;
-
-	/*
-	 * Count the hash table buckets.
-	 */
-	for (i = n = 0; i < var_table->size; ++i)
-		for (bucket = var_table->table[i]; bucket != NULL; bucket = bucket->next)
-			++n;
-
-	/*
-	 * Allocate space for the sorted table.
-	 */
-	sorted_table = (bucketp *)xmalloc(sizeof(bucketp) * n);
-
-	/*
-	 * Add the buckets to the sorted table.
-	 */
-	for (i = j = 0; i < var_table->size; ++i)
-		for (bucket = var_table->table[i]; bucket != NULL; bucket = bucket->next)
-			sorted_table[j++] = bucket;
-
-	/*
-	 * Sort the table.
-	 */
-	qsort(sorted_table, n, sizeof(bucketp), sort_func);
+	windowp old_wp = va_arg(ap, windowp);
+	alist al;
+	hpair *pair;
 
 	bprintf("Global variables:\n\n");
 	bprintf("%-30s %s\n", "Variable", "Value");
 	bprintf("%-30s %s\n", "--------", "-----");
 
-	/*
-	 * Output the table.
-	 */
-	for (i = 0; i < n; i++)
-		if (sorted_table[i]->data != NULL)
-			bprintf("%-30s \"%s\"\n", sorted_table[i]->key,
-				sorted_table[i]->data);
-
-	free(sorted_table);
+	al = htable_list(var_table);
+	alist_sort(al, sorter);
+	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
+		if (pair->data != NULL)
+			bprintf("%-30s \"%s\"\n", pair->key, pair->data);
+	alist_delete(al);
 
 	bprintf("\nLocal buffer variables:\n\n");
 	bprintf("%-30s %s\n", "Variable", "Value");
@@ -280,7 +258,6 @@ DEFUN("list-variables", list_variables)
 List defined variables.
 +*/
 {
-	write_to_temporary_buffer("*Variable List*", write_variables_list,
-				  cur_wp, NULL, NULL, NULL);
+	write_temp_buffer("*Variable List*", write_variables_list, cur_wp);
 	return TRUE;
 }

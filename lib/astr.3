@@ -1,0 +1,382 @@
+.\" -*- nroff -*-
+.\" $Id: astr.3,v 1.1 2003/04/24 15:11:59 rrt Exp $
+.Dd July 31, 2001
+.Os
+.Dt ASTR 3
+.Sh NAME
+.Nm astr
+.Nd Dynamically allocated strings
+.Sh SYNOPSIS
+.Fd #include <astr.h>
+.Bd -literal
+
+typedef /* ... */ astr;
+typedef const /* ... */ castr;
+
+astr   astr_new(void);
+astr   astr_copy(castr as);
+astr   astr_copy_cstr(const char *s);
+void   astr_delete(astr as);
+void   astr_clear(astr as);
+char * astr_cstr(castr as);
+size_t astr_size(castr as);
+astr   astr_fill(astr as, int c, size_t size);
+int    astr_cmp(castr s1, castr s2);
+int    astr_cmp_cstr(castr s1, const char *s2);
+int    astr_eq(castr s1, castr s2);
+int    astr_eq_cstr(castr as, const char *s);
+astr   astr_assign(astr as, castr src);
+astr   astr_assign_cstr(astr as, const char *s);
+astr   astr_assign_char(astr as, int c);
+astr   astr_insert(astr as, int pos, castr src);
+astr   astr_insert_cstr(astr as, int pos, const char *s);
+astr   astr_insert_char(astr as, int pos, int c);
+astr   astr_prepend(astr as, castr src);
+astr   astr_prepend_cstr(astr as, const char *s);
+astr   astr_prepend_char(astr as, int c);
+astr   astr_append(astr as, castr src);
+astr   astr_append_cstr(astr as, const char *s);
+astr   astr_append_char(astr as, int c);
+astr   astr_remove(astr as, int pos, size_t size);
+astr   astr_truncate(astr as, size_t size);
+astr   astr_substr(castr as, int pos, size_t size);
+astr   astr_left(castr as, size_t size);
+astr   astr_right(castr as, size_t size);
+int    astr_find(castr as, castr src);
+int    astr_find_cstr(castr as, const char *s);
+int    astr_find_char(castr as, int c);
+int    astr_rfind(castr as, castr src);
+int    astr_rfind_cstr(castr as, const char *s);
+int    astr_rfind_char(castr as, int c);
+astr   astr_replace(astr as, int pos, size_t size, castr src);
+astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
+astr   astr_replace_char(astr as, int pos, size_t size, int c);
+astr   astr_fgets(astr as, FILE *f);
+void   astr_fputs(castr as, FILE *f);
+astr   astr_fmt(astr as, const char *fmt, ...);
+astr   astr_afmt(astr as, const char *fmt, ...);
+
+.Sh DESCRIPTION
+The
+.Nm
+string library provides a high-level interface to dynamically
+allocated null-terminated C strings.
+.Pp
+The library provides two types:
+.Fa astr
+and
+.Fa castr .
+The type
+.Fa astr
+is a modifiable string, while
+.Fa castr
+is a const (read-only) string.
+Strings with type
+.Fa astr
+can be implicitly casted to
+.Fa castr ,
+while the (explicitly) inverse operation should be avoided.
+.Pp
+Most of the user code will use the
+.Fa astr
+type, while
+.Fa castr
+will be used as function arguments to signal that they
+will not be modified by the function.
+.Pp
+The
+.Fn astr_new
+function allocates a new string with zero length.
+.Pp
+The
+.Fn astr_copy
+and
+.Fn astr_copy_cstr
+functions allocate a new string copying the contents from the argument
+string
+.Fa as
+and
+.Fa s ,
+respectively.
+.Pp
+The
+.Fn astr_delete
+function deallocates the previously allocated string
+.Fa as .
+.Pp
+The
+.Fn astr_clear
+function truncates the argument string
+.Fa as
+to zero length.
+.Pp
+The
+.Fn astr_cstr
+function converts the argument string
+.Fa as
+into a C null-terminated string.  The returned string should
+not be modified.
+.Pp
+The
+.Fn astr_size
+function returns the length of the argument string
+.Fa as .
+.Pp
+The
+.Fn astr_fill
+function fills the argument string
+.Fa as
+with the character
+.Fa c ,
+up to
+.Fa size
+characters.
+.Pp
+The
+.Fn astr_cmp 
+and
+.Fn astr_cmp_cstr
+functions compare the argument strings and return an integer less than,
+equal to, or greater than zero if
+.Fa s1
+is found, respectively, to be less than, to match, or be greater than
+.Fa s2 .
+.Pp
+The
+.Fn astr_eq
+and
+.Fn astr_eq_cstr
+functions compare the argument strings and return an non-zero integer
+if
+.Fa s1
+is equal to
+.Fa s2 ,
+otherwise a zero value.
+.Pp
+The
+.Fn astr_assign ,
+.Fn astr_assign_cstr ,
+and
+.Fn astr_assign_char
+functions assign the contents of the argument string or character
+to the string
+.Fa as ,
+overwritting any previously existing text.
+.Pp
+The
+.Fn astr_insert ,
+.Fn astr_insert_cstr ,
+and
+.Fn astr_insert_char
+functions insert the contents of the argument string or character
+into the string
+.Fa as
+at the specified position
+.Fa pos .
+.Pp
+The
+.Fn astr_prepend ,
+.Fn astr_prepend_cstr ,
+and
+.Fn astr_prepend_char
+functions prepend the contents of the argument string or character
+at the beginning of the string
+.Fa as .
+.Pp
+The
+.Fn astr_append ,
+.Fn astr_append_cstr ,
+and
+.Fn astr_append_char
+functions append the contents of the argument string or character
+at the end of the string
+.Fa as .
+.Pp
+The
+.Fn astr_remove
+function removes from the argument string
+.Fa as
+the text of size
+.Fa size
+starting from the position
+.Fa pos .
+.Pp
+The
+.Fn astr_truncate
+function truncates the argument string
+.Fa as
+to the specified length
+.Fa size .
+.Pp
+The
+.Fn astr_substr
+function returns a new allocated substring extracted from the argument string
+.Fa as ,
+starting from position
+.Fa pos
+up to
+.Fa size
+characters.
+Negative
+.Fa pos
+values mean
+starting counting from the end of the string, instead of the beginning.
+.Pp
+The
+.Fn astr_left
+function returns a new allocated substring containing the beginning
+.Fa size
+characters extracted from the argument string
+.Fa as .
+.Pp
+The
+.Fn astr_right
+function returns a new allocated substring containing the ending
+.Fa size
+characters extracted from the argument string
+.Fa as .
+.Pp
+The
+.Fn astr_find ,
+.Fn astr_find_cstr ,
+and
+.Fn astr_find_char
+functions find the first occurrence of the argument string or character
+into the argument
+.Fa as ,
+returning the position starting from the beginning of the string.
+.Pp
+The
+.Fn astr_replace ,
+.Fn astr_replace_cstr ,
+and
+.Fn astr_replace_char
+functions replace up to 
+.Fa size
+characters of the argument string
+.Fa as ,
+starting from the position
+.Fa pos ,
+with the argument string or character.
+.Pp
+The
+.Fn astr_fgets
+function reads a string from the file
+.Fa f
+and stores it into the string
+.Fa as .
+The trailing newline is removed from the string.
+The
+.Fn astr_fgets
+function returns the argument
+.Fa as
+string, and
+.Fa NULL
+when end of file occurs while no characters have been read.
+.Pp
+The
+.Fn astr_fputs
+functions writes the argument string
+.Fa as
+into the file
+.Fa f .
+Please note that no trailing newline is written after the string.
+.Pp
+The
+.Fn astr_fmt
+function writes formatted text into the argument string
+.Fa as .
+Previously existing text will be overwritten.
+.Pp
+The
+.Fn astr_afmt
+function appends formatted text to the argument string
+.Fa as .
+.Pp
+Where not otherwise specified, the
+.Nm
+functions return the first argument string, usually named
+.Fa as
+in the function prototype.
+.Sh DEBUGGING
+If you would like to debug your program, you should define the macro
+.Fa ASTR_NO_MACRO_DEFS
+before including the header of this library, i.e.
+.Bd -literal -offset indent
+#define ASTR_NO_MACRO_DEFS
+#include <astr.h>
+.Ed
+.Pp
+This prevents defining at least the following function macros that makes
+code faster but debugging harder:
+.Fn astr_cstr ,
+.Fn astr_size ,
+.Fn astr_cmp ,
+.Fn astr_cmp_cstr ,
+.Fn astr_eq ,
+.Fn astr_eq_cstr .
+Side effects (like incrementing the argument) in parameters of these macros
+should be avoided.
+.Sh IMPLEMENTATION
+Internally, each
+.Nm
+entry stores three variables: a buffer that contains
+the C string, the buffer size and the size of the string.
+.Pp
+At each modification that enlarges the string, if the buffer is not big
+enough to contain the modified string, the buffer is reallocated with
+.Fa realloc .
+.Sh EXAMPLES
+Create and concatenate two strings:
+.Bd -literal -offset indent
+astr s1, s2;
+s1 = astr_new();
+s2 = astr_new();
+astr_assign_cstr(s1, "string 1");
+astr_assign_cstr(s2, "string 2");
+astr_append_char(s1, ' ');
+astr_append(s1, s2);
+printf("s1: '%s', s2: '%s'\\n", astr_cstr(s1), astr_cstr(s2));
+astr_delete(s1);
+astr_delete(s2);
+.Ed
+.Pp
+Replace occurrences into a string:
+.Bd -literal -offset indent
+astr s;
+int i;
+s = astr_new();
+astr_assign_cstr(s, "buffer: this is a buffer");
+while ((i = astr_find_cstr(s, "buffer")) >= 0)
+	astr_replace_cstr(s, i, 6, "astr string");
+printf("s: '%s'\\n", astr_cstr(s));
+astr_delete(s);
+.Ed
+.Pp
+Filtering files:
+.Bd -literal -offset indent
+astr s;
+int i;
+s = astr_new();
+while (astr_fgets(s, stdin) != NULL) {
+	while ((i = astr_find_cstr(s, "vi")) >= 0)
+		astr_replace_cstr(s, i, 2, "emacs");
+	astr_fputs(s, stdout);
+	putc('\\n', stdout);
+}
+astr_delete(s);
+.Ed
+.Pp
+Miscellaneous operations on strings:
+.Bd -literal -offset indent
+astr s;
+s = astr_new();
+astr_assign_cstr(s, "world");
+astr_prepend_cstr(s, "hello");
+astr_insert_char(s, astr_find_char(s, 'w'), ' ');
+astr_append_char(s, '!');
+printf("s: '%s'\\n", astr_cstr(s));
+astr_delete(s);
+.Ed
+.Sh AUTHORS
+Sandro Sigala <sandro@sigala.it>

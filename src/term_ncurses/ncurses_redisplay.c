@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.1 2001/01/19 22:03:37 ssigala Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -32,6 +32,8 @@
  * and updating when is needed.
  */
 
+#include "config.h"
+
 #ifdef __FreeBSD__
 /* 
  * XXX a redundant refresh() call fixes a refresh bug under
@@ -52,7 +54,6 @@
 #include <curses.h>
 #endif
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -401,10 +402,11 @@ do {									\
 
 /*
  * Draw a line on the screen with font lock color.
+ * C/C++ Mode.
  */
-static void draw_line_fontlock(int line, int startcol, windowp wp, linep lp,
-			       int lineno, struct highlight_region *d,
-			       int *lastanchor)
+static void draw_line_cpp(int line, int startcol, windowp wp, linep lp,
+			  int lineno, struct highlight_region *d,
+			  int *lastanchor)
 {
 	int i, x, c, nonspace = FALSE;
 
@@ -443,10 +445,10 @@ static void draw_line_fontlock(int line, int startcol, windowp wp, linep lp,
 			j = i;
 			while (j < lp->size && (isalnum(lp->text[j]) || lp->text[j] == '_'))
 				++j;
-			if (wp->bp->flags & BFLAG_CMODE &&
+			if (wp->bp->mode == BMODE_C &&
 			    is_c_keyword(lp->text + i, j-i) != NULL)
 				attr = font_keyword;
-			else if (wp->bp->flags & BFLAG_CPPMODE &&
+			else if (wp->bp->mode == BMODE_CPP &&
 				 is_cpp_keyword(lp->text + i, j-i) != NULL)
 				attr = font_keyword;
 			else
@@ -499,6 +501,40 @@ static void draw_line_fontlock(int line, int startcol, windowp wp, linep lp,
 		   not begin a directive. */
 		if (!isspace(c))
 			nonspace = TRUE;
+	}
+	if (x >= COLS)
+		mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
+}
+
+/*
+ * Draw a line on the screen with font lock color.
+ * Shell Mode.
+ */
+static void draw_line_shell(int line, int startcol, windowp wp, linep lp,
+			    int lineno, struct highlight_region *d,
+			    int *lastanchor)
+{
+	int i, x, c;
+
+	move(line, 0);
+	for (x = i = 0; i < lp->size; ++i) {
+		c = lp->text[i];
+
+		/* String handling. */
+		if (lp->anchors[i] == ANCHOR_END_STRING) {
+			OUTCH(c, font_string_delimiters);
+			*lastanchor = ANCHOR_NULL;
+		} else if (lp->anchors[i] == ANCHOR_BEGIN_STRING) {
+			OUTCH(c, font_string_delimiters);
+			*lastanchor = ANCHOR_BEGIN_STRING;
+		} else if (*lastanchor == ANCHOR_BEGIN_STRING)
+			OUTCH(c, font_string);
+		else if (c == '#') {
+			/* Comment. */
+			for (; i < lp->size; ++i)
+				OUTCH(lp->text[i], font_comment);
+		} else
+			OUTCH(c, font_other);
 	}
 	if (x >= COLS)
 		mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
@@ -569,11 +605,16 @@ static void draw_window(int topline, windowp wp)
 			startcol = point_start_column;
 		else
 			startcol = 0;
-		if (wp->bp->flags & BFLAG_FONTLOCK &&
-		    wp->bp->flags & (BFLAG_CMODE | BFLAG_CPPMODE))
-			draw_line_fontlock(i, startcol, wp, lp,
-					   lineno, &tdata, &lastanchor);
-		else
+		if (wp->bp->flags & BFLAG_FONTLOCK && lp->anchors != NULL) {
+			if (wp->bp->mode == BMODE_C || wp->bp->mode == BMODE_CPP)
+				draw_line_cpp(i,  startcol, wp, lp,
+					      lineno, &tdata, &lastanchor);
+			else if (wp->bp->mode == BMODE_SHELL)
+				draw_line_shell(i, startcol, wp, lp,
+						lineno, &tdata, &lastanchor);
+			else
+				draw_line(i, startcol, wp, lp, lineno, &tdata);
+		} else
 			draw_line(i, startcol, wp, lp, lineno, &tdata);
 
 		/*
@@ -697,12 +738,19 @@ static void draw_status_line(int line, windowp wp)
 	for (i = 0; i < wp->ewidth; ++i)
 		addch('-');
 
-	if (wp->bp->flags & BFLAG_CMODE)
+	switch (wp->bp->mode) {
+	case BMODE_C:
 		mode = "C";
-	else if (wp->bp->flags & BFLAG_CPPMODE)
+		break;
+	case BMODE_CPP:
 		mode = "C++";
-	else
+		break;
+	case BMODE_SHELL:
+		mode = "Shell-script";
+		break;
+	default:
 		mode = "Text";
+	}
 
 	move(line, 0);
 	printw("--%2s-Zile: %-18s (%s%s%s%s%s)--L%d/%d,C%d--%s",

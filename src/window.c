@@ -1,4 +1,4 @@
-/*	$Id: window.c,v 1.1 2001/01/19 22:02:57 ssigala Exp $	*/
+/*	$Id: window.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,12 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -37,7 +39,7 @@ windowp new_window(void)
 {
 	windowp wp;
 
-	wp = (windowp)xmalloc(sizeof *wp);
+	wp = (windowp)zmalloc(sizeof *wp);
 	memset(wp, 0, sizeof *wp);
 
 	return wp;
@@ -74,7 +76,7 @@ Both windows display the same buffer now current.
 
 	/* Windows smaller than 4 lines cannot be split. */
 	if (cur_wp->fheight < 4) {
-		minibuf_error("%FCWindow height %d too small for splitting%E", cur_wp->fheight);
+		minibuf_error("Window height %d too small for splitting", cur_wp->fheight);
 		return FALSE;
 	}
 
@@ -88,6 +90,7 @@ Both windows display the same buffer now current.
 	if (cur_wp->topdelta >= cur_wp->eheight)
 		recenter(cur_wp);
 	newwp->bp = cur_bp;
+        assert(cur_bp == cur_wp->bp);
 	++newwp->bp->num_windows;
 	newwp->pointp = cur_wp->pointp;
 	newwp->pointn = cur_wp->pointn;
@@ -106,7 +109,7 @@ Remove the current window from the screen.
 	windowp wp;
 
 	if (cur_wp == head_wp && cur_wp->next == NULL) {
-		minibuf_error("%FCAttempt to delete sole ordinary window%E");
+		minibuf_error("Attempt to delete sole ordinary window");
 		return FALSE;
 	}
 
@@ -289,7 +292,7 @@ void create_first_window(void)
 	wp->pointo = bp->save_pointo;
 }
 
-windowp find_window(char *name)
+windowp find_window(const char *name)
 {
 	windowp wp;
 

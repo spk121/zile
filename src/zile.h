@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.1 2001/01/19 22:03:07 ssigala Exp $	*/
+/*	$Id: zile.h,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -23,6 +23,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#ifndef ZILE_H
+#define ZILE_H
+
+#include <alist.h>
 
 #undef TRUE
 #define TRUE				1
@@ -94,7 +99,9 @@ struct line {
 #define UNDO_REPLACE_CHAR		5
 /* Replace a block of characters. */
 #define UNDO_REPLACE_BLOCK		6
+/* Start a multi operation sequence. */
 #define UNDO_START_SEQUENCE		7
+/* End a multi operation sequence. */
 #define UNDO_END_SEQUENCE		8
 
 struct undo {
@@ -140,6 +147,8 @@ struct region {
 	int	num_lines;
 };
 
+/* Buffer flags or minor modes. */
+
 /* The buffer has been modified. */
 #define BFLAG_MODIFIED			(0000001)
 /* The buffer need not to be saved. */
@@ -158,14 +167,21 @@ struct region {
 #define BFLAG_FONTLOCK			(0000200)
 /* Do not record undo informations. */
 #define BFLAG_NOUNDO			(0000400)
-/* The buffer is in C mode. */
-#define BFLAG_CMODE			(0001000)
-/* The buffer is in C++ mode. */
-#define BFLAG_CPPMODE			(0002000)
-/* The buffer is in autofill mode. */
-#define BFLAG_AUTOFILL			(0004000)
+/* The buffer is in Auto Fill mode. */
+#define BFLAG_AUTOFILL			(0001000)
 /* Do not display the EOB marker in this buffer. */
-#define BFLAG_NOEOB			(0010000)
+#define BFLAG_NOEOB			(0002000)
+
+/* Mutually exclusive buffer major modes. */
+
+/* The buffer is in Text mode. */
+#define BMODE_TEXT			0
+/* The buffer is in C mode. */
+#define BMODE_C				1
+/* The buffer is in C++ mode. */
+#define BMODE_CPP			2
+/* The buffer is in Shell-script mode. */
+#define BMODE_SHELL			3
 
 struct buffer {
 	/* The next buffer in buffer list. */
@@ -189,6 +205,7 @@ struct buffer {
 
 	/* Buffer flags. */
 	int	flags;
+	int	mode;
 	int	tab_width;
 	int	fill_column;
 
@@ -230,10 +247,6 @@ struct window {
 #define HISTORY_NONUNIQUE		3
 
 struct history {
-	/* The number of completions in the `completions' vector. */
-	int	size;
-	int	maxsize;
-
 	/* This flag is set when the vector is sorted. */
 	int	fl_sorted;
 	/* This flag is set when a completion window has been popped up. */
@@ -251,11 +264,11 @@ struct history {
 	/* This flag is set when the space character is allowed. */
 	int	fl_space;
 
-	/* The completions vector. */
-	char	**completions;
+	/* The completions list. */
+	alist	completions;
 
-	/* The matches vector. */
-	char	**matches;
+	/* The matches list. */
+	alist	matches;
 	/* The match buffer. */
 	char	*match;
 	/* The match buffer size. */
@@ -268,10 +281,8 @@ struct history {
 	void	(*scroll_down)(historyp hp);
 };
 
-#define MINIBUF_SET_FGBG		'\1'
-#define MINIBUF_SET_FG			'\2'
-#define MINIBUF_SET_BG			'\3'
-#define MINIBUF_UNSET			'\4'
+#define MINIBUF_SET_COLOR	'\1'
+#define MINIBUF_UNSET_COLOR	'\2'
 
 struct terminal {
 	int	width, height;
@@ -286,7 +297,7 @@ struct terminal {
 	void	(*refresh)(void);
 	void	(*redisplay)(void);
 	void	(*full_redisplay)(void);
-	void	(*show_about)(char *splash, char *minibuf, char *waitstr);
+	void	(*show_about)(char *splash, char *minibuf);
 	void	(*clear)(void);
 	void	(*beep)(void);
 	void	(*minibuf_write)(const char *fmt);
@@ -298,46 +309,44 @@ struct terminal {
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
 
-#define GETKEY_DELAYED			(0000001)
-#define GETKEY_NONBLOCKING		(0000002)
-#define GETKEY_NONFILTERED		(0000004)
+#define GETKEY_DELAYED			(0001)
+#define GETKEY_NONBLOCKING		(0002)
+#define GETKEY_NONFILTERED		(0004)
 
 /* Special value returned in non blocking mode, when no key is pressed. */
 #define KBD_NOKEY			(-1)
 
-/* Special keys. */
-#define KBD_PGUP			(0000001 << 8)
-#define KBD_PGDN			(0000002 << 8)
-#define KBD_HOME			(0000004 << 8)
-#define KBD_END				(0000010 << 8)
-#define KBD_DEL				(0000020 << 8)
-#define KBD_BS				(0000040 << 8)
-#define KBD_INS				(0000100 << 8)
-#define KBD_LEFT			(0000200 << 8)
-#define KBD_RIGHT			(0000400 << 8)
-#define KBD_UP				(0001000 << 8)
-#define KBD_DOWN			(0002000 << 8)
-#define KBD_F0				(0004000 << 8)
-#define KBD_F1				(KBD_F0 + 1)
-#define KBD_F2				(KBD_F0 + 2)
-#define KBD_F3				(KBD_F0 + 3)
-#define KBD_F4				(KBD_F0 + 4)
-#define KBD_F5				(KBD_F0 + 5)
-#define KBD_F6				(KBD_F0 + 6)
-#define KBD_F7				(KBD_F0 + 7)
-#define KBD_F8				(KBD_F0 + 8)
-#define KBD_F9				(KBD_F0 + 9)
-#define KBD_F10				(KBD_F0 + 10)
-#define KBD_F11				(KBD_F0 + 11)
-#define KBD_F12				(KBD_F0 + 12)
-
 /* Key modifiers. */
-#define KBD_CTL				(0010000 << 8)
-#define KBD_META			(0020000 << 8)
+#define KBD_CTL				(01000)
+#define KBD_META			(02000)
 
+/* Common non-alphanumeric keys. */
 #define KBD_CANCEL			(KBD_CTL | 'g')
-#define KBD_TAB				(KBD_CTL | 'i')
-#define KBD_RET				(KBD_CTL | 'm')
+#define KBD_TAB				(00402)
+#define KBD_RET				(00403)
+#define KBD_PGUP			(00404)
+#define KBD_PGDN			(00405)
+#define KBD_HOME			(00406)
+#define KBD_END				(00407)
+#define KBD_DEL				(00410)
+#define KBD_BS				(00411)
+#define KBD_INS				(00412)
+#define KBD_LEFT			(00413)
+#define KBD_RIGHT			(00414)
+#define KBD_UP				(00415)
+#define KBD_DOWN			(00416)
+#define KBD_F1				(00420)
+#define KBD_F2				(00421)
+#define KBD_F3				(00422)
+#define KBD_F4				(00423)
+#define KBD_F5				(00424)
+#define KBD_F6				(00425)
+#define KBD_F7				(00426)
+#define KBD_F8				(00427)
+#define KBD_F9				(00430)
+#define KBD_F10				(00431)
+#define KBD_F11				(00432)
+#define KBD_F12				(00433)
 
 /*--------------------------------------------------------------------------
  * Global flags.
@@ -377,3 +386,5 @@ struct terminal {
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)		\
 	F_ ## c_func(uniarg)
+
+#endif /* !ZILE_H */

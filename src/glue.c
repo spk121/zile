@@ -1,4 +1,4 @@
-/*	$Id: glue.c,v 1.1 2001/01/19 22:02:18 ssigala Exp $	*/
+/*	$Id: glue.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,13 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -80,7 +81,7 @@ char *copy_text_block(int startn, int starto, size_t size)
 	linep lp;
 
 	max_size = 10;
-	dp = buf = (char *)xmalloc(max_size);
+	dp = buf = (char *)zmalloc(max_size);
 
 	lp = cur_wp->pointp;
 	n = cur_wp->pointn;
@@ -99,7 +100,7 @@ char *copy_text_block(int startn, int starto, size_t size)
 		if (dp - buf + 1 > max_size) {
 			int save_off = dp - buf;
 			max_size += 10;
-			buf = (char *)xrealloc(buf, max_size);
+			buf = (char *)zrealloc(buf, max_size);
 			dp = buf + save_off;
 		}
 		if (sp < lp->text + lp->size)
@@ -254,4 +255,47 @@ int calculate_mark_lineno(windowp wp)
 
 	assert(0); /* Cannot happen */
 	return 0;
+}
+
+/*
+ * Return an allocated memory area.
+ */
+void *zmalloc(size_t size)
+{
+	void *ptr;
+
+	assert(size > 0);
+
+	if ((ptr = malloc(size)) == NULL) {
+		fprintf(stderr, "zile: cannot allocate memory\n");
+		zile_exit(1);
+	}
+
+	return ptr;
+}
+
+/*
+ * Resize an allocated memory area.
+ */
+void *zrealloc(void *ptr, size_t size)
+{
+	void *newptr;
+
+	assert(ptr != NULL);
+	assert(size > 0);
+
+	if ((newptr = realloc(ptr, size)) == NULL) {
+		fprintf(stderr, "zile: cannot allocate memory\n");
+		zile_exit(1);
+	}
+
+	return newptr;
+}
+
+/*
+ * Duplicate a string.
+ */
+char *zstrdup(const char *s)
+{
+	return strcpy(zmalloc(strlen(s) + 1), s);
 }

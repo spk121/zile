@@ -1,4 +1,4 @@
-/*	$Id: term_ncurses.h,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: htable.h,v 1.1 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,22 +24,33 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define ZILE_COLOR_BLACK	0
-#define ZILE_COLOR_RED		1
-#define ZILE_COLOR_GREEN	2
-#define ZILE_COLOR_YELLOW	3
-#define ZILE_COLOR_BLUE		4
-#define ZILE_COLOR_MAGENTA	5
-#define ZILE_COLOR_CYAN		6
-#define ZILE_COLOR_WHITE	7
+#ifndef HTABLE_H
+#define HTABLE_H
 
-#define C_FG_BLACK		COLOR_PAIR(ZILE_COLOR_BLACK)
-#define C_FG_RED		COLOR_PAIR(ZILE_COLOR_RED)
-#define C_FG_GREEN		COLOR_PAIR(ZILE_COLOR_GREEN)	
-#define C_FG_YELLOW		COLOR_PAIR(ZILE_COLOR_YELLOW)
-#define C_FG_BLUE		COLOR_PAIR(ZILE_COLOR_BLUE)
-#define C_FG_MAGENTA		COLOR_PAIR(ZILE_COLOR_MAGENTA)
-#define C_FG_CYAN		COLOR_PAIR(ZILE_COLOR_CYAN)
-#define C_FG_WHITE		COLOR_PAIR(ZILE_COLOR_WHITE)
+#include <stdio.h>
 
-extern terminalp ncurses_tp;
+#include "alist.h"
+
+typedef unsigned long (*hfunc_t)(const char *data, unsigned long table_size);
+
+typedef struct hpair_s {
+	char *key;
+	void *data;
+} hpair;
+
+typedef struct htable_s *htable;
+
+extern htable htable_new(void);
+extern htable htable_new_custom(unsigned long size);
+extern void   htable_delete(htable ht);
+extern void   htable_set_hash_func(htable ht, hfunc_t hfunc);
+extern int    htable_store_key(htable ht, const char *key);
+extern int    htable_store_data(htable ht, const char *key, void *data);
+extern int    htable_store(htable ht, const char *key, void *data);
+extern int    htable_exists(htable ht, const char *key);
+extern void * htable_fetch(htable ht, const char *key);
+extern int    htable_remove(htable ht, const char *key);
+extern void   htable_dump(htable ht, FILE *fout);
+extern alist  htable_list(htable ht);
+
+#endif /* !HTABLE_H */

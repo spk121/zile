@@ -1,4 +1,4 @@
-/*	$Id: rc.c,v 1.1 2001/01/19 22:02:43 ssigala Exp $	*/
+/*	$Id: rc.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,14 +24,17 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <ctype.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -82,7 +85,7 @@ static void parse_id_line(int c)
 		value[++i] = '\0';
 	} else if (c == '"') {
 		i = 0;
-		while ((c = fgetc(rc_file)) != '"') {
+		while ((c = fgetc(rc_file)) != '"' && c != EOF) {
 			value[i++] = c;
 			if (c == '\\')
 				value[i++] = fgetc(rc_file);
@@ -101,7 +104,7 @@ static void parse_rc(void)
 
 	while ((c = skip_ws(fgetc(rc_file))) != EOF)
 		if (c == '#') {
-			while ((c = fgetc(rc_file)) != '\n')
+			while ((c = fgetc(rc_file)) != '\n' && c != EOF)
 				;
 			++lineno;
 		} else if (c == '\n')
@@ -120,10 +123,8 @@ void read_rc_file(void)
 	strcat(buf, "/.zilerc");
 	rc_name = buf;
 
-	if ((rc_file = fopen(buf, "r")) == NULL)
-		return;
-
-	parse_rc();
-
-	fclose(rc_file);
+	if ((rc_file = fopen(buf, "r")) != NULL) {
+		parse_rc();
+		fclose(rc_file);
+	}
 }

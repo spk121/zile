@@ -1,4 +1,4 @@
-/*	$Id: fontlock.c,v 1.1 2001/01/19 22:02:09 ssigala Exp $	*/
+/*	$Id: fontlock.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -29,20 +29,23 @@
  * matching, simplifying a lot of the work.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
 /*
  * Parse the line for comments and strings and add anchors if found.
+ * C/C++ Mode.
  */
-static void line_set_anchors(linep lp, int *lastanchor)
+static void cpp_set_anchors(linep lp, int *lastanchor)
 {
 	char *sp, *ap;
 
@@ -51,7 +54,7 @@ static void line_set_anchors(linep lp, int *lastanchor)
 		return;
 	}
 
-	ap = lp->anchors = (char *)xmalloc(lp->size);
+	ap = lp->anchors = (char *)zmalloc(lp->size);
 
 	for (sp = lp->text; sp < lp->text + lp->size; sp++)
 		if (*lastanchor == ANCHOR_BEGIN_COMMENT) {
@@ -97,6 +100,10 @@ static void line_set_anchors(linep lp, int *lastanchor)
 			*ap++ = ANCHOR_BEGIN_COMMENT;
 			*ap++ = ANCHOR_NULL;
 			*lastanchor = ANCHOR_BEGIN_COMMENT;
+		} else if (*sp == '/' && sp < lp->text + lp->size - 1 && *(sp+1) == '/') {
+			/* // C++ style comment; ignore to end of line. */
+			for (; sp < lp->text + lp->size; sp++)
+				*ap++ = ANCHOR_NULL;
 		} else if (*sp == '\'') {
 			/*
 			 * Parse a character constant.  No anchors are
@@ -104,13 +111,13 @@ static void line_set_anchors(linep lp, int *lastanchor)
 			 * cannot be longer than a line.
 			 */
 			*ap++ = ANCHOR_NULL;
-			do {
+			while (sp < lp->text + lp->size - 1 && *sp != '\'') {
 				*ap++ = ANCHOR_NULL;
 				if (*++sp == '\\' && sp < lp->text + lp->size - 1) {
 					*ap++ = ANCHOR_NULL;
 					++sp;
 				}
-			} while (sp < lp->text + lp->size - 1 && *sp != '\'');
+			}
 		} else if (*sp == '"') {
 			/*
 			 * Found a string beginning sequence.  Put an anchor to
@@ -120,6 +127,70 @@ static void line_set_anchors(linep lp, int *lastanchor)
 			*lastanchor = ANCHOR_BEGIN_STRING;
 		} else
 			*ap++ = ANCHOR_NULL;
+}
+
+/*
+ * Parse the line for comments and strings and add anchors if found.
+ * Shell Mode.
+ */
+static void shell_set_anchors(linep lp, int *lastanchor)
+{
+	char *sp, *ap;
+	static int laststrchar;
+
+	if (lp->size == 0) {
+		lp->anchors = NULL;
+		return;
+	}
+
+	ap = lp->anchors = (char *)zmalloc(lp->size);
+
+	for (sp = lp->text; sp < lp->text + lp->size; sp++)
+		if (*lastanchor == ANCHOR_BEGIN_STRING) {
+			/*
+			 * We are in the middle of a string, so parse for
+			 * finding the termination sequence.
+			 */
+			if (*sp == '\\' && sp < lp->text + lp->size - 1) {
+				*ap++ = ANCHOR_NULL;
+				*ap++ = ANCHOR_NULL;
+				++sp;
+			} else if (*sp == laststrchar) {
+				/*
+				 * Found a string termination.  Put an anchor
+				 * to signal this.
+				 */
+				*ap++ = ANCHOR_END_STRING;
+				*lastanchor = ANCHOR_NULL;
+			} else
+				*ap++ = ANCHOR_NULL;
+		} else if (*sp == '"' || *sp == '`' || *sp == '\'') {
+			/*
+			 * Found a string beginning sequence.  Put an anchor to
+			 * signal this.
+			 */
+			laststrchar = *sp;
+			*ap++ = ANCHOR_BEGIN_STRING;
+			*lastanchor = ANCHOR_BEGIN_STRING;
+		} else if (*sp == '#') {
+			/* Comment; ignore to end of line. */
+			for (; sp < lp->text + lp->size; sp++)
+				*ap++ = ANCHOR_NULL;
+		} else
+			*ap++ = ANCHOR_NULL;
+}
+
+static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
+{
+	switch (bp->mode) {
+	case BMODE_C:
+	case BMODE_CPP:
+		cpp_set_anchors(lp, lastanchor);
+		break;
+	case BMODE_SHELL:
+		shell_set_anchors(lp, lastanchor);
+		break;
+	}
 }
 
 /*
@@ -134,7 +205,7 @@ void font_lock_reset_anchors(bufferp bp, linep lp)
 		free(lp->anchors);
 	lp->anchors = NULL;
 	lastanchor = find_last_anchor(bp, lp->prev);
-	line_set_anchors(lp, &lastanchor);
+	line_set_anchors(bp, lp, &lastanchor);
 }
 
 /*
@@ -144,11 +215,14 @@ int find_last_anchor(bufferp bp, linep lp)
 {
 	char *p;
 
-	for (; lp != bp->limitp; lp = lp->prev)
+	for (; lp != bp->limitp; lp = lp->prev) {
+		if (lp->anchors == NULL)
+			continue;
 		if (lp->size > 0)
 			for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
 				if (*p != ANCHOR_NULL)
 					return *p;
+	}
 
 	return ANCHOR_NULL;
 }
@@ -165,7 +239,7 @@ static void font_lock_set_anchors(bufferp bp)
 	cur_tp->refresh();
 
 	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next)
-		line_set_anchors(lp, &lastanchor);
+		line_set_anchors(bp, lp, &lastanchor);
 
 	minibuf_clear();
 }

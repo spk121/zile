@@ -1,4 +1,4 @@
-/*	$Id: help.c,v 1.1 2001/01/19 22:02:23 ssigala Exp $	*/
+/*	$Id: help.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,19 +24,23 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <ctype.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 #include "paths.h"
 #include "version.h"
+#include "astr.h"
 
 DEFUN("zile-version", zile_version)
 /*+
@@ -48,49 +52,109 @@ Show the zile version.
 	return TRUE;
 }
 
+static int minihelp_page = 1;
+
+/*
+ * Replace each occurrence of `C-h' in buffer with `M-h'.
+ */
+static void fix_alternative_keys(bufferp bp)
+{
+	linep lp;
+	char *p;
+	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next)
+		for (p = lp->text; p - lp->text < lp->size - 2; ++p)
+			if (p[0] == 'C' && p[1] == '-' && p[2] == 'h')
+				p[0] = 'M', p += 2;
+}
+
+/*
+ * Switch to the `bp' buffer and replace any contents with the current
+ * Mini Help page (read from disk).
+ */
+static int read_minihelp_page(bufferp bp)
+{
+	char fname[PATH_MAX];
+	int delta;
+
+	switch_to_buffer(bp);
+	zap_buffer_content();
+	bp->flags = BFLAG_NOUNDO | BFLAG_READONLY | BFLAG_NOSAVE
+		| BFLAG_NEEDNAME | BFLAG_TEMPORARY | BFLAG_MODIFIED
+		| BFLAG_NOEOB;
+	set_temporary_buffer(bp);
+
+	sprintf(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
+	if (!exist_file(fname)) {
+		minihelp_page = 1;
+		sprintf(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
+		if (!exist_file(fname)) {
+			minibuf_error("Unable to read file `@b%s@@'", fname);
+			return FALSE;
+		}
+	}
+
+	read_from_disk(fname);
+	if (lookup_bool_variable("alternative-bindings"))
+		fix_alternative_keys(bp);
+	gotobob();
+
+	while ((delta = cur_wp->eheight - head_wp->bp->num_lines) < 1) {
+		FUNCALL(enlarge_window);
+		/* Break if cannot enlarge further. */
+		if (delta == cur_wp->eheight - head_wp->bp->num_lines)
+			break;
+	}
+
+	return TRUE;
+}
+
 DEFUN("toggle-minihelp-window", toggle_minihelp_window)
 /*+
 Toggle the mini help window.
 +*/
 {
-	char *bname = "*Mini Help*";
+	const char *bname = "*Mini Help*";
 	bufferp bp;
 	windowp wp;
+	int delta;
 
 	if ((wp = find_window(bname)) != NULL) {
 		cur_wp = wp;
 		cur_bp = wp->bp;
 		FUNCALL(delete_window);
 	} else {
-		if (!exist_file(PATH_DATA "/HELPWIN")) {
-			minibuf_error("%FCUnable to read file %FY`%s'%E",
-				      PATH_DATA "/HELPWIN");
-			return FALSE;
-		}
-
 		FUNCALL(delete_other_windows);
 		FUNCALL(split_window);
 		cur_wp = head_wp;
-		if ((bp = find_buffer(bname, FALSE)) == NULL) {
+		if ((bp = find_buffer(bname, FALSE)) == NULL)
 			bp = find_buffer(bname, TRUE);
-			bp->flags = BFLAG_NOUNDO | BFLAG_READONLY
-				| BFLAG_NOSAVE | BFLAG_NEEDNAME
-				| BFLAG_TEMPORARY | BFLAG_MODIFIED
-				| BFLAG_NOEOB;
-			set_temporary_buffer(bp);
-			switch_to_buffer(bp);
-			if (lookup_bool_variable("alternative-bindings"))
-				read_from_disk(PATH_DATA "/HELPWINALT");
-			else
-				read_from_disk(PATH_DATA "/HELPWIN");
-		} else {
-			switch_to_buffer(bp);
-			gotobob();
-		}
+		read_minihelp_page(bp);
 		cur_wp = head_wp->next;
 		cur_bp = head_wp->next->bp;
-		while (head_wp->eheight > head_wp->bp->num_lines + 1)
+		while ((delta = head_wp->eheight - head_wp->bp->num_lines) > 1) {
 			FUNCALL(enlarge_window);
+			/* Break if cannot enlarge further. */
+			if (delta == head_wp->eheight - head_wp->bp->num_lines)
+				break;
+		}
+	}
+
+	return TRUE;
+}
+
+DEFUN("rotate-minihelp-window", rotate_minihelp_window)
+/*+
+Show the next mini help entry.
++*/
+{
+	const char *bname = "*Mini Help*";
+
+	if (find_window(bname) == NULL)
+		FUNCALL(toggle_minihelp_window);
+	else { /* Easy hack */
+		FUNCALL(toggle_minihelp_window);
+		++minihelp_page;
+		FUNCALL(toggle_minihelp_window);
 	}
 
 	return TRUE;
@@ -99,7 +163,7 @@ Toggle the mini help window.
 static int show_file(char *filename)
 {
 	if (!exist_file(filename)) {
-		minibuf_error("%FCUnable to read file %FY`%s'%E", filename);
+		minibuf_error("Unable to read file `@b%s@@'", filename);
 		return FALSE;
 	}
 
@@ -165,67 +229,61 @@ Show a tutorial window.
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.
  */
-static char *get_funcvar_doc(char *name, char *defval, int isfunc)
+static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 {
 	FILE *f;
-	char buf[1024], match[128], *doc;
-	size_t size, maxsize;
+	astr buf, match, doc;
 	int reading_doc = 0;
 
+	buf = astr_new();
+	match = astr_new();
+	doc = astr_new();
+
 	if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
-		minibuf_error("%FCUnable to read file %FY`%s'%E",
+		minibuf_error("Unable to read file `@b%s@@'",
 			      PATH_DATA "/AUTODOC");
 		return NULL;
 	}
 
 	if (isfunc)
-		sprintf(match, "\fF_%s\n", name);
+		astr_fmt(match, "\fF_%s", name);
 	else
-		sprintf(match, "\fV_%s\n", name);
-	size = 1;
-	maxsize = 1024;
-	doc = (char *)xmalloc(maxsize);
-	*doc = '\0';
-	if (!isfunc)
-		*defval = '\0';
+		astr_fmt(match, "\fV_%s", name);
 
-	while (fgets(buf, 1024, f) != NULL) {
+	while (astr_fgets(buf, f) != NULL)
 		if (reading_doc) {
-			if (buf[0] == '\f')
+			if (astr_cstr(buf)[0] == '\f')
 				break;
-			if (isfunc || *defval != '\0') {
-				size += strlen(buf);
-				if (size > maxsize) {
-					maxsize = size + 256;
-					doc = (char *)xrealloc(doc, maxsize);
-				}
-				strcat(doc, buf);
-			} else {
-				strcpy(defval, buf);
-				defval[strlen(defval) - 1] = '\0';
-			}
-		} else if (!strcmp(buf, match))
+			if (isfunc || astr_size(defval) > 0) {
+				astr_append(doc, buf);
+				astr_append_char(doc, '\n');
+			} else
+				astr_assign(defval, buf);
+		} else if (astr_eq(buf, match))
 			reading_doc = 1;
-	}
 
 	fclose(f);
 
+	astr_delete(buf);
+	astr_delete(match);
+
 	if (!reading_doc) {
-		minibuf_error("%FCCannot find documentation for %FY`%s'%E", name);
-		free(doc);
+		minibuf_error("Cannot find documentation for `@f%s@@'", name);
+		astr_delete(doc);
 		return NULL;
 	}
 		
 	return doc;
 }
 
-static void write_function_description(void *p1, void *p2, void *p3, void *p4)
+static void write_function_description(va_list ap)
 {
-	char *name = (char *)p1, *doc = (char *)p2;
+	const char *name = va_arg(ap, const char *);
+	astr doc = va_arg(ap, astr);
 
 	bprintf("Function: %s\n\n"
 		"Documentation:\n%s",
-		name, doc);
+		name, astr_cstr(doc));
 }
 
 DEFUN("describe-function", describe_function)
@@ -233,7 +291,8 @@ DEFUN("describe-function", describe_function)
 Display the full documentation of a function.
 +*/
 {
-	char bufname[128], *name, *doc;
+	char *name;
+	astr bufname, doc;
 
 	name = minibuf_read_function_name("Describe function: ");
 	if (name == NULL)
@@ -242,22 +301,26 @@ Display the full documentation of a function.
 	if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
 		return FALSE;
 
-	sprintf(bufname, "*Help: function `%s'*", name);
-	write_to_temporary_buffer(bufname, write_function_description,
-				  name, doc, NULL, NULL);
-	free(doc);
+	bufname = astr_new();
+	astr_fmt(bufname, "*Help: function `%s'*", name);
+	write_temp_buffer(astr_cstr(bufname), write_function_description,
+			  name, doc);
+	astr_delete(bufname);
+	astr_delete(doc);
 
 	return TRUE;
 }
 
-static void write_variable_description(void *p1, void *p2, void *p3, void *p4)
+static void write_variable_description(va_list ap)
 {
-	char *name = (char *)p1, *defval = (char *)p2, *doc = (char *)p3;
+	char *name = va_arg(ap, char *);
+	astr defval = va_arg(ap, astr);
+	astr doc = va_arg(ap, astr);
 	bprintf("Variable: %s\n\n"
 		"Default value: %s\n"
 		"Current value: %s\n\n"
 		"Documentation:\n%s",
-		name, defval, get_variable(name), doc);
+		name, astr_cstr(defval), get_variable(name), astr_cstr(doc));
 }
 
 DEFUN("describe-variable", describe_variable)
@@ -265,19 +328,24 @@ DEFUN("describe-variable", describe_variable)
 Display the full documentation of a variable.
 +*/
 {
-	char bufname[128], defval[128], *name, *doc;
+	char *name;
+	astr bufname, defval, doc;
 
 	name = minibuf_read_variable_name("Describe variable: ");
 	if (name == NULL)
 		return FALSE;
 
+	defval = astr_new();
 	if ((doc = get_funcvar_doc(name, defval, FALSE)) == NULL)
 		return FALSE;
 
-	sprintf(bufname, "*Help: variable `%s'*", name);
-	write_to_temporary_buffer(bufname, write_variable_description,
-				  name, defval, doc, NULL);
-	free(doc);
+	bufname = astr_new();
+	astr_fmt(bufname, "*Help: variable `%s'*", name);
+	write_temp_buffer(astr_cstr(bufname), write_variable_description,
+			  name, defval, doc);
+	astr_delete(bufname);
+	astr_delete(doc);
+	astr_delete(defval);
 
 	return TRUE;
 }
@@ -287,23 +355,26 @@ DEFUN("describe-key", describe_key)
 Display documentation of the function invoked by a key sequence.
 +*/
 {
-	char bufname[128], *name, *doc;
+	char *name;
+	astr bufname, doc;
 
 	minibuf_write("Describe key:");
 	if ((name = get_function_by_key_sequence()) == NULL) {
-		minibuf_error("%FCKey sequence is undefined%E");
+		minibuf_error("Key sequence is undefined");
 		return FALSE;
 	}
 
-	minibuf_write("Key sequence is bound to %FY`%s'%E", name);
+	minibuf_write("Key sequence is bound to `@f%s@@'", name);
 
 	if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
 		return FALSE;
 
-	sprintf(bufname, "*Help: function `%s'*", name);
-	write_to_temporary_buffer(bufname, write_function_description,
-				  name, doc, NULL, NULL);
-	free(doc);
+	bufname = astr_new();
+	astr_fmt(bufname, "*Help: function `%s'*", name);
+	write_temp_buffer(astr_cstr(bufname), write_function_description,
+			  name, doc);
+	astr_delete(bufname);
+	astr_delete(doc);
 
 	return TRUE;
 }

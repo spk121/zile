@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.1 2001/01/19 22:03:34 ssigala Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,7 +24,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#define SUPPORT_XTERM_RESIZE
+#include "config.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -32,10 +32,15 @@
 #include <stdlib.h>
 #include <string.h>
 #ifdef SUPPORT_XTERM_RESIZE
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#include <sys/termios.h>
 #include <signal.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#endif /* SUPPORT_XTERM_RESIZE */
 
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
@@ -43,7 +48,6 @@
 #include <curses.h>
 #endif
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -90,7 +94,7 @@ void resize_windows(int width, int height)
 	ncurses_tp->height = height - hdelta;
 }
 
-static void signal_handler(int signo)
+static void resize_sig_handler(int signo)
 {
 	struct winsize win;
 	switch (signo) {
@@ -110,14 +114,27 @@ static void signal_handler(int signo)
 }
 #endif
 
+static void segv_sig_handler(int signo)
+{
+	fprintf(stderr, "Zile crashed.  Please send a bug report to <sandro@sigala.it>.\r\n");
+	zile_exit(2);
+}
+
 int ncurses_init(void)
 {
+	struct sigaction segv_sig;
 #ifdef SUPPORT_XTERM_RESIZE
-	struct sigaction sig_handler;
+	struct sigaction resize_sig;
+#endif
 
-        sig_handler.sa_handler = signal_handler;
-        sigemptyset(&sig_handler.sa_mask);
-        sig_handler.sa_flags = SA_RESTART;
+	segv_sig.sa_handler = segv_sig_handler;
+	sigemptyset(&segv_sig.sa_mask);
+        segv_sig.sa_flags = SA_RESTART;
+
+#ifdef SUPPORT_XTERM_RESIZE
+        resize_sig.sa_handler = resize_sig_handler;
+        sigemptyset(&resize_sig.sa_mask);
+        resize_sig.sa_flags = SA_RESTART;
 #endif
 
 	initscr();
@@ -125,8 +142,10 @@ int ncurses_init(void)
 	ncurses_tp->width = COLS;
 	ncurses_tp->height = LINES;
 
+	sigaction(SIGFPE, &segv_sig, NULL);
+	sigaction(SIGSEGV, &segv_sig, NULL);
 #ifdef SUPPORT_XTERM_RESIZE
-	sigaction(SIGWINCH, &sig_handler, NULL);
+	sigaction(SIGWINCH, &resize_sig, NULL);
 #endif
 
 	return TRUE;
@@ -189,7 +208,7 @@ void ncurses_refresh(void)
 	refresh();
 }
 
-void ncurses_show_about(char *splash, char *minibuf, char *waitstr)
+static void show_splash_screen(char *splash)
 {
 	int i, bold = 0, red = 0;
 	char *p;
@@ -220,14 +239,18 @@ void ncurses_show_about(char *splash, char *minibuf, char *waitstr)
 		default:
 			addch(*p);
 		}
+}
 
-	if (waitstr != NULL) {
-		attrset(A_BOLD|C_FG_RED);
-		mvaddstr(LINES - 4, (COLS - strlen(waitstr)) / 2, waitstr);
-		attrset(0);
-	}
-
-	minibuf_write(minibuf);
+void ncurses_show_about(char *splash, char *minibuf)
+{
+	if (!lookup_bool_variable("novice-level") &&
+	    !lookup_bool_variable("skip-splash-screen")) {
+		show_splash_screen(splash);
+		minibuf_write(minibuf);
+		waitkey(20 * 1000);
+		minibuf_clear();
+	} else
+		minibuf_write(minibuf);
 }
 
 void ncurses_clear(void)

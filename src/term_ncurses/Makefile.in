@@ -1,4 +1,4 @@
-#	$Id: Makefile.in,v 1.1 2001/01/19 22:03:07 ssigala Exp $
+#	$Id: Makefile.in,v 1.2 2003/04/24 15:12:00 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
@@ -15,7 +15,7 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL = @INSTALL@
 
 CC = @CC@
-CFLAGS = -I.. -I../../lib -W @CFLAGS@
+CFLAGS = -I.. -I$(srcdir)/../../lib @CFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = ../../lib/libzile.a @LIBS@
 RANLIB = @RANLIB@

@@ -1,0 +1,181 @@
+.\" -*- nroff -*-
+.\" $Id: htable.3,v 1.1 2003/04/24 15:11:59 rrt Exp $
+.Dd February 12, 2001
+.Os
+.Dt HTABLE 3
+.Sh NAME
+.Nm htable
+.Nd Hash table library
+.Sh SYNOPSIS
+.Fd #include <htable.h>
+.Bd -literal
+
+typedef /* ... */ htable;
+typedef struct {
+	char *key;
+	void *data;
+} hpair;
+typedef unsigned long (*hfunc_t)(const char *data,
+                                 unsigned long table_size);
+
+htable htable_new(void);
+htable htable_new_custom(unsigned long size);
+void   htable_delete(htable ht);
+void   htable_set_hash_func(htable ht, hfunc_t func);
+int    htable_store_key(htable ht, const char *key);
+int    htable_store_data(htable ht, const char *key, void *data);
+int    htable_store(htable ht, const char *key, void *data);
+int    htable_exists(htable ht, const char *key);
+void * htable_fetch(htable ht, const char *key);
+int    htable_remove(htable ht, const char *key);
+void   htable_dump(htable ht, FILE *fout);
+alist  htable_list(htable ht);
+.Ed
+.Sh DESCRIPTION
+The
+.Nm
+hash table library provides a generic-purpose hash table interface.
+.Pp
+The library provides three types:
+.Fa htable ,
+.Fa hpair ,
+and
+.Fa hfunc_t .
+The
+.Fa htable
+type stores all the data contained into a hash table.
+The
+.Fa hpair
+type is used by the
+.Fn htable_list
+function to store the hash table pairs.
+The
+.Fa hfunc_t
+type is used by the
+.Fn htable_set_hash_func
+function to specify a new hashing function.
+.Pp
+The
+.Fn htable_new
+function allocates a new hash table with default size.
+.Pp
+The
+.Fn htable_new_custom
+function allocates a new hash table, with the specified size
+.Fa size .
+.Pp
+The
+.Fn htable_delete
+function deallocates the previously allocated hash table
+.Fa ht .
+.Pp
+The
+.Fn htable_set_hash_func
+function specifies a new hashing fuction for the hash table
+.Fa ht .
+.Pp
+The
+.Fn htable_store_key
+function stores the key
+.Fa key
+into the hash table
+.Fa ht ,
+with an associated data set to
+.Fa NULL .
+If the key is already existing, the
+.Fn htable_store_key
+function will return the value -1, otherwise 0.
+.Pp
+The
+.Fn htable_store_data
+function associates the data
+.Fa data
+with the key
+.Fa key .
+If the key does not existing into the hash table, the key/data pair will not
+be stored and the
+.Fn htable_store_data
+function will return the value -1, otherwise 0.
+.Pp
+The
+.Fn htable_store
+function stores a key/data pair into the hash table
+.Fa ht .
+Existing key/data pair will be overwritten.
+.Pp
+The
+.Fn htable_exists
+function returns 1 if the specified key
+.Fa key
+exists in the hash table
+.Fa ht ,
+0 otherwise.
+.Pp
+The
+.Fn htable_fetch
+function returns the data associated to the specified key
+.Fa key .
+If the key does not exist or no data was associated with the key, a
+.Fa NULL
+value will be returned.
+.Pp
+The
+.Fn htable_remove
+function removes the specified key
+.Fa key
+from the hash table
+.Fa ht .
+The
+.Fn htable_remove
+function returns 1 if the specified key
+.Fa key
+exists in the hash table
+.Fa ht ,
+0 otherwise.
+.Pp
+The
+.Fn htable_dump
+function dumps a user readable description of the hash table
+.Fa ht
+to the specified file
+.Fa fout .
+This is useful for debugging purposes.
+.Pp
+The
+.Fn htable_list
+function returns a new allocated (unsorted) list filled with all the pairs
+(of type
+.Fa hpair )
+defined in the hash table.  After use, the list should be deallocated
+(but not the elements, because they belong to the hash table).
+.Sh EXAMPLES
+Creating a hash table with some keys:
+.Bd -literal -offset indent
+htable ht = htable_new();
+htable_store_key(ht, "key1");
+htable_store_key(ht, "key2");
+htable_store(ht, "key3", "key with data");
+htable_store_key(ht, "key4");
+htable_remove(ht, "key4");
+printf("key1: %d\\n", htable_exists(ht, "key1"));
+printf("key2: %d\\n", htable_exists(ht, "key2"));
+printf("key3: %d\\n", htable_exists(ht, "key3"));
+printf("key4: %d\\n", htable_exists(ht, "key4"));
+printf("key5: %d\\n", htable_exists(ht, "key5"));
+printf("key3 data: %s\\n", htable_fetch(ht, "key3"));
+htable_delete(ht);
+.Ed
+.Pp
+Dumping a hash table:
+.Bd -literal -offset indent
+htable ht = htable_new();
+htable_store_key(ht, "key1");
+htable_store_key(ht, "key2");
+/* ... */
+htable_dump(ht, stdout);
+htable_delete(ht);
+.Ed
+.Sh SEE ALSO
+.Xr alist 3
+.Sh AUTHORS
+Sandro Sigala <sandro@sigala.it>

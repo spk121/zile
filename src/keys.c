@@ -1,4 +1,4 @@
-/*	$Id: keys.c,v 1.1 2001/01/19 22:02:26 ssigala Exp $	*/
+/*	$Id: keys.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,13 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -47,10 +48,11 @@ char *keytostr(char *buf, int key, int *len)
 {
 	char *p = buf;
 
-	if (key & KBD_CTL && key != KBD_TAB && key != KBD_RET)
+	if (key & KBD_CTL)
 		ADDNSTR(p, "\\C-", 3);
 	if (key & KBD_META)
 		ADDNSTR(p, "\\M-", 3);
+	key &= ~(KBD_CTL | KBD_META);
 
 	switch (key) {
 	case KBD_PGUP:
@@ -151,10 +153,11 @@ char *keytostr_nobs(char *buf, int key, int *len)
 {
 	char *p = buf;
 
-	if (key & KBD_CTL && key != KBD_TAB && key != KBD_RET)
+	if (key & KBD_CTL)
 		ADDNSTR(p, "C-", 2);
 	if (key & KBD_META)
 		ADDNSTR(p, "M-", 2);
+	key &= ~(KBD_CTL | KBD_META);
 
 	switch (key) {
 	case KBD_PGUP:

@@ -1,4 +1,4 @@
-/*	$Id: undo.c,v 1.1 2001/01/19 22:02:52 ssigala Exp $	*/
+/*	$Id: undo.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,12 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -73,7 +75,7 @@ void undo_save(int type, int startn, int starto, int arg1, int arg2)
 	if (cur_bp->flags & BFLAG_NOUNDO || undo_nosave)
 		return;
 
-	up = (undop)xmalloc(sizeof(*up));
+	up = (undop)zmalloc(sizeof(*up));
 
 	up->type = type;
 
@@ -193,7 +195,7 @@ Repeat this command to undo more changes.
 +*/
 {
 	if (cur_bp->flags & BFLAG_NOUNDO) {
-		minibuf_error("%FCUndo disabled in this buffer%E");
+		minibuf_error("Undo disabled in this buffer");
 		return FALSE;
 	}
 
@@ -201,7 +203,7 @@ Repeat this command to undo more changes.
 		return FALSE;
 
 	if (cur_bp->next_undop == NULL) {
-		minibuf_error("%FCNo further undo information%E");
+		minibuf_error("No further undo information");
 		cur_bp->next_undop = cur_bp->last_undop;
 		return FALSE;
 	}
@@ -214,7 +216,7 @@ Repeat this command to undo more changes.
 	if (cur_bp->next_undop == NULL)
 		cur_bp->flags &= ~BFLAG_MODIFIED;
 
-	minibuf_write("%FCUndo!%E");
+	minibuf_write("Undo!");
 
 	return TRUE;
 }

@@ -1,4 +1,4 @@
-/*	$Id: killring.c,v 1.1 2001/01/19 22:02:27 ssigala Exp $	*/
+/*	$Id: killring.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,10 +24,12 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -52,10 +54,10 @@ static void kill_ring_push(char c)
 {
 	if (kill_ring_text == NULL) {
 		kill_ring_maxsize = 16;
-		kill_ring_text = (char *)xmalloc(kill_ring_maxsize);
+		kill_ring_text = (char *)zmalloc(kill_ring_maxsize);
 	} else if (kill_ring_size + 1 >= kill_ring_maxsize) {
 		kill_ring_maxsize += 16;
-		kill_ring_text = (char *)xrealloc(kill_ring_text, kill_ring_maxsize);
+		kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
 	}
 	kill_ring_text[kill_ring_size++] = c;
 }
@@ -64,10 +66,10 @@ static void kill_ring_push_nstring(char *s, size_t size)
 {
 	if (kill_ring_text == NULL) {
 		kill_ring_maxsize = size;
-		kill_ring_text = (char *)xmalloc(size);
+		kill_ring_text = (char *)zmalloc(size);
 	} else if (kill_ring_size + (int)size >= kill_ring_maxsize) {
 		kill_ring_maxsize += size;
-		kill_ring_text = (char *)xrealloc(kill_ring_text, kill_ring_maxsize);
+		kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
 	}
 	memcpy(kill_ring_text + kill_ring_size, s, size);
 	kill_ring_size += size;
@@ -102,7 +104,7 @@ static int kill_line(void)
 		return TRUE;
 	}
 
-	minibuf_error("%FCEnd of buffer%E");
+	minibuf_error("End of buffer");
 
 	return FALSE;
 }
@@ -217,7 +219,7 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 +*/
 {
 	if (kill_ring_size == 0) {
-		minibuf_error("%FCKill ring is empty%E");
+		minibuf_error("Kill ring is empty");
 		return FALSE;
 	}
 

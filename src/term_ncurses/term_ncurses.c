@@ -1,4 +1,4 @@
-/*	$Id: term_ncurses.c,v 1.1 2001/01/19 22:03:37 ssigala Exp $	*/
+/*	$Id: term_ncurses.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -28,6 +28,8 @@
  * This module exports only the `ncurses_tp' pointer.
  */
 
+#include "config.h"
+
 #include <stddef.h>
 
 #ifdef HAVE_NCURSES_H
@@ -36,7 +38,6 @@
 #include <curses.h>
 #endif
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -52,7 +53,7 @@ extern void ncurses_refresh_cached_variables(void);
 extern void ncurses_refresh(void);
 extern void ncurses_redisplay(void);
 extern void ncurses_full_redisplay(void);
-extern void ncurses_show_about(char *splash, char *minibuf, char *waitstr);
+extern void ncurses_show_about(char *splash, char *minibuf);
 extern void ncurses_clear(void);
 extern void ncurses_beep(void);
 extern void ncurses_minibuf_write(const char *fmt);

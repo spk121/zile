@@ -1,4 +1,4 @@
-/*	$Id: bind.c,v 1.1 2001/01/19 22:01:53 ssigala Exp $	*/
+/*	$Id: bind.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,6 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -31,7 +33,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -57,11 +58,11 @@ static leafp new_leaf(int vecmax)
 {
 	leafp p;
 
-	p = (leafp)xmalloc(sizeof *p);
+	p = (leafp)zmalloc(sizeof *p);
 	memset(p, 0, sizeof *p);
 
 	p->vecmax = vecmax;
-	p->vec = (leafp *)xmalloc(sizeof *p * vecmax);
+	p->vec = (leafp *)zmalloc(sizeof *p * vecmax);
 
 	return p;
 }
@@ -98,7 +99,7 @@ static void add_leaf(leafp tree, leafp p)
 	 */
 	if (tree->vecnum + 1 >= tree->vecmax) {
 		tree->vecmax += 5;
-		tree->vec = (leafp *)xrealloc(tree->vec, sizeof *p * tree->vecmax);
+		tree->vec = (leafp *)zrealloc(tree->vec, sizeof *p * tree->vecmax);
 	}
 
 	/*
@@ -143,7 +144,7 @@ void bind_key(char *key, funcp func)
 		if (leaf_tree == NULL)
 			leaf_tree = new_leaf(10);
 		if (!bind_key0(leaf_tree, keys, i, func)) {
-			minibuf_error("%FCError: key %FY%s%FC already bound%E", key);
+			minibuf_error("Error: key @k%s@@ already bound", key);
 			waitkey(2 * 1000);
 		}
 	}
@@ -216,16 +217,16 @@ int do_completion(char *s, int *compl)
 	int c;
 	char buf[32];
 
-	sprintf(buf, "%%FG%s%%E", s);
+	strcpy(buf, s);
 	if (!*compl) {
-		c = cur_tp->xgetkey(GETKEY_DELAYED, 400);
+		c = cur_tp->xgetkey(GETKEY_DELAYED, 500);
 		if (c == KBD_NOKEY) {
-			minibuf_write(buf);
+			minibuf_write("%s", buf);
 			c = cur_tp->getkey();
 			*compl = 1;
 		}
 	} else {
-		minibuf_write(buf);
+		minibuf_write("%s", buf);
 		c = cur_tp->getkey();
 	}
 	minibuf_clear();
@@ -244,25 +245,27 @@ static char *make_completion(char *buf, int *keys, int numkeys)
 		len += l - 1;
 	}
 
-	buf[len] = '-';
-	buf[len+1] = '\0';
+	buf[len] = ' ';
+	buf[len+1] = '-';
+	buf[len+2] = '\0';
 
 	return buf;
 }
 
-static leafp completion_scan(int c)
+static leafp completion_scan(int c, int keys[], int *numkeys)
 {
-	int keys[64] = { c };
-	int compl = 0, numkeys = 1;
+	int compl = 0;
 	leafp p;
+	keys[0] = c;
+	*numkeys = 1;
 
 	for (;;) {
-		if ((p = search_key0(leaf_tree, keys, numkeys)) == NULL)
+		if ((p = search_key0(leaf_tree, keys, *numkeys)) == NULL)
 			return NULL;
 		if (p->func == NULL) {
 			char buf[64];
-			make_completion(buf, keys, numkeys);
-			keys[numkeys++] = do_completion(buf, &compl);
+			make_completion(buf, keys, *numkeys);
+			keys[(*numkeys)++] = do_completion(buf, &compl);
 			continue;
 		} else
 			return p;
@@ -271,21 +274,29 @@ static leafp completion_scan(int c)
 
 void process_key(int c)
 {
-	int uni;
+	int uni, keys[64], numkeys;
 	leafp p;
+
+	if (c == KBD_NOKEY)
+		return;
 
 	if (c & KBD_META && isdigit(c & 255)) {
 		/*
 		 * Got a ESC x sequence where `x' is a digit.
 		 */
 		universal_argument(KBD_META, (c & 255) - '0');
-	} else if ((p = completion_scan(c)) == NULL) {
+	} else if ((p = completion_scan(c, keys, &numkeys)) == NULL) {
 		/*
 		 * There are no bindings for the pressed key.
 		 */
 		for (uni = 0; uni < last_uniarg; ++uni) {
-			if (!self_insert_command(c))
+			if (!self_insert_command(c)) {
+				char buf[64];
+				make_completion(buf, keys, numkeys);
+				buf[strlen(buf)-2] = '\0';
+				minibuf_error("%s not defined.", buf);
 				return;
+			}
 			if (thisflag & FLAG_DEFINING_MACRO)
 				add_kbd_macro(self_insert_command, c);
 		}
@@ -314,28 +325,24 @@ struct fentry {
 	char	*key1;
 	char	*key2;
 	char	*key3;
-	char	*key4;
 };
 
 typedef struct fentry *fentryp;
 
-struct fentry fentry_table[] = {
+static struct fentry fentry_table[] = {
 #define X0(zile_name, c_name) \
-	{ zile_name, F_ ## c_name, NULL, NULL, NULL, NULL },
+	{ zile_name, F_ ## c_name, NULL, NULL, NULL },
 #define X1(zile_name, c_name, key1) \
-	{ zile_name, F_ ## c_name, key1, NULL, NULL, NULL },
+	{ zile_name, F_ ## c_name, key1, NULL, NULL },
 #define X2(zile_name, c_name, key1, key2) \
-	{ zile_name, F_ ## c_name, key1, key2, NULL, NULL },
+	{ zile_name, F_ ## c_name, key1, key2, NULL },
 #define X3(zile_name, c_name, key1, key2, key3) \
-	{ zile_name, F_ ## c_name, key1, key2, key3, NULL },
-#define X4(zile_name, c_name, key1, key2, key3, key4) \
-	{ zile_name, F_ ## c_name, key1, key2, key3, key4 },
+	{ zile_name, F_ ## c_name, key1, key2, key3 },
 #include "tbl_funcs.h"
 #undef X0
 #undef X1
 #undef X2
 #undef X3
-#undef X4
 };
 
 #define fentry_table_size (sizeof(fentry_table) / sizeof fentry_table[0])
@@ -355,20 +362,16 @@ void init_bindings(void)
 		alternative_bindings = 1;
 		for (i = 0; i < fentry_table_size; ++i) {
 			if (fentry_table[i].key1 != NULL) {
-				fentry_table[i].key1 = xstrdup(fentry_table[i].key1);
+				fentry_table[i].key1 = zstrdup(fentry_table[i].key1);
 				replace_string(fentry_table[i].key1, "C-h", "M-h");
 			}
 			if (fentry_table[i].key2 != NULL) {
-				fentry_table[i].key2 = xstrdup(fentry_table[i].key2);
+				fentry_table[i].key2 = zstrdup(fentry_table[i].key2);
 				replace_string(fentry_table[i].key2, "C-h", "M-h");
 			}
 			if (fentry_table[i].key3 != NULL) {
-				fentry_table[i].key3 = xstrdup(fentry_table[i].key3);
+				fentry_table[i].key3 = zstrdup(fentry_table[i].key3);
 				replace_string(fentry_table[i].key3, "C-h", "M-h");
-			}
-			if (fentry_table[i].key4 != NULL) {
-				fentry_table[i].key4 = xstrdup(fentry_table[i].key4);
-				replace_string(fentry_table[i].key4, "C-h", "M-h");
 			}
 		}
 	}
@@ -388,8 +391,6 @@ void init_bindings(void)
 			bind_key(fentry_table[i].key2, fentry_table[i].func);
 		if (fentry_table[i].key3 != NULL)
 			bind_key(fentry_table[i].key3, fentry_table[i].func);
-		if (fentry_table[i].key4 != NULL)
-			bind_key(fentry_table[i].key4, fentry_table[i].func);
 	}
 }
 
@@ -415,8 +416,6 @@ void free_bindings(void)
 				free(fentry_table[i].key2);
 			if (fentry_table[i].key3 != NULL)
 				free(fentry_table[i].key3);
-			if (fentry_table[i].key4 != NULL)
-				free(fentry_table[i].key4);
 		}
 	}
 
@@ -432,13 +431,13 @@ static struct fentry *bsearch_function(char *name)
 char *minibuf_read_function_name(char *msg)
 {
 	unsigned int i;
-	char *ms;
+	char *p, *ms;
 	fentryp entryp;
 	historyp hp;
 
-	hp = new_history(fentry_table_size, FALSE);
+	hp = new_history(FALSE);
 	for (i = 0; i < fentry_table_size; ++i)
-		hp->completions[i] = xstrdup(fentry_table[i].name);
+		alist_append(hp->completions, zstrdup(fentry_table[i].name));
 
 	for (;;) {
 		ms = minibuf_read_history(msg, "", hp);
@@ -451,19 +450,20 @@ char *minibuf_read_function_name(char *msg)
 
 		if (ms[0] == '\0') {
 			free_history(hp);
-			minibuf_error("%FCNo function name given%E");
+			minibuf_error("No function name given");
 			return NULL;
 		} else {
 			/* Complete partial words if possible. */
 			if (hp->try(hp, ms) == HISTORY_MATCHED)
 				ms = hp->match;
-			for (i = 0; i < (unsigned int)hp->size; ++i)
-				if (!strcmp(ms, hp->completions[i])) {
-					ms = hp->completions[i];
+			for (p = alist_first(hp->completions); p != NULL;
+			     p = alist_next(hp->completions))
+				if (!strcmp(ms, p)) {
+					ms = p;
 					break;
 				}
 			if ((entryp = bsearch_function(ms)) == NULL) {
-				minibuf_error("%FCUndefined function name%E");
+				minibuf_error("Undefined function name");
 				waitkey(2 * 1000);
 			} else {
 				minibuf_clear();
@@ -522,10 +522,11 @@ char *get_function_by_key_sequence(void)
 {
 	leafp p;
 	int c = cur_tp->getkey();
+	int keys[64], numkeys;
 
 	if (c & KBD_META && isdigit(c & 255))
 		return "universal-argument";
-	else if ((p = completion_scan(c)) == NULL) {
+	else if ((p = completion_scan(c, keys, &numkeys)) == NULL) {
 		if (c == KBD_RET || c == KBD_TAB || c <= 255)
 			return "self-insert-command";
 		else
@@ -536,18 +537,17 @@ char *get_function_by_key_sequence(void)
 	return NULL;
 }
 
-static void write_functions_list(void *p1, void *p2, void *p3, void *p4)
+static void write_functions_list(va_list ap)
 {
 	unsigned int i;
 
 	bprintf("%-30s%s\n", "Function", "Bindings");
 	bprintf("%-30s%s\n", "--------", "--------");
 	for (i = 0; i < fentry_table_size; ++i) {
-		char key1[64], key2[64], key3[64], key4[64];
+		char key1[64], key2[64], key3[64];
 		simplify_key(key1, fentry_table[i].key1);
 		simplify_key(key2, fentry_table[i].key2);
 		simplify_key(key3, fentry_table[i].key3);
-		simplify_key(key4, fentry_table[i].key4);
 		bprintf("%-30s", fentry_table[i].name);
 		if (key1[0] != '\0')
 			bprintf("%s", key1);
@@ -555,8 +555,6 @@ static void write_functions_list(void *p1, void *p2, void *p3, void *p4)
 			bprintf(", %s", key2);
 		if (key3[0] != '\0')
 			bprintf(", %s", key3);
-		if (key4[0] != '\0')
-			bprintf(", %s", key4);	
 		bprintf("\n");
 	}
 }
@@ -566,8 +564,7 @@ DEFUN("list-functions", list_functions)
 List defined functions.
 +*/
 {
-	write_to_temporary_buffer("*Functions List*", write_functions_list,
-				  NULL, NULL, NULL, NULL);
+	write_temp_buffer("*Functions List*", write_functions_list);
 	return TRUE;
 }
 
@@ -594,7 +591,7 @@ static void write_bindings_tree(leafp tree, int level)
 	}
 }
 
-static void write_bindings_list(void *p1, void *p2, void *p3, void *p4)
+static void write_bindings_list(va_list ap)
 {
 	bprintf("%-15s %s\n", "Binding", "Function");
 	bprintf("%-15s %s\n", "-------", "--------");
@@ -607,7 +604,6 @@ DEFUN("list-bindings", list_bindings)
 List defined bindings.
 +*/
 {
-	write_to_temporary_buffer("*Bindings List*", write_bindings_list,
-				  NULL, NULL, NULL, NULL);
+	write_temp_buffer("*Bindings List*", write_bindings_list);
 	return TRUE;
 }

@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.1 2001/01/19 22:03:31 ssigala Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,6 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -36,7 +38,6 @@
 #include <curses.h>
 #endif
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -64,14 +65,10 @@ static size_t astrlen(const char *s)
 
 	while (*s != '\0')
 		switch (*s++) {
-		case MINIBUF_SET_FGBG:
+		case MINIBUF_SET_COLOR:
 			++s;
 			/* FALLTROUGH */
-		case MINIBUF_SET_FG:
-		case MINIBUF_SET_BG:
-			++s;
-			/* FALLTROUGH */
-		case MINIBUF_UNSET:
+		case MINIBUF_UNSET_COLOR:
 			break;
 		default:
 			++size;
@@ -95,25 +92,20 @@ static void xminibuf_write(const char *fmt)
 {
 	int y, x, bold;
 	const unsigned char *p = fmt;
-	chtype attr = 0;
+	chtype attr = 0, oldattr = 0;
 
 	getyx(stdscr, y, x);
 
 	for (; *p != '\0' && x < COLS; p++)
 		switch (*p) {
-		case MINIBUF_SET_FGBG:
-			/* XXX */
-			break;
-		case MINIBUF_SET_FG:
+		case MINIBUF_SET_COLOR:
 			++p;
 			bold = isupper(*p) ? A_BOLD : 0;
+			oldattr = attr;
 			attr = COLOR_PAIR(filter_color(*p)) | bold;
 			break;
-		case MINIBUF_SET_BG:
-			/* XXX */
-			break;
-		case MINIBUF_UNSET:
-			attr = 0;
+		case MINIBUF_UNSET_COLOR:
+			attr = oldattr;
 			break;
 		default:
 			addch(attr | *p);
@@ -178,9 +170,9 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 	if (*max < i + 10) {
 		*max = i + 10;
 		if (*p != NULL)
-			*p = (char *)xrealloc(*p, *max);
+			*p = (char *)zrealloc(*p, *max);
 		else
-			*p = (char *)xmalloc(*max);
+			*p = (char *)zmalloc(*max);
 	}
 	strcpy(*p, value);
 
@@ -305,7 +297,7 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 					else
 						len = i = hp->matchsize;
 					*max = len + 1;
-					s = (char *)xmalloc(*max);
+					s = (char *)zmalloc(*max);
 					if (hp->fl_dir) {
 						strcpy(s, hp->path);
 						strncat(s, hp->match, hp->matchsize);
@@ -335,7 +327,7 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 				char *s;
 				if (len >= *max - 1) {
 					*max *= 2;
-					*p = (char *)xrealloc(*p, *max);
+					*p = (char *)zrealloc(*p, *max);
 				}
 				s = *p;
 				for (; *s != '\0'; s++)

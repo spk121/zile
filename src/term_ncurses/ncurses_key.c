@@ -1,4 +1,4 @@
-/*	$Id: ncurses_key.c,v 1.1 2001/01/19 22:03:19 ssigala Exp $	*/
+/*	$Id: ncurses_key.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,6 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,7 +36,6 @@
 #include <curses.h>
 #endif
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -45,18 +46,19 @@ static int translate_key(int c)
 	switch (c) {
 	case '\0':		/* C-@ */
 		return KBD_CTL | '@';
-
 	case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
-	case '\6':  case '\7':  case '\10': case '\11': case '\12':
-	case '\13': case '\14': case '\15': case '\16': case '\17':
+	case '\6':  case '\7':  case '\10':             case '\12':
+	case '\13': case '\14':             case '\16': case '\17':
 	case '\20': case '\21': case '\22': case '\23': case '\24':
 	case '\25': case '\26': case '\27': case '\30': case '\31':
 	case '\32':		/* C-a ... C-z */
 		return KBD_CTL | ('a' + c - 1);
-
+	case '\11':
+		return KBD_TAB;
+	case '\15':
+		return KBD_RET;
 	case '\37':
 		return KBD_CTL | (c ^ 0x40);
-
 #if 0
 	case '\34': case '\35': case '\36': case '\37':
 	case '\40': case '\41': case '\42': case '\43': case '\44':
@@ -68,87 +70,61 @@ static int translate_key(int c)
 	case '\76': case '\77': case '\100':
 		return KBD_CTL | (c ^ 0x40);
 #endif
-
 #ifdef __linux__
 	case 0627:		/* C-z */
 		return KBD_CTL | 'z';
 #endif
-
 	case '\33':		/* META */
 		return KBD_META;
-
 	case KEY_PPAGE:		/* PGUP */
 		return KBD_PGUP;
-
 	case KEY_NPAGE:		/* PGDN */
 		return KBD_PGDN;
-
 	case KEY_HOME:		/* HOME */
 		return KBD_HOME;
-
 	case KEY_END:		/* END */
 		return KBD_END;
-
 	case KEY_DC:		/* DEL */
 		return KBD_DEL;
-
 	case KEY_BACKSPACE:	/* BS */
-#ifdef __linux__
 	case 0177:		/* BS */
-#endif
 		return KBD_BS;
-
 	case KEY_IC:		/* INSERT */
 		return KBD_INS;
-
 	case KEY_LEFT:		/* LEFT */
 		return KBD_LEFT;
-
 	case KEY_RIGHT:		/* RIGHT */
 		return KBD_RIGHT;
-
 	case KEY_UP:		/* UP */
 		return KBD_UP;
-
 	case KEY_DOWN:		/* DOWN */
 		return KBD_DOWN;
-
 	case KEY_F(1):
 		return KBD_F1;
-
 	case KEY_F(2):
 		return KBD_F2;
-
 	case KEY_F(3):
 		return KBD_F3;
-
 	case KEY_F(4):
 		return KBD_F4;
-
 	case KEY_F(5):
 		return KBD_F5;
-
 	case KEY_F(6):
 		return KBD_F6;
-
 	case KEY_F(7):
 		return KBD_F7;
-
 	case KEY_F(8):
 		return KBD_F8;
-
 	case KEY_F(9):
 		return KBD_F9;
-
 	case KEY_F(10):
 		return KBD_F10;
-
 	case KEY_F(11):
 		return KBD_F11;
-
 	case KEY_F(12):
 		return KBD_F12;
-
+	case KEY_RESIZE:
+		return KBD_NOKEY;
 	default:
 		if (c > 255)
 			return KBD_NOKEY;	/* Undefined behaviour. */
@@ -224,6 +200,9 @@ int ncurses_xgetkey(int mode, int arg)
 		nodelay(stdscr, FALSE);
 		break;
 	}
+
+	if (c == KEY_RESIZE)
+		return ncurses_xgetkey(mode, arg);
 
 	return c;
 }

@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.1 2001/01/19 22:03:04 ssigala Exp $
-.Dd January 1, 2001
+.\" $Id: zile.1.in,v 1.2 2003/04/24 15:12:00 rrt Exp $
+.Dd August 19, 2001
 .Os
 .Dt ZILE 1
 .Sh NAME
@@ -28,6 +28,8 @@ The options are as follows:
 For the first file the cursor will be positioned on the line specified by
 .Ar number
 (do not insert a space between the "+" sign and the number).
+.It Fl f Ar function
+Invoke the named internal function with no arguments.
 .It Fl h
 Display the minihelp window at startup.  This may be useful for
 novice users.
@@ -35,8 +37,6 @@ novice users.
 Do not load the user's initialization file.
 .It Fl V
 Print version information on standard output then exit.
-.It Fl f Ar function
-Invoke the named internal function with no arguments.
 .El
 .Sh COMMANDS
 .Bl -tag -width Fl
@@ -48,7 +48,9 @@ toggle overwrite mode
 insert a new line
 .It Ic TAB
 insert a tab character
-.It Ic C-@, C-SPC
+.It Ic F11
+switch to a correlated buffer
+.It Ic C-@, C-SPC, F5
 set mark
 .It Ic C-a, HOME
 go to the beginning of line
@@ -64,8 +66,10 @@ move cursor to the next char
 cancel current command
 .It Ic C-h C-d
 show informations about getting the latest version
-.It Ic C-h C-h
+.It Ic C-h C-h, F10
 toggle mini help window
+.It Ic C-h C-r, F9
+rotate mini help contents
 .It Ic C-h F
 show the FAQ
 .It Ic C-h d, C-h f
@@ -88,7 +92,7 @@ show a sample configuration file
 show a tutorial window
 .It Ic C-h v
 describe a variable
-.It Ic C-k
+.It Ic C-k, F6
 kill line
 .It Ic C-l
 redraw display
@@ -104,19 +108,19 @@ search backward
 search forward
 .It Ic C-u
 begin a numeric argument for the following command
-.It Ic C-w
+.It Ic C-w, F7
 kill region
 .It Ic C-x C-b
 list buffers
 .It Ic C-x C-c
 save modified buffers and quit zile
-.It Ic C-x C-f
+.It Ic C-x C-f, F2
 find a file for editing
 .It Ic C-x C-l
 convert the region to downcase
 .It Ic C-x C-q
 toggle read only mode
-.It Ic C-x C-s
+.It Ic C-x C-s, F3
 save the current buffer
 .It Ic C-x C-u
 convert the region to upcase
@@ -140,7 +144,7 @@ delete the other open windows
 split current window
 .It Ic C-x b
 switch to a buffer
-.It Ic C-x e
+.It Ic C-x e, F12
 execute the last recorded keyboard macro
 .It Ic C-x f
 set the fill column
@@ -158,9 +162,9 @@ copy region to register
 save modified buffers
 .It Ic C-x o
 select the other window
-.It Ic C-x u, C-_
+.It Ic C-x u, C-_, F4
 undo some previous changes
-.It Ic C-y
+.It Ic C-y, F8
 yank killed text
 .It Ic C-v, PGDN
 scroll up one screen page
@@ -257,6 +261,10 @@ insert the contents of a buffer
 insert the contents of a file
 .It Ic insert-register
 insert register
+.It Ic isearch-backward
+incrementally search backward for a string
+.It Ic isearch-forward
+incrementally search forward for a string
 .It Ic keyboard-quit
 cancel current command
 .It Ic kill-buffer
@@ -287,10 +295,16 @@ select the other window
 toggle overwrite mode
 .It Ic previous-line
 move cursor to the previous line
+.It Ic query-replace
+interactively replace occurrences of a string with other text
 .It Ic quoted-insert
 read next input character and insert it
 .It Ic recenter
 recenter the cursor in the view
+.It Ic replace-string
+replace occurrences of a string with other text
+.It Ic rotate-minihelp-window
+show the next mini help entry
 .It Ic save-buffer
 save the current buffer
 .It Ic save-buffers-kill-zile
@@ -313,6 +327,12 @@ set the fill column
 set mark
 .It Ic set-variable
 set variable value
+.It Ic shell-command
+run an external shell command
+.It Ic shell-command-on-region
+filter current region with external shell command
+.It Ic shell-script-mode
+set the buffer mode to Shell-script Mode
 .It Ic split-window
 split current window
 .It Ic start-kbd-macro
@@ -321,6 +341,8 @@ start recording keyboard macro
 stop Zile and return to superior process
 .It Ic switch-to-buffer
 switch to a buffer
+.It Ic switch-to-correlated-buffer
+switch to a correlated buffer
 .It Ic tabify
 convert multiple spaces in region to tabs
 .It Ic tab-to-tab-stop
@@ -364,13 +386,11 @@ self-documentation
 .It Pa @ETCDIR@/FAQ
 Zile FAQ
 .It Pa @ETCDIR@/HELP
-Zile help
-.It Pa @ETCDIR@/HELPWIN
-mini-help window
-.It Pa @ETCDIR@/HELPWINALT
-alternative mini-help window
+Zile manual
 .It Pa @ETCDIR@/LATEST_VERSION
-where to get the last version
+where to get the latest version
+.It Pa @ETCDIR@/MINIHELP*
+Mini Help window text
 .It Pa @ETCDIR@/TUTORIAL
 Zile tutorial
 .It Pa @ETCDIR@/zilerc.sample
@@ -381,4 +401,4 @@ sample Zile initialization file
 .Xr xemacs 1 ,
 .Xr vi 1
 .Sh AUTHORS
-Sandro Sigala (ssigala@tiscalinet.it)
+Sandro Sigala <sandro@sigala.it>

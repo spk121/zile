@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.1 2001/01/19 22:02:08 ssigala Exp $	*/
+/*	$Id: file.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,21 +24,28 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <pwd.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #include <utime.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -250,7 +257,7 @@ void open_file(char *path, int lineno)
 	getcwd(buf, PATH_MAX);
 	if (!expand_path(path, buf, dir, fname)) {
 		fprintf(stderr, "zile: %s: invalid filename or path\n", path);
-		exit(1);
+		zile_exit(1);
 	}
 	strcpy(buf, dir);
 	strcat(buf, fname);
@@ -270,7 +277,7 @@ static linep fadd_char(linep lp, int c)
 
 	if (lp->size + 1 >= lp->maxsize) {
 		lp->maxsize += 10;
-		lp1 = (linep)xrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
+		lp1 = (linep)zrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
 		if (lp != lp1) {
 			if (cur_bp->limitp->next == lp)
 				cur_bp->limitp->next = lp1;
@@ -293,7 +300,7 @@ static linep fadd_newline(linep lp)
 
 #if 0
 	lp->maxsize = lp->size ? lp->size : 1;
-	lp1 = (linep)xrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
+	lp1 = (linep)zrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
 	if (lp != lp1) {
 		if (cur_bp->limitp->next == lp)
 			cur_bp->limitp->next = lp1;
@@ -325,7 +332,7 @@ void read_from_disk(char *filename)
 
 	if ((fd = open(filename, O_RDONLY)) < 0) {
 		if (errno != ENOENT) {
-			minibuf_write("%FY%s%E: %s", filename, strerror(errno));
+			minibuf_write("@b%s@@: %s", filename, strerror(errno));
 			cur_bp->flags |= BFLAG_READONLY;
 		}
 		return;
@@ -347,37 +354,133 @@ void read_from_disk(char *filename)
 	close(fd);
 }
 
-static int have_extension(char *filename, ...)
+static int have_extension(const char *filename, const char *exts[])
 {
-	va_list ap;
 	int i, len, extlen;
-	char *s;
 
 	len = strlen(filename);
-
-	va_start(ap, filename);
-	for (i = 0; (s = va_arg(ap, char *)) != NULL; ++i) {
-		extlen = strlen(s);
-		if (len > extlen && !strcmp(filename + len - extlen, s))
+	for (i = 0; exts[i] != NULL; ++i) {
+		extlen = strlen(exts[i]);
+		if (len > extlen && !strcmp(filename + len - extlen, exts[i]))
 			return TRUE;
 	}
-	va_end(ap);
 
 	return FALSE;
 }
 
+static int exists_corr_file(char *dest, char *src, const char *ext)
+{
+	int retvalue;
+	char *p;
+	strcpy(dest, src);
+	if ((p = strrchr(dest, '.')) != NULL)
+		*p = '\0';
+	strcat(dest, ext);
+	if (exist_file(dest))
+		return TRUE;
+	strcpy(dest, src);
+	strcat(dest, ext);
+	if (exist_file(dest))
+		return TRUE;
+	return FALSE;
+}
+
+DEFUN("switch-to-correlated-buffer", switch_to_correlated_buffer)
+/*+
+Find and open a file correlated with the current buffer.
+Some examples of correlated files are the following:
+    anyfile.c  --> anyfile.h
+    anyfile.h  --> anyfile.c
+    anyfile.in --> anyfile
+    anyfile    --> anyfile.in
++*/
+{
+	const char *c_src[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".m", NULL };
+	const char *c_hdr[] = { ".h", ".H", ".hpp", NULL };
+	const char *in_ext[] = { ".in", ".IN", NULL };
+	int i;
+	char *nfile;
+	char *fname;
+
+	fname = cur_bp->filename;
+	if (fname == NULL)
+		fname = cur_bp->name;
+	nfile = (char *)zmalloc(strlen(fname) + 10);
+
+	if (have_extension(fname, c_src))
+		for (i = 0; c_hdr[i] != NULL; ++i)
+			if (exists_corr_file(nfile, fname, c_hdr[i])) {
+				int retvalue = find_file(nfile);
+				free(nfile);
+				return retvalue;
+			}
+	if (have_extension(fname, c_hdr))
+		for (i = 0; c_src[i] != NULL; ++i)
+			if (exists_corr_file(nfile, fname, c_src[i])) {
+				int retvalue = find_file(nfile);
+				free(nfile);
+				return retvalue;
+			}
+	if (have_extension(fname, in_ext))
+		if (exists_corr_file(nfile, fname, "")) {
+			int retvalue = find_file(nfile);
+			free(nfile);
+			return retvalue;
+		}
+	if (exists_corr_file(nfile, fname, ".in")) {
+		int retvalue = find_file(nfile);
+		free(nfile);
+		return retvalue;
+	}
+
+	minibuf_error("No correlated file was found for this buffer");
+	return FALSE;
+}
+
+/*
+ * Try to identify a shell script file.
+ */
+static int is_shell_file(const char *filename)
+{
+	FILE *f;
+	char buf[1024], *p;
+	if ((f = fopen(filename, "r")) == NULL)
+		return FALSE;
+	p = fgets(buf, 1024, f);
+	fclose(f);
+	if (p == NULL)
+		return FALSE;
+	while (isspace(*p))
+		++p;
+	if (*p != '#')
+		return FALSE;
+	++p;
+	while (isspace(*p))
+		++p;
+	if (*p != '!')
+		return FALSE;
+	return TRUE;
+}
+
 static void find_file_hooks(char *filename)
 {
-	if (have_extension(filename, ".c", ".h", NULL)) {
+	const char *c_file[] = { ".c", ".h", ".m", NULL };
+	const char *cpp_file[] = { ".C", ".H", ".cc", ".cpp",
+				   ".cxx", ".hpp", NULL };
+	const char *shell_file[] = { ".sh", ".csh", NULL };
+	if (have_extension(filename, c_file))
 		FUNCALL(c_mode);
-		if (lookup_bool_variable("auto-font-lock"))
-			FUNCALL(font_lock_mode);
-	} else if (have_extension(filename, ".C", ".H", ".cc", ".cpp",
-				  ".cxx", ".hpp", NULL)) {
+	else if (have_extension(filename, cpp_file))
 		FUNCALL(cpp_mode);
-		if (lookup_bool_variable("auto-font-lock"))
-			FUNCALL(font_lock_mode);
-	}
+	else if (have_extension(filename, shell_file) ||
+		 is_shell_file(filename))
+		FUNCALL(shell_script_mode);
+
+	if (cur_bp->mode == BMODE_TEXT) {
+		if (lookup_bool_variable("text-mode-auto-fill"))
+			FUNCALL(auto_fill_mode);
+	} else if (lookup_bool_variable("auto-font-lock"))
+		FUNCALL(font_lock_mode);
 }
 
 int find_file(char *filename)
@@ -398,20 +501,18 @@ int find_file(char *filename)
 	}
 
 	if (!is_regular_file(filename)) {
-		minibuf_error("%FY%s%FC is not a regular file%E", filename);
+		minibuf_error("@b%s@@ is not a regular file", filename);
 		waitkey(1 * 1000);
 		return FALSE;
 	}
 
 	bp = create_buffer(s);
 	free(s);
-	bp->filename = xstrdup(filename);
+	bp->filename = zstrdup(filename);
 	bp->flags = 0;
 
 	switch_to_buffer(bp);
-
 	read_from_disk(filename);
-
 	find_file_hooks(filename);
 
 	thisflag |= FLAG_NEED_RESYNC;
@@ -423,13 +524,10 @@ historyp make_buffer_history(void)
 {
 	bufferp bp;
 	historyp hp;
-	int i;
 
-	for (i = 0, bp = head_bp; bp != NULL; bp = bp->next)
-		++i;
-	hp = new_history(i, FALSE);
-	for (i = 0, bp = head_bp; bp != NULL; bp = bp->next)
-		hp->completions[i++] = xstrdup(bp->name);
+	hp = new_history(FALSE);
+	for (bp = head_bp; bp != NULL; bp = bp->next)
+		alist_append(hp->completions, zstrdup(bp->name));
 
 	return hp;
 }
@@ -446,14 +544,8 @@ creating one if none already exists.
 	if ((ms = minibuf_read_dir("Find file: ", buf)) == NULL)
 		return cancel();
 
-	if (ms[0] != '\0') {
-		int retvalue = find_file(ms);
-		if (!(cur_bp->flags & (BFLAG_CMODE | BFLAG_CPPMODE)) &&
-		    lookup_bool_variable("text-mode-auto-fill"))
-			FUNCALL(auto_fill_mode);
-		return retvalue;
-	}
-
+	if (ms[0] != '\0')
+		return find_file(ms);
 	return FALSE;
 }
 
@@ -472,14 +564,7 @@ If the current buffer now contains an empty file that you just visited
 
 	if (ms[0] != '\0' && check_modified_buffer(cur_bp)) {
 		kill_buffer(cur_bp);
-		if (!find_file(ms))
-			return FALSE;
-
-		if (!(cur_bp->flags & (BFLAG_CMODE | BFLAG_CPPMODE)) &&
-		    lookup_bool_variable("text-mode-auto-fill"))
-			FUNCALL(auto_fill_mode);
-
-		return TRUE;
+		return find_file(ms);
 	}
 
 	return FALSE;
@@ -497,7 +582,7 @@ Select to the user specified buffer in the current window.
 	swbuf = prev_bp != NULL ? prev_bp : cur_bp->next != NULL ? cur_bp->next : head_bp;
 
 	hp = make_buffer_history();
-	ms = minibuf_read_history("Switch to buffer (default %FY%s%E): ", "", hp, swbuf->name);
+	ms = minibuf_read_history("Switch to buffer (default @b%s@@): ", "", hp, swbuf->name);
 	free_history(hp);
 	if (ms == NULL)
 		return cancel();
@@ -526,7 +611,7 @@ int check_modified_buffer(bufferp bp)
 
 	if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
 		for (;;) {
-			if ((ans = minibuf_read_yesno("Buffer %FY%s%E modified; kill anyway? (yes or no) ", bp->name)) == -1)
+			if ((ans = minibuf_read_yesno("Buffer @b%s@@ modified; kill anyway? (yes or no) ", bp->name)) == -1)
 				return cancel();
 			else if (!ans)
 				return FALSE;
@@ -635,12 +720,12 @@ Kill the current buffer or the user specified one.
 	historyp hp;
 
 	hp = make_buffer_history();
-	if ((ms = minibuf_read_history("Kill buffer (default %FY%s%E): ", "", hp, cur_bp->name)) == NULL)
+	if ((ms = minibuf_read_history("Kill buffer (default @b%s@@): ", "", hp, cur_bp->name)) == NULL)
 		return cancel();
 	free_history(hp);
 	if (ms[0] != '\0') {
 		if ((bp = find_buffer(ms, FALSE)) == NULL) {
-			minibuf_error("%FCBuffer %FY`%s'%FC not found%E", ms);
+			minibuf_error("Buffer `@b%s@@' not found", ms);
 			return FALSE;
 		}
 	} else
@@ -682,19 +767,19 @@ Puts mark after the inserted text.
 
 	swbuf = prev_bp != NULL ? prev_bp : cur_bp->next != NULL ? cur_bp->next : head_bp;
 	hp = make_buffer_history();
-	if ((ms = minibuf_read_history("Insert buffer (default %FY%s%E): ", "", hp, swbuf->name)) == NULL)
+	if ((ms = minibuf_read_history("Insert buffer (default @b%s@@): ", "", hp, swbuf->name)) == NULL)
 		return cancel();
 	free_history(hp);
 	if (ms[0] != '\0') {
 		if ((bp = find_buffer(ms, FALSE)) == NULL) {
-			minibuf_error("%FCBuffer %FY`%s'%FC not found%E", ms);
+			minibuf_error("Buffer `@b%s@@' not found", ms);
 			return FALSE;
 		}
 	} else
 		bp = swbuf;
 
 	if (bp == cur_bp) {
-		minibuf_error("%FCCannot insert the current buffer%E");
+		minibuf_error("Cannot insert the current buffer");
 		return FALSE;
 	}
 
@@ -710,12 +795,12 @@ int insert_file(char *filename)
 	char buf[BUFSIZ];
 
 	if (!exist_file(filename)) {
-		minibuf_error("%FCUnable to read file %FY`%s'%E", filename);
+		minibuf_error("Unable to read file `@b%s@@'", filename);
 		return FALSE;
 	}
 
 	if ((fd = open(filename, O_RDONLY)) < 0) {
-		minibuf_write("%FY%s%E: %s", filename, strerror(errno));
+		minibuf_write("@b%s@@: %s", filename, strerror(errno));
 		return FALSE;
 	}
 
@@ -789,14 +874,14 @@ static char *create_backup_filename(char *filename, int withrevs,
 
 		if (!expand_path(buf, "", dir, fname)) {
 			fprintf(stderr, "zile: %s: invalid backup directory\n", dir);
-			exit(1);
+			zile_exit(1);
 		}
 		strcpy(buf, dir);
 		strcat(buf, fname);
 		filename = buf;
  	}
 
-	s = (char *)xmalloc(strlen(filename) + 10);
+	s = (char *)zmalloc(strlen(filename) + 10);
 
 	if (withrevs) {
 		int n = 1, fd;
@@ -828,20 +913,20 @@ static int copy_file(char *source, char *dest)
 
 	ifd = open(source, O_RDONLY, 0);
 	if (ifd < 0) {
-		minibuf_error("%FY%s:%FC unable to backup%E", source);
+		minibuf_error("@b%s@@: unable to backup", source);
 		return FALSE;
 	}
 
 	ofd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	if (ifd < 0) {
 		close(ifd);
-		minibuf_error("%FY%s:%FC unable to create backup%E", dest);
+		minibuf_error("@b%s@@: unable to create backup", dest);
 		return FALSE;
 	}
 
 	while ((len = read(ifd, buf, sizeof buf)) > 0)
 		if(write(ofd, buf, len) < 0) {
-			minibuf_error("%FCunable to write to backup %FY%s%E", dest);
+			minibuf_error("unable to write to backup @b%s@@", dest);
 			close(ifd);
 			close(ofd);
 			return FALSE;
@@ -865,6 +950,26 @@ static int copy_file(char *source, char *dest)
 		t.modtime = st.st_mtime; 
 		utime(dest, &t);
 	}
+
+	return TRUE;
+}
+
+static int raw_write_to_disk(bufferp bp, char *filename)
+{
+	int fd;
+	linep lp;
+
+	if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
+		return FALSE;
+
+	/* Save all the lines. */
+	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
+		write(fd, lp->text, lp->size);
+		if (lp->next != bp->limitp)
+			write(fd, "\n", 1);
+	}
+
+	close(fd);
 
 	return TRUE;
 }
@@ -898,7 +1003,7 @@ static int write_to_disk(bufferp bp, char *filename)
 	}
 
 	if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0) {
-		minibuf_error("%FY%s%E: %s", filename, strerror(errno));
+		minibuf_error("@b%s@@: %s", filename, strerror(errno));
 		return FALSE;
 	}
 
@@ -919,7 +1024,7 @@ static int save_buffer(bufferp bp)
 	char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
 
 	if (!(bp->flags & BFLAG_MODIFIED))
-		minibuf_write("%FC(No changes need to be saved)%E");
+		minibuf_write("(No changes need to be saved)");
 	else {
 		if (bp->flags & BFLAG_NEEDNAME) {
 			if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
@@ -933,7 +1038,7 @@ static int save_buffer(bufferp bp)
 		} else
 			ms = bp->filename;
 		if (write_to_disk(bp, ms)) {
-			minibuf_write("Wrote %FY%s%E", ms);
+			minibuf_write("Wrote @b%s@@", ms);
 			bp->flags &= ~BFLAG_MODIFIED;
 		}
 		bp->flags &= ~BFLAG_TEMPORARY;
@@ -970,7 +1075,7 @@ Makes buffer visit that file, and marks it not modified.
 	cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
 
 	if (write_to_disk(cur_bp, ms)) {
-		minibuf_write("Wrote %FY%s%E", ms);
+		minibuf_write("Wrote @b%s@@", ms);
 		cur_bp->flags &= ~BFLAG_MODIFIED;
 	}
 
@@ -980,7 +1085,7 @@ Makes buffer visit that file, and marks it not modified.
 static int save_some_buffers(void)
 {
 	bufferp bp;
-	int i = 0, noask = 0, c;
+	int i = 0, noask = FALSE, c;
 
 	for (bp = head_bp; bp != NULL; bp = bp->next)
 		if (bp->flags & BFLAG_MODIFIED
@@ -993,7 +1098,8 @@ static int save_some_buffers(void)
 				save_buffer(bp);
 			else {
 				for (;;) {
-					minibuf_write("Save file %FY%s%E? (SPC, y, n, !, ., q) ", fname);
+					minibuf_write("Save file @b%s@@? (y, n, !, ., q) ", fname);
+
 					c = cur_tp->getkey();
 					switch (c) {
 					case KBD_CANCEL:
@@ -1007,7 +1113,7 @@ static int save_some_buffers(void)
 						goto exitloop;
 					}
 
-					minibuf_error("Please answer SPC, y, n, !, . or q.");
+					minibuf_error("Please answer y, n, !, . or q.");
 					waitkey(2 * 1000);
 				}
 
@@ -1024,7 +1130,7 @@ static int save_some_buffers(void)
 					++i;
 					return TRUE;
 				case '!':
-					noask = 1;
+					noask = TRUE;
 					/* FALLTHROUGH */
 				case ' ':
 				case 'y':
@@ -1041,7 +1147,7 @@ static int save_some_buffers(void)
 
 endoffunc:
 	if (i == 0)
-		minibuf_write("%FC(No files need saving)%E");
+		minibuf_write("(No files need saving)");
 
 	return TRUE;
 }
@@ -1084,6 +1190,30 @@ Offer to save each buffer, then kill this Zile process.
 	return TRUE;
 }
 
+/*
+ * Function called on unexpected error or Zile crash (SIGSEGV).
+ * Attempts to save modified buffers.
+ */
+void zile_exit(int exitcode)
+{
+	bufferp bp;
+
+	fprintf(stderr, "Trying to save modified buffers (if any)...\r\n");
+	for (bp = head_bp; bp != NULL; bp = bp->next)
+		if (bp->flags & BFLAG_MODIFIED &&
+		    !(bp->flags & BFLAG_NOSAVE)) {
+			char buf[PATH_MAX];
+			if (bp->filename != NULL)
+				strcpy(buf, bp->filename);
+			else
+				strcpy(buf, bp->name);
+			strcat(buf, ".ZILESAVE");
+			fprintf(stderr, "Saving %s...\r\n", buf);
+			raw_write_to_disk(bp, buf);
+		}
+	exit(exitcode);
+}
+
 DEFUN("cd", cd)
 /*+
 Make the user specified directory become the current buffer's default
@@ -1099,11 +1229,11 @@ directory.
 
 	if (ms[0] != '\0') {
 		if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
-			minibuf_error("%FY`%s'%E is not a directory", ms);
+			minibuf_error("`@b%s@@' is not a directory", ms);
 			return FALSE;
 		}
 		if (chdir(ms) == -1) {
-			minibuf_write("%FY%s%E: %s", ms, strerror(errno));
+			minibuf_write("@b%s@@: %s", ms, strerror(errno));
 			return FALSE;
 		}
 		return TRUE;

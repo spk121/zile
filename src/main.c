@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.1 2001/01/19 22:02:36 ssigala Exp $	*/
+/*	$Id: main.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,16 +24,22 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <ctype.h>
+#ifdef HAVE_LIMITS_H
 #include <limits.h>
+#endif
 #include <locale.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 #include "version.h"
@@ -47,13 +53,14 @@
 	"Zile " ZILE_VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST
 
 /* The current window; the first window in list. */
-windowp cur_wp, head_wp;
+windowp cur_wp = NULL, head_wp = NULL;
 /* The current buffer; the previous buffer; the first buffer in list. */
-bufferp cur_bp, prev_bp, head_bp;
-terminalp cur_tp;
+bufferp cur_bp = NULL, prev_bp = NULL, head_bp = NULL;
+/* The current output terminal. */
+terminalp cur_tp = NULL;
 
 /* The global editor flags. */
-int thisflag, lastflag;
+int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
 
@@ -79,7 +86,7 @@ static void check_list(windowp wp)
 			fclose(f);
 			cur_tp->close();
 			fprintf(stderr, "\aAborting due to internal buffer structure corruption\n");
-			fprintf(stderr, "\aFor more informations read the `zile.abort' file\n");
+			fprintf(stderr, "\aFor more information read the `zile.abort' file\n");
 			abort();
 		}
 		if (lp == wp->bp->limitp)
@@ -126,6 +133,10 @@ static void loop(void)
 	}
 }
 
+/*
+ * Select the output interface; this function is dummy for now (only ncurses
+ * is supported), but other terminals can be easily added.
+ */
 static void select_terminal(void)
 {
 #ifdef USE_NCURSES
@@ -137,11 +148,11 @@ static void select_terminal(void)
 static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
-%Copyright (C) 1997-2001 Sandro Sigala <ssigala@tiscalinet.it>%\n\
+%Copyright (C) 1997-2001 Sandro Sigala <sandro@sigala.it>%\n\
 \n\
 Type %C-x C-c% to exit Zile.\n\
 Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\
-Type %C-h C-h% to show a mini help window.\n\
+Type %C-h C-h% or %F10% to show a mini help window.\n\
 Type %C-h C-d% for information on getting the latest version.\n\
 Type %C-h t% for a tutorial on using Zile.\n\
 Type %C-h s% for a sample configuration file.\n\
@@ -157,25 +168,17 @@ $(Type C-h F [a capital F!].)$\
 ";
 
 static char about_minibuf_str[] =
-"For help type %FWC-h h%E or %FWF1%E; to show a mini help window type %FWC-h C-h%E";
-static char *about_wait_str = "[Press any key to leave this screen]";
+"Welcome to Zile!  For help type @kC-h h@@ or @kF1@@";
 
 static void about_screen(void)
 {
+	/* I don't like this hack, but I don't know another way... */
 	if (lookup_bool_variable("alternative-bindings")) {
 		replace_string(about_splash_str, "C-h", "M-h");
 		replace_string(about_minibuf_str, "C-h", "M-h");
 	}
 
-	if (lookup_bool_variable("novice-level")) {
-		cur_tp->show_about(about_splash_str, about_minibuf_str,
-				   about_wait_str);
-		waitkey_discard(200 * 1000);
-	} else {
-		cur_tp->show_about(about_splash_str, about_minibuf_str, NULL);
-		waitkey(20 * 1000);
-	}
-	minibuf_clear();
+	cur_tp->show_about(about_splash_str, about_minibuf_str);
 }
 
 /*
@@ -234,6 +237,10 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	/*
+	 * With this call `display-time-format' variable will be formatted
+	 * by strftime() according to the current locale.
+	 */
 	setlocale(LC_ALL, "");
 
 	sanity_checks();
@@ -246,11 +253,17 @@ int main(int argc, char **argv)
 		read_rc_file();
 	cur_tp->open();
 
+	/* Create the `*scratch*' buffer and initialize key bindings. */
 	create_first_window();
 	cur_tp->redisplay();
 	init_bindings();
 
 	if (argc < 1) {
+		/*
+		 * Show the splash screen only if there isn't any file
+		 * specified on command line and no function was specified
+		 * with the `-f' flag.
+		 */
 		if (!hflag && farg == NULL)
 			about_screen();
 	} else {
@@ -271,7 +284,7 @@ int main(int argc, char **argv)
 		FUNCALL(toggle_minihelp_window);
 
 	if (argc < 1 && lookup_bool_variable("novice-level")) {
-		/* Cutted & pasted from Emacs 20.2. */
+		/* Cut & pasted from Emacs 20.2. */
 		insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
@@ -284,11 +297,11 @@ then enter the text in that file's own buffer.\n\
 	if (farg != NULL) {
 		cur_tp->redisplay();
 		if (!execute_function(farg, 1))
-			minibuf_error("%FCFunction %FY`%s'%FC not defined%E", farg);
+			minibuf_error("Function `@f%s@@' not defined", farg);
 		lastflag |= FLAG_NEED_RESYNC;
 	}
 
-	/* Run the main Zile loop. */
+	/* Run the main Zile loop (read key, process key, read key, ...). */
 	loop();
 
 	/* Free all the memory allocated. */

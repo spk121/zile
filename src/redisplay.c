@@ -1,4 +1,4 @@
-/*	$Id: redisplay.c,v 1.1 2001/01/19 22:02:43 ssigala Exp $	*/
+/*	$Id: redisplay.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -27,6 +27,8 @@
 /*
  * Terminal independent redisplay routines.
  */
+
+#include <stdarg.h>
 
 #include "config.h"
 #include "zile.h"

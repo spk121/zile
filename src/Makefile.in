@@ -1,8 +1,9 @@
-#	$Id: Makefile.in,v 1.1 2001/01/19 22:01:45 ssigala Exp $
+#	$Id: Makefile.in,v 1.2 2003/04/24 15:11:59 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
 
+DESTDIR =
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
@@ -16,7 +17,7 @@ INSTALL = @INSTALL@
 
 CC = @CC@
 PROG = zile
-CFLAGS = -I../lib -W @CFLAGS@
+CFLAGS = -I$(srcdir)/../lib @CFLAGS@
 LDFLAGS = @LDFLAGS@
 ZILELIBS = ../lib/libzile.a
 LIBS = $(ZILELIBS) @LIBS@
@@ -25,7 +26,7 @@ GPERF = gperf
 TERMINALS = ncurses
 TERMINALSLIBS = term_ncurses/libterm_ncurses.a
 
-ZSRCS =	$(srcdir)/basic.c	\
+SRCS =	$(srcdir)/basic.c	\
 	$(srcdir)/bind.c	\
 	$(srcdir)/buffer.c	\
 	$(srcdir)/file.c	\
@@ -49,9 +50,6 @@ ZSRCS =	$(srcdir)/basic.c	\
 	$(srcdir)/variables.c	\
 	$(srcdir)/window.c
 
-SRCS = $(ZSRCS)			\
-	$(srcdir)/hash.c
-
 OBJS =	basic.o			\
 	bind.o			\
 	buffer.o		\
@@ -61,7 +59,6 @@ OBJS =	basic.o			\
 	fontlock_cpp.o		\
 	funcs.o			\
 	glue.o			\
-	hash.o			\
 	help.o			\
 	keys.o			\
 	killring.o		\
@@ -90,7 +87,7 @@ maketerminals:
 $(PROG): $(OBJS) $(TERMINALSLIBS) $(LIBS)
 	$(CC) $(LDFLAGS) -o $(PROG) $(OBJS) $(TERMINALSLIBS) $(LIBS)
 
-paths.h: Makefile
+paths.h:
 	@echo "Producing \`paths.h'."
 	@echo "/* Automatically generated file.  NO NOT EDIT! */" >paths.h.tmp
 	@echo "" >>paths.h.tmp
@@ -105,18 +102,19 @@ fontlock_cpp.c: fontlock_cpp.gperf
 	$(GPERF) -a -l -S1 -N is_cpp_keyword fontlock_cpp.gperf >fontlock_cpp.c
 
 zile.1: zile.1.in Makefile
-	sed "s+@ETCDIR@+$(etcdir)+" <$(srcdir)/zile.1.in >zile.1
+	echo '.\" Automatically generated file: NO DOT EDIT!' >zile.1
+	sed "s+@ETCDIR@+$(etcdir)+" <$(srcdir)/zile.1.in >>zile.1
 
 .PHONY: install uninstall clean realclean distclean mostlyclean
 
 install: all
-	$(srcdir)/../mkinsdir.sh $(bindir) $(mandir)
-	$(INSTALL_PROGRAM) $(PROG) $(bindir)
-	$(INSTALL_DATA) zile.1 $(mandir)/$(PROG).1
+	$(srcdir)/../mkinsdir.sh $(DESTDIR)$(bindir) $(DESTDIR)$(mandir)
+	$(INSTALL_PROGRAM) $(PROG) $(DESTDIR)$(bindir)
+	$(INSTALL_DATA) $(srcdir)/$(PROG).1 $(DESTDIR)$(mandir)/$(PROG).1
 
 uninstall:
-	rm -f $(bindir)/$(PROG)
-	rm -f $(mandir)/$(PROG).1
+	rm -f $(DESTDIR)$(bindir)/$(PROG)
+	rm -f $(DESTDIR)$(mandir)/$(PROG).1
 
 clean:
 	@for f in $(TERMINALS); do \
@@ -140,6 +138,6 @@ mostlyclean: clean
 
 $(OBJS): $(srcdir)/zile.h $(srcdir)/extern.h config.h
 help.o main.o: $(srcdir)/version.h paths.h
-hash.o variables.o: $(srcdir)/hash.h
+variables.o: $(srcdir)/../lib/htable.h
 bind.o: $(srcdir)/tbl_funcs.h
 variables.o: $(srcdir)/tbl_vars.h

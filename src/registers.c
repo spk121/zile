@@ -1,4 +1,4 @@
-/*	$Id: registers.c,v 1.1 2001/01/19 22:02:44 ssigala Exp $	*/
+/*	$Id: registers.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,11 +24,13 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -88,7 +90,7 @@ Puts point before and mark after the inserted text.
 	reg %= NUM_REGISTERS;
 
 	if (regs[reg].text == NULL) {
-		minibuf_error("%FCRegister does not contain text%E");
+		minibuf_error("Register does not contain text");
 		return FALSE;
 	}
 
@@ -103,7 +105,7 @@ Puts point before and mark after the inserted text.
 	return TRUE;
 }
 
-static void write_registers_list(void *p1, void *p2, void *p3, void *p4)
+static void write_registers_list(va_list ap)
 {
 	unsigned int i, count;
 
@@ -128,8 +130,7 @@ DEFUN("list-registers", list_registers)
 List defined registers.
 +*/
 {
-	write_to_temporary_buffer("*Registers List*", write_registers_list,
-				  NULL, NULL, NULL, NULL);
+	write_temp_buffer("*Registers List*", write_registers_list);
 	return TRUE;
 }
 

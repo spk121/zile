@@ -1,4 +1,4 @@
-/*	$Id: buffer.c,v 1.1 2001/01/19 22:01:58 ssigala Exp $	*/
+/*	$Id: buffer.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,12 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -44,13 +46,13 @@ bufferp new_buffer(void)
 	bufferp bp;
 	char *s;
 
-	bp = (bufferp)xmalloc(sizeof *bp);
+	bp = (bufferp)zmalloc(sizeof *bp);
 	memset(bp, 0, sizeof *bp);
 
 	if ((s = get_variable("tab-width")) != NULL) {
 		bp->tab_width = atoi(s);
 		if (bp->tab_width < 1) {
-			minibuf_error("%FCWarning: wrong global tab-width value %FY`%s'%E", s);
+			minibuf_error("Warning: wrong global tab-width value `@v%s@@'", s);
 			waitkey(2 * 1000);
 			bp->tab_width = 8;
 		}
@@ -60,7 +62,7 @@ bufferp new_buffer(void)
 	if ((s = get_variable("fill-column")) != NULL) {
 		bp->fill_column = atoi(s);
 		if (bp->fill_column < 2) {
-			minibuf_error("%FCwarning: wrong global fill-column value %FY`%s'%E", s);
+			minibuf_error("warning: wrong global fill-column value `@v%s@@'", s);
 			waitkey(2 * 1000);
 			bp->fill_column = 70;
 		}
@@ -137,16 +139,15 @@ void free_buffers(void)
 /*
  * Allocate a new buffer and insert it into the buffer list.
  */
-bufferp create_buffer(char *name)
+bufferp create_buffer(const char *name)
 {
 	bufferp bp;
 
 	bp = new_buffer();
 	set_buffer_name(bp, name);
 
-	if (head_bp == cur_bp)
-		head_bp = bp;
-	bp->next = cur_bp;
+	bp->next = head_bp;
+        head_bp = bp;
 
 	return bp;
 }
@@ -154,11 +155,11 @@ bufferp create_buffer(char *name)
 /*
  * Set a new name for the buffer.
  */
-void set_buffer_name(bufferp bp, char *name)
+void set_buffer_name(bufferp bp, const char *name)
 {
 	if (bp->name != NULL)
 		free(bp->name);
-	bp->name = xstrdup(name);
+	bp->name = zstrdup(name);
 }
 
 /*
@@ -168,7 +169,7 @@ void set_buffer_filename(bufferp bp, char *filename)
 {
 	if (bp->filename != NULL)
 		free(bp->filename);
-	bp->filename = xstrdup(filename);
+	bp->filename = zstrdup(filename);
 
 	if (bp->name != NULL)
 		free(bp->name);
@@ -180,7 +181,7 @@ void set_buffer_filename(bufferp bp, char *filename)
  * Search for a buffer named `name'.  If not buffer is found and
  * the `cflag' variable is set to `TRUE', create a new buffer.
  */
-bufferp find_buffer(char *name, int cflag)
+bufferp find_buffer(const char *name, int cflag)
 {
 	bufferp bp;
 
@@ -227,14 +228,14 @@ char *make_buffer_name(char *filename)
 		++p;
 
 	if (find_buffer(p, FALSE) == NULL)
-		return xstrdup(p);
+		return zstrdup(p);
 
 	/*
 	 * The limit of 999 buffers with the same name should
 	 * be enough; if it is too much restrictive for you,
 	 * just change 999 to your preferred value :-)
 	 */
-	name = (char *)xmalloc(strlen(p) + 6);	/* name + "<nnn>\0" */
+	name = (char *)zmalloc(strlen(p) + 6);	/* name + "<nnn>\0" */
 	for (i = 2; i <= 999; i++) {
 		sprintf(name, "%s<%d>", p, i);
 		if (find_buffer(name, FALSE) == NULL)
@@ -348,7 +349,7 @@ int zap_buffer_content(void)
 int warn_if_readonly_buffer(void)
 {
 	if (cur_bp->flags & BFLAG_READONLY) {
-		minibuf_error("%FCBuffer is readonly: %E%FY%s%E", cur_bp->name);
+		minibuf_error("Buffer is readonly: @b%s@@", cur_bp->name);
 		return TRUE;
 	}
 
@@ -358,7 +359,7 @@ int warn_if_readonly_buffer(void)
 int warn_if_no_mark(void)
 {
 	if (cur_bp->markp == NULL) {
-		minibuf_error("%FCThe region is not active now%E");
+		minibuf_error("The region is not active now");
 		return TRUE;
 	}
 
@@ -491,4 +492,3 @@ void set_temporary_buffer(bufferp bp)
 	bp0->next = bp;
 	bp->next = NULL;
 }
-

@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.1 2001/01/19 22:02:17 ssigala Exp $	*/
+/*	$Id: funcs.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,6 +24,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
 #include <ctype.h>
 #include <signal.h>
@@ -32,15 +34,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
+#include "astr.h"
 
 int cancel(void)
 {
 	cur_wp->bp->markp = NULL;
 
-	minibuf_error("%FCQuit%E");
+	minibuf_error("Quit");
 
 	return FALSE;
 }
@@ -77,23 +79,28 @@ static char *make_buffer_flags(bufferp bp, int iscurrent)
 	 * the current buffer, i.e. the `*Buffer List*' buffer.
 	 */
 	buf[2] = (bp->flags & BFLAG_READONLY || bp == cur_bp) ? '%' : ' ';
+	buf[3] = '\0';
 
 	return buf;
 }
 
 static char *make_buffer_mode(bufferp bp)
 {
-	static char buf[16];
+	static char buf[32]; /* Make sure the buffer is large enough. */
 
-	/*
-	 * Only two modes are recognized for now.
-	 */
-	if (bp->flags & BFLAG_CMODE)
+	switch (bp->mode) {
+	case BMODE_C:
 		strcpy(buf, "C");
-	else if (bp->flags & BFLAG_CPPMODE)
+		break;
+	case BMODE_CPP:
 		strcpy(buf, "C++");
-	else
+		break;
+	case BMODE_SHELL:
+		strcpy(buf, "Shell-script");
+		break;
+	default:
 		strcpy(buf, "Text");
+	}
 
 	if (bp->flags & BFLAG_FONTLOCK)
 		strcat(buf, " Font");
@@ -108,6 +115,9 @@ static int calculate_buffer_size(bufferp bp)
 {
 	linep lp = bp->limitp->next;
 	int size = 0;
+
+	if (lp == bp->limitp)
+		return 0;
 
 	for (;;) {
 		size += lp->size;
@@ -140,12 +150,10 @@ static void print_buf(bufferp old_bp, bufferp bp)
 	insert_newline();
 }
 
-void write_to_temporary_buffer(char *name,
-			       void (*write_text)(void *, void *,
-						  void *, void *),
-			       void *p1, void *p2, void *p3, void *p4)
+void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
 {
 	windowp wp, old_wp = cur_wp;
+	va_list ap;
 
 	if ((wp = find_window(name)) == NULL) {
 		bufferp bp;
@@ -163,7 +171,9 @@ void write_to_temporary_buffer(char *name,
 		| BFLAG_NOEOB;
 	set_temporary_buffer(cur_bp);
 
-	write_text(p1, p2, p3, p4);
+	va_start(ap, func);
+	func(ap);
+	va_end(ap);
 
 	gotobob();
 
@@ -173,9 +183,9 @@ void write_to_temporary_buffer(char *name,
 	cur_bp = old_wp->bp;
 }
 
-static void write_buffers_list(void *p1, void *p2, void *p3, void *p4)
+static void write_buffers_list(va_list ap)
 {
-	windowp old_wp = (windowp)p1;
+	windowp old_wp = va_arg(ap, windowp);
 	bufferp bp;
 
 	bprintf(" MR Buffer             Size  Mode         File\n");
@@ -210,8 +220,7 @@ The M column contains a * for buffers that are modified.
 The R column contains a % for buffers that are read-only.
 +*/
 {
-	write_to_temporary_buffer("*Buffer List*", write_buffers_list,
-				  cur_wp, NULL, NULL, NULL);
+	write_temp_buffer("*Buffer List*", write_buffers_list, cur_wp);
 	return TRUE;
 }
 
@@ -270,10 +279,9 @@ DEFUN("text-mode", text_mode)
 Turn on the mode for editing text intended for humans to read.
 +*/
 {
-	cur_bp->flags &= ~(BFLAG_CMODE | BFLAG_CPPMODE);
+	cur_bp->mode = BMODE_TEXT;
 
-	if (!(cur_bp->flags & (BFLAG_CMODE | BFLAG_CPPMODE)) &&
-	    lookup_bool_variable("text-mode-auto-fill"))
+	if (lookup_bool_variable("text-mode-auto-fill"))
 		FUNCALL(auto_fill_mode);
 
 	return TRUE;
@@ -284,8 +292,7 @@ DEFUN("c-mode", c_mode)
 Turn on the mode for editing K&R and ANSI/ISO C code.
 +*/
 {
-	cur_bp->flags &= ~BFLAG_CPPMODE;
-	cur_bp->flags |= BFLAG_CMODE;
+	cur_bp->mode = BMODE_C;
 
 	return TRUE;
 }
@@ -295,8 +302,17 @@ DEFUN("c++-mode", cpp_mode)
 Turn on the mode for editing ANSI/ISO C++ code.
 +*/
 {
-	cur_bp->flags &= ~BFLAG_CMODE;
-	cur_bp->flags |= BFLAG_CPPMODE;
+	cur_bp->mode = BMODE_CPP;
+
+	return TRUE;
+}
+
+DEFUN("shell-script-mode", shell_script_mode)
+/*+
+Turn on the mode for editing shell script code.
++*/
+{
+	cur_bp->mode = BMODE_SHELL;
 
 	return TRUE;
 }
@@ -313,7 +329,7 @@ that value, otherwise with the current column value.
 	else if (cur_wp->pointo > 1)
 		cur_bp->fill_column = cur_wp->pointo + 1;
 	else {
-		minibuf_error("%FCInvalid fill column%E");
+		minibuf_error("Invalid fill column");
 		return FALSE;
 	}
 
@@ -325,7 +341,7 @@ int set_mark_command(void)
 	cur_bp->markp = cur_wp->pointp;
 	cur_bp->marko = cur_wp->pointo;
 
-	minibuf_write("%FCMark set%E");
+	minibuf_write("Mark set");
 
 	return TRUE;
 }
@@ -391,63 +407,6 @@ Put point at beginning and mark at end of buffer.
 	return TRUE;
 }
 
-#define CASE_UPPER	1
-#define CASE_LOWER	2
-
-/*
- * Set the region case.
- */
-static int setcase_region(int rcase)
-{
-	struct region r;
-	linep lp;
-	char *p;
-	int size;
-
-	if (warn_if_readonly_buffer() || warn_if_no_mark())
-		return FALSE;
-
-	calculate_region(&r);
-	size = r.size;
-
-	undo_save(UNDO_REPLACE_BLOCK, r.startn, r.starto, size, size);
-
-	lp = r.startp;
-	p = lp->text + r.starto;
-	while (size--) {
-		if (p < lp->text + lp->size) {
-			if (rcase == CASE_UPPER)
-				*p = toupper(*p);
-			else
-				*p = tolower(*p);
-			++p;
-		} else {
-			lp = lp->next;
-			p = lp->text;
-		}
-	}
-
-	cur_bp->flags |= BFLAG_MODIFIED;
-
-	return TRUE;
-}
-
-DEFUN("upcase-region", upcase_region)
-/*+
-Convert the region to upper case.
-+*/
-{
-	return setcase_region(CASE_UPPER);
-}
-
-DEFUN("downcase-region", downcase_region)
-/*+
-Convert the region to lower case.
-+*/
-{
-	return setcase_region(CASE_LOWER);
-}
-
 DEFUN("quoted-insert", quoted_insert)
 /*+
 Read next input character and insert it.
@@ -456,8 +415,10 @@ This is useful for inserting control characters.
 {
 	int c;
 
-	minibuf_write("%FGC-q-%E");
-	c = cur_tp->xgetkey(GETKEY_NONFILTERED, 0);
+	do {
+		c = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
+		minibuf_write("C-q -");
+	} while (c == KBD_NOKEY);
 	minibuf_clear();
 
 	if (c == '\r')
@@ -480,7 +441,7 @@ int universal_argument(int keytype, int xarg)
 		++i;
 		goto gotesc;
 	} else
-		strcpy(buf, "C-u-");
+		strcpy(buf, "C-u -");
 	for (;;) {
 		c = do_completion(buf, &compl);
 		if (c == KBD_CANCEL)
@@ -533,7 +494,10 @@ by 4 each time.
 	return universal_argument(KBD_CTL | 'u', 0);
 }
 
-static void edit_tab_line(linep *lp, int lineno, int offset, int size, int untabify)
+#define TAB_TABIFY	1
+#define TAB_UNTABIFY	2
+
+static void edit_tab_line(linep *lp, int lineno, int offset, int size, int action)
 {
 	char *src, *dest;
 
@@ -541,12 +505,12 @@ static void edit_tab_line(linep *lp, int lineno, int offset, int size, int untab
 		return;
 	assert(size >= 1);
 
-	src = (char *)xmalloc(size + 1);
-	dest = (char *)xmalloc(size * cur_bp->tab_width + 1);
+	src = (char *)zmalloc(size + 1);
+	dest = (char *)zmalloc(size * cur_bp->tab_width + 1);
 	strncpy(src, (*lp)->text + offset, size);
 	src[size] = '\0';
 
-	if (untabify)
+	if (action == TAB_UNTABIFY)
 		untabify_string(dest, src, offset, cur_bp->tab_width); 
 	else 
 		tabify_string(dest, src, offset, cur_bp->tab_width); 
@@ -559,7 +523,7 @@ static void edit_tab_line(linep *lp, int lineno, int offset, int size, int untab
 	free(dest);
 }
 
-static int tabify_or_untabify(int untabify)
+static int edit_tab_region(int action)
 {
 	struct region r;
 	linep lp;
@@ -577,15 +541,15 @@ static int tabify_or_untabify(int untabify)
 		if (lp == r.startp) {
 			if (lp == r.endp) /* Region on a sole line. */
 				edit_tab_line(&lp, lineno, r.starto,
-					      r.endo - r.starto, untabify);
+					      r.endo - r.starto, action);
 			else /* Region is multi-line. */
 				edit_tab_line(&lp, lineno, r.starto, lp->size,
-					      untabify);
+					      action);
 		} else if (lp == r.endp) /* Last line of multi-line region. */
-			edit_tab_line(&lp, lineno, 0, r.endo, untabify);
+			edit_tab_line(&lp, lineno, 0, r.endo, action);
 		else /* Middle line of multi-line region. */
 			edit_tab_line(&lp, lineno, r.starto,
-				      lp->size - r.starto, untabify);
+				      lp->size - r.starto, action);
 		if (lp == r.endp)
 			break;
 	}
@@ -604,7 +568,7 @@ when this can be done without changing the column they end at.
 The variable `tab-width' controls the spacing of tab stops.
 +*/
 {
-	if (tabify_or_untabify(FALSE)) {
+	if (edit_tab_region(TAB_TABIFY)) {
 		/* Avoid pointing over the end of the line. */
 		cur_wp->pointo = 0;
 		return TRUE;
@@ -618,5 +582,343 @@ Convert all tabs in region to multiple spaces, preserving columns.
 The variable `tab-width' controls the spacing of tab stops.
 +*/
 {
-	return tabify_or_untabify(TRUE);
+	return edit_tab_region(TAB_UNTABIFY);
+}
+
+#if 0
+DEFUN("transpose-chars", transpose_chars)
+/*+
++*/
+{
+}
+
+DEFUN("transpose-words", transpose_words)
+/*+
++*/
+{
+}
+
+DEFUN("transpose-sexps", transpose_sexps)
+/*+
++*/
+{
+}
+
+DEFUN("transpose-lines", transpose_lines)
+/*+
++*/
+{
+}
+
+DEFUN("forward-word", forward_word)
+/*+
++*/
+{
+}
+
+DEFUN("backward-word", backward_word)
+/*+
++*/
+{
+}
+
+DEFUN("kill-word", kill_word)
+/*+
++*/
+{
+}
+
+DEFUN("backward-kill-word", backward_kill_word)
+/*+
++*/
+{
+}
+
+DEFUN("mark-word", mark_word)
+/*+
++*/
+{
+}
+
+DEFUN("backward-sentence", backward_sentence)
+/*+
++*/
+{
+}
+
+DEFUN("forward-sentence", forward_sentence)
+/*+
++*/
+{
+}
+
+DEFUN("kill-sentence", kill_sentence)
+/*+
++*/
+{
+}
+
+DEFUN("backward-kill-sentence", backward_kill_sentence)
+/*+
++*/
+{
+}
+
+DEFUN("backward-paragraph", backward_paragraph)
+/*+
++*/
+{
+}
+
+DEFUN("forward-paragraph", forward_paragraph)
+/*+
++*/
+{
+}
+
+DEFUN("mark-paragraph", mark_paragraph)
+/*+
++*/
+{
+}
+#endif
+
+#define CASE_UPPER	1
+#define CASE_LOWER	2
+
+/*
+ * Set the region case.
+ */
+static int setcase_region(int rcase)
+{
+	struct region r;
+	linep lp;
+	char *p;
+	int size;
+
+	if (warn_if_readonly_buffer() || warn_if_no_mark())
+		return FALSE;
+
+	calculate_region(&r);
+	size = r.size;
+
+	undo_save(UNDO_REPLACE_BLOCK, r.startn, r.starto, size, size);
+
+	lp = r.startp;
+	p = lp->text + r.starto;
+	while (size--) {
+		if (p < lp->text + lp->size) {
+			if (rcase == CASE_UPPER)
+				*p = toupper(*p);
+			else
+				*p = tolower(*p);
+			++p;
+		} else {
+			lp = lp->next;
+			p = lp->text;
+		}
+	}
+
+	cur_bp->flags |= BFLAG_MODIFIED;
+
+	return TRUE;
+}
+
+#if 0
+DEFUN("downcase-word", downcase_word)
+/*+
++*/
+{
+}
+
+DEFUN("upcase-word", upcase_word)
+/*+
++*/
+{
+}
+
+DEFUN("capitalize-word", capitalize_word)
+/*+
++*/
+{
+}
+#endif
+
+DEFUN("upcase-region", upcase_region)
+/*+
+Convert the region to upper case.
++*/
+{
+	return setcase_region(CASE_UPPER);
+}
+
+DEFUN("downcase-region", downcase_region)
+/*+
+Convert the region to lower case.
++*/
+{
+	return setcase_region(CASE_LOWER);
+}
+
+static void write_shell_output(va_list ap)
+{
+	astr out = va_arg(ap, astr);
+
+	insert_string((char *)astr_cstr(out));
+}
+
+DEFUN("shell-command", shell_command)
+/*+
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command.
+Standard input from the command comes from the null device.  If the
+shell command produces any output, the output goes to a Zile buffer
+named `*Shell Command Output*', which is displayed in another window
+but not selected.
+If the output is one line, it is displayed in the echo area.
+A numeric argument, as in `M-1 M-!', directs this command to insert
+any output into the current buffer.
++*/
+{
+	char *ms;
+	FILE *pipe;
+	astr out, s;
+	int lines = 0;
+	astr cmd;
+
+	if ((ms = minibuf_read("Shell command: ", "")) == NULL)
+		return cancel();
+	if (ms[0] == '\0')
+		return FALSE;
+
+	cmd = astr_new();
+	astr_fmt(cmd, "%s 2>&1 </dev/null", ms);
+	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
+		minibuf_error("Cannot open pipe to process");
+		return FALSE;
+	}
+	astr_delete(cmd);
+
+	out = astr_new();
+	s = astr_new();
+	while (astr_fgets(s, pipe) != NULL) {
+		++lines;
+		astr_append(out, s);
+		astr_append_char(out, '\n');
+	}
+	astr_delete(s);
+	pclose(pipe);
+
+	if (lines == 0)
+		minibuf_write("(Shell command succeeded with no output)");
+	else {
+		if (lastflag & FLAG_SET_UNIARG)
+			insert_string((char *)astr_cstr(out));
+		else {
+			if (lines > 1)
+				write_temp_buffer("*Shell Command Output*",
+						  write_shell_output, out);
+			else /* lines == 1 */
+				minibuf_write("%s", astr_cstr(out));
+		}
+	}
+	astr_delete(out);
+
+	return TRUE;
+}
+
+DEFUN("shell-command-on-region", shell_command_on_region)
+/*+
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command; passes the contents of the region as
+input to the shell command.
+If the shell command produces any output, the output goes to a Zile buffer
+named `*Shell Command Output*', which is displayed in another window
+but not selected.  
+If the output is one line, it is displayed in the echo area.
+A numeric argument, as in `M-1 M-!', directs output to the current buffer,
+then the old region is deleted first and the output replaces it as the
+contents of the region.
++*/
+{
+	char *ms;
+	FILE *pipe;
+	astr out, s;
+	int lines = 0;
+	astr cmd;
+	char *tempfile;
+
+	if ((ms = minibuf_read("Shell command: ", "")) == NULL)
+		return cancel();
+	if (ms[0] == '\0')
+		return FALSE;
+
+	cmd = astr_new();
+	if (cur_bp->markp != NULL) { /* Region selected; filter text. */
+		struct region r;
+		char *p;
+		FILE *f;
+
+		tempfile = tmpnam(NULL);
+		if ((f = fopen(tempfile, "w")) == NULL) {
+			minibuf_error("Cannot open temporary file");
+			return FALSE;
+		}
+
+		calculate_region(&r);
+		p = copy_text_block(r.startn, r.starto, r.size);
+		fwrite(p, 1, r.size, f);
+		free(p);
+
+		fclose(f);
+
+		astr_fmt(cmd, "%s 2>&1 <%s", ms, tempfile);
+	} else
+		astr_fmt(cmd, "%s 2>&1 </dev/null", ms);
+
+	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
+		minibuf_error("Cannot open pipe to process");
+		return FALSE;
+	}
+	astr_delete(cmd);
+
+	out = astr_new();
+	s = astr_new();
+	while (astr_fgets(s, pipe) != NULL) {
+		++lines;
+		astr_append(out, s);
+		astr_append_char(out, '\n');
+	}
+	astr_delete(s);
+	pclose(pipe);
+	if (cur_bp->markp != NULL)
+		remove(tempfile);
+
+	if (lines == 0)
+		minibuf_write("(Shell command succeeded with no output)");
+	else {
+		if (lastflag & FLAG_SET_UNIARG) {
+			if (cur_bp->markp != NULL) {
+				struct region r;
+				calculate_region(&r);
+				if (cur_wp->pointp != r.startp || r.starto != cur_wp->pointo)
+					FUNCALL(exchange_point_and_mark);
+				undo_save(UNDO_INSERT_BLOCK, cur_wp->pointn, cur_wp->pointo, r.size, 0);
+				undo_nosave = TRUE;
+				while (r.size--)
+					FUNCALL(delete_char);
+				undo_nosave = FALSE;
+			}
+			insert_string((char *)astr_cstr(out));
+		} else {
+			if (lines > 1)
+				write_temp_buffer("*Shell Command Output*",
+						  write_shell_output, out);
+			else /* lines == 1 */
+				minibuf_write("%s", astr_cstr(out));
+		}
+	}
+	astr_delete(out);
+
+	return TRUE;
 }

@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.1 2001/01/19 22:02:32 ssigala Exp $	*/
+/*	$Id: line.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -25,8 +25,10 @@
  */
 
 /*
- * All the common line-oriented editing function are declared in this file.
+ * All the common line-oriented editing functions are declared in this file.
  */
+
+#include "config.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -35,7 +37,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -54,7 +55,7 @@ linep new_line(int maxsize)
 	linep lp;
 	size_t size = sizeof *lp + maxsize - sizeof lp->text;
 
-	lp = (linep)xmalloc(size);
+	lp = (linep)zmalloc(size);
 	memset(lp, 0, size);
 
 	lp->size = 0;
@@ -74,7 +75,7 @@ linep resize_line(windowp wp, linep lp, int maxsize)
 	linep newlp;
 	windowp wp1;
 
-	newlp = (linep)xrealloc(lp, sizeof *lp + maxsize - sizeof lp->text);
+	newlp = (linep)zrealloc(lp, sizeof *lp + maxsize - sizeof lp->text);
 	newlp->maxsize = maxsize;
 
 	/*
@@ -367,20 +368,26 @@ the current buffer.
 
 void insert_string(char *s)
 {
+	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, strlen(s), 0);
+	undo_nosave = TRUE;
 	for (; *s != '\0'; ++s)
 		if (*s == '\n')
 			insert_newline();
 		else
 			insert_char(*s);
+	undo_nosave = FALSE;
 }
 
 void insert_nstring(char *s, size_t size)
 {
+	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+	undo_nosave = TRUE;
 	for (; 0 < size--; ++s)
 		if (*s == '\n')
 			insert_newline();
 		else
 			insert_char(*s);
+	undo_nosave = FALSE;
 }
 
 /*
@@ -460,13 +467,24 @@ Insert the character you type.
 void bprintf(const char *fmt, ...)
 {
 	va_list ap;
-	char buf[2048];
-
+#ifdef HAVE_VASPRINTF
+	char *buf;
+#else
+	char buf[2048]; /* XXX fix this */
+#endif
 	va_start(ap, fmt);
+#ifdef HAVE_VASPRINTF
+	vasprintf(&buf, fmt, ap);
+#else
 	vsprintf(buf, fmt, ap);
+#endif
 	va_end(ap);
 
 	insert_string(buf);
+
+#ifdef HAVE_VASPRINTF
+	free(buf);
+#endif
 }
 
 int delete_char(void)
@@ -579,7 +597,7 @@ int delete_char(void)
 		return TRUE;
 	}
 
-	minibuf_error("%FCEnd of buffer%E");
+	minibuf_error("End of buffer");
 
 	return FALSE;
 }
@@ -719,7 +737,7 @@ int backward_delete_char(void)
 		return TRUE;
 	}
 
-	minibuf_error("%FCBeginning of buffer%E");
+	minibuf_error("Beginning of buffer");
 
 	return FALSE;
 }

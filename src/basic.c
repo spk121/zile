@@ -1,4 +1,4 @@
-/*	$Id: basic.c,v 1.1 2001/01/19 22:01:53 ssigala Exp $	*/
+/*	$Id: basic.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,12 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -137,7 +139,7 @@ column, or at the end of the line if it is not long enough.
 
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!previous_line()) {
-			minibuf_error("%FCBeginning of buffer%E");
+			minibuf_error("Beginning of buffer");
 			return FALSE;
 		}
 
@@ -180,7 +182,7 @@ column, or at the end of the line if it is not long enough.
 
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!next_line()) {
-			minibuf_error("%FCEnd of buffer%E");
+			minibuf_error("End of buffer");
 			return FALSE;
 		}
 
@@ -301,7 +303,7 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!backward_char()) {
-			minibuf_error("%FCBeginning of buffer%E");
+			minibuf_error("Beginning of buffer");
 			return FALSE;
 		}
 
@@ -341,7 +343,7 @@ On reaching end of buffer, stop and signal error.
 
 	for (uni = 0; uni < uniarg; ++uni)
 		if (!forward_char()) {
-			minibuf_error("%FCEnd of buffer%E");
+			minibuf_error("End of buffer");
 			return FALSE;
 		}
 
@@ -384,7 +386,7 @@ int scroll_down(void)
 	} else if (cur_wp->pointo > 0)
 		FUNCALL(beginning_of_line);
 	else {
-		minibuf_error("%FCBeginning of buffer%E");
+		minibuf_error("Beginning of buffer");
 		return FALSE;
 	}
 
@@ -421,7 +423,7 @@ int scroll_up(void)
 	} else if (cur_wp->pointo < cur_wp->pointp->size)
 		FUNCALL(end_of_line);
 	else {
-		minibuf_error("%FCEnd of buffer%E");
+		minibuf_error("End of buffer");
 		return FALSE;
 	}
 

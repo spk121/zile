@@ -1,16 +1,16 @@
-#	$Id: Makefile.in,v 1.1 2001/01/19 22:01:44 ssigala Exp $
+#	$Id: Makefile.in,v 1.2 2003/04/24 15:11:58 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
 
 CC = @CC@
-CFLAGS = -I../src -W @CFLAGS@
+CFLAGS = -I../src @CFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 RANLIB = @RANLIB@
 
 LIB = libzile.a
-OBJS = @LIBOBJS@
+OBJS = alist.o astr.o htable.o @LIBOBJS@
 
 .c.o:
 	$(CC) -c -I. -I$(srcdir) $(CFLAGS) $<
@@ -37,3 +37,7 @@ distclean: clean
 realclean: distclean
 
 mostlyclean: clean
+
+alist.o: alist.h
+astr.o: astr.h
+htable.o: htable.h

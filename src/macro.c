@@ -1,4 +1,4 @@
-/*	$Id: macro.c,v 1.1 2001/01/19 22:02:33 ssigala Exp $	*/
+/*	$Id: macro.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -24,12 +24,14 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "config.h"
+
 #include <assert.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "zile.h"
 #include "extern.h"
 
@@ -61,7 +63,7 @@ void add_kbd_macro(funcp func, int uniarg)
 {
 	macrop mp;
 
-	mp = (macrop)xmalloc(sizeof(*mp));
+	mp = (macrop)zmalloc(sizeof(*mp));
 	mp->func = func;
 	mp->uniarg = uniarg;
 	mp->next = NULL;
@@ -82,14 +84,14 @@ Use C-x ) to finish recording and make the macro available.
 +*/
 {
 	if (thisflag & FLAG_DEFINING_MACRO) {
-		minibuf_error("%FCAlready defining a keyboard macro%E");
+		minibuf_error("Already defining a keyboard macro");
 		return FALSE;
 	}
 
 	if (head_mp != NULL)
 		cancel_kbd_macro();
 
-	minibuf_write("%FCDefining keyboard macro...%E");
+	minibuf_write("Defining keyboard macro...");
 
 	thisflag |= FLAG_DEFINING_MACRO;
 
@@ -104,7 +106,7 @@ The macro is now available for use via C-x e.
 +*/
 {
 	if (!(thisflag & FLAG_DEFINING_MACRO)) {
-		minibuf_error("%FCNot defining a keyboard macro%E");
+		minibuf_error("Not defining a keyboard macro");
 		return FALSE;
 	}
 
@@ -118,7 +120,7 @@ static int call_last_kbd_macro(void)
 	macrop mp;
 
 	if (head_mp == NULL) {
-		minibuf_error("%FCKeyboard macro not defined%E");
+		minibuf_error("Keyboard macro not defined");
 		return FALSE;
 	}
 
