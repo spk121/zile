@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.58 2005/02/05 01:49:13 rrt Exp $	*/
+/*	$Id: bind.c,v 1.59 2005/02/06 01:49:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -252,13 +252,13 @@ typedef struct fentry *fentryp;
 
 static struct fentry fentry_table[] = {
 #define X0(zile_name, c_name) \
-	{ zile_name, F_ ## c_name, { NULL, NULL, NULL } },
+	{zile_name, F_ ## c_name, {NULL, NULL, NULL}},
 #define X1(zile_name, c_name, key1) \
-	{ zile_name, F_ ## c_name, { key1, NULL, NULL } },
+	{zile_name, F_ ## c_name, {key1, NULL, NULL}},
 #define X2(zile_name, c_name, key1, key2) \
-	{ zile_name, F_ ## c_name, { key1, key2, NULL } },
+	{zile_name, F_ ## c_name, {key1, key2, NULL}},
 #define X3(zile_name, c_name, key1, key2, key3) \
-	{ zile_name, F_ ## c_name, { key1, key2, key3 } },
+	{zile_name, F_ ## c_name, {key1, key2, key3}},
 #include "tbl_funcs.h"
 #undef X0
 #undef X1
@@ -298,8 +298,7 @@ void init_bindings(void)
   for (i = 0; i < fentry_table_size; i++)
     for (j = 0; j < 3; ++j)
       if (fentry_table[i].key[j] != NULL)
-        bind_key_string(fentry_table[i].key[j],
-                        fentry_table[i].func);
+        bind_key_string(fentry_table[i].key[j], fentry_table[i].func);
 }
 
 static void recursive_free_bindings(leafp p)
@@ -325,14 +324,20 @@ static char *bsearch_function(char *name)
   return entryp ? entryp->name : NULL;
 }
 
-Function get_function(char *name)
+static fentryp get_fentry(char *name)
 {
   size_t i;
   assert(name);
   for (i = 0; i < fentry_table_size; ++i)
     if (!strcmp(name, fentry_table[i].name))
-      return fentry_table[i].func;
+      return &fentry_table[i];
   return NULL;
+}
+
+Function get_function(char *name)
+{
+  fentryp f = get_fentry(name);
+  return f ? f->func : NULL;
 }
 
 char *get_function_name(Function p)
@@ -342,6 +347,23 @@ char *get_function_name(Function p)
     if (fentry_table[i].func == p)
       return fentry_table[i].name;
   return NULL;
+}
+
+static astr bindings_string(fentryp f)
+{
+  size_t i;
+  astr as = astr_new();
+
+  for (i = 0; i < 3; ++i) {
+    astr key = simplify_key(f->key[i]);
+    if (astr_len(key) > 0) {
+        astr_cat_cstr(as, (i == 0) ? "" : ", ");
+        astr_cat(as, key);
+    }
+    astr_delete(key);
+  }
+
+  return as;
 }
 
 int execute_function(char *name, int uniarg)
@@ -481,6 +503,39 @@ DEFUN("global-set-key", global_set_key)
   return ok;
 }
 
+DEFUN("where-is", where_is)
+  /*+
+    Print message listing key sequences that invoke the command DEFINITION.
+    Argument is a command definition, usually a symbol with a function definition.
+    If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
+    +*/
+{
+  char *name;
+  fentryp f;
+
+  name = minibuf_read_function_name("Where is command: ");
+
+  if (name == NULL || (f = get_fentry(name)) == NULL)
+    return FALSE;
+
+  if (f->key[0]) {
+    astr bindings = bindings_string(f);
+    astr as = astr_new();
+
+    astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
+    if (lastflag & FLAG_SET_UNIARG)
+      bprintf("%s", astr_cstr(as));
+    else
+      minibuf_write("%s", astr_cstr(as));
+
+    astr_delete(as);
+    astr_delete(bindings);
+  } else
+    minibuf_write("%s is not on any key", name);
+
+  return TRUE;
+}
+
 char *get_function_by_key_sequence(void)
 {
   leafp p;
@@ -501,35 +556,6 @@ char *get_function_by_key_sequence(void)
     return get_function_name(p->func);
 }
 
-static void write_functions_list(va_list ap)
-{
-  size_t i, j;
-  astr key;
-
-  (void)ap;
-  bprintf("%-30s%s\n", "Function", "Bindings");
-  bprintf("%-30s%s\n", "--------", "--------");
-  for (i = 0; i < fentry_table_size; ++i) {
-    bprintf("%-30s", fentry_table[i].name);
-    for (j = 0; j < 3; ++j) {
-      key = simplify_key(fentry_table[i].key[j]);
-      if (astr_len(key) > 0)
-        bprintf("%s%s", !j ? "" : ", ", astr_cstr(key));
-      astr_delete(key);
-    }
-    bprintf("\n");
-  }
-}
-
-DEFUN("list-functions", list_functions)
-  /*+
-    List defined functions.
-    +*/
-{
-  write_temp_buffer("*Functions List*", write_functions_list);
-  return TRUE;
-}
-
 static void write_bindings_tree(leafp tree, list keys)
 {
   size_t i;
@@ -543,16 +569,15 @@ static void write_bindings_tree(leafp tree, list keys)
     if (p->func != NULL) {
       astr key = astr_new();
       astr as = chordtostr(p->key);
-      for (l = list_first(keys);
-           l != list_last(keys);
+      for (l = list_next(list_first(keys));
+           l != keys;
            l = list_next(l)) {
         astr_cat(key, l->item);
         astr_cat_char(key, ' ');
       }
       astr_cat(key, as);
       astr_delete(as);
-      bprintf("%-15s %s\n", astr_cstr(key),
-              get_function_name(p->func));
+      bprintf("%-15s %s\n", astr_cstr(key), get_function_name(p->func));
       astr_delete(key);
     } else
       write_bindings_tree(p, keys);

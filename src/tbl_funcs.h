@@ -1,11 +1,11 @@
-/*	$Id: tbl_funcs.h,v 1.32 2005/01/26 18:26:48 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.33 2005/02/06 01:49:13 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
  * X0 means no key binding, X1 means one key binding, etc.
  *
  * Please remember to keep in sync with the Texinfo documentation
- * `../doc/zile.texi' and the manual page `zile.1.in'.
+ * `../doc/zile.texi'.
  */
 
 X0("auto-fill-mode", auto_fill_mode)
@@ -71,7 +71,6 @@ X1("kill-sexp", kill_sexp,				"\\C-\\M-k")
 X1("kill-word", kill_word,				"\\M-d")
 X1("list-bindings", list_bindings,			"\\C-hb")
 X1("list-buffers", list_buffers,			"\\C-x\\C-b")
-X1("list-functions", list_functions,			"\\C-hlf")
 X1("list-registers", list_registers,			"\\C-hlr")
 X1("mark-whole-buffer", mark_whole_buffer,		"\\C-xh")
 X1("mark-paragraph", mark_paragraph,			"\\M-h")
@@ -121,6 +120,7 @@ X0("untabify", untabify)
 X1("upcase-region", upcase_region,			"\\C-x\\C-u")
 X1("upcase-word", upcase_word,				"\\M-u")
 X1("view-zile-FAQ", view_zile_FAQ,			"\\C-hF")
+X1("where-is", where_is,				"\\C-hw")
 X1("write-file", write_file,				"\\C-x\\C-w")
 X2("yank", yank,					"\\C-y", "\\F8")
 X0("zile-version", zile_version)

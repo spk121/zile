@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.18 2005/01/29 12:51:53 rrt Exp $	*/
+/*	$Id: keys.c,v 1.19 2005/02/06 01:49:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -121,11 +121,14 @@ astr chordtostr(size_t key)
   case KBD_F12:
     astr_cat_cstr(as, "F12");
     break;
+  case ' ':
+    astr_cat_cstr(as, "SPC");
+    break;
   default:
     if (isgraph(key))
       astr_cat_char(as, (int)(key & 0xff));
     else
-      astr_cat_cstr(as, "<?>");
+      astr_afmt(as, "<%x>", key);
   }
 
   return as;
@@ -211,7 +214,7 @@ static int bstrcmp_prefix(const void *s, const void *t)
 /*
  * Convert a key string to its key code.
  */
-static int strtokey(char *buf, size_t *len)
+static size_t strtokey(char *buf, size_t *len)
 {
   if (*buf == '\\') {
     char **p = bsearch(&buf, keyname,
@@ -220,38 +223,37 @@ static int strtokey(char *buf, size_t *len)
                        bstrcmp_prefix);
     if (p == NULL) {
       *len = 0;
-      return -1;
+      return KBD_NOKEY;
     } else {
       *len = strlen(*p);
       return keycode[p - (char **)keyname];
     }
   } else {
     *len = 1;
-    return *buf;
+    return (size_t)*buf;
   }
 }
 
 /*
  * Convert a key chord string to its key code.
  */
-int strtochord(char *buf, size_t *len)
+size_t strtochord(char *buf, size_t *len)
 {
-  int key;
-  size_t l;
+  size_t key, l;
 
   key = strtokey(buf, &l);
-  if (key == -1) {
+  if (key == KBD_NOKEY) {
     *len = 0;
-    return -1;
+    return KBD_NOKEY;
   }
 
   *len = l;
 
   if (key == KBD_CTL || key == KBD_META) {
-    int k = strtochord(buf + l, &l);
-    if (k == -1) {
+    size_t k = strtochord(buf + l, &l);
+    if (k == KBD_NOKEY) {
       *len = 0;
-      return -1;
+      return KBD_NOKEY;
     }
     *len += l;
     key |= k;
@@ -265,14 +267,13 @@ int strtochord(char *buf, size_t *len)
  */
 int keystrtovec(char *key, size_t **keys)
 {
-  vector *v = vec_new(sizeof(int));
+  vector *v = vec_new(sizeof(size_t));
   size_t size;
 
   for (size = 0; *key != '\0'; size++) {
-    size_t len;
-    int code = strtochord(key, &len);
-    vec_item(v, size, int) = code;
-    if ((vec_item(v, size, int) = code) == -1) {
+    size_t len, code = strtochord(key, &len);
+    vec_item(v, size, size_t) = code;
+    if ((vec_item(v, size, size_t) = code) == KBD_NOKEY) {
       vec_delete(v);
       return -1;
     }
