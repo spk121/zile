@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lithp.c,v 1.3 2005/01/14 23:46:47 rrt Exp $	*/
+/*	$Id: lithp.c,v 1.4 2005/01/17 00:28:21 rrt Exp $	*/
 
 #include <stdio.h>
 #include "zile.h"
@@ -58,17 +58,14 @@ void lithp(char* file)
     fp = NULL;
   }
 
-  /* evaluate the read-in lists and free */
+  /* evaluate the read-in lists, display the result, and the variables
+     and defuns */
   printf(astr_cstr(leDumpEval(list, 0)));
+  printf("Variables:\n%s", astr_cstr(variableDump(mainVarList)));
+  printf("defuns:\n%s", astr_cstr(variableDump(defunList)));
+
+  /* Free the state */
   leWipe(list);
-
-  /* display the variables and free */
-  printf("Variables:\n");
-  printf("%s", astr_cstr(variableDump(mainVarList)));
   variableFree(mainVarList);
-
-  /* display the user-defined functions and free */
-  printf("defun's:\n");
-  printf("%s", astr_cstr(variableDump(defunList)));
   variableFree(defunList);
 }
