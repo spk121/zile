@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.14 2004/12/21 00:21:05 rrt Exp $
+## $Id: Makefile.am,v 1.15 2005/01/01 02:06:03 rrt Exp $
 
 SUBDIRS = doc src
 
@@ -14,9 +14,7 @@ EXTRA_DIST =					\
 
 CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
-dist-epoc: zile.zip
-
-zile.zip:
+dist-epoc:
 	emxsis zile.pkg
 	cp README Readme.txt
 	zip zile.zip zile.sis Readme.txt
