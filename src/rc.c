@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.11 2004/03/03 01:50:33 rrt Exp $	*/
+/*	$Id: rc.c,v 1.12 2004/03/09 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -70,13 +70,14 @@ static int skip_ws(int c)
 static void parse_id_line(int c)
 {
 	char id[50], value[50];
-	int i, c2;
+        size_t i = 0;
+	int c2;
 
 	/* Read variable name.  */
-	id[i = 0] = tolower(c);
+	id[i] = tolower(c);
 	while (isalnum(c = fgetc(rc_file)) || c == '-') {
 		/* Prevent overflow.  */
-		if (i < sizeof(id)-2)
+		if (i < sizeof(id) - 2)
 			id[++i] = tolower(c);
 	}
 	id[++i] = '\0';
@@ -92,7 +93,7 @@ static void parse_id_line(int c)
 		value[i = 0] = tolower(c);
 		while (isalnum(c = fgetc(rc_file)) || c == '-') {
 			/* Prevent overflow.  */
-			if (i < sizeof(value)-2)
+			if (i < sizeof(value) - 2)
 				value[++i] = tolower(c);
 		}
 		value[++i] = '\0';
@@ -102,7 +103,7 @@ static void parse_id_line(int c)
 		i = 0;
 		while ((c = fgetc(rc_file)) != '"' && c != EOF) {
 			/* Prevent overflow.  */
-			if (i < sizeof(value)-2) { /* prevent "\\\0" string */
+			if (i < sizeof(value) - 2) { /* prevent "\\\0" string */
 				value[i++] = c;
 				if (c == '\\') {
 					c2 = fgetc(rc_file);
@@ -116,8 +117,8 @@ static void parse_id_line(int c)
 	} else
 		error("syntax error");
 
-#if 0
-	fprintf(stderr, "'%s' = '%s'\n", id, value);
+#if DEBUG
+	ZTRACE(("'%s' = '%s'\n", id, value));
 #endif
 
 	/* Change variable's value.  */
