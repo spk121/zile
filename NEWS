@@ -1,3 +1,25 @@
+Changes between Zile 1.7 BETA 2 - Zile 1.7
+
+* Patches provided by David A. Capello <dacap@users.sourceforge.net>:
+    * Added `forward-sexp', `backward-sexp', `transpose-sexp', and
+      `mark-sexp'.
+    * Added `forward-line' and `transpose-lines'.
+    * Added `transpose-chars' and `transpose-words' (they don't
+      support uniarg yet).
+    * Fixed `forward-word'.
+    * `C-q' doesn't support overwrite-mode.
+    * Fixed `overwrite-mode' to Emacs behavior.
+    * Fixed `revert_action' to handle nested undo-sequences.
+    * Added `delete-horizontal-space' and `just-one-space'.
+    * Fixed a bug in strtokey0 to handle `M-\' key combination.
+    * Fixed the clock, now is updated correctly.
+    * Added `mark-word'.
+    * Fixed `isearch' to stop recording macros when you press C-g.
+    * Fixed the column indicator in the status line (now 0 is the
+      first column).
+    * Modified `universal_argument' to Emacs behavior.
+    * Fixed overflow for long variable names in configuration file.
+
 Changes between Zile 1.6.1 - Zile 1.7 BETA 2
 
 Note: 1.7 BETA 2 was produced from 1.6.1, not 1.6.2, but all the same
