@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.39 2005/01/27 01:27:24 rrt Exp $	*/
+/*	$Id: search.c,v 1.40 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -110,7 +110,7 @@ static void goto_linep(Line *lp)
     next_line();
 }
 
-static int search_forward(Line *startp, unsigned starto, const char *s)
+static int search_forward(Line *startp, size_t starto, const char *s)
 {
   Line *lp;
   const char *sp, *sp2;
@@ -143,7 +143,7 @@ static int search_forward(Line *startp, unsigned starto, const char *s)
   return FALSE;
 }
 
-static int search_backward(Line *startp, unsigned starto, const char *s)
+static int search_backward(Line *startp, size_t starto, const char *s)
 {
   Line *lp;
   const char *sp, *sp2;

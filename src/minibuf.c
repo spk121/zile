@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.35 2005/01/27 01:27:23 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.36 2005/01/27 01:33:17 rrt Exp $     */
 
 #include "config.h"
 
@@ -220,7 +220,7 @@ int minibuf_read_yesno(const char *fmt, ...)
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(list_at(cp->completions, (unsigned)retvalue), "yes"))
+    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "yes"))
       retvalue = TRUE;
     else
       retvalue = FALSE;
@@ -250,7 +250,7 @@ int minibuf_read_boolean(const char *fmt, ...)
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(list_at(cp->completions, (unsigned)retvalue), "true"))
+    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "true"))
       retvalue = TRUE;
     else
       retvalue = FALSE;

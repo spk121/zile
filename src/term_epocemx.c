@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.10 2005/01/26 23:58:52 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.11 2005/01/27 01:33:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -60,8 +60,8 @@ static Screen screen;
 
 Terminal *termp = &thisterm;
 
-unsigned ZILE_COLS;   /* Current number of columns on screen. */
-unsigned ZILE_LINES;  /* Current number of rows on screen. */
+size_t ZILE_COLS;   /* Current number of columns on screen. */
+size_t ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
@@ -384,7 +384,7 @@ static int xgetkey(int mode)
   }
 }
 
-int term_xgetkey(int mode, unsigned timeout)
+int term_xgetkey(int mode, size_t timeout)
 {
   return xgetkey(mode);
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.53 2005/01/27 01:27:24 rrt Exp $        */
+/*      $Id: zile.h,v 1.54 2005/01/27 01:33:19 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -72,8 +72,8 @@ typedef int (*Function)(int uniarg);
 /* Point and Marker. */
 struct Point {
   Line *p;                      /* Line pointer. */
-  unsigned n;                   /* Line number. */
-  unsigned o;                   /* Offset. */
+  size_t n;                   /* Line number. */
+  size_t o;                   /* Offset. */
 };
 
 struct Marker {
@@ -119,8 +119,8 @@ struct Undo {
     /* The block to insert. */
     struct {
       char *text;
-      unsigned osize;      /* Original size; only for replace. */
-      unsigned size;       /* New block size. */
+      size_t osize;      /* Original size; only for replace. */
+      size_t size;       /* New block size. */
     } block;
   } delta;
 };
@@ -128,7 +128,7 @@ struct Undo {
 struct Region {
   Point start;            /* The region start. */
   Point end;              /* The region end. */
-  unsigned size;                /* The region size. */
+  size_t size;                /* The region size. */
 
   /* The total number of lines ('\n' newlines) in region. */
   int num_lines;
@@ -170,7 +170,7 @@ struct Buffer {
 
   /* Buffer flags. */
   int flags;
-  unsigned mark_active : 1;
+  size_t mark_active : 1;
 
   /* Buffer-local variables. */
   le *vars;
@@ -202,8 +202,8 @@ struct Window {
   Marker *saved_pt;
 
   /* The formal and effective width and height of window. */
-  unsigned fwidth, fheight;
-  unsigned ewidth, eheight;
+  size_t fwidth, fheight;
+  size_t ewidth, eheight;
 };
 
 enum {
@@ -235,7 +235,7 @@ struct Completion {
 
   list matches;           /* The matches list. */
   char *match;            /* The match buffer. */
-  unsigned matchsize;     /* The match buffer size. */
+  size_t matchsize;     /* The match buffer size. */
 };
 
 struct History {
@@ -251,12 +251,12 @@ struct Terminal {
 
 /* The actual number of lines and columns on the screen, which may
    differ from the Terminal's settings after a SIGWINCH. */
-extern unsigned ZILE_LINES, ZILE_COLS;
+extern size_t ZILE_LINES, ZILE_COLS;
 
 extern Terminal *termp; /* The global Terminal. */
 
 /* Type of font attributes */
-typedef unsigned long Font;
+typedef size_t Font;
 
 /* Zile font codes
  * Designed to fit in an int, leaving room for a char underneath. */

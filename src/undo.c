@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.18 2005/01/27 01:27:24 rrt Exp $        */
+/*      $Id: undo.c,v 1.19 2005/01/27 01:33:19 rrt Exp $        */
 
 #include "config.h"
 
@@ -41,7 +41,7 @@ static int doing_undo = FALSE;
 /*
  * Save a reverse delta for doing undo.
  */
-void undo_save(int type, Point pt, unsigned arg1, unsigned arg2)
+void undo_save(int type, Point pt, size_t arg1, size_t arg2)
 {
   Undo *up;
 
@@ -144,7 +144,7 @@ static Undo *revert_action(Undo *up)
     break;
   case UNDO_REPLACE_CHAR:
     undo_save(UNDO_REPLACE_CHAR, up->pt,
-              (unsigned)(*astr_char(cur_bp->pt.p->item,
+              (size_t)(*astr_char(cur_bp->pt.p->item,
                                     (ptrdiff_t)up->pt.o)), 0);
     *astr_char(cur_bp->pt.p->item, (ptrdiff_t)up->pt.o) = up->delta.c;
     cur_bp->flags |= BFLAG_MODIFIED;

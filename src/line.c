@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.56 2005/01/27 01:27:23 rrt Exp $	*/
+/*	$Id: line.c,v 1.57 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,7 @@
 #include "extern.h"
 
 
-static void adjust_markers(Line *newlp, Line *oldlp, unsigned pointo, int dir, int offset)
+static void adjust_markers(Line *newlp, Line *oldlp, size_t pointo, int dir, int offset)
 {
   Marker *pt = point_marker(), *marker;
 
@@ -92,7 +92,7 @@ int insert_char(int c)
                 && ((get_goalc() % t) == t)))) {
       /* Replace the character.  */
       undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
-                (unsigned)(*astr_char(cur_bp->pt.p->item,
+                (size_t)(*astr_char(cur_bp->pt.p->item,
                                       (ptrdiff_t)cur_bp->pt.o)), 0);
       *astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o) = c;
       ++cur_bp->pt.o;
@@ -285,7 +285,7 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen,
  */
 void fill_break_line(void)
 {
-  unsigned break_col, last_col, excess = 0;
+  size_t break_col, last_col, excess = 0;
 
   /* Move cursor back to fill column */
   while (get_goalc() > get_variable_number("fill-column") + 1) {
@@ -431,7 +431,7 @@ int delete_char(void)
       return FALSE;
 
     undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
-              (unsigned)(*astr_char(cur_bp->pt.p->item,
+              (size_t)(*astr_char(cur_bp->pt.p->item,
                                     (ptrdiff_t)cur_bp->pt.o)), 0);
 
     /*

@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: list.c,v 1.5 2005/01/26 23:45:00 rrt Exp $	*/
+/*	$Id: list.c,v 1.6 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <assert.h>
@@ -52,10 +52,10 @@ void list_delete(list l)
 }
 
 /* Return the length of a list */
-unsigned long list_length(list l)
+size_t list_length(list l)
 {
   list p;
-  unsigned long length = 0;
+  size_t length = 0;
 
   for (p = l->next; p != l; p = p->next)
     ++length;
@@ -136,7 +136,7 @@ void *list_betail(list l)
 
 /* Return the nth item of l, or l->item (usually NULL) if that is out
    of range */
-void *list_at(list l, unsigned n)
+void *list_at(list l, size_t n)
 {
   int i;
   list p;
@@ -154,7 +154,7 @@ void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
 {
   list p;
   void **vec;
-  unsigned long i, len = list_length(l);
+  size_t i, len = list_length(l);
 
   assert(l != NULL && cmp != NULL);
 

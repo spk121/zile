@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.58 2005/01/26 23:58:52 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.59 2005/01/27 01:33:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -46,9 +46,9 @@ static Terminal thisterm = {
 };
 
 typedef struct {
-  unsigned curx, cury;          /* cursor x and y. */
+  size_t curx, cury;          /* cursor x and y. */
   Font font;                    /* current font. */
-  unsigned *array, *oarray;     /* contents of screen (8 low bits is
+  size_t *array, *oarray;     /* contents of screen (8 low bits is
                                    character, rest is Zile font code).
                                    array is current, oarray is last
                                    displayed contents. */
@@ -61,8 +61,8 @@ Terminal *termp = &thisterm;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
-unsigned ZILE_COLS;   /* Current number of columns on screen. */
-unsigned ZILE_LINES;  /* Current number of rows on screen. */
+size_t ZILE_COLS;   /* Current number of columns on screen. */
+size_t ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;
@@ -91,7 +91,7 @@ static size_t key_len[KEYS];
 astr norm_string;
 static struct termios ostate, nstate;
 
-void term_move(unsigned y, unsigned x)
+void term_move(size_t y, size_t x)
 {
   screen.curx = x;
   screen.cury = y;
@@ -99,7 +99,7 @@ void term_move(unsigned y, unsigned x)
 
 void term_clrtoeol(void)
 {
-  unsigned i, x = screen.curx;
+  size_t i, x = screen.curx;
   for (i = screen.curx; i < termp->width; i++)
     term_addch(0);
   screen.curx = x;
@@ -127,7 +127,7 @@ static const char *getattr(Font f) {
 void term_refresh(void)
 {
   int skipped, eol;
-  unsigned i, j;
+  size_t i, j;
   Font of = ZILE_NORMAL;
   astr as = astr_new();
 
@@ -148,7 +148,7 @@ void term_refresh(void)
     skipped = FALSE;
 
     for (j = 0; j < termp->width; j++) {
-      unsigned offset = i * termp->width + j;
+      size_t offset = i * termp->width + j;
       int n = screen.array[offset];
       char c = n & 0xff;
       Font f = n & ~0xff;
@@ -188,7 +188,7 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  unsigned i;
+  size_t i;
   term_move(0, 0);
   for (i = 0; i < termp->width * termp->height; i++) {
     screen.array[i] = 0;
@@ -212,9 +212,9 @@ void term_addch(int c)
   }
 }
 
-void term_attrset(unsigned attrs, ...)
+void term_attrset(size_t attrs, ...)
 {
-  unsigned i;
+  size_t i;
   va_list valist;
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++) {
@@ -266,10 +266,10 @@ static void read_screen_size(void)
 
 static void term_init_screen(void)
 {
-  unsigned size = termp->width * termp->height;
+  size_t size = termp->width * termp->height;
         
-  screen.array = zmalloc(size * sizeof(unsigned));
-  screen.oarray = zmalloc(size * sizeof(unsigned));
+  screen.array = zmalloc(size * sizeof(size_t));
+  screen.oarray = zmalloc(size * sizeof(size_t));
   screen.curx = screen.cury = 0;
 
   term_clear(); /* Ensure the first call to term_refresh will update the screen. */
@@ -298,7 +298,7 @@ static void setattr(int flags, struct termios *state)
 
 void term_init(void)
 {
-  unsigned i;
+  size_t i;
   char *tcap;
 
   key_buf = astr_new();  
@@ -392,7 +392,7 @@ void term_resume(void)
   winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
 }
 
-static int translate_key(char *s, unsigned nbytes)
+static int translate_key(char *s, size_t nbytes)
 {
   int key = KBD_NOKEY, i, used = 0;
 
@@ -448,7 +448,7 @@ static int translate_key(char *s, unsigned nbytes)
   return key;
 }
 
-static int xgetkey(int mode, unsigned dsecs)
+static int xgetkey(int mode, size_t dsecs)
 {
   size_t nbytes;
   size_t len = astr_len(key_buf);
@@ -493,7 +493,7 @@ static int xgetkey(int mode, unsigned dsecs)
   return key;
 }
 
-int term_xgetkey(int mode, unsigned timeout)
+int term_xgetkey(int mode, size_t timeout)
 {
   int key;
   struct sigaction winch_sig;

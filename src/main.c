@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.76 2005/01/27 01:27:23 rrt Exp $	*/
+/*	$Id: main.c,v 1.77 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -341,7 +341,7 @@ int main(int argc, char **argv)
 
     if (argc >= 1)
       while (*argv) {
-        unsigned line = 0;
+        size_t line = 0;
         if (**argv == '+')
           line = strtoul(*argv++ + 1, NULL, 10);
         if (*argv)

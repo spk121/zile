@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.30 2005/01/27 01:27:20 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.31 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -353,10 +353,10 @@ void set_temporary_buffer(Buffer *bp)
   bp->next = NULL;
 }
 
-unsigned calculate_buffer_size(Buffer *bp)
+size_t calculate_buffer_size(Buffer *bp)
 {
   Line *lp = list_next(bp->lines);
-  unsigned size = 0;
+  size_t size = 0;
 
   if (lp == bp->lines)
     return 0;
@@ -400,9 +400,9 @@ int is_mark_actived(void)
 /*
  * Return a safe tab width for the given buffer.
  */
-unsigned tab_width(Buffer *bp)
+size_t tab_width(Buffer *bp)
 {
-  unsigned t = get_variable_number_bp(bp, "tab-width");
+  size_t t = get_variable_number_bp(bp, "tab-width");
 
   return t ? t : 1;
 }

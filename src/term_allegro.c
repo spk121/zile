@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.20 2005/01/26 23:58:52 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.21 2005/01/27 01:33:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,14 +48,14 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-unsigned ZILE_LINES, ZILE_COLS;
+size_t ZILE_LINES, ZILE_COLS;
 
 /* current position and color */
 static int cur_x = 0, cur_y = 0;
 static Font cur_color = 0;
 
-static unsigned short *cur_scr = NULL;
-static unsigned short *new_scr = NULL;
+static size_t short *cur_scr = NULL;
+static size_t short *new_scr = NULL;
 
 static void _get_color(int c, int *_fg, int *_bg)
 {
@@ -151,7 +151,7 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(unsigned short)*ZILE_COLS*ZILE_LINES);
+  memset(new_scr, 0, sizeof(size_t short)*ZILE_COLS*ZILE_LINES);
 }
 
 void term_addch(int c)
@@ -180,7 +180,7 @@ void term_addch(int c)
 void term_attrset(int attrs, ...)
 {
   int i;
-  unsigned long a = 0;
+  size_t a = 0;
   va_list valist;
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++)
@@ -220,8 +220,8 @@ void term_init(void)
   termp->width = ZILE_COLS;
   termp->height = ZILE_LINES;
 
-  cur_scr = calloc(1, sizeof(unsigned short)*ZILE_COLS*ZILE_LINES);
-  new_scr = calloc(1, sizeof(unsigned short)*ZILE_COLS*ZILE_LINES);
+  cur_scr = calloc(1, sizeof(size_t short)*ZILE_COLS*ZILE_LINES);
+  new_scr = calloc(1, sizeof(size_t short)*ZILE_COLS*ZILE_LINES);
 }
 
 void term_close(void)
@@ -353,7 +353,7 @@ int term_getkey(void)
   return _term_getkey(0);
 }
 
-static int xgetkey(int mode, unsigned timeout)
+static int xgetkey(int mode, size_t timeout)
 {
   int c = 0;
   switch (mode) {
@@ -370,7 +370,7 @@ static int xgetkey(int mode, unsigned timeout)
   return c;
 }
 
-int term_xgetkey(int mode, unsigned timeout)
+int term_xgetkey(int mode, size_t timeout)
 {
   int c;
 

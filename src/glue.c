@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.26 2005/01/27 01:27:23 rrt Exp $	*/
+/*	$Id: glue.c,v 1.27 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -50,7 +50,7 @@ void ding(void)
  * Wait for two seconds or until a key is pressed.
  * The key is then available with term_getkey().
  */
-void waitkey(unsigned delay)
+void waitkey(size_t delay)
 {
   term_ungetkey(term_xgetkey(GETKEY_DELAYED, delay));
 }
@@ -58,7 +58,7 @@ void waitkey(unsigned delay)
 /*
  * Copy a region of text into an allocated buffer.
  */
-char *copy_text_block(unsigned startn, unsigned starto, size_t size)
+char *copy_text_block(size_t startn, size_t starto, size_t size)
 {
   char *buf, *dp;
   size_t max_size, n, i;
@@ -138,7 +138,7 @@ char *replace_string(char *s, char *match, char *subst)
 /*
  * Compact the spaces into tabulations according to the `tw' tab width.
  */
-void tabify_string(char *dest, char *src, unsigned scol, unsigned tw)
+void tabify_string(char *dest, char *src, size_t scol, size_t tw)
 {
   char *sp, *dp;
   int dcol = scol, ocol = scol;
@@ -177,7 +177,7 @@ void tabify_string(char *dest, char *src, unsigned scol, unsigned tw)
  * The output buffer should be big enough to contain the expanded string.
  * To be sure, sizeof(dest) should be >= strlen(src)*tw + 1.
  */
-void untabify_string(char *dest, char *src, unsigned scol, unsigned tw)
+void untabify_string(char *dest, char *src, size_t scol, size_t tw)
 {
   char *sp, *dp;
   int col = scol;

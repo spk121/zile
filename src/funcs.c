@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.74 2005/01/27 01:27:22 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.75 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -437,10 +437,10 @@ DEFUN("universal-argument", universal_argument)
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
 
-static void edit_tab_line(Line **lp, unsigned lineno, unsigned offset, unsigned size, int action)
+static void edit_tab_line(Line **lp, size_t lineno, size_t offset, size_t size, int action)
 {
   char *src, *dest;
-  unsigned col, i, t = tab_width(cur_bp);
+  size_t col, i, t = tab_width(cur_bp);
 
   if (size == 0)
     return;
@@ -478,7 +478,7 @@ static int edit_tab_region(int action)
 {
   Region r;
   Line *lp;
-  unsigned lineno;
+  size_t lineno;
   Marker *marker;
 
   if (warn_if_readonly_buffer() || warn_if_no_mark())
@@ -569,7 +569,7 @@ static void astr_append_region(astr s)
   if (r.size > 0) {
     char *t = copy_text_block(r.start.n, r.start.o, r.size);
     if (t) {
-      unsigned i;
+      size_t i;
       for (i = 0; i < r.size; i++)
         astr_cat_char(s, t[i]);
       free(t);
@@ -1202,7 +1202,7 @@ DEFUN("fill-paragraph", fill_paragraph)
 static int setcase_word(int rcase)
 {
   int gotword;
-  unsigned i, size;
+  size_t i, size;
 
   if (!forward_word())
     return FALSE;
@@ -1312,7 +1312,7 @@ static int setcase_region(int rcase)
 {
   Region r;
   Line *lp;
-  unsigned size, i;
+  size_t size, i;
 
   if (warn_if_readonly_buffer() || warn_if_no_mark())
     return FALSE;
@@ -1542,7 +1542,7 @@ DEFUN("delete-region", delete_region)
   if (cur_bp->flags & BFLAG_READONLY) {
     warn_if_readonly_buffer();
   } else {
-    unsigned size = r.size;
+    size_t size = r.size;
 
     if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
       FUNCALL(exchange_point_and_mark);

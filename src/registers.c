@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.15 2005/01/26 23:45:00 rrt Exp $	*/
+/*	$Id: registers.c,v 1.16 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -113,7 +113,7 @@ DEFUN("insert-register", insert_register)
 
 static void write_registers_list(va_list ap)
 {
-  unsigned i, count;
+  size_t i, count;
 
   (void)ap;
   bprintf("%-8s %8s\n", "Register", "Size");

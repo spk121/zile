@@ -8,8 +8,8 @@ void goto_line(int to_line);
 void gotobob(void);
 void gotoeob(void);
 int next_line(void);
-int ngotodown(unsigned n);
-int ngotoup(unsigned n);
+int ngotodown(size_t n);
+int ngotoup(size_t n);
 int previous_line(void);
 int scroll_down(void);
 int scroll_up(void);
@@ -38,12 +38,12 @@ void switch_to_buffer(Buffer *bp);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 void set_temporary_buffer(Buffer *bp);
-unsigned calculate_buffer_size(Buffer *bp);
+size_t calculate_buffer_size(Buffer *bp);
 int transient_mark_mode(void);
 void activate_mark(void);
 void deactivate_mark(void);
 int is_mark_actived(void);
-unsigned tab_width(Buffer *bp);
+size_t tab_width(Buffer *bp);
 
 /* editfns.c -------------------------------------------------------------- */
 void push_mark(void);
@@ -68,7 +68,7 @@ astr get_home_dir(void);
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
 astr compact_path(const char *path);
 astr get_current_dir(int interactive);
-void open_file(char *path, unsigned lineno);
+void open_file(char *path, size_t lineno);
 void read_from_disk(const char *filename);
 int find_file(const char *filename);
 Completion *make_buffer_completion(void);
@@ -87,20 +87,20 @@ int backward_sexp(void);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
-void waitkey(unsigned delay);
-char *copy_text_block(unsigned startn, unsigned starto, size_t size);
+void waitkey(size_t delay);
+char *copy_text_block(size_t startn, size_t starto, size_t size);
 astr shorten_string(char *s, int maxlen);
 char *replace_string(char *s, char *match, char *subst);
-void tabify_string(char *dest, char *src, unsigned scol, unsigned tw);
-void untabify_string(char *dest, char *src, unsigned scol, unsigned tw);
+void tabify_string(char *dest, char *src, size_t scol, size_t tw);
+void untabify_string(char *dest, char *src, size_t scol, size_t tw);
 void goto_point(Point pt);
 char *getln(FILE *fp);
 
 /* keys.c ----------------------------------------------------------------- */
-astr chordtostr(unsigned key);
-int strtochord(char *buf, unsigned *len);
-int keystrtovec(char *key, unsigned **keyvec);
-astr keyvectostr(unsigned *keys, unsigned numkeys);
+astr chordtostr(size_t key);
+int strtochord(char *buf, size_t *len);
+int keystrtovec(char *key, size_t **keyvec);
+astr keyvectostr(size_t *keys, size_t numkeys);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
@@ -177,7 +177,7 @@ const char *previous_history_element(History *hp);
 const char *next_history_element(History *hp);
 
 /* point.c ---------------------------------------------------------------- */
-Point make_point(unsigned lineno, unsigned offset);
+Point make_point(size_t lineno, size_t offset);
 int cmp_point(Point pt1, Point pt2);
 int point_dist(Point pt1, Point pt2);
 int count_lines(Point pt1, Point pt2);
@@ -213,15 +213,15 @@ void term_init(void);
 void term_close(void);
 void term_suspend(void);
 void term_resume(void);
-void term_move(unsigned y, unsigned x);
+void term_move(size_t y, size_t x);
 void term_clrtoeol(void);
 void term_refresh(void);
 void term_clear(void);
 void term_addch(int c);
-void term_attrset(unsigned attrs, ...);
+void term_attrset(size_t attrs, ...);
 void term_beep(void);
 int term_getkey(void);
-int term_xgetkey(int mode, unsigned timeout);
+int term_xgetkey(int mode, size_t timeout);
 void term_ungetkey(int key);
 
 /* undo.c ----------------------------------------------------------------- */
@@ -229,7 +229,7 @@ extern int undo_nosave;
 
 void undo_start_sequence(void);
 void undo_end_sequence(void);
-void undo_save(int type, Point pt, unsigned arg1, unsigned arg2);
+void undo_save(int type, Point pt, size_t arg1, size_t arg2);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.16 2005/01/26 23:49:58 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.17 2005/01/27 01:33:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -52,7 +52,7 @@ void term_minibuf_write(const char *s)
 }
 
 static void draw_minibuf_read(const char *prompt, const char *value,
-                              unsigned prompt_len, char *match, unsigned pointo)
+                              size_t prompt_len, char *match, size_t pointo)
 {
   int margin = 1, n = 0;
 
@@ -80,7 +80,7 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 }
 
 static char *rot_vminibuf_read(const char *prompt, const char *value,
-			       Completion *cp, History *hp, char **p, unsigned *max)
+			       Completion *cp, History *hp, char **p, size_t *max)
 {
   static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
@@ -327,7 +327,7 @@ static char *rotation_buffers[MAX_ROTATIONS];
 char *term_minibuf_read(const char *prompt, const char *value,
                         Completion *cp, History *hp)
 {
-  static unsigned max[MAX_ROTATIONS], rot;
+  static size_t max[MAX_ROTATIONS], rot;
   Window *wp, *old_wp = cur_wp;
   char **p = rotation_buffers, *s;
 

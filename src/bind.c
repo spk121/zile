@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.48 2005/01/27 01:27:20 rrt Exp $	*/
+/*	$Id: bind.c,v 1.49 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -44,12 +44,12 @@ typedef struct leaf *leafp;
 
 struct leaf {
   /* The key and the function associated with the leaf. */
-  unsigned key;
+  size_t key;
   Function func;
 
   /* Leaf vector, number of items, max number of items. */
   leafp *vec;
-  unsigned vecnum, vecmax;
+  size_t vecnum, vecmax;
 };
 
 static leafp leaf_tree;
@@ -67,7 +67,7 @@ static leafp leaf_new(int vecmax)
   return p;
 }
 
-static leafp search_leaf(leafp tree, unsigned key)
+static leafp search_leaf(leafp tree, size_t key)
 {
   int i;
 
@@ -100,7 +100,7 @@ static void add_leaf(leafp tree, leafp p)
   ++tree->vecnum;
 }
 
-static void bind_key_vec(leafp tree, unsigned *keys, unsigned n, Function func)
+static void bind_key_vec(leafp tree, size_t *keys, size_t n, Function func)
 {
   leafp p, s;
 
@@ -120,7 +120,7 @@ static void bind_key_vec(leafp tree, unsigned *keys, unsigned n, Function func)
 
 static void bind_key_string(char *key, Function func)
 {
-  unsigned numkeys, *keys;
+  size_t numkeys, *keys;
 
   if ((numkeys = keystrtovec(key, &keys)) > 0) {
     bind_key_vec(leaf_tree, keys, numkeys, func);
@@ -128,7 +128,7 @@ static void bind_key_string(char *key, Function func)
   }
 }
 
-static leafp search_key(leafp tree, unsigned *keys, unsigned n)
+static leafp search_key(leafp tree, size_t *keys, size_t n)
 {
   leafp p;
 
@@ -153,7 +153,7 @@ int do_completion(astr as)
   return c;
 }
 
-static astr make_completion(unsigned *keys, unsigned numkeys)
+static astr make_completion(size_t *keys, size_t numkeys)
 {
   astr as = astr_new(), key;
   int i, len = 0;
@@ -171,12 +171,12 @@ static astr make_completion(unsigned *keys, unsigned numkeys)
   return astr_cat_cstr(as, "-");
 }
 
-static leafp completion_scan(int c, unsigned **keys, unsigned *numkeys)
+static leafp completion_scan(int c, size_t **keys, size_t *numkeys)
 {
   leafp p;
-  vector *v = vec_new(sizeof(unsigned));
+  vector *v = vec_new(sizeof(size_t));
 
-  vec_item(v, 0, unsigned) = c;
+  vec_item(v, 0, size_t) = c;
   *numkeys = 1;
 
   do {
@@ -184,7 +184,7 @@ static leafp completion_scan(int c, unsigned **keys, unsigned *numkeys)
       break;
     if (p->func == NULL) {
       astr as = make_completion(vec_array(v), *numkeys);
-      vec_item(v, (*numkeys)++, unsigned) = do_completion(as);
+      vec_item(v, (*numkeys)++, size_t) = do_completion(as);
       astr_delete(as);
     }
   } while (p->func == NULL);
@@ -196,7 +196,7 @@ static leafp completion_scan(int c, unsigned **keys, unsigned *numkeys)
 void process_key(int c)
 {
   int uni;
-  unsigned *keys = NULL, numkeys;
+  size_t *keys = NULL, numkeys;
   leafp p;
 
   if (c == KBD_NOKEY)
@@ -280,7 +280,7 @@ static int alternative_bindings = 0;
 
 void init_bindings(void)
 {
-  unsigned i, j;
+  size_t i, j;
 
   leaf_tree = leaf_new(10);
 
@@ -333,7 +333,7 @@ static struct fentry *bsearch_function(char *name)
 
 static Function get_function(char *name)
 {
-  unsigned i;
+  size_t i;
   for (i = 0; i < fentry_table_size; ++i)
     if (!strcmp(name, fentry_table[i].name))
       return fentry_table[i].func;
@@ -342,7 +342,7 @@ static Function get_function(char *name)
 
 static char *get_function_name(Function p)
 {
-  unsigned i;
+  size_t i;
   for (i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].func == p)
       return fentry_table[i].name;
@@ -365,7 +365,7 @@ int execute_function(char *name, int uniarg)
 char *minibuf_read_function_name(const char *fmt, ...)
 {
   va_list ap;
-  unsigned i;
+  size_t i;
   char *buf, *ms;
   list p;
   fentryp entryp;
@@ -453,7 +453,7 @@ DEFUN("global-set-key", global_set_key)
     +*/
 {
   int c, ok = FALSE;
-  unsigned *keys, numkeys;
+  size_t *keys, numkeys;
   leafp p;
   Function func;
   char *name;
@@ -484,7 +484,7 @@ char *get_function_by_key_sequence(void)
 {
   leafp p;
   int c = term_getkey();
-  unsigned *keys, numkeys;
+  size_t *keys, numkeys;
 
   if (c & KBD_META && isdigit(c & 255))
     return "universal-argument";
@@ -502,7 +502,7 @@ char *get_function_by_key_sequence(void)
 
 static void write_functions_list(va_list ap)
 {
-  unsigned i, j;
+  size_t i, j;
   astr key;
 
   (void)ap;

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.16 2005/01/27 01:27:23 rrt Exp $	*/
+/*	$Id: keys.c,v 1.17 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -35,7 +35,7 @@
 /*
  * Convert a key chord into its ASCII representation
  */
-astr chordtostr(unsigned key)
+astr chordtostr(size_t key)
 {
   astr as = astr_new();
 
@@ -211,7 +211,7 @@ static int bstrcmp_prefix(const void *s, const void *t)
 /*
  * Convert a key string to its key code.
  */
-static int strtokey(char *buf, unsigned *len)
+static int strtokey(char *buf, size_t *len)
 {
   if (*buf == '\\') {
     char **p = bsearch(&buf, keyname,
@@ -234,9 +234,9 @@ static int strtokey(char *buf, unsigned *len)
 /*
  * Convert a key chord string to its key code.
  */
-int strtochord(char *buf, unsigned *len)
+int strtochord(char *buf, size_t *len)
 {
-  unsigned key, l;
+  size_t key, l;
 
   key = strtokey(buf, &l);
   if (key == -1) {
@@ -247,7 +247,7 @@ int strtochord(char *buf, unsigned *len)
   *len = l;
 
   if (key == KBD_CTL || key == KBD_META) {
-    unsigned k = strtochord(buf + l, &l);
+    size_t k = strtochord(buf + l, &l);
     if (k == -1) {
       *len = 0;
       return -1;
@@ -262,13 +262,13 @@ int strtochord(char *buf, unsigned *len)
 /*
  * Convert a key sequence string into a key code sequence.
  */
-int keystrtovec(char *key, unsigned **keys)
+int keystrtovec(char *key, size_t **keys)
 {
   vector *v = vec_new(sizeof(int));
-  unsigned size;
+  size_t size;
 
   for (size = 0; *key != '\0'; size++) {
-    unsigned len;
+    size_t len;
     int code = strtochord(key, &len);
     vec_item(v, size, int) = code;
     if ((vec_item(v, size, int) = code) == -1) {
@@ -285,7 +285,7 @@ int keystrtovec(char *key, unsigned **keys)
 /*
  * Convert a key code sequence into a key code sequence string.
  */
-astr keyvectostr(unsigned *keys, unsigned numkeys)
+astr keyvectostr(size_t *keys, size_t numkeys)
 {
   int i;
   astr as = astr_new();
@@ -306,7 +306,7 @@ astr keyvectostr(unsigned *keys, unsigned numkeys)
  */
 astr simplify_key(char *key)
 {
-  unsigned i, j, *keys;
+  size_t i, j, *keys;
   astr dest = astr_new();
 
   if (key == NULL)

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.64 2005/01/27 01:27:22 rrt Exp $        */
+/*      $Id: file.c,v 1.65 2005/01/27 01:33:17 rrt Exp $        */
 
 #include "config.h"
 
@@ -229,7 +229,7 @@ astr get_current_dir(int interactive)
   if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
-    unsigned p;
+    size_t p;
 
     buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
     p = astr_rfind_cstr(buf, "/");
@@ -260,7 +260,7 @@ astr get_home_dir(void)
   return as;
 }
 
-void open_file(char *path, unsigned lineno)
+void open_file(char *path, size_t lineno)
 {
   astr buf, dir, fname;
 
@@ -594,7 +594,7 @@ DEFUN("kill-buffer", kill_buffer)
 static void insert_buffer(Buffer *bp)
 {
   Line *lp;
-  unsigned size = calculate_buffer_size(bp), i;
+  size_t size = calculate_buffer_size(bp), i;
 
   undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = TRUE;
@@ -648,7 +648,7 @@ DEFUN("insert-buffer", insert_buffer)
 static int insert_file(char *filename)
 {
   int fd;
-  unsigned i, size;
+  size_t i, size;
   char buf[BUFSIZ];
 
   if (!exist_file(filename)) {

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.22 2005/01/27 01:27:19 rrt Exp $	*/
+/*	$Id: basic.c,v 1.23 2005/01/27 01:33:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -379,7 +379,7 @@ DEFUN("forward-char", forward_char)
   return TRUE;
 }
 
-int ngotoup(unsigned n)
+int ngotoup(size_t n)
 {
   for (; n > 0; n--)
     if (list_prev(cur_bp->pt.p) != cur_bp->lines)
@@ -390,7 +390,7 @@ int ngotoup(unsigned n)
   return TRUE;
 }
 
-int ngotodown(unsigned n)
+int ngotodown(size_t n)
 {
   for (; n > 0; n--)
     if (list_next(cur_bp->pt.p) != cur_bp->lines)

@@ -19,10 +19,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: list.h,v 1.3 2005/01/26 23:45:00 rrt Exp $	*/
+/*	$Id: list.h,v 1.4 2005/01/27 01:33:17 rrt Exp $	*/
 
 #ifndef LIST_H
 #define LIST_H
+
+#include <stddef.h>
+
 
 typedef struct list_s *list;
 struct list_s {
@@ -33,13 +36,13 @@ struct list_s {
 
 list list_new(void);
 void list_delete(list l);
-unsigned long list_length(list l);
+size_t list_length(list l);
 list list_prepend(list l, void *i);
 list list_append(list l, void *i);
 void *list_head(list l);
 void *list_behead(list l);
 void *list_betail(list l);
-void *list_at(list l, unsigned n);
+void *list_at(list l, size_t n);
 void list_sort(list l, int (*cmp)(const void *p1, const void *p2));
 
 #define list_first(l) ((l)->next)

@@ -238,12 +238,12 @@ type_s( xprintf_struct * s,
      /* hand-made strlen() whitch stops when 'prec' is reached. */
      /* if 'prec' is -1 then it is never reached.               */
      string_len = 0;
-     while ( arg_string[string_len]!=0 && (unsigned)prec!=string_len )
+     while ( arg_string[string_len]!=0 && (size_t)prec!=string_len )
           string_len++;
 
      if ( width != -1 )
-          if ( string_len < (unsigned)width )
-               string_len = (unsigned)width;
+          if ( string_len < (size_t)width )
+               string_len = (size_t)width;
 
      return print_it( s, string_len, format_string, arg_string );
 }
@@ -355,7 +355,7 @@ static int dispatch(xprintf_struct *s)
   if (*SRCTXT == '*') {         /* width given by next argument */
     SRCTXT++;
     width = va_arg( s->vargs, int );
-    if ( (unsigned)width > 0x3fffU ) /* 'unsigned' to check against negative values too */
+    if ( (size_t)width > 0x3fffU ) /* 'size_t' to check against negative values too */
       width = 0x3fff;
   } else if (isdigit(*SRCTXT)) /* width given as ASCII number */
     width = getint( &SRCTXT );
@@ -369,7 +369,7 @@ static int dispatch(xprintf_struct *s)
     SRCTXT++;
     if (*SRCTXT == '*') {       /* .prec given by next argument */
       prec = va_arg( s->vargs, int );
-      if ((unsigned)prec >= 0x3fffU) /* 'unsigned' to check against negative values too */
+      if ((size_t)prec >= 0x3fffU) /* 'size_t' to check against negative values too */
         prec = 0x3fff;
     } else {                    /* .prec given as ASCII number */
       if (isdigit(*SRCTXT) == 0)
