@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.25 2005/01/26 23:54:08 rrt Exp $	*/
+/*	$Id: glue.c,v 1.26 2005/01/27 01:27:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -86,7 +86,7 @@ char *copy_text_block(unsigned startn, unsigned starto, size_t size)
       dp = buf + save_off;
     }
     if (i < astr_len(lp->item))
-      *dp++ = *astr_char(lp->item, i++);
+      *dp++ = *astr_char(lp->item, (ptrdiff_t)(i++));
     else {
       *dp++ = '\n';
       lp = list_next(lp);
@@ -138,7 +138,7 @@ char *replace_string(char *s, char *match, char *subst)
 /*
  * Compact the spaces into tabulations according to the `tw' tab width.
  */
-void tabify_string(char *dest, char *src, int scol, int tw)
+void tabify_string(char *dest, char *src, unsigned scol, unsigned tw)
 {
   char *sp, *dp;
   int dcol = scol, ocol = scol;
@@ -177,7 +177,7 @@ void tabify_string(char *dest, char *src, int scol, int tw)
  * The output buffer should be big enough to contain the expanded string.
  * To be sure, sizeof(dest) should be >= strlen(src)*tw + 1.
  */
-void untabify_string(char *dest, char *src, int scol, int tw)
+void untabify_string(char *dest, char *src, unsigned scol, unsigned tw)
 {
   char *sp, *dp;
   int col = scol;

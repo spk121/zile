@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.9 2005/01/26 21:57:42 rrt Exp $	*/
+/*	$Id: astr.c,v 1.10 2005/01/27 01:27:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ static void astr_resize(astr as, size_t reqsize)
   }
 }
 
-static int astr_pos(astr as, size_t pos)
+static int astr_pos(astr as, ptrdiff_t pos)
 {
   assert(as != NULL);
   if (pos < 0)
@@ -64,7 +64,7 @@ static int astr_pos(astr as, size_t pos)
   return pos;
 }
 
-char *astr_char(const astr as, size_t pos)
+char *astr_char(const astr as, ptrdiff_t pos)
 {
   assert(as != NULL);
   pos = astr_pos(as, pos);
@@ -142,7 +142,7 @@ astr astr_cat_delete(astr as, const astr src)
   return as;
 }
 
-astr astr_substr(const astr as, size_t pos, size_t size)
+astr astr_substr(const astr as, ptrdiff_t pos, size_t size)
 {
   assert(as != NULL);
   pos = astr_pos(as, pos);
@@ -176,65 +176,67 @@ int astr_rfind_cstr(const astr as, const char *s)
   return (sp == NULL) ? -1 : sp - as->text;
 }
 
-static astr astr_replace_x(astr as, size_t pos, size_t size, const char *s, size_t csize)
+static astr astr_replace_x(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
 {
   astr tail;
+  assert(as != NULL);
   pos = astr_pos(as, pos);
   if (as->len - pos < size)
     size = as->len - pos;
-  tail = astr_substr(as, pos + size, astr_len(as) - (pos + size));
+  tail = astr_substr(as, pos + (ptrdiff_t)size, astr_len(as) - (pos + size));
   astr_truncate(as, pos);
   astr_ncat_cstr(as, s, csize);
   return astr_cat(as, tail);
 }
 
-astr astr_replace(astr as, size_t pos, size_t size, const astr src)
+astr astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src)
 {
   assert(src != NULL);
   return astr_replace_x(as, pos, size, src->text, src->len);
 }
 
-astr astr_replace_cstr(astr as, size_t pos, size_t size, const char *s)
+astr astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s)
 {
   assert(s != NULL);
   return astr_replace_x(as, pos, size, s, strlen(s));
 }
 
-astr astr_replace_char(astr as, size_t pos, size_t size, int c)
+astr astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c)
 {
   return astr_replace_x(as, pos, size, (const char *)&c, 1);
 }
 
-astr astr_insert(astr as, size_t pos, const astr src)
+astr astr_insert(astr as, ptrdiff_t pos, const astr src)
 {
   assert(src != NULL);
   return astr_replace_x(as, pos, 0, src->text, src->len);
 }
 
-astr astr_insert_cstr(astr as, size_t pos, const char *s)
+astr astr_insert_cstr(astr as, ptrdiff_t pos, const char *s)
 {
   assert(s != NULL);
   return astr_replace_x(as, pos, 0, s, strlen(s));
 }
 
-astr astr_insert_char(astr as, size_t pos, int c)
+astr astr_insert_char(astr as, ptrdiff_t pos, int c)
 {
   char ch = (char)c;
   return astr_replace_x(as, pos, 0, &ch, 1);
 }
 
-astr astr_remove(astr as, size_t pos, size_t size)
+astr astr_remove(astr as, ptrdiff_t pos, size_t size)
 {
   return astr_replace_x(as, pos, size, "", 0);
 }
 
 /* Don't define in terms of astr_remove, to avoid endless recursion */
-astr astr_truncate(astr as, size_t size)
+astr astr_truncate(astr as, ptrdiff_t pos)
 {
   assert(as != NULL);
-  if (size < as->len) {
-    as->len = size;
-    as->text[size] = '\0';
+  pos = astr_pos(as, pos);
+  if (pos < as->len) {
+    as->len = pos;
+    as->text[pos] = '\0';
   }
   return as;
 }

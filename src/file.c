@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.63 2005/01/23 18:39:03 rrt Exp $        */
+/*      $Id: file.c,v 1.64 2005/01/27 01:27:22 rrt Exp $        */
 
 #include "config.h"
 
@@ -155,10 +155,10 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
       } else if (*(sp + 1) == '.' &&
                  (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
         if (astr_len(dir) >= 1 && *astr_char(dir, -1) == '/')
-          astr_truncate(dir, astr_len(dir) - 1);
+          astr_truncate(dir, -1);
         while (*astr_char(dir, -1) != '/' &&
                astr_len(dir) >= 1)
-          astr_truncate(dir, astr_len(dir) - 1);
+          astr_truncate(dir, -1);
         sp += 2;
         if (*sp == '/' && *(sp + 1) != '/')
           ++sp;
@@ -197,7 +197,7 @@ astr compact_path(const char *path)
 {
   astr buf = astr_new();
   struct passwd *pw;
-  int i;
+  size_t i;
 
   if ((pw = getpwuid(getuid())) == NULL) {
     /* User not found in password file. */
@@ -229,12 +229,12 @@ astr get_current_dir(int interactive)
   if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
-    int p;
+    unsigned p;
 
     buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
     p = astr_rfind_cstr(buf, "/");
     if (p != -1)
-      astr_truncate(buf, p ? p : 1);
+      astr_truncate(buf, (ptrdiff_t)(p ? p : 1));
     if (*astr_char(buf, -1) != '/')
       astr_cat_cstr(buf, "/");
   } else {
@@ -260,7 +260,7 @@ astr get_home_dir(void)
   return as;
 }
 
-void open_file(char *path, int lineno)
+void open_file(char *path, unsigned lineno)
 {
   astr buf, dir, fname;
 
@@ -594,13 +594,13 @@ DEFUN("kill-buffer", kill_buffer)
 static void insert_buffer(Buffer *bp)
 {
   Line *lp;
-  int size = calculate_buffer_size(bp), i;
+  unsigned size = calculate_buffer_size(bp), i;
 
   undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = TRUE;
   for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     for (i = 0; i < astr_len(lp->item); i++)
-      insert_char(*astr_char(lp->item, i));
+      insert_char(*astr_char(lp->item, (ptrdiff_t)i));
     if (list_next(lp) != bp->lines)
       insert_newline();
   }
@@ -647,7 +647,8 @@ DEFUN("insert-buffer", insert_buffer)
 
 static int insert_file(char *filename)
 {
-  int fd, i, size;
+  int fd;
+  unsigned i, size;
   char buf[BUFSIZ];
 
   if (!exist_file(filename)) {
@@ -771,7 +772,8 @@ static astr create_backup_filename(const char *filename,
 static int copy_file(const char *source, const char *dest)
 {
   char buf[BUFSIZ];
-  int ifd, ofd, len, stat_valid;
+  int ifd, ofd, stat_valid;
+  size_t len;
   struct stat st;
 
   ifd = open(source, O_RDONLY, 0);
@@ -825,7 +827,8 @@ static int copy_file(const char *source, const char *dest)
 
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
-  int fd, eol_len = strlen(bp->eol);
+  int fd;
+  size_t eol_len = strlen(bp->eol);
   Line *lp;
 
   if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.18 2005/01/25 12:28:29 rrt Exp $	*/
+/*	$Id: killring.c,v 1.19 2005/01/27 01:27:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -33,8 +33,8 @@
 #include "extern.h"
 
 static char *kill_ring_text;
-static int kill_ring_size;
-static int kill_ring_maxsize;
+static unsigned kill_ring_size;
+static unsigned kill_ring_maxsize;
 
 static void flush_kill_ring(void)
 {
@@ -49,7 +49,7 @@ static void flush_kill_ring(void)
   }
 }
 
-static void kill_ring_push(char c)
+static void kill_ring_push(int c)
 {
   if (kill_ring_text == NULL) {
     kill_ring_maxsize = 16;
@@ -58,7 +58,7 @@ static void kill_ring_push(char c)
     kill_ring_maxsize += 16;
     kill_ring_text = (char *)zrealloc(kill_ring_text, kill_ring_maxsize);
   }
-  kill_ring_text[kill_ring_size++] = c;
+  kill_ring_text[kill_ring_size++] = (char)c;
 }
 
 static void kill_ring_push_nstring(char *s, size_t size)
@@ -174,7 +174,7 @@ DEFUN("kill-region", kill_region)
 
     warn_if_readonly_buffer();
   } else {
-    int size = r.size;
+    unsigned size = r.size;
 
     if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
       FUNCALL(exchange_point_and_mark);

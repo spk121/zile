@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.38 2005/01/27 00:21:25 rrt Exp $	*/
+/*	$Id: search.c,v 1.39 2005/01/27 01:27:24 rrt Exp $	*/
 
 #include "config.h"
 
@@ -121,7 +121,7 @@ static int search_forward(Line *startp, unsigned starto, const char *s)
 
   for (lp = startp; lp != cur_bp->lines; lp = list_next(lp)) {
     if (lp == startp) {
-      sp = astr_char(lp->item, starto);
+      sp = astr_char(lp->item, (ptrdiff_t)starto);
       s1size = astr_len(lp->item) - starto;
     } else {
       sp = astr_cstr(lp->item);
@@ -299,7 +299,7 @@ static int isearch(int dir)
       break;
     } else if (c == KBD_BS) {
       if (astr_len(pattern) > 0) {
-        astr_truncate(pattern, astr_len(pattern) - 1);
+        astr_truncate(pattern, -1);
         cur_bp->pt = start;
         thisflag |= FLAG_NEED_RESYNC;
       } else
@@ -432,7 +432,7 @@ DEFUN("replace-regexp", replace_regexp)
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
                          cur_bp->pt.o - find_len),
-              (int)strlen(find), (int)strlen(repl));
+              strlen(find), strlen(repl));
     line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
                       find_len, repl, repl_len, find_no_upper);
   }
@@ -513,7 +513,7 @@ DEFUN("query-replace-regexp", query_replace_regexp)
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
                          cur_bp->pt.o - find_len),
-              (int)find_len, (int)repl_len);
+              find_len, repl_len);
     line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
                       find_len, repl, repl_len, find_no_upper);
   nextmatch:

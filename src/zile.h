@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.52 2005/01/26 23:49:58 rrt Exp $        */
+/*      $Id: zile.h,v 1.53 2005/01/27 01:27:24 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -119,8 +119,8 @@ struct Undo {
     /* The block to insert. */
     struct {
       char *text;
-      int osize;      /* Original size; only for replace. */
-      int size;       /* New block size. */
+      unsigned osize;      /* Original size; only for replace. */
+      unsigned size;       /* New block size. */
     } block;
   } delta;
 };
@@ -128,7 +128,7 @@ struct Undo {
 struct Region {
   Point start;            /* The region start. */
   Point end;              /* The region end. */
-  int size;               /* The region size. */
+  unsigned size;                /* The region size. */
 
   /* The total number of lines ('\n' newlines) in region. */
   int num_lines;

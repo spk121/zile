@@ -20,11 +20,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: astr.h,v 1.6 2005/01/26 21:57:43 rrt Exp $        */
+/*      $Id: astr.h,v 1.7 2005/01/27 01:27:19 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -74,13 +75,13 @@ extern void   astr_delete(astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-extern char * astr_char(const astr as, size_t pos);
+extern char * astr_char(const astr as, ptrdiff_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-extern astr   astr_substr(const astr as, size_t pos, size_t size);
+extern astr   astr_substr(const astr as, ptrdiff_t pos, size_t size);
 
 /*
  * Do strcmp on the contents of s1 and s2
@@ -111,26 +112,26 @@ extern astr   astr_cat_delete(astr as, const astr src);
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */
-extern astr   astr_replace(astr as, size_t pos, size_t size, const astr src);
-extern astr   astr_replace_cstr(astr as, size_t pos, size_t size, const char *s);
-extern astr   astr_replace_char(astr as, size_t pos, size_t size, int c);
+extern astr   astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src);
+extern astr   astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s);
+extern astr   astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c);
 
 /*
  * Insert the contents of the argument string or character in as.
  */
-extern astr   astr_insert(astr as, size_t pos, const astr src);
-extern astr   astr_insert_cstr(astr as, size_t pos, const char *s);
-extern astr   astr_insert_char(astr as, size_t pos, int c);
+extern astr   astr_insert(astr as, ptrdiff_t pos, const astr src);
+extern astr   astr_insert_cstr(astr as, ptrdiff_t pos, const char *s);
+extern astr   astr_insert_char(astr as, ptrdiff_t pos, int c);
 
 /*
  * Remove size chars from as at position pos.
  */
-extern astr   astr_remove(astr as, size_t pos, size_t size);
+extern astr   astr_remove(astr as, ptrdiff_t pos, size_t size);
 
 /*
- * Truncate as to given length.
+ * Truncate as to given position.
  */
-extern astr   astr_truncate(astr as, size_t size);
+extern astr   astr_truncate(astr as, ptrdiff_t pos);
 
 /*
  * Find the first occurrence of the argument string in as, returning

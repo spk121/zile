@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.21 2005/01/14 17:15:02 rrt Exp $   */
+/*      $Id: completion.c,v 1.22 2005/01/27 01:27:20 rrt Exp $   */
 
 #include "config.h"
 
@@ -118,7 +118,7 @@ void completion_scroll_down(void)
 /*
  * Calculate the maximum length of the completions.
  */
-static int calculate_max_length(list l, int size)
+static unsigned calculate_max_length(list l, unsigned size)
 {
   int len, i, max = 0;
   list p;
@@ -133,9 +133,9 @@ static int calculate_max_length(list l, int size)
 /*
  * Print the list of completions in a set of columns.
  */
-static void completion_print(list l, int size)
+static void completion_print(list l, unsigned size)
 {
-  int i, j, col, max, numcols;
+  unsigned i, j, col, max, numcols;
   list p;
 
   max = calculate_max_length(l, size) + 5;
@@ -158,7 +158,7 @@ static void write_completion(va_list ap)
 {
   Completion *cp = va_arg(ap, Completion *);
   int allflag = va_arg(ap, int);
-  int num = va_arg(ap, int); 
+  unsigned num = va_arg(ap, unsigned); 
   if (allflag)
     completion_print(cp->completions, list_length(cp->completions));
   else
@@ -262,7 +262,8 @@ static int completion_reread(Completion *cp, astr as)
  */
 int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
-  int i, j, ssize, fullmatches = 0, partmatches = 0;
+  int fullmatches = 0, partmatches = 0;
+  unsigned i, j, ssize;
   char c;
   list p;
 

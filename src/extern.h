@@ -8,8 +8,8 @@ void goto_line(int to_line);
 void gotobob(void);
 void gotoeob(void);
 int next_line(void);
-int ngotodown(int n);
-int ngotoup(int n);
+int ngotodown(unsigned n);
+int ngotoup(unsigned n);
 int previous_line(void);
 int scroll_down(void);
 int scroll_up(void);
@@ -38,7 +38,7 @@ void switch_to_buffer(Buffer *bp);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 void set_temporary_buffer(Buffer *bp);
-int calculate_buffer_size(Buffer *bp);
+unsigned calculate_buffer_size(Buffer *bp);
 int transient_mark_mode(void);
 void activate_mark(void);
 void deactivate_mark(void);
@@ -68,7 +68,7 @@ astr get_home_dir(void);
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
 astr compact_path(const char *path);
 astr get_current_dir(int interactive);
-void open_file(char *path, int lineno);
+void open_file(char *path, unsigned lineno);
 void read_from_disk(const char *filename);
 int find_file(const char *filename);
 Completion *make_buffer_completion(void);
@@ -91,16 +91,16 @@ void waitkey(unsigned delay);
 char *copy_text_block(unsigned startn, unsigned starto, size_t size);
 astr shorten_string(char *s, int maxlen);
 char *replace_string(char *s, char *match, char *subst);
-void tabify_string(char *dest, char *src, int scol, int tw);
-void untabify_string(char *dest, char *src, int scol, int tw);
+void tabify_string(char *dest, char *src, unsigned scol, unsigned tw);
+void untabify_string(char *dest, char *src, unsigned scol, unsigned tw);
 void goto_point(Point pt);
 char *getln(FILE *fp);
 
 /* keys.c ----------------------------------------------------------------- */
-astr chordtostr(int key);
-int strtochord(char *buf, int *len);
-int keystrtovec(char *key, int **keyvec);
-astr keyvectostr(int *keys, int numkeys);
+astr chordtostr(unsigned key);
+int strtochord(char *buf, unsigned *len);
+int keystrtovec(char *key, unsigned **keyvec);
+astr keyvectostr(unsigned *keys, unsigned numkeys);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
@@ -229,7 +229,7 @@ extern int undo_nosave;
 
 void undo_start_sequence(void);
 void undo_end_sequence(void);
-void undo_save(int type, Point pt, int arg1, int arg2);
+void undo_save(int type, Point pt, unsigned arg1, unsigned arg2);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables(void);

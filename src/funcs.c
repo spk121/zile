@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.73 2005/01/26 23:04:46 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.74 2005/01/27 01:27:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -236,9 +236,9 @@ DEFUN("set-fill-column", set_fill_column)
     +*/
 {
   if (uniarg > 1)
-    variableSetNumber(cur_bp, "fill-column", uniarg);
+    variableSetNumber(cur_bp->vars, "fill-column", uniarg);
   else if (cur_bp->pt.o > 1)
-    variableSetNumber(cur_bp, "fill-column", cur_bp->pt.o + 1);
+    variableSetNumber(cur_bp->vars, "fill-column", (int)(cur_bp->pt.o + 1));
   else {
     minibuf_error("Invalid fill column");
     return FALSE;
@@ -369,7 +369,7 @@ int universal_argument(int keytype, int xarg)
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
     c = do_completion(as);
-    astr_truncate(as, astr_len(as) - 1); /* Remove the '-' character. */
+    astr_truncate(as, -1); /* Remove the '-' character. */
 
     /* Cancelled. */
     if (c == KBD_CANCEL)
@@ -437,10 +437,10 @@ DEFUN("universal-argument", universal_argument)
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
 
-static void edit_tab_line(Line **lp, int lineno, int offset, unsigned size, int action)
+static void edit_tab_line(Line **lp, unsigned lineno, unsigned offset, unsigned size, int action)
 {
   char *src, *dest;
-  int col, i, t = tab_width(cur_bp);
+  unsigned col, i, t = tab_width(cur_bp);
 
   if (size == 0)
     return;
@@ -453,7 +453,7 @@ static void edit_tab_line(Line **lp, int lineno, int offset, unsigned size, int 
   /* Get offset's column.  */
   col = 0;
   for (i = 0; i < offset; i++) {
-    if (*astr_char((*lp)->item, i) == '\t')
+    if (*astr_char((*lp)->item, (ptrdiff_t)i) == '\t')
       col |= t - 1;
     ++col;
   }
@@ -478,7 +478,7 @@ static int edit_tab_region(int action)
 {
   Region r;
   Line *lp;
-  int lineno;
+  unsigned lineno;
   Marker *marker;
 
   if (warn_if_readonly_buffer() || warn_if_no_mark())
@@ -928,8 +928,10 @@ int forward_sexp(void)
       /* Jump quotes that aren't sexp separators. */
       if (c == '\\'
           && cur_bp->pt.o+1 < astr_len(cur_bp->pt.p->item)
-          && ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o + 1) == '\"')
-              || (*astr_char(cur_bp->pt.p->item, cur_bp->pt.o + 1) == '\''))) {
+          && ((*astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o + 1))
+               == '\"') ||
+              (*astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o + 1))
+                  == '\''))) {
         cur_bp->pt.o++;
         c = 'a'; /* Convert \' and \" into a word char. */
       }
@@ -1003,7 +1005,8 @@ int backward_sexp(void)
       /* Jump quotes that doesn't are sexp separators.  */
       if (((c == '\'') || (c == '\"'))
           && cur_bp->pt.o-1 > 0
-          && (*astr_char(cur_bp->pt.p->item, cur_bp->pt.o - 2) == '\\')) {
+          && (*astr_char(cur_bp->pt.p->item, (ptrdiff_t)(cur_bp->pt.o - 2))
+              == '\\')) {
         cur_bp->pt.o--;
         c = 'a'; /* Convert \' and \" like a
                     word char */
@@ -1198,7 +1201,8 @@ DEFUN("fill-paragraph", fill_paragraph)
 
 static int setcase_word(int rcase)
 {
-  int i, size, gotword;
+  int gotword;
+  unsigned i, size;
 
   if (!forward_word())
     return FALSE;
@@ -1207,7 +1211,7 @@ static int setcase_word(int rcase)
 
   i = cur_bp->pt.o;
   while (i < astr_len(cur_bp->pt.p->item)) {
-    if (!ISWORDCHAR(*astr_char(cur_bp->pt.p->item, i)))
+    if (!ISWORDCHAR(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)i)))
       break;
     ++i;
   }
@@ -1217,7 +1221,7 @@ static int setcase_word(int rcase)
 
   gotword = FALSE;
   while (cur_bp->pt.o < astr_len(cur_bp->pt.p->item)) {
-    char *p = astr_char(cur_bp->pt.p->item, cur_bp->pt.o);
+    char *p = astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o);
     if (!ISWORDCHAR(*p))
       break;
     if (isalpha(*p)) {
@@ -1308,7 +1312,7 @@ static int setcase_region(int rcase)
 {
   Region r;
   Line *lp;
-  int size, i;
+  unsigned size, i;
 
   if (warn_if_readonly_buffer() || warn_if_no_mark())
     return FALSE;
@@ -1323,9 +1327,11 @@ static int setcase_region(int rcase)
   while (size--) {
     if (i < astr_len(lp->item)) {
       if (rcase == UPPERCASE)
-        *astr_char(lp->item, i) = toupper(*astr_char(lp->item, i));
+        *astr_char(lp->item, (ptrdiff_t)i) =
+          toupper(*astr_char(lp->item, (ptrdiff_t)i));
       else
-        *astr_char(lp->item, i) = tolower(*astr_char(lp->item, i));
+        *astr_char(lp->item, (ptrdiff_t)i) =
+          tolower(*astr_char(lp->item, (ptrdiff_t)i));
       ++i;
     } else {
       lp = list_next(lp);
@@ -1536,7 +1542,7 @@ DEFUN("delete-region", delete_region)
   if (cur_bp->flags & BFLAG_READONLY) {
     warn_if_readonly_buffer();
   } else {
-    int size = r.size;
+    unsigned size = r.size;
 
     if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
       FUNCALL(exchange_point_and_mark);

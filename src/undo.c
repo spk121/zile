@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.17 2005/01/26 23:52:43 rrt Exp $        */
+/*      $Id: undo.c,v 1.18 2005/01/27 01:27:24 rrt Exp $        */
 
 #include "config.h"
 
@@ -41,7 +41,7 @@ static int doing_undo = FALSE;
 /*
  * Save a reverse delta for doing undo.
  */
-void undo_save(int type, Point pt, int arg1, int arg2)
+void undo_save(int type, Point pt, unsigned arg1, unsigned arg2)
 {
   Undo *up;
 
@@ -61,19 +61,19 @@ void undo_save(int type, Point pt, int arg1, int arg2)
   case UNDO_INSERT_CHAR:
   case UNDO_REPLACE_CHAR:
   case UNDO_INTERCALATE_CHAR:
-    up->delta.c = arg1;
+    up->delta.c = (char)arg1;
     break;
   case UNDO_INSERT_BLOCK:
-    up->delta.block.size = (unsigned)arg1;
-    up->delta.block.text = copy_text_block(pt.n, pt.o, (unsigned)arg1);
+    up->delta.block.size = arg1;
+    up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
     break;
   case UNDO_REPLACE_BLOCK:
-    up->delta.block.osize = (unsigned)arg1;
-    up->delta.block.size = (unsigned)arg2;
-    up->delta.block.text = copy_text_block(pt.n, pt.o, (unsigned)arg1);
+    up->delta.block.osize = arg1;
+    up->delta.block.size = arg2;
+    up->delta.block.text = copy_text_block(pt.n, pt.o, arg1);
     break;
   case UNDO_REMOVE_BLOCK:
-    up->delta.block.size = (unsigned)arg1;
+    up->delta.block.size = arg1;
     break;
   case UNDO_START_SEQUENCE:
   case UNDO_END_SEQUENCE:
@@ -144,8 +144,9 @@ static Undo *revert_action(Undo *up)
     break;
   case UNDO_REPLACE_CHAR:
     undo_save(UNDO_REPLACE_CHAR, up->pt,
-              *astr_char(cur_bp->pt.p->item, up->pt.o), 0);
-    *astr_char(cur_bp->pt.p->item, up->pt.o) = up->delta.c;
+              (unsigned)(*astr_char(cur_bp->pt.p->item,
+                                    (ptrdiff_t)up->pt.o)), 0);
+    *astr_char(cur_bp->pt.p->item, (ptrdiff_t)up->pt.o) = up->delta.c;
     cur_bp->flags |= BFLAG_MODIFIED;
     break;
   case UNDO_REPLACE_BLOCK:

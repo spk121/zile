@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.29 2005/01/26 23:04:38 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.30 2005/01/27 01:27:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -42,7 +42,6 @@
 static Buffer *buffer_new(void)
 {
   Buffer *bp;
-  char *s;
 
   bp = (Buffer *)zmalloc(sizeof(Buffer));
 
@@ -354,10 +353,10 @@ void set_temporary_buffer(Buffer *bp)
   bp->next = NULL;
 }
 
-int calculate_buffer_size(Buffer *bp)
+unsigned calculate_buffer_size(Buffer *bp)
 {
   Line *lp = list_next(bp->lines);
-  int size = 0;
+  unsigned size = 0;
 
   if (lp == bp->lines)
     return 0;

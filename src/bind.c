@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.47 2005/01/26 23:44:59 rrt Exp $	*/
+/*	$Id: bind.c,v 1.48 2005/01/27 01:27:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -44,12 +44,12 @@ typedef struct leaf *leafp;
 
 struct leaf {
   /* The key and the function associated with the leaf. */
-  int key;
+  unsigned key;
   Function func;
 
   /* Leaf vector, number of items, max number of items. */
   leafp *vec;
-  int vecnum, vecmax;
+  unsigned vecnum, vecmax;
 };
 
 static leafp leaf_tree;
@@ -67,7 +67,7 @@ static leafp leaf_new(int vecmax)
   return p;
 }
 
-static leafp search_leaf(leafp tree, int key)
+static leafp search_leaf(leafp tree, unsigned key)
 {
   int i;
 
@@ -100,7 +100,7 @@ static void add_leaf(leafp tree, leafp p)
   ++tree->vecnum;
 }
 
-static void bind_key_vec(leafp tree, int *keys, int n, Function func)
+static void bind_key_vec(leafp tree, unsigned *keys, unsigned n, Function func)
 {
   leafp p, s;
 
@@ -120,7 +120,7 @@ static void bind_key_vec(leafp tree, int *keys, int n, Function func)
 
 static void bind_key_string(char *key, Function func)
 {
-  int numkeys, *keys;
+  unsigned numkeys, *keys;
 
   if ((numkeys = keystrtovec(key, &keys)) > 0) {
     bind_key_vec(leaf_tree, keys, numkeys, func);
@@ -128,7 +128,7 @@ static void bind_key_string(char *key, Function func)
   }
 }
 
-static leafp search_key(leafp tree, int *keys, int n)
+static leafp search_key(leafp tree, unsigned *keys, unsigned n)
 {
   leafp p;
 
@@ -153,7 +153,7 @@ int do_completion(astr as)
   return c;
 }
 
-static astr make_completion(int *keys, int numkeys)
+static astr make_completion(unsigned *keys, unsigned numkeys)
 {
   astr as = astr_new(), key;
   int i, len = 0;
@@ -171,12 +171,12 @@ static astr make_completion(int *keys, int numkeys)
   return astr_cat_cstr(as, "-");
 }
 
-static leafp completion_scan(int c, int **keys, int *numkeys)
+static leafp completion_scan(int c, unsigned **keys, unsigned *numkeys)
 {
   leafp p;
-  vector *v = vec_new(sizeof(int));
+  vector *v = vec_new(sizeof(unsigned));
 
-  vec_item(v, 0, int) = c;
+  vec_item(v, 0, unsigned) = c;
   *numkeys = 1;
 
   do {
@@ -184,7 +184,7 @@ static leafp completion_scan(int c, int **keys, int *numkeys)
       break;
     if (p->func == NULL) {
       astr as = make_completion(vec_array(v), *numkeys);
-      vec_item(v, (*numkeys)++, int) = do_completion(as);
+      vec_item(v, (*numkeys)++, unsigned) = do_completion(as);
       astr_delete(as);
     }
   } while (p->func == NULL);
@@ -195,7 +195,8 @@ static leafp completion_scan(int c, int **keys, int *numkeys)
 
 void process_key(int c)
 {
-  int uni, *keys = NULL, numkeys;
+  int uni;
+  unsigned *keys = NULL, numkeys;
   leafp p;
 
   if (c == KBD_NOKEY)
@@ -210,7 +211,7 @@ void process_key(int c)
     for (uni = 0; uni < last_uniarg; ++uni) {
       if (!self_insert_command(c)) {
         astr as = make_completion(keys, numkeys);
-        astr_truncate(as, astr_len(as) - 1);
+        astr_truncate(as, -1);
         minibuf_error("%s not defined.", astr_cstr(as));
         astr_delete(as);
         undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -451,7 +452,8 @@ DEFUN("global-set-key", global_set_key)
     sequence.
     +*/
 {
-  int c, *keys, numkeys, ok = FALSE;
+  int c, ok = FALSE;
+  unsigned *keys, numkeys;
   leafp p;
   Function func;
   char *name;
@@ -482,7 +484,7 @@ char *get_function_by_key_sequence(void)
 {
   leafp p;
   int c = term_getkey();
-  int *keys, numkeys;
+  unsigned *keys, numkeys;
 
   if (c & KBD_META && isdigit(c & 255))
     return "universal-argument";

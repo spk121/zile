@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.10 2005/01/10 14:09:45 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.11 2005/01/27 01:27:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -92,7 +92,7 @@ int char_after(Point *pt)
   else if (eolp())
     return '\n';
   else
-    return *astr_char(pt->p->item, pt->o);
+    return *astr_char(pt->p->item, (ptrdiff_t)pt->o);
 }
 
 int char_before(Point *pt)
@@ -102,7 +102,7 @@ int char_before(Point *pt)
   else if (bolp())
     return '\n';
   else
-    return *astr_char(pt->p->item, pt->o - 1);
+    return *astr_char(pt->p->item, (ptrdiff_t)(pt->o - 1));
 }
 
 /* This function returns the character following point in the current

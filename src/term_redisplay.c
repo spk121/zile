@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.34 2005/01/26 23:45:00 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.35 2005/01/27 01:27:24 rrt Exp $	*/
 
 #include "config.h"
 
@@ -116,9 +116,9 @@ static void draw_line(unsigned line, unsigned startcol, Window *wp, Line *lp,
   term_move(line, 0);
   for (x = 0, i = startcol; i < astr_len(lp->item) && x < wp->ewidth; i++) {
     if (highlight && in_region(lineno, i, r))
-      outch(*astr_char(lp->item, i), ZILE_REVERSE, &x);
+      outch(*astr_char(lp->item, (ptrdiff_t)i), ZILE_REVERSE, &x);
     else
-      outch(*astr_char(lp->item, i), ZILE_NORMAL, &x);
+      outch(*astr_char(lp->item, (ptrdiff_t)i), ZILE_NORMAL, &x);
   }
 
   draw_end_of_line(line, wp, lineno, r, highlight, x, i);
@@ -210,7 +210,7 @@ static void calculate_start_column(Window *wp)
   char *buf, *rp, *lp, *p;
   Point pt = window_pt(wp);
 
-  rp = astr_char(pt.p->item, pt.o);
+  rp = astr_char(pt.p->item, (ptrdiff_t)pt.o);
   rpfact = pt.o / (wp->ewidth / 3);
 
   for (lp = rp; lp >= astr_cstr(pt.p->item); --lp) {

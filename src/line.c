@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.55 2005/01/27 00:24:50 rrt Exp $	*/
+/*	$Id: line.c,v 1.56 2005/01/27 01:27:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -63,7 +63,7 @@ int intercalate_char(int c)
     return FALSE;
 
   undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
-  astr_insert_char(cur_bp->pt.p->item, cur_bp->pt.o, c);
+  astr_insert_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
   return TRUE;
@@ -86,13 +86,15 @@ int insert_char(int c)
        || tab width isn't correct
        || current char is a \t && we are in the tab limit.  */
     if ((cur_bp->pt.o < astr_len(cur_bp->pt.p->item))
-        && ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o) != '\t')
-            || ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o) == '\t')
+        && ((*astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o) != '\t')
+            || ((*astr_char(cur_bp->pt.p->item,
+                            (ptrdiff_t)cur_bp->pt.o) == '\t')
                 && ((get_goalc() % t) == t)))) {
       /* Replace the character.  */
       undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
-                *astr_char(cur_bp->pt.p->item, cur_bp->pt.o), 0);
-      *astr_char(cur_bp->pt.p->item, cur_bp->pt.o) = c;
+                (unsigned)(*astr_char(cur_bp->pt.p->item,
+                                      (ptrdiff_t)cur_bp->pt.o)), 0);
+      *astr_char(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o) = c;
       ++cur_bp->pt.o;
 
       cur_bp->flags |= BFLAG_MODIFIED;
@@ -194,8 +196,9 @@ int intercalate_newline()
   ++cur_bp->num_lines;
 
   /* Move the text after the point into the new line. */
-  astr_cpy(lp2->item, astr_substr(lp1->item, lp1len, lp2len));
-  astr_truncate(lp1->item, lp1len);
+  astr_cpy(lp2->item,
+           astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len));
+  astr_truncate(lp1->item, (ptrdiff_t)lp1len);
 
   adjust_markers(lp2, lp1, lp1len, 1, 0);
 
@@ -258,15 +261,17 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen,
 
   if (replace_case && lookup_bool_variable("case-replace")) {
     newtext = zstrdup(newtext);
-    recase(newtext, newlen, astr_char((*lp)->item, offset), oldlen);
+    recase(newtext, newlen, astr_char((*lp)->item, (ptrdiff_t)offset),
+           oldlen);
   }
 
   if (newlen != oldlen) {
     cur_bp->flags |= BFLAG_MODIFIED;
-    astr_replace_cstr((*lp)->item, offset, oldlen, newtext);
+    astr_replace_cstr((*lp)->item, (ptrdiff_t)offset, oldlen, newtext);
     adjust_markers(*lp, *lp, offset, 0, (int)(newlen - oldlen));
-  } else if (memcmp(astr_char((*lp)->item, offset), newtext, newlen) != 0) {
-    memcpy(astr_char((*lp)->item, offset), newtext, newlen);
+  } else if (memcmp(astr_char((*lp)->item, (ptrdiff_t)offset),
+                    newtext, newlen) != 0) {
+    memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), newtext, newlen);
     cur_bp->flags |= BFLAG_MODIFIED;
   }
                 
@@ -290,7 +295,7 @@ void fill_break_line(void)
 
   /* Find break point moving left from fill-column. */
   for (break_col = cur_bp->pt.o; break_col > 0; --break_col) {
-    int c = *astr_char(cur_bp->pt.p->item, break_col - 1);
+    int c = *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(break_col - 1));
     if (isspace(c))
       break;
   }
@@ -348,7 +353,7 @@ DEFUN("open-line", open_line)
 
 void insert_string(const char *s)
 {
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, (int)strlen(s), 0);
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
   undo_nosave = TRUE;
   for (; *s != '\0'; ++s)
     if (*s == '\n')
@@ -360,7 +365,7 @@ void insert_string(const char *s)
 
 void insert_nstring(const char *s, size_t size)
 {
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, (int)size, 0);
+  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = TRUE;
   for (; 0 < size--; ++s)
     if (*s == '\n')
@@ -426,14 +431,15 @@ int delete_char(void)
       return FALSE;
 
     undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
-              *astr_char(cur_bp->pt.p->item, cur_bp->pt.o), 0);
+              (unsigned)(*astr_char(cur_bp->pt.p->item,
+                                    (ptrdiff_t)cur_bp->pt.o)), 0);
 
     /*
      * Move the text one position backward after the point,
      * if required.
      * This code assumes that memmove(d, s, 0) does nothing.
      */
-    astr_remove(cur_bp->pt.p->item, cur_bp->pt.o, 1);
+    astr_remove(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, 1);
 
     adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
 

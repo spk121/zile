@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.15 2005/01/25 20:06:07 rrt Exp $	*/
+/*	$Id: eval.c,v 1.16 2005/01/27 01:27:20 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -885,7 +885,7 @@ le *eval_cb_progn(int argc, le *branch)
     
 le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
 {
-  le *newkey, *newvalue = leNIL, *current;
+  le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
 
   if (branch != NULL && argc >= 3) {
     for (current = branch->list_next; current; current = current->list_next->list_next) {

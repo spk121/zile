@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.c,v 1.8 2005/01/25 00:54:45 rrt Exp $	*/
+/*	$Id: parser.c,v 1.9 2005/01/27 01:27:24 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -78,7 +78,7 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
     if (!doublequotes) { 
       if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
         ungetachar(c);
-        astr_truncate(tok, astr_len(tok) - 1);
+        astr_truncate(tok, -1);
 
         if (!astr_cmp_cstr(tok, "quote")) {
           *tokenid = T_QUOTE;
@@ -96,7 +96,7 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
         /* Fall through */
 
       case '\"':
-        astr_truncate(tok, astr_len(tok) - 1);
+        astr_truncate(tok, -1);
         *tokenid = T_WORD;
         return tok;
     
