@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.13 2005/01/25 12:28:28 rrt Exp $	*/
+/*	$Id: eval.c,v 1.14 2005/01/25 16:47:27 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -424,7 +424,7 @@ le *eval_cb_gt_eq(int argc, le *branch)
 
 static int eqsign_helper(int a, int b)
 {
-  return a >= b;
+  return a == b;
 }
 
 le *eval_cb_eqsign(int argc, le *branch)
