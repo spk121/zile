@@ -68,9 +68,9 @@ Zile should really appear like
 Emacs, but a lot of good ideas were also taken from from other editors:
 @itemize -
 @item Emacs:
-General look-n-feel, function names, function behaviors, key bindings.
+General look and feel, function names, function behaviors, key bindings.
 @item XEmacs:
-Some minor hints for look-n-feel.
+Some minor hints for look and feel.
 @item Jed:
 @i{Mini Help} window, mode line.
 @item ce:
@@ -83,26 +83,25 @@ Internal structure and function names.
 
 @itemize -
 @item Small but fast and powerful.
-It is very useful for small footprint installations (like on floppy disk)
+It is very useful for small footprint installations (e.g. on floppy disk)
 or quick editing sessions.
 @item 8-bit clean.
 Zile can operate with binary files.
 @item Looks like @emph{Emacs}.
 Most Zile key sequences and function names are identical to Emacs ones.
-@item Multi buffer editing w/multi level undo.
+@item Multi buffer editing with multi level undo.
 Zile can open an infinite number of files and can record an infinite
 sequence of undo operations (limited only by the amount of free memory).
 @item Multi window.
 Zile can display multiple windows on the screen.
 @item Killing, yanking and registers.
-The typical killing, yanking and register features of Emacs are available
+The killing, yanking and register features of Emacs are available
 under Zile.
 @item Minibuffer completion.
-Zile can complete the user written text.  This is very useful for
-@kbd{M-x} commands and for selecting files.
+This works for @kbd{M-x} commands and for file names.
 @item Colors.
 Zile makes use of the color capatibilities of the terminal if available.
-@item Source highlighting (``C'', ``C++'', ``C#'', Java, shell scripts, mails).
+@item Source highlighting (``C'', ``C++'', ``C#'', Java, shell scripts, email).
 Zile can highlight source files and scripts for better reading.
 @item Auto fill (word wrap).
 Zile automatically breaks the lines when they become too wide (if the
@@ -820,7 +819,7 @@ input to the shell command.
 
 If the shell command produces any output, the output goes to a Zile buffer
 named @samp{*Shell Command Output*}, which is displayed in another window
-but not selected.  
+but not selected.
 
 If the output is one line, it is displayed in the echo area.
 A numeric argument, as in @kbd{M-1 M-|} or @kbd{C-u M-|}, directs output
@@ -1179,7 +1178,7 @@ highlight all windows or just the selected window.  Default value is
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the
-author at the Internet email address @email{sandro@@sigala.it}.
+maintainers at @email{zile-devel@@lists.sourceforge.net}.
 Please take a look at the @file{KNOWNBUGS} file in the source package
 before posting a bug report.
 
