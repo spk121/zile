@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.6 2003/05/25 21:23:24 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.7 2003/05/25 21:34:56 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -269,9 +269,12 @@ int minibuf_read_forced(const char *fmt, const char *errmsg,
 			return -1;
 		} else {
 			char *s;
+                        astr as;
 			/* Complete partial words if possible. */
-			if (hp->try(hp, p) == HISTORY_MATCHED)
+                        as = astr_copy_cstr(p);
+			if (hp->try(hp, as) == HISTORY_MATCHED)
 				p = hp->match;
+                        astr_delete(as);
 			for (s = alist_first(hp->completions); s != NULL;
 			     s = alist_next(hp->completions))
 				if (!strcmp(p, s)) {
@@ -420,7 +423,7 @@ void minibuf_clear(void)
 /* Forward declarations. */
 static void default_history_scroll_up(historyp hp);
 static void default_history_scroll_down(historyp hp);
-static int default_history_try(historyp hp, const char *s);
+static int default_history_try(historyp hp, astr as);
 static int default_history_reread(historyp hp, astr as);
 
 /*
@@ -599,40 +602,33 @@ static int hcompar(const void *p1, const void *p2)
 /*
  * The default history matching function.
  */
-static int default_history_try(historyp hp, const char *s)
+static int default_history_try(historyp hp, astr search)
 {
 	int i, j, ssize, fullmatches = 0, partmatches = 0;
 	char *p, c;
-	astr search;
 
 	alist_clear(hp->matches);
 
-	search = astr_new();
-	astr_assign_cstr(search, s);
 	if (hp->fl_dir)
-		if (!hp->reread(hp, search)) {
-			astr_delete(search);
+		if (!hp->reread(hp, search))
 			return HISTORY_NOTMATCHED;
-		}
 
 	if (!hp->fl_sorted) {
 		alist_sort(hp->completions, hcompar);
 		hp->fl_sorted = 1;
 	}
 
-	ssize = strlen(astr_cstr(search));
+	ssize = astr_size(search);
 
 	if (ssize == 0) {
 		if (alist_count(hp->completions) > 1) {
 			hp->match = alist_first(hp->completions);
 			hp->matchsize = 0;
 			popup_history(hp, TRUE, 0);
-			astr_delete(search);
 			return HISTORY_NONUNIQUE;
 		} else {
 			hp->match = alist_first(hp->completions);
 			hp->matchsize = strlen(hp->match);
-			astr_delete(search);
 			return HISTORY_MATCHED;
 		}
 	}
@@ -645,9 +641,6 @@ static int default_history_try(historyp hp, const char *s)
 			if (!strcmp(p, astr_cstr(search)))
 				++fullmatches;
 		}
-
-	astr_delete(search);
-	search = NULL;
 
 	if (partmatches == 0)
 		return HISTORY_NOTMATCHED;

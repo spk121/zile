@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.8 2003/05/25 21:20:12 rrt Exp $	*/
+/*	$Id: zile.h,v 1.9 2003/05/25 21:34:56 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -291,7 +291,7 @@ struct history {
 
 	/* The action functions. */
 	int	(*reread)(historyp hp, astr as);
-	int	(*try)(historyp hp, const char *s);
+	int	(*try)(historyp hp, astr search);
 	void	(*scroll_up)(historyp hp);
 	void	(*scroll_down)(historyp hp);
 };

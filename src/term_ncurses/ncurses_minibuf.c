@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.7 2003/05/23 09:37:26 ssigala Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.8 2003/05/25 21:34:57 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -289,7 +289,9 @@ static char *rot_vminibuf_read(const char *prompt, const char *value, historyp h
 				hp->scroll_up(hp);
 				thistab = lasttab;
 			} else {
-				thistab = hp->try(hp, *p);
+                                astr as = astr_copy_cstr(*p);
+				thistab = hp->try(hp, as);
+                                astr_delete(as);
 				switch (thistab) {
 				case HISTORY_NONUNIQUE:
 				case HISTORY_MATCHED:

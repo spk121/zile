@@ -1,4 +1,4 @@
-/*	$Id: bind.c,v 1.3 2003/05/06 22:28:41 rrt Exp $	*/
+/*	$Id: bind.c,v 1.4 2003/05/25 21:34:55 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -456,9 +456,11 @@ char *minibuf_read_function_name(char *msg)
 			minibuf_error("No function name given");
 			return NULL;
 		} else {
+                        astr as = astr_copy_cstr(ms);
 			/* Complete partial words if possible. */
-			if (hp->try(hp, ms) == HISTORY_MATCHED)
+			if (hp->try(hp, as) == HISTORY_MATCHED)
 				ms = hp->match;
+                        astr_delete(as);
 			for (p = alist_first(hp->completions); p != NULL;
 			     p = alist_next(hp->completions))
 				if (!strcmp(ms, p)) {
