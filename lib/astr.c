@@ -20,13 +20,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.10 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: astr.c,v 1.11 2004/03/09 16:11:30 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
 #endif
 #include <assert.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
