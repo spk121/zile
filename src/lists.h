@@ -20,14 +20,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.h,v 1.5 2005/01/25 00:27:59 rrt Exp $	*/
+/*	$Id: lists.h,v 1.6 2005/01/30 23:24:34 rrt Exp $	*/
 
 #ifndef LISTS_H
 #define LISTS_H
 
 #include "astr.h"
 
-typedef struct le{
+typedef struct le {
   /* either data or a branch */
   struct le *branch;
   char *data;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.55 2005/01/30 17:46:14 rrt Exp $	*/
+/*	$Id: bind.c,v 1.56 2005/01/30 23:24:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -59,11 +59,11 @@ static leafp leaf_new(int vecmax)
 {
   leafp p;
 
-  p = (leafp)zmalloc(sizeof *p);
-  memset(p, 0, sizeof *p);
+  p = (leafp)zmalloc(sizeof(*p));
+  memset(p, 0, sizeof(*p));
 
   p->vecmax = vecmax;
-  p->vec = (leafp *)zmalloc(sizeof *p * vecmax);
+  p->vec = (leafp *)zmalloc(sizeof(*p) * vecmax);
 
   return p;
 }
@@ -86,13 +86,13 @@ static void add_leaf(leafp tree, leafp p)
   /* Reallocate vector if there is not enough space. */
   if (tree->vecnum + 1 >= tree->vecmax) {
     tree->vecmax += 5;
-    tree->vec = (leafp *)zrealloc(tree->vec, sizeof *p * tree->vecmax);
+    tree->vec = (leafp *)zrealloc(tree->vec, sizeof(*p) * tree->vecmax);
   }
 
   /* Insert the leaf at the sorted position. */
   for (i = 0; i < tree->vecnum; i++)
     if (tree->vec[i]->key > p->key) {
-      memmove(&tree->vec[i+1], &tree->vec[i], sizeof p * tree->vecnum - i);
+      memmove(&tree->vec[i+1], &tree->vec[i], sizeof(p) * tree->vecnum - i);
       tree->vec[i] = p;
       break;
     }
@@ -175,7 +175,7 @@ static astr make_completion(size_t *keys, size_t numkeys)
 static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)
 {
   leafp p;
-  vector *v = vec_new(sizeof(size_t));
+  vector *v = vec_new(sizeof(key));
 
   vec_item(v, 0, size_t) = key;
   *numkeys = 1;
@@ -225,8 +225,11 @@ void process_key(size_t key)
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   } else {
     size_t i;
-    
-    if (p->func(last_uniarg) && thisflag & FLAG_DEFINING_MACRO)
+
+    /* Only add keystrokes if we're already in macro defining mode
+       before the function call, to cope with start-kbd-macro. */
+    if (p->func(last_uniarg) && lastflag & FLAG_DEFINING_MACRO &&
+        thisflag & FLAG_DEFINING_MACRO)
       for (uni = 0; uni < last_uniarg; ++uni)
         for (i = 0; i < numkeys; i++)
           add_macro_key(keys[i]);
@@ -275,7 +278,7 @@ static struct fentry fentry_table[] = {
 #undef X3
 };
 
-#define fentry_table_size (sizeof(fentry_table) / sizeof fentry_table[0])
+#define fentry_table_size (sizeof(fentry_table) / sizeof(fentry_table[0]))
 
 static int bind_compar(const void *p1, const void *p2)
 {
@@ -326,16 +329,18 @@ void free_bindings(void)
   free_history_elements(&functions_history);
 }
 
-static struct fentry *bsearch_function(char *name)
+static char *bsearch_function(char *name)
 {
-  struct fentry key;
+  struct fentry key, *entryp;
   key.name = name;
-  return bsearch(&key, fentry_table, fentry_table_size, sizeof fentry_table[0], bind_compar);
+  entryp = bsearch(&key, fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
+  return entryp ? entryp->name : NULL;
 }
 
 Function get_function(char *name)
 {
   size_t i;
+  assert(name);
   for (i = 0; i < fentry_table_size; ++i)
     if (!strcmp(name, fentry_table[i].name))
       return fentry_table[i].func;
@@ -353,16 +358,20 @@ char *get_function_name(Function p)
 
 int execute_function(char *name, int uniarg)
 {
-  Function func = get_function(name);
-  if (func) {
-    func(uniarg);
-    return TRUE;
-  }
-  return FALSE;
+  Function func;
+  Macro *mp;
+
+  if ((func = get_function(name)))
+    return func(uniarg);
+  else if ((mp = get_macro(name)))
+    return call_macro(mp);
+  else
+    return FALSE;
 }
 
 /*
  * Read a function name from the minibuffer.
+ * The returned buffer must be freed by the caller.
  */
 char *minibuf_read_function_name(const char *fmt, ...)
 {
@@ -370,7 +379,6 @@ char *minibuf_read_function_name(const char *fmt, ...)
   size_t i;
   char *buf, *ms;
   list p;
-  fentryp entryp;
   Completion *cp;
 
   va_start(ap, fmt);
@@ -407,23 +415,21 @@ char *minibuf_read_function_name(const char *fmt, ...)
           ms = p->item;
           break;
         }
-      if ((entryp = bsearch_function(ms)) == NULL) {
+      if (bsearch_function(ms) || get_macro(ms)) {
+        add_history_element(&functions_history, ms);
+        minibuf_clear();        /* Remove any error message. */
+        ms = zstrdup(ms);       /* Might be about to be freed. */
+        break;                  /* We're finished. */
+      } else {
         minibuf_error("Undefined function name `%s'", ms);
         waitkey(WAITKEY_DEFAULT);
-      } else {
-        /* Add history element. */
-        add_history_element(&functions_history,
-                            entryp->name);
-
-        minibuf_clear();
-        break;
       }
     }
   }
 
   free_completion(cp);
 
-  return entryp->name;
+  return ms;
 }
 
 DEFUN("execute-extended-command", execute_extended_command)
@@ -431,6 +437,7 @@ DEFUN("execute-extended-command", execute_extended_command)
     Read function name, then read its arguments and call it.
     +*/
 {
+  int res;
   char *name;
   astr msg = astr_new();
 
@@ -444,7 +451,10 @@ DEFUN("execute-extended-command", execute_extended_command)
   if (name == NULL)
     return FALSE;
 
-  return execute_function(name, last_uniarg);
+  res = execute_function(name, last_uniarg);
+  free(name);
+
+  return res;
 }
 
 DEFUN("global-set-key", global_set_key)
@@ -454,7 +464,7 @@ DEFUN("global-set-key", global_set_key)
     sequence.
     +*/
 {
-  int  ok = FALSE;
+  int ok = FALSE;
   size_t key, *keys, numkeys;
   leafp p;
   Function func;
@@ -478,6 +488,7 @@ DEFUN("global-set-key", global_set_key)
   } else
     minibuf_error("No such function `%d'", name);
 
+  free(name);
   free(keys);
   return ok;
 }
@@ -538,7 +549,7 @@ static void write_bindings_tree(leafp tree, list keys)
   astr as = chordtostr(tree->key);
 
   list_append(keys, as);
-        
+
   for (i = 0; i < tree->vecnum; ++i) {
     leafp p = tree->vec[i];
     if (p->func != NULL) {
@@ -558,7 +569,7 @@ static void write_bindings_tree(leafp tree, list keys)
     } else
       write_bindings_tree(p, keys);
   }
-        
+
   astr_delete(list_betail(keys));
 }
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.28 2005/01/26 23:04:47 rrt Exp $	*/
+/*	$Id: help.c,v 1.29 2005/01/30 23:24:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -183,6 +183,7 @@ DEFUN("describe-function", describe_function)
   astr_afmt(bufname, "*Help: function `%s'*", name);
   write_temp_buffer(astr_cstr(bufname), write_function_description,
                     name, doc);
+  free(name);
   astr_delete(bufname);
   astr_delete(doc);
 

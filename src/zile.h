@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.59 2005/01/30 17:46:20 rrt Exp $        */
+/*      $Id: zile.h,v 1.60 2005/01/30 23:24:34 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -233,17 +233,24 @@ struct Completion {
   /* This flag is set when the space character is allowed. */
   int fl_space;
 
-  list completions;       /* The completions list. */
+  list completions;             /* The completions list. */
 
-  list matches;           /* The matches list. */
-  char *match;            /* The match buffer. */
-  size_t matchsize;     /* The match buffer size. */
+  list matches;                 /* The matches list. */
+  char *match;                  /* The match buffer. */
+  size_t matchsize;             /* The match buffer size. */
 };
 
 struct History {
-  list elements;          /* Elements (strings).  */
+  list elements;                /* Elements (strings).  */
   list sel;
 };
+
+typedef struct Macro {
+  size_t nkeys;                 /* The number of keystrokes. */
+  size_t *keys;                 /* Vector of keystrokes. */
+  char *name;                   /* Name of the macro. */
+  struct Macro *next;           /* Next macro in the list. */
+} Macro;
 
 struct Terminal {
   void *screen; /* The real type of this pointer depends on the
@@ -362,5 +369,5 @@ typedef size_t Font;
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
-        
+
 #endif /* !ZILE_H */

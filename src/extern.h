@@ -48,6 +48,13 @@ void deactivate_mark(void);
 int is_mark_actived(void);
 size_t tab_width(Buffer *bp);
 
+/* completion.c ----------------------------------------------------------- */
+Completion *completion_new(int fileflag);
+void free_completion(Completion *cp);
+void completion_scroll_up(void);
+void completion_scroll_down(void);
+int completion_try(Completion *cp, astr search, int popup_when_complete);
+
 /* editfns.c -------------------------------------------------------------- */
 void push_mark(void);
 void pop_mark(void);
@@ -99,6 +106,13 @@ void untabify_string(char *dest, char *src, size_t scol, size_t tw);
 void goto_point(Point pt);
 char *getln(FILE *fp);
 
+/* history.c -------------------------------------------------------------- */
+void free_history_elements(History *hp);
+void add_history_element(History *hp, const char *string);
+void prepare_history(History *hp);
+const char *previous_history_element(History *hp);
+const char *next_history_element(History *hp);
+
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(size_t key);
 int strtochord(char *buf, size_t *len);
@@ -133,14 +147,15 @@ astr lisp_dump(le *list);
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
 void add_macro_key(size_t key);
+int call_macro(Macro *mp);
 void free_macros(void);
+Macro *get_macro(char *name);
 
 /* main.c ----------------------------------------------------------------- */
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
 extern Terminal *cur_tp;
 extern int thisflag, lastflag, last_uniarg;
-extern int resize_needed;
 
 /* marker.c --------------------------------------------------------------- */
 Marker *make_marker(void);
@@ -162,20 +177,6 @@ int minibuf_read_boolean(const char *fmt, ...);
 char *minibuf_read_dir(const char *fmt, const char *value, ...);
 char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
 void minibuf_clear(void);
-
-/* completion.c ----------------------------------------------------------- */
-Completion *completion_new(int fileflag);
-void free_completion(Completion *cp);
-void completion_scroll_up(void);
-void completion_scroll_down(void);
-int completion_try(Completion *cp, astr search, int popup_when_complete);
-
-/* history.c -------------------------------------------------------------- */
-void free_history_elements(History *hp);
-void add_history_element(History *hp, const char *string);
-void prepare_history(History *hp);
-const char *previous_history_element(History *hp);
-const char *next_history_element(History *hp);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point(size_t lineno, size_t offset);

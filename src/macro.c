@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: macro.c,v 1.11 2005/01/30 17:46:16 rrt Exp $	*/
+/*	$Id: macro.c,v 1.12 2005/01/30 23:24:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,25 +32,18 @@
 #include "extern.h"
 
 
-typedef struct Macro Macro;
-
-struct Macro {
-  size_t nkeys;
-  size_t *keys;
-};
-
-static Macro *head_mp;
+static Macro *cur_mp, *head_mp = NULL;
 
 void add_macro_key(size_t key)
 {
-  head_mp->keys = zrealloc(head_mp->keys, sizeof(size_t) * ++head_mp->nkeys);
-  head_mp->keys[head_mp->nkeys - 1] = key;
+  cur_mp->keys = zrealloc(cur_mp->keys, sizeof(size_t) * ++cur_mp->nkeys);
+  cur_mp->keys[cur_mp->nkeys - 1] = key;
 }
 
 void cancel_kbd_macro(void)
 {
   free_macros();
-  head_mp = NULL;
+  cur_mp = NULL;
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
@@ -59,6 +52,7 @@ DEFUN("start-kbd-macro", start_kbd_macro)
     Record subsequent keyboard input, defining a keyboard macro.
     The commands are recorded even as they are executed.
     Use C-x ) to finish recording and make the macro available.
+    Use M-x name-last-kbd-macro to give it a permanent name.
     +*/
 {
   if (thisflag & FLAG_DEFINING_MACRO) {
@@ -66,13 +60,13 @@ DEFUN("start-kbd-macro", start_kbd_macro)
     return FALSE;
   }
 
-  if (head_mp)
+  if (cur_mp)
     cancel_kbd_macro();
 
   minibuf_write("Defining keyboard macro...");
 
   thisflag |= FLAG_DEFINING_MACRO;
-  head_mp = (Macro *)zmalloc(sizeof(Macro));
+  cur_mp = (Macro *)zmalloc(sizeof(Macro));
   return TRUE;
 }
 
@@ -94,27 +88,55 @@ DEFUN("end-kbd-macro", end_kbd_macro)
 
 DEFUN("name-last-kbd-macro", name_last_kbd_macro)
   /*+
-    Bind the last keyboard macro to a command with the given name.
+    Assign a name to the last keyboard macro defined.
+    Argument SYMBOL is the name to define.
+    The symbol's function definition becomes the keyboard macro string.
+    Such a "function" cannot be called from Lisp, but it is a valid editor command.
     +*/
 {
-  /* XXX */
-  return FALSE;
-}
+  char *ms;
+  Macro *mp;
+  size_t size;
 
-static int call_last_kbd_macro(void)
-{
-  int old_thisflag = thisflag;
-  int old_lastflag = lastflag;
-  int ret = TRUE;
-  size_t i;
-
-  if (head_mp == NULL) {
-    minibuf_error("Keyboard macro not defined");
+  if ((ms = minibuf_read("Name for last kbd macro: ", "")) == NULL) {
+    minibuf_error("No command name given");
     return FALSE;
   }
 
-  for (i = head_mp->nkeys - 1; i < head_mp->nkeys ; i--)
-    term_ungetkey(head_mp->keys[i]);
+  if (cur_mp == NULL) {
+    minibuf_error("No keyboard macro defined");
+    return FALSE;
+  }
+
+  if ((mp = get_macro(ms))) {
+    /* If a macro with this name already exists, update its key list */
+    free(mp->keys);
+  } else {
+    /* Add a new macro to the list */
+    mp = zmalloc(sizeof(*mp));
+    mp->next = head_mp;
+    mp->name = zstrdup(ms);
+    head_mp = mp;
+  }
+
+  /* Copy the keystrokes from cur_mp. */
+  mp->nkeys = cur_mp->nkeys;
+  size = sizeof(*(mp->keys)) * mp->nkeys;
+  mp->keys = zmalloc(size);
+  memcpy(mp->keys, cur_mp->keys, size);
+
+  return TRUE;
+}
+
+int call_macro(Macro *mp)
+{
+  int ret = TRUE;
+  int old_thisflag = thisflag;
+  int old_lastflag = lastflag;
+  size_t i;
+
+  for (i = mp->nkeys - 1; i < mp->nkeys ; i--)
+    term_ungetkey(mp->keys[i]);
 
   if (lastflag & FLAG_GOT_ERROR)
     ret = FALSE;
@@ -129,34 +151,65 @@ DEFUN("call-last-kbd-macro", call_last_kbd_macro)
   /*+
     Call the last keyboard macro that you defined with C-x (.
     A prefix argument serves as a repeat count.  Zero means repeat until error.
+
+    To make a macro permanent so you can call it even after
+    defining others, use M-x name-last-kbd-macro.
     +*/
 {
   int uni, ret = TRUE;
 
-  /*	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0); */
-  if (uniarg == 0) {
-    for (;;)
-      if (!call_last_kbd_macro())
-        break;
-  } else {
+  if (cur_mp == NULL) {
+    minibuf_error("No kbd macro has been defined");
+    return FALSE;
+  }
+
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  if (uniarg == 0)
+    while (call_macro(cur_mp));
+  else {
     for (uni = 0; uni < uniarg; ++uni)
-      if (!call_last_kbd_macro()) {
+      if (!call_macro(cur_mp)) {
         ret = FALSE;
         break;
       }
   }
-  /*	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0); */
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   return ret;
 }
 
+static void macro_delete(Macro *mp)
+{
+  assert(mp);
+  free(mp->keys);
+  free(mp);
+}
+
 /*
- * Free all the allocated macros (used at Zile exit).
+ * Free all the macros (used at Zile exit).
  */
 void free_macros(void)
 {
-  if (head_mp) {
-    free(head_mp->keys);
-    free(head_mp);
+  Macro *mp, *next;
+
+  if (cur_mp)
+    macro_delete(cur_mp);
+
+  for (mp = head_mp; mp; mp = next) {
+    next = mp->next;
+    macro_delete(mp);
   }
+}
+
+/*
+ * Find a macro given its name.
+ */
+Macro *get_macro(char *name)
+{
+  Macro *mp;
+  assert(name);
+  for (mp = head_mp; mp; mp = mp->next)
+    if (!strcmp(mp->name, name))
+      return mp;
+  return NULL;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.11 2005/01/27 01:33:18 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.12 2005/01/30 23:24:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -133,7 +133,7 @@ void term_refresh(void)
         if (skipped)
           astr_cat_cstr(as, tgoto(cm_string, j, i));
         skipped = FALSE;
-        
+
         screen.oarray[offset] = n;
 
         if (f != of)
@@ -213,7 +213,7 @@ void term_beep(void)
 static char *get_tcap(void)
 {
   /* termcap buffer, conventionally big enough. */
-  char *tcap = (char *)zmalloc(2048);
+  char *tcap = zmalloc(2048);
   char *term = "vt100";   /* This is ignored by epocemx. */
   int res;
 
@@ -240,7 +240,7 @@ static void read_screen_size(void)
 static void term_init_screen(void)
 {
   int size = termp->width * termp->height;
-        
+
   screen.array = zmalloc(size * sizeof(int));
   screen.oarray = zmalloc(size * sizeof(int));
   screen.curx = screen.cury = 0;
@@ -373,7 +373,7 @@ static int xgetkey(int mode)
     return *--keyp;
 
   code= _read_key(0);
-        
+
   if (mode & GETKEY_NONFILTERED) {
     return code & 0xff;
   } else {
