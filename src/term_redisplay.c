@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.9 2004/09/20 14:22:08 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.10 2004/10/05 18:13:29 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -267,6 +267,8 @@ static void outch(int c, Font font, int *x)
 	if (*x >= ZILE_COLS)
 		return;
 
+        term_attrset(1, font);
+                
 	if (c == '\t')
 		for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZILE_COLS; w--)
 			term_addch(' '), ++(*x);
@@ -278,6 +280,8 @@ static void outch(int c, Font font, int *x)
 			term_addch(buf[w]), ++(*x);
                 free(buf);
 	}
+
+        term_attrset(1, ZILE_NORMAL);
 }
 
 static int in_region(int lineno, int x, Region *r)
