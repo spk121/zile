@@ -299,7 +299,7 @@ dispatch( xprintf_struct * s )
      int    flag_plus, flag_minus, flag_space, flag_sharp, flag_zero;
      int    width;
      int    prec;
-     char   modifier;
+     int    modifier;
      char   type;
      int    approx_width;
      /* most of those variables are here to rewrite the format string */
