@@ -143,6 +143,9 @@ extern bufferp	cur_bp, prev_bp, head_bp;
 extern terminalp cur_tp;
 extern int	thisflag, lastflag, last_uniarg;
 
+extern int	getkey_safe (void);
+extern void	refresh_clock_timeout (void);
+
 /* minibuf.c -------------------------------------------------------------- */
 extern void	minibuf_clear(void);
 extern void	minibuf_error(const char *fmt, ...);
