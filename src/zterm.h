@@ -19,13 +19,15 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zterm.h,v 1.1 2004/06/30 22:52:41 rrt Exp $        */
+/*      $Id: zterm.h,v 1.2 2004/07/08 23:39:25 rrt Exp $        */
 
 #ifndef ZTERM_H
 #define ZTERM_H
 
 /* This header file is just a shell that loads the configured
    implementation. */
+
+#include "config.h"
 
 #ifdef CURSES
 #include "term_ncurses.h"
