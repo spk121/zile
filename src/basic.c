@@ -1,4 +1,4 @@
-/*	$Id: basic.c,v 1.4 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: basic.c,v 1.5 2004/01/27 16:54:35 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -233,7 +233,7 @@ Line 1 is the beginning of the buffer.
 {
 	char *ms;
 	int to_line;
-  
+
 	do {
 		if ((ms = minibuf_read("Goto line: ", "")) == NULL)
 			return cancel();

@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.10 2004/01/21 01:54:59 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.11 2004/01/27 16:55:16 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -538,14 +538,14 @@ int universal_argument(int keytype, int xarg)
 	arg = 4;
 	sgn = 1;
 	compl = 0;
-	
+
 	if (keytype == KBD_META) {
 		strcpy (buf, "ESC");
 		cur_tp->ungetkey (xarg + '0');
 	}
 	else
 		strcpy (buf, "C-u");
-	
+
 	for (;;) {
 		strcat (buf, "-"); /* Add the '-' character.  */
 		c = do_completion (buf, &compl);
@@ -602,9 +602,9 @@ int universal_argument(int keytype, int xarg)
 			break;
 		}
 	}
-	
+
 	last_uniarg = arg * sgn;
-	
+
 	thisflag |= FLAG_SET_UNIARG;
 
 	minibuf_clear();
