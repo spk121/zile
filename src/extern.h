@@ -246,7 +246,6 @@ int is_variable_equal(char *var, char *val);
 int lookup_bool_variable(char *var);
 char *minibuf_read_variable_name(char *msg);
 void set_variable(char *var, char *val);
-void unset_variable(char *var);
 char *get_variable(char *var);
 
 /* window.c --------------------------------------------------------------- */

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.24 2005/01/16 13:07:44 rrt Exp $	*/
+/*	$Id: variables.c,v 1.25 2005/01/22 11:27:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,7 +32,8 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "htable.h"
+#include "eval.h"
+#include "vars.h"
 
 /*
  * Default variables values table.
@@ -47,57 +48,32 @@ static struct var_entry {
 #undef X
 };
 
-static htable var_table;
-
 void init_variables(void)
 {
   struct var_entry *p;
-
-  var_table = htable_new(127);
 
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
     set_variable(p->var, p->val);
 }
 
-static void free_var_iter(hpair *pair, va_list ap)
-{
-  (void)ap;
-  unset_variable(pair->key);
-}
-
 void free_variables(void)
 {
-  htable_foreach(var_table, free_var_iter);
-  htable_delete(var_table);
+  variableFree(mainVarList);
 }
 
 void set_variable(char *var, char *val)
 {
-  unset_variable(var);
-  htable_store(var_table, var, zstrdup(val));
-}
-
-void unset_variable(char *var)
-{
-  char *p = htable_fetch(var_table, var);
-  free(p);
+  mainVarList = variableSetString(mainVarList, var, val);
 }
 
 char *get_variable(char *var)
 {
-  char *val = htable_fetch(var_table, var);
-#ifdef DEBUG
-  if (!val)
-    ZTRACE(("getting unknown variable `%s'\n", var));
-  else
-    ZTRACE(("getting variable `%s' = `%s'\n", var, val));
-#endif
-  return val;
+  return variableGetString(mainVarList, var);
 }
 
 int is_variable_equal(char *var, char *val)
 {
-  char *v = htable_fetch(var_table, var);
+  char *v = get_variable(var);
   return v != NULL && !strcmp(v, val);
 }
 
@@ -105,7 +81,7 @@ int lookup_bool_variable(char *var)
 {
   char *p;
 
-  if ((p = htable_fetch(var_table, var)) != NULL)
+  if ((p = get_variable(var)) != NULL)
     return !strcmp(p, "true");
 
 #if DEBUG
@@ -116,18 +92,14 @@ int lookup_bool_variable(char *var)
   return FALSE;
 }
 
-static void make_var_compl_iter(hpair *pair, va_list ap)
-{
-  Completion *cp = va_arg(ap, Completion *);
-  list_append(cp->completions, zstrdup(pair->key));
-}
-
 char *minibuf_read_variable_name(char *msg)
 {
   char *ms;
   Completion *cp = completion_new(FALSE);
-
-  htable_foreach(var_table, make_var_compl_iter, cp);
+  le *lp;
+  
+  for (lp = mainVarList; lp != NULL; lp = lp->list_next)
+    list_append(cp->completions, zstrdup(lp->data));
 
   for (;;) {
     ms = minibuf_read_completion(msg, "", cp, NULL);
@@ -221,44 +193,5 @@ DEFUN("set-variable", set_variable)
   } else
     set_variable(var, val);
 
-  return TRUE;
-}
-
-static int sorter(const void *p1, const void *p2)
-{
-  return strcmp((*(hpair **)p1)->key, (*(hpair **)p2)->key);
-}
-
-static void write_variables_list(va_list ap)
-{
-  Window *old_wp = va_arg(ap, Window *);
-  list l, p;
-
-  bprintf("Global variables:\n\n");
-  bprintf("%-30s %s\n", "Variable", "Value");
-  bprintf("%-30s %s\n", "--------", "-----");
-
-  l = htable_list(var_table);
-  list_sort(l, sorter);
-  for (p = list_first(l); p != l; p = list_next(p)) {
-    hpair *pair = p->item;
-    if (pair->val != NULL)
-      bprintf("%-30s \"%s\"\n", pair->key, pair->val);
-  }
-  list_delete(l);
-
-  bprintf("\nLocal buffer variables:\n\n");
-  bprintf("%-30s %s\n", "Variable", "Value");
-  bprintf("%-30s %s\n", "--------", "-----");
-  bprintf("%-30s \"%d\"\n", "fill-column", old_wp->bp->fill_column);
-  bprintf("%-30s \"%d\"\n", "tab-width", old_wp->bp->tab_width);
-}
-
-DEFUN("list-variables", list_variables)
-  /*+
-    List defined variables.
-    +*/
-{
-  write_temp_buffer("*Variable List*", write_variables_list, cur_wp);
   return TRUE;
 }

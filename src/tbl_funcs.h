@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.27 2005/01/16 20:59:27 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.28 2005/01/22 11:27:17 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -73,7 +73,6 @@ X1("list-bindings", list_bindings,			"\\C-hb")
 X1("list-buffers", list_buffers,			"\\C-x\\C-b")
 X1("list-functions", list_functions,			"\\C-hlf")
 X1("list-registers", list_registers,			"\\C-hlr")
-X1("list-variables", list_variables,			"\\C-hlv")
 X1("mark-whole-buffer", mark_whole_buffer,		"\\C-xh")
 X1("mark-paragraph", mark_paragraph,			"\\M-h")
 X1("mark-sexp", mark_sexp,				"\\C-\\M-@")
