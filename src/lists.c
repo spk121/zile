@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.6 2005/01/19 00:40:52 rrt Exp $	*/
+/*	$Id: lists.c,v 1.7 2005/01/19 01:21:04 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -241,7 +241,8 @@ astr leDumpEval(le *list, int indent)
       astr_cat_cstr(as, "\n==> ");
       le_value = evaluateBranch(list->branch);
       astr_cat_delete(as, leDumpReformat(le_value));
-      leWipe(le_value);
+      if (le_value && le_value != leNIL)
+        leWipe(le_value);
       astr_cat_cstr(as, "\n");
     }
   }
