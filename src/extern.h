@@ -120,7 +120,7 @@ char *simplify_key(char *dest, char *key);
 Line *new_line(int maxsize);
 Line *resize_line(Line *lp, int maxsize);
 void free_line(Line *lp);
-void line_replace_text(Line **lp, int offset, int orgsize, char *newtext);
+void line_replace_text(Line **lp, int offset, int orgsize, char *newtext, int replace_case);
 int insert_char(int c);
 int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);

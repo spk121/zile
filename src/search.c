@@ -1,4 +1,4 @@
-/*	$Id: search.c,v 1.8 2004/02/14 10:22:56 dacap Exp $	*/
+/*	$Id: search.c,v 1.9 2004/02/16 01:07:00 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -575,7 +575,7 @@ Replace occurrences of a string with other text.
 				     cur_bp->pt.o - strlen(find)),
 			  strlen(find), strlen(repl));
 		line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - strlen(find),
-				  strlen(find), repl);
+				  strlen(find), repl, TRUE);
 	}
 
 	if (thisflag & FLAG_NEED_RESYNC)
@@ -668,7 +668,7 @@ what to do with it.
 				     cur_bp->pt.o - strlen(find)),
 			  strlen(find), strlen(repl));
 		line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - strlen(find),
-				  strlen(find), repl);
+				  strlen(find), repl, TRUE);
 	nextmatch:
 		if (exitloop)
 			break;
