@@ -1,6 +1,7 @@
 Changes between Zile 1.7 BETA 2 - Zile 1.7
 
 * Patches provided by David A. Capello <dacap@users.sourceforge.net>:
+    * Added regexp search functions.
     * The `prev_bp' was removed.
     * Now the `exchange-point-and-mark' activates the mark.
     * Fixed `insert_char' to don't move the mark when insert a

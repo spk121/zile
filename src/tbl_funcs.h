@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.6 2004/01/29 10:40:22 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.7 2004/02/05 02:40:35 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -102,7 +102,9 @@ X0("insert-buffer", insert_buffer)
 X1("insert-file", insert_file,				"\\C-xi")
 X1("insert-register", insert_register,			"\\C-xri")
 X1("isearch-backward", isearch_backward,		"\\C-r")
+X1("isearch-backward-regexp", isearch_backward_regexp,	"\\C-\\M-r")
 X1("isearch-forward", isearch_forward,			"\\C-s")
+X1("isearch-forward-regexp", isearch_forward_regexp,	"\\C-\\M-s")
 #if ENABLE_JAVA_MODE
 X0("java-mode", java_mode)
 #endif
@@ -141,7 +143,9 @@ X1("save-some-buffers", save_some_buffers,		"\\C-xs")
 X2("scroll-down", scroll_down,				"\\M-v", "\\PGUP")
 X2("scroll-up", scroll_up,				"\\C-v", "\\PGDN")
 X0("search-backward", search_backward)
+X0("search-backward-regexp", search_backward_regexp)
 X0("search-forward", search_forward)
+X0("search-forward-regexp", search_forward_regexp)
 X0("self-insert-command", self_insert_command)
 X1("set-fill-column", set_fill_column,			"\\C-xf")
 X2("set-mark-command", set_mark_command,		"\\C-@", "\\F5")
