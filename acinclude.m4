@@ -1,5 +1,6 @@
 dnl Copied from binutils 1.15 so probably covered by the GPL
-dnl (Plus minor modifications to find non-gcc compilers )
+dnl (Plus minor modifications to find non-gcc compilers)
+dnl Richard Smith <richard@ex-parrot.com>
 dnl
 dnl Get a default for CC_FOR_BUILD to put into Makefile.
 AC_DEFUN([BFD_CC_FOR_BUILD],
