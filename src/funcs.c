@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.66 2005/01/18 19:10:21 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.67 2005/01/19 18:43:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -344,8 +344,6 @@ DEFUN("quoted-insert", quoted_insert)
 
   if (isdigit(c) && c - '0' < 8)
     quoted_insert_octal(c);
-  else if (c == '\r')
-    insert_newline();
   else
     insert_char_in_insert_mode(c);
 
