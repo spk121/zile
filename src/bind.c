@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.62 2005/02/07 23:18:24 rrt Exp $	*/
+/*	$Id: bind.c,v 1.63 2005/02/17 16:03:58 rrt Exp $	*/
 
 #include "config.h"
 
@@ -92,7 +92,7 @@ static void add_leaf(leafp tree, leafp p)
   /* Insert the leaf at the sorted position. */
   for (i = 0; i < tree->vecnum; i++)
     if (tree->vec[i]->key > p->key) {
-      memmove(&tree->vec[i+1], &tree->vec[i], sizeof(p) * tree->vecnum - i);
+      memmove(&tree->vec[i+1], &tree->vec[i], sizeof(p) * (tree->vecnum - i));
       tree->vec[i] = p;
       break;
     }
