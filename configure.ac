@@ -18,6 +18,7 @@ dnl Checks for programs.
 dnl ==================================================================
 
 AC_PROG_CC
+BFD_CC_FOR_BUILD
 AC_C_INLINE
 AC_PROG_INSTALL
 AC_PROG_RANLIB

@@ -1,40 +1,36 @@
-#serial 3
-
-dnl From Jim Meyering
-
-dnl Define HAVE_STRUCT_UTIMBUF if `struct utimbuf' is declared --
-dnl usually in <utime.h>.
-dnl Some systems have utime.h but don't declare the struct anywhere.
-
-AC_DEFUN([jm_CHECK_TYPE_STRUCT_UTIMBUF],
-[
-  AC_CHECK_HEADERS(utime.h)
-  AC_REQUIRE([AC_HEADER_TIME])
-  AC_CACHE_CHECK([for struct utimbuf], fu_cv_sys_struct_utimbuf,
-    [AC_TRY_COMPILE(
-      [
-#ifdef TIME_WITH_SYS_TIME
-# include <sys/time.h>
-# include <time.h>
-#else
-# ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
-# else
-#  include <time.h>
-# endif
-#endif
-#ifdef HAVE_UTIME_H
-# include <utime.h>
-#endif
-      ],
-      [static struct utimbuf x; x.actime = x.modtime;],
-      fu_cv_sys_struct_utimbuf=yes,
-      fu_cv_sys_struct_utimbuf=no)
-    ])
-
-  if test $fu_cv_sys_struct_utimbuf = yes; then
-    AC_DEFINE_UNQUOTED(HAVE_STRUCT_UTIMBUF, 1,
-[Define if struct utimbuf is declared -- usually in <utime.h>.
-   Some systems have utime.h but don't declare the struct anywhere. ])
+dnl Copied from binutils 1.15 so probably covered by the GPL
+dnl (Plus minor modifications to find non-gcc compilers )
+dnl
+dnl Get a default for CC_FOR_BUILD to put into Makefile.
+AC_DEFUN([BFD_CC_FOR_BUILD],
+[# Put a plausible default for CC_FOR_BUILD in Makefile.
+if test -z "$CC_FOR_BUILD"; then
+  if test "x$cross_compiling" = "xno"; then
+    CC_FOR_BUILD='$(CC)'
+  else
+    AC_CHECK_PROGS(CC_FOR_BUILD, cc gcc cl)
   fi
-])
+fi
+AC_SUBST(CC_FOR_BUILD)
+# Also set EXEEXT_FOR_BUILD.
+if test "x$cross_compiling" = "xno"; then
+  EXEEXT_FOR_BUILD='$(EXEEXT)'
+else
+  AC_CACHE_CHECK([for build system executable suffix], bfd_cv_build_exeext,
+    [rm -f conftest*
+     echo 'int main () { return 0; }' > conftest.c
+     bfd_cv_build_exeext=
+     ${CC_FOR_BUILD} -o conftest conftest.c 1>&5 2>&5
+     for file in conftest.*; do
+       case $file in
+       *.c | *.o | *.obj | *.ilk | *.pdb) ;;
+       *) bfd_cv_build_exeext=`echo $file | sed -e s/conftest//` ;;
+       esac
+     done
+     rm -f conftest*
+     test x"${bfd_cv_build_exeext}" = x && bfd_cv_build_exeext=no])
+  EXEEXT_FOR_BUILD=""
+  test x"${bfd_cv_build_exeext}" != xno && EXEEXT_FOR_BUILD=${bfd_cv_build_exeex
+t}
+fi
+AC_SUBST(EXEEXT_FOR_BUILD)])dnl
