@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.39 2004/12/08 23:47:27 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.40 2004/12/09 00:53:10 rrt Exp $	*/
 
 #include "config.h"
 
@@ -422,8 +422,8 @@ static int translate_key(char *s, int nbytes)
                 }
         } else {
                 for (i = 0; i < KEYS; i++) {
-                        if (key_len[i] > 0 && key_len[i] == nbytes &&
-                            strncmp(s, key_cap[i], nbytes) == 0) {
+                        if (key_len[i] > 0 && key_len[i] <= nbytes &&
+                            strncmp(s, key_cap[i], key_len[i]) == 0) {
                                 key = key_code[i];
                                 used = key_len[i];
                                 break;
