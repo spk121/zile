@@ -20,16 +20,17 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.6 2004/09/20 14:22:08 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.7 2004/10/05 19:38:15 rrt Exp $	*/
 
 #include "config.h"
 
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <signal.h>
+#include <termcap.h>
 #include <termios.h>
-#include <term.h>
+#include <unistd.h>
+#include <sys/select.h>
 
 /* Avoid clash with zile function. */
 #undef newline
@@ -68,10 +69,6 @@ static char *kl_string, *kr_string, *ku_string, *kd_string;
 static int auto_wrap;
 static struct termios ostate, nstate;
 
-static char PC;   /* For tputs. */
-static char *BC;  /* For tgoto. */
-static char *UP;
-
 void term_move(int y, int x)
 {
         tputs(tgoto(cm_string, x, y), 1, putchar);
@@ -84,7 +81,7 @@ void term_clrtoeol(void)
 
 void term_refresh(void)
 {
-        /* Termcap has no refresh function; all updates are immediate. */
+        /* termcap has no refresh function; all updates are immediate. */
 }
 
 void term_clear(void)
@@ -133,7 +130,6 @@ void term_init(void)
         char *tcap = (char *)malloc(2048);
         char *term = getenv("TERM");
         int res;
-        char *temp;
 
         if (!term) {
                 fprintf(stderr, "No terminal type in TERM.\n");
@@ -159,18 +155,13 @@ void term_init(void)
         ce_string = tgetstr("ce", &tcap);
         so_string = tgetstr("so", &tcap);
         se_string = tgetstr("se", &tcap);
-	ZILE_REVERSE = tgetstr("mr", &tcap);
+	C_FG_WHITE_BG_BLUE = ZILE_REVERSE = tgetstr("mr", &tcap);
 	ZILE_NORMAL = tgetstr("me", &tcap);
         kl_string = tgetstr("kl", &tcap);
         kr_string = tgetstr("ku", &tcap);
         ku_string = tgetstr("kr", &tcap);
         kd_string = tgetstr("kd", &tcap);
-
-        /* Extract information that termcap functions use. */
-        temp = tgetstr("pc", &tcap);
-        PC = temp ? *temp : 0;
-        BC = tgetstr("le", &tcap);
-        UP = tgetstr("up", &tcap);
+        /* Use km, mm, mo for Meta key */
 
         /* Save terminal flags. */
         if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
@@ -189,19 +180,10 @@ void term_init(void)
                 fprintf(stderr, "Can't set terminal mode\n");
                 zile_exit(1);
         }
-        /* Provide a smaller terminal output buffer so that the type-ahead
-           detection works better (more often). */
-/*         setbuffer (stdout, &tobuf[0], TBUFSIZ); */
-        signal (SIGTSTP, SIG_DFL);
 }
-
-/* static void init_colors(void) */
-/* { */
-/* } */
 
 int term_open(void)
 {
-
 	return TRUE;
 }
 
@@ -300,83 +282,55 @@ static int translate_key(int c)
 	}
 }
 
+static int xgetkey(int mode, int arg)
+{
+        int key, ret;
+        fd_set rfds;
+
+        FD_ZERO(&rfds);
+        FD_SET(STDIN_FILENO, &rfds);
+
+        if (mode & GETKEY_DELAYED) {
+                struct timeval tv;
+                tv.tv_sec = arg / 1000;
+                tv.tv_usec = (arg % 1000) * 1000;
+/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv); */
+        } else
+/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, NULL); */
+
+	if (ret < 0)
+		return KBD_NOKEY;
+
+        key = getchar();
+
+        if ((mode & GETKEY_NONFILTERED) == 0) {
+                key = translate_key(key);
+                while (key == KBD_META) {
+                        key = translate_key(getchar());
+                        key |= KBD_META;
+                }
+        }
+
+        return key;
+}
+
 #define MAX_UNGETKEY_BUF	16
 
 static int ungetkey_buf[MAX_UNGETKEY_BUF];
 static int *ungetkey_p = ungetkey_buf;
 
-int term_getkey(void)
-{
-	int c, key;
-
-	if (ungetkey_p > ungetkey_buf)
-		return *--ungetkey_p;
-
-#ifdef KEY_RESIZE
-	for (;;) {
-		c = getchar();
-		if (c != KEY_RESIZE)
-			break;
-		resize_windows();
-	}
-#else
-	c = getchar();
-#endif
-
-/*	if (c == ERR) */
-/*		return KBD_NOKEY; */
-
-	key = translate_key(c);
-
-	while (key == KBD_META) {
-		c = getchar();
-		key = translate_key(c);
-		key |= KBD_META;
-	}
-
-	return key;
-}
-
-static int xgetkey(int mode, int arg)
-{
-	int c = 0;
-	switch (mode) {
-	case GETKEY_NONFILTERED:
-		c = getchar();
-		break;
-	case GETKEY_DELAYED:
-/*                 wtimeout(stdscr, arg); */
-		c = term_getkey();
-/*                 wtimeout(stdscr, -1); */
-		break;
-	case GETKEY_NONFILTERED|GETKEY_DELAYED:
-/*                 wtimeout(stdscr, arg); */
-		c = getchar();
-/*                 wtimeout(stdscr, -1); */
-		break;
-	}
-	return c;
-}
-
 int term_xgetkey(int mode, int arg)
 {
-	int c;
-
 	if (ungetkey_p > ungetkey_buf)
 		return *--ungetkey_p;
 
-#ifdef KEY_RESIZE
-	for (;;) {
-		c = xgetkey(mode, arg);
-		if (c != KEY_RESIZE)
-			break;
-		resize_windows();
-	}
-#else
-	c = xgetkey(mode, arg);
-#endif
+        /* TODO: signal handler resize_windows(); */
+	return xgetkey(mode, arg);
+}
 
-	return c;
+int term_getkey(void)
+{
+        return term_xgetkey(0, 0);
 }
 
 int term_ungetkey(int key)
