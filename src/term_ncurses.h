@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.1 2004/05/10 16:49:50 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.2 2004/05/20 21:48:40 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -60,9 +60,6 @@ extern void term_refresh(void);
 extern void term_clear(void);
 extern void term_addch(char c);
 extern void term_addnstr(const char *s, int len);
-extern void term_addstr(const char *s);
-extern void term_mvaddch(int y, int x, char c);
-extern void term_mvaddstr(int y, int x, char *s);
 extern void term_attrset(Font f);
 extern int term_printw(const char *fmt, ...);
 extern void term_beep(void);

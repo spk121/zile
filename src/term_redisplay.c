@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.3 2004/05/10 16:49:50 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.4 2004/05/20 21:48:40 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -311,7 +311,8 @@ static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
                              int highlight, int x, int i)
 {
 	if (x >= ZILE_COLS) {
-		term_mvaddch(line, ZILE_COLS-1, '$');
+		term_move(line, ZILE_COLS-1);
+                term_addch('$');
 	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
 			if (in_region(lineno, i, r))
@@ -396,8 +397,10 @@ static void draw_window(int topline, Window *wp)
                 draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
 #ifdef ENABLE_FULL_HSCROLL
-		if (point_start_column > 0)
-			term_mvaddch(i, 0, '$');
+		if (point_start_column > 0) {
+			term_move(i, 0);
+			term_addch('$');
+                }
 #endif
 		lp = lp->next;
 	}
@@ -530,7 +533,8 @@ static void draw_status_line(int line, Window *wp)
 
 	if (display_time) {
 		buf = make_time_str();
-		term_mvaddstr(line, wp->ewidth - strlen(buf) - 2, buf);
+		term_move(line, wp->ewidth - strlen(buf) - 2);
+		term_addnstr(buf, strlen(buf));
                 free(buf);
 	}
 

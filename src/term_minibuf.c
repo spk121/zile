@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.2 2004/05/10 16:49:50 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.3 2004/05/20 21:48:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -82,18 +82,22 @@ static void draw_minibuf_read(const char *prompt, const char *value, int prompt_
 
 	if (prompt_len + pointo + 1 < ZILE_COLS) {
 		term_addnstr(value, ZILE_COLS - prompt_len - 1);
-		term_addstr(match);
-		if ((int)strlen(value) >= ZILE_COLS - prompt_len - 1)
-			term_mvaddch(ZILE_LINES - 1, ZILE_COLS - 1, '$');
+		term_addnstr(match, strlen(match));
+		if ((int)strlen(value) >= ZILE_COLS - prompt_len - 1) {
+                        term_move(ZILE_LINES - 1, ZILE_COLS - 1);
+                        term_addch('$');
+                }
 		term_move(ZILE_LINES - 1, prompt_len + pointo);
 	} else {
 		int n;
 		term_addch('$');
 		n = pointo - pointo % (ZILE_COLS - prompt_len - 2);
 		term_addnstr(value + n, ZILE_COLS - prompt_len - 2);
-		term_addstr(match);
-		if ((int)strlen(value + n) >= ZILE_COLS - prompt_len - 2)
-			term_mvaddch(ZILE_LINES - 1, ZILE_COLS - 1, '$');
+		term_addnstr(match, strlen(match));
+		if ((int)strlen(value + n) >= ZILE_COLS - prompt_len - 2) {
+                        term_move(ZILE_LINES - 1, ZILE_COLS - 1);
+                        term_addch('$');
+                }
 		term_move(ZILE_LINES - 1, prompt_len + 1 + pointo % (ZILE_COLS - prompt_len - 2));
 	}
 }

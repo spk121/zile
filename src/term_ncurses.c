@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.1 2004/05/10 16:49:50 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.2 2004/05/20 21:48:40 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -113,21 +113,6 @@ void term_addch(char c)
 void term_addnstr(const char *s, int len)
 {
         addnstr(s, len);
-}
-
-void term_addstr(const char *s)
-{
-        addstr(s);
-}
-
-void term_mvaddch(int y, int x, char c)
-{
-        mvaddch(y, x, c);
-}
-
-void term_mvaddstr(int y, int x, char *s)
-{
-        mvaddstr(y, x, s);
 }
 
 void term_attrset(Font f)
