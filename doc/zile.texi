@@ -239,8 +239,6 @@ Backspace
 Escape
 @item DEL
 Delete
-@item SFT
-Shift
 @item CTRL
 Control
 @item META
