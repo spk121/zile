@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: astr.3,v 1.4 2003/05/25 21:23:24 rrt Exp $
+.\" $Id: astr.3,v 1.5 2003/10/24 23:32:08 ssigala Exp $
 .Dd May 17, 2003
 .Os
 .Dt ASTR 3
@@ -22,6 +22,7 @@ void   astr_clear(astr as);
 char * astr_cstr(castr as);
 size_t astr_size(castr as);
 size_t astr_maxsize(castr as);
+int    astr_isempty(castr as);
 astr   astr_fill(astr as, int c, size_t size);
 int    astr_cmp(castr s1, castr s2);
 int    astr_cmp_cstr(castr s1, const char *s2);
@@ -44,6 +45,8 @@ astr   astr_truncate(astr as, size_t size);
 astr   astr_substr(castr as, int pos, size_t size);
 astr   astr_left(castr as, size_t size);
 astr   astr_right(castr as, size_t size);
+char   astr_first_char(castr as);
+char   astr_last_char(castr as);
 int    astr_find(castr as, castr src);
 int    astr_find_cstr(castr as, const char *s);
 int    astr_find_char(castr as, int c);
@@ -134,6 +137,12 @@ The
 .Fn astr_maxsize
 function returns the current buffer size of the argument string
 .Fa as .
+.Pp
+The
+.Fn astr_isempty
+function returns a non-zero value if the argument string
+.Fa as
+is empty, zero otherwise.
 .Pp
 The
 .Fn astr_fill
@@ -250,6 +259,11 @@ characters extracted from the argument string
 .Fa as .
 .Pp
 The
+.Fn astr_first_char ,
+.Fn astr_last_char
+functions return the first and the last character in string, respectively.
+.Pp
+The
 .Fn astr_find ,
 .Fn astr_find_cstr ,
 and
@@ -338,6 +352,8 @@ This prevents defining at least the following function macros that makes
 code faster but debugging harder:
 .Fn astr_cstr ,
 .Fn astr_size ,
+.Fn astr_first_char ,
+.Fn astr_last_char ,
 .Fn astr_cmp ,
 .Fn astr_cmp_cstr ,
 .Fn astr_eq ,

@@ -1,7 +1,7 @@
-/*	$Id: ncurses_redisplay.c,v 1.4 2003/06/24 14:00:52 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.5 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -66,21 +66,26 @@ static chtype font_character;
 static chtype font_character_delimiters;
 static chtype font_comment;
 static chtype font_directive;
+static chtype font_here_document;
 static chtype font_identifier;
 static chtype font_keyword;
 static chtype font_number;
 static chtype font_other;
 static chtype font_string;
 static chtype font_string_delimiters;
-static chtype font_special;
 #if ENABLE_MAIL_MODE
 static chtype font_mail[5];
 static int quoting_char;
 #endif
 #endif /* ENABLE_NONTEXT_MODES */
-static int is_displayable[256];
 static int highlight_region;
+static chtype status_line_color;
+static int display_time;
+static char *display_time_format;
+static char *displayable_characters;
+static int show_eob_marker;
 
+static int is_displayable[256];
 static int cur_tab_width;
 static int point_start_column;
 static int point_screen_column;
@@ -129,10 +134,8 @@ static chtype strtochtype(char *s)
 static chtype get_font(char *font)
 {
 	char *s;
-
 	if ((s = get_variable(font)) == NULL)
 		return C_FG_WHITE;
-
 	return strtochtype(s);
 }
 
@@ -154,10 +157,9 @@ static chtype get_font(char *font)
  *     0x20-0x7e		(standard English-only character set)
  *     0x20-0x7e,0xa1-0xff	(typical European character set)
  */
-static void parse_displayable_chars(void)
+static void parse_displayable_chars(const char *s)
 {
 	int i, num, in_range, range_low, range_high;
-	char *s = get_variable("displayable-characters");
 
 	if (s == NULL || *s == '\0') { /* Invalid set */
 		for (i = 0; i < 256; ++i)
@@ -244,6 +246,7 @@ void ncurses_refresh_cached_variables(void)
 	font_character_delimiters = get_font("font-character-delimiters");
 	font_comment = get_font("font-comment");
 	font_directive = get_font("font-directive");
+	font_here_document = get_font("font-here-document");
 	font_identifier = get_font("font-identifier");
 	font_keyword = get_font("font-keyword");
 #if ENABLE_MAIL_MODE
@@ -257,7 +260,6 @@ void ncurses_refresh_cached_variables(void)
 	font_other = get_font("font-other");
 	font_string = get_font("font-string");
 	font_string_delimiters = get_font("font-string-delimiters");
-	font_special = get_font("font-special");
 #if ENABLE_MAIL_MODE
 	p = get_variable("mail-quoting-char");
 	if (p != NULL && strlen(p) > 0)
@@ -267,8 +269,12 @@ void ncurses_refresh_cached_variables(void)
 #endif
 #endif /* ENABLE_NONTEXT_MODES */
 	highlight_region = lookup_bool_variable("highlight-region");
-
-	parse_displayable_chars();
+	status_line_color = get_font("status-line-color");
+	display_time = lookup_bool_variable("display-time");
+	display_time_format = get_variable("display-time-format");
+	displayable_characters = get_variable("displayable-characters");
+	parse_displayable_chars(displayable_characters);
+	show_eob_marker = lookup_bool_variable("show-eob-marker");
 }
 
 static int make_char_printable(char *buf, unsigned int c)
@@ -393,17 +399,16 @@ static void draw_end_of_line(int line, windowp wp, linep lp,
 			     int lineno, struct highlight_region *d,
 			     int x, int i)
 {
-  if (x >= COLS) {
-    mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
-  }
-  else if (d->highlight) {
-    for (; x < wp->ewidth; ++i) {
-      if (in_region(wp, lp, lineno, i, d))
-	outch(' ', C_FG_WHITE_BG_BLUE, &x);
-      else
-	x++;
-    }
-  }
+	if (x >= COLS) {
+		mvaddch(line, COLS-1, '>' | C_FG_GREEN | A_BOLD);
+	} else if (d->highlight) {
+		for (; x < wp->ewidth; ++i) {
+			if (in_region(wp, lp, lineno, i, d))
+				outch(' ', C_FG_WHITE_BG_BLUE, &x);
+			else
+				x++;
+		}
+	}
 }
   
 static void draw_line(int line, int startcol, windowp wp, linep lp,
@@ -584,103 +589,90 @@ static void draw_line_shell(int line, int startcol, windowp wp, linep lp,
 			    int lineno, struct highlight_region *d,
 			    int *lastanchor)
 {
-  int i, x, c;
+	int i, x, c;
 
-  move(line, 0);
-  for (x = i = 0; i < lp->size; ++i) {
-    c = lp->text[i];
+	move(line, 0);
+	for (x = i = 0; i < lp->size; ++i) {
+		c = lp->text[i];
 
-    /* String handling. */
-    if (lp->anchors[i] == ANCHOR_END_STRING) {
-      OUTCH(c, font_string_delimiters);
-      *lastanchor = ANCHOR_NULL;
-    }
-    else if (lp->anchors[i] == ANCHOR_BEGIN_STRING) {
-      OUTCH(c, font_string_delimiters);
-      *lastanchor = ANCHOR_BEGIN_STRING;
-    }
-    else if (*lastanchor == ANCHOR_BEGIN_STRING) {
-      OUTCH(c, font_string);
-    }
-    /* special "<<EOF" handling */
-    else if (lp->anchors[i] == ANCHOR_END_SPECIAL) {
-      OUTCH(c, font_special);
-      *lastanchor = ANCHOR_NULL;
-    }
-    else if (lp->anchors[i] == ANCHOR_BEGIN_SPECIAL) {
-      OUTCH(c, font_special);
-      *lastanchor = ANCHOR_BEGIN_SPECIAL;
-    }
-    else if (*lastanchor == ANCHOR_BEGIN_SPECIAL) {
-      OUTCH(c, font_special);
-    }
-    /* Comment. */
-    else if (c == '#') {
-      if ((i == 0) || (lp->text[i-1] != '$')) {
-	for (; i < lp->size; ++i)
-	  OUTCH(lp->text[i], font_comment);
-      }
-      else
-	OUTCH(c, font_identifier);
-    }
-    /* Identifier name. */
-    else if ((c == '$') ||
-	     ((x == 0) && (my_strnchr(lp->text, lp->size, '=')))) {
-      int first, jump = FALSE;
+		/* ``Here documents'' "<<EOF" handling. */
+		if (lp->anchors[i] == ANCHOR_END_HEREDOC) {
+			OUTCH(c, font_here_document);
+			*lastanchor = ANCHOR_NULL;
+		} else if (lp->anchors[i] == ANCHOR_BEGIN_HEREDOC) {
+			OUTCH(c, font_here_document);
+			*lastanchor = ANCHOR_BEGIN_HEREDOC;
+		} else if (*lastanchor == ANCHOR_BEGIN_HEREDOC) {
+			OUTCH(c, font_here_document);
+		}
+		/* String handling. */
+		else if (lp->anchors[i] == ANCHOR_END_STRING) {
+			OUTCH(c, font_string_delimiters);
+			*lastanchor = ANCHOR_NULL;
+		} else if (lp->anchors[i] == ANCHOR_BEGIN_STRING) {
+			OUTCH(c, font_string_delimiters);
+			*lastanchor = ANCHOR_BEGIN_STRING;
+		} else if (*lastanchor == ANCHOR_BEGIN_STRING) {
+			OUTCH(c, font_string);
+		} else if (c == '#') {
+			/* Comment. */
+			if ((i == 0) || (lp->text[i-1] != '$')) {
+				for (; i < lp->size; ++i)
+					OUTCH(lp->text[i], font_comment);
+			} else
+				OUTCH(c, font_identifier);
+		} else if ((c == '$') ||
+			 ((x == 0) && (my_strnchr(lp->text, lp->size, '=')))) {
+			/* Identifier name. */
+			int first, gotid = TRUE;
 
-      /* $identifier */
-      if (c == '$') {
-	OUTCH(c, font_other);
-	if (++i < lp->size) {
-	  c = lp->text[i];
-	  if (c == '$') {
-	    OUTCH(c, font_identifier);
-	    jump = TRUE;
-	  }
+			/* $identifier */
+			if (c == '$') {
+				OUTCH(c, font_other);
+				if (++i < lp->size) {
+					c = lp->text[i];
+					if (c == '$') {
+						/* $$ special variable */
+						OUTCH(c, font_identifier);
+						gotid = FALSE;
+					}
+				}
+			} else {
+				/* Assignment: identifier=... */
+				int j, oldc = c;
+				for (first = TRUE, j = i; j < lp->size; ++j) {
+					c = lp->text[j];
+					if (c == '_' || isalpha(c) ||
+					    (!first && isdigit(c))) {
+						first = FALSE;
+					} else if (c != '=') {
+						OUTCH(oldc, font_other);
+						gotid = FALSE;
+						break;
+					} else
+						break;
+				}
+			}
+
+			if (gotid) {
+				for (first = TRUE; i < lp->size; ++i) {
+					c = lp->text[i];
+					if (c == '_' || isalpha(c) ||
+					    (!first && isdigit(c))) {
+						OUTCH(c, font_identifier);
+						first = FALSE;
+					} else {
+						--i;
+						break;
+					}
+				}
+			}
+		} else {
+			OUTCH(c, font_other);
+		}
 	}
-      }
-      /* identifier=... */
-      else {
-	int j, oldc=c;
-	for (first=TRUE, j=i; j<lp->size; ++j) {
-	  c = lp->text[j];
-	  if ((c == '_') ||
-	      (isalpha(c)) ||
-	      (!first && isdigit(c))) {
-	    first = FALSE;
-	  }
-	  else if (c != '=') {
-	    OUTCH(oldc, font_other);
-	    jump = TRUE;
-	    break;
-	  }
-	  else
-	    break;
-	}
-      }
 
-      if (!jump) {
-	for (first=TRUE; i<lp->size; ++i) {
-	  c = lp->text[i];
-	  if ((c == '_') ||
-	      (isalpha(c)) ||
-	      (!first && isdigit(c))) {
-	    OUTCH(c, font_identifier);
-	    first = FALSE;
-	  }
-	  else {
-	    i--;
-	    break;
-	  }
-	}
-      }
-    }
-    else {
-      OUTCH(c, font_other);
-    }
-  }
-
-  draw_end_of_line(line, wp, lp, lineno, d, x, i);
+	draw_end_of_line(line, wp, lp, lineno, d, x, i);
 }
 #endif /* ENABLE_SHELL_MODE */
 
@@ -693,7 +685,7 @@ static void draw_line_mail(int line, int startcol, windowp wp, linep lp,
 			    int lineno, struct highlight_region *d,
 			    int *lastanchor)
 {
-	int i, x, c, level;
+	int i, x, level;
 
 	move(line, 0);
 	for (i = level = 0; i < lp->size; ++i) {
@@ -824,8 +816,7 @@ static void draw_window(int topline, windowp wp)
 		 * and the marker is on the current page.
 		 */
 		if (lp->next == wp->bp->limitp
-		    && !(wp->bp->flags & BFLAG_NOEOB)
-		    && lookup_bool_variable("show-eob-marker")) {
+		    && !(wp->bp->flags & BFLAG_NOEOB) && show_eob_marker) {
 			static chtype eob_str[] = {
 				'['|C_FG_CYAN|A_BOLD,
 				'E'|C_FG_CYAN,
@@ -917,15 +908,13 @@ static char *make_screen_pos(windowp wp)
  */
 static char *make_time_str(char *buf)
 {
-	char *fmt;
+	const char *fmt;
 	time_t t;
-
-	if ((fmt = get_variable("display-time-format")) != NULL) {
-		time(&t);
-		strftime(buf, 80, fmt, localtime(&t)); 
-		return buf;
-	} else
-		return NULL;
+	if ((fmt = display_time_format) == NULL)
+		fmt = "%I:%M:%p";
+	time(&t);
+	strftime(buf, 80, fmt, localtime(&t)); 
+	return buf;
 }
 
 static void draw_status_line(int line, windowp wp)
@@ -933,7 +922,7 @@ static void draw_status_line(int line, windowp wp)
 	int i;
 	char *mode;
 
-	attrset(A_REVERSE | get_font("status-line-color"));
+	attrset(A_REVERSE | status_line_color);
 
 	move(line, 0);
 	for (i = 0; i < wp->ewidth; ++i)
@@ -985,10 +974,10 @@ static void draw_status_line(int line, windowp wp)
 	       wp->pointn+1, wp->bp->num_lines+1, get_text_goalc(wp)+1,
 	       make_screen_pos(wp));
 
-	if (lookup_bool_variable("display-time")) {
+	if (display_time) {
 		char buf[64];
-		if (make_time_str(buf) != NULL)
-			mvaddstr(line, wp->ewidth - strlen(buf) - 2, buf);
+		make_time_str(buf);
+		mvaddstr(line, wp->ewidth - strlen(buf) - 2, buf);
 	}
 
 	attrset(0);

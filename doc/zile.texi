@@ -16,7 +16,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle Edition 1.7 for Zile version 1.7
-@subtitle May 2002
+@subtitle Oct 2003
 @author Sandro Sigala
 
 @dircategory Text editors
@@ -26,7 +26,7 @@
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1997-2002 Sandro Sigala @email{sandro@@sigala.it}.
+Copyright @copyright{} 1997-2003 Sandro Sigala @email{sandro@@sigala.it}.
 @end titlepage
 
 @c ---------------------------------------------------------------------------
@@ -414,6 +414,8 @@ Kill the current buffer and find a file for editing.  Bound to @code{find-altern
 Write buffer to a file.  Bound to @code{write-file}.
 @item C-x C-x
 Exchange point and mark.  Bound to @code{exchange-point-and-mark}.
+@item M-@key{BS}
+Kill word backward.  Bound to @code{backward-kill-word}.
 @item M-!
 Execute an external command in inferior shell.  Bound to @code{shell-command}.
 @item M-|
@@ -426,6 +428,8 @@ Go to the end of buffer.  Bound to @code{end-of-buffer}.
 Move backward until encountering the end of a word.  Bound to @code{backward-word}.
 @item M-c
 Capitalize the following word.  Bound to @code{capitalize-word}.
+@item M-d
+Kill word.  Bound to @code{kill-word}.
 @item M-f
 Move point forward one word.  Bound to @code{forward-word}.
 @item M-g
@@ -475,6 +479,9 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 @item backward-delete-char
 Delete the previous character.
 Join lines if the character is a newline.
+@item backward-kill-word
+Kill characters backward until encountering the end of a word.
+With argument, do this that many times.
 @item backward-word
 Move backward until encountering the end of a word (forward if the
 argument is negative).
@@ -612,6 +619,9 @@ you can use the killing commands to copy text from a read-only buffer.
 If the previous command was also a kill command,
 the text killed this time appends to the text killed last time
 to make one entry in the kill ring.
+@item kill-word
+Kill characters forward until encountering the end of a word.
+With argument, do this that many times.
 @item list-bindings
 List defined bindings.
 @item list-buffers
@@ -700,6 +710,7 @@ that value, otherwise with the current column value.
 Set mark at where point is.
 @item set-variable
 Set a variable value to the user specified value.
+@item sh-mode
 @item shell-script-mode
 Turn on the @i{Shell-script Mode} for editing shell scripts.
 @item shell-command
@@ -969,6 +980,10 @@ Default value is @samp{red}.
 @item font-directive
 The color used in @i{Font Lock Mode} for preprocessor directives.
 Default value is @samp{blue}.
+@item font-here-document
+The color used in @i{Font Lock} and @i{Shell-script} modes for
+@i{here-document} (e.g.: @samp{<<EOF}) blocks.
+Default value is @samp{green}.
 @item font-identifier
 The color used in @i{Font Lock Mode} for identifiers.
 Default value is @samp{white}.

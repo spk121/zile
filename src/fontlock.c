@@ -1,7 +1,7 @@
-/*	$Id: fontlock.c,v 1.4 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: fontlock.c,v 1.5 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -134,50 +134,50 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
 #endif /* ENABLE_CLIKE_MODES */
 
 #if ENABLE_SHELL_MODE
-static char *special_string = NULL;
+static char *heredoc_string = NULL;
 
-static char *make_special_string (linep lp, char *sp, char *ap)
+static int make_heredoc_string(linep lp, char *sp, char *ap)
 {
-  char *start, *end;
-  int chr;
+	char *start, *end;
 
-  if (special_string) {
-    free (special_string);
-    special_string = NULL;
-  }
-
-  for (; sp < lp->text + lp->size; sp++) {
-    if (*sp != ' ') {
-      start = sp;
-
-      for (; sp < lp->text + lp->size; sp++) {
-	if (!(((*sp >= 'a') && (*sp <= 'z')) ||
-	      ((*sp >= 'A') && (*sp <= 'Z')) ||
-	      ((*sp == '_'))))
-	  return NULL;
-
-	if (ap) {
-	  if (sp == start)
-	    *ap++ = ANCHOR_BEGIN_SPECIAL;
-	  else
-	    *ap++ = ANCHOR_NULL;
+	if (heredoc_string) {
+		free(heredoc_string);
+		heredoc_string = NULL;
 	}
-      }
 
-      end = lp->text + lp->size;
-      chr = *end;
-      *end = 0;
-      special_string = xstrdup (start);
-      *end = chr;
+	for (; sp < lp->text + lp->size; ++sp) {
+		if (isspace(*sp)) {
+			if (ap)
+				*ap++ = ANCHOR_NULL;
+			continue;
+		}
 
-      return special_string;
-    }
+		start = end = sp;
+		for (; sp < lp->text + lp->size; ++sp) {
+			if (!isalpha(*sp) && *sp != '_') {
+				if (start == end)
+					return FALSE;
+				break;
+			}
 
-    if (ap)
-      *ap++ = ANCHOR_NULL;
-  }
+			if (ap) {
+				if (sp == start)
+					*ap++ = ANCHOR_BEGIN_HEREDOC;
+				else
+					*ap++ = ANCHOR_NULL;
+			}
+			end = sp;
+		}
 
-  return NULL;
+		heredoc_string = zmalloc(end - start + 2);
+		strncpy(heredoc_string, start, end - start + 1);
+		heredoc_string[end - start + 1] = '\0';
+		ZTRACE(("special string = `%s'\n", heredoc_string));
+
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 /*
@@ -186,120 +186,107 @@ static char *make_special_string (linep lp, char *sp, char *ap)
  */
 static void shell_set_anchors(linep lp, int *lastanchor)
 {
-  char *sp, *ap;
-  static int laststrchar;
+	char *sp, *ap;
+	static int laststrchar;
 
-  if (lp->size == 0) {
-    lp->anchors = NULL;
-    return;
-  }
+	if (lp->size == 0) {
+		lp->anchors = NULL;
+		return;
+	}
 
-  ap = lp->anchors = (char *)zmalloc(lp->size);
+	ap = lp->anchors = (char *)zmalloc(lp->size);
 
-  for (sp = lp->text; sp < lp->text + lp->size; sp++) {
-    if (*lastanchor == ANCHOR_BEGIN_STRING) {
-      /*
-       * We are in the middle of a string, so parse for
-       * finding the termination sequence.
-       */
-      if (*sp == '\\' && sp < lp->text + lp->size - 1) {
-	*ap++ = ANCHOR_NULL;
-	*ap++ = ANCHOR_NULL;
-	++sp;
-      }
-      else if (*sp == laststrchar) {
-	/*
-	 * Found a string termination.  Put an anchor
-	 * to signal this.
-	 */
-	*ap++ = ANCHOR_END_STRING;
-	*lastanchor = ANCHOR_NULL;
-      }
-      else {
-	*ap++ = ANCHOR_NULL;
-      }
-    }
-    /* special chunks "<< EOF \n ... \n " */
-    else if (*lastanchor == ANCHOR_BEGIN_SPECIAL) {
-      if ((sp == lp->text) &&
-	  (special_string) &&
-	  (*sp == *special_string) &&
-	  (lp->size == (int)strlen (special_string)) &&
-	  (strncmp (sp, special_string, lp->size) == 0)) {
-	int i, l = strlen (special_string);
-
-	for (i=0; i<l-1; i++)
-	  *ap++ = ANCHOR_NULL;
-
-	sp += l;
-	*ap++ = ANCHOR_END_SPECIAL;
-	*lastanchor = ANCHOR_NULL;
-      }
-      else {
-	*ap++ = ANCHOR_NULL;
-      }
-    }
-    /* string stuff */
-    else if (*sp == '"' || *sp == '`' || *sp == '\'') {
-      /* found just a string character (\', \" or \`) */
-      if ((sp > lp->text) && (*(sp-1) == '\\')) {
-	laststrchar = *sp;
-	ap--;
-	*ap++ = ANCHOR_BEGIN_STRING;
-	*ap++ = ANCHOR_END_STRING;
-	*lastanchor = ANCHOR_NULL;
-      }
-      else {
-	/*
-	 * Found a string beginning sequence.  Put an anchor to
-	 * signal this.
-	 */
-	laststrchar = *sp;
-	*ap++ = ANCHOR_BEGIN_STRING;
-	*lastanchor = ANCHOR_BEGIN_STRING;
-      }
-    }
-    else if ((*sp == '<') && (sp > lp->text) && (*(sp-1) == '<')) {
-      if (make_special_string (lp, sp+1, ap+1)) {
-	*lastanchor = ANCHOR_BEGIN_SPECIAL;
-	break;
-      }
-      else
-	*ap++ = ANCHOR_NULL;
-    }
-    /* Comment; ignore to end of line. */
-    else if ((*sp == '#') && ((sp == lp->text) || (*(sp-1) != '$'))) {
-      for (; sp < lp->text + lp->size; sp++)
-	*ap++ = ANCHOR_NULL;
-    }
-    else
-      *ap++ = ANCHOR_NULL;
-  }
+	for (sp = lp->text; sp < lp->text + lp->size; sp++) {
+		if (*lastanchor == ANCHOR_BEGIN_STRING) {
+			/*
+			 * We are in the middle of a string, so parse for
+			 * finding the termination sequence.
+			 */
+			if (*sp == '\\' && sp < lp->text + lp->size - 1) {
+				*ap++ = ANCHOR_NULL;
+				*ap++ = ANCHOR_NULL;
+				++sp;
+			} else if (*sp == laststrchar) {
+				/*
+				 * Found a string termination.  Put an anchor
+				 * to signal this.
+				 */
+				*ap++ = ANCHOR_END_STRING;
+				*lastanchor = ANCHOR_NULL;
+			} else {
+				*ap++ = ANCHOR_NULL;
+			}
+		} else if (*lastanchor == ANCHOR_BEGIN_HEREDOC) {
+			/* Special chunks "<< EOF \n ... \n " */
+			if ((sp == lp->text) && heredoc_string &&
+			    (*sp == *heredoc_string) &&
+			    (lp->size == (int)strlen(heredoc_string)) &&
+			    (strncmp(sp, heredoc_string, lp->size) == 0)) {
+				int i, l = strlen(heredoc_string);
+				for (i = 0; i < l - 1; ++i)
+					*ap++ = ANCHOR_NULL;
+				sp += l;
+				*ap++ = ANCHOR_END_HEREDOC;
+				*lastanchor = ANCHOR_NULL;
+			} else {
+				*ap++ = ANCHOR_NULL;
+			}
+		} else if (*sp == '"' || *sp == '`' || *sp == '\'') {
+			/* Found just a string character (\', \" or \`) */
+			if ((sp > lp->text) && (*(sp-1) == '\\')) {
+				laststrchar = *sp;
+				ap--;
+				*ap++ = ANCHOR_BEGIN_STRING;
+				*ap++ = ANCHOR_END_STRING;
+				*lastanchor = ANCHOR_NULL;
+			} else {
+				/*
+				 * Found a string beginning sequence.
+				 * Put an anchor to signal this.
+				 */
+				laststrchar = *sp;
+				*ap++ = ANCHOR_BEGIN_STRING;
+				*lastanchor = ANCHOR_BEGIN_STRING;
+			}
+		} else if ((*sp == '<') && (sp > lp->text) && (*(sp-1) == '<')) {
+			if (make_heredoc_string(lp, sp+1, ap+1)) {
+				*lastanchor = ANCHOR_BEGIN_HEREDOC;
+				break;
+			} else
+				*ap++ = ANCHOR_NULL;
+		}
+		/* Comment; ignore to end of line. */
+		else if ((*sp == '#') && ((sp == lp->text) || (*(sp-1) != '$'))) {
+			for (; sp < lp->text + lp->size; sp++)
+				*ap++ = ANCHOR_NULL;
+		} else
+			*ap++ = ANCHOR_NULL;
+	}
 }
 #endif /* ENABLE_SHELL_MODE */
 
 static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
 {
-  if (lp->anchors) {
-    free (lp->anchors);
-    lp->anchors = NULL;
-  }
+	if (lp->anchors) {
+		free(lp->anchors);
+		lp->anchors = NULL;
+	}
 
-  switch (bp->mode) {
-  case BMODE_C:
-  case BMODE_CPP:
-  case BMODE_CSHARP:
-  case BMODE_JAVA:
+	switch (bp->mode) {
+	case BMODE_C:
+	case BMODE_CPP:
+	case BMODE_CSHARP:
+	case BMODE_JAVA:
 #if ENABLE_CLIKE_MODES
-    cpp_set_anchors(lp, lastanchor);
+		cpp_set_anchors(lp, lastanchor);
 #endif
-    break;
-  case BMODE_SHELL:
+		break;
+	case BMODE_SHELL:
 #if ENABLE_SHELL_MODE
-    shell_set_anchors(lp, lastanchor);
+		shell_set_anchors(lp, lastanchor);
 #endif
-    break;
-  }
+		break;
+	}
 }
 
 /*
@@ -308,10 +295,10 @@ static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
  */
 void font_lock_reset_anchors(bufferp bp, linep lp)
 {
-  int lastanchor;
+	int lastanchor;
 
-  lastanchor = find_last_anchor (bp, lp->prev);
-  line_set_anchors (bp, lp, &lastanchor);
+	lastanchor = find_last_anchor(bp, lp->prev);
+	line_set_anchors(bp, lp, &lastanchor);
 }
 
 /*
@@ -319,22 +306,21 @@ void font_lock_reset_anchors(bufferp bp, linep lp)
  */
 int find_last_anchor(bufferp bp, linep lp)
 {
-  char *p;
+	char *p;
 
-  for (; lp != bp->limitp; lp = lp->prev) {
-    if (lp->anchors == NULL)
-      continue;
-    if (lp->size > 0)
-      for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
-	if (*p != ANCHOR_NULL) {
-	  if ((bp->mode == BMODE_SHELL) && (*p == ANCHOR_BEGIN_SPECIAL))
-	    make_special_string (lp, lp->text + (p - lp->anchors), NULL);
-
-	  return *p;
+	for (; lp != bp->limitp; lp = lp->prev) {
+		if (lp->anchors == NULL || lp->size == 0)
+			continue;
+		for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
+			if (*p != ANCHOR_NULL) {
+				if ((bp->mode == BMODE_SHELL) && (*p == ANCHOR_BEGIN_HEREDOC))
+					make_heredoc_string(lp, lp->text + (p - lp->anchors), NULL);
+				
+				return *p;
+			}
 	}
-  }
 
-  return ANCHOR_NULL;
+	return ANCHOR_NULL;
 }
 
 /*

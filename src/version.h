@@ -1,1 +1,1 @@
-#define ZILE_VERSION "1.7 BETA 1 \"2003\""
+#define ZILE_VERSION "1.7 BETA 2"

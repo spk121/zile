@@ -1,7 +1,7 @@
-/*	$Id: glue.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: glue.c,v 1.4 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -281,7 +281,6 @@ void *zrealloc(void *ptr, size_t size)
 {
 	void *newptr;
 
-	assert(ptr != NULL);
 	assert(size > 0);
 
 	if ((newptr = realloc(ptr, size)) == NULL) {
@@ -299,3 +298,21 @@ char *zstrdup(const char *s)
 {
 	return strcpy(zmalloc(strlen(s) + 1), s);
 }
+
+#ifdef DEBUG
+/*
+ * Append a debug message to `zile.dbg'.
+ */
+void ztrace(const char *fmt, ...)
+{
+	static FILE *dbgfile = NULL;
+	va_list ap;
+	if (dbgfile == NULL) {
+		if ((dbgfile = fopen("zile.dbg", "w")) == NULL)
+			return;
+	}
+	va_start(ap, fmt);
+	vfprintf(dbgfile, fmt, ap);
+	va_end(ap);
+}
+#endif

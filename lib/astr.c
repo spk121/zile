@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.7 2003/06/24 14:00:20 rrt Exp $	*/
+/*	$Id: astr.c,v 1.8 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -58,6 +58,12 @@ void astr_resize(astr as, size_t reqsize)
 		as->maxsize = reqsize + ALLOCATION_CHUNK_SIZE;
 		as->text = (char *)xrealloc(as->text, as->maxsize + 1);
         }
+}
+
+int (astr_isempty)(castr as)
+{
+	assert(as != NULL);
+	return as->size == 0;
 }
 
 astr astr_copy(castr as)
@@ -333,6 +339,20 @@ astr astr_right(castr as, size_t size)
 	if (size > as->size)
 		size = as->size;
 	return astr_substr(as, as->size - size, size);
+}
+
+char (astr_first_char)(castr as)
+{
+	assert(as != NULL);
+	assert(as->size != 0);
+	return as->text[0];
+}
+
+char (astr_last_char)(castr as)
+{
+	assert(as != NULL);
+	assert(as->size != 0);
+	return as->text[as->size - 1];
 }
 
 int astr_find(castr as, castr src)

@@ -1,6 +1,6 @@
-Changes between Zile 1.6.1 - Zile 1.7 BETA 1
+Changes between Zile 1.6.1 - Zile 1.7 BETA 2
 
-Note: 1.7 BETA 1 was produced from 1.6.1, not 1.6.2, but all the same
+Note: 1.7 BETA 2 was produced from 1.6.1, not 1.6.2, but all the same
 fixes were applied.
 
 * Changed configure script so no syntax colouring modes are built by
@@ -34,15 +34,16 @@ fixes were applied.
     * implemented `kill-word', `backward-kill-word';
     * fixed bug in undo/redo;
     * fixed bug in highlight;
-    * macros support "isearch" facility;
+    * macros support `isearch' facility;
     * shell mode supports highlight for "cat<<EOF\n...\nEOF" stuff.  With
-      this, added a new variable: "font-special";
+      this, added a new variable: `font-here-document';
     * better shell mode highlight: $identifier, and fixed the \'string\'
       problem;
     * optimized the selection highlight color;
-    * added "sh-mode" (same as "shell-script-mode").
-* Many other bug fixes (including some excellent patches from Nicolas
-  Duboc).
+    * added alias `sh-mode' to `shell-script-mode'.
+* Integrated some excellent patches from Nicolas Duboc.
+* Speed-up improvements.
+* Many many other bug fixes.
 
 Changes between Zile 1.6 - Zile 1.6.1
 

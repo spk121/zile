@@ -1,7 +1,7 @@
-/*	$Id: basic.c,v 1.3 2003/05/06 22:28:41 rrt Exp $	*/
+/*	$Id: basic.c,v 1.4 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -208,8 +208,7 @@ Position 1 is the beginning of the buffer.
 +*/
 {
 	char *ms;
-	int to_char;
-	size_t count;
+	int to_char, count;
 
 	do {
 		if ((ms = minibuf_read("Goto char: ", "")) == NULL)

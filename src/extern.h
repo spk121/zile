@@ -45,7 +45,7 @@ extern int	is_regular_file(const char *filename);
 extern int	expand_path(const char *path, const char *cwdir, astr dir,
 			    astr fname);
 extern astr 	compact_path(astr buf, const char *path);
-extern astr 	get_current_dir(astr buf);
+extern astr 	get_current_dir(astr buf, int interactive);
 extern void	open_file(char *path, int lineno);
 extern void	read_from_disk(const char *filename);
 extern int	find_file(const char *filename);
@@ -96,6 +96,12 @@ extern int	calculate_mark_lineno(windowp wp);
 extern void *	zmalloc(size_t size);
 extern void *	zrealloc(void *ptr, size_t size);
 extern char *	zstrdup(const char *s);
+#ifdef DEBUG
+extern void	ztrace(const char *fmt, ...);
+#define ZTRACE(arg)	ztrace arg
+#else
+#define ZTRACE(arg)	(void)0
+#endif
 
 /* keys.c ----------------------------------------------------------------- */
 extern char *	keytostr(char *buf, int key, int *len);
@@ -200,3 +206,11 @@ extern windowp	popup_window(void);
 #undef X1
 #undef X2
 #undef X3
+
+/*--------------------------------------------------------------------------
+ * Missing functions.
+ *--------------------------------------------------------------------------*/
+
+#ifndef HAVE_VASPRINTF
+int vasprintf(char **ptr, const char *fmt, va_list vargs);
+#endif

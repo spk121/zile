@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: alist.3,v 1.2 2003/05/06 22:28:41 rrt Exp $
+.\" $Id: alist.3,v 1.3 2003/10/24 23:32:08 ssigala Exp $
 .Dd February 12, 2001
 .Os
 .Dt ALIST 3
@@ -72,9 +72,9 @@ function returns the number of items contained in the argument list
 .Pp
 The
 .Fn alist_isempty
-function returns a zero value if the argument list
+function returns a non-zero value if the argument list
 .Fa al
-is empty, non-zero otherwise.
+is empty, zero otherwise.
 .Pp
 The
 .Fn alist_first

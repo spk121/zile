@@ -1,7 +1,7 @@
-/*	$Id: funcs.c,v 1.5 2003/06/24 14:00:52 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.6 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -704,13 +704,10 @@ Move point to the first non-whitespace character on this line.
 	return TRUE;
 }
 
-#if 0
 DEFUN("transpose-chars", transpose_chars)
 /*+
 Interchange characters around point, moving forward one character.
-With prefix arg ARG, effect is to take character before point
-and drag it forward past ARG other characters (backward if ARG negative).
-If no argument and at end of line, the previous two chars are exchanged.
+If at end of line, the previous two chars are exchanged.
 +*/
 {
 }
@@ -718,10 +715,6 @@ If no argument and at end of line, the previous two chars are exchanged.
 DEFUN("transpose-words", transpose_words)
 /*+
 Interchange words around point, leaving point at end of them.
-With prefix arg ARG, effect is to take word before or around point
-and drag it forward past ARG other words (backward if ARG negative).
-If ARG is zero, the words around or after point and around or after mark
-are interchanged.
 +*/
 {
 }
@@ -729,8 +722,6 @@ are interchanged.
 DEFUN("transpose-sexps", transpose_sexps)
 /*+
 Like M-t but applies to sexps.
-Does not work on a sexp that point is in the middle of
-if it is a list or string.
 +*/
 {
 }
@@ -743,7 +734,6 @@ With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
 }
-#endif
 
 #define ISWORDCHAR(c)	(isalnum(c) || c == '$')
 
@@ -851,8 +841,7 @@ Move backward to start of sentence.  With argument N, do it N times.
 
 DEFUN("forward-sentence", forward_sentence)
 /*+
-Move forward to next sentence end.  With argument, repeat.
-With negative argument, move backward repeatedly to sentence beginning.
+Move forward to next sentence end.  With argument N, do it N times.
 +*/
 {
         return FALSE;
@@ -860,9 +849,7 @@ With negative argument, move backward repeatedly to sentence beginning.
 
 DEFUN("kill-sentence", kill_sentence)
 /*+
-Kill from point to end of sentence.
-With argument, repeat; negative argument -N means kill back to Nth start
-of sentence.
+Kill from point to end of sentence.  With argument N, do it N times.
 +*/
 {
         return FALSE;
@@ -870,9 +857,7 @@ of sentence.
 
 DEFUN("backward-kill-sentence", backward_kill_sentence)
 /*+
-Kill back from point to start of sentence.
-With argument N, do it N times; negative argument -N means kill forward
-to Nth end of sentence.
+Kill back from point to start of sentence.  With argument N, do it N times.
 +*/
 {
         return FALSE;
@@ -880,9 +865,7 @@ to Nth end of sentence.
 
 DEFUN("backward-paragraph", backward_paragraph)
 /*+
-Move backward to start of paragraph.
-With argument N, do it N times; negative argument -N means move forward
-N paragraphs.
+Move backward to start of paragraph.  With argument N, do it N times.
 +*/
 {
         return FALSE;
@@ -890,9 +873,7 @@ N paragraphs.
 
 DEFUN("forward-paragraph", forward_paragraph)
 /*+
-Move forward to end of paragraph.
-With argument N, do it N times; negative argument -N means move backward
-N paragraphs.
+Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
         return FALSE;
@@ -1182,7 +1163,7 @@ it as the contents of the region.
 		char *p;
 		int fd;
 
-		fd = mkstemp (tempfile);
+		fd = mkstemp(tempfile);
 		if (fd == -1) {
 			minibuf_error("Cannot open temporary file");
 			return FALSE;

@@ -1,7 +1,3 @@
-Confrontare bindings nella ducumentatione con `C-h l b'.
-
-------------------------------------------------------------------------------
-
 HIGH PRIORITY
 
 * Functions/bindings to implement:
@@ -22,11 +18,12 @@ X1("transpose-chars", transpose_chars,			"C-t")
 X1("transpose-words", transpose_words,			"M-t")
 X1("transpose-sexps", transpose_sexps,			"C-M-t")
 X1("transpose-lines", transpose_lines,			"C-x C-t")
-X1("kill-rectangle", kill_rectangle,			"C-xrk")
 
 ------------------------------------------------------------------------------
 
 LOW PRIORITY
+
+X1("kill-rectangle", kill_rectangle,			"C-xrk")
 
 * Make query & replace case friendly, e.g., if you specify to replace
   `foo' with `bar', the string

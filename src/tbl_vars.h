@@ -1,7 +1,7 @@
-/*	$Id: tbl_vars.h,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -146,6 +146,9 @@ X("font-comment",			"c", "red", "\
 The color used in Font Lock Mode for comments.")
 X("font-directive",			"c", "blue", "\
 The color used in Font Lock Mode for preprocessor directives.")
+X("font-here-document",			"c", "green", "\
+The color used in Font Lock/Shell-script modes for here-document\n\
+(e.g.: `<<EOF') blocks.")
 X("font-identifier",			"c", "white", "\
 The color used in Font Lock Mode for identifiers.")
 X("font-keyword",			"c", "magenta", "\

@@ -1,4 +1,4 @@
-/*	$Id: agetcwd.h,v 1.1 2003/05/19 21:51:54 rrt Exp $	*/
+/*	$Id: agetcwd.h,v 1.2 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
  * Copyright (c) 2003 Reuben Thomas.  All rights reserved.
@@ -27,6 +27,8 @@
 #ifndef AGETCWD_H
 #define AGETCWD_H
 
-extern char *	agetcwd(void);
+#include "astr.h"
+
+extern astr	agetcwd(astr dest);
 
 #endif /* !AGETCWD_H */

@@ -1,7 +1,7 @@
-/*	$Id: tbl_funcs.h,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -152,12 +152,10 @@ X0("tabify", tabify)
 X1("tab-to-tab-stop", tab_to_tab_stop,			"\\TAB")
 X0("text-mode", text_mode)
 X1("toggle-read-only", toggle_read_only,		"\\C-x\\C-q")
-#if 0
 X1("transpose-chars", transpose_chars,			"\\C-t")
 X1("transpose-lines", transpose_lines,			"\\C-x\\C-t")
 X1("transpose-sexps", transpose_sexps,			"\\C-\\M-t")
 X1("transpose-words", transpose_words,			"\\M-t")
-#endif
 X3("undo", undo,					"\\C-xu", "\\C-_", "\\F4")
 X1("universal-argument", universal_argument,		"\\C-u")
 X0("untabify", untabify)

@@ -1,7 +1,7 @@
-/*	$Id: zile.h,v 1.10 2003/05/25 21:41:39 rrt Exp $	*/
+/*	$Id: zile.h,v 1.11 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,7 +27,7 @@
 #ifndef ZILE_H
 #define ZILE_H
 
-#include <alist.h>
+#include "alist.h"
 #include "astr.h"
 
 #undef TRUE
@@ -41,7 +41,7 @@
 #define max(a, b)			((a) > (b) ? (a) : (b))
 
 #ifndef PATH_MAX
-#define PATH_MAX _POSIX_PATH_MAX
+#define PATH_MAX 			_POSIX_PATH_MAX
 #endif
 
 /*--------------------------------------------------------------------------
@@ -71,8 +71,8 @@ typedef int (*funcp)(int uniarg);
 #define ANCHOR_END_COMMENT		2
 #define ANCHOR_BEGIN_STRING		3
 #define ANCHOR_END_STRING		4
-#define ANCHOR_BEGIN_SPECIAL		5
-#define ANCHOR_END_SPECIAL		6
+#define ANCHOR_BEGIN_HEREDOC		5
+#define ANCHOR_END_HEREDOC		6
 
 struct line {
 	/* The previous line and next line pointers. */
@@ -392,9 +392,16 @@ struct terminal {
  * Miscellaneous stuff.
  *--------------------------------------------------------------------------*/
 
+#undef GCC_UNUSED
+#ifdef __GNUC__
+#define GCC_UNUSED __attribute__ ((unused))
+#else
+#define GCC_UNUSED
+#endif
+
 /* Define an interactive function (callable with `M-x'). */
 #define DEFUN(zile_func, c_func)		\
-	int F_ ## c_func(int uniarg)
+	int F_ ## c_func(int uniarg GCC_UNUSED)
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)				\
@@ -403,13 +410,5 @@ struct terminal {
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)		\
 	F_ ## c_func(uniarg)
-
-/*--------------------------------------------------------------------------
- * Missing functions.
- *--------------------------------------------------------------------------*/
-
-#ifndef HAVE_VASPRINTF
-int vasprintf(char ** ptr, const char * format_string, va_list vargs);
-#endif
 
 #endif /* !ZILE_H */

@@ -1,7 +1,7 @@
-/*	$Id: main.c,v 1.7 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: main.c,v 1.8 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -144,7 +144,7 @@ static void select_terminal(void)
 static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
-%Copyright (C) 1997-2002 Sandro Sigala <sandro@sigala.it>%\n\
+%Copyright (C) 1997-2003 Sandro Sigala <sandro@sigala.it>%\n\
 %Copyright (C) 2003 Reuben Thomas <rrt@sc3d.org>%\n\
 \n\
 Type %C-x C-c% to exit Zile.\n\
@@ -310,6 +310,8 @@ int main(int argc, char **argv)
 	if (!qflag)
 		read_rc_file(uarg);
 	set_variables(vargs);
+	/* Force refresh of cached variables. */
+	cur_tp->refresh_cached_variables();
 	cur_tp->open();
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */

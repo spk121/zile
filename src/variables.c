@@ -1,7 +1,7 @@
-/*	$Id: variables.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: variables.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,8 +69,6 @@ void free_variables(void)
 void set_variable(char *var, char *val)
 {
 	htable_store(var_table, var, zstrdup(val));
-	/* Force refresh of cached variables. */
-	cur_tp->refresh_cached_variables();
 }
 
 void unset_variable(char *var)
@@ -82,7 +80,14 @@ void unset_variable(char *var)
 
 char *get_variable(char *var)
 {
-	return htable_fetch(var_table, var);
+	char *val = htable_fetch(var_table, var);
+#ifdef DEBUG
+	if (!val)
+		ZTRACE(("getting unknown variable `%s'\n", var));
+	else
+		ZTRACE(("getting variable `%s' = `%s'\n", var, val));
+#endif
+	return val;
 }
 
 int is_variable_equal(char *var, char *val)
@@ -217,8 +222,11 @@ Set a variable value to the user specified value.
 			waitkey(2 * 1000);
 		} else
 			cur_bp->fill_column = i;
-	} else
+	} else {
 		set_variable(var, val);
+		/* Force refresh of cached variables. */
+		cur_tp->refresh_cached_variables();
+	}
 
 	return TRUE;
 }

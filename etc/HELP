@@ -235,6 +235,7 @@ A sample file
      font-character-delimiters = white       # [default: white]
      font-comment = red                      # [default: red]
      font-directive = blue                   # [default: blue]
+     font-here-document = green              # [default: green]
      font-identifier = white                 # [default: white]
      font-keyword = magenta                  # [default: magenta]
      font-number = cyan                      # [default: cyan]
@@ -578,6 +579,9 @@ For full documentation, see *Note Functions::.
 `C-x C-x'
      Exchange point and mark.  Bound to `exchange-point-and-mark'.
 
+`M-<BS>'
+     Kill word backward.  Bound to `backward-kill-word'.
+
 `M-!'
      Execute an external command in inferior shell.  Bound to
      `shell-command'.
@@ -598,6 +602,9 @@ For full documentation, see *Note Functions::.
 
 `M-c'
      Capitalize the following word.  Bound to `capitalize-word'.
+
+`M-d'
+     Kill word.  Bound to `kill-word'.
 
 `M-f'
      Move point forward one word.  Bound to `forward-word'.
@@ -656,6 +663,10 @@ the compilation options given to `configure'.
 `backward-delete-char'
      Delete the previous character.  Join lines if the character is a
      newline.
+
+`backward-kill-word'
+     Kill characters backward until encountering the end of a word.
+     With argument, do this that many times.
 
 `backward-word'
      Move backward until encountering the end of a word (forward if the
@@ -847,6 +858,10 @@ the compilation options given to `configure'.
      this time appends to the text killed last time to make one entry
      in the kill ring.
 
+`kill-word'
+     Kill characters forward until encountering the end of a word.
+     With argument, do this that many times.
+
 `list-bindings'
      List defined bindings.
 
@@ -960,6 +975,8 @@ the compilation options given to `configure'.
 
 `set-variable'
      Set a variable value to the user specified value.
+
+`sh-mode'
 
 `shell-script-mode'
      Turn on the Shell-script Mode for editing shell scripts.
@@ -1246,8 +1263,8 @@ the compilation options given to `configure'.
 
     `0-15,17,0xef-0xff'
     `012,015-0x50'
-          Correct but useless character sets.  Default value is
-     `0x20-0x7e'.
+          Correct but useless character sets.
+     Default value is `0x20-0x7e'.
 
 `expand-tabs'
      If disabled, Zile will insert hard tabs (the character `\t'),
@@ -1272,6 +1289,10 @@ the compilation options given to `configure'.
 `font-directive'
      The color used in Font Lock Mode for preprocessor directives.
      Default value is `blue'.
+
+`font-here-document'
+     The color used in Font Lock and Shell-script modes for
+     here-document (e.g.: `<<EOF') blocks.  Default value is `green'.
 
 `font-identifier'
      The color used in Font Lock Mode for identifiers.  Default value

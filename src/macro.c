@@ -1,7 +1,7 @@
-/*	$Id: macro.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: macro.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,41 +38,41 @@
 typedef struct macro *macrop;
 
 struct macro {
-  funcp func;
-  int ndata;
-  int *data;
-  macrop next;
+	funcp	func;
+	int	ndata;
+	int	*data;
+	macrop	next;
 };
 
 static macrop head_mp, last_mp;
 static macrop running_mp, wait_mp = NULL;
 static int macro_key;
 
-static macrop macro_new()
+static macrop macro_new(void)
 {
-  macrop mp;
+	macrop mp;
 
-  mp = (macrop)zmalloc(sizeof(*mp));
-  mp->func = NULL;
-  mp->ndata = 0;
-  mp->data = NULL;
-  mp->next = NULL;
+	mp = (macrop)zmalloc(sizeof(*mp));
+	mp->func = NULL;
+	mp->ndata = 0;
+	mp->data = NULL;
+	mp->next = NULL;
 
-  return mp;
+	return mp;
 }
 
 static void macro_free(macrop mp)
 {
-  if (mp->data)
-    free(mp->data);
-  free(mp);
+	if (mp->data)
+		free(mp->data);
+	free(mp);
 }
 
 static void add_macro_data(macrop mp, int data)
 {
-  int n = mp->ndata++;
-  mp->data = zrealloc(mp->data, sizeof(int)*mp->ndata);
-  mp->data[n] = data;
+	int n = mp->ndata++;
+	mp->data = zrealloc(mp->data, sizeof(int)*mp->ndata);
+	mp->data[n] = data;
 }
 
 void cancel_kbd_macro(void)
@@ -81,7 +81,7 @@ void cancel_kbd_macro(void)
 
 	for (mp = head_mp; mp != NULL; mp = next_mp) {
 		next_mp = mp->next;
-		macro_free (mp);
+		macro_free(mp);
 	}
 
 	head_mp = last_mp = NULL;
@@ -91,41 +91,39 @@ void cancel_kbd_macro(void)
 
 void add_kbd_macro(funcp func, int uniarg)
 {
-  macrop mp = macro_new ();
+	macrop mp = macro_new();
 
-  mp->func = func;
-  add_macro_data (mp, uniarg);
+	mp->func = func;
+	add_macro_data(mp, uniarg);
 
-  if (wait_mp) {
-    int c;
-    for (c=0; c<wait_mp->ndata; c++)
-      add_macro_data (mp, wait_mp->data[c]);
-    macro_free (wait_mp);
-    wait_mp = NULL;
-  }
+	if (wait_mp) {
+		int c;
+		for (c = 0; c < wait_mp->ndata; ++c)
+			add_macro_data(mp, wait_mp->data[c]);
+		macro_free(wait_mp);
+		wait_mp = NULL;
+	}
 
-  if (head_mp == NULL)
-    head_mp = last_mp = mp;
-  else {
-    last_mp->next = mp;
-    last_mp = mp;
-  }
+	if (head_mp == NULL)
+		head_mp = last_mp = mp;
+	else {
+		last_mp->next = mp;
+		last_mp = mp;
+	}
 }
 
 void add_macro_key_data(int key)
 {
-  if (!wait_mp)
-    wait_mp = macro_new ();
-
-  add_macro_data (wait_mp, key);
+	if (!wait_mp)
+		wait_mp = macro_new();
+	add_macro_data(wait_mp, key);
 }
 
 int get_macro_key_data(void)
 {
-  if (macro_key < running_mp->ndata)
-    return running_mp->data[macro_key++];
-  else
-    return 0;
+	if (macro_key < running_mp->ndata)
+		return running_mp->data[macro_key++];
+	return 0;
 }
 
 DEFUN("start-kbd-macro", start_kbd_macro)
@@ -181,7 +179,7 @@ static int call_last_kbd_macro(void)
 
 		running_mp = mp;
 		macro_key = 0;
-		(*mp->func)(get_macro_key_data ());
+		(*mp->func)(get_macro_key_data());
 
 		thisflag &= ~FLAG_EXECUTING_MACRO;
 
@@ -228,6 +226,6 @@ void free_macros(void)
 
 	for (mp = head_mp; mp != NULL; mp = next) {
 		next = mp->next;
-		macro_free (mp);
+		macro_free(mp);
 	}
 }

@@ -1,4 +1,4 @@
-/*	$Id: astr.h,v 1.4 2003/05/25 21:23:24 rrt Exp $	*/
+/*	$Id: astr.h,v 1.5 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -42,6 +42,7 @@ extern void   astr_clear(astr as);
 extern const char * astr_cstr(castr as);
 extern size_t astr_size(castr as);
 extern size_t astr_maxsize(castr as);
+extern int    astr_isempty(castr as);
 extern astr   astr_fill(astr as, int c, size_t size);
 extern int    astr_cmp(castr s1, castr s2);
 extern int    astr_cmp_cstr(castr s1, const char *s2);
@@ -64,6 +65,8 @@ extern astr   astr_truncate(astr as, size_t size);
 extern astr   astr_substr(castr as, int pos, size_t size);
 extern astr   astr_left(castr as, size_t size);
 extern astr   astr_right(castr as, size_t size);
+extern char   astr_first_char(castr as);
+extern char   astr_last_char(castr as);
 extern int    astr_find(castr as, castr src);
 extern int    astr_find_cstr(castr as, const char *s);
 extern int    astr_find_char(castr as, int c);
@@ -101,6 +104,9 @@ struct astr_s {
 #define astr_cstr(as)		((const char *)as->text)
 #define astr_size(as)		((const int)as->size)
 #define astr_maxsize(as)	((const int)as->maxsize)
+#define astr_isempty(as)	(as->size == 0)
+#define astr_first_char(as)	(as->text[0])
+#define astr_last_char(as)	(as->text[as->size - 1])
 #define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
 #define astr_cmp_cstr(s1, s2)	(strcmp(s1->text, s2))
 #define astr_eq(s1, s2)		(!strcmp(s1->text, s2->text))

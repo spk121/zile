@@ -1,7 +1,7 @@
-/*	$Id: minibuf.c,v 1.7 2003/05/25 21:34:56 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.8 2003/10/24 23:32:09 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -216,12 +216,12 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 	astr dir, fname;
 	astr rbuf;
 
-	rbuf = astr_new();
 	va_start(ap, value);
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
-        astr_assign_cstr(rbuf, agetcwd());
+	rbuf = astr_new();
+	agetcwd(rbuf);
 	dir = astr_new();
 	fname = astr_new();
 	expand_path(value, astr_cstr(rbuf), dir, fname);
@@ -240,7 +240,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 		return p;
 	}
 
-        astr_assign_cstr(rbuf, agetcwd());
+	agetcwd(rbuf);
 	expand_path(p, astr_cstr(rbuf), dir, fname);
 	astr_assign_cstr(rbuf, astr_cstr(dir));
 	astr_append_cstr(rbuf, astr_cstr(fname));
@@ -693,7 +693,7 @@ static int default_history_reread(historyp hp, astr as)
 	hp->fl_sorted = 0;
 
 	buf = astr_new();
-        astr_assign_cstr(buf, agetcwd());
+	agetcwd(buf);
 	pdir = astr_new();
 	fname = astr_new();
 	if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))

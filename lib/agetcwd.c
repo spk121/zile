@@ -1,4 +1,4 @@
-/*	$Id: agetcwd.c,v 1.2 2003/09/30 22:51:53 rrt Exp $	*/
+/*	$Id: agetcwd.c,v 1.3 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
  * Copyright (c) 2003 Reuben Thomas.  All rights reserved.
@@ -29,14 +29,15 @@
 #include <unistd.h>
 
 #include "config.h"
+#include "agetcwd.h"
 
-char *agetcwd(void)
-{
-#ifdef PATH_MAX
-        size_t len = PATH_MAX;
-#else
-        size_t len = 256;
+#ifndef PATH_MAX
+#define PATH_MAX 256
 #endif
+
+astr agetcwd(astr as)
+{
+        size_t len = PATH_MAX;
         char *buf = (char *)xmalloc(len);
         char *res;
         while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
@@ -46,5 +47,7 @@ char *agetcwd(void)
         /* If there was an error, return the empty string */
         if (res == NULL)
                 *buf = '\0';
-        return buf;
+	astr_assign_cstr(as, buf);
+	free(buf);
+        return as;
 }

@@ -1,7 +1,7 @@
-/*	$Id: file.c,v 1.10 2003/09/07 23:13:54 rrt Exp $	*/
+/*	$Id: file.c,v 1.11 2003/10/24 23:32:08 ssigala Exp $	*/
 
 /*
- * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -89,24 +89,20 @@ int is_regular_file(const char *filename)
  * - replaces the `//' with `/' (restarting from the root directory);
  * - removes the `..' and `.' entries.
  */
-int expand_path(const char *path, const char *cwdir, astr dir,
-		astr fname)
+int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 {
 	struct passwd *pw;
-	const char *sp;
-        const char *p;
-
-	sp = path;
+	const char *sp = path;
 
 	if (*sp != '/') {
-		p = cwdir;
+		const char *p = cwdir;
 		while (*p != '\0')
 			astr_append_char(dir, *p++);
-		if (*(p - 1) != '/')
+		if (astr_last_char(dir) != '/')
 			astr_append_char(dir, '/');
 	}
 
-	while (sp != '\0')
+	while (sp != '\0') {
 		if (*sp == '/') {
 			if (*(sp + 1) == '/') {
 				/*
@@ -130,7 +126,7 @@ int expand_path(const char *path, const char *cwdir, astr dir,
 				if ((pw = getpwuid(getuid())) == NULL)
 					return FALSE;
 				if (strcmp(pw->pw_dir, "/") != 0) {
-					p = pw->pw_dir;
+					const char *p = pw->pw_dir;
 					while (*p != '\0')
 						astr_append_char(dir, *p++);
 				}
@@ -144,19 +140,15 @@ int expand_path(const char *path, const char *cwdir, astr dir,
                                 astr as = astr_new();
 				astr_clear(dir);
 				++sp;
-                                if ((p = strchr(sp, '/'))) {
-                                        astr_replace_cstr(as, 0, p - sp, sp);
-                                        sp = p;
-                                } else {
-                                        astr_assign_cstr(as, sp);
-                                        sp += strlen(sp);
-                                }
-				if ((pw = getpwnam(astr_cstr(as))) == NULL)
+				while (*sp != '\0' && *sp != '/')
+					astr_append_char(as, *sp++);
+				pw = getpwnam(astr_cstr(as));
+                                astr_delete(as);
+				if (pw == NULL)
 					return FALSE;
 				p = pw->pw_dir;
 				while (*p != '\0')
 					astr_append_char(dir, *p++);
-                                astr_delete(as);
 			}
 		} else if (*sp == '.') {
 			if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
@@ -165,11 +157,10 @@ int expand_path(const char *path, const char *cwdir, astr dir,
 					++sp;
 			} else if (*(sp + 1) == '.' &&
 				   (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
-				if (astr_size(dir) > 1 && 
-				    astr_cstr(dir)[astr_size(dir) - 1] == '/')
+			    if (astr_size(dir) >= 1 && astr_last_char(dir) == '/')
 					astr_truncate(dir, astr_size(dir) - 1);
-				while (astr_cstr(dir)[astr_size(dir) - 1] != '/' &&
-				       astr_size(dir) > 1)
+				while (astr_last_char(dir) != '/' &&
+				       astr_size(dir) >= 1)
 					astr_truncate(dir, astr_size(dir) - 1);
 				sp += 2;
 				if (*sp == '/' && *(sp + 1) != '/')
@@ -177,12 +168,14 @@ int expand_path(const char *path, const char *cwdir, astr dir,
 			} else
 				goto gotfname;
 		} else {
+			const char *p;
 		gotfname:
 			p = sp;
 			while (*p != '\0' && *p != '/')
 				p++;
 			if (*p == '\0') {
-                                astr_assign_cstr(fname, sp);
+				/* Final filename. */
+				astr_append_cstr(fname, sp);
 				break;
 			} else {
 				/* Non-final directory. */
@@ -190,8 +183,9 @@ int expand_path(const char *path, const char *cwdir, astr dir,
 					astr_append_char(dir, *sp++);
 			}
 		}
+	}
 
-	if (astr_size(dir) == 0)
+	if (astr_isempty(dir))
 		astr_append_char(dir, '/');
 
 	return TRUE;
@@ -231,9 +225,9 @@ astr compact_path(astr buf, const char *path)
 /*
  * Return the current directory.
  */
-astr get_current_dir(astr buf)
+astr get_current_dir(astr buf, int interactive)
 {
-	if (cur_bp->filename != NULL) {
+	if (interactive && cur_bp->filename != NULL) {
 		/*
 		 * If the current buffer has a filename, get the current
 		 * directory name from it.
@@ -244,14 +238,14 @@ astr get_current_dir(astr buf)
                 p = astr_rfind_char(buf, '/');
                 if (p != -1)
                         astr_truncate(buf, p ? p : 1);
-		if (astr_cstr(buf)[astr_size(buf) - 1] != '/')
-			astr_append_cstr(buf, "/");
+		if (astr_last_char(buf) != '/')
+			astr_append_char(buf, '/');
 	} else {
 		/*
 		 * Get the current directory name from the system.
 		 */
-                astr_assign_cstr(buf, agetcwd());
-		astr_append_cstr(buf, "/");
+		agetcwd(buf);
+		astr_append_char(buf, '/');
 	}
 
 	return buf;
@@ -264,11 +258,13 @@ void open_file(char *path, int lineno)
 	buf = astr_new();
 	dir = astr_new();
 	fname = astr_new();
-	get_current_dir(buf);
+	get_current_dir(buf, FALSE);
+	ZTRACE(("original filename: %s, cwd: %s\n", path, astr_cstr(buf)));
 	if (!expand_path(path, astr_cstr(buf), dir, fname)) {
 		fprintf(stderr, "zile: %s: invalid filename or path\n", path);
 		zile_exit(1);
 	}
+	ZTRACE(("new filename: %s, dir: %s\n", astr_cstr(fname), astr_cstr(dir)));
 	astr_assign_cstr(buf, astr_cstr(dir));
 	astr_append_cstr(buf, astr_cstr(fname));
 	astr_delete(dir);
@@ -582,7 +578,7 @@ creating one if none already exists.
 	astr buf;
 
 	buf = astr_new();
-	get_current_dir(buf);
+	get_current_dir(buf, TRUE);
 	if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf)))
 	    == NULL) {
 		astr_delete(buf);
@@ -611,7 +607,7 @@ If the current buffer now contains an empty file that you just visited
 	astr buf;
 
 	buf = astr_new();
-	get_current_dir(buf);
+	get_current_dir(buf, TRUE);
 	if ((ms = minibuf_read_dir("Find alternate: ", astr_cstr(buf)))
 	    == NULL) {
 		astr_delete(buf);
@@ -640,7 +636,7 @@ Select to the user specified buffer in the current window.
 	bufferp swbuf;
 	historyp hp;
 
-	swbuf = prev_bp != NULL ? prev_bp : cur_bp->next != NULL ? cur_bp->next : head_bp;
+	swbuf = (prev_bp != NULL) ? prev_bp : ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
 	hp = make_buffer_history();
 	ms = minibuf_read_history("Switch to buffer (default @b%s@@): ", "", hp, swbuf->name);
@@ -903,7 +899,7 @@ Set mark after the inserted text.
 		return FALSE;
 
 	buf = astr_new();
-	get_current_dir(buf);
+	get_current_dir(buf, TRUE);
 	if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf)))
 	    == NULL) {
 		astr_delete(buf);
@@ -1014,7 +1010,7 @@ static char *create_backup_filename(const char *filename, int withrevs,
 
 		while (*backupdir != '\0')
 			astr_append_char(buf, *backupdir++);
-		if (astr_cstr(buf)[astr_size(buf) - 1] != '/')
+		if (astr_last_char(buf) != '/')
 			astr_append_char(buf, '/');
 		while (*filename != '\0') {
 			if (*filename == '/')
@@ -1389,7 +1385,7 @@ directory.
 	struct stat st;
 
 	buf = astr_new();
-	get_current_dir(buf);
+	get_current_dir(buf, TRUE);
 	if ((ms = minibuf_read_dir("Change default directory: ",
 				   astr_cstr(buf))) == NULL) {
 		astr_delete(buf);
