@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.9 2004/03/09 22:43:00 rrt Exp $	*/
+/*	$Id: registers.c,v 1.10 2004/03/10 11:00:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -104,7 +104,7 @@ Puts point before and mark after the inserted text.
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	exchange_point_and_mark();
-	desactivate_mark();
+	deactivate_mark();
 
 	return TRUE;
 }

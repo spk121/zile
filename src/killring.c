@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.9 2004/03/09 16:20:03 rrt Exp $	*/
+/*	$Id: killring.c,v 1.10 2004/03/10 11:00:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -135,7 +135,7 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 	}
 
-	desactivate_mark();
+	deactivate_mark();
 	return ret;
 }
 
@@ -192,7 +192,7 @@ to make one entry in the kill ring.
 	}
 
 	thisflag |= FLAG_DONE_KILL;
-	desactivate_mark();
+	deactivate_mark();
 
 	return TRUE;
 }
@@ -218,7 +218,7 @@ Save the region as if killed, but don't kill it.
 	free(p);
 
 	thisflag |= FLAG_DONE_KILL;
-	desactivate_mark();
+	deactivate_mark();
 
 	return TRUE;
 }
@@ -307,7 +307,7 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 	insert_nstring(kill_ring_text, kill_ring_size);
 	undo_nosave = FALSE;
 
-	desactivate_mark();
+	deactivate_mark();
 
 	return TRUE;
 }

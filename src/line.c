@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.25 2004/03/10 10:27:04 rrt Exp $	*/
+/*	$Id: line.c,v 1.26 2004/03/10 11:00:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -473,7 +473,7 @@ void insert_nstring(const char *s, size_t size)
 
 int self_insert_command(int c)
 {
-	desactivate_mark();
+	deactivate_mark();
 
 	if (c <= 255) {
                 if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
@@ -521,7 +521,7 @@ void bprintf(const char *fmt, ...)
 
 int delete_char(void)
 {
-	desactivate_mark();
+	deactivate_mark();
 
 	if (!eolp()) {
 		if (warn_if_readonly_buffer())
@@ -633,7 +633,7 @@ Join lines if the character is a newline.
 
 int backward_delete_char(void)
 {
-	desactivate_mark();
+	deactivate_mark();
 
 	if (backward_char()) {
 		delete_char();
@@ -745,7 +745,7 @@ static int indent_relative(void)
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	desactivate_mark();
+	deactivate_mark();
 	old_point = point_marker();
 
 	/* Find previous non-blank line.  */
@@ -796,7 +796,7 @@ static int indent_relative(void)
 		backward_char();
 	exchange_point_and_mark();
 	FUNCALL(tabify);
-	desactivate_mark();
+	deactivate_mark();
 	pop_mark();
 
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);

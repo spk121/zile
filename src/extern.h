@@ -43,7 +43,7 @@ int calculate_buffer_size(Buffer *bp);
 
 int transient_mark_mode(void);
 void activate_mark(void);
-void desactivate_mark(void);
+void deactivate_mark(void);
 int is_mark_actived(void);
 
 /* file.c ----------------------------------------------------------------- */

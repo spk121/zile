@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.10 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.11 2004/03/10 11:00:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -458,7 +458,7 @@ void activate_mark(void)
 	cur_bp->mark_active = TRUE;
 }
 
-void desactivate_mark(void)
+void deactivate_mark(void)
 {
 	cur_bp->mark_active = FALSE;
 }

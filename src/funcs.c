@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.27 2004/03/10 10:46:21 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.28 2004/03/10 11:00:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -40,7 +40,7 @@
 
 int cancel(void)
 {
-	desactivate_mark();
+	deactivate_mark();
 	minibuf_error("Quit");
 	return FALSE;
 }
@@ -706,7 +706,7 @@ static int edit_tab_region(int action)
 	cur_bp->pt = marker->pt;
 	undo_save(UNDO_END_SEQUENCE, marker->pt, 0, 0);
 	free_marker(marker);
-	desactivate_mark();
+	deactivate_mark();
 
 	return TRUE;
 }
@@ -897,7 +897,7 @@ static int transpose_subr(Function f)
 	/* Restore mark.  */
 	pop_mark();
 
-	desactivate_mark();
+	deactivate_mark();
 
 	/* Free markers.  */
 	free_marker(p0);
@@ -1730,7 +1730,7 @@ Delete the text between point and mark.
 		undo_nosave = FALSE;
 	}
 
-	desactivate_mark();
+	deactivate_mark();
 	return TRUE;
 }
 
@@ -1808,7 +1808,7 @@ On nonblank line, delete any immediately following blank lines.
 		undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	free_marker(old_marker);
-	desactivate_mark();
+	deactivate_mark();
 
 	return TRUE;
 }
