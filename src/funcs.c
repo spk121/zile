@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.62 2005/01/13 00:16:16 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.63 2005/01/14 00:43:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -144,7 +144,7 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
   /* Remove all the content of that buffer. */
   new_bp = create_buffer(cur_bp->name);
   kill_buffer(cur_bp);
-  cur_bp = new_bp;
+  cur_bp = cur_wp->bp = new_bp;
 
   /* Make the buffer like a temporary one. */
   cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
