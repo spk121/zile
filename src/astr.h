@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: astr.h,v 1.5 2005/01/26 00:22:57 rrt Exp $        */
+/*      $Id: astr.h,v 1.6 2005/01/26 21:57:43 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -74,13 +74,13 @@ extern void   astr_delete(astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-extern char * astr_char(const astr as, int pos);
+extern char * astr_char(const astr as, size_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-extern astr   astr_substr(const astr as, int pos, size_t size);
+extern astr   astr_substr(const astr as, size_t pos, size_t size);
 
 /*
  * Do strcmp on the contents of s1 and s2
@@ -100,7 +100,7 @@ extern astr   astr_cpy_cstr(astr as, const char *s);
 extern astr   astr_cat(astr as, const astr src);
 extern astr   astr_cat_cstr(astr as, const char *s);
 extern astr   astr_ncat_cstr(astr as, const char *s, size_t len);
-extern astr   astr_cat_char(astr as, char c);
+extern astr   astr_cat_char(astr as, int c);
 
 /*
  * Append the contents of src to as and free src.
@@ -111,21 +111,21 @@ extern astr   astr_cat_delete(astr as, const astr src);
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */
-extern astr   astr_replace(astr as, int pos, size_t size, const astr src);
-extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
-extern astr   astr_replace_char(astr as, int pos, size_t size, int c);
+extern astr   astr_replace(astr as, size_t pos, size_t size, const astr src);
+extern astr   astr_replace_cstr(astr as, size_t pos, size_t size, const char *s);
+extern astr   astr_replace_char(astr as, size_t pos, size_t size, int c);
 
 /*
  * Insert the contents of the argument string or character in as.
  */
-extern astr   astr_insert(astr as, int pos, const astr src);
-extern astr   astr_insert_cstr(astr as, int pos, const char *s);
-extern astr   astr_insert_char(astr as, int pos, char c);
+extern astr   astr_insert(astr as, size_t pos, const astr src);
+extern astr   astr_insert_cstr(astr as, size_t pos, const char *s);
+extern astr   astr_insert_char(astr as, size_t pos, int c);
 
 /*
  * Remove size chars from as at position pos.
  */
-extern astr   astr_remove(astr as, int pos, size_t size);
+extern astr   astr_remove(astr as, size_t pos, size_t size);
 
 /*
  * Truncate as to given length.
