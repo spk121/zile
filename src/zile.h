@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.7 2003/05/23 09:37:25 ssigala Exp $	*/
+/*	$Id: zile.h,v 1.8 2003/05/25 21:20:12 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -403,5 +403,13 @@ struct terminal {
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)		\
 	F_ ## c_func(uniarg)
+
+/*--------------------------------------------------------------------------
+ * Missing functions.
+ *--------------------------------------------------------------------------*/
+
+#ifndef HAS_VASPRINTF
+int vasprintf(char ** ptr, const char * format_string, va_list vargs);
+#endif
 
 #endif /* !ZILE_H */

@@ -17,7 +17,7 @@ else
 fi
 
 dnl Checks for libraries.
-AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup)
+AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf)
 AC_CHECK_LIB(ncurses, initscr,
     AC_DEFINE(HAVE_LIBCURSES, 1,
 	      [Define if you have the ncurses library (-lncurses).])
@@ -38,7 +38,7 @@ AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(getcwd strerror strstr vasprintf)
+AC_CHECK_FUNCS(getcwd strerror strstr)
 
 AC_MSG_CHECKING([if the debugging code should be included])
 AC_ARG_ENABLE(debug,

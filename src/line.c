@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.7 2003/05/19 22:26:19 rrt Exp $	*/
+/*	$Id: line.c,v 1.8 2003/05/25 21:20:12 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -537,24 +537,12 @@ Insert the character you type.
 void bprintf(const char *fmt, ...)
 {
 	va_list ap;
-#if HAVE_VASPRINTF
 	char *buf;
-#else
-	char buf[2048]; /* XXX fix this */
-#endif
 	va_start(ap, fmt);
-#if HAVE_VASPRINTF
 	vasprintf(&buf, fmt, ap);
-#else
-	vsprintf(buf, fmt, ap);
-#endif
 	va_end(ap);
-
 	insert_string(buf);
-
-#if HAVE_VASPRINTF
 	free(buf);
-#endif
 }
 
 int delete_char(void)
