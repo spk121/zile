@@ -21,6 +21,7 @@ char *minibuf_read_function_name(const char *fmt, ...);
 char *get_function_by_key_sequence(void);
 void process_key(size_t key);
 void init_bindings(void);
+Function last_command(void);
 void free_bindings(void);
 Function get_function(char *name);
 char *get_function_name(Function p);
