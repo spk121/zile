@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.10 2004/10/12 00:19:47 rrt Exp $   */
+/*      $Id: completion.c,v 1.11 2004/12/20 12:48:53 rrt Exp $   */
 
 #include "config.h"
 
@@ -43,12 +43,6 @@
                          Completion functions
  ***********************************************************************/
 
-/* Forward declarations. */
-static void default_completion_scroll_up(Completion *cp);
-static void default_completion_scroll_down(Completion *cp);
-static int default_completion_try(Completion *cp, astr as);
-static int default_completion_reread(Completion *cp, astr as);
-
 /*
  * Allocate a new completion structure.
  */
@@ -61,10 +55,6 @@ Completion *new_completion(int fileflag)
 
         cp->completions = alist_new();
         cp->matches = alist_new();
-        cp->try = default_completion_try;
-        cp->scroll_up = default_completion_scroll_up;
-        cp->scroll_down = default_completion_scroll_down;
-        cp->reread = default_completion_reread;
 
         if (fileflag) {
                 cp->path = astr_new();
@@ -90,9 +80,9 @@ void free_completion(Completion *cp)
 }
 
 /*
- * The default completion scrolling function.
+ * Scroll completions up.
  */
-static void default_completion_scroll_up(Completion *cp)
+void completion_scroll_up(Completion *cp)
 {
         Window *wp, *old_wp = cur_wp;
 
@@ -108,9 +98,9 @@ static void default_completion_scroll_up(Completion *cp)
 }
 
 /*
- * The default completion scrolling function.
+ * Scroll completions down.
  */
-static void default_completion_scroll_down(Completion *cp)
+void completion_scroll_down(Completion *cp)
 {
         Window *wp, *old_wp = cur_wp;
 
@@ -217,85 +207,9 @@ static int hcompar(const void *p1, const void *p2)
 }
 
 /*
- * The default completion matching function.
+ * Reread directory for completions.
  */
-static int default_completion_try(Completion *cp, astr search)
-{
-        int i, j, ssize, fullmatches = 0, partmatches = 0;
-        char *p, c;
-
-        alist_clear(cp->matches);
-
-        if (cp->fl_dir)
-                if (!cp->reread(cp, search))
-                        return COMPLETION_NOTMATCHED;
-
-        if (!cp->fl_sorted) {
-                alist_sort(cp->completions, hcompar);
-                cp->fl_sorted = 1;
-        }
-
-        ssize = astr_len(search);
-
-        if (ssize == 0) {
-                if (alist_count(cp->completions) > 1) {
-                        cp->match = alist_first(cp->completions);
-                        cp->matchsize = 0;
-                        popup_completion(cp, TRUE, 0);
-                        return COMPLETION_NONUNIQUE;
-                } else {
-                        cp->match = alist_first(cp->completions);
-                        cp->matchsize = strlen(cp->match);
-                        return COMPLETION_MATCHED;
-                }
-        }
-
-        for (p = alist_first(cp->completions); p != NULL;
-             p = alist_next(cp->completions))
-                if (!strncmp(p, astr_cstr(search), ssize)) {
-                        ++partmatches;
-                        alist_append(cp->matches, p);
-                        if (!strcmp(p, astr_cstr(search)))
-                                ++fullmatches;
-                }
-
-        if (partmatches == 0)
-                return COMPLETION_NOTMATCHED;
-        else if (partmatches == 1) {
-                cp->match = alist_first(cp->matches);
-                cp->matchsize = strlen(cp->match);
-                return COMPLETION_MATCHED;
-        }
-
-        if (fullmatches == 1 && partmatches > 1) {
-                cp->match = alist_first(cp->matches);
-                cp->matchsize = strlen(cp->match);
-                popup_completion(cp, FALSE, partmatches);
-                return COMPLETION_MATCHEDNONUNIQUE;
-        }
-
-        for (j = ssize; ; ++j) {
-                char *s = alist_first(cp->matches);
-                c = s[j];
-                for (i = 1; i < partmatches; ++i) {
-                        s = alist_at(cp->matches, i);
-                        if (s[j] != c) {
-                                cp->match = alist_first(cp->matches);
-                                cp->matchsize = j;
-                                popup_completion(cp, FALSE, partmatches);
-                                return COMPLETION_NONUNIQUE;
-                        }
-                }
-        }
-
-        assert(0);
-        return COMPLETION_NOTMATCHED;
-}
-
-/*
- * The default completion directory re-reading function.
- */
-static int default_completion_reread(Completion *cp, astr as)
+static int completion_reread(Completion *cp, astr as)
 {
         astr buf, pdir, fname;
         DIR *dir;
@@ -361,4 +275,80 @@ static int default_completion_reread(Completion *cp, astr as)
         astr_delete(fname);
 
         return TRUE;
+}
+
+/*
+ * Match completions.
+ */
+int completion_try(Completion *cp, astr search)
+{
+        int i, j, ssize, fullmatches = 0, partmatches = 0;
+        char *p, c;
+
+        alist_clear(cp->matches);
+
+        if (cp->fl_dir)
+                if (!completion_reread(cp, search))
+                        return COMPLETION_NOTMATCHED;
+
+        if (!cp->fl_sorted) {
+                alist_sort(cp->completions, hcompar);
+                cp->fl_sorted = 1;
+        }
+
+        ssize = astr_len(search);
+
+        if (ssize == 0) {
+                if (alist_count(cp->completions) > 1) {
+                        cp->match = alist_first(cp->completions);
+                        cp->matchsize = 0;
+                        popup_completion(cp, TRUE, 0);
+                        return COMPLETION_NONUNIQUE;
+                } else {
+                        cp->match = alist_first(cp->completions);
+                        cp->matchsize = strlen(cp->match);
+                        return COMPLETION_MATCHED;
+                }
+        }
+
+        for (p = alist_first(cp->completions); p != NULL;
+             p = alist_next(cp->completions))
+                if (!strncmp(p, astr_cstr(search), ssize)) {
+                        ++partmatches;
+                        alist_append(cp->matches, p);
+                        if (!strcmp(p, astr_cstr(search)))
+                                ++fullmatches;
+                }
+
+        if (partmatches == 0)
+                return COMPLETION_NOTMATCHED;
+        else if (partmatches == 1) {
+                cp->match = alist_first(cp->matches);
+                cp->matchsize = strlen(cp->match);
+                return COMPLETION_MATCHED;
+        }
+
+        if (fullmatches == 1 && partmatches > 1) {
+                cp->match = alist_first(cp->matches);
+                cp->matchsize = strlen(cp->match);
+                popup_completion(cp, FALSE, partmatches);
+                return COMPLETION_MATCHEDNONUNIQUE;
+        }
+
+        for (j = ssize; ; ++j) {
+                char *s = alist_first(cp->matches);
+                c = s[j];
+                for (i = 1; i < partmatches; ++i) {
+                        s = alist_at(cp->matches, i);
+                        if (s[j] != c) {
+                                cp->match = alist_first(cp->matches);
+                                cp->matchsize = j;
+                                popup_completion(cp, FALSE, partmatches);
+                                return COMPLETION_NONUNIQUE;
+                        }
+                }
+        }
+
+        assert(0);
+        return COMPLETION_NOTMATCHED;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.11 2004/10/11 23:32:16 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.12 2004/12/20 12:48:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -123,14 +123,16 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 			FUNCALL(suspend_zile);
 			break;
 		case KBD_RET:
-			term_move(ZILE_LINES-1, 0);
+			term_move(ZILE_LINES - 1, 0);
 			term_clrtoeol();
-			if (saved) free(saved);
+			if (saved)
+                                free(saved);
 			return *p;
 		case KBD_CANCEL:
-			term_move(ZILE_LINES-1, 0);
+			term_move(ZILE_LINES - 1, 0);
 			term_clrtoeol();
-			if (saved) free(saved);
+			if (saved)
+                                free(saved);
 			return NULL;
 		case KBD_CTL | 'a':
 		case KBD_HOME:
@@ -187,7 +189,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 			}
 
 			if (cp->fl_poppedup) {
-				cp->scroll_down(cp);
+				completion_scroll_down(cp);
 				thistab = lasttab;
 			}
 			break;
@@ -199,7 +201,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 			}
 
 			if (cp->fl_poppedup) {
-				cp->scroll_up(cp);
+				completion_scroll_up(cp);
 				thistab = lasttab;
 			}
 			break;
@@ -248,12 +250,12 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 
 			if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
 			    && cp->fl_poppedup) {
-				cp->scroll_up(cp);
+				completion_scroll_up(cp);
 				thistab = lasttab;
 			} else {
                                 astr as = astr_new();
                                 astr_cpy_cstr(as, *p);
-				thistab = cp->try(cp, as);
+				thistab = completion_try(cp, as);
                                 astr_delete(as);
 				switch (thistab) {
 				case COMPLETION_NONUNIQUE:
@@ -329,7 +331,8 @@ char *term_minibuf_read(const char *prompt, const char *value,
 	char **p = rotation_buffers, *s;
 
 	/* Prepare the history. */
-	if (hp) prepare_history(hp);
+	if (hp)
+                prepare_history(hp);
 
 	/* Rotate text buffer. */
 	if (++rot >= MAX_ROTATIONS)
