@@ -1,4 +1,4 @@
-/*	$Id: ncurses_key.c,v 1.5 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: ncurses_key.c,v 1.6 2004/01/28 09:24:23 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -177,14 +177,14 @@ static int xgetkey(int mode, int arg)
 		c = getch();
 		break;
 	case GETKEY_DELAYED:
-		stdscr->_delay = arg;
+                wtimeout(stdscr, arg);
 		c = ncurses_getkey();
-		stdscr->_delay = -1; /* Blocking call. */
+                wtimeout(stdscr, -1);
 		break;
 	case GETKEY_NONFILTERED|GETKEY_DELAYED:
-		stdscr->_delay = arg;
+                wtimeout(stdscr, arg);
 		c = getch();
-		stdscr->_delay = -1; /* Blocking call. */
+                wtimeout(stdscr, -1);
 		break;
 	case GETKEY_NONBLOCKING:
 		nodelay(stdscr, TRUE);
