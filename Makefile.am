@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.6 2004/11/15 00:47:12 rrt Exp $
+## $Id: Makefile.am,v 1.7 2004/11/15 00:54:49 rrt Exp $
 
-SUBDIRS = doc etc src
+SUBDIRS = doc src etc
 
 EXTRA_DIST =					\
 	AUTHORS					\

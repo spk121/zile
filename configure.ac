@@ -188,6 +188,5 @@ dnl ==================================================================
 
 AC_OUTPUT(Makefile \
 	  doc/Makefile \
-	  lib/Makefile \
-	  etc/Makefile \
-	  src/Makefile)
+	  src/Makefile \
+	  etc/Makefile)
