@@ -1,4 +1,4 @@
-/*	$Id: glue.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: glue.c,v 1.8 2004/02/16 01:04:39 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -158,7 +158,7 @@ char *replace_string(char *s, char *match, char *subst)
 void tabify_string(char *dest, char *src, int scol, int tw)
 {
 	char *sp, *dp;
-	int dcol = scol, ocol = 0;
+	int dcol = scol, ocol = scol;
 
 	for (sp = src, dp = dest;; ++sp)
 		switch (*sp) {
@@ -197,12 +197,14 @@ void tabify_string(char *dest, char *src, int scol, int tw)
 void untabify_string(char *dest, char *src, int scol, int tw)
 {
 	char *sp, *dp;
-	int col = scol, w;
+	int col = scol;
 
 	for (sp = src, dp = dest; *sp != '\0'; ++sp)
-		if (*sp == '\t')
-			for (w = tw - col % tw; w > 0; --w)
+		if (*sp == '\t') {
+			do
 				*dp++ = ' ', ++col;
+			while ((col%tw) > 0);
+		}
 		else
 			*dp++ = *sp, ++col;
 	*dp = '\0';
