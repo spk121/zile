@@ -1,7 +1,7 @@
-/*	$Id: basic.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: basic.c,v 1.3 2003/05/06 22:28:41 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -201,9 +201,35 @@ void goto_line(int to_line)
 		ngotodown(to_line - cur_wp->pointn);
 }
 
+DEFUN("goto-char", goto_char)
+/*+
+Read a number N and move the cursor to character number N.
+Position 1 is the beginning of the buffer.
++*/
+{
+	char *ms;
+	int to_char;
+	size_t count;
+
+	do {
+		if ((ms = minibuf_read("Goto char: ", "")) == NULL)
+			return cancel();
+		if ((to_char = atoi(ms)) < 0)
+			ding();
+	} while (to_char < 0);
+
+	gotobob();
+	for (count = 1; count < to_char; ++count)
+		if (!forward_char())
+			break;
+
+	return TRUE;
+}
+
 DEFUN("goto-line", goto_line)
 /*+
 Move cursor to the beginning of the specified line.
+Line 1 is the beginning of the buffer.
 +*/
 {
 	char *ms;
@@ -212,9 +238,9 @@ Move cursor to the beginning of the specified line.
 	do {
 		if ((ms = minibuf_read("Goto line: ", "")) == NULL)
 			return cancel();
-		if ((to_line = atoi(ms)) < 1)
+		if ((to_line = atoi(ms)) < 0)
 			ding();
-	} while (to_line < 1);
+	} while (to_line < 0);
 
 	goto_line(to_line - 1);
 	cur_wp->pointo = 0;

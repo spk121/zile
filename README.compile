@@ -28,6 +28,29 @@ following from the sources root directory:
 
 ------------------------------------------------------------------------------
 
+Please note that by default not all functions are compiled in the
+executable file.  With proper flags to `configure', you can enable
+the excluded features.
+
+The options are the following:
+
+  --enable-c-mode         include C Mode
+  --enable-cpp-mode       include C++ Mode
+  --enable-shell-mode     include Shell Mode
+  --enable-csharp-mode    include C# Mode
+  --enable-java-mode      include Java Mode
+  --enable-mail-mode      include Mail Mode
+
+  --enable-all-features   include all the features above
+
+Text Mode is always included in the code (surprising?).
+
+If you are debugging the editor, you might enable the debugging code:
+
+  --enable-debug          include debugging code and assertions
+
+------------------------------------------------------------------------------
+
 Please note that by default the editor binary will be installed without
 stripping the symbol tables (useful for debugging).
 

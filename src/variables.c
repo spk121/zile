@@ -1,7 +1,7 @@
-/*	$Id: variables.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: variables.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -69,7 +69,6 @@ void free_variables(void)
 void set_variable(char *var, char *val)
 {
 	htable_store(var_table, var, zstrdup(val));
-
 	/* Force refresh of cached variables. */
 	cur_tp->refresh_cached_variables();
 }
@@ -143,7 +142,7 @@ char *minibuf_read_variable_name(char *msg)
 			minibuf_error("No variable name given");
 			return NULL;
 		} else if (get_variable(ms) == NULL) {
-			minibuf_error("Undefined variable name");
+			minibuf_error("Undefined variable name `@v%s@@'", ms);
 			waitkey(2 * 1000);
 		} else {
 			minibuf_clear();

@@ -37,6 +37,7 @@ extern int	zap_buffer_content(void);
 extern int	warn_if_readonly_buffer(void);
 extern int	warn_if_no_mark(void);
 extern void	set_temporary_buffer(bufferp bp);
+extern int	calculate_buffer_size(bufferp bp);
 
 /* file.c ----------------------------------------------------------------- */
 extern int	exist_file(char *filename);
@@ -61,7 +62,19 @@ extern int	find_last_anchor(bufferp bp, linep lp);
 extern char *	is_c_keyword(const char *str, int len);
 
 /* fontlock_cpp.c --------------------------------------------------------- */
+#if ENABLE_CPP_MODE
 extern char *	is_cpp_keyword(const char *str, int len);
+#endif
+
+/* fontlock_csharp.c --------------------------------------------------------- */
+#if ENABLE_CSHARP_MODE
+extern char *   is_csharp_keyword(const char *str, int len);
+#endif
+
+/* fontlock_java.c --------------------------------------------------------- */
+#if ENABLE_JAVA_MODE
+extern char *   is_java_keyword(const char *str, int len);
+#endif
 
 /* funcs.c ---------------------------------------------------------------- */
 extern int	cancel(void);
@@ -114,6 +127,8 @@ extern void	free_kill_ring(void);
 /* macro.c ---------------------------------------------------------------- */
 extern void	cancel_kbd_macro(void);
 extern void	add_kbd_macro(funcp func, int uniarg);
+extern void	add_macro_key_data(int key);
+extern int	get_macro_key_data(void);
 extern void	free_macros(void);
 
 /* main.c ----------------------------------------------------------------- */
@@ -136,7 +151,7 @@ extern historyp new_history(int fileflag);
 extern void	free_history(historyp hp);
 
 /* rc.c ------------------------------------------------------------------- */
-extern void	read_rc_file(void);
+extern void	read_rc_file(const char *filename);
 
 /* redisplay.c ------------------------------------------------------------ */
 extern void	recenter(windowp wp);
@@ -147,6 +162,8 @@ extern void	free_search_history(void);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int	undo_nosave;
+extern void	undo_start_sequence(void);
+extern void	undo_end_sequence(void);
 extern void	undo_save(int type, int startn, int starto, int arg1, int arg2);
 
 /* variables.c ------------------------------------------------------------ */

@@ -1,8 +1,45 @@
-Changes from Zile 1.6.1 - Zile 1.6.2
+Changes between Zile 1.6.1 - Zile 1.7 BETA 1
 
-* Fixed a few core dumps.
-* Fixed some bugs with patches from Nicolas Duboc.
-* Fixed a build problem where dumb makes tried to build "-lncurses".
+* Changed configure script so no syntax colouring modes are built by
+  default.
+* Implemented Java Mode.  Contributed by Marius Nita <marius@cs.pdx.edu>.
+* Implemented C# Mode.  Contributed by Josef 'Jupp' Schugt <jupp@gmx.de>.
+* Implemented Mail Mode (plus the five variables `font-mailN' and
+  the variable `mail-mode-auto-fill') as suggested by Josef Schugt.
+* Implemented the widely-used Emacs bindings:
+    - `forward-word' (bound to `M-f'), `backward-word' (bound to `M-b');
+    - `capitalize-word' (bount to `M-c');
+    - `upcase-word' (bount to `M-u'), `downcase-word' (bount to `M-l');
+* Implemented `describe-key-briefly' (bound to `C-h c').
+* Implemented `shrink-window' (bound to `M-e').  Contributed by Marius Nita.
+* Implemented `back-to-indentation' (bound to `M-m').  Contributed by
+  Joseph Boyd <k963@bonbon.net>.
+* Implemented `goto-char'.
+* Implemented `revisions-kept' and `revisions-delete' variables as
+  suggested by Josef Schugt.
+* Added `-u rcfile' and `-v variable=value' command line options as
+  requested by many users.
+* Now multiple functions can be specified on command line with `-f func'.
+* Now `quoted-insert' (bound to `C-q') accepts octal digits to
+  insert particular characters.
+* Cleaned up X Window terminal resize handling.  Low level SIGWINCH signal
+  handling has been removed; now Zile relies only on ncurses KEY_RESIZE.
+* The behavior of the `auto-font-lock' variable is changed in this version.
+  Now the variable applies also to buffer mode changes.
+* Fixed two old bugs thanks to Reuben Thomas <rrt@mupsych.org>.
+* Patches provided by David A. Capello <dacap@users.sourceforge.net>:
+    * implemented `kill-word', `backward-kill-word';
+    * fixed bug in undo/redo;
+    * fixed bug in highlight;
+    * macros support "isearch" facility;
+    * shell mode supports highlight for "cat<<EOF\n...\nEOF" stuff.  With
+      this, added a new variable: "font-special";
+    * better shell mode highlight: $identifier, and fixed the \'string\'
+      problem;
+    * optimized the selection highlight color;
+    * added "sh-mode" (same as "shell-script-mode").
+* Many other bug fixes (including some excellent patches from Nicolas
+  Duboc).
 
 Changes between Zile 1.6 - Zile 1.6.1
 

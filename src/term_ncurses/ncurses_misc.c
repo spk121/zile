@@ -1,7 +1,7 @@
-/*	$Id: ncurses_misc.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,21 +28,12 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef SUPPORT_XTERM_RESIZE
-#ifdef HAVE_SYS_IOCTL_H
-#include <sys/ioctl.h>
-#endif
-#include <sys/termios.h>
-#include <signal.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#endif /* SUPPORT_XTERM_RESIZE */
 
-#ifdef HAVE_NCURSES_H
+#if HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
@@ -53,8 +44,7 @@
 
 #include "term_ncurses.h"
 
-#ifdef SUPPORT_XTERM_RESIZE
-void resize_windows(int width, int height)
+static void resize_windows(int width, int height)
 {
 	windowp wp;
 	int hdelta = height - ncurses_tp->height;
@@ -94,25 +84,12 @@ void resize_windows(int width, int height)
 	ncurses_tp->height = height - hdelta;
 }
 
-static void resize_sig_handler(int signo)
+void ncurses_resize_windows(void)
 {
-	struct winsize win;
-	switch (signo) {
-	case SIGWINCH:
-		ioctl(STDIN_FILENO, TIOCGWINSZ, &win);
-		/* Avoid bogus sizes. */
-		if (win.ws_col > 10 && win.ws_row > 5) {
-			/* Setup the ncurses library internal data. */
-			resizeterm(win.ws_row, win.ws_col);
-			/* Resize the Zile windows. */
-			resize_windows(COLS, LINES);
-		}
-		FUNCALL(recenter);
-		refresh();
-		break;
-	}
+	/* Resize the Zile windows. */
+	resize_windows(COLS, LINES);
+	FUNCALL(recenter);
 }
-#endif
 
 static void segv_sig_handler(int signo)
 {
@@ -120,22 +97,24 @@ static void segv_sig_handler(int signo)
 	zile_exit(2);
 }
 
+static void other_sig_handler(int signo)
+{
+	fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
+	zile_exit(2);
+}
+
 int ncurses_init(void)
 {
 	struct sigaction segv_sig;
-#ifdef SUPPORT_XTERM_RESIZE
-	struct sigaction resize_sig;
-#endif
+	struct sigaction other_sig;
 
 	segv_sig.sa_handler = segv_sig_handler;
 	sigemptyset(&segv_sig.sa_mask);
         segv_sig.sa_flags = SA_RESTART;
 
-#ifdef SUPPORT_XTERM_RESIZE
-        resize_sig.sa_handler = resize_sig_handler;
-        sigemptyset(&resize_sig.sa_mask);
-        resize_sig.sa_flags = SA_RESTART;
-#endif
+	other_sig.sa_handler = other_sig_handler;
+	sigemptyset(&other_sig.sa_mask);
+	other_sig.sa_flags = SA_RESTART;
 
 	initscr();
 
@@ -144,9 +123,10 @@ int ncurses_init(void)
 
 	sigaction(SIGFPE, &segv_sig, NULL);
 	sigaction(SIGSEGV, &segv_sig, NULL);
-#ifdef SUPPORT_XTERM_RESIZE
-	sigaction(SIGWINCH, &resize_sig, NULL);
-#endif
+	sigaction(SIGHUP, &other_sig, NULL);
+	sigaction(SIGINT, &other_sig, NULL);
+	sigaction(SIGQUIT, &other_sig, NULL);
+	sigaction(SIGTERM, &other_sig, NULL);
 
 	return TRUE;
 }
@@ -173,6 +153,8 @@ static void init_colors(void)
 	init_pair(ZILE_COLOR_BLUE,    COLOR_BLUE,    bg);
 	init_pair(ZILE_COLOR_MAGENTA, COLOR_MAGENTA, bg);
 	init_pair(ZILE_COLOR_CYAN,    COLOR_CYAN,    bg);
+
+	init_pair(ZILE_COLOR_BLUEBG,  COLOR_CYAN,    COLOR_BLUE);
 }
 
 int ncurses_open(void)

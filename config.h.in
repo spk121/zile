@@ -1,0 +1,163 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* The date of compilation. */
+#undef CONFIGURE_DATE
+
+/* The host of compilation. */
+#undef CONFIGURE_HOST
+
+/* Define this to include debugging code. */
+#undef DEBUG
+
+/* Define this to include C++ Mode. */
+#undef ENABLE_CPP_MODE
+
+/* Define this to include C# Mode. */
+#undef ENABLE_CSHARP_MODE
+
+/* Define this to include C Mode. */
+#undef ENABLE_C_MODE
+
+/* Define this to include Java Mode. */
+#undef ENABLE_JAVA_MODE
+
+/* Define this to include Mail Mode. */
+#undef ENABLE_MAIL_MODE
+
+/* Define this to include Shell Mode. */
+#undef ENABLE_SHELL_MODE
+
+/* Define to 1 if you don't have `vprintf' but do have `_doprnt.' */
+#undef HAVE_DOPRNT
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the `getcwd' function. */
+#undef HAVE_GETCWD
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define if you have the ncurses library (-lncurses). */
+#undef HAVE_LIBNCURSES
+
+/* Define to 1 if you have the <limits.h> header file. */
+#undef HAVE_LIMITS_H
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the `strerror' function. */
+#undef HAVE_STRERROR
+
+/* Define to 1 if you have the `strftime' function. */
+#undef HAVE_STRFTIME
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `strstr' function. */
+#undef HAVE_STRSTR
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if `utime(file, NULL)' sets file's timestamp to the present. */
+#undef HAVE_UTIME_NULL
+
+/* Define to 1 if you have the `vasprintf' function. */
+#undef HAVE_VASPRINTF
+
+/* Define to 1 if you have the `vprintf' function. */
+#undef HAVE_VPRINTF
+
+/* Define to 1 if you have the `xmalloc' function. */
+#undef HAVE_XMALLOC
+
+/* Define to 1 if you have the `xrealloc' function. */
+#undef HAVE_XREALLOC
+
+/* Define to 1 if you have the `xstrdup' function. */
+#undef HAVE_XSTRDUP
+
+/* Define this to remove the debugging assertions. */
+#undef NDEBUG
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Default terminal. */
+#undef USE_NCURSES
+
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
+
+/* Define as `__inline' if that's what the C compiler calls it, or to nothing
+   if it is not supported. */
+#undef inline
+
+/* Define to `unsigned' if <sys/types.h> does not define. */
+#undef size_t
+
+
+#ifdef USE_NCURSES
+#ifndef HAVE_LIBNCURSES
+#error ncurses is required for compilation.
+#endif
+#endif
+
+#include <stddef.h>
+
+#ifndef HAVE_XMALLOC
+extern void *xmalloc(size_t);
+#endif
+
+#ifndef HAVE_XREALLOC
+extern void *xrealloc(void *, size_t);
+#endif
+
+#ifndef HAVE_XSTRDUP
+extern char *xstrdup(const char *);
+#endif
+
+#if defined(ENABLE_C_MODE) || defined(ENABLE_CPP_MODE) || \
+    defined(ENABLE_CSHARP_MODE) || defined(ENABLE_JAVA_MODE)
+#define ENABLE_CLIKE_MODES 1
+#endif
+
+#if defined(ENABLE_CLIKE_MODES) || defined(ENABLE_SHELL_MODE) || \
+    defined(ENABLE_MAIL_MODE)
+#define ENABLE_NONTEXT_MODES 1
+#endif
+

@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# Check the consistency of the keys and functions definitions between
+# the Zile sources, the Texinfo documentation, and the `zile.1.in' man page.
+#
+# This script is a big hack, like all shell scripts.
+#
+
+if [ ! -f ../src/tbl_funcs.h ]; then
+	echo "Please run this script in the sources directory \`etc/'";
+	exit 1
+fi
+
+echo "Extracting info..."
+
+TMPFILE1=`mktemp /tmp/$0.XXXXXX` || exit 1
+TMPFUNCS=`mktemp /tmp/$0.XXXXXX` || exit 1
+TMPVARS=`mktemp /tmp/$0.XXXXXX` || exit 1
+TMPFUNCST=`mktemp /tmp/$0.XXXXXX` || exit 1
+TMPVARST=`mktemp /tmp/$0.XXXXXX` || exit 1
+
+cat >$TMPFILE1 <<EOF
+#define ENABLE_CPP_MODE	 1
+#define ENABLE_CSHARP_MODE 1
+#define ENABLE_JAVA_MODE 1
+#define ENABLE_MAIL_MODE 1
+#define X0(z, c)     			z
+#define X1(z, c, k1) 			z
+#define X2(z, c, k1, k2) 		z
+#define X3(z, c, k1, k2, k3) 		z
+#define X4(z, c, k1, k2, k3, k4) 	z
+EOF
+
+cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
+	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
+
+cat >$TMPFILE1 <<EOF
+#define ENABLE_CPP_MODE	 1
+#define ENABLE_CSHARP_MODE 1
+#define ENABLE_JAVA_MODE 1
+#define ENABLE_MAIL_MODE 1
+#define X(v, t, d, c)	v
+EOF
+
+cat $TMPFILE1 ../src/tbl_vars.h | cpp | tr -d " \t\"" \
+	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPVARS
+
+cat ../doc/zile.texi | awk '
+BEGIN { v=0;i=0 }
+/^@c LINT FUNC/ { v=1 }
+/^@c LINT END FUNC/ { v=0 }
+/^@c LINT IGNORE/ { i=1 }
+/^@c LINT END IGNORE/ { i=0 }
+{ if (v && !i) print }
+' | grep "@item" | sed "s/@item //" | sort >$TMPFUNCST
+
+cat ../doc/zile.texi | awk '
+BEGIN { v=0;i=0 }
+/^@c LINT VAR/ { v=1 }
+/^@c LINT END VAR/ { v=0 }
+/^@c LINT IGNORE/ { i=1 }
+/^@c LINT END IGNORE/ { i=0 }
+{ if (v && !i) print }
+' | grep "@item" | sed "s/@item //" | sort >$TMPVARST
+
+echo "Checking functions..."
+for f in `comm -13 $TMPFUNCS $TMPFUNCST`; do
+	echo "function $f defined in Texinfo but not in tbl_funcs.h."
+done
+for f in `comm -23 $TMPFUNCS $TMPFUNCST`; do
+	echo "function $f defined in tbl_funcs.h but not in Texinfo."
+done
+
+echo "Checking variables..."
+for f in `comm -13 $TMPVARS $TMPVARST`; do
+	echo "variable $f defined in Texinfo but not in tbl_vars.h."
+done
+for f in `comm -23 $TMPVARS $TMPVARST`; do
+	echo "variable $f defined in tbl_vars.h but not in Texinfo."
+done
+
+rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
+exit 0

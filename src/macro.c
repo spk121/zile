@@ -1,7 +1,7 @@
-/*	$Id: macro.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: macro.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -38,12 +38,42 @@
 typedef struct macro *macrop;
 
 struct macro {
-	funcp	func;
-	int	uniarg;
-	macrop	next;
+  funcp func;
+  int ndata;
+  int *data;
+  macrop next;
 };
 
 static macrop head_mp, last_mp;
+static macrop running_mp, wait_mp = NULL;
+static int macro_key;
+
+static macrop macro_new()
+{
+  macrop mp;
+
+  mp = (macrop)zmalloc(sizeof(*mp));
+  mp->func = NULL;
+  mp->ndata = 0;
+  mp->data = NULL;
+  mp->next = NULL;
+
+  return mp;
+}
+
+static void macro_free(macrop mp)
+{
+  if (mp->data)
+    free(mp->data);
+  free(mp);
+}
+
+static void add_macro_data(macrop mp, int data)
+{
+  int n = mp->ndata++;
+  mp->data = zrealloc(mp->data, sizeof(int)*mp->ndata);
+  mp->data[n] = data;
+}
 
 void cancel_kbd_macro(void)
 {
@@ -51,7 +81,7 @@ void cancel_kbd_macro(void)
 
 	for (mp = head_mp; mp != NULL; mp = next_mp) {
 		next_mp = mp->next;
-		free(mp);
+		macro_free (mp);
 	}
 
 	head_mp = last_mp = NULL;
@@ -61,19 +91,41 @@ void cancel_kbd_macro(void)
 
 void add_kbd_macro(funcp func, int uniarg)
 {
-	macrop mp;
+  macrop mp = macro_new ();
 
-	mp = (macrop)zmalloc(sizeof(*mp));
-	mp->func = func;
-	mp->uniarg = uniarg;
-	mp->next = NULL;
+  mp->func = func;
+  add_macro_data (mp, uniarg);
 
-	if (head_mp == NULL)
-		head_mp = last_mp = mp;
-	else {
-		last_mp->next = mp;
-		last_mp = mp;
-	}
+  if (wait_mp) {
+    int c;
+    for (c=0; c<wait_mp->ndata; c++)
+      add_macro_data (mp, wait_mp->data[c]);
+    macro_free (wait_mp);
+    wait_mp = NULL;
+  }
+
+  if (head_mp == NULL)
+    head_mp = last_mp = mp;
+  else {
+    last_mp->next = mp;
+    last_mp = mp;
+  }
+}
+
+void add_macro_key_data(int key)
+{
+  if (!wait_mp)
+    wait_mp = macro_new ();
+
+  add_macro_data (wait_mp, key);
+}
+
+int get_macro_key_data(void)
+{
+  if (macro_key < running_mp->ndata)
+    return running_mp->data[macro_key++];
+  else
+    return 0;
 }
 
 DEFUN("start-kbd-macro", start_kbd_macro)
@@ -125,10 +177,17 @@ static int call_last_kbd_macro(void)
 	}
 
 	for (mp = head_mp; mp != NULL; mp = mp->next) {
-		thisflag = 0;
-		mp->func(mp->uniarg);
+		thisflag = FLAG_EXECUTING_MACRO;
+
+		running_mp = mp;
+		macro_key = 0;
+		(*mp->func)(get_macro_key_data ());
+
+		thisflag &= ~FLAG_EXECUTING_MACRO;
+
 		if (lastflag & FLAG_GOT_ERROR)
-			return FALSE;
+		  return FALSE;
+
 		lastflag = thisflag;
 	}
 
@@ -141,18 +200,23 @@ Call the last keyboard macro that you defined with C-x (.
 A prefix argument serves as a repeat count.  Zero means repeat until error.
 +*/
 {
-	int uni;
+	int uni, ret = TRUE;
 
+/*	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0); */
 	if (uniarg == 0) {
 		for (;;)
 			if (!call_last_kbd_macro())
 				break;
-	} else
+	} else {
 		for (uni = 0; uni < uniarg; ++uni)
-			if (!call_last_kbd_macro())
-				return FALSE;
+			if (!call_last_kbd_macro()) {
+				ret = FALSE;
+				break;
+			}
+	}
+/*	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0); */
 
-	return TRUE;
+	return ret;
 }
 
 /*
@@ -164,6 +228,6 @@ void free_macros(void)
 
 	for (mp = head_mp; mp != NULL; mp = next) {
 		next = mp->next;
-		free(mp);
+		macro_free (mp);
 	}
 }

@@ -1,7 +1,7 @@
-/*	$Id: killring.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: killring.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -62,6 +62,13 @@ static void kill_ring_push(char c)
 	kill_ring_text[kill_ring_size++] = c;
 }
 
+static void kill_ring_push_in_beginning(char c)
+{
+	kill_ring_push(0);
+	memmove(kill_ring_text+1, kill_ring_text, kill_ring_size-1);
+	kill_ring_text[0] = c;
+}
+
 static void kill_ring_push_nstring(char *s, size_t size)
 {
 	if (kill_ring_text == NULL) {
@@ -75,7 +82,7 @@ static void kill_ring_push_nstring(char *s, size_t size)
 	kill_ring_size += size;
 }
 
-static int kill_line(void)
+static int kill_line(int literally)
 {
 	if (cur_wp->pointo < cur_wp->pointp->size) {
 		if (warn_if_readonly_buffer())
@@ -92,8 +99,11 @@ static int kill_line(void)
 
 		thisflag |= FLAG_DONE_KILL;
 
-		return TRUE;
-	} else if (cur_wp->pointp->next != cur_bp->limitp) {
+		if (!literally)
+		  return TRUE;
+	}
+
+	if (cur_wp->pointp->next != cur_bp->limitp) {
 		if (!FUNCALL(delete_char))
 			return FALSE;
 
@@ -114,16 +124,25 @@ DEFUN("kill-line", kill_line)
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
 +*/
 {
-	int uni;
+	int uni, ret = TRUE;
 
 	if (!(lastflag & FLAG_DONE_KILL))
 		flush_kill_ring();
 
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!kill_line())
-			return FALSE;
+	if (uniarg == 1) {
+	  kill_line(FALSE);
+	}
+	else {
+	  undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	  for (uni = 0; uni < uniarg; ++uni)
+	    if (!kill_line(TRUE)) {
+	      ret = FALSE;
+	      break;
+	    }
+	  undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	}
 
-	return TRUE;
+	return ret;
 }
 
 DEFUN("kill-region", kill_region)
@@ -210,6 +229,121 @@ Save the region as if killed, but don't kill it.
 	return TRUE;
 }
 
+#define ISWORDCHAR(c)	(isalnum(c) || c == '$')
+
+/* Contributed by David A. Capello <dacap@users.sourceforge.net> */
+DEFUN("kill-word", kill_word)
+/*+
+Kill characters forward until encountering the end of a word.
+With argument, do this that many times.
++*/
+{
+	int c, uni, word_is_killed, ret = TRUE;
+
+	if (!(lastflag & FLAG_DONE_KILL))
+		flush_kill_ring();
+
+	if (warn_if_readonly_buffer())
+		return FALSE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	for (uni = 0; uni < uniarg && ret; ++uni) {
+		word_is_killed = FALSE;
+
+		for (;;) {
+			if (cur_wp->pointo < cur_wp->pointp->size)
+				c = cur_wp->pointp->text[cur_wp->pointo];
+			else if (cur_wp->pointp->next != cur_bp->limitp)
+				c = '\n';
+			else {
+				ret = FALSE;
+				break;
+			}
+
+			if (ISWORDCHAR(c)) {
+				if (!word_is_killed)
+					word_is_killed = TRUE;
+
+				kill_ring_push(c);
+				if (!delete_char()) {
+					ret = FALSE;
+					break;
+				}
+			} else if (!word_is_killed) {
+				kill_ring_push(c);
+				if (!delete_char()) {
+					ret = FALSE;
+					break;
+				}
+			} else
+				break;
+		}
+	}
+
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	thisflag |= FLAG_DONE_KILL;
+
+	return ret;
+}
+
+/* Contributed by David A. Capello <dacap@users.sourceforge.net> */
+DEFUN("backward-kill-word", backward_kill_word)
+/*+
+Kill characters backward until encountering the end of a word.
+With argument, do this that many times.
++*/
+{
+	int c, uni, word_is_killed, ret = TRUE;
+
+	if (!(lastflag & FLAG_DONE_KILL))
+		flush_kill_ring();
+
+	if (warn_if_readonly_buffer())
+		return FALSE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	for (uni = 0; uni < uniarg && ret; ++uni) {
+		word_is_killed = FALSE;
+
+		for (;;) {
+			if (cur_wp->pointo > 0)
+				c = cur_wp->pointp->text[cur_wp->pointo-1];
+			else if (cur_wp->pointp->prev != cur_bp->limitp)
+				c = '\n';
+			else {
+				ret = FALSE;
+				break;
+			}
+
+			if (ISWORDCHAR(c)) {
+				if (!word_is_killed)
+					word_is_killed = TRUE;
+
+				kill_ring_push_in_beginning(c);
+				if (!backward_delete_char()) {
+					ret = FALSE;
+					break;
+				}
+			} else if (!word_is_killed) {
+				kill_ring_push_in_beginning(c);
+				if (!backward_delete_char()) {
+					ret = FALSE;
+					break;
+				}
+			} else
+				break;
+		}
+	}
+
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	thisflag |= FLAG_DONE_KILL;
+
+	return ret;
+}
 
 DEFUN("yank", yank)
 /*+

@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.1 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: astr.c,v 1.2 2003/05/06 22:28:41 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -421,6 +421,8 @@ astr astr_fgets(astr as, FILE *f)
 	astr_clear(as);
 	if ((c = fgetc(f)) == EOF)
 		return NULL;
+	if (c == '\n')
+		return as;
 	astr_append_char(as, c);
 	while ((c = fgetc(f)) != EOF && c != '\n')
 		astr_append_char(as, c);

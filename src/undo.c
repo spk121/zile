@@ -1,7 +1,7 @@
-/*	$Id: undo.c,v 1.3 2003/04/24 15:47:40 rrt Exp $	*/
+/*	$Id: undo.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -150,7 +150,7 @@ static undop revert_action(undop up)
 	case UNDO_INSERT_BLOCK:
 		undo_save(UNDO_REMOVE_BLOCK, up->pointn, up->pointo, up->delta.block.size, 0);
 		undo_nosave = TRUE;
-		for (i = 0; i < up->delta.block.size; i++)
+		for (i = 0; i < up->delta.block.size; ++i)
 			if (up->delta.block.text[i] != '\n')
 				insert_char(up->delta.block.text[i]);
 			else
@@ -158,13 +158,13 @@ static undop revert_action(undop up)
 		undo_nosave = FALSE;
 		break;
 	case UNDO_REMOVE_CHAR:
-		FUNCALL(delete_char);
+		delete_char();
 		break;
 	case UNDO_REMOVE_BLOCK:
 		undo_save(UNDO_INSERT_BLOCK, up->pointn, up->pointo, up->delta.block.size, 0);
 		undo_nosave = TRUE;
-		for (i = 0; i < up->delta.block.size; i++)
-			FUNCALL(delete_char);
+		for (i = 0; i < up->delta.block.size; ++i)
+			delete_char();
 		undo_nosave = FALSE;
 		break;
 	case UNDO_REPLACE_CHAR:
@@ -172,16 +172,18 @@ static undop revert_action(undop up)
 			  cur_wp->pointp->text[up->pointo], 0);
 		cur_wp->pointp->text[up->pointo] = up->delta.c;
 		cur_bp->flags |= BFLAG_MODIFIED;
+#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 		break;
 	case UNDO_REPLACE_BLOCK:
 		undo_save(UNDO_REPLACE_BLOCK, up->pointn, up->pointo,
 			  up->delta.block.size, up->delta.block.osize);
 		undo_nosave = TRUE;
-		for (i = 0; i < up->delta.block.size; i++)
-			FUNCALL(delete_char);
-		for (i = 0; i < up->delta.block.osize; i++)
+		for (i = 0; i < up->delta.block.size; ++i)
+			delete_char();
+		for (i = 0; i < up->delta.block.osize; ++i)
 			if (up->delta.block.text[i] != '\n')
 				insert_char(up->delta.block.text[i]);
 			else

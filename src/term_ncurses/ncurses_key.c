@@ -1,7 +1,7 @@
-/*	$Id: ncurses_key.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: ncurses_key.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_NCURSES_H
+#if HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
@@ -123,8 +123,6 @@ static int translate_key(int c)
 		return KBD_F11;
 	case KEY_F(12):
 		return KBD_F12;
-	case KEY_RESIZE:
-		return KBD_NOKEY;
 	default:
 		if (c > 255)
 			return KBD_NOKEY;	/* Undefined behaviour. */
@@ -137,6 +135,8 @@ static int translate_key(int c)
 static int ungetkey_buf[MAX_UNGETKEY_BUF];
 static int *ungetkey_p = ungetkey_buf;
 
+extern void ncurses_resize_windows(void);
+
 int ncurses_getkey(void)
 {
 	int c, key;
@@ -144,7 +144,18 @@ int ncurses_getkey(void)
 	if (ungetkey_p > ungetkey_buf)
 		return *--ungetkey_p;
 
-	if ((c = getch()) == ERR)
+#ifdef KEY_RESIZE
+	for (;;) {
+		c = getch();
+		if (c != KEY_RESIZE)
+			break;
+		ncurses_resize_windows();
+	}
+#else
+	c = getch();
+#endif
+
+	if (c == ERR)
 		return KBD_NOKEY;
 
 	key = translate_key(c);
@@ -158,23 +169,9 @@ int ncurses_getkey(void)
 	return key;
 }
 
-int ncurses_ungetkey(int key)
+static int xgetkey(int mode, int arg)
 {
-	if (ungetkey_p - ungetkey_buf >= MAX_UNGETKEY_BUF)
-		return FALSE;
-
-	*ungetkey_p++ = key;
-
-	return TRUE;
-}
-
-int ncurses_xgetkey(int mode, int arg)
-{
-	int c = 0;
-
-	if (ungetkey_p > ungetkey_buf)
-		return *--ungetkey_p;
-
+	int c;
 	switch (mode) {
 	case GETKEY_NONFILTERED:
 		c = getch();
@@ -200,9 +197,36 @@ int ncurses_xgetkey(int mode, int arg)
 		nodelay(stdscr, FALSE);
 		break;
 	}
+	return c;
+}
 
-	if (c == KEY_RESIZE)
-		return ncurses_xgetkey(mode, arg);
+int ncurses_xgetkey(int mode, int arg)
+{
+	int c;
+
+	if (ungetkey_p > ungetkey_buf)
+		return *--ungetkey_p;
+
+#ifdef KEY_RESIZE
+	for (;;) {
+		c = xgetkey(mode, arg);
+		if (c != KEY_RESIZE)
+			break;
+		ncurses_resize_windows();
+	}
+#else
+	c = xgetkey(mode, arg);
+#endif
 
 	return c;
+}
+
+int ncurses_ungetkey(int key)
+{
+	if (ungetkey_p - ungetkey_buf >= MAX_UNGETKEY_BUF)
+		return FALSE;
+
+	*ungetkey_p++ = key;
+
+	return TRUE;
 }

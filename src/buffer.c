@@ -1,7 +1,7 @@
-/*	$Id: buffer.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -147,7 +147,7 @@ bufferp create_buffer(const char *name)
 	set_buffer_name(bp, name);
 
 	bp->next = head_bp;
-        head_bp = bp;
+	head_bp = bp;
 
 	return bp;
 }
@@ -491,4 +491,23 @@ void set_temporary_buffer(bufferp bp)
 
 	bp0->next = bp;
 	bp->next = NULL;
+}
+
+int calculate_buffer_size(bufferp bp)
+{
+	linep lp = bp->limitp->next;
+	int size = 0;
+
+	if (lp == bp->limitp)
+		return 0;
+
+	for (;;) {
+		size += lp->size;
+		lp = lp->next;
+		if (lp == bp->limitp)
+			break;
+		++size;
+	}
+
+	return size;
 }

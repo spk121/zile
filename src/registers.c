@@ -1,7 +1,7 @@
-/*	$Id: registers.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: registers.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -72,13 +72,22 @@ Copy region into the user specified register.
 	return TRUE;
 }
 
+static void insert_register(int reg)
+{
+	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo,
+		  regs[reg].size, 0);
+	undo_nosave = TRUE;
+	insert_nstring(regs[reg].text, regs[reg].size);
+	undo_nosave = FALSE;
+}
+
 DEFUN("insert-register", insert_register)
 /*+
 Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
 +*/
 {
-	int reg;
+	int reg, uni;
 
 	if (warn_if_readonly_buffer())
 		return FALSE;
@@ -94,11 +103,10 @@ Puts point before and mark after the inserted text.
 		return FALSE;
 	}
 
-	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo,
-		  regs[reg].size, 0);
-	undo_nosave = TRUE;
-	insert_nstring(regs[reg].text, regs[reg].size);
-	undo_nosave = FALSE;
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	for (uni = 0; uni < last_uniarg; ++uni)
+		insert_register(reg);
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
 	set_mark_command();
 

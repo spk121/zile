@@ -1,7 +1,7 @@
-/*	$Id: help.c,v 1.3 2003/04/24 15:36:50 rrt Exp $	*/
+/*	$Id: help.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,7 +28,7 @@
 
 #include <assert.h>
 #include <ctype.h>
-#ifdef HAVE_LIMITS_H
+#if HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #include <stdarg.h>
@@ -115,7 +115,7 @@ static int read_minihelp_page(bufferp bp)
 	return TRUE;
 }
 
-DEFUN("toggle-minihelp-window", toggle_minihelp_window)
+DEFUN("minihelp-toggle-window", minihelp_toggle_window)
 /*+
 Toggle the mini help window.
 +*/
@@ -149,7 +149,7 @@ Toggle the mini help window.
 	return TRUE;
 }
 
-DEFUN("rotate-minihelp-window", rotate_minihelp_window)
+DEFUN("minihelp-rotate-contents", minihelp_rotate_contents)
 /*+
 Show the next mini help entry.
 +*/
@@ -157,11 +157,11 @@ Show the next mini help entry.
 	const char *bname = "*Mini Help*";
 
 	if (find_window(bname) == NULL)
-		FUNCALL(toggle_minihelp_window);
+		FUNCALL(minihelp_toggle_window);
 	else { /* Easy hack */
-		FUNCALL(toggle_minihelp_window);
+		FUNCALL(minihelp_toggle_window);
 		++minihelp_page;
-		FUNCALL(toggle_minihelp_window);
+		FUNCALL(minihelp_toggle_window);
 	}
 
 	return TRUE;
@@ -383,6 +383,24 @@ Display documentation of the function invoked by a key sequence.
 			  name, doc);
 	astr_delete(bufname);
 	astr_delete(doc);
+
+	return TRUE;
+}
+
+DEFUN("describe-key-briefly", describe_key_briefly)
+/*+
+Display the name of the function invoked by a key sequence.
++*/
+{
+	char *name;
+
+	minibuf_write("Describe key briefly:");
+	if ((name = get_function_by_key_sequence()) == NULL) {
+		minibuf_error("Key sequence is undefined");
+		return FALSE;
+	}
+
+	minibuf_write("Key sequence runs the command `@f%s@@'", name);
 
 	return TRUE;
 }

@@ -1,7 +1,7 @@
-/*	$Id: fontlock.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: fontlock.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -41,9 +41,11 @@
 #include "zile.h"
 #include "extern.h"
 
+#if ENABLE_NONTEXT_MODES
+#if ENABLE_CLIKE_MODES
 /*
  * Parse the line for comments and strings and add anchors if found.
- * C/C++ Mode.
+ * C/C++/C#/Java Mode.
  */
 static void cpp_set_anchors(linep lp, int *lastanchor)
 {
@@ -56,7 +58,7 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
 
 	ap = lp->anchors = (char *)zmalloc(lp->size);
 
-	for (sp = lp->text; sp < lp->text + lp->size; sp++)
+	for (sp = lp->text; sp < lp->text + lp->size; ++sp)
 		if (*lastanchor == ANCHOR_BEGIN_COMMENT) {
 			/*
 			 * We are in the middle of a comment, so parse
@@ -102,7 +104,7 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
 			*lastanchor = ANCHOR_BEGIN_COMMENT;
 		} else if (*sp == '/' && sp < lp->text + lp->size - 1 && *(sp+1) == '/') {
 			/* // C++ style comment; ignore to end of line. */
-			for (; sp < lp->text + lp->size; sp++)
+			for (; sp < lp->text + lp->size; ++sp)
 				*ap++ = ANCHOR_NULL;
 		} else if (*sp == '\'') {
 			/*
@@ -111,6 +113,7 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
 			 * cannot be longer than a line.
 			 */
 			*ap++ = ANCHOR_NULL;
+			++sp;
 			while (sp < lp->text + lp->size - 1 && *sp != '\'') {
 				*ap++ = ANCHOR_NULL;
 				if (*++sp == '\\' && sp < lp->text + lp->size - 1) {
@@ -128,6 +131,54 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
 		} else
 			*ap++ = ANCHOR_NULL;
 }
+#endif /* ENABLE_CLIKE_MODES */
+
+#if ENABLE_SHELL_MODE
+static char *special_string = NULL;
+
+static char *make_special_string (linep lp, char *sp, char *ap)
+{
+  char *start, *end;
+  int chr;
+
+  if (special_string) {
+    free (special_string);
+    special_string = NULL;
+  }
+
+  for (; sp < lp->text + lp->size; sp++) {
+    if (*sp != ' ') {
+      start = sp;
+
+      for (; sp < lp->text + lp->size; sp++) {
+        if (!(((*sp >= 'a') && (*sp <= 'z')) ||
+              ((*sp >= 'A') && (*sp <= 'Z')) ||
+              ((*sp == '_'))))
+          return NULL;
+
+        if (ap) {
+          if (sp == start)
+            *ap++ = ANCHOR_BEGIN_SPECIAL;
+          else
+            *ap++ = ANCHOR_NULL;
+        }
+      }
+
+      end = lp->text + lp->size;
+      chr = *end;
+      *end = 0;
+      special_string = xstrdup (start);
+      *end = chr;
+
+      return special_string;
+    }
+
+    if (ap)
+      *ap++ = ANCHOR_NULL;
+  }
+
+  return NULL;
+}
 
 /*
  * Parse the line for comments and strings and add anchors if found.
@@ -135,62 +186,120 @@ static void cpp_set_anchors(linep lp, int *lastanchor)
  */
 static void shell_set_anchors(linep lp, int *lastanchor)
 {
-	char *sp, *ap;
-	static int laststrchar;
+  char *sp, *ap;
+  static int laststrchar;
 
-	if (lp->size == 0) {
-		lp->anchors = NULL;
-		return;
-	}
+  if (lp->size == 0) {
+    lp->anchors = NULL;
+    return;
+  }
 
-	ap = lp->anchors = (char *)zmalloc(lp->size);
+  ap = lp->anchors = (char *)zmalloc(lp->size);
 
-	for (sp = lp->text; sp < lp->text + lp->size; sp++)
-		if (*lastanchor == ANCHOR_BEGIN_STRING) {
-			/*
-			 * We are in the middle of a string, so parse for
-			 * finding the termination sequence.
-			 */
-			if (*sp == '\\' && sp < lp->text + lp->size - 1) {
-				*ap++ = ANCHOR_NULL;
-				*ap++ = ANCHOR_NULL;
-				++sp;
-			} else if (*sp == laststrchar) {
-				/*
-				 * Found a string termination.  Put an anchor
-				 * to signal this.
-				 */
-				*ap++ = ANCHOR_END_STRING;
-				*lastanchor = ANCHOR_NULL;
-			} else
-				*ap++ = ANCHOR_NULL;
-		} else if (*sp == '"' || *sp == '`' || *sp == '\'') {
-			/*
-			 * Found a string beginning sequence.  Put an anchor to
-			 * signal this.
-			 */
-			laststrchar = *sp;
-			*ap++ = ANCHOR_BEGIN_STRING;
-			*lastanchor = ANCHOR_BEGIN_STRING;
-		} else if (*sp == '#') {
-			/* Comment; ignore to end of line. */
-			for (; sp < lp->text + lp->size; sp++)
-				*ap++ = ANCHOR_NULL;
-		} else
-			*ap++ = ANCHOR_NULL;
+  for (sp = lp->text; sp < lp->text + lp->size; sp++) {
+    if (*lastanchor == ANCHOR_BEGIN_STRING) {
+      /*
+       * We are in the middle of a string, so parse for
+       * finding the termination sequence.
+       */
+      if (*sp == '\\' && sp < lp->text + lp->size - 1) {
+	*ap++ = ANCHOR_NULL;
+	*ap++ = ANCHOR_NULL;
+	++sp;
+      }
+      else if (*sp == laststrchar) {
+	/*
+	 * Found a string termination.  Put an anchor
+	 * to signal this.
+	 */
+	*ap++ = ANCHOR_END_STRING;
+	*lastanchor = ANCHOR_NULL;
+      }
+      else {
+	*ap++ = ANCHOR_NULL;
+      }
+    }
+    /* special chunks "<< EOF \n ... \n " */
+    else if (*lastanchor == ANCHOR_BEGIN_SPECIAL) {
+      if ((sp == lp->text) &&
+	  (special_string) &&
+	  (*sp == *special_string) &&
+	  (lp->size == (int)strlen (special_string)) &&
+	  (strncmp (sp, special_string, lp->size) == 0)) {
+	int i, l = strlen (special_string);
+
+	for (i=0; i<l-1; i++)
+	  *ap++ = ANCHOR_NULL;
+
+	sp += l;
+	*ap++ = ANCHOR_END_SPECIAL;
+	*lastanchor = ANCHOR_NULL;
+      }
+      else {
+	*ap++ = ANCHOR_NULL;
+      }
+    }
+    /* string stuff */
+    else if (*sp == '"' || *sp == '`' || *sp == '\'') {
+      /* found just a string character (\', \" or \`) */
+      if ((sp > lp->text) && (*(sp-1) == '\\')) {
+	laststrchar = *sp;
+	ap--;
+	*ap++ = ANCHOR_BEGIN_STRING;
+	*ap++ = ANCHOR_END_STRING;
+	*lastanchor = ANCHOR_NULL;
+      }
+      else {
+	/*
+	 * Found a string beginning sequence.  Put an anchor to
+	 * signal this.
+	 */
+	laststrchar = *sp;
+	*ap++ = ANCHOR_BEGIN_STRING;
+	*lastanchor = ANCHOR_BEGIN_STRING;
+      }
+    }
+    else if ((*sp == '<') && (sp > lp->text) && (*(sp-1) == '<')) {
+      if (make_special_string (lp, sp+1, ap+1)) {
+	*lastanchor = ANCHOR_BEGIN_SPECIAL;
+	break;
+      }
+      else
+	*ap++ = ANCHOR_NULL;
+    }
+    /* Comment; ignore to end of line. */
+    else if ((*sp == '#') && ((sp == lp->text) || (*(sp-1) != '$'))) {
+      for (; sp < lp->text + lp->size; sp++)
+	*ap++ = ANCHOR_NULL;
+    }
+    else
+      *ap++ = ANCHOR_NULL;
+  }
 }
+#endif /* ENABLE_SHELL_MODE */
 
 static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
 {
-	switch (bp->mode) {
-	case BMODE_C:
-	case BMODE_CPP:
-		cpp_set_anchors(lp, lastanchor);
-		break;
-	case BMODE_SHELL:
-		shell_set_anchors(lp, lastanchor);
-		break;
-	}
+  if (lp->anchors) {
+    free (lp->anchors);
+    lp->anchors = NULL;
+  }
+
+  switch (bp->mode) {
+  case BMODE_C:
+  case BMODE_CPP:
+  case BMODE_CSHARP:
+  case BMODE_JAVA:
+#if ENABLE_CLIKE_MODES
+    cpp_set_anchors(lp, lastanchor);
+#endif
+    break;
+  case BMODE_SHELL:
+#if ENABLE_SHELL_MODE
+    shell_set_anchors(lp, lastanchor);
+#endif
+    break;
+  }
 }
 
 /*
@@ -199,13 +308,10 @@ static void line_set_anchors(bufferp bp, linep lp, int *lastanchor)
  */
 void font_lock_reset_anchors(bufferp bp, linep lp)
 {
-	int lastanchor;
+  int lastanchor;
 
-	if (lp->anchors != NULL)
-		free(lp->anchors);
-	lp->anchors = NULL;
-	lastanchor = find_last_anchor(bp, lp->prev);
-	line_set_anchors(bp, lp, &lastanchor);
+  lastanchor = find_last_anchor (bp, lp->prev);
+  line_set_anchors (bp, lp, &lastanchor);
 }
 
 /*
@@ -213,18 +319,22 @@ void font_lock_reset_anchors(bufferp bp, linep lp)
  */
 int find_last_anchor(bufferp bp, linep lp)
 {
-	char *p;
+  char *p;
 
-	for (; lp != bp->limitp; lp = lp->prev) {
-		if (lp->anchors == NULL)
-			continue;
-		if (lp->size > 0)
-			for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
-				if (*p != ANCHOR_NULL)
-					return *p;
+  for (; lp != bp->limitp; lp = lp->prev) {
+    if (lp->anchors == NULL)
+      continue;
+    if (lp->size > 0)
+      for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
+	if (*p != ANCHOR_NULL) {
+	  if ((bp->mode == BMODE_SHELL) && (*p == ANCHOR_BEGIN_SPECIAL))
+	    make_special_string (lp, lp->text + (p - lp->anchors), NULL);
+
+	  return *p;
 	}
+  }
 
-	return ANCHOR_NULL;
+  return ANCHOR_NULL;
 }
 
 /*
@@ -262,6 +372,7 @@ static void font_lock_unset_anchors(bufferp bp)
 
 	minibuf_clear();
 }
+#endif /* ENABLE_NONTEXT_MODES */
 
 DEFUN("font-lock-mode", font_lock_mode)
 /*+
@@ -271,10 +382,14 @@ When Font Lock mode is enabled, text is fontified as you type it.
 {
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
 		cur_bp->flags &= ~BFLAG_FONTLOCK;
+#if ENABLE_NONTEXT_MODES
 		font_lock_unset_anchors(cur_bp);
+#endif
 	} else {
 		cur_bp->flags |= BFLAG_FONTLOCK;
+#if ENABLE_NONTEXT_MODES
 		font_lock_set_anchors(cur_bp);
+#endif
 	}
 
 	return TRUE;
@@ -286,10 +401,12 @@ Refresh the Font Lock mode internal structures.
 This may be called when the fontification looks weird.
 +*/
 {
+#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
 		font_lock_unset_anchors(cur_bp);
 		font_lock_set_anchors(cur_bp);
 	}
+#endif
 
 	return TRUE;
 }

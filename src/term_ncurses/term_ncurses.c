@@ -1,7 +1,7 @@
-/*	$Id: term_ncurses.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
 
 #include <stddef.h>
 
-#ifdef HAVE_NCURSES_H
+#if HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>

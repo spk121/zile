@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2003/04/24 15:11:17 $
+		   Last updated: $Date: 2003/05/06 22:28:41 $
 
 ------------------------------------------------------------------------------
 
@@ -16,6 +16,7 @@ INDEX
    1.7. Zile is bogus.
    1.8. I like the xyz function of (X)Emacs but in Zile isn't implemented.
    1.9. How small does Zile get?
+   1.10. Does Zile support the Unicode / UTF-8 encodings?
 
 2. Functionality
    2.1. How to quit Zile?
@@ -32,11 +33,15 @@ INDEX
    2.12. How to enable Auto Fill Mode in Text Mode at startup?
    2.13. How to change the binding of a function?
    2.14. How to implement a new Font Lock xyz Mode?
+   2.15. Why not implementing a HTML Mode?
+   2.16. How to enable Mail Mode with Font Lock at startup?
+   2.17. The Zile screen is not resized in a X Window terminal.
+   2.18. The highlighting looks weird.
 
 3. Compiling
    3.1. Can I compile Zile with the old Berkeley curses?
    3.2. Zile doesn't compile correctly under the Foobar operating system.
-   3.3. Compile error: ncurses_misc.c: `TIOCGWINSZ' undeclared
+   3.3. Can I compile Zile under Cygwin?
 
 ------------------------------------------------------------------------------
 
@@ -56,7 +61,7 @@ INDEX
     A verbatim copy of the license follows:
 
     -------------------------------------------------------------------------
-    Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+    Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions
@@ -138,6 +143,12 @@ INDEX
 
     (*) This is the default on many systems.
 
+1.10. Does Zile support the Unicode / UTF-8 encodings?
+
+   Currently Zile doesn't include any code for Unicode support.  A major
+   rewrite of the editor with ad-hoc support for multibyte sequences
+   is planned in the future.
+
 ------------------------------------------------------------------------------
 
 2. Functionality
@@ -178,6 +189,9 @@ INDEX
 
     Enable the `colors' variable into your `~/.zilerc' file.  If it is already
     enabled, check your `TERM' environment variable and the ncurses manual.
+
+    If you are using Zile under xterm, you might need to set the
+    `TERM' variable to `xterm-color' or something like.
 
 2.7. What are the available variables that can be modified?
 
@@ -221,9 +235,13 @@ INDEX
 
 	text-mode-auto-fill = true
 
+    The same thing applies to Mail Mode:
+
+	mail-mode-auto-fill = true
+
 2.13. How to change the binding of a function?
 
-    Unfortunately non run-time option exists, yet.
+    Unfortunately no run-time option exists, yet.
     If you would like to change a key binding of Zile, you have to
     edit the `src/tbl_funcs.h' file and recompile the sources.
 
@@ -241,8 +259,12 @@ INDEX
 
 	#define BMODE_XYZ
 
-    then grep all the sources for `BMODE_C' and add proper support for your 
-    new mode `BMODE_XYZ'.
+    then grep all the sources for references to `BMODE_C' and add proper
+    support for your new mode `BMODE_XYZ'.
+
+    tbl_funcs.h: add a
+
+	X0("xyz-mode", xyz_mode)
 
     funcs.c: implement a function like:
 
@@ -259,6 +281,45 @@ INDEX
 
     term_ncurses/ncurses_redisplay.c: Implement a `draw_line_xyz' function
     (`draw_line_cpp' can be used as example).
+
+2.15. Why not implementing a HTML Mode?
+
+    HTML parsing is difficult to implement and a big DTD model
+    describing the syntax should be included for each HTML version:
+    2.0, 3.0, 4.0, 4.01, XML, CSS, ...  I want to keep the Zile
+    package size smaller (below the 300k).  Hint: use (X)Emacs.
+
+2.16. How to enable Mail Mode with Font Lock at startup?
+
+    If you would like to interface Zile with your mail client, e.g. Pine,
+    you might add a line like this in your mail client configuration:
+
+	editor = zile -f mail-mode
+
+    Zile will automatically turn on Mail Mode at startup.
+
+    You might also want to disable backups in mail editing, to avoid
+    pullulating the /tmp directory with useless backup files:
+
+	editor = zile -v backup-method=none -f mail-mode
+
+2.17. The Zile screen is not resized in a X Window terminal.
+
+    There are two possibilities:
+    (1) Your terminal application does not send the signal `SIGWINCH'
+        to Zile (and other applications).  To be sure, you might check if
+        also other text-mode applications, like `vim' and `joe', do not
+        resize their windows.
+    (2) Your ncurses library does not support the `KEY_RESIZE' pseudo key.
+        This is because your version is old or was not compiled
+        with the flag `--enable-sigwinch' to `configure'.
+
+2.18. The highlighting looks weird.
+
+     Type `C-l' for making Zile reparse the whole file.  If this doesn't
+     fix the problem you have probably found a bug in the Font Lock
+     engine of Zile (please remember that Font Lock is somewhat limited
+     in Shell Mode).
 
 ------------------------------------------------------------------------------
 
@@ -283,13 +344,13 @@ INDEX
 	* NetBSD
 	* OpenBSD
 	* Solaris
+	* Windows 9x with Cygwin
 
-3.3. Compile error: ncurses_misc.c: `TIOCGWINSZ' undeclared
+3.3. Can I compile Zile under Cygwin?
 
-    If you are compiling Zile under a UNIX-like environment were X Window
-    is supported, please check the headers included in the first lines of the
-    `src/term_ncurses/ncurses_misc.c' source file.
+    Yes, you can. You might need to put a
 
-    If you are compiling Zile under a non-UNIX environment (like cygwin),
-    you have to disable the xterm support, with the `--disable-xterm-support'
-    parameter to `configure'.
+	#include <getopt.h>
+
+    line in the `etc/mkdoc.c' and `src/main.c' files, if the compiler complains
+    about the `getopt' function prototype and/or the `optarg' variable.

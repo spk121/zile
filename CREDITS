@@ -17,11 +17,22 @@
 * Gerd Bavendiek <bav@epost.de> for suggestions and bug reports.
 * Dale DePriest <daled@cadence.com> for suggestions.
 * Florian Nykrin <flo.n@gmx.de> for suggestions and bug reports.
-* Josef 'Jupp' Schugt <jupp@jupp.8m.com> for suggestions.
+* Josef 'Jupp' Schugt <jupp@gmx.de> for suggestions, bug fixes and
+  the C# Mode (C sharp).
 * Alexander Glasmacher <alexander.glasmacher@web.de> for bug fixes.
 * Abel Morabito <amorabito@funescoop.com.ar> for suggestions.
 * Jacques A. Vidrine <n@nectar.com> for suggestions.
 * Maxime Soulé <max@IPricot.com> for suggestions.
 * Falk Hueffner <falk@debian.org> for bug reports.
-* Reuben Thomas <rrt@sc3d.org> for bug fixes and maintenance.
+* Staffan Johansson <e9drift@etek.chalmers.se> for bug reports.
+* db <db@mosey.org> for suggestions.
+* Reuben Thomas <rrt@mupsych.org> for bug reports, fixes and
+  maintenance.
+* Marius Nita <marius@cs.pdx.edu> for the Java Mode and the
+  `shrink-window' feature.
+* Alan James <alan@tomun.org> for suggestions.
+* Joseph Boyd <k963@bonbon.net> for the `back-to-indentation' feature.
+* David A. Capello <dacap@users.sourceforge.net> for `kill-word',
+  `backward-kill-word', identifiers hightlighting in Shell Script Mode
+  and bug fixes.
 * Nicolas Duboc <nicolas@duboc.net> for bug fixes.

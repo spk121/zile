@@ -1,7 +1,7 @@
-/*	$Id: file.c,v 1.3 2003/04/24 15:36:50 rrt Exp $	*/
+/*	$Id: file.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -26,14 +26,18 @@
 
 #include "config.h"
 
+#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#if HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <assert.h>
 #include <errno.h>
-#ifdef HAVE_FCNTL_H
+#if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_LIMITS_H
+#if HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #include <pwd.h>
@@ -41,7 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <utime.h>
@@ -448,7 +452,7 @@ Some examples of correlated files are the following:
 +*/
 {
 	const char *c_src[] = { ".c", ".C", ".cc", ".cpp", ".cxx", ".m", NULL };
-	const char *c_hdr[] = { ".h", ".H", ".hpp", NULL };
+	const char *c_hdr[] = { ".h", ".H", ".hpp", ".hh", NULL };
 	const char *in_ext[] = { ".in", ".IN", NULL };
 	int i;
 	char *nfile;
@@ -489,8 +493,12 @@ Some examples of correlated files are the following:
 	return FALSE;
 }
 
+#if ENABLE_SHELL_MODE
 /*
  * Try to identify a shell script file.
+ *
+ * A shell file is identified if the first line is in the format:
+ *     <any whitespace> <the # char> <any whitespace> <the ! char>
  */
 static int is_shell_file(const char *filename)
 {
@@ -513,27 +521,48 @@ static int is_shell_file(const char *filename)
 		return FALSE;
 	return TRUE;
 }
+#endif
 
+#if ENABLE_NONTEXT_MODES
 static void find_file_hooks(char *filename)
 {
 	const char *c_file[] = { ".c", ".h", ".m", NULL };
+#if ENABLE_CPP_MODE
 	const char *cpp_file[] = { ".C", ".H", ".cc", ".cpp",
-				   ".cxx", ".hpp", NULL };
+				   ".cxx", ".hpp", ".hh", NULL };
+#endif
+#if ENABLE_CSHARP_MODE
+	const char *csharp_file[] = { ".cs", ".CS", NULL };
+#endif
+#if ENABLE_JAVA_MODE
+	const char *java_file[] = { ".java", ".JAVA", NULL };
+#endif
 	const char *shell_file[] = { ".sh", ".csh", NULL };
-	if (have_extension(filename, c_file))
+
+	if (0) {} /* Hack */
+#if ENABLE_C_MODE
+	else if (have_extension(filename, c_file))
 		FUNCALL(c_mode);
+#endif
+#if ENABLE_CPP_MODE
 	else if (have_extension(filename, cpp_file))
 		FUNCALL(cpp_mode);
+#endif
+#if ENABLE_CSHARP_MODE
+	else if (have_extension(filename, csharp_file))
+		FUNCALL(csharp_mode);
+#endif
+#if ENABLE_JAVA_MODE
+	else if (have_extension(filename, java_file))
+		FUNCALL(java_mode);
+#endif
+#if ENABLE_SHELL_MODE
 	else if (have_extension(filename, shell_file) ||
 		 is_shell_file(filename))
 		FUNCALL(shell_script_mode);
-
-	if (cur_bp->mode == BMODE_TEXT) {
-		if (lookup_bool_variable("text-mode-auto-fill"))
-			FUNCALL(auto_fill_mode);
-	} else if (lookup_bool_variable("auto-font-lock"))
-		FUNCALL(font_lock_mode);
+#endif
 }
+#endif /* ENABLE_NONTEXT_MODES */
 
 int find_file(char *filename)
 {
@@ -565,7 +594,9 @@ int find_file(char *filename)
 
 	switch_to_buffer(bp);
 	read_from_disk(filename);
+#if ENABLE_NONTEXT_MODES
 	find_file_hooks(filename);
+#endif
 
 	thisflag |= FLAG_NEED_RESYNC;
 
@@ -816,13 +847,17 @@ void insert_buffer(bufferp bp)
 {
 	linep lp;
 	char *p;
+	int size = calculate_buffer_size(bp);
 
+	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+	undo_nosave = TRUE;
 	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
 		for (p = lp->text; p < lp->text + lp->size; ++p)
 			insert_char(*p);
 		if (lp->next != bp->limitp)
 			insert_newline();
 	}
+	undo_nosave = FALSE;
 }
 
 DEFUN("insert-buffer", insert_buffer)
@@ -862,7 +897,7 @@ Puts mark after the inserted text.
 	return TRUE;
 }
 
-int insert_file(char *filename)
+static int insert_file(char *filename)
 {
 	int fd, i, size;
 	char buf[BUFSIZ];
@@ -877,12 +912,22 @@ int insert_file(char *filename)
 		return FALSE;
 	}
 
+	size = lseek(fd, 0, SEEK_END);
+	if (size < 1) {
+		close(fd);
+		return TRUE;
+	}
+
+	lseek(fd, 0, SEEK_SET);
+	undo_save(UNDO_REMOVE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+	undo_nosave = TRUE;
 	while ((size = read(fd, buf, BUFSIZ)) > 0)
 		for (i = 0; i < size; i++)
 			if (buf[i] != '\n')
 				insert_char(buf[i]);
 			else
 				insert_newline();
+	undo_nosave = FALSE;
 	close(fd);
 
 	return TRUE;
@@ -925,10 +970,75 @@ Set mark after the inserted text.
 	return TRUE;
 }
 
+static int ask_delete_old_revisions(char *filename)
+{
+	int c;
+	minibuf_write("Delete excess backup versions of @b%s@@? (y or n) ", filename);
+	c = cur_tp->getkey();
+	while (c != 'y') {
+		if (c == 'n' || c == 'q' || c == KBD_CANCEL)
+			return FALSE;
+		minibuf_write("Please answer y or n.  Delete excess backup versions of @b%s@@? (y or n) ", filename);
+		c = cur_tp->getkey();
+	}
+	return TRUE;
+}
+
+static int get_new_revision(char *filename)
+{
+	int i, fd, first, latest, count, maxrev;
+	char *buf = (char *)zmalloc(strlen(filename) + 10);
+
+	/* Find the latest existing revision. */
+	for (i = 999; i >= 1; --i) { /* XXX need to fix this. */
+		sprintf(buf, "%s.~%d~", filename, i);
+		if ((fd = open(buf, O_RDONLY, 0)) != -1) {
+			close(fd);
+			break;
+		}
+	}
+	latest = i + 1;
+	first = 0;
+	/* Count the existing revisions. */
+	for (i = 1; i <= latest; ++i) {
+		sprintf(buf, "%s.~%d~", filename, i);
+		if ((fd = open(buf, O_RDONLY, 0)) != -1) {
+			close(fd);
+			if (first == 0)
+				first = i;
+			++count;
+		}
+	}
+	maxrev = atoi(get_variable("revisions-kept"));
+	maxrev = max(maxrev, 2);
+	if (count >= maxrev) {
+		char *action = get_variable("revisions-delete");
+		int no = count - maxrev + 1;
+		int confirm = FALSE;
+		if (!strcmp(action, "ask"))
+			confirm = ask_delete_old_revisions(filename);
+		else if (!strcmp(action, "noask"))
+			confirm = TRUE;
+		if (confirm) {
+			for (i = 1; i < latest && no > 0; ++i) {
+				sprintf(buf, "%s.~%d~", filename, i);
+				if ((fd = open(buf, O_RDONLY, 0)) != -1) {
+					close(fd);
+					remove(buf);
+					--no;
+				}
+			}
+		}
+	}
+
+	free(buf);
+
+	return latest;
+}
+
 /*
  * Create a backup filename according to user specified variables.
  */
-
 static char *create_backup_filename(char *filename, int withrevs,
 				    int withdirectory)
 {
@@ -975,16 +1085,8 @@ static char *create_backup_filename(char *filename, int withrevs,
 	s = (char *)zmalloc(strlen(filename) + 10);
 
 	if (withrevs) {
-		int n = 1, fd;
-		/* Find a non existing filename. */
-		for (;;) {
-			sprintf(s, "%s~%d~", filename, n);
-			if ((fd = open(s, O_RDONLY, 0)) != -1)
-				close(fd);
-			else
-				break;
-			++n;
-		}
+		int n = get_new_revision(filename);
+		sprintf(s, "%s.~%d~", filename, n);
 	} else { /* simple backup */
 		strcpy(s, filename);
 		strcat(s, "~");

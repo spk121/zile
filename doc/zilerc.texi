@@ -28,8 +28,9 @@ tab-width = 8
 # The default fill column (in Auto Fill Mode) [default: 72]
 fill-column = 72
 
-# Automatically enable the Auto Fill Mode in Text Mode [default: false]
-text-mode-auto-fill = false
+# Automatically enable the Auto Fill Mode in Text Mode and/or Mail Mode
+text-mode-auto-fill = false             # [default: false]
+mail-mode-auto-fill = false             # [default: false]
 
 # Display time in status line [default: true]
 display-time = true
@@ -48,15 +49,13 @@ highlight-region = true
 # Possible values are: none, simple and revision.
 #
 # * If `none' is specified, Zile will not create backup files.
-#
 # * If `simple' is specified, Zile will create a backup file with a
 #   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
 #   create the backup `foo.c~').
-#
 # * If `revision' is specified, Zile will create a new backup file on
 #   each file saving preserving the old backups of the original file
-#   (e.g.: on saving `foo.c' it will create the backup `foo.c~1~', then
-#   on next save `foo.c~2~', etc.).
+#   (e.g.: on saving `foo.c' it will create the backup `foo.c.~1~', then
+#   on next save `foo.c.~2~', etc.).
 backup-method = simple
 
 # Enable backup directory for backup files [default: false]
@@ -68,6 +67,19 @@ backup-with-directory = false
 # Specify target backup directory [default: "~/.backup"]
 # Directory must be existent.
 backup-directory = "~/.backup"
+
+# Maximum number of revisions [default: 5]
+# Number of oldest versions to keep when a new numbered backup
+# is made (used only when `backup-method' is set to `revision').
+revisions-kept = 5
+
+# Specify the action when the number of revisions exceed the value
+# specified in `revisions-kept' [default: ask]
+#
+# * If `ask' is specified, ask confirmation to delete.
+# * If `noask' is specified, delete excess backup versions silently.
+# * Any other value prevents any trimming.
+revisions-delete = ask
 
 # Expand tabs [default: false]
 # If disabled, Zile will insert hard tabs (the character \t),
@@ -97,8 +109,14 @@ font-number = cyan                      # [default: cyan]
 font-other = white                      # [default: white]
 font-string = green                     # [default: green]
 font-string-delimiters = white          # [default: white]
+# The colors used in Mail Mode (if Mail Mode was compiled-in)
+font-mail1 = green                      # [default: green]
+font-mail2 = red                        # [default: red]
+font-mail3 = cyan                       # [default: cyan]
+font-mail4 = magenta                    # [default: magenta]
+font-mail5 = blue                       # [default: blue]
 
-# Enable automatic Font Lock Mode for C/C++/sh-scripts [default: true]
+# Enable automatic Font Lock Mode [default: true]
 # Font Lock can also be toggled using the `M-x font-lock-mode' command.
 auto-font-lock = true
 
@@ -106,6 +124,10 @@ auto-font-lock = true
 # If enabled, the file will be reparsed by Font Lock on every C-l press.
 # This may be disabled on slow machines.
 auto-font-lock-refresh = true
+
+# The character prepended to quoted text in mails [default: ">"]
+# Used by Font Lock in Mail Mode (if Mail Mode was compiled-in).
+mail-quoting-char = ">"
 
 # Enable beep [default: true]
 # If enabled, a sound will be emitted on any error.

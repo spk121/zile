@@ -1,7 +1,7 @@
-/*	$Id: search.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: search.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -224,7 +224,23 @@ static int isearch(int dir)
 			 (dir == ISEARCH_FORWARD) ? "" : " backward",
 			 astr_cstr(pattern));
 		minibuf_write("%s", astr_cstr(buf));
-		c = cur_tp->getkey();
+
+		if (thisflag & FLAG_EXECUTING_MACRO) {
+		  if (!last) {
+		    thisflag ^= FLAG_EXECUTING_MACRO;
+		    lastflag |= FLAG_GOT_ERROR;
+		    break;
+		  }
+		  else {
+		    c = get_macro_key_data ();
+		  }
+		}
+		else {
+		  c = cur_tp->getkey();
+		  if (thisflag & FLAG_DEFINING_MACRO)
+		    add_macro_key_data (c);
+		}
+
 		if (c == KBD_CANCEL) {
 			cur_wp->pointp = startp;
 			cur_wp->pointo = starto;

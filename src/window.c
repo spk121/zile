@@ -1,7 +1,7 @@
-/*	$Id: window.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: window.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -168,6 +168,33 @@ Make current window one line bigger.
 		recenter(wp);
 	++cur_wp->fheight;
 	++cur_wp->eheight;
+
+	return TRUE;
+}
+
+DEFUN("shrink-window", shrink_window)
+/*+
+Make current window one line smaller.
++*/
+{
+	windowp wp;
+
+	if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
+		return FALSE;
+
+	if ((wp = cur_wp->next) == NULL) {
+		for (wp = head_wp; wp != NULL; wp = wp->next) {
+			if (wp->next == cur_wp)
+				break;
+		}
+	}
+
+	++wp->fheight;
+	++wp->eheight;
+	--cur_wp->fheight;
+	--cur_wp->eheight;
+	if (cur_wp->topdelta >= cur_wp->eheight)
+		recenter(cur_wp);
 
 	return TRUE;
 }

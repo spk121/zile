@@ -1,7 +1,7 @@
-/*	$Id: term_ncurses.h,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,14 +32,16 @@
 #define ZILE_COLOR_MAGENTA	5
 #define ZILE_COLOR_CYAN		6
 #define ZILE_COLOR_WHITE	7
+#define ZILE_COLOR_BLUEBG	8
 
 #define C_FG_BLACK		COLOR_PAIR(ZILE_COLOR_BLACK)
 #define C_FG_RED		COLOR_PAIR(ZILE_COLOR_RED)
-#define C_FG_GREEN		COLOR_PAIR(ZILE_COLOR_GREEN)	
+#define C_FG_GREEN		COLOR_PAIR(ZILE_COLOR_GREEN)
 #define C_FG_YELLOW		COLOR_PAIR(ZILE_COLOR_YELLOW)
 #define C_FG_BLUE		COLOR_PAIR(ZILE_COLOR_BLUE)
 #define C_FG_MAGENTA		COLOR_PAIR(ZILE_COLOR_MAGENTA)
 #define C_FG_CYAN		COLOR_PAIR(ZILE_COLOR_CYAN)
 #define C_FG_WHITE		COLOR_PAIR(ZILE_COLOR_WHITE)
+#define C_FG_WHITE_BG_BLUE	COLOR_PAIR(ZILE_COLOR_BLUEBG)
 
 extern terminalp ncurses_tp;

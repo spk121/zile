@@ -1,7 +1,7 @@
-/*	$Id: rc.c,v 1.3 2003/04/24 15:36:51 rrt Exp $	*/
+/*	$Id: rc.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -27,7 +27,7 @@
 #include "config.h"
 
 #include <ctype.h>
-#ifdef HAVE_LIMITS_H
+#if HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #include <stdarg.h>
@@ -119,16 +119,29 @@ static void parse_rc(void)
 			error("unexpected character `%c'", c);
 }
 
-void read_rc_file(void)
+void read_rc_file(const char *filename)
 {
 	pathbuffer_t *buf;
 
 	buf = pathbuffer_create(0);
-	pathbuffer_put(buf, getenv("HOME"));
-	pathbuffer_append(buf, "/.zilerc");
-	rc_name = pathbuffer_str(buf);
+	rc_file = NULL;
 
-	if ((rc_file = fopen(rc_name, "r")) != NULL) {
+	if (filename != NULL) {
+		rc_name = (char *)filename;
+		if ((rc_file = fopen(filename, "r")) == NULL) {
+			minibuf_error("Cannot open configuration file %s", filename);
+			waitkey_discard(3 * 1000);
+		}
+	}
+
+	if (rc_file == NULL) {
+		pathbuffer_put(buf, getenv("HOME"));
+		pathbuffer_append(buf, "/.zilerc");
+		rc_name = pathbuffer_str(buf);
+		rc_file = fopen(rc_name, "r");
+	}
+
+	if (rc_file != NULL) {
 		parse_rc();
 		fclose(rc_file);
 	}

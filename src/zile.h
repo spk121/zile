@@ -1,7 +1,7 @@
-/*	$Id: zile.h,v 1.4 2003/04/24 15:47:40 rrt Exp $	*/
+/*	$Id: zile.h,v 1.5 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -40,6 +40,10 @@
 #undef max
 #define max(a, b)			((a) > (b) ? (a) : (b))
 
+#ifndef PATH_MAX
+#define PATH_MAX _POSIX_PATH_MAX
+#endif
+
 /*--------------------------------------------------------------------------
  * Main editor structures.
  *--------------------------------------------------------------------------*/
@@ -67,6 +71,8 @@ typedef int (*funcp)(int uniarg);
 #define ANCHOR_END_COMMENT		2
 #define ANCHOR_BEGIN_STRING		3
 #define ANCHOR_END_STRING		4
+#define ANCHOR_BEGIN_SPECIAL		5
+#define ANCHOR_END_SPECIAL		6
 
 struct line {
 	/* The previous line and next line pointers. */
@@ -183,8 +189,14 @@ struct region {
 #define BMODE_C				1
 /* The buffer is in C++ mode. */
 #define BMODE_CPP			2
+/* The buffer is in C# (C sharp) mode. */
+#define BMODE_CSHARP			3
+/* The buffer is in Java mode */
+#define BMODE_JAVA			4
 /* The buffer is in Shell-script mode. */
-#define BMODE_SHELL			3
+#define BMODE_SHELL			5
+/* The buffer is in Mail mode */
+#define BMODE_MAIL			6
 
 struct buffer {
 	/* The next buffer in buffer list. */
@@ -367,12 +379,14 @@ struct terminal {
 #define FLAG_SET_UNIARG			(0000020)
 /* We are defining a macro. */
 #define FLAG_DEFINING_MACRO		(0000040)
+/* We are executing a macro. */
+#define FLAG_EXECUTING_MACRO		(0000100)
 /* Encountered an error. */
-#define FLAG_GOT_ERROR			(0000100)
+#define FLAG_GOT_ERROR			(0000200)
 /* Enable the highlight region. */
-#define FLAG_HIGHLIGHT_REGION		(0000200)
+#define FLAG_HIGHLIGHT_REGION		(0000400)
 /* The highlight region should be left enabled. */
-#define FLAG_HIGHLIGHT_REGION_STAYS	(0000400)
+#define FLAG_HIGHLIGHT_REGION_STAYS	(0001000)
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

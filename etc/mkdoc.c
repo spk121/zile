@@ -1,4 +1,8 @@
-/*	$Id: mkdoc.c,v 1.2 2003/04/24 15:11:17 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.3 2003/05/06 22:28:41 rrt Exp $	*/
+
+/*
+ * A Quick & Dirty tool to produce the AUTODOC file.
+ */
 
 #include "config.h"
 
@@ -8,13 +12,15 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "astr.h"
+
 struct fentry {
 	char	*name;
 	char	*key1;
 	char	*key2;
 	char	*key3;
 	char	*key4;
-	char	*doc;
+	astr	doc;
 } fentry_table[] = {
 #define X0(zile_name, c_name) \
 	{ zile_name, NULL, NULL, NULL, NULL, NULL },
@@ -52,64 +58,68 @@ struct ventry {
 #undef X4
 };
 
-#define ventry_table_size (sizeof ventry_table  / sizeof ventry_table[0])
-
+#define ventry_table_size (sizeof ventry_table / sizeof ventry_table[0])
 
 FILE *input_file;
 FILE *output_file;
 
-static void fdecl(char *name)
+static void fdecl(const char *name)
 {
-	char *doc, buf[1024];
-	int size, maxsize, s = 0;
-	unsigned int i;
+	astr doc = astr_new();
+	astr buf = astr_new();
+	unsigned int s = 0, i;
 
-	size = 0;
-	maxsize = 30;
-	doc = (char *)xmalloc(maxsize);
-	doc[0] = '\0';
-
-	while (fgets(buf, 1024, input_file) != NULL) {
+	while (astr_fgets(buf, input_file) != NULL) {
 		if (s == 1) {
-			if (!strncmp(buf, "+*/", 3))
+			if (!strncmp(astr_cstr(buf), "+*/", 3))
 				break;
-			i = strlen(buf);
-			if (size + (int)i >= maxsize) {
-				maxsize += i + 10;
-				doc = (char *)xrealloc(doc, maxsize);
-			}
-			strcat(doc, buf);
-			size += i;
+			astr_append(doc, buf);
+			astr_append_char(doc, '\n');
 		}
-		if (!strncmp(buf, "/*+", 3))
+		if (!strncmp(astr_cstr(buf), "/*+", 3))
 			s = 1;
-		else if (buf[0] == '{')
+		else if (astr_cstr(buf)[0] == '{')
 			break;
 	}
 
 	for (i = 0; i < fentry_table_size; ++i)
 		if (!strcmp(name, fentry_table[i].name))
 			fentry_table[i].doc = doc;
+
+	astr_delete(buf);
 }
 
 static void parse(void)
 {
-	char buf[1024];
+	astr buf = astr_new();
 
-	while (fgets(buf, 1024, input_file) != NULL) {
-		if (!strncmp(buf, "DEFUN(", 6)) {
-			*strchr(strchr(buf, '"') + 1, '"') = '\0';
-			fdecl(strchr(buf, '"') + 1);
+	while (astr_fgets(buf, input_file) != NULL) {
+		if (!strncmp(astr_cstr(buf), "DEFUN(", 6)) {
+			int i, j;
+			i = astr_find_char(buf, '"');
+			j = astr_rfind_char(buf, '"');
+			if (i < 0 || j < 0 || i == j) {
+				fprintf(stderr, "mkdoc: invalid DEFUN() syntax\n");
+				exit(1);
+			}
+			astr_truncate(buf, j);
+			astr_remove(buf, 0, i + 1);
+			fdecl(astr_cstr(buf));
 		}
 	}
+
+	astr_delete(buf);
 }
 
 static void dump_help(void)
 {
 	unsigned int i;
-	for (i = 0; i < fentry_table_size; ++i)
-		fprintf(output_file, "\fF_%s\n%s",
-			fentry_table[i].name, fentry_table[i].doc);
+	for (i = 0; i < fentry_table_size; ++i) {
+		astr doc = fentry_table[i].doc;
+		if (doc != NULL)
+			fprintf(output_file, "\fF_%s\n%s",
+				fentry_table[i].name, astr_cstr(doc));
+	}
 	for (i = 0; i < ventry_table_size; ++i)
 		fprintf(output_file, "\fV_%s\n%s\n%s\n",
 			ventry_table[i].name, ventry_table[i].defvalue,
@@ -142,13 +152,10 @@ static void usage(void)
 	exit(1);
 }
 
-char *progname;
-
 int main(int argc, char **argv)
 {
 	int c;
 
-	progname = argv[0];
 	input_file = stdin;
 	output_file = stdout;
 

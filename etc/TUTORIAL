@@ -1,38 +1,42 @@
-Copyright (c) 1985 Free Software Foundation, Inc;  See end for conditions.
+Copyright (c) 1985, 1996 Free Software Foundation, Inc. See end for conditions.
 
 Modified for Zile by Sandro Sigala <sandro@sigala.it>.
 
 You are looking at the Zile tutorial.
 
-Zile commands generally involve the CONTROL key (sometimes labeled
-CTRL or CTL) or the META key (sometimes labeled EDIT or ALT).  Rather than
-write that in full each time, we'll use the following abbreviations:
+Zile commands generally involve the CONTROL key (sometimes labelled
+CTRL or CTL) or the META key.  On some keyboards, the META key is
+labelled ALT or EDIT or something else (for example, on Sun keyboards,
+the diamond key to the left of the spacebar is META).  If you have no
+META key, you can use ESC instead.  Rather than write out META or
+CONTROL each time we want you to prefix a character, we'll use the
+following abbreviations:
 
  C-<chr>  means hold the CONTROL key while typing the character <chr>
 	  Thus, C-f would be: hold the CONTROL key and type f.
- M-<chr>  means hold the META or EDIT or ALT key down while typing <chr>.
-	  If there is no META, EDIT or ALT key, instead press and release the
-	  ESC key and then type <chr>.  We write <ESC> for the ESC key.
+ M-<chr>  means hold the META key down while typing <chr>.  If there
+	  is no META key, type <ESC>, release it, then type the
+	  character <chr>.
 
 Important note: to end the Zile session, type C-x C-c.  (Two characters.)
 The characters ">>" at the left margin indicate directions for you to
 try using a command.  For instance:
-<<Blank lines inserted here by startup of help-with-tutorial>>
+
 >>  Now type C-v (View next screen) to move to the next screen.
-	(go ahead, do it by depressing the control key and v together).
-	From now on, you'll be expected to do this whenever you finish
+	(go ahead, do it by holding down the control key while typing v).
+	From now on, you should do this again whenever you finish
 	reading the screen.
 
-Note that there is an overlap when going from screen to screen; this
-provides some continuity when moving through the file.
+Note that there is an overlap of two lines when you move from screen
+to screen; this provides some continuity so you can continue reading
+the text.
 
-The first thing that you need to know is how to move around from
-place to place in the file.  You already know how to move forward a
-screen, with C-v.  To move backwards a screen, type M-v (depress the
-META key and type v, or type <ESC>v if you don't have a META or EDIT
-key).
+The first thing that you need to know is how to move around from place
+to place in the text.  You already know how to move forward one screen,
+with C-v.  To move backwards one screen, type M-v (hold down the META key
+and type v, or type <ESC>v if you do not have a META, EDIT, or ALT key).
 
->>  Try typing M-v and then C-v to move back and forth a few times.
+>>  Try typing M-v and then C-v, a few times.
 
 
 * SUMMARY
@@ -46,22 +50,23 @@ The following commands are useful for viewing screenfuls:
 		 putting the text near the cursor at the center.
 		 (That's control-L, not control-1.)
 
->> Find the cursor and remember what text is near it.
-   Then type a C-l.
-   Find the cursor again and see what text is near it now.
+>> Find the cursor, and note what text is near it.
+   Then type C-l.
+   Find the cursor again and notice that the same text
+   is near the cursor now.
 
 
 * BASIC CURSOR CONTROL
 ----------------------
 
-Getting from screenful to screenful is useful, but how do you
-reposition yourself within a given screen to a specific place?
-There are several ways you can do this.  One way (not the best, but
-the most basic) is to use the commands previous, backward, forward
-and next.  As you can imagine these commands (which are given to
-Zile as C-p, C-b, C-f, and C-n  respectively) move the cursor from
-where it currently is to a new place in the given direction.  Here,
-in a more graphical form are the commands:
+Moving from screenful to screenful is useful, but how do you
+move to a specific place within the text on the screen?
+
+There are several ways you can do this.  The most basic way is to use
+the commands C-p, C-b, C-f, and C-n.  Each of these commands moves the
+cursor one row or column in a particular direction on the screen.
+Here is a table showing these four commands and shows the directions
+they move:
  
 			  Previous line, C-p
 				  :
@@ -69,57 +74,87 @@ in a more graphical form are the commands:
    Backward, C-b .... Current cursor position .... Forward, C-f
 				  :
 				  :
-			  Next line, C-n
+			    Next line, C-n
 
 >> Move the cursor to the line in the middle of that diagram
-   and type C-l to see the whole diagram centered in the screen.
+   using C-n or C-p.  Then type C-l to see the whole diagram
+   centered in the screen.
 
-You'll probably find it easy to think of these by letter.  P for
-previous, N for next, B for backward and F for forward.  These are
-the basic cursor positioning commands and you'll be using them ALL
-the time so it would be of great benefit if you learn them now.
+You'll probably find it easy to think of these by letter: P for
+previous, N for next, B for backward and F for forward.  These are the
+basic cursor positioning commands, and you'll be using them ALL the
+time, so it would be of great benefit if you learn them now.
 
 >> Do a few C-n's to bring the cursor down to this line.
 
 >> Move into the line with C-f's and then up with C-p's.
    See what C-p does when the cursor is in the middle of the line.
 
-Lines are separated by Newline characters.  For most applications
-there should normally be a Newline character at the end of the text,
-as well, but it is up to you to make sure of this.  A file can
-validly exist without a Newline at the end.
+Each of text line ends with a Newline character, which serves to
+separate it from the following line.  The last line in your file ought
+to have a Newline at the end (but Zile does not require it to have
+one).
 
->> Try to C-b at the beginning of a line.  Do a few more C-b's.
-   Then do C-f's back to the end of the line and beyond.
+>> Try to C-b at the beginning of a line.  It should move to
+   the end of the previous line.  This is because it moves back
+   across the Newline character.
 
-When you go off the top or bottom of the screen, the text beyond
-the edge is shifted onto the screen so that your instructions can
-be carried out while keeping the cursor on the screen.
+C-f can move across a Newline just like C-b.
 
->> Try to move the cursor off the bottom of the screen with C-n and
+>> Do a few more C-b's, so you get a feel for where the cursor is.
+   Then do C-f's to return to the end of the line.
+   Then do one more C-f to move to the following line.
+
+When you move past the top or bottom of the screen, the text beyond
+the edge shifts onto the screen.  This is called "scrolling".  It
+enables Zile to move the cursor to the specified place in the text
+without moving it off the screen.
+
+>> Try to move the cursor off the bottom of the screen with C-n, and
    see what happens.
 
-C-a and C-e move to the beginning or end of a line.
+If moving by characters is too slow, you can move by words.  M-f
+(Meta-f) moves forward a word and M-b moves back a word.
+
+>> Type a few M-f's and M-b's.
+
+When you are in the middle of a word, M-f moves to the end of the word.
+When you are in whitespace between words, M-f moves to the end of the
+following word.  M-b works likewise in the opposite direction.
+
+>> Type M-f and M-b a few times, interspersed with C-f's and C-b's
+   so that you can observe the action of M-f and M-b from various
+   places inside and between words.
+
+Notice the parallel between C-f and C-b on the one hand, and M-f and
+M-b on the other hand.  Very often Meta characters are used for
+operations related to the units defined by language (words, sentences,
+paragraphs), while Control characters operate on basic units that are
+independent of what you are editing (characters, lines, etc).
+
+This parallel applies between lines and sentences: C-a and C-e move to
+the beginning or end of a line, and M-a and M-e move to the beginning
+or end of a sentence.
 
 >> Try a couple of C-a's, and then a couple of C-e's.
+   Try a couple of M-a's, and then a couple of M-e's.
 
-Two other simple cursor motion commands are M-< (Meta Less-than),
-which moves to the beginning of the file, and M-> (Meta Greater-than),
-which moves to the end of the file.  You probably don't need to try
-them, since finding this spot again will be boring.  On most terminals
-the "<" is above the comma and you must use the shift key to type it.
-On these terminals you must use the shift key to type M-< also;
-without the shift key, you would be typing M-comma.
+See how repeated C-a's do nothing, but repeated M-a's keep moving one
+more sentence.  Although these are not quite analogous, each one seems
+natural.
 
 The location of the cursor in the text is also called "point".  To
 paraphrase, the cursor shows on the screen where point is located in
 the text.
 
-Here is a summary of simple moving operations including the word and
-sentence moving commands:
+Here is a summary of simple cursor-moving operations, including the
+word and sentence moving commands:
 
 	C-f	Move forward a character
 	C-b	Move backward a character
+
+	M-f	Move forward a word
+	M-b	Move backward a word
 
 	C-n	Move to next line
 	C-p	Move to previous line
@@ -127,29 +162,101 @@ sentence moving commands:
 	C-a	Move to beginning of line
 	C-e	Move to end of line
 
-	M-<	Go to beginning of file
-	M->	Go to end of file
+	M-a	Move back to beginning of sentence
+	M-e	Move forward to end of sentence
 
 >> Try all of these commands now a few times for practice.
-   Since the last two will take you away from this screen,
-   you can come back here with M-v's and C-v's.  These are
-   the most often used commands.
+   These are the most often used commands.
 
+Two other important cursor motion commands are M-< (Meta Less-than),
+which moves to the beginning of the whole text, and M-> (Meta
+Greater-than), which moves to the end of the whole text.
+
+On most terminals, the "<" is above the comma, so you must use the
+shift key to type it.  On these terminals you must use the shift key
+to type M-< also; without the shift key, you would be typing M-comma.
+
+>> Try M-< now, to move to the beginning of the tutorial.
+   Then use C-v repeatedly to move back here.
+
+>> Try M-> now, to move to the end of the tutorial.
+   Then use M-v repeatedly to move back here.
+
+You can also move the cursor with the arrow keys, if your terminal has
+arrow keys.  We recommend learning C-b, C-f, C-n and C-p for three
+reasons.  First, they work on all kinds of terminals.  Second, once
+you gain practice at using Zile, you will find that typing these CTRL
+characters is faster than typing the arrow keys (because you do not
+have to move your hands away from touch-typing position).  Third, once
+you form the habit of using these CTRL character commands, you can
+easily learn to use other advanced cursor motion commands as well.
+
+Most Zile commands accept a numeric argument; for most commands, this
+serves as a repeat-count.  The way you give a command a repeat count
+is by typing C-u and then the digits before you type the command.  If
+you have a META (or EDIT or ALT) key, there is another alternative way
+to enter a numeric argument: type the digits while holding down the
+META key.  We recommend learning the C-u method because it works on
+any terminal.
+
+For instance, C-u 8 C-f moves forward eight characters.
+	
+>> Try using C-n or C-p with a numeric argument, to move the cursor
+   to a line near this one with just one command.
+
+Most commands use the numeric argument as a repeat count.  Certain
+exceptional commands use it differently.
 
 * WHEN ZILE IS HUNG
---------------------
+-------------------
 
-If Zile gets into an infinite (or simply very long) computation which
-you don't want to finish, you can stop it safely by typing C-g.
+If Zile stops responding to your commands, you can stop it safely by
+typing C-g.  You can use C-g to stop a command which is taking too
+long to execute.
+
 You can also use C-g to discard a numeric argument or the beginning of
-a command that you don't want to finish.
+a command that you do not want to finish.
+
+>> Type C-u 100 to make a numeric arg of 100, then type C-g.
+   Now type C-f.  It should move just one character,
+   because you canceled the argument with C-g.
+
+If you have typed an <ESC> by mistake, you can get rid of it
+with a C-g.
+
+
+* WINDOWS
+---------
+
+Zile can have several windows, each displaying its own text.
+
+At this stage it is better not to go into the techniques of
+using multiple windows.  But you do need to know how to get
+rid of extra windows that may appear to display help or
+output from certain commands.  It is simple:
+
+	C-x 1	One window (i.e., kill all other windows).
+
+That is Control-x followed by the digit 1.  C-x 1 expands the window
+which contains the cursor, to occupy the full screen.  It deletes all
+other windows.
+
+>> Move the cursor to this line and type C-l.
+
+(Remember that C-l redraws the screen and recenters the current line.)
+
+>> Type Control-x 2
+   See how this window shrinks, while a new one appears
+   to display contents of this buffer.
+
+>> Type C-x 1 and see the new window disappear.
 
 
 * INSERTING AND DELETING
 ------------------------
 
-If you want to insert text, just type it.  Characters which you can
-see, such as A, 7, *, etc. are taken by Zile as text and inserted
+If you want to insert text, just type the text.  Characters which you
+can see, such as A, 7, *, etc. are taken by Zile as text and inserted
 immediately.  Type <Return> (the carriage-return key) to insert a
 Newline character.
 
@@ -160,24 +267,32 @@ some cases, the "Backspace" key serves as <Delete>, but not always!
 More generally, <Delete> deletes the character immediately before the
 current cursor position.
 
->> Do this now, type a few characters and then delete them
+>> Do this now--type a few characters, then delete them
    by typing <Delete> a few times.  Don't worry about this file
-   being changed; you won't affect the master tutorial.  This is just
-   a copy of it.
+   being changed; you will not alter the master tutorial.  This is
+   your personal copy of it.
 
->> Now start typing text until you reach the right margin, and keep
-   typing.  When a line of text gets too big for one line on the
-   screen, the line of text is "continued" onto a second screen line.
-   The backslash at the right margin indicates a line which has
-   been continued.
+>> Insert text until you reach the right margin, and keep on inserting.
+   You'll see a continuation line appear.
+
 >> Use <Delete>s to delete the text until the line fits on one screen
    line again.  The continuation line goes away.
 
+You can delete a Newline character just like any other character.
+Deleting the Newline character between two lines merges them into
+one line.  If the resulting combined line is too long to fit in the
+screen width, it will be displayed with a continuation line.
+
 >> Move the cursor to the beginning of a line and type <Delete>.  This
-   deletes the newline before the line and merges the line onto
-   the previous line.  The resulting line may be too long to fit, in
-   which case it has a continuation line.
+   merges that line with the previous line.
+
 >> Type <Return> to reinsert the Newline you deleted.
+
+Remember that most Zile commands can be given a repeat count;
+this includes text characters.  Repeating a text character inserts
+it several times.
+
+>>  Try that now -- type C-u 8 * to insert ********.
 
 You've now learned the most basic way of typing something in
 Zile and correcting errors.  You can delete by words or lines
@@ -186,39 +301,46 @@ as well.  Here is a summary of the delete operations:
 	<Delete>     delete the character just before the cursor
 	C-d   	     delete the next character after the cursor
 
+	M-<Delete>   kill the word immediately before the cursor
+	M-d	     kill the next word after the cursor
+
 	C-k	     kill from the cursor position to end of line
+	M-k	     kill to the end of the current sentence
 
-Now suppose you kill something, and then you decide that you want to
-get it back?  Well, whenever you kill something bigger than a
-character, Zile saves it for you.  To yank it back, use C-y.  You
-can kill text in one place, move elsewhere, and then do C-y; this is
-a good way to move text around.  Note that the difference
-between "Killing" and "Deleting" something is that "Killed" things
-can be yanked back, and "Deleted" things cannot.  Generally, the
-commands that can destroy a lot of text save it, while the ones that
-attack only one character, or nothing but blank lines and spaces, do
-not save.
+Notice that <Delete> and C-d vs M-<Delete> and M-d extend the parallel
+started by C-f and M-f (well, <Delete> is not really a control
+character, but let's not worry about that).  C-k and M-k are like C-e
+and M-e, sort of, in that lines are opposite sentences.
 
-For instance, type C-n a couple times to position the cursor
-at some line on this screen.
+When you delete more than one character at a time, Zile saves the
+deleted text so that you can bring it back.  Bringing back killed text
+is called "yanking".  You can yank the killed text either at the same
+place where it was killed, or at some other place in the text.  You
+can yank the text several times in order to make multiple copies of
+it.  The command to yank is C-y.
 
->> Do this now, move the cursor and kill that line with C-k.
+Note that the difference between "Killing" and "Deleting" something is
+that "Killed" things can be yanked back, and "Deleted" things cannot.
+Generally, the commands that can remove a lot of text save the text,
+while the commands that delete just one character, or just blank lines
+and spaces, do not save the deleted text.
+
+>> Move the cursor to the  beginning of a line which is not empty.
+   Then type C-k to kill the text on that line.
+>> Type C-k a second time.  You'll see that it kills the Newline
+   which follows that line.
 
 Note that a single C-k kills the contents of the line, and a second
-C-k kills the line itself, and make all the other lines move up.  If
-you give C-k a repeat count, it kills that many lines AND their
-contents.
-
-The text that has just disappeared is saved so that you can
-retrieve it.  To retrieve the last killed text and put it where
-the cursor currently is, type C-y.
+C-k kills the line itself, and make all the other lines move up.
+To retrieve the last killed text and put it where the cursor currently
+is, type C-y.
 
 >> Try it; type C-y to yank the text back.
 
-Think of C-y as if you were yanking something back that someone
-took away from you.  Notice that if you do several C-k's in a row
-the text that is killed is all saved together so that one C-y will
-yank all of the lines.
+Think of C-y as if you were yanking something back that someone took
+away from you.  Notice that if you do several C-k's in a row, all of
+the killed text is saved together, so that one C-y will yank all of
+the lines.
 
 >> Do this now, type C-k several times.
 
@@ -228,32 +350,61 @@ Now to retrieve that killed text:
    again.  You now see how to copy some text.
 
 
+* UNDO
+------
+
+If you make a change to the text, and then decide that it was a
+mistake, you can undo the change with the undo command, C-x u.
+
+Normally, C-x u undoes the changes made by one command; if you repeat
+the C-x u several times in a row, each repetition undoes one
+additional command.
+
+But there is an exception: commands that do not change the text do
+not count (this includes cursor motion commands and scrolling
+command).
+
+>> Kill this line with C-k, then type C-x u and it should reappear.
+
+C-_ is an alternative undo command; it works just the same as C-x u,
+but it is easier to type several times in a row.  The disadvantage of
+C-_ is that on some keyboards it is not obvious how to type it.  That
+is why we provide C-x u as well.  On some terminals, you can type C-_
+by typing / while holding down CTRL.
+
+A numeric argument to C-_ or C-x u acts as a repeat count.
+
+
 * FILES
 -------
 
 In order to make the text you edit permanent, you must put it in a
 file.  Otherwise, it will go away when your invocation of Zile goes
-away.  You put your editing in a file by "finding" the file.  What
-finding means is that you see the contents of the file in your Zile;
-and, loosely speaking, what you are editing is the file itself.
-However, the changes still don't become permanent until you "save" the
-file.  This is so you can have control to avoid leaving a half-changed
-file around when you don't want to.  Even then, Zile leaves the
-original file under a changed name in case your changes turn out
-to be a mistake.
+away.  You put your editing in a file by "finding" the file.  (This is
+also called "visiting" the file.)
+
+Finding a file means that you see the contents of the file within
+Zile.  In many ways, it is as if you were editing the file itself.
+However, the changes you make using Zile do not become permanent
+until you "save" the file.  This is so you can avoid leaving a
+half-changed file on the system when you do not want to.  Even when
+you save, Zile leaves the original file under a changed name in case
+you later decide that your changes were a mistake.
 
 If you look near the bottom of the screen you will see a line that
-begins and ends with dashes, and contains the string "Zile: TUTORIAL".
-Your copy of the Zile tutorial is called "TUTORIAL".  Whatever
-file you find, that file's name will appear in that precise
+begins and ends with dashes, and contains the string "Zile:
+TUTORIAL".  This part of the screen always shows the name of the file
+that you are visiting.  Right now, you are visiting a file called
+"TUTORIAL" which is your personal scratch copy of the Zile tutorial.
+Whatever file you find, that file's name will appear in that precise
 spot.
 
 The commands for finding and saving files are unlike the other
 commands you have learned in that they consist of two characters.
 They both start with the character Control-x.  There is a whole series
 of commands that start with Control-x; many of them have to do with
-files, buffers, and related things, and all of them consist of
-Control-x followed by some other character.
+files, buffers, and related things.  These commands are two, three or
+four characters long.
 
 Another thing about the command for finding a file is that you have
 to say what file name you want.  We say the command "reads an argument
@@ -262,32 +413,40 @@ file).  After you type the command
 
 	C-x C-f   Find a file
 
-Zile asks you to type the file name.  It echoes on the bottom
-line of the screen.  You are using the minibuffer now!  this is
-what the minibuffer is for.  When you type <Return> to end the
-file name, the minibuffer is no longer needed, so it disappears.
+Zile asks you to type the file name.  The file name you type appears
+on the bottom line of the screen.  The bottom line is called the
+minibuffer when it is used for this sort of input.  You can use
+ordinary Zile editing commands to edit the file name.
+
+While you are entering the file name (or any minibuffer input),
+you can cancel the command with C-g.
 
 >> Type C-x C-f, then type C-g.  This cancels the minibuffer,
    and also cancels the C-x C-f command that was using the
    minibuffer.  So you do not find any file.
 
-In a little while the file contents appear on the screen.  You can
-edit the contents.  When you wish to make the changes permanent,
-issue the command
+When you have finished entering the file name, type <Return> to
+terminate it.  Then C-x C-f command goes to work, and finds the file
+you chose.  The minibuffer disappears when the C-x C-f command is
+finished.
+
+In a little while the file contents appear on the screen, and you can
+edit the contents.  When you wish to make your changes permanent,
+type the command
 
 	C-x C-s   Save the file
 
-The contents of Zile are written into the file.  The first time you
-do this, the original file is renamed to a new name so that it
-is not lost.  The new name is made by appending "~" to the end
-of the original file's name.
+This copies the text within Zile into the file.  The first time you
+do this, Zile renames the original file to a new name so that it is
+not lost.  The new name is made by adding "~" to the end of the
+original file's name.
 
 When saving is finished, Zile prints the name of the file written.
 You should save fairly often, so that you will not lose very much
 work if the system should crash.
 
 >> Type C-x C-s, saving your copy of the tutorial.
-   This should print "Wrote .../TUTORIAL" at the bottom of the screen.
+   This should print "Wrote ...TUTORIAL" at the bottom of the screen.
 
 NOTE: On some systems, typing C-x C-s will freeze the screen and you
 will see no further output from Zile.  This indicates that an
@@ -295,11 +454,13 @@ operating system "feature" called "flow control" is intercepting the
 C-s and not letting it get through to Zile.  To unfreeze the screen,
 type C-q.
 
-To make a new file, just find it "as if" it already existed.  Then
-start typing in the text.  When you ask to "save" the file, Zile
-will really create the file with the text that you have inserted.
-From then on, you can consider yourself to be editing an already
-existing file.
+You can find an existing file, to view it or edit it.  You can also
+find a file which does not already exist.  This is the way to create a
+file with Zile: find the file, which will start out empty, and then
+begin inserting the text for the file.  When you ask to "save" the
+file, Zile will really create the file with the text that you have
+inserted.  From then on, you can consider yourself to be editing an
+already existing file.
 
 
 * BUFFERS
@@ -309,9 +470,14 @@ If you find a second file with C-x C-f, the first file remains
 inside Zile.  You can switch back to it by finding it again with
 C-x C-f.  This way you can get quite a number of files inside Zile.
 
-The object inside Zile which holds the text read from one file
-is called a "buffer."  Finding a file makes a new buffer inside Zile.
-To see a list of the buffers that exist in Zile, type
+>> Create a file named "foo" by typing  C-x C-f foo <Return>.
+   Then insert some text, edit it, and save "foo" by typing  C-x C-s.
+   Finally, type C-x C-f TUTORIAL <Return>
+   to come back to the tutorial.
+
+Zile stores each file's text inside an object called a "buffer."
+Finding a file makes a new buffer inside Zile.  To see a list of the
+buffers that current exist in your Zile job, type
 
 	C-x C-b   List buffers
 
@@ -322,7 +488,9 @@ for the file whose contents it holds.  Some buffers do not correspond
 to files.  For example, the buffer named "*Buffer List*" does
 not have any file.  It is the buffer which contains the buffer
 list that was made by C-x C-b.  ANY text you see in an Zile window
-has to be in some buffer.
+is always part of some buffer.
+
+>> Type C-x 1 to get rid of the buffer list.
 
 If you make changes to the text of one file, then find another file,
 this does not save the first file.  Its changes remain inside Zile,
@@ -334,10 +502,13 @@ it with C-x C-f in order to save it with C-x C-s.  So we have
 
 	C-x s     Save some buffers
 
-C-x s goes through the list of all the buffers you have
-and finds the ones that contain files you have changed.
-For each such buffer, C-x s asks you whether to save it.
+C-x s asks you about each buffer which contains changes that you have
+not saved.  It asks you, for each such buffer, whether to save the
+buffer.
 
+>> Insert a line of text, then type C-x s.
+   It should ask you whether to save the buffer named TUTORIAL.
+   Answer yes to the question by typing "y".
 
 * EXTENDING THE COMMAND SET
 ---------------------------
@@ -350,71 +521,240 @@ the X (eXtend) command.  This comes in two flavors:
 	M-x	Named command eXtend.  Followed by a long name.
 
 These are commands that are generally useful but used less than the
-commands you have already learned about.  You have already seen two
-of them: the file commands C-x C-f to Find and C-x C-s to Save.
-Another example is the command to tell Zile that you'd like to stop
-editing and get rid of Zile.  The command to do this is C-x C-c.
-(Don't worry; it offers to save each changed file before it kills the
-Zile.)
+commands you have already learned about.  You have already seen two of
+them: the file commands C-x C-f to Find and C-x C-s to Save.  Another
+example is the command to end the Zile session--this is the command
+C-x C-c.  (Do not worry about losing changes you have made; C-x C-c
+offers to save each changed file before it kills the Zile.)
 
 C-z is the command to exit Zile *temporarily*--so that you can go
 back to the same Zile session afterward.
 
-On systems which allow it, C-z exits from Zile to the shell but does
-not destroy the Zile; if you use the C shell, you can resume Zile
-with the `fg' command (or, more generally, with `%zile', which works
-even if your most recent job was some other).  On systems which don't
-implement suspending, C-z creates a subshell running under Zile to
-give you the chance to run other programs and return to Zile
-afterward; it does not truly "exit" from Zile.  In this case, the
-shell command `exit' is the usual way to get back to Zile from the
-subshell.
+On systems which allow it, C-z "suspends" Zile; that is, it returns
+to the shell but does not destroy the Zile.  In the most common
+shells, you can resume Zile with the `fg' command or with `%zile'.
+
+On systems which do not implement suspending, C-z creates a subshell
+running under Zile to give you the chance to run other programs and
+return to Zile afterward; it does not truly "exit" from Zile.  In
+this case, the shell command `exit' is the usual way to get back to
+Zile from the subshell.
 
 The time to use C-x C-c is when you are about to log out.  It's also
 the right thing to use to exit an Zile invoked under mail handling
-programs and other random utilities, since they may not know how to
-cope with suspension of Zile.  On other occasions, use C-z, and
-resume the Zile when you have more editing to do.
+programs and other miscellaneous utilities, since they may not know
+how to cope with suspension of Zile.  In ordinary circumstances,
+though, if you are not about to log out, it is better to suspend Zile
+with C-z instead of exiting Zile.
 
-There are many C-x commands.  The ones you know are:
+There are many C-x commands.  Here is a list of the ones you have learned:
 
 	C-x C-f		Find file.
 	C-x C-s		Save file.
 	C-x C-b		List buffers.
 	C-x C-c		Quit Zile.
+	C-x u		Undo.
 
 Named eXtended commands are commands which are used even less
-frequently, or commands which are used only in certain modes.  These
-commands are usually called "functions".
+frequently, or commands which are used only in certain modes.  An
+example is the command replace-string, which globally replaces one
+string with another.  When you type M-x, Zile prompts you at the
+bottom of the screen with M-x and you should type the name of the
+command; in this case, "replace-string".  Just type "repl s<TAB>" and
+Zile will complete the name.  End the command name with <Return>.
+
+The replace-string command requires two arguments--the string to be
+replaced, and the string to replace it with.  You must end each
+argument with <Return>.
+
+>> Move the cursor to the blank line two lines below this one.
+   Then type M-x repl s<Return>changed<Return>altered<Return>.
+
+   Notice how this line has changed: you've replaced
+   the word c-h-a-n-g-e-d with "altered" wherever it occurred,
+   after the initial position of the cursor.
 
 
-* MODE LINE
+* ECHO AREA
 -----------
 
 If Zile sees that you are typing commands slowly it shows them to you
 at the bottom of the screen in an area called the "echo area."  The echo
-area contains the bottom line of the screen.  The line immediately above
-it is called the MODE LINE.  The mode line says something like
+area contains the bottom line of the screen.
 
---**-Zile: TUTORIAL          (Text)--58%----------------------
 
-This is a very useful "information" line.
+* MODELINE
+-----------
+
+The line immediately above the echo area it is called the "modeline".
+The mode line says something like this:
+
+--**-Zile: TUTORIAL          (Text)--L670/820,C1--78%----------------
+
+This line gives useful information about the status of Zile and
+the text you are editing.
 
 You already know what the filename means--it is the file you have
-found.  What the --NN%-- means is that NN percent of the file is
-above the top of the screen.  If the top of the file is on the screen,
-it will say --Top-- instead of --00%--.  If the bottom of the file is
-on the screen, it will say --Bot--.  If you are looking at a file so
-small it all fits on the screen, it says --All--.
+found.  -NN%-- indicates your current position in the text; it means
+that NN percent of the text is above the top of the screen.  If the
+top of the file is on the screen, it will say --Top-- instead of
+--00%--.  If the bottom of the text is on the screen, it will say
+--Bot--.  If you are looking at text so small that all of it fits on
+the screen, the mode line says --All--.
 
 The stars near the front mean that you have made changes to the text.
-Right after you visit or save a file, there are no stars, just dashes.
+Right after you visit or save a file, that part of the mode line shows
+no stars, just dashes.
 
 The part of the mode line inside the parentheses is to tell you what
-modes you are in.  The default mode is Text which is what you
-are in now.  It is an example of a "major mode". At any time one and
-only one major mode is active, and its name can always be found in the
-mode line just where "Text" is now.
+editing modes you are in.  The default mode is Text which is
+what you are using now.  It is an example of a "major mode".  
+
+Zile has many different major modes.  Some of them are meant for
+editing different languages and/or kinds of text, such as C mode,
+Text mode, etc.  At any time one and only one major mode is active,
+and its name can always be found in the mode line just where
+"Text" is now.
+
+Each major mode is the name of an extended command, which is how you can
+switch to that mode.  For example, M-x text-mode is a command to
+switch to Text mode.
+
+If you are going to be editing English text, such as this file, you
+should probably use Text Mode.
+>> Type M-x text-mode<Return>.
+
+Major modes are called major because there are also minor modes.
+Minor modes are alternatives not to the major modes, just minor
+modifications of them.  Each minor mode can be turned on or off by
+itself, independent of all other minor modes, and independent of your
+major mode.  So you can use no minor modes, or one minor mode, or any
+combination of several minor modes.
+
+One minor mode which is very useful, especially for editing English
+text, is Auto Fill mode.  When this mode is on, Zile breaks the line
+in between words automatically whenever you insert text and make a
+line that is too wide.
+
+You can turn Auto Fill mode on by doing M-x auto-fill-mode<Return>.
+When the mode is on, you can turn it off by doing M-x
+auto-fill-mode<Return>.  If the mode is off, this command turns it on,
+and if the mode is on, this command turns it off.  We say that the
+command "toggles the mode".
+
+>> Type M-x auto-fill-mode<Return> now.  Then insert a line of "asdf "
+   over again until you see it divide into two lines.  You must put in
+   spaces between them because Auto Fill breaks lines only at spaces.
+
+The margin is usually set at 72 characters, but you can change it
+with the C-x f command.  You should give the margin setting you want
+as a numeric argument.
+
+>> Type C-x f with an argument of 20.  (C-u 2 0 C-x f).
+   Then type in some text and see Zile fill lines of 20
+   characters with it.  Then set the margin back to 72 using
+   C-x f again.
+
+If you makes changes in the middle of a paragraph, Auto Fill mode
+does not re-fill it for you.
+To re-fill the paragraph, type M-q (Meta-q) with the cursor inside
+that paragraph.
+
+>> Move the cursor into the previous paragraph and type M-q.
+
+
+* SEARCHING
+-----------
+
+Zile can do searches for strings (these are groups of contiguous
+characters or words) either forward through the text or backward
+through it.  Searching for a string is a cursor motion command;
+it moves the cursor to the next place where that string appears.
+
+The Zile search command is different from the search commands
+of most editors, in that it is "incremental".  This means that the
+search happens while you type in the string to search for.
+
+The command to initiate a search is C-s for forward search, and C-r
+for reverse search.  BUT WAIT!  Don't try them now.
+
+When you type C-s you'll notice that the string "I-search" appears as
+a prompt in the echo area.  This tells you that Zile is in what is
+called an incremental search waiting for you to type the thing that
+you want to search for.  <Return> terminates a search.
+
+>> Now type C-s to start a search.  SLOWLY, one letter at a time,
+   type the word 'cursor', pausing after you type each
+   character to notice what happens to the cursor.
+   Now you have searched for "cursor", once.
+>> Type C-s again, to search for the next occurrence of "cursor".
+>> Now type <Delete> four times and see how the cursor moves.
+>> Type <RET> to terminate the search.
+
+Did you see what happened?  Zile, in an incremental search, tries to
+go to the occurrence of the string that you've typed out so far,
+highlighting it for your convenience.  To go to the next occurrence of
+'cursor' just type C-s again.  If no such occurrence exists Zile
+beeps and tells you the search is currently "failing", C-g would also
+terminate the search.
+
+NOTE: On some systems, typing C-s will freeze the screen and you will
+see no further output from Zile.  This indicates that an operating
+system "feature" called "flow control" is intercepting the C-s and not
+letting it get through to Zile.  To unfreeze the screen, type C-q.
+
+If you are in the middle of an incremental search and type <Delete>,
+you'll notice that the last character in the search string is erased
+and the search backs up to the last place of the search.  For
+instance, suppose you have typed "c", to search for the first
+occurrence of "c".  Now if you type "u", the cursor will move
+to the first occurrence of "cu".  Now type <Delete>.  This erases
+the "u" from the search string, and the cursor moves back to
+the first occurrence of "c".
+
+If you are in the middle of a search and type a control or meta
+character (with a few exceptions--characters that are special in
+a search, such as C-s and C-r), the search is terminated.
+
+The C-s starts a search that looks for any occurrence of the search
+string AFTER the current cursor position.  If you want to search for
+something earlier in the text, type C-r instead.  Everything that we
+have said about C-s also applies to C-r, except that the direction of
+the search is reversed.
+
+
+* MULTIPLE WINDOWS
+------------------
+
+One of the nice features of Zile is that you can display more than one
+window on the screen at the same time.
+
+>> Move the cursor to this line and type C-l.
+
+>> Now type C-x 2 which splits the screen into two windows.
+   Both windows display this tutorial.  The cursor stays in the top window.
+
+>> Type C-x o ("o" for "other") to move the cursor to the bottom window.
+>> Use C-v and M-v in the bottom window to scroll it.
+   Keep reading these directions in the top window.
+
+>> Type C-x o again to move the cursor back to the top window.
+   The cursor in the top window is just where it was before.
+
+You can keep using C-x o to switch between the windows.  Each
+window has its own cursor position, but only one window actually
+shows the cursor.  All the ordinary editing commands apply to the
+window that the cursor is in.  We call this the "selected window".
+
+>> Type C-x 1 (in the top window) to get rid of the bottom window.
+
+(If you had typed C-x 1 in the bottom window, that would get rid
+of the top one.  Think of this command as "Keep just one
+window--the window I am already in.")
+
+You do not have to display the same buffer in both windows.  If you
+use C-x C-f to find a file in one window, the other window does not
+change.  You can find a file in each window independently.
 
 
 * CONCLUSION
@@ -427,19 +767,21 @@ This tutorial is meant to be understandable to all new users, so if
 you found something unclear, don't sit and blame yourself - complain!
 
 
-* COPYING
----------
+COPYING
+-------
 
 This tutorial descends from a long line of Emacs tutorials
 starting with the one written by Stuart Cracraft for the original Emacs.
+Ben Wing updated the tutorial for X Windows.  Martin Buchholz and
+Hrvoje Niksic added more corrections for XEmacs.
 
 This version has been modified for Zile.  You may find the original text
-in the Emacs sources at ftp://prep.ai.mit.edu/pub/gnu/.
+in the XEmacs sources at ftp://ftp.xemacs.org/pub/xemacs.
 
-The tutorial is copyrighted, and comes with permission to distribute copies
-on certain conditions:
+This version of the tutorial, like GNU Emacs, is copyrighted, and
+comes with permission to distribute copies on certain conditions:
 
-Copyright (c) 1985 Free Software Foundation
+Copyright (c) 1985, 1996 Free Software Foundation
 
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the

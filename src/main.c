@@ -1,7 +1,7 @@
-/*	$Id: main.c,v 1.3 2003/04/24 15:36:51 rrt Exp $	*/
+/*	$Id: main.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,7 +28,7 @@
 
 #include <assert.h>
 #include <ctype.h>
-#ifdef HAVE_LIMITS_H
+#if HAVE_LIMITS_H
 #include <limits.h>
 #endif
 #include <locale.h>
@@ -36,14 +36,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef HAVE_UNISTD_H
+#if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+#include "alist.h"
 
 #include "zile.h"
 #include "extern.h"
 #include "version.h"
-#ifdef USE_NCURSES
+#if USE_NCURSES
 #include "term_ncurses/term_ncurses.h"
 #else
 #error "One terminal should be defined."
@@ -64,7 +66,7 @@ int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
 
-#ifdef DEBUG
+#if DEBUG
 /*
  * This function checks the line list of the specified buffer and
  * appends list informations to the `zile.abort' file if
@@ -103,7 +105,7 @@ static void loop(void)
 	for (;;) {
 		if (lastflag & FLAG_NEED_RESYNC)
 			resync_redisplay();
-#ifdef DEBUG
+#if DEBUG
 		check_list(cur_wp);
 #endif
 		cur_tp->redisplay();
@@ -139,7 +141,7 @@ static void loop(void)
  */
 static void select_terminal(void)
 {
-#ifdef USE_NCURSES
+#if USE_NCURSES
 	/* Only the ncurses terminal is available for now. */
 	cur_tp = ncurses_tp;
 #endif
@@ -148,7 +150,8 @@ static void select_terminal(void)
 static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
-%Copyright (C) 1997-2001 Sandro Sigala <sandro@sigala.it>%\n\
+%Copyright (C) 1997-2002 Sandro Sigala <sandro@sigala.it>%\n\
+%Copyright (C) 2003 Reuben Thomas <rrt@sc3d.org>%\n\
 \n\
 Type %C-x C-c% to exit Zile.\n\
 Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\
@@ -202,12 +205,62 @@ static void sanity_checks(void)
 #endif
 }
 
+static void execute_functions(alist al)
+{
+	char *func;
+	for (func = alist_first(al); func != NULL; func = alist_next(al)) {
+		cur_tp->redisplay();
+		if (!execute_function(func, 1))
+			minibuf_error("Function `@f%s@@' not defined", func);
+		lastflag |= FLAG_NEED_RESYNC;
+	}
+}
+
+/*
+ * Return the number of occurrences of c into s.
+ */
+static int countchr(const char *s, int c)
+{
+	int count = 0;
+	for (; *s != '\0'; ++s)
+		if (*s == c)
+			++count;
+	return count;
+}
+
+/*
+ * Check the `variable=expression' syntax correctness.
+ */
+static void check_var_syntax(const char *expr)
+{
+	if (strlen(expr) < 3 || countchr(expr, '=') != 1 ||
+	    strchr(expr, '=') == expr ||
+	    strchr(expr, '=') == expr + strlen(expr) - 1) {
+		fprintf(stderr, "zile: invalid `variable=expression' syntax\n");
+		exit(1);
+	}
+}
+
+static void set_variables(alist al)
+{
+	char *expr;
+	for (expr = alist_first(al); expr != NULL; expr = alist_next(al)) {
+		char *var = expr;
+		char *eq = strchr(expr, '=');
+		char *val = eq + 1;
+		*eq = '\0';
+		fprintf(stderr, "'%s' = '%s'\n", var, val);
+		set_variable(var, val);
+	}
+}
+
 /*
  * Output the program syntax then exit.
  */
 static void usage(void)
 {
-	fprintf(stderr, "usage: zile [-hqV] [-f function] [+number] [file ...]\n");
+	fprintf(stderr, "usage: zile [-hqV] [-f function] [-v variable=value] [-u rcfile]\n"
+		        "            [+number] [file ...]\n");
 	exit(1);
 }
 
@@ -215,12 +268,14 @@ int main(int argc, char **argv)
 {
 	int c;
 	int hflag = 0, qflag = 0;
-	char *farg = NULL;
+	char *uarg = NULL;
+	alist fargs = alist_new();
+	alist vargs = alist_new();
 
-	while ((c = getopt(argc, argv, "f:hqV")) != -1)
+	while ((c = getopt(argc, argv, "f:hqu:v:V")) != -1)
 		switch (c) {
 		case 'f':
-			farg = optarg;
+			alist_append(fargs, optarg);
 			break;
 		case 'h':
 			hflag = 1;
@@ -228,9 +283,16 @@ int main(int argc, char **argv)
 		case 'q':
 			qflag = 1;
 			break;
+		case 'u':
+			uarg = optarg;
+			break;
+		case 'v':
+			check_var_syntax(optarg);
+			alist_append(vargs, optarg);
+			break;
 		case 'V':
 			fprintf(stderr, ZILE_VERSION_STRING "\n");
-			exit(0);
+			return 0;
 		case '?':
 		default:
 			usage();
@@ -252,7 +314,8 @@ int main(int argc, char **argv)
 
 	init_variables();
 	if (!qflag)
-		read_rc_file();
+		read_rc_file(uarg);
+	set_variables(vargs);
 	cur_tp->open();
 
 	/* Create the `*scratch*' buffer and initialize key bindings. */
@@ -266,7 +329,7 @@ int main(int argc, char **argv)
 		 * specified on command line and no function was specified
 		 * with the `-f' flag.
 		 */
-		if (!hflag && farg == NULL)
+		if (!hflag && alist_isempty(fargs))
 			about_screen();
 	} else {
 		while (*argv) {
@@ -283,7 +346,7 @@ int main(int argc, char **argv)
 	 * on command line or the novice level is enabled.
 	 */
 	if (hflag || lookup_bool_variable("novice-level"))
-		FUNCALL(toggle_minihelp_window);
+		FUNCALL(minihelp_toggle_window);
 
 	if (argc < 1 && lookup_bool_variable("novice-level")) {
 		/* Cut & pasted from Emacs 20.2. */
@@ -296,17 +359,14 @@ then enter the text in that file's own buffer.\n\
 		resync_redisplay();
 	}
 
-	if (farg != NULL) {
-		cur_tp->redisplay();
-		if (!execute_function(farg, 1))
-			minibuf_error("Function `@f%s@@' not defined", farg);
-		lastflag |= FLAG_NEED_RESYNC;
-	}
+	execute_functions(fargs);
 
 	/* Run the main Zile loop (read key, process key, read key, ...). */
 	loop();
 
 	/* Free all the memory allocated. */
+	alist_delete(fargs);
+	alist_delete(vargs);
 	free_kill_ring();
 	free_registers();
 	free_search_history();

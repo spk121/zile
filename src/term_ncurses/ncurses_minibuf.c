@@ -1,7 +1,7 @@
-/*	$Id: ncurses_minibuf.c,v 1.3 2003/04/24 15:36:52 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,7 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_NCURSES_H
+#if HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
@@ -196,6 +196,8 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 		thistab = -1;
 
 		switch (c = cur_tp->getkey()) {
+		case KBD_NOKEY:
+			break;
 		case KBD_CTL | 'z':
 			FUNCALL(suspend_zile);
 			break;

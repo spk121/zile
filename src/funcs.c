@@ -1,7 +1,7 @@
-/*	$Id: funcs.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -89,15 +89,36 @@ static char *make_buffer_mode(bufferp bp)
 	static char buf[32]; /* Make sure the buffer is large enough. */
 
 	switch (bp->mode) {
+#if ENABLE_C_MODE
 	case BMODE_C:
 		strcpy(buf, "C");
 		break;
+#endif
+#if ENABLE_CPP_MODE
 	case BMODE_CPP:
 		strcpy(buf, "C++");
 		break;
+#endif
+#if ENABLE_CSHARP_MODE
+	case BMODE_CSHARP:
+		strcpy(buf, "C#");
+		break;
+#endif
+#if ENABLE_JAVA_MODE
+	case BMODE_JAVA:
+		strcpy(buf, "Java");
+		break;
+#endif
+#if ENABLE_SHELL_MODE
 	case BMODE_SHELL:
 		strcpy(buf, "Shell-script");
 		break;
+#endif
+#if ENABLE_MAIL_MODE
+	case BMODE_MAIL:
+		strcpy(buf, "Mail");
+		break;
+#endif
 	default:
 		strcpy(buf, "Text");
 	}
@@ -109,25 +130,6 @@ static char *make_buffer_mode(bufferp bp)
 		strcat(buf, " Fill");
 
 	return buf;
-}
-
-static int calculate_buffer_size(bufferp bp)
-{
-	linep lp = bp->limitp->next;
-	int size = 0;
-
-	if (lp == bp->limitp)
-		return 0;
-
-	for (;;) {
-		size += lp->size;
-		lp = lp->next;
-		if (lp == bp->limitp)
-			break;
-		++size;
-	}
-
-	return size;
 }
 
 static void print_buf(bufferp old_bp, bufferp bp)
@@ -280,42 +282,105 @@ Turn on the mode for editing text intended for humans to read.
 +*/
 {
 	cur_bp->mode = BMODE_TEXT;
-
+	if (cur_bp->flags & BFLAG_FONTLOCK)
+		FUNCALL(font_lock_mode);
 	if (lookup_bool_variable("text-mode-auto-fill"))
-		FUNCALL(auto_fill_mode);
+		cur_bp->flags |= BFLAG_AUTOFILL;
 
 	return TRUE;
 }
 
+#if ENABLE_C_MODE
 DEFUN("c-mode", c_mode)
 /*+
 Turn on the mode for editing K&R and ANSI/ISO C code.
 +*/
 {
 	cur_bp->mode = BMODE_C;
+	if (lookup_bool_variable("auto-font-lock") &&
+	    !(cur_bp->flags & BFLAG_FONTLOCK))
+		FUNCALL(font_lock_mode);
 
 	return TRUE;
 }
+#endif
 
+#if ENABLE_CPP_MODE
 DEFUN("c++-mode", cpp_mode)
 /*+
 Turn on the mode for editing ANSI/ISO C++ code.
 +*/
 {
 	cur_bp->mode = BMODE_CPP;
+	if (lookup_bool_variable("auto-font-lock") &&
+	    !(cur_bp->flags & BFLAG_FONTLOCK))
+		FUNCALL(font_lock_mode);
 
 	return TRUE;
 }
+#endif
 
+#if ENABLE_CSHARP_MODE
+DEFUN("c#-mode", csharp_mode)
+/*+
+Turn on the mode for editing C# (C sharp) code.
++*/
+{
+	cur_bp->mode = BMODE_CSHARP;
+	if (lookup_bool_variable("auto-font-lock") &&
+	    !(cur_bp->flags & BFLAG_FONTLOCK))
+		FUNCALL(font_lock_mode);
+
+	return TRUE;
+}
+#endif
+
+#if ENABLE_JAVA_MODE
+DEFUN("java-mode", java_mode)
+/*+
+Turn on the mode for editing Java code.
++*/
+{
+	cur_bp->mode = BMODE_JAVA;
+	if (lookup_bool_variable("auto-font-lock") &&
+	    !(cur_bp->flags & BFLAG_FONTLOCK))
+		FUNCALL(font_lock_mode);
+
+	return TRUE;
+}
+#endif
+
+#if ENABLE_SHELL_MODE
 DEFUN("shell-script-mode", shell_script_mode)
 /*+
 Turn on the mode for editing shell script code.
 +*/
 {
 	cur_bp->mode = BMODE_SHELL;
+	if (lookup_bool_variable("auto-font-lock") &&
+	    !(cur_bp->flags & BFLAG_FONTLOCK))
+		FUNCALL(font_lock_mode);
 
 	return TRUE;
 }
+#endif
+
+#if ENABLE_MAIL_MODE
+DEFUN("mail-mode", mail_mode)
+/*+
+Turn on the mode for editing emails.
++*/
+{
+	cur_bp->mode = BMODE_MAIL;
+	if (lookup_bool_variable("auto-font-lock") &&
+	    !(cur_bp->flags & BFLAG_FONTLOCK))
+		FUNCALL(font_lock_mode);
+	if (lookup_bool_variable("mail-mode-auto-fill"))
+		cur_bp->flags |= BFLAG_AUTOFILL;
+
+	return TRUE;
+}
+#endif
 
 DEFUN("set-fill-column", set_fill_column)
 /*+
@@ -407,10 +472,45 @@ Put point at beginning and mark at end of buffer.
 	return TRUE;
 }
 
+static int quoted_insert_octal(int c1)
+{
+	int c2, c3;
+	do {
+		c2 = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
+		if (c2 == KBD_CANCEL)
+			return FALSE;
+		minibuf_write("C-q %d -", c1 - '0');
+	} while (c2 == KBD_NOKEY);
+
+	if (!isdigit(c2) || c2 - '0' >= 8) {
+		insert_char(c1 - '0');
+		insert_char(c2);
+		return TRUE;
+	}
+
+	do {
+		c3 = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
+		if (c3 == KBD_CANCEL)
+			return FALSE;
+		minibuf_write("C-q %d %d -", c1 - '0', c2 - '0');
+	} while (c3 == KBD_NOKEY);
+
+	if (!isdigit(c3) || c3 - '0' >= 8) {
+		insert_char((c1 - '0') * 8 + (c2 - '0'));
+		insert_char(c3);
+		return TRUE;
+	}
+
+	insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
+
+	return TRUE;
+}
+
 DEFUN("quoted-insert", quoted_insert)
 /*+
 Read next input character and insert it.
 This is useful for inserting control characters.
+You may also type up to 3 octal digits, to insert a character with that code.
 +*/
 {
 	int c;
@@ -419,12 +519,15 @@ This is useful for inserting control characters.
 		c = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
 		minibuf_write("C-q -");
 	} while (c == KBD_NOKEY);
-	minibuf_clear();
 
-	if (c == '\r')
+	if (isdigit(c) && c - '0' < 8)
+		quoted_insert_octal(c);
+	else if (c == '\r')
 		insert_newline();
 	else
 		insert_char(c);
+
+	minibuf_clear();
 
 	return TRUE;
 }
@@ -585,106 +688,336 @@ The variable `tab-width' controls the spacing of tab stops.
 	return edit_tab_region(TAB_UNTABIFY);
 }
 
+DEFUN("back-to-indentation", back_to_indentation)
+/*+
+Move point to the first non-whitespace character on this line.
++*/
+{
+	cur_wp->pointo = 0;
+	while (cur_wp->pointo < cur_wp->pointp->size) {
+		if (!isspace(cur_wp->pointp->text[cur_wp->pointo]))
+			break;
+		++cur_wp->pointo;
+	}
+	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
+	return TRUE;
+}
+
 #if 0
 DEFUN("transpose-chars", transpose_chars)
 /*+
+Interchange characters around point, moving forward one character.
+With prefix arg ARG, effect is to take character before point
+and drag it forward past ARG other characters (backward if ARG negative).
+If no argument and at end of line, the previous two chars are exchanged.
 +*/
 {
 }
 
 DEFUN("transpose-words", transpose_words)
 /*+
+Interchange words around point, leaving point at end of them.
+With prefix arg ARG, effect is to take word before or around point
+and drag it forward past ARG other words (backward if ARG negative).
+If ARG is zero, the words around or after point and around or after mark
+are interchanged.
 +*/
 {
 }
 
 DEFUN("transpose-sexps", transpose_sexps)
 /*+
+Like M-t but applies to sexps.
+Does not work on a sexp that point is in the middle of
+if it is a list or string.
 +*/
 {
 }
 
 DEFUN("transpose-lines", transpose_lines)
 /*+
+Exchange current line and previous line, leaving point after both.
+With argument ARG, takes previous line and moves it past ARG lines.
+With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
+}
+#endif
+
+#define ISWORDCHAR(c)	(isalnum(c) || c == '$')
+
+static int forward_word(void)
+{
+	int gotword = FALSE;
+	for (;;) {
+		while (cur_wp->pointo <= cur_wp->pointp->size) {
+			int c = cur_wp->pointp->text[cur_wp->pointo];
+			if (!ISWORDCHAR(c)) {
+				if (gotword)
+					return TRUE;
+			} else
+				gotword = TRUE;
+			++cur_wp->pointo;
+		}
+		cur_wp->pointo = cur_wp->pointp->size;
+		if (!next_line())
+			return FALSE;
+		cur_wp->pointo = 0;
+	}
+	return FALSE;
 }
 
 DEFUN("forward-word", forward_word)
 /*+
+Move point forward one word (backward if the argument is negative).
+With argument, do this that many times.
 +*/
 {
+	int uni;
+
+	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
+
+	if (uniarg < 0)
+		return FUNCALL_ARG(backward_word, -uniarg);
+
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!forward_word())
+			return FALSE;
+
+	return TRUE;
+}
+
+static int backward_word(void)
+{
+	int gotword = FALSE;
+	for (;;) {
+		if (cur_wp->pointo == 0) {
+			if (!previous_line())
+				return FALSE;
+			cur_wp->pointo = cur_wp->pointp->size;
+		}
+		while (cur_wp->pointo > 0) {
+			int c = cur_wp->pointp->text[cur_wp->pointo - 1];
+			if (!ISWORDCHAR(c)) {
+				if (gotword)
+					return TRUE;
+			} else
+				gotword = TRUE;
+			--cur_wp->pointo;
+		}
+		if (gotword)
+			return TRUE;
+	}
+	return FALSE;
 }
 
 DEFUN("backward-word", backward_word)
 /*+
+Move backward until encountering the end of a word (forward if the
+argument is negative).
+With argument, do this that many times.
 +*/
 {
-}
+	int uni;
 
-DEFUN("kill-word", kill_word)
-/*+
-+*/
-{
-}
+	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
-DEFUN("backward-kill-word", backward_kill_word)
-/*+
-+*/
-{
+	if (uniarg < 0)
+		return FUNCALL_ARG(forward_word, -uniarg);
+
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!backward_word())
+			return FALSE;
+
+	return TRUE;
 }
 
 DEFUN("mark-word", mark_word)
 /*+
+Set mark argument words away from point.
 +*/
 {
 }
 
 DEFUN("backward-sentence", backward_sentence)
 /*+
+Move backward to start of sentence.  With argument N, do it N times.
 +*/
 {
 }
 
 DEFUN("forward-sentence", forward_sentence)
 /*+
+Move forward to next sentence end.  With argument, repeat.
+With negative argument, move backward repeatedly to sentence beginning.
 +*/
 {
 }
 
 DEFUN("kill-sentence", kill_sentence)
 /*+
+Kill from point to end of sentence.
+With argument, repeat; negative argument -N means kill back to Nth start
+of sentence.
 +*/
 {
 }
 
 DEFUN("backward-kill-sentence", backward_kill_sentence)
 /*+
+Kill back from point to start of sentence.
+With argument N, do it N times; negative argument -N means kill forward
+to Nth end of sentence.
 +*/
 {
 }
 
 DEFUN("backward-paragraph", backward_paragraph)
 /*+
+Move backward to start of paragraph.
+With argument N, do it N times; negative argument -N means move forward
+N paragraphs.
 +*/
 {
 }
 
 DEFUN("forward-paragraph", forward_paragraph)
 /*+
+Move forward to end of paragraph.
+With argument N, do it N times; negative argument -N means move backward
+N paragraphs.
 +*/
 {
 }
 
 DEFUN("mark-paragraph", mark_paragraph)
 /*+
+Put point at beginning of this paragraph, mark at end.
+The paragraph marked is the one that contains point or follows point.
 +*/
 {
 }
+
+DEFUN("fill-paragraph", fill_paragraph)
+/*+
+Fill paragraph at or after point.
++*/
+{
+}
+
+#define UPPERCASE		1
+#define LOWERCASE		2
+#define CAPITALIZE		3
+
+static int setcase_word(int rcase)
+{
+	int i, size, gotword;
+
+	if (!forward_word())
+		return FALSE;
+	if (!backward_word())
+		return FALSE;
+
+	i = cur_wp->pointo;
+	while (i < cur_wp->pointp->size) {
+		if (!ISWORDCHAR(cur_wp->pointp->text[i]))
+			break;
+		++i;
+	}
+	size = i-cur_wp->pointo;
+	if (size > 0)
+		undo_save(UNDO_REPLACE_BLOCK, cur_wp->pointn, cur_wp->pointo, size, size);
+
+	gotword = FALSE;
+	while (cur_wp->pointo < cur_wp->pointp->size) {
+		char *p = &cur_wp->pointp->text[cur_wp->pointo];
+		if (!ISWORDCHAR(*p))
+			break;
+		if (isalpha(*p)) {
+			int oldc = *p, newc;
+			if (rcase == UPPERCASE)
+				newc = toupper(oldc);
+			else if (rcase == LOWERCASE)
+				newc = tolower(oldc);
+			else { /* rcase == CAPITALIZE */
+				if (!gotword)
+					newc = toupper(oldc);
+				else
+					newc = tolower(oldc);
+			}
+			if (oldc != newc) {
+				*p = newc;
+			}
+		}
+		gotword = TRUE;
+		++cur_wp->pointo;
+	}
+
+	cur_bp->flags |= BFLAG_MODIFIED;
+
+#if ENABLE_NONTEXT_MODES
+	if (cur_bp->flags & BFLAG_FONTLOCK)
+		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
 #endif
 
-#define CASE_UPPER	1
-#define CASE_LOWER	2
+	return TRUE;
+}
+
+DEFUN("downcase-word", downcase_word)
+/*+
+Convert following word (or argument N words) to lower case, moving over.
++*/
+{
+	int uni, ret = TRUE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!setcase_word(LOWERCASE)) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	return ret;
+}
+
+DEFUN("upcase-word", upcase_word)
+/*+
+Convert following word (or argument N words) to upper case, moving over.
++*/
+{
+	int uni, ret = TRUE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!setcase_word(UPPERCASE)) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	return ret;
+}
+
+DEFUN("capitalize-word", capitalize_word)
+/*+
+Capitalize the following word (or argument N words), moving over.
+This gives the word(s) a first character in upper case and the rest
+lower case.
++*/
+{
+	int uni, ret = TRUE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!setcase_word(CAPITALIZE)) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	return ret;
+}
 
 /*
  * Set the region case.
@@ -708,7 +1041,7 @@ static int setcase_region(int rcase)
 	p = lp->text + r.starto;
 	while (size--) {
 		if (p < lp->text + lp->size) {
-			if (rcase == CASE_UPPER)
+			if (rcase == UPPERCASE)
 				*p = toupper(*p);
 			else
 				*p = tolower(*p);
@@ -724,32 +1057,12 @@ static int setcase_region(int rcase)
 	return TRUE;
 }
 
-#if 0
-DEFUN("downcase-word", downcase_word)
-/*+
-+*/
-{
-}
-
-DEFUN("upcase-word", upcase_word)
-/*+
-+*/
-{
-}
-
-DEFUN("capitalize-word", capitalize_word)
-/*+
-+*/
-{
-}
-#endif
-
 DEFUN("upcase-region", upcase_region)
 /*+
 Convert the region to upper case.
 +*/
 {
-	return setcase_region(CASE_UPPER);
+	return setcase_region(UPPERCASE);
 }
 
 DEFUN("downcase-region", downcase_region)
@@ -757,7 +1070,7 @@ DEFUN("downcase-region", downcase_region)
 Convert the region to lower case.
 +*/
 {
-	return setcase_region(CASE_LOWER);
+	return setcase_region(LOWERCASE);
 }
 
 static void write_shell_output(va_list ap)
@@ -776,8 +1089,8 @@ shell command produces any output, the output goes to a Zile buffer
 named `*Shell Command Output*', which is displayed in another window
 but not selected.
 If the output is one line, it is displayed in the echo area.
-A numeric argument, as in `M-1 M-!', directs this command to insert
-any output into the current buffer.
+A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
+command to insert any output into the current buffer.
 +*/
 {
 	char *ms;
@@ -811,7 +1124,7 @@ any output into the current buffer.
 
 	if (lines == 0)
 		minibuf_write("(Shell command succeeded with no output)");
-	else {
+	else { /* lines >= 1 */
 		if (lastflag & FLAG_SET_UNIARG)
 			insert_string((char *)astr_cstr(out));
 		else {
@@ -836,9 +1149,9 @@ If the shell command produces any output, the output goes to a Zile buffer
 named `*Shell Command Output*', which is displayed in another window
 but not selected.  
 If the output is one line, it is displayed in the echo area.
-A numeric argument, as in `M-1 M-!', directs output to the current buffer,
-then the old region is deleted first and the output replaces it as the
-contents of the region.
+A numeric argument, as in `M-1 M-|' or `C-u M-|', directs output to the
+current buffer, then the old region is deleted first and the output replaces
+it as the contents of the region.
 +*/
 {
 	char *ms;
@@ -846,7 +1159,7 @@ contents of the region.
 	astr out, s;
 	int lines = 0;
 	astr cmd;
-	char *tempfile;
+	char tempfile[] = P_tmpdir "/zileXXXXXX";
 
 	if ((ms = minibuf_read("Shell command: ", "")) == NULL)
 		return cancel();
@@ -857,20 +1170,20 @@ contents of the region.
 	if (cur_bp->markp != NULL) { /* Region selected; filter text. */
 		struct region r;
 		char *p;
-		FILE *f;
+		int fd;
 
-		tempfile = tmpnam(NULL);
-		if ((f = fopen(tempfile, "w")) == NULL) {
+		fd = mkstemp (tempfile);
+		if (fd == -1) {
 			minibuf_error("Cannot open temporary file");
 			return FALSE;
 		}
 
 		calculate_region(&r);
 		p = copy_text_block(r.startn, r.starto, r.size);
-		fwrite(p, 1, r.size, f);
+		write(fd, p, r.size);
 		free(p);
 
-		fclose(f);
+		close(fd);
 
 		astr_fmt(cmd, "%s 2>&1 <%s", ms, tempfile);
 	} else
@@ -896,8 +1209,9 @@ contents of the region.
 
 	if (lines == 0)
 		minibuf_write("(Shell command succeeded with no output)");
-	else {
+	else { /* lines >= 1 */
 		if (lastflag & FLAG_SET_UNIARG) {
+			undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 			if (cur_bp->markp != NULL) {
 				struct region r;
 				calculate_region(&r);
@@ -910,6 +1224,7 @@ contents of the region.
 				undo_nosave = FALSE;
 			}
 			insert_string((char *)astr_cstr(out));
+			undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 		} else {
 			if (lines > 1)
 				write_temp_buffer("*Shell Command Output*",

@@ -1,7 +1,7 @@
-/*	$Id: line.c,v 1.4 2003/04/24 15:47:40 rrt Exp $	*/
+/*	$Id: line.c,v 1.5 2003/05/06 22:28:42 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -48,7 +48,7 @@
  *
  * The '\n' is not stored in the text buffer since it is implicit.
  *
- * The tail of the buffer structure is used for storing the text buffer.
+ * The tail of the line structure is used for storing the text buffer.
  */
 linep new_line(int maxsize)
 {
@@ -143,8 +143,10 @@ int intercalate_char(int c)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK)
 		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 
 	return TRUE;
 }
@@ -176,8 +178,10 @@ int insert_char(int c)
 
 			cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 			if (cur_bp->flags & BFLAG_FONTLOCK)
 				font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 
 			return TRUE;
 		}
@@ -202,6 +206,8 @@ int insert_char(int c)
 
 	if (cur_bp->markp == cur_wp->pointp && cur_bp->marko >= pointo)
 		++cur_bp->marko;
+
+	++cur_wp->pointp->size;
 
 	return TRUE;
 }
@@ -262,19 +268,23 @@ the current buffer.  Convert the tabulation into spaces
 if the `expand-tabs' variable is bound and set to true.
 +*/
 {
-	int uni;
+	int uni, ret = TRUE;
 
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!insert_tab())
-			return FALSE;
+		if (!insert_tab()) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
-	return TRUE;
+	return ret;
 }
 
 static int common_insert_newline(int undo_mode)
 {
 	linep lp1, lp2;
-        int lp1len, lp2len, cur_pointn;
+	int lp1len, lp2len, cur_pointn;
 	windowp wp;
 
 	if (warn_if_readonly_buffer())
@@ -334,10 +344,12 @@ static int common_insert_newline(int undo_mode)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
 		font_lock_reset_anchors(cur_bp, cur_wp->pointp->prev);
 		font_lock_reset_anchors(cur_bp, cur_wp->pointp);
 	}
+#endif
 
 	thisflag |= FLAG_NEED_RESYNC;
 
@@ -396,8 +408,10 @@ void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
 	if (modified) {
 		cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, *lp);
+#endif
 	}
 }
 
@@ -407,13 +421,17 @@ Insert a newline at the current point position into
 the current buffer.
 +*/
 {
-	int uni;
+	int uni, ret = TRUE;
 
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!insert_newline())
-			return FALSE;
+		if (!insert_newline()) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
-	return TRUE;
+	return ret;
 }
 
 void insert_string(char *s)
@@ -503,27 +521,31 @@ DEFUN("self-insert-command", self_insert_command)
 Insert the character you type.
 +*/
 {
-	int uni, c;
+	int uni, c, ret = TRUE;
 
 	c = cur_tp->getkey();
 
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!self_insert_command(c))
-			return FALSE;
+		if (!self_insert_command(c)) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
-	return TRUE;
+	return ret;
 }
 
 void bprintf(const char *fmt, ...)
 {
 	va_list ap;
-#ifdef HAVE_VASPRINTF
+#if HAVE_VASPRINTF
 	char *buf;
 #else
 	char buf[2048]; /* XXX fix this */
 #endif
 	va_start(ap, fmt);
-#ifdef HAVE_VASPRINTF
+#if HAVE_VASPRINTF
 	vasprintf(&buf, fmt, ap);
 #else
 	vsprintf(buf, fmt, ap);
@@ -532,7 +554,7 @@ void bprintf(const char *fmt, ...)
 
 	insert_string(buf);
 
-#ifdef HAVE_VASPRINTF
+#if HAVE_VASPRINTF
 	free(buf);
 #endif
 }
@@ -571,8 +593,10 @@ int delete_char(void)
 		    && cur_bp->marko > cur_wp->pointo)
 			--cur_bp->marko;
 
+#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -640,8 +664,10 @@ int delete_char(void)
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 
 		thisflag |= FLAG_NEED_RESYNC;
 
@@ -659,16 +685,20 @@ Delete the following character.
 Join lines if the character is a newline.
 +*/
 {
-	int uni;
+	int uni, ret = TRUE;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(backward_delete_char, -uniarg);
 
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!delete_char())
-			return FALSE;
+		if (!delete_char()) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
-	return TRUE;
+	return ret;
 }
 
 int backward_delete_char(void)
@@ -707,8 +737,10 @@ int backward_delete_char(void)
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 
 		return TRUE;
 	} else if (cur_wp->pointp->prev != cur_bp->limitp) {
@@ -780,8 +812,10 @@ int backward_delete_char(void)
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
+#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
 
 		thisflag |= FLAG_NEED_RESYNC;
 
@@ -799,15 +833,19 @@ Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-	int uni;
+	int uni, ret = TRUE;
 
 	if (uniarg < 0)
 		return FUNCALL_ARG(delete_char, -uniarg);
 
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!backward_delete_char())
-			return FALSE;
+		if (!backward_delete_char()) {
+			ret = FALSE;
+			break;
+		}
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
-	return TRUE;
+	return ret;
 }
 

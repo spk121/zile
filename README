@@ -14,7 +14,7 @@ Zile features:
 
  - Multi buffer editing w/multi level undo.  Zile can open an
    infinite number of files and can record an infinite sequence of
-   undo operations.
+   undo operations (limited only by the amount of free memory).
 
  - Multi window.  Zile can display multiple windows on the screen.
 
@@ -27,8 +27,8 @@ Zile features:
  - Colors.  Zile makes use of the color capatibilities of the
    terminal if available.
 
- - Source highlighting ("C", "C++", and shell scripts).  Zile can
-   highlight "C", "C++" source files and shell scripts for better reading.
+ - Source highlighting (C, C++, C#, Java, shell scripts, mails).
+   Zile can highlight source files and scripts for better reading.
 
  - Auto fill (word wrap).  Zile automatically breaks the lines when
    they become too wide (if the Auto Fill Mode is enabled).

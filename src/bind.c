@@ -1,7 +1,7 @@
-/*	$Id: bind.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: bind.c,v 1.3 2003/05/06 22:28:41 rrt Exp $	*/
 
 /*
- * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
+ * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -176,7 +176,7 @@ static leafp search_key(char *key)
 }
 #endif
 
-#ifdef DEBUG
+#if DEBUG
 static void prspaces(int i)
 {
 	int x;
@@ -289,17 +289,20 @@ void process_key(int c)
 		/*
 		 * There are no bindings for the pressed key.
 		 */
+		undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 		for (uni = 0; uni < last_uniarg; ++uni) {
 			if (!self_insert_command(c)) {
 				char buf[64];
 				make_completion(buf, keys, numkeys);
 				buf[strlen(buf)-2] = '\0';
 				minibuf_error("%s not defined.", buf);
+				undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 				return;
 			}
 			if (thisflag & FLAG_DEFINING_MACRO)
 				add_kbd_macro(self_insert_command, c);
 		}
+		undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	} else {
 		int oldflag = thisflag;
 		p->func(last_uniarg);
@@ -463,7 +466,7 @@ char *minibuf_read_function_name(char *msg)
 					break;
 				}
 			if ((entryp = bsearch_function(ms)) == NULL) {
-				minibuf_error("Undefined function name");
+				minibuf_error("Undefined function name `@f%s@@'", ms);
 				waitkey(2 * 1000);
 			} else {
 				minibuf_clear();
