@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.8 2004/01/21 01:42:22 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.9 2004/01/21 01:46:28 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -530,49 +530,81 @@ You may also type up to 3 octal digits, to insert a character with that code.
 
 int universal_argument(int keytype, int xarg)
 {
-	char buf[128];
-	int arg = 4, neg = 1, i = 0, compl = 0;
-	int c;
+	int i, arg, sgn, compl;
+	char buf[1024];
+	int c, digit;
 
+	i = 0;
+	arg = 4;
+	sgn = 1;
+	compl = 0;
+	
 	if (keytype == KBD_META) {
-		strcpy(buf, "ESC ");
-		arg = xarg;
-		++i;
-		goto gotesc;
-	} else
-		strcpy(buf, "C-u -");
-	for (;;) {
-		c = do_completion(buf, &compl);
-		if (c == KBD_CANCEL)
-			return cancel();
-		else if (c == (KBD_CTL | 'u')) {
-			if (arg * 4 < arg)
-				arg = 4;
-			else
-				arg *= 4;
-			i = 0;
-		}
-		else if (c == '-' && i == 0)
-			neg = -neg;
-		else if (c > 255 || !isdigit(c)) {
-			cur_tp->ungetkey(c);
-			break;
-		} else {
-			if (i == 0)
-				arg = c - '0';
-			else
-				arg = arg * 10 + c - '0';
-			++i;
-		}
-	gotesc:
-		if (keytype == KBD_META)
-			sprintf(buf, "ESC %d", arg * neg);
-		else
-			sprintf(buf, "C-u %d", arg * neg);
+		strcpy (buf, "ESC");
+		cur_tp->ungetkey (xarg + '0');
 	}
+	else
+		strcpy (buf, "C-u");
+	
+	for (;;) {
+		strcat (buf, "-"); /* Add the '-' character.  */
+		c = do_completion (buf, &compl);
+		buf[strlen (buf)-1] = '\0'; /* Remove the '-' character.  */
 
-	last_uniarg = arg * neg;
+		/* Cancelled.  */
+		if (c == KBD_CANCEL)
+			return cancel ();
+		/* Digit pressed.  */
+		else if (isdigit (c & 0xff)) {
+			digit = (c & 0xff) - '0';
 
+			if (c & KBD_META)
+				strcat (buf, " ESC");
+
+			sprintf (buf+strlen (buf), " %d", digit);
+
+			if (i == 0)
+				arg = digit;
+			else
+				arg = arg * 10 + digit;
+
+			i++;
+		}
+		else if (c == (KBD_CTL | 'u')) {
+			sprintf (buf+strlen (buf), " C-u");
+			if (i == 0)
+				arg *= 4;
+		}
+		else if (c == '-') {
+			/* After any number && if sign doesn't change */
+			if (i == 0 && sgn > 0) {
+				sgn = -sgn;
+				strcat (buf, " -");
+				/* The default "arg" isn't -4, is -1 */
+				arg = 1;
+			}
+			else {
+				if (i == 0) {
+					/* Nothing (the Emacs behavior
+					   is a little strange in this
+					   case, it waits for one more
+					   key that is eaten, and then
+					   back to normal state).  */
+				}
+				else {
+					cur_tp->ungetkey (c);
+					break;
+				}
+			}
+		}
+		else {
+			cur_tp->ungetkey (c);
+			break;
+		}
+	}
+	
+	last_uniarg = arg * sgn;
+	
 	thisflag |= FLAG_SET_UNIARG;
 
 	minibuf_clear();
