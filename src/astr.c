@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: astr.c,v 1.2 2004/11/15 12:36:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -268,6 +268,14 @@ static void assert_eq(astr as, const char *s)
 {
 	if (astr_cmp_cstr(as, s))
 		printf("test failed: \"%s\" != \"%s\"\n", as->text, s);
+}
+
+/*
+ * Stub to make zmalloc &c. happy.
+ */
+void zile_exit(int exitcode)
+{
+        exit(exitcode);
 }
 
 int main(void)

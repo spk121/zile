@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: alist.c,v 1.2 2004/11/15 12:36:13 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -250,6 +250,14 @@ void *alist_at(alist al, unsigned int i)
 static int sorter(const void *p1, const void *p2)
 {
 	return strcmp(*(char **)p1, *(char **)p2);
+}
+
+/*
+ * Stub to make zmalloc &c. happy.
+ */
+void zile_exit(int exitcode)
+{
+        exit(exitcode);
 }
 
 int main(void)

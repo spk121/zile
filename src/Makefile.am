@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.18 2004/11/15 00:47:12 rrt Exp $
+## $Id: Makefile.am,v 1.19 2004/11/15 12:36:13 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -11,10 +11,13 @@ TESTS = alist astr htable
 check_PROGRAMS = alist astr htable
 
 alist_CPPFLAGS = -DTEST
+alist_LDADD = zmalloc.o
 
 astr_CPPFLAGS = -DTEST
+astr_LDADD = zmalloc.o strrstr.o
 
 htable_CPPFLAGS = -DTEST
+htable_LDADD = zmalloc.o alist.o
 
 INCLUDES = -I$(top_srcdir)/lib
 

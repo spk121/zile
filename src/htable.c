@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: htable.c,v 1.2 2004/11/15 12:36:13 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -200,6 +200,14 @@ alist htable_list(htable ht)
 #ifdef TEST
 
 #include <stdio.h>
+
+/*
+ * Stub to make zmalloc &c. happy.
+ */
+void zile_exit(int exitcode)
+{
+        exit(exitcode);
+}
 
 int main(void)
 {

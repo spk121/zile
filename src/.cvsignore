@@ -4,3 +4,4 @@ Makefile.in
 zile
 zile.1
 paths.h
+astr alist htable
