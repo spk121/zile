@@ -193,7 +193,7 @@ Point line_beginning_position(int count);
 Point line_end_position(int count);
 
 /* rc.c ------------------------------------------------------------------- */
-void read_rc_file(const char *filename);
+void read_rc_file(void);
 
 /* redisplay.c ------------------------------------------------------------ */
 void resync_redisplay(void);

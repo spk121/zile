@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.18 2005/01/14 16:56:57 rrt Exp $	*/
+/*	$Id: rc.c,v 1.19 2005/01/15 00:32:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -145,25 +145,16 @@ static void parse_rc(void)
       error("unexpected character `%c'", c);
 }
 
-void read_rc_file(const char *filename)
+void read_rc_file(void)
 {
+  astr buf = get_home_dir();
+
   rc_file = NULL;
 
-  if (filename != NULL) {
-    rc_name = (char *)filename;
-    if ((rc_file = fopen(filename, "r")) == NULL) {
-      minibuf_error("Cannot open configuration file %s", filename);
-      waitkey();
-    }
-  }
-
-  if (rc_file == NULL) {
-    astr buf = get_home_dir();
-    astr_cat_cstr(buf, "/.zilerc");
-    rc_name = astr_cstr(buf);
-    rc_file = fopen(rc_name, "r");
-    astr_delete(buf);
-  }
+  astr_cat_cstr(buf, "/.zilerc");
+  rc_name = astr_cstr(buf);
+  rc_file = fopen(rc_name, "r");
+  astr_delete(buf);
 
   if (rc_file != NULL) {
     parse_rc();
