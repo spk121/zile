@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.27 2004/10/23 14:10:09 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.28 2004/10/24 19:15:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -65,7 +65,7 @@ static int max_key_chars = 0; /* Length of longest key code. */
 int ZILE_COLS;   /* Current number of columns on screen. */
 int ZILE_LINES;  /* Current number of rows on screen. */
 
-static char *ks_string, *ke_string, *cm_string;
+static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
 static char *empty_string = "";
@@ -110,7 +110,7 @@ static const char *getattr(Font f) {
  */
 void term_refresh(void)
 {
-        int i, j, skipped = 0;
+        int i, j, skipped = FALSE, eol = FALSE;
         Font of = ZILE_NORMAL;
         astr as = astr_new();
 
@@ -119,29 +119,38 @@ void term_refresh(void)
         astr_cat_cstr(as, getattr(ZILE_NORMAL));
 
         /* Add the rest of the screen. */
-        for (i = 0; i < termp->height; i++)
+        for (i = 0; i < termp->height; i++) {
+                eol = FALSE;
                 for (j = 0; j < termp->width; j++) {
                         int offset = i * termp->width + j;
                         int n = screen.array[offset];
+                        char c = n & 0xff;
+                        Font f = n & ~0xff;
 
                         if (screen.oarray[offset] != n) {
-                                char c = n & 0xff;
-                                Font f = n & ~0xff;
-
                                 if (skipped)
                                         astr_cat_cstr(as, tgoto(cm_string, j, i));
-                                skipped = 0;
         
                                 screen.oarray[offset] = n;
 
                                 if (f != of)
                                         astr_cat_cstr(as, getattr(f));
                                 of = f;
-                                
-                                astr_cat_char(as, c ? c : ' ');
+
+                                if (c) {
+                                        astr_cat_char(as, c);
+                                        skipped = FALSE;
+                                } else {
+                                        if (!eol) {
+                                                astr_cat_cstr(as, ce_string);
+                                                eol = TRUE;
+                                                skipped = TRUE;
+                                        }
+                                }
                         } else
-                                skipped = 1;
+                                skipped = TRUE;
                 }
+        }
 
         /* Put the cursor back where it should be. */
         astr_cat_cstr(as, tgoto(cm_string, screen.curx, screen.cury));
@@ -262,12 +271,17 @@ static void term_init_screen(void)
         term_clear(); /* Ensure the first call to term_refresh will update the screen. */
 }
 
-static char *tgetstr_note_len(const char *cap, char **tcap)
+static char *tgetstr_safe(const char *cap, char **tcap)
 {
         char *s = tgetstr(cap, tcap);
-        if (s)
-                max_key_chars = max(max_key_chars, strlen(s));
         return s ? s : empty_string;
+}
+
+static char *tgetstr_note_len(const char *cap, char **tcap)
+{
+        char *s = tgetstr_safe(cap, tcap);
+        max_key_chars = max(max_key_chars, strlen(s));
+        return s;
 }
 
 static void setattr(int flags)
@@ -310,13 +324,14 @@ void term_init(void)
         setvbuf(stdout, NULL, _IONBF, 0);
 
         /* Extract information we will use. */
-        ks_string = tgetstr_note_len("ks", &tcap);
-        ke_string = tgetstr_note_len("ke", &tcap);
-        cm_string = tgetstr_note_len("cm", &tcap);
-        so_string = tgetstr_note_len("so", &tcap);
-        se_string = tgetstr_note_len("se", &tcap);
-	mr_string = tgetstr_note_len("mr", &tcap);
-	me_string = tgetstr_note_len("me", &tcap);
+        ks_string = tgetstr_safe("ks", &tcap);
+        ke_string = tgetstr_safe("ke", &tcap);
+        cm_string = tgetstr_safe("cm", &tcap);
+        ce_string = tgetstr_safe("ce", &tcap);
+        so_string = tgetstr_safe("so", &tcap);
+        se_string = tgetstr_safe("se", &tcap);
+	mr_string = tgetstr_safe("mr", &tcap);
+	me_string = tgetstr_safe("me", &tcap);
         kl_string = tgetstr_note_len("kl", &tcap);
         kl_string_len = strlen(kl_string);
         kr_string = tgetstr_note_len("kr", &tcap);
