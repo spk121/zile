@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_key.c,v 1.11 2004/05/09 19:32:43 rrt Exp $	*/
+/*	$Id: ncurses_key.c,v 1.12 2004/05/10 16:02:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -119,8 +119,6 @@ static int translate_key(int c)
 
 static int ungetkey_buf[MAX_UNGETKEY_BUF];
 static int *ungetkey_p = ungetkey_buf;
-
-extern void ncurses_resize_windows(void);
 
 int ncurses_getkey(void)
 {

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.7 2004/05/09 18:00:34 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.8 2004/05/10 16:02:13 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -30,16 +30,6 @@
 #define ZILE_COLOR_WHITE	7
 #define ZILE_COLOR_BLUEBG	8
 
-#define C_FG_BLACK		COLOR_PAIR(ZILE_COLOR_BLACK)
-#define C_FG_RED		COLOR_PAIR(ZILE_COLOR_RED)
-#define C_FG_GREEN		COLOR_PAIR(ZILE_COLOR_GREEN)
-#define C_FG_YELLOW		COLOR_PAIR(ZILE_COLOR_YELLOW)
-#define C_FG_BLUE		COLOR_PAIR(ZILE_COLOR_BLUE)
-#define C_FG_MAGENTA		COLOR_PAIR(ZILE_COLOR_MAGENTA)
-#define C_FG_CYAN		COLOR_PAIR(ZILE_COLOR_CYAN)
-#define C_FG_WHITE		COLOR_PAIR(ZILE_COLOR_WHITE)
-#define C_FG_WHITE_BG_BLUE	COLOR_PAIR(ZILE_COLOR_BLUEBG)
-
 extern int LINES, COLS;
 
 #define ZILE_LINES              LINES
@@ -47,8 +37,48 @@ extern int LINES, COLS;
 
 extern Terminal *ncurses_tp;
 
-void term_getyx(int *y, int *x);
-void term_move(int y, int x);
-void term_clrtoeol(void);
-void term_refresh(void);
-void term_addch(char c);
+typedef unsigned long Font;
+
+extern Font ZILE_REVERSE, ZILE_BOLD;
+extern Font C_FG_BLACK;
+extern Font C_FG_RED;
+extern Font C_FG_GREEN;
+extern Font C_FG_YELLOW;
+extern Font C_FG_BLUE;
+extern Font C_FG_MAGENTA;
+extern Font C_FG_CYAN;
+extern Font C_FG_WHITE;
+extern Font C_FG_WHITE_BG_BLUE;
+
+extern void term_init(void);
+extern void term_getyx(int *y, int *x);
+extern void term_move(int y, int x);
+extern void term_clrtoeol(void);
+extern void term_refresh(void);
+extern void term_clear(void);
+extern void term_addch(char c);
+extern void term_addnstr(const char *s, int len);
+extern void term_addstr(const char *s);
+extern void term_mvaddch(int y, int x, char c);
+extern void term_mvaddstr(int y, int x, char *s);
+extern void term_attrset(Font f);
+extern int term_printw(const char *fmt, ...);
+
+extern int ncurses_init(void);
+extern int ncurses_open(void);
+extern int ncurses_close(void);
+extern int ncurses_getkey(void);
+extern int ncurses_xgetkey(int mode, int arg);
+extern int ncurses_ungetkey(int c);
+extern void ncurses_refresh_cached_variables(void);
+extern void ncurses_refresh(void);
+extern void ncurses_redisplay(void);
+extern void ncurses_full_redisplay(void);
+extern void ncurses_show_about(const char *splash, const char *minibuf);
+extern void ncurses_clear(void);
+extern void ncurses_beep(void);
+extern void ncurses_minibuf_write(const char *fmt);
+extern char *ncurses_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
+extern void ncurses_minibuf_clear(void);
+extern void ncurses_resize_windows(void);
+extern void ncurses_free_rotation_buffers(void);

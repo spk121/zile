@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.26 2004/05/09 18:00:34 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.27 2004/05/10 16:02:13 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -38,11 +38,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif
 
 #include "zile.h"
 #include "config.h"
@@ -60,7 +55,7 @@
 /*
  * The cached variables.
  */
-static chtype status_line_color;
+static Font status_line_color;
 static int display_time;
 static char *display_time_format;
 static char *displayable_characters;
@@ -70,7 +65,7 @@ static int cur_tab_width;
 static int point_start_column;
 static int point_screen_column;
 
-static chtype strtochtype(char *s)
+static Font strtochtype(char *s)
 {
 	switch (*s) {
 	case 'b':
@@ -89,7 +84,7 @@ static chtype strtochtype(char *s)
 		return C_FG_WHITE;
 	case 'l':
 		if (!strncmp(s, "light-", 6))
-			return strtochtype(s + 6)|A_BOLD;
+			return strtochtype(s + 6)|ZILE_BOLD;
 		return C_FG_WHITE;
 	case 'm':
 		if (!strcmp(s, "magenta"))
@@ -111,7 +106,7 @@ static chtype strtochtype(char *s)
 /*
  * Get the font color value from the user specified variables.
  */
-static chtype get_font(char *font)
+static Font get_font(char *font)
 {
 	char *s;
 	if ((s = get_variable(font)) == NULL)
@@ -271,7 +266,7 @@ static int pc_to_ascii[256] =
 	0xf8, 0xf9, 0xfa, 0xfb, 0xfc, 0xfd, 0xfe, 0xff
 };
 
-static void outch(int c, chtype font, int *x)
+static void outch(int c, Font font, int *x)
 {
 	int j, w;
 	char *buf;
@@ -504,42 +499,42 @@ static void draw_status_line(int line, Window *wp)
 	char *buf;
 	Point pt = window_pt(wp);
 
-	attrset(A_REVERSE | status_line_color);
+	term_attrset(ZILE_REVERSE | status_line_color);
 
 	term_move(line, 0);
 	for (i = 0; i < wp->ewidth; ++i)
 		term_addch('-');
 
 	term_move(line, 0);
-	printw("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
+	term_printw("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
 
         if (wp->bp->flags & BFLAG_AUTOFILL) {
-                printw("Fill");
+                term_printw("Fill");
                 someflag = 1;
         }
         if (wp->bp->flags & BFLAG_OVERWRITE) {
-                printw("%sOvwrt", someflag ? " " : "");
+                term_printw("%sOvwrt", someflag ? " " : "");
                 someflag = 1;
         }
         if (thisflag & FLAG_DEFINING_MACRO) {
-                printw("%sDef", someflag ? " " : "");
+                term_printw("%sDef", someflag ? " " : "");
                 someflag = 1;
         }
         if (wp->bp->flags & BFLAG_ISEARCH)
-                printw("%sIsearch", someflag ? " " : "");
+                term_printw("%sIsearch", someflag ? " " : "");
 
-        printw(")--L%d--C%d--%s",
+        term_printw(")--L%d--C%d--%s",
 	       pt.n+1, get_goalc_wp(wp),
 	       make_screen_pos(wp, &buf));
         free(buf);
 
 	if (display_time) {
 		buf = make_time_str();
-		mvaddstr(line, wp->ewidth - strlen(buf) - 2, buf);
+		term_mvaddstr(line, wp->ewidth - strlen(buf) - 2, buf);
                 free(buf);
 	}
 
-	attrset(0);
+	term_attrset(0);
 }
 
 static void do_redisplay(void)
@@ -558,7 +553,7 @@ static void do_redisplay(void)
 		draw_window(topline, wp);
 
 #ifdef NEED_REDUNDANT_REFRESH
-		refresh();
+		term_refresh();
 #endif
 
 		/*
@@ -573,7 +568,7 @@ static void do_redisplay(void)
 
 #ifndef ENABLE_FULL_HSCROLL
 	if (point_start_column > 0)
-		mvaddch(cur_topline + cur_wp->topdelta, 0, '$');
+		term_mvaddch(cur_topline + cur_wp->topdelta, 0, '$');
 #endif
 	term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
@@ -585,6 +580,6 @@ void ncurses_redisplay(void)
 
 void ncurses_full_redisplay(void)
 {
-	clear();
+	term_clear();
 	do_redisplay();
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.11 2004/05/09 18:00:34 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.12 2004/05/10 16:02:13 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -29,6 +29,7 @@
 #include "config.h"
 
 #include <stddef.h>
+#include <stdarg.h>
 #if HAVE_NCURSES_H
 #include <ncurses.h>
 #else
@@ -38,23 +39,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "term_ncurses.h"
-
-extern int ncurses_init(void);
-extern int ncurses_open(void);
-extern int ncurses_close(void);
-extern int ncurses_getkey(void);
-extern int ncurses_xgetkey(int mode, int arg);
-extern int ncurses_ungetkey(int c);
-extern void ncurses_refresh_cached_variables(void);
-extern void ncurses_refresh(void);
-extern void ncurses_redisplay(void);
-extern void ncurses_full_redisplay(void);
-extern void ncurses_show_about(const char *splash, const char *minibuf);
-extern void ncurses_clear(void);
-extern void ncurses_beep(void);
-extern void ncurses_minibuf_write(const char *fmt);
-extern char *ncurses_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-extern void ncurses_minibuf_clear(void);
 
 static Terminal thisterm = {
 	/* Unitialised screen pointer */
@@ -84,6 +68,31 @@ static Terminal thisterm = {
 
 Terminal *ncurses_tp = &thisterm;
 
+Font ZILE_REVERSE = A_REVERSE, ZILE_BOLD = A_BOLD;
+
+Font C_FG_BLACK;
+Font C_FG_RED;
+Font C_FG_GREEN;
+Font C_FG_YELLOW;
+Font C_FG_BLUE;
+Font C_FG_MAGENTA;
+Font C_FG_CYAN;
+Font C_FG_WHITE;
+Font C_FG_WHITE_BG_BLUE;
+
+void term_init(void)
+{
+        C_FG_BLACK = COLOR_PAIR(ZILE_COLOR_BLACK);
+        C_FG_RED = COLOR_PAIR(ZILE_COLOR_RED);
+        C_FG_GREEN = COLOR_PAIR(ZILE_COLOR_GREEN);
+        C_FG_YELLOW = COLOR_PAIR(ZILE_COLOR_YELLOW);
+        C_FG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUE);
+        C_FG_MAGENTA = COLOR_PAIR(ZILE_COLOR_MAGENTA);
+        C_FG_CYAN = COLOR_PAIR(ZILE_COLOR_CYAN);
+        C_FG_WHITE = COLOR_PAIR(ZILE_COLOR_WHITE);
+        C_FG_WHITE_BG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUEBG);
+}
+
 void term_getyx(int *y, int *x)
 {
         getyx(stdscr, *y, *x);
@@ -104,17 +113,22 @@ void term_refresh(void)
         refresh();
 }
 
+void term_clear(void)
+{
+        clear();
+}
+
 void term_addch(char c)
 {
         addch(c);
 }
 
-void term_addnstr(char *s, int len)
+void term_addnstr(const char *s, int len)
 {
         addnstr(s, len);
 }
 
-void term_addstr(char *s)
+void term_addstr(const char *s)
 {
         addstr(s);
 }
@@ -122,4 +136,24 @@ void term_addstr(char *s)
 void term_mvaddch(int y, int x, char c)
 {
         mvaddch(y, x, c);
+}
+
+void term_mvaddstr(int y, int x, char *s)
+{
+        mvaddstr(y, x, s);
+}
+
+void term_attrset(Font f)
+{
+        attrset(f);
+}
+
+int term_printw(const char *fmt, ...)
+{
+        int res;
+        va_list valist;
+        va_start(valist, fmt);
+        res = vw_printw(stdscr, fmt, valist);
+        va_end(valist);
+        return res;
 }

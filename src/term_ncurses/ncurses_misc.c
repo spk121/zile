@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_misc.c,v 1.19 2004/05/09 18:00:33 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.20 2004/05/10 16:02:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -140,8 +140,6 @@ int ncurses_open(void)
 
 	return TRUE;
 }
-
-extern void ncurses_free_rotation_buffers(void);
 
 int ncurses_close(void)
 {
