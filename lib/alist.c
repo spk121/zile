@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.c,v 1.3 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: alist.c,v 1.4 2004/03/09 22:36:55 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -405,8 +405,8 @@ int main(void)
 	alist_sort(al, sorter);
 	printf("sorted elements:\n");
 	for (s = alist_first(al); s != NULL; s = alist_next(al))
-		printf("element %d: %s\n", alist_current_idx(al), s)
-;	assert(alist_at(al, 0) == t2);
+		printf("element %d: %s\n", alist_current_idx(al), s);
+        assert(alist_at(al, 0) == t2);
 	assert(alist_at(al, 1) == t1);
 	assert(alist_at(al, 2) == t3);
 
