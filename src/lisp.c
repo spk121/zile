@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.4 2005/01/24 22:50:50 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.5 2005/01/25 00:51:12 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -45,16 +45,20 @@ static const char *s;
 
 static int getc_string(void)
 {
-  int c = *s++;
+  int c = *s;
+
   if (c)
-    return c;
-  s--;
-  return EOF;
+    s++;
+  else
+    c = EOF;
+  
+  return c;
 }
 
 static void ungetc_string(int c)
 {
-  s--;
+  if (c != EOF)
+    s--;
 }
 
 le *lisp_read_string(const char *string)
