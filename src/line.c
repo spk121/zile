@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.11 2004/01/21 01:39:08 dacap Exp $	*/
+/*	$Id: line.c,v 1.12 2004/01/21 02:04:04 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -882,3 +882,29 @@ Join lines if the character is a newline.
 
 	return ret;
 }
+
+DEFUN ("delete-horizontal-space", delete_horizontal_space)
+{
+	undo_save (UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	while ((cur_wp->pointo < cur_wp->pointp->size)
+	       && isspace (cur_wp->pointp->text[cur_wp->pointo]))
+		delete_char ();
+
+	while ((cur_wp->pointo > 0) &&
+	       isspace (cur_wp->pointp->text[cur_wp->pointo-1]))
+		backward_delete_char ();
+
+	undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	return TRUE;
+}
+
+DEFUN ("just-one-space", just_one_space)
+{
+	undo_save (UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	FUNCALL (delete_horizontal_space);
+	insert_char_in_insert_mode (' ');
+	undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	return TRUE;
+}
+
