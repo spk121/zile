@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.24 2004/10/06 16:28:14 rrt Exp $	*/
+/*	$Id: astr.c,v 1.25 2004/10/14 00:49:37 rrt Exp $	*/
 
 #include "config.h"
 
@@ -171,7 +171,6 @@ static astr astr_replace_x(astr as, int pos, size_t size, const char *s, size_t 
         pos = astr_pos(as, pos);
 	if (as->len - pos < size)
 		size = as->len - pos;
-/*         fprintf(stderr, "%d %d %d\n", size, pos, as->len); */
         tail = astr_substr(as, pos + size, astr_len(as) - (pos + size));
         astr_truncate(as, pos);
         astr_ncat_cstr(as, s, csize);
@@ -263,7 +262,7 @@ astr astr_afmt(astr as, const char *fmt, ...)
 
 #include <stdio.h>
 
-void assert_eq(astr as, const char *s)
+static void assert_eq(astr as, const char *s)
 {
 	if (astr_cmp_cstr(as, s))
 		printf("test failed: \"%s\" != \"%s\"\n", as->text, s);

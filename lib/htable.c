@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.5 2004/03/13 20:07:00 rrt Exp $	*/
+/*	$Id: htable.c,v 1.6 2004/10/14 00:49:37 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -42,9 +42,6 @@ struct htable_s {
 	hbucket *table;
 };
 
-/*
- * Hashing function.
- */
 static unsigned long hash_func(const char *p, unsigned long size)
 {
 	unsigned long hash = 0, g;
@@ -106,11 +103,25 @@ void htable_delete(htable ht)
 	free(ht);
 }
 
+static void *find(htable ht, const char *key)
+{
+	hbucket bucket;
+	unsigned long hash;
+
+	hash = hash_func(key, ht->size);
+
+	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next)
+		if (!strcmp(bucket->pair.key, key))
+			return bucket;
+
+	return NULL;
+}
+
 static int store_key(htable ht, const char *key)
 {
 	unsigned long hash;
 
-	if (htable_fetch(ht, key) != NULL)
+	if (find(ht, key) != NULL)
 		return -1;
 
 	hash = hash_func(key, ht->size);
@@ -142,53 +153,17 @@ static int store_value(htable ht, const char *key, void *val)
 	return -1;
 }
 
-int htable_store(htable ht, const char *key, void *val)
+void htable_store(htable ht, const char *key, void *val)
 {
-        int exists;
-
-	if (htable_fetch(ht, key) != NULL)
-		htable_remove(ht, key);
-
-	exists = store_key(ht, key);
+        store_key(ht, key);
 	assert(store_value(ht, key, val) == 0);
-
-	return exists;
 }
 
 void *htable_fetch(htable ht, const char *key)
 {
-	hbucket bucket;
-	unsigned long hash;
+        hbucket bucket = find(ht, key);
 
-	hash = hash_func(key, ht->size);
-
-	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next)
-		if (!strcmp(bucket->pair.key, key))
-			return bucket->pair.val;
-
-	return NULL;
-}
-
-int htable_remove(htable ht, const char *key)
-{
-	hbucket bucket, last = NULL;
-	unsigned long hash;
-
-	hash = hash_func(key, ht->size);
-
-	for (bucket = ht->table[hash]; bucket != NULL; bucket = bucket->next) {
-		if (!strcmp(bucket->pair.key, key)) {
-			if (bucket == ht->table[hash])
-				ht->table[hash] = bucket->next;
-			else
-				last->next = bucket->next;
-			free_bucket(bucket);
-			return 0;
-		}
-		last = bucket;
-	}
-
-	return -1;
+        return bucket ? bucket->pair.val : NULL;
 }
 
 htable htable_foreach(htable ht, hiterator f, ...)
@@ -228,21 +203,17 @@ int main(void)
 {
 	htable ht = htable_new(127);
 
-	assert(htable_store(ht, "hello", NULL) == 0);
-	assert(htable_store(ht, "world", NULL) == 0);
-	assert(htable_store(ht, "bar", NULL) == 0);
-	assert(htable_store(ht, "hello", NULL) != 0);
-	assert(htable_fetch(ht, "hello") != NULL);
-	assert(htable_fetch(ht, "world") != NULL);
-	assert(htable_remove(ht, "world") == 0);
-	assert(htable_fetch(ht, "world") == NULL);
-	assert(htable_store(ht, "world", NULL) == 0);
-	assert(htable_store(ht, "hello", "hello value") == 0);
-	assert(htable_store(ht, "baz", "baz value") != 0);
-	assert(htable_fetch(ht, "baz") == NULL);
-	assert(htable_store(ht, "foo", "foo value") == 0);
-	assert(htable_store(ht, "var1", NULL) == 0);
-	assert(htable_store(ht, "var2", NULL) == 0);
+	htable_store(ht, "hello", NULL);
+	htable_store(ht, "world", NULL);
+	htable_store(ht, "bar", NULL);
+	htable_store(ht, "hello", NULL);
+	htable_store(ht, "world", NULL);
+	htable_store(ht, "hello", "hello value");
+	htable_store(ht, "baz", "baz value");
+	assert(htable_fetch(ht, "baz"));
+	htable_store(ht, "foo", "foo value");
+	htable_store(ht, "var1", NULL);
+	htable_store(ht, "var2", NULL);
 	assert(htable_fetch(ht, "foo") != NULL &&
 	       !strcmp(htable_fetch(ht, "foo"), "foo value"));
 	assert(htable_fetch(ht, "hello") != NULL &&

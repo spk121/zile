@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.c,v 1.6 2004/03/13 20:07:00 rrt Exp $	*/
+/*	$Id: alist.c,v 1.7 2004/10/14 00:49:37 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -245,7 +245,7 @@ void *alist_at(alist al, unsigned int i)
 #include <stdio.h>
 #include <string.h>
 
-int sorter(const void *p1, const void *p2)
+static int sorter(const void *p1, const void *p2)
 {
 	return strcmp(*(char **)p1, *(char **)p2);
 }
@@ -308,7 +308,7 @@ int main(void)
 	assert(alist_current(al) == NULL);
 	assert(alist_current_idx(al) == -1);
 
-	alist_insert(al, 5, t1);
+	alist_insert(al, 0, t1);
 	assert(alist_count(al) == 1);
 	assert(alist_current(al) == t1);
 	assert(alist_current_idx(al) == 0);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.h,v 1.4 2004/03/13 20:07:00 rrt Exp $	*/
+/*	$Id: htable.h,v 1.5 2004/10/14 00:49:37 rrt Exp $	*/
 
 #ifndef HTABLE_H
 #define HTABLE_H
@@ -52,10 +52,9 @@ extern htable htable_new(unsigned long size);
 extern void   htable_delete(htable ht);
 
 /*
- * Store a key-value pair into ht. The return value is -1 if the key
- * already existed and 0 otherwise.
+ * Store a key-value pair into ht.
  */
-extern int    htable_store(htable ht, const char *key, void *val);
+extern void   htable_store(htable ht, const char *key, void *val);
 
 /*
  * Return the data associated with the key in ht. If the key does not
@@ -63,11 +62,6 @@ extern int    htable_store(htable ht, const char *key, void *val);
  * returned.
  */
 extern void * htable_fetch(htable ht, const char *key);
-
-/*
- * Remove the specified key from ht.
- */
-extern int    htable_remove(htable ht, const char *key);
 
 /*
  * The type of key-value pairs, used by htable_foreach iterators and
