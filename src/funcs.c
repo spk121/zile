@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.70 2005/01/25 12:28:28 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.71 2005/01/25 18:01:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -360,7 +360,7 @@ int universal_argument(int keytype, int xarg)
 
   if (keytype == KBD_META) {
     astr_cpy_cstr(as, "ESC");
-    term_unget(xarg + '0');
+    term_ungetkey(xarg + '0');
   } else
     astr_cpy_cstr(as, "C-u");
 
@@ -402,11 +402,11 @@ int universal_argument(int keytype, int xarg)
         /* If i == 0 do nothing (the Emacs behavior is a little
            strange in this case, it waits for one more key that is
            eaten, and then goes back to the normal state). */
-        term_unget(c);
+        term_ungetkey(c);
         break;
       }
     } else {
-      term_unget(c);
+      term_ungetkey(c);
       break;
     }
   }

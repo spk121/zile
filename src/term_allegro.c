@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.17 2005/01/18 12:25:45 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.18 2005/01/25 18:01:27 rrt Exp $	*/
 
 #include "config.h"
 
@@ -382,7 +382,7 @@ int term_xgetkey(int mode, int arg)
   return c;
 }
 
-void term_unget(int key)
+void term_ungetkey(int key)
 {
   if (ungetkey_p - ungetkey_buf < MAX_UNGETKEY_BUF &&
       key != KBD_NOKEY)

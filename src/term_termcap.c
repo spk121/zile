@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.52 2005/01/20 21:24:13 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.53 2005/01/25 18:01:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,9 +55,8 @@ typedef struct {
 } Screen;
 
 static char *tcap_ptr;
-
+static astr key_buf;
 static Screen screen;
-
 Terminal *termp = &thisterm;
 
 static int max_key_chars = 0; /* Length of longest key code. */
@@ -301,6 +300,7 @@ void term_init(void)
   unsigned i;
   char *tcap;
 
+  key_buf = astr_new();  
   tcap_ptr = tcap = get_tcap();
 
   read_screen_size();
@@ -325,7 +325,10 @@ void term_init(void)
   nstate.c_cflag |= CS8;
   setattr(TCSADRAIN, &nstate);
 
-  /* Unbuffered I/O so screen is always up-to-date. */
+  /* Unbuffered stdin so keystrokes are always received whole. */
+  setvbuf(stdin, NULL, _IONBF, 0);
+
+  /* Unbuffered stdout so screen is always up to date. */
   setvbuf(stdout, NULL, _IONBF, 0);
 
   /* Extract information we will use. */
@@ -361,6 +364,7 @@ void term_close(void)
   tcdrain(0);
   fflush(stdout);
   term_suspend();
+  astr_delete(key_buf);
 }
 
 /* Suspend the term ready to go back to the shell */
@@ -438,21 +442,16 @@ static int translate_key(char *s, int nbytes)
   }
 
   for (i = nbytes - 1; i >= used; i--)
-    term_unget(s[i]);
+    term_ungetkey(s[i]);
 
   return key;
 }
 
-#define MAX_KEY_BUF	64
-
-static char key_buf[MAX_KEY_BUF];
-static char *keyp = key_buf + MAX_KEY_BUF;
-
 static int xgetkey(int mode, int dsecs)
 {
   size_t nbytes;
-  char *keys = zmalloc(MAX_KEY_BUF + max_key_chars);
-  int len = MAX_KEY_BUF - (keyp - key_buf);
+  int len = astr_len(key_buf);
+  char *keys = zmalloc(len + max_key_chars);
   int key = KBD_NOKEY;
 
   if (mode & GETKEY_DELAYED) {
@@ -463,11 +462,11 @@ static int xgetkey(int mode, int dsecs)
     nstate.c_cc[VMIN] = 1;      /* ...for at least one character. */
   }
 
-  if (keyp < key_buf + MAX_KEY_BUF) {
+  if (len > 0) {
     nstate.c_cc[VMIN] = 0; /* We already have characters; don't wait for more. */
     nstate.c_cc[VTIME] = 0;
-    memcpy(keys, keyp, len);
-    keyp = key_buf + MAX_KEY_BUF;
+    memcpy(keys, astr_cstr(key_buf), len);
+    astr_truncate(key_buf, 0);
   }
 
   setattr(TCSANOW, &nstate); /* Set waiting period and number of characters. */
@@ -480,7 +479,7 @@ static int xgetkey(int mode, int dsecs)
     if (mode & GETKEY_NONFILTERED) {
       int i;
       for (i = nbytes - 2; i >= 0; i--)
-        term_unget(keys[i]);
+        term_ungetkey(keys[i]);
       key = keys[nbytes - 1];
     } else {
       key = translate_key(keys, nbytes);
@@ -519,30 +518,34 @@ int term_getkey(void)
   return term_xgetkey(0, 0);
 }
 
-void term_unget(int c)
+void term_ungetkey(int key)
 {
-  if (keyp == key_buf || c == KBD_NOKEY)
-    return;
+  if (key != KBD_NOKEY) {
+    char c = 0;
+    
+    if (key & KBD_CTL)
+      switch (key & 0xff) {
+      case '@':
+        c = '\0';
+        break;
+      case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
+      case 'f':  case 'g':  case 'h':             case 'j':
+      case 'k':  case 'l':             case 'n':  case 'o':
+      case 'p':  case 'q':  case 'r':  case 's':  case 't':
+      case 'u':  case 'v':  case 'w':  case 'x':  case 'y':
+      case 'z':
+        c = (key & 0xff) - 'a' + 1;
+        break;
+      case '_':
+        c = '\37';
+        break;
+      }
+    else
+      c = key & 0xff;
 
-  if (c & KBD_CTL)
-    switch (c & 0xff) {
-    case '@':
-      *--keyp = '\0';
-      break;
-    case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
-    case 'f':  case 'g':  case 'h':             case 'j':
-    case 'k':  case 'l':             case 'n':  case 'o':
-    case 'p':  case 'q':  case 'r':  case 's':  case 't':
-    case 'u':  case 'v':  case 'w':  case 'x':  case 'y':
-    case 'z':
-      *--keyp = (c & 0xff) - 'a' + 1;
-      break;
-    case '_':
-      *--keyp = '\37';
-      break;
-    }
-  else
-    *--keyp = c & 0xff;
-  if (c & KBD_META)
-    *--keyp = '\033';
+    astr_insert_char(key_buf, 0, c);
+      
+    if (key & KBD_META)
+      astr_insert_char(key_buf, 0, '\033');
+  }
 }

@@ -222,7 +222,7 @@ void term_attrset(unsigned attrs, ...);
 void term_beep(void);
 int term_getkey(void);
 int term_xgetkey(int mode, int arg);
-void term_unget(int c);
+void term_ungetkey(int key);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;
