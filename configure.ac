@@ -10,11 +10,6 @@ AM_CONFIG_HEADER(config.h)
 
 AC_SUBST(VERSION)
 
-ISODATE=`date +%Y-%m-%d`
-AC_SUBST(ISODATE)
-
-AC_CANONICAL_HOST
-
 dnl Allow GNU functions to be used if present (e.g. vasprintf)
 AC_GNU_SOURCE
 
