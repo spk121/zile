@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/10/08 13:30:45 $
+		   Last updated: $Date: 2004/10/11 01:08:42 $
 
 ------------------------------------------------------------------------------
 
@@ -32,9 +32,8 @@ INDEX
    2.12. The Zile screen is not resized in a X Window terminal.
 
 3. Compiling
-   3.1. Can I compile Zile with the old Berkeley curses?
-   3.2. Zile doesn't compile correctly under the Foobar operating system.
-   3.3. Can I compile Zile under Cygwin?
+   3.1. Zile doesn't compile correctly under the Foobar operating system.
+   3.2. Can I compile Zile under Cygwin?
 
 ------------------------------------------------------------------------------
 
@@ -181,30 +180,19 @@ INDEX
 
 2.12. The Zile screen is not resized in a X Window terminal.
 
-    There are two possibilities:
-
-    (1) Your terminal application does not send the signal `SIGWINCH'
-        to Zile (and other applications). To be sure, you might check
-        if other terminal applications, like `vim' and `joe', also
-        fail to resize their windows.
-
-    (2) Your ncurses library does not support the `KEY_RESIZE' pseudo
-        key. This is because your version is old or was not compiled
-        with the flag `--enable-sigwinch' to `configure'.
+    Your terminal application does not send the signal `SIGWINCH' to
+    Zile (and other applications). To be sure, you might check if other
+    terminal applications, like `vim' and `joe', also fail to resize
+    their windows.
 
 ------------------------------------------------------------------------------
 
 3. Compiling
 
-3.1. Can I compile Zile with the old Berkeley curses?
+3.1. Zile doesn't compile correctly under the Foobar operating system.
 
-    No, you can't. The 4.4BSD or prior versions of curses are
-    obsolete. Zile supports only ncurses (tested with version 5.3).
-
-3.2. Zile doesn't compile correctly under the Foobar operating system.
-
-    We have tested Zile under Linux only. Since it is written in ANSI
-    C, should be fairly easy to port it under other UNIX-like
+    We have tested Zile under GNU/Linux only. Since it is written in
+    ANSI C, should be fairly easy to port it under other UNIX-like
     operating systems. If you get Zile running under some other OS,
     please send a message to the Zile developers telling them that
     (you might send him the patches you have made to the Zile sources
@@ -218,7 +206,7 @@ INDEX
 	* Solaris
 	* Windows with Cygwin
 
-3.3. Can I compile Zile under Cygwin?
+3.2. Can I compile Zile under Cygwin?
 
     Yes, you can. You might need to put a
 

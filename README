@@ -6,8 +6,8 @@ user should feel at home with Zile. Zile is aimed at small footprint
 systems (a typical binary is about 100Kb) and quick editing sessions
 (it starts up and shuts down instantly).
 
-Zile is written in C; its only external dependency is the ncurses
-library.
+Zile is written in C; its only external dependency is a terminal
+library, either termcap or allegro.
 
 See INSTALL for installation instructions.
 

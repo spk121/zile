@@ -56,9 +56,7 @@ user should feel at home with Zile.
 @node Overview, Features, Top, Top
 @chapter Overview
 
-The @emph{Zile} editor is written entirely in ``C'' with the help of the
-@emph{ncurses}
-library.  Zile can't be compiled with a library different than ncurses.
+The @emph{Zile} editor is written entirely in ``C''.
 It has been tested under @emph{Linux} only, but it
 should be fairly
 simple to port it under other operating systems, since it is written in
