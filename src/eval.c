@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.4 2005/01/19 00:40:49 rrt Exp $	*/
+/*	$Id: eval.c,v 1.5 2005/01/19 01:23:37 rrt Exp $	*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,39 +85,33 @@ evalLookupNode evalTable[] = {
 };
 
     
-le * evaluateBranch(le * trybranch)
+le *evaluateBranch(le *trybranch)
 {
-  le * keyword;
+  le *keyword;
   int tryit = 0;
-  if (!trybranch) return( NULL );
+
+  if (!trybranch)
+    return NULL;
 
   if (trybranch->branch)
-    {
-      keyword = evaluateBranch(trybranch->branch);
-    }
+    keyword = evaluateBranch(trybranch->branch);
   else 
-    keyword = leNew( trybranch->data );
+    keyword = leNew(trybranch->data);
 
-  if (!keyword->data)
-    {
-      leWipe( keyword );
-      return( leNIL);
+  if (!keyword->data) {
+    leWipe(keyword);
+      return leNIL;
+  }
+
+  for (tryit=0; evalTable[tryit].word; tryit++) {
+    if (!strcmp(evalTable[tryit].word, keyword->data)) {
+      leWipe(keyword);
+      return(evalTable[tryit].callback(countNodes(trybranch), trybranch));
     }
+  }
 
-  for ( tryit=0 ; evalTable[tryit].word ; tryit++)
-    {
-      if (!strcmp(evalTable[tryit].word, keyword->data))
-        {
-          leWipe( keyword );
-          return( evalTable[tryit].callback(
-                                            countNodes( trybranch ), 
-                                            trybranch) 
-                  );
-        }
-    }
-
-  leWipe( keyword );
-  return( evaluateNode( trybranch ));
+  leWipe(keyword);
+  return evaluateNode(trybranch);
 }
     
 le *evaluateNode(le *node)
