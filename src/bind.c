@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.31 2004/10/16 20:17:03 rrt Exp $	*/
+/*	$Id: bind.c,v 1.32 2004/10/24 23:52:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -267,7 +267,7 @@ struct fentry {
 	/* The function pointer. */
 	Function func;
 
-	/* The assigned keys.  XXX use a list */
+	/* The assigned keys. */
 	char *key[3];
 };
 
