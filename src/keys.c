@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.12 2004/04/05 13:27:44 rrt Exp $	*/
+/*	$Id: keys.c,v 1.13 2005/01/09 00:18:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -121,7 +121,10 @@ astr chordtostr(int key)
 		astr_cat_cstr(as, "F12");
 		break;
 	default:
-                astr_cat_char(as, key & 255);
+                if (isgraph(key))
+                        astr_cat_char(as, key & 255);
+                else
+                        astr_cat_cstr(as, "<?>");
 	}
 
 	return as;
