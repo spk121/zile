@@ -1,9 +1,7 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.7 2004/03/13 17:27:50 rrt Exp $
+## $Id: Makefile.am,v 1.8 2004/03/13 20:32:58 rrt Exp $
 
-noinst_MANS = htable.3
-
-EXTRA_DIST = htable.3 regex.c regex.h
+EXTRA_DIST = regex.c regex.h
 
 if HAVE_REGEX_H
 regex =
