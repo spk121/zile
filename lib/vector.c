@@ -18,10 +18,11 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.c,v 1.1 2004/03/08 15:26:43 rrt Exp $	*/
+/*	$Id: vector.c,v 1.2 2004/03/09 16:15:11 rrt Exp $	*/
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "config.h"
 #include "vector.h"
