@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: list.c,v 1.2 2005/01/10 00:24:03 rrt Exp $	*/
+/*	$Id: list.c,v 1.3 2005/01/10 09:19:20 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <assert.h>
@@ -143,7 +143,8 @@ void *list_at(list l, unsigned int n)
         
   assert(l != NULL);
 
-  for (p = list_first(l), i = 0; p != l && i < n; p = list_next(p), i++);
+  for (p = list_first(l), i = 0; p != l && i < n; p = list_next(p), i++)
+    ;
   
   return p->item;
 }

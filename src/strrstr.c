@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: strrstr.c,v 1.3 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.4 2005/01/10 09:19:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,8 @@ char *strrstr(const char *s, const char *t) {
     return NULL;
 
   for (i = slen - tlen; i > 0; i--) {
-    for (j = 0; j < tlen && s[i + j] == t[j]; j++);
+    for (j = 0; j < tlen && s[i + j] == t[j]; j++)
+      ;
     if (j == tlen)
       return (char *)(s + i);
   }
