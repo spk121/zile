@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.45 2004/11/14 21:57:54 rrt Exp $	*/
+/*	$Id: main.c,v 1.46 2004/11/14 22:07:29 rrt Exp $	*/
 
 #include "config.h"
 
@@ -142,8 +142,6 @@ Type %C-g% at any time to cancel the current operation.\n\
 If there is no META, EDIT or ALT key, instead press and release\n\
 the ESC key and then type %x%.\n\
 Combinations like %C-h t% mean first do %C-h%, then press %t%.\n\
-For tips and answers to frequently asked questions, see the Zile FAQ.\n\
-(Type C-h F [a capital F!].)\
 ";
 
 static char about_minibuf_str[] =
