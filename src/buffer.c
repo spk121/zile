@@ -1,4 +1,4 @@
-/*	$Id: buffer.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: buffer.c,v 1.8 2004/02/14 09:46:43 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -52,7 +52,7 @@ static Buffer *new_buffer(void)
 	if ((s = get_variable("tab-width")) != NULL) {
 		bp->tab_width = atoi(s);
 		if (bp->tab_width < 1) {
-			minibuf_error("Warning: wrong global tab-width value `@v%s@@'", s);
+			minibuf_error("Warning: wrong global tab-width value `%s'", s);
 			waitkey(2 * 1000);
 			bp->tab_width = 8;
 		}
@@ -62,7 +62,7 @@ static Buffer *new_buffer(void)
 	if ((s = get_variable("fill-column")) != NULL) {
 		bp->fill_column = atoi(s);
 		if (bp->fill_column < 2) {
-			minibuf_error("warning: wrong global fill-column value `@v%s@@'", s);
+			minibuf_error("warning: wrong global fill-column value `%s'", s);
 			waitkey(2 * 1000);
 			bp->fill_column = 70;
 		}
@@ -356,7 +356,7 @@ int zap_buffer_content(void)
 int warn_if_readonly_buffer(void)
 {
 	if (cur_bp->flags & BFLAG_READONLY) {
-		minibuf_error("Buffer is readonly: @b%s@@", cur_bp->name);
+		minibuf_error("Buffer is readonly: %s", cur_bp->name);
 		return TRUE;
 	}
 

@@ -1,4 +1,4 @@
-/*	$Id: bind.c,v 1.8 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: bind.c,v 1.9 2004/02/14 09:41:55 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -146,7 +146,7 @@ void bind_key(char *key, Function func)
 		if (leaf_tree == NULL)
 			leaf_tree = new_leaf(10);
 		if (!bind_key0(leaf_tree, keys, i, func)) {
-			minibuf_error("Error: key @k%s@@ already bound", key);
+			minibuf_error("Error: key %s already bound", key);
 			waitkey(2 * 1000);
 		}
 	}
@@ -472,7 +472,7 @@ char *minibuf_read_function_name(char *msg)
 					break;
 				}
 			if ((entryp = bsearch_function(ms)) == NULL) {
-				minibuf_error("Undefined function name `@f%s@@'", ms);
+				minibuf_error("Undefined function name `%s'", ms);
 				waitkey(2 * 1000);
 			} else {
 				/* Add history element.  */
