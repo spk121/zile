@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.4 2003/05/25 21:23:24 rrt Exp $	*/
+/*	$Id: astr.c,v 1.5 2003/05/25 21:38:49 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -445,38 +445,18 @@ void astr_fputs(castr as, FILE *f)
 
 astr astr_vfmt(astr as, const char *fmt, va_list ap)
 {
-#ifdef HAVE_VASPRINTF
 	char *buf;
-#else
-	char buf[2048]; /* XXX fix this */
-#endif
-#ifdef HAVE_VASPRINTF
 	vasprintf(&buf, fmt, ap);
-#else
-	vsprintf(buf, fmt, ap);
-#endif
 	astr_assign_cstr(as, buf);
-#ifdef HAVE_VASPRINTF
 	free(buf);
-#endif        
 }
 
 astr astr_vafmt(astr as, const char *fmt, va_list ap)
 {
-#ifdef HAVE_VASPRINTF
 	char *buf;
-#else
-	char buf[2048]; /* XXX fix this */
-#endif
-#ifdef HAVE_VASPRINTF
 	vasprintf(&buf, fmt, ap);
-#else
-	vsprintf(buf, fmt, ap);
-#endif
 	astr_append_cstr(as, buf);
-#ifdef HAVE_VASPRINTF
 	free(buf);
-#endif        
 }
 
 astr astr_fmt(astr as, const char *fmt, ...)
