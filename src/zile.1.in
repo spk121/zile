@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.7 2004/03/14 14:36:05 rrt Exp $
+.\" $Id: zile.1.in,v 1.8 2004/10/16 20:36:50 rrt Exp $
 .Dd Nov, 2003
 .Os
 .Dt ZILE 1
@@ -95,8 +95,6 @@ show a sample configuration file
 show a tutorial window
 .It Ic C-h v
 describe a variable
-.It Ic C-h C-d
-show informations about getting the latest version
 .It Ic C-h C-h, F10
 toggle mini help window
 .It Ic C-h C-r, F9
@@ -220,8 +218,6 @@ self-documentation
 Zile FAQ
 .It Pa @pkgdatadir@/HELP
 Zile manual
-.It Pa @pkgdatadir@/LATEST_VERSION
-where to get the latest version
 .It Pa @pkgdatadir@/MINIHELP*
 Mini Help window text
 .It Pa @pkgdatadir@/TUTORIAL

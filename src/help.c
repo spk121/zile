@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.19 2004/10/06 16:32:19 rrt Exp $	*/
+/*	$Id: help.c,v 1.20 2004/10/16 20:36:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -178,14 +178,6 @@ Show a help window.
 +*/
 {
 	return show_file(PATH_DATA "/HELP");
-}
-
-DEFUN("help-latest-version", help_latest_version)
-/*+
-Show informations about getting the latest version.
-+*/
-{
-	return show_file(PATH_DATA "/LATEST_VERSION");
 }
 
 DEFUN("help-config-sample", help_config_sample)

@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/10/11 01:21:00 $
+		   Last updated: $Date: 2004/10/16 20:36:50 $
 
 ------------------------------------------------------------------------------
 
@@ -11,11 +11,12 @@ INDEX
    1.2. What is the Zile license?
    1.3. What about a GUI version of Zile?
    1.4. Why another clone of Emacs?  Why not just use Emacs?
-   1.5. Why did you choose such difficult key sequences?
-   1.6. Zile has a bug!
-   1.7. I like the xyz function of (X)Emacs but it's not in Zile!
-   1.8. How small does Zile get?
-   1.9. Does Zile support the Unicode / UTF-8 encodings?
+   1.5. Where can I get the latest version?
+   1.6. Why did you choose such difficult key sequences?
+   1.7. Zile has a bug!
+   1.8. I like the xyz function of (X)Emacs but it's not in Zile!
+   1.9. How small does Zile get?
+   1.10. Does Zile support the Unicode / UTF-8 encodings?
 
 2. Functionality
    2.1. How to quit Zile?
@@ -47,7 +48,7 @@ INDEX
 1.2. What is the Zile license?
 
     Zile is released under the GNU General Public License. For more
-    information, see http://www.gnu.org/.
+    information, see http://www.gnu.org/licenses/gpl.html.
 
 1.3. Why another clone of Emacs?  Why not just use Emacs?
 
@@ -57,7 +58,7 @@ INDEX
 	footprint installations (like on floppy disk) or quick editing
 	sessions.''
 
-    That's why sometimes (X)Emacs isn't the best editor to use :-) I
+    That's why sometimes Emacs isn't the best editor to use :-)  I
     use XEmacs myself when I do coding, but I use Zile when I have,
     let's say, to quick edit the dot files in the home directory; I
     don't want to wait 5 seconds to load XEmacs for doing a 2 seconds
@@ -67,14 +68,24 @@ INDEX
 
     To be the same as Emacs.
 
-1.5. Zile has a bug!
+1.5. Where can I get the latest version?
+
+    The Zile project is hosted on SourceForge at:
+
+	http://zile.sourceforge.net/
+
+    The latest stable version is also available at the address:
+
+	ftp://sunsite.unc.edu/pub/Linux/apps/editors/emacs/clones
+
+1.6. Zile has a bug!
 
     Bug reports can be sent to the developers at
     <zile-devel@lists.sourceforge.net>, or entered directly into
     Bugzilla at http://sourceforge.net/projects/zile. Patches are
     appreciated.
 
-1.6. I like the xyz function of (X)Emacs but it's not in Zile!
+1.7. I like the xyz function of (X)Emacs but it's not in Zile!
 
     Zile was written to be small but fast and powerful enough.
 
@@ -87,17 +98,15 @@ INDEX
     in Zile, please send a message to the developers (see question
     1.5).
 
-1.7. How small does Zile get?
+1.8. How small does Zile get?
 
     On Fedora Core 1/i386, Zile 1.7 built with gcc 3.3.2 -O2 weighs in
     at 92,206 bytes when stripped. This is how Zile will typically be
     built.
 
-1.8. Does Zile support the Unicode / UTF-8 encodings?
+1.9. Does Zile support Unicode?
 
-   Currently Zile doesn't include any code for Unicode support. A
-   major rewrite of the editor with ad-hoc support for multibyte
-   sequences is planned in the future.
+    No.  Support for Unicode is planned in the future.
 
 ------------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.2 2004/03/13 16:26:19 rrt Exp $
+## $Id: Makefile.am,v 1.3 2004/10/16 20:36:50 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
@@ -14,13 +14,11 @@ zile_DATA =					\
 	MINIHELP1				\
 	MINIHELP2				\
 	MINIHELP3				\
-        LATEST_VERSION				\
 	TUTORIAL				\
 	zilerc.sample
 
 EXTRA_DIST =					\
 	FAQ					\
-	LATEST_VERSION				\
 	MINIHELP1				\
 	MINIHELP2				\
 	MINIHELP3				\
