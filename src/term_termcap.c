@@ -20,10 +20,9 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.12 2004/10/10 17:08:56 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.13 2004/10/10 21:52:03 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
-/* TODO: Sort out use of select */
 
 #include "config.h"
 
@@ -34,8 +33,6 @@
 #include <termcap.h>
 #include <termios.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <sys/select.h>
 
 /* Avoid clash with zile function. */
 #undef newline
@@ -87,6 +84,15 @@ void term_clrtoeol(void)
         screen.curx = x;
 }
 
+static void doattr(Font f) {
+        if (f == ZILE_NORMAL)
+                printf("%s%s", se_string, me_string);
+        if (f & ZILE_BOLD)
+                printf("%s", so_string);
+        if (f & ZILE_REVERSE)
+                printf("%s", mr_string);
+}
+
 void term_refresh(void)
 {
         int i, j;
@@ -105,13 +111,7 @@ void term_refresh(void)
         
                                 screen.oarray[offset] = n;
 
-                                if (f == ZILE_NORMAL)
-                                        printf("%s%s", se_string, me_string);
-                                if (f & ZILE_BOLD)
-                                        printf("%s", so_string);
-                                if (f & ZILE_REVERSE)
-                                        printf("%s", mr_string);
-
+                                doattr(f);
                                 putchar(c ? c : ' ');
                         }
                 }
@@ -200,7 +200,7 @@ void term_init(void)
         /* termcap buffer, conventionally big enough. */
         char *tcap = (char *)zmalloc(2048);
         char *term = getenv("TERM");
-        int flags, res;
+        int res;
 
         if (!term) {
                 fprintf(stderr, "No terminal type in TERM.\n");
@@ -233,7 +233,7 @@ void term_init(void)
         kr_string = tgetstr("ku", &tcap);
         ku_string = tgetstr("kr", &tcap);
         kd_string = tgetstr("kd", &tcap);
-        /* TODO: Use km, mm, mo for Meta key */
+        /* TODO: Use km, mm, mo for Meta key. */
 
         /* Save terminal flags. */
         if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
@@ -247,25 +247,14 @@ void term_init(void)
         nstate.c_oflag &= ~OPOST;
         nstate.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
         nstate.c_cflag &= ~(CSIZE|PARENB);
-        nstate.c_cflag |= CS8;
         nstate.c_cc[VMIN] = 1;
-        nstate.c_cc[VTIME] = 0;	/* Block indefinitely for a single char. */
+        nstate.c_cflag |= CS8;
         if (tcsetattr(0, TCSADRAIN, &nstate) < 0) {
                 fprintf(stderr, "Can't set terminal mode\n");
                 zile_exit(1);
         }
 
-        /* Set stdin to non-blocking, so we can check how much input there is. */
-/*         flags = fcntl(STDIN_FILENO, F_GETFL); */
-/*         if (flags < 0) { */
-/*                 fprintf(stderr, "Can't read stdin fcntl settings\n"); */
-/*                 zile_exit(1); */
-/*         } */
-/*         res = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK); */
-/*         if (res < 0) { */
-/*                 fprintf(stderr, "Can't set stdin fcntl settings\n"); */
-/*                 zile_exit(1); */
-/*         } */
+       setvbuf(stdout, NULL, _IONBF, 0);
 }
 
 void term_open(void)
@@ -278,6 +267,7 @@ void term_close(void)
 	term_move(ZILE_LINES - 1, 0);
 	term_clrtoeol();
 	term_refresh();
+        doattr(ZILE_NORMAL);
 
 	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
@@ -362,32 +352,30 @@ static int translate_key(char *s, int bytes)
 	}
 }
 
+#define MAX_KEY_CHARS 16 /* Hopefully more than the longest keycode sequence. */
+
 static int xgetkey(int mode, int arg)
 {
         int ret = 0;
         size_t nbytes;
         fd_set rfds;
-        char keys[16];          /* Array hopefully larger than the longest keycode sequence. */
+        char keys[MAX_KEY_CHARS];
 
         FD_ZERO(&rfds);
         FD_SET(STDIN_FILENO, &rfds);
 
-        fflush(stdout);
+        if (mode & GETKEY_DELAYED)
+                nstate.c_cc[VTIME] = 0;	/* Wait indefinitely for at least one character. */
+        else {
+                if (arg == 0) /* If we want to wait no time at all, wait the minimum. */
+                        arg = 1;
+                nstate.c_cc[VTIME] = arg / 100; /* Wait up to arg/100 10ths of a second. */
+        }                
 
-        if (mode & GETKEY_DELAYED) {
-                struct timeval tv;
-                tv.tv_sec = arg / 1000;
-                tv.tv_usec = (arg % 1000) * 1000;
-/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv); */
-        } else;
-/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, NULL); */
-
+        nbytes = read(STDIN_FILENO, keys, MAX_KEY_CHARS);
+        
 	if (ret < 0)
 		return KBD_NOKEY;
-
-/*         nbytes = fread(keys, sizeof(char), sizeof(keys), stdin); */
-        nbytes = 1;
-        *keys = getchar();
 
         if (mode & GETKEY_NONFILTERED)
                 return keys[nbytes - 1];
