@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.5 2004/11/14 19:19:48 rrt Exp $
+## $Id: Makefile.am,v 1.6 2004/11/14 20:34:11 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
@@ -23,12 +23,11 @@ EXTRA_DIST =					\
 	MINIHELP2				\
 	MINIHELP3				\
 	rationale				\
-	refcard.tex				\
 	TUTORIAL				\
 	zilerc.sample				\
 	zlint
 
-all-local: HELP AUTODOC refcard.ps
+all-local: HELP AUTODOC
 
 HELP: $(top_srcdir)/doc/zile.texi
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
@@ -41,10 +40,6 @@ AUTODOC: $(AUTODOCSRCS) mkdoc
 
 $(top_srcdir)/lib/libzile.a:
 	cd $(top_srcdir)/lib && make libzile.a
-
-refcard.ps: refcard.tex
-	latex refcard
-	dvips -o refcard.ps -ta4 -tlandscape refcard.dvi
 
 clean-local:
 	-rm -f mkdoc AUTODOC HELP *.o *.dvi *.ps *.log *.aux
