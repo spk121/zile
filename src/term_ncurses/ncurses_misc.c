@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_misc.c,v 1.16 2004/02/17 23:20:32 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.17 2004/03/09 16:26:32 rrt Exp $	*/
 
 #include "config.h"
 
@@ -89,12 +89,14 @@ void ncurses_resize_windows(void)
 
 static void segv_sig_handler(int signo)
 {
+        (void)signo;
 	fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
 	zile_exit(2);
 }
 
 static void other_sig_handler(int signo)
 {
+        (void)signo;
 	fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
 	zile_exit(2);
 }
