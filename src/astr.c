@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.4 2005/01/03 00:46:32 rrt Exp $	*/
+/*	$Id: astr.c,v 1.5 2005/01/03 12:10:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -283,6 +283,7 @@ int main(void)
 {
 	astr as1, as2, as3;
 	int i;
+        FILE *fp;
 
 	as1 = astr_new();
 	astr_cpy_cstr(as1, "hello world");
@@ -374,12 +375,12 @@ int main(void)
 	astr_afmt(as1, "%s * %d = ", "5", 3);
 	astr_afmt(as1, "%d", 15);
 	assert_eq(as1, "5 * 3 = 15");
-
-	printf("Input one string: ");
-	fflush(stdout);
 	astr_delete(as1);
-	as1 = astr_fgets(stdin);
-	printf("You wrote: \"%s\"\n", astr_cstr(as1));
+
+        assert(fp = fopen("astr.c", "r"));
+	as1 = astr_fgets(fp);
+	printf("The first line of astr.c is: \"%s\"\n", astr_cstr(as1));
+        assert(fclose(fp) == 0);
 
 	astr_delete(as1);
 	astr_delete(as2);
