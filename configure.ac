@@ -114,7 +114,6 @@ AC_DEFUN(zile_CHECK_ALLEGRO,
 			AC_DEFINE(HAVE_ALLEGRO_H, 1, [We have the allegro.h header.]),
 			AC_MSG_FAILURE([cannot find allegro.h]))
         AC_DEFINE(ALLEGRO, 1, [Define this to use Allegro library.])
-	LIBS="$LIBS `allegro-config --libs`"
 ])
 
 AC_MSG_CHECKING([use allegro library])
