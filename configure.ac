@@ -64,7 +64,7 @@ dnl ==================================================================
 dnl Turn on additional compiler warnings
 dnl ==================================================================
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
+  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wconversion -pedantic"
 fi
 
 dnl ==================================================================
