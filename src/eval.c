@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.21 2005/02/07 01:36:43 rrt Exp $	*/
+/*	$Id: eval.c,v 1.22 2005/02/08 19:27:52 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -932,20 +932,6 @@ le *eval_cb_defun(int argc, le *branch)
   variableSet(&defunList, branch->list_next->data, branch->list_next->list_next);
 
   return leNew(branch->list_next->data);
-}
-
-
-void eval_init(void)
-{
-  leNIL = leNew("NIL");
-  leT = leNew("T");
-}
-
-
-void eval_finalise(void)
-{
-  leReallyWipe(leNIL);
-  leReallyWipe(leT);
 }
 
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.16 2005/01/29 13:15:39 rrt Exp $	*/
+/*	$Id: lists.c,v 1.17 2005/02/08 19:27:57 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -28,9 +28,12 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "vector.h"
 #include "lists.h"
 #include "eval.h"
 
+
+vector *leRoot;
 
 le *leNew(const char *text)
 {
@@ -45,16 +48,7 @@ le *leNew(const char *text)
 
   return new;
 }
-    
-void leDelete(le *element)
-{
-  if (element) {
-    if (element->data)
-      free(element->data);
-    free(element);
-  }
-}
-    
+
 void leReallyWipe(le *list)
 {
   if (list) {
@@ -74,7 +68,7 @@ void leWipe(le *list)
   if (list != leNIL && list != leT)
     leReallyWipe(list);
 }
-    
+
 le *leAddHead(le *list, le *element)
 {
   if (!element)
@@ -85,12 +79,12 @@ le *leAddHead(le *list, le *element)
     list->list_prev = element;
   return element;
 }
-    
+
 le *leAddTail(le *list, le *element)
 {
   le *temp = list;
 
-  /* if either element or list doesn't exist, return the 'new' list */ 
+  /* if either element or list doesn't exist, return the 'new' list */
   if (!element)
     return list;
   if (!list)
@@ -108,7 +102,7 @@ le *leAddTail(le *list, le *element)
   return list;
 }
 
-    
+
 le *leAddBranchElement(le *list, le *branch, int quoted)
 {
   le *temp = leNew(NULL);
@@ -116,7 +110,7 @@ le *leAddBranchElement(le *list, le *branch, int quoted)
   temp->quoted = quoted;
   return leAddTail(list, temp);
 }
-    
+
 le *leAddDataElement(le *list, const char *data, int quoted)
 {
   le *newdata = leNew(data);
@@ -124,13 +118,13 @@ le *leAddDataElement(le *list, const char *data, int quoted)
   newdata->quoted = quoted;
   return leAddTail(list, newdata);
 }
-    
+
 le *leDup(le *list)
 {
   le *temp;
   if (!list)
     return NULL;
-	
+
   temp = leNew(list->data);
   temp->branch = leDup(list->branch);
   temp->list_next = leDup(list->list_next);
@@ -149,7 +143,7 @@ void leClearTag(le *list)
   leClearTag(list->branch);
   leClearTag(list->list_next);
 }
-    
+
 void leTagData(le *list, char *data, int tagval)
 {
   if (!data || !list)
@@ -162,7 +156,7 @@ void leTagData(le *list, char *data, int tagval)
     leTagData(list->branch, data, tagval);
   }
 }
-    
+
 void leTagReplace(le *list, int tagval, le *newinfo)
 {
   if (!list || !newinfo)
@@ -180,7 +174,7 @@ void leTagReplace(le *list, int tagval, le *newinfo)
       if (newinfo->list_next || newinfo->branch) {
         list->branch = leDup(newinfo);
         list->quoted = 1;
-      } 
+      }
       else if (newinfo->data)
         list->data = zstrdup(newinfo->data);
     }
@@ -207,7 +201,7 @@ astr leDump(le *list, int indent)
 
   return as;
 }
-    
+
 astr leDumpEvalTree(le *list, int indent)
 {
   int c;
@@ -233,7 +227,7 @@ astr leDumpEvalTree(le *list, int indent)
 
   return as;
 }
-    
+
 astr leDumpEval(le *list, int indent)
 {
   le *start = list;
@@ -253,7 +247,7 @@ astr leDumpEval(le *list, int indent)
 
   return as;
 }
-    
+
 astr leDumpReformat(le *tree)
 {
   int notfirst = FALSE;

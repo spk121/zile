@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.6 2005/01/25 16:48:28 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.7 2005/02/08 19:27:57 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -28,6 +28,20 @@
 #include "extern.h"
 #include "vars.h"
 #include "eval.h"
+
+
+void lisp_init(void)
+{
+  leNIL = leNew("NIL");
+  leT = leNew("T");
+}
+
+
+void lisp_finalise(void)
+{
+  leReallyWipe(leNIL);
+  leReallyWipe(leT);
+}
 
 
 le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
@@ -51,7 +65,7 @@ static int getc_string(void)
     s++;
   else
     c = EOF;
-  
+
   return c;
 }
 
@@ -80,7 +94,7 @@ static void ungetc_file(int c)
 {
   ungetc(c, fp);
 }
-    
+
 le *lisp_read_file(const char *file)
 {
   le *list;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.h,v 1.6 2005/01/30 23:24:34 rrt Exp $	*/
+/*	$Id: lists.h,v 1.7 2005/02/08 19:28:00 rrt Exp $	*/
 
 #ifndef LISTS_H
 #define LISTS_H
@@ -40,7 +40,6 @@ typedef struct le {
 } le;
 
 le *leNew(const char *text);
-void leDelete(le *element);
 void leReallyWipe(le *list);
 void leWipe(le *list);
 
