@@ -185,10 +185,8 @@ Describe a function.
 Show this manual.
 @item C-h k
 Describe a key sequence.
-@item C-h l b
+@item C-h b
 Show the defined bindings.
-@item C-h l f
-Show the defined functions.
 @item C-h l r
 Show the defined registers.
 @item C-h s
@@ -286,10 +284,8 @@ Describe a function.  Bound to @code{describe-function}.
 Show a help window.  Bound to @code{help}.
 @item C-h k
 Describe a key sequence.  Bound to @code{describe-key}.
-@item C-h l b
+@item C-h b
 Show the defined bindings.  Bound to @code{list-bindings}.
-@item C-h l f
-Show the defined functions.  Bound to @code{list-functions}.
 @item C-h l r
 Show the defined registers.  Bound to @code{list-registers}.
 @item C-h s
