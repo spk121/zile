@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.43 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.44 2005/01/11 22:33:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -199,7 +199,7 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-  screen.array[screen.cury * termp->width + screen.curx] = c | screen.font;
+  screen.array[screen.cury * termp->width + screen.curx] = (c & 0xff) | screen.font;
   screen.curx++;
   if (screen.curx == termp->width) {
     if (screen.cury < termp->height - 1) {
