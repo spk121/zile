@@ -15,5 +15,3 @@
 
 * Font lock in C/C++ Mode lacks correct support for floats (e.g:
   1.-e3.4e5 is recognized as a number).
-
-* Line wrapping should happen on Return, not just Space.

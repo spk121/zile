@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.24 2004/02/20 16:05:52 rrt Exp $	*/
+/*	$Id: line.c,v 1.25 2004/03/10 10:27:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -393,49 +393,6 @@ void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
 	}
 }
 
-DEFUN("newline", newline)
-/*+
-Insert a newline at the current point position into
-the current buffer.
-+*/
-{
-	int uni, ret = TRUE;
-
-	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-	for (uni = 0; uni < uniarg; ++uni)
-		if (!insert_newline()) {
-			ret = FALSE;
-			break;
-		}
-	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-	return ret;
-}
-
-void insert_string(const char *s)
-{
-	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
-	undo_nosave = TRUE;
-	for (; *s != '\0'; ++s)
-		if (*s == '\n')
-			insert_newline();
-		else
-			insert_char(*s);
-	undo_nosave = FALSE;
-}
-
-void insert_nstring(const char *s, size_t size)
-{
-	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-	undo_nosave = TRUE;
-	for (; 0 < size--; ++s)
-		if (*s == '\n')
-			insert_newline();
-		else
-			insert_char_in_insert_mode(*s);
-	undo_nosave = FALSE;
-}
-
 /*
  * Split the current line so that the text width is less
  * than the value specified by `fill-column'.
@@ -467,18 +424,61 @@ static void auto_fill_break_line()
 	}
 }
 
+DEFUN("newline", newline)
+/*+
+Insert a newline at the current point position into
+the current buffer.
++*/
+{
+	int uni, ret = TRUE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+	for (uni = 0; uni < uniarg; ++uni) {
+                if (cur_bp->flags & BFLAG_AUTOFILL &&
+                    get_goalc() > cur_bp->fill_column)
+                        auto_fill_break_line();
+		if (!insert_newline()) {
+			ret = FALSE;
+			break;
+		}
+        }
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+
+	return ret;
+}
+
+void insert_string(const char *s)
+{
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, strlen(s), 0);
+	undo_nosave = TRUE;
+	for (; *s != '\0'; ++s)
+		if (*s == '\n')
+			insert_newline();
+		else
+			insert_char(*s);
+	undo_nosave = FALSE;
+}
+
+void insert_nstring(const char *s, size_t size)
+{
+	undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+	undo_nosave = TRUE;
+	for (; 0 < size--; ++s)
+		if (*s == '\n')
+			insert_newline();
+		else
+			insert_char_in_insert_mode(*s);
+	undo_nosave = FALSE;
+}
+
 int self_insert_command(int c)
 {
 	desactivate_mark();
 
-	if (c == KBD_RET)
-		insert_newline();
-	else if (c == KBD_TAB)
-		insert_tab();
-	else if (c <= 255) {
-		if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
-		    get_goalc() > cur_bp->fill_column)
-			auto_fill_break_line();
+	if (c <= 255) {
+                if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
+                    get_goalc() > cur_bp->fill_column)
+                        auto_fill_break_line();
 		insert_char(c);
 	} else {
 		ding();
