@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.38 2004/10/11 01:17:40 rrt Exp $	*/
+/*	$Id: main.c,v 1.39 2004/10/11 01:34:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -58,8 +58,6 @@
 Window *cur_wp = NULL, *head_wp = NULL;
 /* The current buffer; the first buffer in list. */
 Buffer *cur_bp = NULL, *head_bp = NULL;
-/* The current output terminal. */
-Terminal *cur_tp = NULL;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;
@@ -124,21 +122,6 @@ static void loop(void)
 
 		lastflag = thisflag;
 	}
-}
-
-/*
- * Select the output interface.
- */
-static void select_terminal(int term)
-{
-        switch (term) {
-        case 0:
-                cur_tp = termp;
-                break;
-        default:
-		fprintf(stderr, "fatal error: bad terminal type chosen\n");
-		exit(1);
-        }
 }
 
 static char about_splash_str[] = "\
@@ -387,7 +370,6 @@ int main(int argc, char **argv)
         /*
          * Initialise terminal.
          */
-	select_terminal(0);
 	term_init();
 
 	init_variables();

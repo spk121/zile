@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.9 2004/04/05 17:18:14 rrt Exp $	*/
+/*	$Id: window.c,v 1.10 2004/10/11 01:34:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -241,9 +241,9 @@ Make the selected window fill the screen.
 			free_window(wp);
 	}
 
-	cur_wp->fwidth = cur_wp->ewidth = cur_tp->width;
+	cur_wp->fwidth = cur_wp->ewidth = termp->width;
 	/* Save space for minibuffer. */
-	cur_wp->fheight = cur_tp->height - 1;
+	cur_wp->fheight = termp->height - 1;
 	/* Save space for status line. */
 	cur_wp->eheight = cur_wp->fheight - 1;
 	cur_wp->next = NULL;
@@ -283,9 +283,9 @@ void create_first_window(void)
 
 	wp = new_window();
 	cur_wp = head_wp = wp;
-	wp->fwidth = wp->ewidth = cur_tp->width;
+	wp->fwidth = wp->ewidth = termp->width;
 	/* Save space for minibuffer. */
-	wp->fheight = cur_tp->height - 1;
+	wp->fheight = termp->height - 1;
 	/* Save space for status line. */
 	wp->eheight = wp->fheight - 1;
 	wp->bp = bp;
