@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.56 2005/01/12 01:02:17 rrt Exp $	*/
+/*	$Id: main.c,v 1.57 2005/01/12 10:39:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -144,8 +144,7 @@ static void sanity_checks(void)
  */
 static void usage(void)
 {
-  fprintf(stderr, "usage: zile [-hqV] [-f function] [-v variable=value] [-u rcfile]\n"
-          "	     [+number] [file ...]\n");
+  fprintf(stderr, "Usage: zile [-hqV] [-e EXPR] [-u RCFILE] [+NUMBER] [FILE...]\n");
   exit(1);
 }
 
@@ -205,10 +204,12 @@ int main(int argc, char **argv)
 {
   int c;
   int qflag = 0;
-  char *uarg = NULL;
+  char *uarg = NULL, *earg = NULL;
 
-  while ((c = getopt(argc, argv, "f:hqu:v:V")) != -1)
+  while ((c = getopt(argc, argv, "e:hqu:V")) != -1)
     switch (c) {
+    case 'e':
+      earg = optarg;
     case 'q':
       qflag = 1;
       break;
