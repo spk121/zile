@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.17 2004/02/04 02:45:05 dacap Exp $	*/
+/*	$Id: line.c,v 1.18 2004/02/06 01:53:47 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -861,7 +861,7 @@ int backward_delete_char_overwrite(void)
 
 		return TRUE;
 	} else {
-		return backward_delete_char ();
+		return backward_delete_char();
 	}
 }
 
@@ -872,8 +872,8 @@ Join lines if the character is a newline.
 +*/
 {
 	 /* In overwrite-mode and isn't called by delete_char().  */
-	int (*f) () = (cur_bp->flags & BFLAG_OVERWRITE &&
-		       (last_uniarg > 0)) ?
+	int (*f)() = (cur_bp->flags & BFLAG_OVERWRITE &&
+		      (last_uniarg > 0)) ?
 		backward_delete_char_overwrite:
 		backward_delete_char;
 	int uni, ret = TRUE;
@@ -892,27 +892,27 @@ Join lines if the character is a newline.
 	return ret;
 }
 
-DEFUN ("delete-horizontal-space", delete_horizontal_space)
+DEFUN("delete-horizontal-space", delete_horizontal_space)
 {
-	undo_save (UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
 	while ((cur_wp->pointo < cur_wp->pointp->size)
-	       && isspace (cur_wp->pointp->text[cur_wp->pointo]))
-		delete_char ();
+	       && isspace(cur_wp->pointp->text[cur_wp->pointo]))
+		delete_char();
 
 	while ((cur_wp->pointo > 0) &&
-	       isspace (cur_wp->pointp->text[cur_wp->pointo-1]))
-		backward_delete_char ();
+	       isspace(cur_wp->pointp->text[cur_wp->pointo-1]))
+		backward_delete_char();
 
-	undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	return TRUE;
 }
 
-DEFUN ("just-one-space", just_one_space)
+DEFUN("just-one-space", just_one_space)
 {
-	undo_save (UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
-	FUNCALL (delete_horizontal_space);
-	insert_char_in_insert_mode (' ');
-	undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+	FUNCALL(delete_horizontal_space);
+	insert_char_in_insert_mode(' ');
+	undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	return TRUE;
 }
