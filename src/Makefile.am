@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.33 2005/01/21 23:40:43 rrt Exp $
+## $Id: Makefile.am,v 1.34 2005/01/22 11:30:14 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -7,14 +7,11 @@ else
 regex = regex.o
 endif
 
-TESTS = astr htable tests
-check_PROGRAMS = astr htable
+TESTS = astr tests
+check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
-
-htable_CPPFLAGS = -DTEST
-htable_LDADD = zmalloc.o list.o
 
 bin_PROGRAMS = zile
 
@@ -23,8 +20,6 @@ zile_base_SOURCES =				\
 	list.h					\
 	astr.c					\
 	astr.h					\
-	htable.c				\
-	htable.h				\
 	vector.c				\
 	vector.h				\
 	strrstr.c				\
