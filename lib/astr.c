@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.2 2003/05/06 22:28:41 rrt Exp $	*/
+/*	$Id: astr.c,v 1.3 2003/05/19 21:50:23 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -36,15 +36,7 @@
 #include "astr.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
-
-static void resize_if_smaller(astr as, size_t reqsize)
-{
-	assert(as != NULL);
-	if (reqsize > as->maxsize) {
-		as->maxsize = reqsize + ALLOCATION_CHUNK_SIZE;
-		as->text = (char *)xrealloc(as->text, as->maxsize + 1);
-	}
-}
+#define ENLARGE_FACTOR 2
 
 astr astr_new(void)
 {
@@ -55,6 +47,17 @@ astr astr_new(void)
 	as->text = (char *)xmalloc(as->maxsize + 1);
 	memset(as->text, 0, as->maxsize + 1);
 	return as;
+}
+
+void astr_resize(astr as, size_t reqsize)
+{
+	assert(as != NULL);
+	if (reqsize == 0)
+		reqsize = as->maxsize * ENLARGE_FACTOR;
+	if (reqsize > as->maxsize) {
+		as->maxsize = reqsize + ALLOCATION_CHUNK_SIZE;
+		as->text = (char *)xrealloc(as->text, as->maxsize + 1);
+        }
 }
 
 astr astr_copy(castr as)
@@ -83,6 +86,15 @@ void astr_delete(astr as)
 	free(as);
 }
 
+char *astr_delete_struct_only(astr as)
+{
+	char *text;
+	assert(as != NULL);
+        text = as->text;
+	free(as);
+	return text;
+}
+
 void astr_clear(astr as)
 {
 	assert(as != NULL);
@@ -90,7 +102,13 @@ void astr_clear(astr as)
 	as->size = 0;
 }
 
-char *(astr_cstr)(castr as)
+const char *(astr_cstr)(castr as)
+{
+	assert(as != NULL);
+	return as->text;
+}
+
+char *(astr_str)(castr as)
 {
 	assert(as != NULL);
 	return as->text;
@@ -102,10 +120,16 @@ size_t (astr_size)(castr as)
 	return as->size;
 }
 
+size_t (astr_maxsize)(castr as)
+{
+	assert(as != NULL);
+	return as->maxsize;
+}
+
 astr astr_fill(astr as, int c, size_t size)
 {
 	assert(as != NULL);
-	resize_if_smaller(as, size);
+	astr_resize(as, size);
 	memset(as->text, c, size);
 	as->text[size] = '\0';
 	return as;
@@ -137,7 +161,7 @@ int (astr_eq_cstr)(castr s1, const char *s2)
 
 static astr astr_assign_x(astr as, const char *s, size_t csize)
 {
-	resize_if_smaller(as, csize);
+	astr_resize(as, csize);
 	strcpy(as->text, s);
 	as->size = csize;
 	return as;
@@ -176,7 +200,7 @@ static astr astr_insert_x(astr as, int pos, const char *s, size_t csize)
 	if ((unsigned int)pos > as->size)
 		pos = as->size;
 	dest->size = as->size + csize;
-	resize_if_smaller(dest, dest->size);
+	astr_resize(dest, dest->size);
 	memcpy(dest->text, as->text, pos);
 	memcpy(dest->text + pos, s, csize);
 	strcpy(dest->text + pos + csize, as->text + pos);
@@ -222,7 +246,7 @@ astr astr_prepend_char(astr as, int c)
 
 static astr astr_append_x(astr as, const char *s, size_t csize)
 {
-	resize_if_smaller(as, as->size + csize);
+	astr_resize(as, as->size + csize);
 	strcpy(as->text + as->size, s);
 	as->size += csize;
 	return as;
@@ -243,7 +267,7 @@ astr astr_append_cstr(astr as, const char *s)
 astr astr_append_char(astr as, int c)
 {
 	assert(as != NULL);
-	resize_if_smaller(as, as->size + 1);
+	astr_resize(as, as->size + 1);
 	as->text[as->size] = c;
 	as->text[++as->size] = '\0';
 
@@ -297,7 +321,7 @@ astr astr_substr(castr as, int pos, size_t size)
 	if (as->size - pos < size)
 		size = as->size - pos;
 	if (size > 0) {
-		resize_if_smaller(dest, size);
+		astr_resize(dest, size);
 		memcpy(dest->text, as->text + pos, size);
 		dest->size = size;
 	}
@@ -384,7 +408,7 @@ static astr astr_replace_x(astr as, int pos, size_t size, const char *s, size_t 
 		size = as->size - pos;
 	if (size > 0) {
 		dest->size = as->size - size + csize;
-		resize_if_smaller(dest, dest->size);
+		astr_resize(dest, dest->size);
 		memcpy(dest->text, as->text, pos);
 		memcpy(dest->text + pos, s, csize);
 		strcpy(dest->text + pos + csize, as->text + pos + size);
@@ -434,47 +458,57 @@ void astr_fputs(castr as, FILE *f)
 	fputs(as->text, f);
 }
 
-astr astr_fmt(astr as, const char *fmt, ...)
+astr astr_vfmt(astr as, const char *fmt, va_list ap)
 {
-	va_list ap;
 #ifdef HAVE_VASPRINTF
 	char *buf;
 #else
 	char buf[2048]; /* XXX fix this */
 #endif
-	va_start(ap, fmt);
 #ifdef HAVE_VASPRINTF
 	vasprintf(&buf, fmt, ap);
 #else
 	vsprintf(buf, fmt, ap);
 #endif
-	va_end(ap);
 	astr_assign_cstr(as, buf);
 #ifdef HAVE_VASPRINTF
 	free(buf);
+#endif        
+}
+
+astr astr_vafmt(astr as, const char *fmt, va_list ap)
+{
+#ifdef HAVE_VASPRINTF
+	char *buf;
+#else
+	char buf[2048]; /* XXX fix this */
 #endif
+#ifdef HAVE_VASPRINTF
+	vasprintf(&buf, fmt, ap);
+#else
+	vsprintf(buf, fmt, ap);
+#endif
+	astr_append_cstr(as, buf);
+#ifdef HAVE_VASPRINTF
+	free(buf);
+#endif        
+}
+
+astr astr_fmt(astr as, const char *fmt, ...)
+{
+	va_list ap;
+	va_start(ap, fmt);
+        astr_vfmt(as, fmt, ap);
+	va_end(ap);
 	return as;
 }
 
 astr astr_afmt(astr as, const char *fmt, ...)
 {
 	va_list ap;
-#ifdef HAVE_VASPRINTF
-	char *buf;
-#else
-	char buf[2048]; /* XXX fix this */
-#endif
 	va_start(ap, fmt);
-#ifdef HAVE_VASPRINTF
-	vasprintf(&buf, fmt, ap);
-#else
-	vsprintf(buf, fmt, ap);
-#endif
+        astr_vafmt(as, fmt, ap);
 	va_end(ap);
-	astr_append_cstr(as, buf);
-#ifdef HAVE_VASPRINTF
-	free(buf);
-#endif
 	return as;
 }
 

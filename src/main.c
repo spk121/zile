@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.6 2003/05/15 10:02:44 rrt Exp $	*/
+/*	$Id: main.c,v 1.7 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -186,7 +186,7 @@ static void sanity_checks(void)
 	/*
 	 * The functions `read_rc_file' and `help_tutorial' rely
 	 * on a usable `HOME' environment variable.
-         */
+	 */
 	if (getenv("HOME") == NULL) {
 		fprintf(stderr, "fatal error: please set `HOME' to point to your home-directory\n");
 		exit(1);
@@ -254,7 +254,7 @@ static void set_variables(alist al)
 static void usage(void)
 {
 	fprintf(stderr, "usage: zile [-hqV] [-f function] [-v variable=value] [-u rcfile]\n"
-		        "            [+number] [file ...]\n");
+			"            [+number] [file ...]\n");
 	exit(1);
 }
 

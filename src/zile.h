@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.5 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: zile.h,v 1.6 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -28,7 +28,7 @@
 #define ZILE_H
 
 #include <alist.h>
-#include "pathbuffer.h"
+#include "astr.h"
 
 #undef TRUE
 #define TRUE				1
@@ -111,7 +111,7 @@ struct line {
 /* End a multi operation sequence. */
 #define UNDO_END_SEQUENCE		8
 /* Insert a char without moving the current pointer */
-#define UNDO_INTERCALATE_CHAR           9
+#define UNDO_INTERCALATE_CHAR		9
 
 struct undo {
 	/* Next undo delta in list. */
@@ -274,7 +274,7 @@ struct history {
 
 	/* This flag is set when this is a filename history. */
 	int	fl_dir;
-	pathbuffer_t	*path;
+	astr    path;
 
 	/* This flag is set when the space character is allowed. */
 	int	fl_space;
@@ -290,8 +290,8 @@ struct history {
 	int	matchsize;
 
 	/* The action functions. */
-	int	(*reread)(historyp hp, char *s);
-	int	(*try)(historyp hp, char *s);
+	int	(*reread)(historyp hp, astr as);
+	int	(*try)(historyp hp, const char *s);
 	void	(*scroll_up)(historyp hp);
 	void	(*scroll_down)(historyp hp);
 };
@@ -316,7 +316,7 @@ struct terminal {
 	void	(*clear)(void);
 	void	(*beep)(void);
 	void	(*minibuf_write)(const char *fmt);
-	char *	(*minibuf_read)(char *prompt, char *value, historyp hp);
+	char *	(*minibuf_read)(char *prompt, const char *value, historyp hp);
 	void	(*minibuf_clear)(void);
 };
 

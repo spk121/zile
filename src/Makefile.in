@@ -1,4 +1,4 @@
-#	$Id: Makefile.in,v 1.6 2003/05/06 22:28:41 rrt Exp $
+#	$Id: Makefile.in,v 1.7 2003/05/19 21:50:24 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
@@ -44,7 +44,6 @@ SRCS =	$(srcdir)/basic.c	\
 	$(srcdir)/macro.c	\
 	$(srcdir)/main.c	\
 	$(srcdir)/minibuf.c	\
-	$(srcdir)/pathbuffer.c  \
 	$(srcdir)/rc.c		\
 	$(srcdir)/redisplay.c	\
 	$(srcdir)/registers.c	\
@@ -71,7 +70,6 @@ OBJS =	basic.o			\
 	macro.o			\
 	main.o			\
 	minibuf.o		\
-	pathbuffer.o            \
 	rc.o			\
 	redisplay.o		\
 	registers.o		\

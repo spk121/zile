@@ -1,4 +1,4 @@
-/*	$Id: window.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: window.c,v 1.4 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -90,7 +90,7 @@ Both windows display the same buffer now current.
 	if (cur_wp->topdelta >= cur_wp->eheight)
 		recenter(cur_wp);
 	newwp->bp = cur_bp;
-        assert(cur_bp == cur_wp->bp);
+	assert(cur_bp == cur_wp->bp);
 	++newwp->bp->num_windows;
 	newwp->pointp = cur_wp->pointp;
 	newwp->pointn = cur_wp->pointn;

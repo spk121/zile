@@ -1,4 +1,4 @@
-/*	$Id: astr.h,v 1.2 2003/05/06 22:28:41 rrt Exp $	*/
+/*	$Id: astr.h,v 1.3 2003/05/19 21:50:23 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -28,17 +28,21 @@
 #define ASTR_H
 
 #include <stdio.h>
+#include <stdarg.h>
 
 typedef struct astr_s *astr;
 typedef const struct astr_s *castr;
 
 extern astr   astr_new(void);
+extern void   astr_resize(astr as, size_t reqsize);
 extern astr   astr_copy(castr as);
 extern astr   astr_copy_cstr(const char *s);
 extern void   astr_delete(astr as);
+extern char * astr_delete_struct_only(astr as);
 extern void   astr_clear(astr as);
-extern char * astr_cstr(castr as);
+extern const char * astr_cstr(castr as);
 extern size_t astr_size(castr as);
+extern size_t astr_maxsize(castr as);
 extern astr   astr_fill(astr as, int c, size_t size);
 extern int    astr_cmp(castr s1, castr s2);
 extern int    astr_cmp_cstr(castr s1, const char *s2);
@@ -72,6 +76,8 @@ extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 extern astr   astr_replace_char(astr as, int pos, size_t size, int c);
 extern astr   astr_fgets(astr as, FILE *f);
 extern void   astr_fputs(castr as, FILE *f);
+extern astr   astr_vfmt(astr as, const char *fmt, va_list ap);
+extern astr   astr_vafmt(astr as, const char *fmt, va_list ap);
 extern astr   astr_fmt(astr as, const char *fmt, ...);
 extern astr   astr_afmt(astr as, const char *fmt, ...);
 
@@ -94,7 +100,9 @@ struct astr_s {
  */
 
 #define astr_cstr(as)		((const char *)as->text)
+#define astr_str(as)		((char *)as->text)
 #define astr_size(as)		((const int)as->size)
+#define astr_maxsize(as)	((const int)as->maxsize)
 #define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
 #define astr_cmp_cstr(s1, s2)	(strcmp(s1->text, s2))
 #define astr_eq(s1, s2)		(!strcmp(s1->text, s2->text))

@@ -1,4 +1,4 @@
-#	$Id: Makefile.in,v 1.3 2003/05/06 22:28:41 rrt Exp $
+#	$Id: Makefile.in,v 1.4 2003/05/19 21:50:23 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
@@ -10,7 +10,7 @@ LIBS = @LIBS@
 RANLIB = @RANLIB@
 
 LIB = libzile.a
-OBJS = alist.o astr.o htable.o @LIBOBJS@
+OBJS = alist.o astr.o htable.o agetcwd.o @LIBOBJS@
 
 .c.o:
 	$(CC) -c -I. -I.. -I$(srcdir) $(CFLAGS) $<
@@ -42,3 +42,4 @@ $(OBJS): ../config.h
 alist.o: alist.h
 astr.o: astr.h
 htable.o: htable.h
+agetcwd.o: agetcwd.h

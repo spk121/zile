@@ -1,4 +1,4 @@
-/*	$Id: rc.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: rc.c,v 1.5 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -37,29 +37,28 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "pathbuffer.h"
 
 static FILE *rc_file;
-static char *rc_name;
+static const char *rc_name;
 static int lineno = 1;
 
 static void error(char *fmt, ...)
 {
 	va_list ap;
-	pathbuffer_t *msg1;
+	astr msg1;
 	char msg2[50];
 
-	msg1 = pathbuffer_create(0);
-	pathbuffer_fput(msg1, "zile:%s:%d: ", rc_name, lineno);
+	msg1 = astr_new();
+	astr_fmt(msg1, "zile:%s:%d: ", rc_name, lineno);
 
 	va_start(ap, fmt);
 	vsprintf(msg2, fmt, ap);
 	va_end(ap);
 
-	minibuf_error("%s%s", pathbuffer_str(msg1), msg2);
+	minibuf_error("%s%s", astr_cstr(msg1), msg2);
 
 	waitkey_discard(3 * 1000);
-	pathbuffer_free(msg1);
+	astr_delete(msg1);
 }
 
 static int skip_ws(int c)
@@ -121,9 +120,9 @@ static void parse_rc(void)
 
 void read_rc_file(const char *filename)
 {
-	pathbuffer_t *buf;
+	astr buf;
 
-	buf = pathbuffer_create(0);
+	buf = astr_new();
 	rc_file = NULL;
 
 	if (filename != NULL) {
@@ -135,9 +134,9 @@ void read_rc_file(const char *filename)
 	}
 
 	if (rc_file == NULL) {
-		pathbuffer_put(buf, getenv("HOME"));
-		pathbuffer_append(buf, "/.zilerc");
-		rc_name = pathbuffer_str(buf);
+		astr_assign_cstr(buf, getenv("HOME"));
+		astr_append_cstr(buf, "/.zilerc");
+		rc_name = astr_cstr(buf);
 		rc_file = fopen(rc_name, "r");
 	}
 
@@ -146,5 +145,5 @@ void read_rc_file(const char *filename)
 		fclose(rc_file);
 	}
 
-	pathbuffer_free(buf);
+	astr_delete(buf);
 }

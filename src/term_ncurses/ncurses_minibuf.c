@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.4 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.5 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -158,7 +158,7 @@ static void draw_minibuf_read(char *prompt, char *value, int prompt_len,
 	}
 }
 
-static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
+static char *rot_vminibuf_read(char *prompt, const char *value, historyp hp,
 			       char **p, int *max)
 {
 	static int overwrite_mode = 0;
@@ -296,13 +296,13 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 				case HISTORY_MATCHED:
 				case HISTORY_MATCHEDNONUNIQUE:
 					if (hp->fl_dir)
-						len = i = hp->matchsize + strlen(pathbuffer_str(hp->path));
+						len = i = hp->matchsize + strlen(astr_cstr(hp->path));
 					else
 						len = i = hp->matchsize;
 					*max = len + 1;
 					s = (char *)zmalloc(*max);
 					if (hp->fl_dir) {
-						strcpy(s, pathbuffer_str(hp->path));
+						strcpy(s, astr_cstr(hp->path));
 						strncat(s, hp->match, hp->matchsize);
 					} else
 						strncpy(s, hp->match, hp->matchsize);
@@ -357,7 +357,7 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 
 static char *rotation_buffers[MAX_ROTATIONS];
 
-char *ncurses_minibuf_read(char *prompt, char *value, historyp hp)
+char *ncurses_minibuf_read(char *prompt, const char *value, historyp hp)
 {
 	static int max[MAX_ROTATIONS], rot;
 	windowp wp, old_wp = cur_wp;

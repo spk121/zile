@@ -1,4 +1,4 @@
-/*	$Id: buffer.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.4 2003/05/19 21:50:24 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -165,7 +165,7 @@ void set_buffer_name(bufferp bp, const char *name)
 /*
  * Set a new filename (and a name) for the buffer.
  */
-void set_buffer_filename(bufferp bp, char *filename)
+void set_buffer_filename(bufferp bp, const char *filename)
 {
 	if (bp->filename != NULL)
 		free(bp->filename);
@@ -217,9 +217,10 @@ bufferp get_next_buffer(void)
 /*
  * Create a buffer name using the file name.
  */
-char *make_buffer_name(char *filename)
+char *make_buffer_name(const char *filename)
 {
-	char *p, *name;
+	const char *p;
+        char *name;
 	int i;
 
 	if ((p = strrchr(filename, '/')) == NULL)

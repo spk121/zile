@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
-.\" $Id: astr.3,v 1.2 2003/05/06 22:28:41 rrt Exp $
-.Dd July 31, 2001
+.\" $Id: astr.3,v 1.3 2003/05/19 21:50:23 rrt Exp $
+.Dd May 17, 2003
 .Os
 .Dt ASTR 3
 .Sh NAME
@@ -14,12 +14,15 @@ typedef /* ... */ astr;
 typedef const /* ... */ castr;
 
 astr   astr_new(void);
+void   astr_resize(astr as, size_t reqsize);
 astr   astr_copy(castr as);
 astr   astr_copy_cstr(const char *s);
 void   astr_delete(astr as);
+char * astr_delete_struct_only(astr as);
 void   astr_clear(astr as);
 char * astr_cstr(castr as);
 size_t astr_size(castr as);
+size_t astr_maxsize(castr as);
 astr   astr_fill(astr as, int c, size_t size);
 int    astr_cmp(castr s1, castr s2);
 int    astr_cmp_cstr(castr s1, const char *s2);
@@ -53,6 +56,8 @@ astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 astr   astr_replace_char(astr as, int pos, size_t size, int c);
 astr   astr_fgets(astr as, FILE *f);
 void   astr_fputs(castr as, FILE *f);
+astr   astr_vfmt(astr as, const char *fmt, va_list ap);
+astr   astr_vafmt(astr as, const char *fmt, va_list ap);
 astr   astr_fmt(astr as, const char *fmt, ...);
 astr   astr_afmt(astr as, const char *fmt, ...);
 
@@ -89,6 +94,10 @@ The
 function allocates a new string with zero length.
 .Pp
 The
+.Fn astr_resize
+function enlarges a string if it is smaller than the given size.
+.Pp
+The
 .Fn astr_copy
 and
 .Fn astr_copy_cstr
@@ -105,6 +114,12 @@ function deallocates the previously allocated string
 .Fa as .
 .Pp
 The
+.Fn astr_delete_struct_only
+function deallocates the previously allocated string
+.Fa as ,
+and returns the C null-terminated string, which must be freed after use.
+.Pp
+The
 .Fn astr_clear
 function truncates the argument string
 .Fa as
@@ -118,8 +133,19 @@ into a C null-terminated string.  The returned string should
 not be modified.
 .Pp
 The
+.Fn astr_str
+function converts the argument string
+.Fa as
+into a C null-terminated string, which can be modified.
+.Pp
+The
 .Fn astr_size
 function returns the length of the argument string
+.Fa as .
+.Pp
+The
+.Fn astr_maxsize
+function returns the current buffer size of the argument string
 .Fa as .
 .Pp
 The
@@ -247,6 +273,16 @@ into the argument
 returning the position starting from the beginning of the string.
 .Pp
 The
+.Fn astr_rfind ,
+.Fn astr_rfind_cstr ,
+and
+.Fn astr_rfind_char
+functions find the first occurrence of the argument string or character
+into the argument
+.Fa as ,
+returning the position starting from the end of the string.
+.Pp
+The
 .Fn astr_replace ,
 .Fn astr_replace_cstr ,
 and
@@ -284,13 +320,17 @@ Please note that no trailing newline is written after the string.
 .Pp
 The
 .Fn astr_fmt
-function writes formatted text into the argument string
+and
+.Fn astr_vfmt
+functions write formatted text into the argument string
 .Fa as .
 Previously existing text will be overwritten.
 .Pp
 The
 .Fn astr_afmt
-function appends formatted text to the argument string
+and
+.Fn astr_vafmt
+functions append formatted text to the argument string
 .Fa as .
 .Pp
 Where not otherwise specified, the

@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.5 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: line.c,v 1.6 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -323,7 +323,7 @@ static int common_insert_newline(int undo_mode)
 	 * Scan all the windows searching for points
 	 * pointing at the changed line.
 	 */
-        cur_pointn = cur_wp->pointn;
+	cur_pointn = cur_wp->pointn;
 	for (wp = head_wp; wp != NULL; wp = wp->next) {
 		if (wp->bp != cur_bp)
 			continue;
@@ -333,7 +333,7 @@ static int common_insert_newline(int undo_mode)
 			wp->pointp = lp2;
 			wp->pointo -= lp1len;
 			++wp->pointn;
-                } else if (wp->pointn > cur_pointn)
+		} else if (wp->pointn > cur_pointn)
 			++wp->pointn;
 	}
 

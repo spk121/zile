@@ -1,4 +1,4 @@
-/*	$Id: fontlock.c,v 1.3 2003/05/06 22:28:42 rrt Exp $	*/
+/*	$Id: fontlock.c,v 1.4 2003/05/19 21:50:25 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -151,17 +151,17 @@ static char *make_special_string (linep lp, char *sp, char *ap)
       start = sp;
 
       for (; sp < lp->text + lp->size; sp++) {
-        if (!(((*sp >= 'a') && (*sp <= 'z')) ||
-              ((*sp >= 'A') && (*sp <= 'Z')) ||
-              ((*sp == '_'))))
-          return NULL;
+	if (!(((*sp >= 'a') && (*sp <= 'z')) ||
+	      ((*sp >= 'A') && (*sp <= 'Z')) ||
+	      ((*sp == '_'))))
+	  return NULL;
 
-        if (ap) {
-          if (sp == start)
-            *ap++ = ANCHOR_BEGIN_SPECIAL;
-          else
-            *ap++ = ANCHOR_NULL;
-        }
+	if (ap) {
+	  if (sp == start)
+	    *ap++ = ANCHOR_BEGIN_SPECIAL;
+	  else
+	    *ap++ = ANCHOR_NULL;
+	}
       }
 
       end = lp->text + lp->size;
