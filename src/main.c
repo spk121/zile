@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.70 2005/01/19 00:40:52 rrt Exp $	*/
+/*	$Id: main.c,v 1.71 2005/01/19 01:20:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -242,9 +242,9 @@ static void signal_init(void)
 /* Options table */
 struct option longopts[] = {
     { "batch",        0, NULL, 'b' },
-    { "eval",         0, NULL, 'e' },
+    { "eval",         1, NULL, 'e' },
     { "help",         0, NULL, 'h' },
-    { "load",         0, NULL, 'l' },
+    { "load",         1, NULL, 'l' },
     { "no-init-file", 0, NULL, 'q' },
     { "version",      0, NULL, 'v' },
     { 0, 0, 0, 0 }
