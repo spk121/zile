@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.14 2004/10/11 00:57:48 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.15 2004/10/11 03:02:06 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
@@ -33,9 +33,6 @@
 #include <termcap.h>
 #include <termios.h>
 #include <unistd.h>
-
-/* Avoid clash with zile function. */
-#undef newline
 
 #include "zile.h"
 #include "extern.h"
@@ -187,12 +184,15 @@ void term_beep(void)
 
 static void term_init_screen(void)
 {
-        if (screen.array)
-                free(screen.array);
-
-        screen.array = zmalloc(termp->width * termp->height * sizeof(int));
-        screen.oarray = zmalloc(termp->width * termp->height * sizeof(int));
+        int i, size = termp->width * termp->height;
+        
+        screen.array = zmalloc(size * sizeof(int));
+        screen.oarray = zmalloc(size * sizeof(int));
         screen.curx = screen.cury = 0;
+
+        /* Make the first call to term_refresh will update the screen */
+        for (i = 0; i < size; i++)
+                screen.oarray[i] = 1;
 }
 
 void term_init(void)
@@ -267,6 +267,8 @@ void term_close(void)
 
 	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
+        free(screen.array);
+        free(screen.oarray);
 	termp->screen = NULL;
         tcdrain(0);
         fflush(stdout);

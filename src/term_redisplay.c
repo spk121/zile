@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.16 2004/10/11 01:17:40 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.17 2004/10/11 03:02:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -389,6 +389,8 @@ void show_splash_screen(const char *splash)
 		case '%':
 			if (!bold)
 				term_attrset(1, ZILE_BOLD);
+                        else
+                                term_attrset(1, ZILE_NORMAL);
 			bold ^= 1;
 			break;
 		case  '\n':
@@ -397,4 +399,6 @@ void show_splash_screen(const char *splash)
 		default:
 			term_addch(*p);
 		}
+
+        term_refresh();
 }

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.39 2004/10/11 01:34:46 rrt Exp $	*/
+/*	$Id: main.c,v 1.40 2004/10/11 03:02:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -345,8 +345,6 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	setlocale(LC_ALL, "");
-
 	sanity_checks();
 
         /*
@@ -367,9 +365,6 @@ int main(int argc, char **argv)
 	sigaction(SIGQUIT, &other_sig, NULL);
 	sigaction(SIGTERM, &other_sig, NULL);
 
-        /*
-         * Initialise terminal.
-         */
 	term_init();
 
 	init_variables();
@@ -382,15 +377,7 @@ int main(int argc, char **argv)
 	term_redisplay();
 	init_bindings();
 
-	if (argc < 1) {
-		/*
-		 * Show the splash screen only if there isn't any file
-		 * specified on command line and no function was specified
-		 * with the `-f' flag.
-		 */
-		if (!hflag && alist_count(fargs) == 0)
-			about_screen();
-	} else {
+	if (argc >= 1)
 		while (*argv) {
 			int line = 0;
 			if (**argv == '+')
@@ -398,7 +385,14 @@ int main(int argc, char **argv)
 			if (*argv)
 				open_file(*argv++, line - 1);
 		}
-	}
+        else
+		/*
+		 * Show the splash screen only if there isn't any file
+		 * specified on command line and no function was specified
+		 * with the `-f' flag.
+		 */
+		if (!hflag && alist_count(fargs) == 0)
+			about_screen();
 
 	setup_main_screen(argc, hflag);
 
