@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.8 2004/11/15 00:47:12 rrt Exp $
+## $Id: Makefile.am,v 1.9 2004/11/15 01:01:20 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
 
-mkdoc_LDADD = $(top_srcdir)/src/astr.o $(top_srcdir)/src/strrstr.o $(top_srcdir)/src/zmalloc.o
+mkdoc_LDADD = $(top_srcdir)/src/astr.o $(top_srcdir)/src/strrstr.o $(top_srcdir)/src/zmalloc.o $(top_srcdir)/src/vasprintf.o
 
 ziledir = $(datadir)/zile
 zile_DATA =					\
