@@ -6,9 +6,6 @@
 * The method of resolving the `C-h' problem by replacing it with `M-h'
   is not a ``Good Thing''(TM).
 
-* The background colors are not handled very well under X Window
-  terminals (reported by users, but cannot reproduce).
-
 * The macros do not work for interactive commands.
 
 * Font Lock in Shell Mode isn't perfect; Shell scripts can be very
