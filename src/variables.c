@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.22 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: variables.c,v 1.23 2005/01/13 00:16:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -125,7 +125,7 @@ static void make_var_compl_iter(hpair *pair, va_list ap)
 char *minibuf_read_variable_name(char *msg)
 {
   char *ms;
-  Completion *cp = new_completion(FALSE);
+  Completion *cp = completion_new(FALSE);
 
   htable_foreach(var_table, make_var_compl_iter, cp);
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.55 2005/01/12 00:16:45 rrt Exp $        */
+/*      $Id: file.c,v 1.56 2005/01/13 00:16:16 rrt Exp $        */
 
 #include "config.h"
 
@@ -372,7 +372,7 @@ Completion *make_buffer_completion(void)
   Buffer *bp;
   Completion *cp;
 
-  cp = new_completion(FALSE);
+  cp = completion_new(FALSE);
   for (bp = head_bp; bp != NULL; bp = bp->next)
     list_append(cp->completions, zstrdup(bp->name));
 

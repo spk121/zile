@@ -167,7 +167,7 @@ char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, Hist
 void minibuf_clear(void);
 
 /* completion.c ----------------------------------------------------------- */
-Completion *new_completion(int fileflag);
+Completion *completion_new(int fileflag);
 void free_completion(Completion *cp);
 void completion_scroll_up(void);
 void completion_scroll_down(void);
@@ -244,7 +244,6 @@ char *get_variable(char *var);
 
 /* window.c --------------------------------------------------------------- */
 void create_first_window(void);
-Window *new_window(void);
 void free_window(Window *wp);
 Window *find_window(const char *name);
 void free_windows(void);

@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.17 2004/11/14 21:57:54 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.18 2005/01/13 00:16:16 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -20,6 +20,8 @@ be useful when `C-h' is already bound to Backspace or Delete.\n\
 \n\
 Please note that changing this variable at run-time has no effect; you\n\
 need instead to modify your `~/.zilerc' configuration file and restart Zile.")
+X("auto-fill-mode",			"b", "false", "\
+If enabled, the Auto Fill Mode is automatically enabled.")
 X("backup-directory",			"", "~/.backup", "\
 Specify target backup directory.  Directory must be existent.\n\
 This value is used only when the `backup-with-directory' value is true.")
@@ -51,8 +53,6 @@ X("standard-indent",			"", "4", "\
 Default number of columns for margin-changing functions to indent.")
 X("tab-width",				"", "8", "\
 The default tabulation width.")
-X("auto-fill-mode",			"b", "false", "\
-If enabled, the Auto Fill Mode is automatically enabled.")
 X("transient-mark-mode",		"b", "true", "\
 If enabled, deactivates the mark when the buffer contents change.\n\
 Also enables highlighting of the region whenever the mark is active.\n\

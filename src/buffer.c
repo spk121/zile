@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.23 2005/01/12 00:28:13 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.24 2005/01/13 00:16:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,7 +39,7 @@
  * The allocation of the first empty line is done here to simplify
  * a lot the code.
  */
-static Buffer *new_buffer(void)
+static Buffer *buffer_new(void)
 {
   Buffer *bp;
   char *s;
@@ -142,7 +142,7 @@ Buffer *create_buffer(const char *name)
 {
   Buffer *bp;
 
-  bp = new_buffer();
+  bp = buffer_new();
   set_buffer_name(bp, name);
 
   bp->next = head_bp;

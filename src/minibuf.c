@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.30 2005/01/10 00:24:59 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.31 2005/01/13 00:16:16 rrt Exp $     */
 
 #include "config.h"
 
@@ -136,7 +136,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
   astr_delete(dir);
   astr_delete(fname);
 
-  cp = new_completion(TRUE);
+  cp = completion_new(TRUE);
   p = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
   free_completion(cp);
   astr_delete(rbuf);
@@ -217,7 +217,7 @@ int minibuf_read_yesno(const char *fmt, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  cp = new_completion(FALSE);
+  cp = completion_new(FALSE);
   list_append(cp->completions, zstrdup("yes"));
   list_append(cp->completions, zstrdup("no"));
 
@@ -247,7 +247,7 @@ int minibuf_read_boolean(const char *fmt, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  cp = new_completion(FALSE);
+  cp = completion_new(FALSE);
   list_append(cp->completions, zstrdup("true"));
   list_append(cp->completions, zstrdup("false"));
 

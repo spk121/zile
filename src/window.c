@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.12 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: window.c,v 1.13 2005/01/13 00:16:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -31,7 +31,7 @@
 #include "zile.h"
 #include "extern.h"
 
-Window *new_window(void)
+static Window *window_new(void)
 {
   Window *wp;
 
@@ -104,7 +104,7 @@ DEFUN("split-window", split_window)
     return FALSE;
   }
 
-  newwp = new_window();
+  newwp = window_new();
   newwp->fwidth = cur_wp->fwidth;
   newwp->ewidth = cur_wp->ewidth;
   newwp->fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2;
@@ -281,7 +281,7 @@ void create_first_window(void)
   if (lookup_bool_variable("auto-fill-mode"))
     FUNCALL(auto_fill_mode);
 
-  wp = new_window();
+  wp = window_new();
   cur_wp = head_wp = wp;
   wp->fwidth = wp->ewidth = termp->width;
   /* Save space for minibuffer. */

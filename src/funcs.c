@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.61 2005/01/12 23:26:18 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.62 2005/01/13 00:16:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -133,7 +133,7 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
   Buffer *new_bp;
   va_list ap;
 
-  /* Popup a window with the buffer "name".  */
+  /* Popup a window with the buffer "name". */
   if ((wp = find_window(name)))
     set_current_window(wp);
   else {
@@ -141,27 +141,24 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
     switch_to_buffer(find_buffer(name, TRUE));
   }
 
-  /* Remove all the content of that buffer.  */
+  /* Remove all the content of that buffer. */
   new_bp = create_buffer(cur_bp->name);
   kill_buffer(cur_bp);
   cur_bp = new_bp;
 
-  /* Make the buffer like a temporary one.  */
+  /* Make the buffer like a temporary one. */
   cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
   set_temporary_buffer(cur_bp);
 
-  /* Use the "callback" routine.  */
+  /* Use the "callback" routine. */
   va_start(ap, func);
   func(ap);
   va_end(ap);
 
-  /* Go to beginning of buffer.  */
   gotobob();
-
-  /* It'll be read only.  */
   cur_bp->flags |= BFLAG_READONLY;
 
-  /* Restore old current window.  */
+  /* Restore old current window. */
   set_current_window(old_wp);
 }
 

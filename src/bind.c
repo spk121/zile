@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.41 2005/01/09 23:56:03 rrt Exp $	*/
+/*	$Id: bind.c,v 1.42 2005/01/13 00:16:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ struct leaf {
 
 static leafp leaf_tree;
 
-static leafp new_leaf(int vecmax)
+static leafp leaf_new(int vecmax)
 {
   leafp p;
 
@@ -83,17 +83,13 @@ static void add_leaf(leafp tree, leafp p)
 {
   int i;
 
-  /*
-   * Reallocate vector if there is no enough space.
-   */
+  /* Reallocate vector if there is not enough space. */
   if (tree->vecnum + 1 >= tree->vecmax) {
     tree->vecmax += 5;
     tree->vec = (leafp *)zrealloc(tree->vec, sizeof *p * tree->vecmax);
   }
 
-  /*
-   * Insert the leaf at the sorted position.
-   */
+  /* Insert the leaf at the sorted position. */
   for (i = 0; i < tree->vecnum; i++)
     if (tree->vec[i]->key > p->key) {
       memmove(&tree->vec[i+1], &tree->vec[i], sizeof p * tree->vecnum - i);
@@ -110,7 +106,7 @@ static void bind_key_vec(leafp tree, int *keys, int n, Function func)
   leafp p, s;
 
   if ((s = search_leaf(tree, keys[0])) == NULL) {
-    p = new_leaf(n == 1 ? 1 : 5);
+    p = leaf_new(n == 1 ? 1 : 5);
     p->key = keys[0];
     add_leaf(tree, p);
     if (n == 1)
@@ -214,14 +210,10 @@ void process_key(int c)
     return;
 
   if (c & KBD_META && isdigit(c & 255)) {
-    /*
-     * Got an ESC x sequence where `x' is a digit.
-     */
+    /* Got an ESC x sequence where `x' is a digit. */
     universal_argument(KBD_META, (c & 255) - '0');
   } else if ((p = completion_scan(c, &keys, &numkeys)) == NULL) {
-    /*
-     * There are no bindings for the pressed key.
-     */
+    /* There are no bindings for the pressed key. */
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     for (uni = 0; uni < last_uniarg; ++uni) {
       if (!self_insert_command(c)) {
@@ -297,7 +289,7 @@ void init_bindings(void)
 {
   unsigned int i, j;
 
-  leaf_tree = new_leaf(10);
+  leaf_tree = leaf_new(10);
 
   if (lookup_bool_variable("alternative-bindings")) {
     alternative_bindings = 1;
@@ -313,14 +305,10 @@ void init_bindings(void)
         }
   }
 
-  /*
-   * Sort the array for better searching later.
-   */
+  /* Sort the array for better searching later. */
   qsort(fentry_table, fentry_table_size, sizeof fentry_table[0], bind_compar);
 
-  /*
-   * Bind all the default functions.
-   */
+  /* Bind all the default functions. */
   for (i = 0; i < fentry_table_size; i++)
     for (j = 0; j < 3; ++j)
       if (fentry_table[i].key[j] != NULL)
@@ -394,7 +382,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  cp = new_completion(FALSE);
+  cp = completion_new(FALSE);
   for (i = 0; i < fentry_table_size; ++i)
     list_append(cp->completions, zstrdup(fentry_table[i].name));
 

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.18 2005/01/12 00:16:44 rrt Exp $   */
+/*      $Id: completion.c,v 1.19 2005/01/13 00:16:16 rrt Exp $   */
 
 #include "config.h"
 
@@ -45,7 +45,7 @@
 /*
  * Allocate a new completion structure.
  */
-Completion *new_completion(int fileflag)
+Completion *completion_new(int fileflag)
 {
   Completion *cp;
 
