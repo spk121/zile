@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.13 2004/02/04 02:59:01 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.14 2004/02/04 12:02:55 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -786,7 +786,7 @@ static int transpose_subr (funcp f)
 	}
 
 	/* Mark the beginning of first string.  */
-	set_mark_command ();
+	set_mark_command();
 
 	n1 = cur_wp->pointn;
 	o1 = cur_wp->pointo;
@@ -797,88 +797,88 @@ static int transpose_subr (funcp f)
 		if (f == F_forward_line) {
 			if (!seq_started) {
 				seq_started = TRUE;
-				undo_save (UNDO_START_SEQUENCE, n0, o0, 0, 0);
+				undo_save(UNDO_START_SEQUENCE, n0, o0, 0, 0);
 			}
 
 			/* When last line has characters. */
 			if (cur_wp->pointp->size > 0)
 				/* We must insert the '\n' in the end
 				   of line (not in the beginning) */
-				FUNCALL (end_of_line);
+				FUNCALL(end_of_line);
 
 			/* Insert a newline */
-			FUNCALL (newline);
+			FUNCALL(newline);
 		}
 		else {
-			goto_point (n1, o1);
-			minibuf_error ("End of buffer");
+			goto_point(n1, o1);
+			minibuf_error("End of buffer");
 			return FALSE;
 		}
 	}
 
-	goto_point (n1, o1);
+	goto_point(n1, o1);
 
 	/* Forward.  */
-	f (1);
+	f(1);
 
 	/* Save and delete 1st marked region.  */
-	s1 = astr_new ();
-	insert_region (s1);
+	s1 = astr_new();
+	insert_region(s1);
 
 	if (!seq_started) {
 		seq_started = TRUE;
-		undo_save (UNDO_START_SEQUENCE, n0, o0, 0, 0);
+		undo_save(UNDO_START_SEQUENCE, n0, o0, 0, 0);
 	}
 
-	FUNCALL (delete_region);
+	FUNCALL(delete_region);
 
 	/* For transpose-lines.  */
 	if (f == F_forward_line) {
 		/* Forward.  */
-		f (forward_after_del1);
+		f(forward_after_del1);
 
 		n2 = cur_wp->pointn;
 		o2 = cur_wp->pointo;
 	}
 	else {
 		/* Forward.  */
-		f (forward_after_del1);
+		f(forward_after_del1);
 
 		/* Mark the end of second string.  */
-		set_mark_command ();
+		set_mark_command();
 
 		/* Backward.  */
-		f (-1);
+		f(-1);
 
 		n2 = cur_wp->pointn;
 		o2 = cur_wp->pointo;
 
 		/* Save and delete the marked region.  */
-		s2 = astr_new ();
-		insert_region (s2);
-		FUNCALL (delete_region);
+		s2 = astr_new();
+		insert_region(s2);
+		FUNCALL(delete_region);
 	}
 
 	/* Insert the second string in the first position.  */
 	if (s2) {
-		goto_point (n1, o1);
-		if (astr_size (s2) > 0)
-			insert_string (astr_cstr (s2));
+		goto_point(n1, o1);
+		if (astr_size(s2) > 0)
+			insert_string(astr_cstr(s2));
 	}
 
 	/* Insert the first string in the second position.  */
 	if (s1) {
-		goto_point (n2, (n1 != n2) ? o2: o2 + astr_size (s2));
-		if (astr_size (s1) > 0)
-			insert_string (astr_cstr (s1));
+		goto_point(n2, (n1 != n2) ? o2 : o2 + astr_size(s2));
+		if (astr_size(s1) > 0)
+			insert_string(astr_cstr (s1));
 	}
 
 	if (seq_started)
-		undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 
 	/* Delete temporary strings.  */
-	if (s1) astr_delete (s1);
-	if (s2) astr_delete (s2);
+	if (s1) astr_delete(s1);
+	if (s2) astr_delete(s2);
 
 	/* Restore mark.  */
 	cur_bp->markp = markp;
@@ -895,14 +895,15 @@ Interchange characters around point, moving forward one character.
 If at end of line, the previous two chars are exchanged.
 +*/
 {
-	if (warn_if_readonly_buffer ())
+        int i, ok = TRUE;
+
+	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	if (!(lastflag & FLAG_SET_UNIARG))
-		return transpose_subr (F_forward_char);
+        for (i = 0; i < uniarg && ok; i++)
+                ok = transpose_subr(F_forward_char);
 
-	minibuf_error ("transpose-chars doesn't support uniarg yet");
-	return FALSE;
+        return ok;
 }
 
 DEFUN("transpose-words", transpose_words)
@@ -910,14 +911,15 @@ DEFUN("transpose-words", transpose_words)
 Interchange words around point, leaving point at end of them.
 +*/
 {
-	if (warn_if_readonly_buffer ())
+        int i, ok = TRUE;
+
+	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	if (!(lastflag & FLAG_SET_UNIARG))
-		return transpose_subr (F_forward_word);
+        for (i = 0; i < uniarg && ok; i++)
+		ok = transpose_subr(F_forward_word);
 
-	minibuf_error ("transpose-words doesn't support uniarg yet");
-	return FALSE;
+	return ok;
 }
 
 DEFUN("transpose-sexps", transpose_sexps)
@@ -925,14 +927,15 @@ DEFUN("transpose-sexps", transpose_sexps)
 Like M-t but applies to sexps.
 +*/
 {
-	if (warn_if_readonly_buffer ())
+        int i, ok = TRUE;
+
+	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	if (!(lastflag & FLAG_SET_UNIARG))
-		return transpose_subr (F_forward_sexp);
+        for (i = 0; i < uniarg && ok; i++)
+		ok = transpose_subr(F_forward_sexp);
 
-	minibuf_error ("transpose-sexps doesn't support uniarg yet");
-	return FALSE;
+	return ok;
 }
 
 DEFUN("transpose-lines", transpose_lines)
@@ -942,14 +945,15 @@ With argument ARG, takes previous line and moves it past ARG lines.
 With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
-	if (warn_if_readonly_buffer ())
+        int i, ok = TRUE;
+
+        if (warn_if_readonly_buffer())
 		return FALSE;
 
-	if (!(lastflag & FLAG_SET_UNIARG))
-		return transpose_subr (F_forward_line);
+        for (i = 0; i < uniarg && ok; i++)
+		ok = transpose_subr(F_forward_line);
 
-	minibuf_error ("transpose-lines doesn't support uniarg yet");
-	return FALSE;
+	return ok;
 }
 
 /**********************************************************************/
