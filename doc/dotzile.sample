@@ -1,4 +1,4 @@
-; .zilerc sample configuration
+; .zile sample configuration
 
 ; Do not display the splash screen at startup [default: false]
 (setq skip-splash-screen false)

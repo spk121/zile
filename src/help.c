@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.30 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: help.c,v 1.31 2005/02/14 21:57:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -75,7 +75,7 @@ DEFUN_INT("help-config-sample", help_config_sample)
     Show a configuration file sample.
     +*/
 {
-  return show_file(PATH_DATA "/zilerc.sample");
+  return show_file(PATH_DATA "/dotzile.sample");
 }
 END_DEFUN
 

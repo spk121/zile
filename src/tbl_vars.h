@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.21 2005/02/06 20:09:33 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.22 2005/02/14 21:57:48 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -19,7 +19,7 @@ Remap the help functions (bound by default to `C-h') to `M-h'.  This may\n\
 be useful when `C-h' is already bound to Backspace or Delete.\n\
 \n\
 Please note that changing this variable at run-time has no effect; you\n\
-need instead to modify your `~/.zilerc' configuration file and restart Zile.")
+need instead to modify your `~/.zile' configuration file and restart Zile.")
 X("auto-fill-mode",			"b", "false", "\
 If enabled, the Auto Fill Mode is automatically enabled.")
 X("backup-directory",			"", "~/.backup", "\

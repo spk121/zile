@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.1 2005/01/12 00:43:04 rrt Exp $
+.\" $Id: zile.1.in,v 1.2 2005/02/14 21:57:47 rrt Exp $
 .Dd Jan, 2005
 .Os
 .Dt ZILE 1
@@ -37,7 +37,7 @@ Print version information on standard output then exit.
 .El
 .Sh FILES
 .Bl -tag -width Fl
-.It Pa ~/.zilerc
+.It Pa ~/.zile
 user customized Zile initialization file
 .It Pa @pkgdatadir@/AUTODOC
 self-documentation
@@ -47,7 +47,7 @@ Zile FAQ
 Zile manual
 .It Pa @pkgdatadir@/TUTORIAL
 Zile tutorial
-.It Pa @pkgdatadir@/zilerc.sample
+.It Pa @pkgdatadir@/dotzile.sample
 sample Zile initialization file
 .El
 .Sh SEE ALSO

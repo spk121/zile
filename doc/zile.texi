@@ -838,7 +838,7 @@ Show the zile version.
 
 This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
-in the @file{.zilerc} initialization file.
+in the @file{.zile} initialization file.
 
 Please note that some variables may be not available depending
 on the compilation options given to @samp{configure}.
@@ -850,7 +850,7 @@ Remap the help functions (bound by default to @kbd{C-h}) to @kbd{M-h}.
 This may be useful when @kbd{C-h} is already bound to @key{BS}
 or @key{DEL}.
 Please note that changing this variable at run-time has no effect; you
-need instead to modify your @file{~/.zilerc} configuration file and
+need instead to modify your @file{~/.zile} configuration file and
 restart Zile.
 Default value is @samp{false}.
 @item backup-directory

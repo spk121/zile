@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2005/01/23 13:43:36 $
+		   Last updated: $Date: 2005/02/14 21:57:47 $
 
 ------------------------------------------------------------------------------
 
@@ -148,7 +148,7 @@ INDEX
 
 2.6. What settings can I change?
 
-    Check out the `zilerc.sample' file (type `C-h s') for a full list
+    Check out the `dotzile.sample' file (type `C-h s') for a full list
     of variables.
 
 2.7. How do I display non-ASCII characters?
@@ -170,17 +170,17 @@ INDEX
 
 2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
-    Add the following line to your `~/.zilerc' file:
+    Add the following line to your `~/.zile' file:
 
-	alternative-bindings = true
+	(setq alternative-bindings true)
 
     and use the alternative key sequences (`M-h' instead of `C-h').
 
 2.10. How do I enable Auto Fill Mode at startup?
 
-    Add the following line to your `~/.zilerc' file:
+    Add the following line to your `~/.zile' file:
 
-	auto-fill-mode = true
+	(setq auto-fill-mode true)
 
 2.11. The Zile screen is not resized when I resize my terminal.
 
