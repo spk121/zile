@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.51 2005/01/19 18:45:59 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.52 2005/01/20 21:24:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,20 +38,20 @@
 #include "extern.h"
 
 static Terminal thisterm = {
-  /* Unitialised screen pointer. */
+  /* Uninitialized screen pointer. */
   NULL,
 
   /* Uninitialized width and height. */
-  -1, -1,
+  0, 0,
 };
 
 typedef struct {
-  int curx, cury;  /* cursor x and y. */
-  Font font;       /* current font. */
-  int *array, *oarray; /* contents of screen (8 low bits is
-                          character, rest is Zile font code).
-                          array is current, oarray is last
-                          displayed contents. */
+  unsigned curx, cury;          /* cursor x and y. */
+  Font font;                    /* current font. */
+  unsigned *array, *oarray;     /* contents of screen (8 low bits is
+                                   character, rest is Zile font code).
+                                   array is current, oarray is last
+                                   displayed contents. */
 } Screen;
 
 static char *tcap_ptr;
@@ -91,7 +91,7 @@ static int key_len[KEYS];
 astr norm_string;
 static struct termios ostate, nstate;
 
-void term_move(int y, int x)
+void term_move(unsigned y, unsigned x)
 {
   screen.curx = x;
   screen.cury = y;
@@ -99,7 +99,7 @@ void term_move(int y, int x)
 
 void term_clrtoeol(void)
 {
-  int i, x = screen.curx;
+  unsigned i, x = screen.curx;
   for (i = screen.curx; i < termp->width; i++)
     term_addch(0);
   screen.curx = x;
@@ -126,7 +126,8 @@ static const char *getattr(Font f) {
  */
 void term_refresh(void)
 {
-  int i, j, skipped, eol;
+  int skipped, eol;
+  unsigned i, j;
   Font of = ZILE_NORMAL;
   astr as = astr_new();
 
@@ -147,7 +148,7 @@ void term_refresh(void)
     skipped = FALSE;
 
     for (j = 0; j < termp->width; j++) {
-      int offset = i * termp->width + j;
+      unsigned offset = i * termp->width + j;
       int n = screen.array[offset];
       char c = n & 0xff;
       Font f = n & ~0xff;
@@ -187,7 +188,7 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  int i;
+  unsigned i;
   term_move(0, 0);
   for (i = 0; i < termp->width * termp->height; i++) {
     screen.array[i] = 0;
@@ -197,6 +198,9 @@ void term_clear(void)
 
 void term_addch(int c)
 {
+  if (screen.curx >= termp->width || screen.cury >= termp->height)
+    return;
+
   screen.array[screen.cury * termp->width + screen.curx] = (c & 0xff) | screen.font;
   screen.curx++;
   if (screen.curx == termp->width) {
@@ -208,9 +212,9 @@ void term_addch(int c)
   }
 }
 
-void term_attrset(int attrs, ...)
+void term_attrset(unsigned attrs, ...)
 {
-  int i;
+  unsigned i;
   va_list valist;
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++) {
@@ -262,10 +266,10 @@ static void read_screen_size(void)
 
 static void term_init_screen(void)
 {
-  int size = termp->width * termp->height;
+  unsigned size = termp->width * termp->height;
         
-  screen.array = zmalloc(size * sizeof(int));
-  screen.oarray = zmalloc(size * sizeof(int));
+  screen.array = zmalloc(size * sizeof(unsigned));
+  screen.oarray = zmalloc(size * sizeof(unsigned));
   screen.curx = screen.cury = 0;
 
   term_clear(); /* Ensure the first call to term_refresh will update the screen. */
@@ -294,7 +298,7 @@ static void setattr(int flags, struct termios *state)
 
 void term_init(void)
 {
-  int i;
+  unsigned i;
   char *tcap;
 
   tcap_ptr = tcap = get_tcap();
