@@ -1,0 +1,2 @@
+This terminal implements a fully-featured interface between the Zile
+editor and the ncurses CRT screen handling and optimization library.

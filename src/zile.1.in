@@ -1,0 +1,384 @@
+.\" -*- nroff -*-
+.\" $Id: zile.1.in,v 1.1 2001/01/19 22:03:04 ssigala Exp $
+.Dd January 1, 2001
+.Os
+.Dt ZILE 1
+.Sh NAME
+.Nm zile
+.Nd Zile Is Lossy Emacs
+.Sh SYNOPSIS
+.Nm zile
+.Op Fl hqV
+.Op Fl f Ar function
+.Op Ar +number
+.Op Ar
+.Sh DESCRIPTION
+.Nm Zile
+is another Emacs-clone.
+Zile is a customizable, self-documenting real-time
+display editor.
+.Pp
+This document contains only a brief description of the Zile editor.  For a
+more complete documentation, please read the Info file or the
+Texinfo manual.
+.Pp
+The options are as follows:
+.Bl -tag -width indent
+.It Ar +number
+For the first file the cursor will be positioned on the line specified by
+.Ar number
+(do not insert a space between the "+" sign and the number).
+.It Fl h
+Display the minihelp window at startup.  This may be useful for
+novice users.
+.It Fl q
+Do not load the user's initialization file.
+.It Fl V
+Print version information on standard output then exit.
+.It Fl f Ar function
+Invoke the named internal function with no arguments.
+.El
+.Sh COMMANDS
+.Bl -tag -width Fl
+.It Ic BS
+backspace
+.It Ic INS
+toggle overwrite mode
+.It Ic RET
+insert a new line
+.It Ic TAB
+insert a tab character
+.It Ic C-@, C-SPC
+set mark
+.It Ic C-a, HOME
+go to the beginning of line
+.It Ic C-b, LEFT
+move cursor to the previous char
+.It Ic C-d, DEL
+delete current char
+.It Ic C-e, END
+go to the end of line
+.It Ic C-f, RIGHT
+move cursor to the next char
+.It Ic C-g
+cancel current command
+.It Ic C-h C-d
+show informations about getting the latest version
+.It Ic C-h C-h
+toggle mini help window
+.It Ic C-h F
+show the FAQ
+.It Ic C-h d, C-h f
+describe a function
+.It Ic C-h h, F1
+show an help window
+.It Ic C-h k
+describe a key sequence
+.It Ic C-h l b
+show the defined bindings
+.It Ic C-h l f
+show the defined functions
+.It Ic C-h l r
+show the defined registers
+.It Ic C-h l v
+list defined variables
+.It Ic C-h s
+show a sample configuration file
+.It Ic C-h t
+show a tutorial window
+.It Ic C-h v
+describe a variable
+.It Ic C-k
+kill line
+.It Ic C-l
+redraw display
+.It Ic C-n, DOWN
+move cursor to the next line
+.It Ic C-p, UP
+move cursor to the previous line
+.It Ic C-q
+read next input character and insert it
+.It Ic C-r
+search backward
+.It Ic C-s
+search forward
+.It Ic C-u
+begin a numeric argument for the following command
+.It Ic C-w
+kill region
+.It Ic C-x C-b
+list buffers
+.It Ic C-x C-c
+save modified buffers and quit zile
+.It Ic C-x C-f
+find a file for editing
+.It Ic C-x C-l
+convert the region to downcase
+.It Ic C-x C-q
+toggle read only mode
+.It Ic C-x C-s
+save the current buffer
+.It Ic C-x C-u
+convert the region to upcase
+.It Ic C-x C-v
+kill the current buffer and find a file for editing
+.It Ic C-x C-w
+write buffer to a file
+.It Ic C-x C-x
+exchange point and mark
+.It Ic C-x ^
+enlarge current window
+.It Ic C-x (
+start recording keyboard macro
+.It Ic C-x )
+end recording keyboard macro
+.It Ic C-x 0
+delete the current window
+.It Ic C-x 1
+delete the other open windows
+.It Ic C-x 2
+split current window
+.It Ic C-x b
+switch to a buffer
+.It Ic C-x e
+execute the last recorded keyboard macro
+.It Ic C-x f
+set the fill column
+.It Ic C-x h
+mark whole buffer
+.It Ic C-x i
+insert the contents of a file
+.It Ic C-x k
+kill current buffer
+.It Ic C-x r i
+insert register
+.It Ic C-x r s
+copy region to register
+.It Ic C-x s
+save modified buffers
+.It Ic C-x o
+select the other window
+.It Ic C-x u, C-_
+undo some previous changes
+.It Ic C-y
+yank killed text
+.It Ic C-v, PGDN
+scroll up one screen page
+.It Ic C-z, C-x C-z
+stop Zile and return to superior process
+.It Ic M-<
+go to the beginning of buffer
+.It Ic M->
+go to the end of buffer
+.It Ic M-g
+read line number and go there
+.It Ic M-v, PGUP
+scroll down one screen page
+.It Ic M-w
+save the region as if killed, but don't kill it
+.It Ic M-x
+execute extended command
+.El
+.Sh FUNCTIONS
+.Bl -tag -width indent
+.It Ic auto-fill-mode
+toggle Auto Fill Mode
+.It Ic backward-char
+move cursor to the previous char
+.It Ic backward-delete-char
+backspace
+.It Ic beginning-of-buffer
+go to the beginning of buffer
+.It Ic beginning-of-line
+go to the beginning of line
+.It Ic c-mode
+set the buffer mode to C Mode
+.It Ic c++-mode
+set the buffer mode to C++ Mode
+.It Ic call-last-kbd-macro
+execute the last recorded keyboard macro
+.It Ic cd
+change current directory
+.It Ic copy-region-as-kill
+save the region as if killed, but don't kill it
+.It Ic copy-to-register
+copy region to register
+.It Ic delete-char
+delete current char
+.It Ic delete-other-windows
+delete the other open windows
+.It Ic delete-window
+delete the current window
+.It Ic describe-function
+describe a function
+.It Ic describe-key
+describe a key sequence
+.It Ic describe-variable
+describe a variable
+.It Ic downcase-region
+convert the region to downcase
+.It Ic end-kbd-macro
+end recording keyboard macro
+.It Ic end-of-buffer
+go to the end of buffer
+.It Ic end-of-line
+go to the end of line
+.It Ic enlarge-window
+enlarge current window
+.It Ic exchange-point-and-mark
+exchange point and mark
+.It Ic execute-extended-command
+execute extended command
+.It Ic find-alternate-file
+kill the current buffer and find a file for editing
+.It Ic find-file
+find a file for editing
+.It Ic font-lock-mode
+toggle font lock mode
+.It Ic font-lock-refresh
+refresh font lock mode
+.It Ic forward-char
+move cursor to the next char
+.It Ic goto-line
+read line number and go there
+.It Ic help
+show an help window
+.It Ic help-config-sample
+show a sample configuration file
+.It Ic help-faq
+show the FAQ
+.It Ic help-latest-version
+show informations about getting the latest version
+.It Ic help-tutorial
+show a tutorial window
+.It Ic insert-buffer
+insert the contents of a buffer
+.It Ic insert-file
+insert the contents of a file
+.It Ic insert-register
+insert register
+.It Ic keyboard-quit
+cancel current command
+.It Ic kill-buffer
+kill current buffer
+.It Ic kill-line
+kill line
+.It Ic kill-region
+kill region
+.It Ic list-bindings
+list defined bindings
+.It Ic list-buffers
+list buffers
+.It Ic list-functions
+list defined functions
+.It Ic list-registers
+list defined registers
+.It Ic list-variables
+list defined variables
+.It Ic mark-whole-buffer
+mark whole buffer
+.It Ic newline
+insert a new line
+.It Ic next-line
+move cursor to the next line
+.It Ic other-window
+select the other window
+.It Ic overwrite-mode
+toggle overwrite mode
+.It Ic previous-line
+move cursor to the previous line
+.It Ic quoted-insert
+read next input character and insert it
+.It Ic recenter
+recenter the cursor in the view
+.It Ic save-buffer
+save the current buffer
+.It Ic save-buffers-kill-zile
+save modified buffers and quit zile
+.It Ic save-some-buffers
+save modified buffers
+.It Ic scroll-down
+scroll down one screen page
+.It Ic scroll-up
+scroll up one screen page
+.It Ic search-backward
+search backward for a string
+.It Ic search-forward
+search forward for a string
+.It Ic self-insert-command
+insert a character
+.It Ic set-fill-column
+set the fill column
+.It Ic set-mark-command
+set mark
+.It Ic set-variable
+set variable value
+.It Ic split-window
+split current window
+.It Ic start-kbd-macro
+start recording keyboard macro
+.It Ic suspend-zile
+stop Zile and return to superior process
+.It Ic switch-to-buffer
+switch to a buffer
+.It Ic tabify
+convert multiple spaces in region to tabs
+.It Ic tab-to-tab-stop
+insert a tab character
+.It Ic text-mode
+set the buffer mode to Text Mode
+.It Ic toggle-minihelp-window
+toggle the mini help window
+.It Ic toggle-read-only
+toggle read only mode
+.It Ic undo
+undo some previous changes
+.It Ic universal-argument
+begin a numeric argument for the following command
+.It Ic untabify
+convert all tabs in region to multiple spaces
+.It Ic upcase-region
+convert the region to upcase
+.It Ic write-file
+write buffer to a file
+.It Ic yank
+yank killed text
+.It Ic zile-version
+show Zile version
+.El
+.Sh ENVIRONMENT
+.Nm Zile
+utilizes the following environment variables.
+.Bl -tag -width Fl
+.It Ev HOME
+For default location of a
+.Pa .zilerc
+file, if one exists.
+.El
+.Sh FILES
+.Bl -tag -width Fl
+.It Pa ~/.zilerc
+user customized Zile initialization file
+.It Pa @ETCDIR@/AUTODOC
+self-documentation
+.It Pa @ETCDIR@/FAQ
+Zile FAQ
+.It Pa @ETCDIR@/HELP
+Zile help
+.It Pa @ETCDIR@/HELPWIN
+mini-help window
+.It Pa @ETCDIR@/HELPWINALT
+alternative mini-help window
+.It Pa @ETCDIR@/LATEST_VERSION
+where to get the last version
+.It Pa @ETCDIR@/TUTORIAL
+Zile tutorial
+.It Pa @ETCDIR@/zilerc.sample
+sample Zile initialization file
+.El
+.Sh SEE ALSO
+.Xr emacs 1 ,
+.Xr xemacs 1 ,
+.Xr vi 1
+.Sh AUTHORS
+Sandro Sigala (ssigala@tiscalinet.it)
