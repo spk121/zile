@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.61 2005/02/07 01:36:43 rrt Exp $	*/
+/*	$Id: bind.c,v 1.62 2005/02/07 23:18:24 rrt Exp $	*/
 
 #include "config.h"
 
@@ -468,7 +468,7 @@ DEFUN_INT("execute-extended-command", execute_extended_command)
 }
 END_DEFUN
 
-DEFUN_INT("global-set-key", global_set_key)
+DEFUN("global-set-key", global_set_key)
   /*+
     Bind a command to a key sequence.
     Read key sequence and function name, and bind the function to the key
@@ -476,31 +476,44 @@ DEFUN_INT("global-set-key", global_set_key)
     +*/
 {
   int ok = FALSE;
-  size_t key, *keys, numkeys;
+  size_t key, *keys = NULL, numkeys;
   leafp p;
   Function func;
-  char *name;
+  char *name, *keystr = NULL;
   astr as;
 
-  minibuf_write("Set key globally: ");
-  key = getkey();
-  p = completion_scan(key, &keys, &numkeys);
+  if (uniused) {
+    if (argc != 3)
+      return FALSE;
+    keystr = evaluateNode(branch->list_next)->data;
+    name = evaluateNode(branch->list_next->list_next)->data;
+  } else {
+    minibuf_write("Set key globally: ");
+    key = getkey();
+    p = completion_scan(key, &keys, &numkeys);
 
-  as = keyvectostr(keys, numkeys);
-  name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
-  astr_delete(as);
+    as = keyvectostr(keys, numkeys);
+    name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
+    astr_delete(as);
+  }
+
   if (name == NULL)
     return FALSE;
 
   func = get_function(name);
   if (func) {
-    bind_key_vec(leaf_tree, keys, numkeys, func);
     ok = TRUE;
+    if (uniused)
+      bind_key_string(keystr, func);
+    else
+      bind_key_vec(leaf_tree, keys, numkeys, func);
   } else
     minibuf_error("No such function `%d'", name);
 
   free(name);
-  free(keys);
+  if (uniused == 0)
+    free(keys);
+
   return ok;
 }
 END_DEFUN

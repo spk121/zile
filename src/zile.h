@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.63 2005/02/07 01:36:45 rrt Exp $        */
+/*      $Id: zile.h,v 1.64 2005/02/07 23:18:24 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -350,10 +350,12 @@ typedef size_t Font;
 
 /* Define an interactive function. */
 /* N.B. The function type is actually eval_cb. */
-#define DEFUN_INT(zile_func, c_func)                \
+#define DEFUN(zile_func, c_func) \
         int F_ ## c_func(int argc, le *branch) \
         { \
-          int uniused = argc > 0; \
+          int uniused = argc > 1;
+#define DEFUN_INT(zile_func, c_func) \
+	DEFUN(zile_func, c_func) \
           int uniarg = 1; \
           if (uniused) { \
             le *value_le = evaluateNode(branch); \
