@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.65 2005/02/09 00:26:24 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.66 2005/02/14 21:51:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -264,12 +264,17 @@ static void read_screen_size(void)
   free(tcap);
 }
 
-static void term_init_screen(void)
+static void init_screen(void)
 {
-  size_t size = termp->width * termp->height;
+  int size;
 
-  screen.array = zmalloc(size * sizeof(size_t));
-  screen.oarray = zmalloc(size * sizeof(size_t));
+  read_screen_size();
+  termp->width = ZILE_COLS;
+  termp->height = ZILE_LINES;
+
+  size = termp->width * termp->height;
+  screen.array = zrealloc(screen.array, size * sizeof(int));
+  screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
   screen.curx = screen.cury = 0;
 
   term_clear(); /* Ensure the first call to term_refresh will update the screen. */
@@ -303,11 +308,7 @@ void term_init(void)
 
   tcap_ptr = tcap = get_tcap();
 
-  read_screen_size();
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
-
-  term_init_screen();
+  init_screen();
   termp->screen = &screen;
 
   /* Save terminal flags. */
@@ -375,10 +376,8 @@ void term_suspend(void)
 static void winch_sig_handler(int signo)
 {
   assert(signo == SIGWINCH);
-  read_screen_size();
+  init_screen();
   resize_windows();
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
   resync_redisplay();
   term_refresh();
 }
