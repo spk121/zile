@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: zile.h,v 1.3 2003/04/24 15:36:51 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -28,6 +28,7 @@
 #define ZILE_H
 
 #include <alist.h>
+#include "pathbuffer.h"
 
 #undef TRUE
 #define TRUE				1
@@ -259,7 +260,7 @@ struct history {
 
 	/* This flag is set when this is a filename history. */
 	int	fl_dir;
-	char	*path;
+	pathbuffer_t	*path;
 
 	/* This flag is set when the space character is allowed. */
 	int	fl_space;

@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.3 2003/04/24 15:36:51 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -202,37 +202,51 @@ char *minibuf_read(const char *fmt, char *value, ...)
 	return p;
 }
 
+/* The returned buffer must be freed by the caller. */
 char *minibuf_read_dir(const char *fmt, char *value, ...)
 {
 	va_list ap;
 	char *buf, *p;
 	historyp hp;
-	static char rbuf[PATH_MAX];
-	char dir[PATH_MAX], fname[PATH_MAX];
+	pathbuffer_t *dir, *fname;
+	pathbuffer_t *rbuf;
 
+	rbuf = pathbuffer_create(0);
 	va_start(ap, value);
 	buf = minibuf_format(fmt, ap, FALSE);
 	va_end(ap);
 
-	getcwd(rbuf, PATH_MAX);
-	expand_path(value, rbuf, dir, fname);
-	strcat(dir, fname);
-	compact_path(rbuf, dir);
+	while (getcwd(pathbuffer_str(rbuf), pathbuffer_size(rbuf)) == NULL) {
+		pathbuffer_realloc_larger(rbuf);
+	}
+	dir = pathbuffer_create(0);
+	fname = pathbuffer_create(0);
+	expand_path(value, pathbuffer_str(rbuf), dir, fname);
+	pathbuffer_append(dir, pathbuffer_str(fname));
+	compact_path(rbuf, pathbuffer_str(dir));
 
 	hp = new_history(TRUE);
-	p = cur_tp->minibuf_read(buf, rbuf, hp);
+	p = cur_tp->minibuf_read(buf, pathbuffer_str(rbuf), hp);
 	free_history(hp);
 	free(buf);
 
-	if (p == NULL)
+	if (p == NULL) {
+		pathbuffer_free(dir);
+		pathbuffer_free(fname);
+		pathbuffer_free(rbuf);
 		return p;
+	}
 
-	getcwd(rbuf, PATH_MAX);
-	expand_path(p, rbuf, dir, fname);
-	strcpy(rbuf, dir);
-	strcat(rbuf, fname);
+	while (getcwd(pathbuffer_str(rbuf), pathbuffer_size(rbuf)) == NULL) {
+		pathbuffer_realloc_larger(rbuf);
+	}
+	expand_path(p, pathbuffer_str(rbuf), dir, fname);
+	pathbuffer_put(rbuf, pathbuffer_str(dir));
+	pathbuffer_append(rbuf, pathbuffer_str(fname));
 
-	return rbuf;
+	pathbuffer_free(dir);
+	pathbuffer_free(fname);
+	return pathbuffer_free_struct_only(rbuf);
 }
 
 int minibuf_read_forced(const char *fmt, const char *errmsg,
@@ -424,7 +438,7 @@ historyp new_history(int fileflag)
 	hp->reread = default_history_reread;
 
 	if (fileflag) {
-		hp->path = (char *)zmalloc(PATH_MAX);
+		hp->path = pathbuffer_create(0);
 		hp->fl_dir = TRUE;
 	}
 
@@ -442,7 +456,7 @@ void free_history(historyp hp)
 	alist_delete(hp->completions);
 	alist_delete(hp->matches);
 	if (hp->fl_dir)
-		free(hp->path);
+		pathbuffer_free(hp->path);
 	free(hp);
 }
 
@@ -585,43 +599,52 @@ static int hcompar(const void *p1, const void *p2)
 static int default_history_try(historyp hp, char *s)
 {
 	int i, j, ssize, fullmatches = 0, partmatches = 0;
-	char *p, c, search[PATH_MAX];
+	char *p, c;
+	pathbuffer_t *search;
 
 	alist_clear(hp->matches);
 
-	strcpy(search, s);
+	search = pathbuffer_create(0);
+	pathbuffer_put(search, s);
 	if (hp->fl_dir)
-		if (!hp->reread(hp, search))
+		if (!hp->reread(hp, pathbuffer_str(search))) {
+			pathbuffer_free(search);
 			return HISTORY_NOTMATCHED;
+		}
 
 	if (!hp->fl_sorted) {
 		alist_sort(hp->completions, hcompar);
 		hp->fl_sorted = 1;
 	}
 
-	ssize = strlen(search);
+	ssize = strlen(pathbuffer_str(search));
 
 	if (ssize == 0) {
 		if (alist_count(hp->completions) > 1) {
 			hp->match = alist_first(hp->completions);
 			hp->matchsize = 0;
 			popup_history(hp, TRUE, 0);
+			pathbuffer_free(search);
 			return HISTORY_NONUNIQUE;
 		} else {
 			hp->match = alist_first(hp->completions);
 			hp->matchsize = strlen(hp->match);
+			pathbuffer_free(search);
 			return HISTORY_MATCHED;
 		}
 	}
 
 	for (p = alist_first(hp->completions); p != NULL;
 	     p = alist_next(hp->completions))
-		if (!strncmp(p, search, ssize)) {
+		if (!strncmp(p, pathbuffer_str(search), ssize)) {
 			++partmatches;
 			alist_append(hp->matches, p);
-			if (!strcmp(p, search))
+			if (!strcmp(p, pathbuffer_str(search)))
 				++fullmatches;
 		}
+
+	pathbuffer_free(search);
+	search = NULL;
 
 	if (partmatches == 0)
 		return HISTORY_NOTMATCHED;
@@ -661,7 +684,7 @@ static int default_history_try(historyp hp, char *s)
  */
 static int default_history_reread(historyp hp, char *s)
 {
-	char buf[PATH_MAX], pdir[PATH_MAX], fname[PATH_MAX];
+	pathbuffer_t *buf, *pdir, *fname;
 	DIR *dir;
 	struct dirent *d;
 	struct stat st;
@@ -673,29 +696,38 @@ static int default_history_reread(historyp hp, char *s)
 	alist_clear(hp->completions);
 	hp->fl_sorted = 0;
 
-	getcwd(buf, PATH_MAX);
-	if (!expand_path(s, buf, pdir, fname))
+	buf = pathbuffer_create(0);
+	while ((getcwd(pathbuffer_str(buf), pathbuffer_size(buf))) == NULL) {
+		pathbuffer_realloc_larger(buf);
+	}
+	pdir = pathbuffer_create(0);
+	fname = pathbuffer_create(0);
+	if (!expand_path(s, pathbuffer_str(buf), pdir, fname))
 		return FALSE;
 
-	if ((dir = opendir(pdir)) == NULL)
+	if ((dir = opendir(pathbuffer_str(pdir))) == NULL)
 		return FALSE;
 
-	strcpy(s, fname);
+	strcpy(s, pathbuffer_str(fname));
 
 	while ((d = readdir(dir)) != NULL) {
-		strcpy(buf, pdir);
-		strcat(buf, d->d_name);
-		if (stat(buf, &st) != -1) {
-			strcpy(buf, d->d_name);
+		pathbuffer_put(buf, pathbuffer_str(pdir));
+		pathbuffer_append(buf, d->d_name);
+		if (stat(pathbuffer_str(buf), &st) != -1) {
+			pathbuffer_put(buf, d->d_name);
 			if (S_ISDIR(st.st_mode))
-				strcat(buf, "/");
+				pathbuffer_append(buf, "/");
 		} else
-			strcpy(buf, d->d_name);
-		alist_append(hp->completions, zstrdup(buf));
+			pathbuffer_put(buf, d->d_name);
+		alist_append(hp->completions, zstrdup(pathbuffer_str(buf)));
 	}
 	closedir(dir);
 
-	compact_path(hp->path, pdir);
+	compact_path(hp->path, pathbuffer_str(pdir));
+
+	pathbuffer_free(buf);
+	pathbuffer_free(pdir);
+	pathbuffer_free(fname);
 
 	return TRUE;
 }

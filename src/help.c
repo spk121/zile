@@ -1,4 +1,4 @@
-/*	$Id: help.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: help.c,v 1.3 2003/04/24 15:36:50 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -41,6 +41,7 @@
 #include "paths.h"
 #include "version.h"
 #include "astr.h"
+#include "pathbuffer.h"
 
 DEFUN("zile-version", zile_version)
 /*+
@@ -73,7 +74,7 @@ static void fix_alternative_keys(bufferp bp)
  */
 static int read_minihelp_page(bufferp bp)
 {
-	char fname[PATH_MAX];
+	pathbuffer_t *fname;
 	int delta;
 
 	switch_to_buffer(bp);
@@ -83,17 +84,21 @@ static int read_minihelp_page(bufferp bp)
 		| BFLAG_NOEOB;
 	set_temporary_buffer(bp);
 
-	sprintf(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
-	if (!exist_file(fname)) {
+	fname = pathbuffer_create(0);
+	pathbuffer_fput(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
+	if (!exist_file(pathbuffer_str(fname))) {
 		minihelp_page = 1;
-		sprintf(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
-		if (!exist_file(fname)) {
-			minibuf_error("Unable to read file `@b%s@@'", fname);
+		pathbuffer_fput(fname, "%s%d", PATH_DATA "/MINIHELP",
+				minihelp_page);
+		if (!exist_file(pathbuffer_str(fname))) {
+			minibuf_error("Unable to read file `@b%s@@'",
+				      pathbuffer_str(fname));
+			pathbuffer_free(fname);
 			return FALSE;
 		}
 	}
 
-	read_from_disk(fname);
+	read_from_disk(pathbuffer_str(fname));
 	if (lookup_bool_variable("alternative-bindings"))
 		fix_alternative_keys(bp);
 	gotobob();
@@ -104,6 +109,8 @@ static int read_minihelp_page(bufferp bp)
 		if (delta == cur_wp->eheight - head_wp->bp->num_lines)
 			break;
 	}
+
+	pathbuffer_free(fname);
 
 	return TRUE;
 }
@@ -212,13 +219,14 @@ Show a tutorial window.
 +*/
 {
 	if (show_file(PATH_DATA "/TUTORIAL")) {
-		char buf[PATH_MAX];
-
+		pathbuffer_t *buf;
+		buf = pathbuffer_create(0);
 		cur_bp->flags = 0;
-		strcpy(buf, getenv("HOME"));
-		strcat(buf, "/TUTORIAL");
-		set_buffer_filename(cur_bp, buf);
+		pathbuffer_put(buf, getenv("HOME"));
+		pathbuffer_append(buf, "/TUTORIAL");
+		set_buffer_filename(cur_bp, pathbuffer_str(buf));
 
+		pathbuffer_free(buf);
 		return TRUE;
 	}
 

@@ -41,9 +41,10 @@ extern void	set_temporary_buffer(bufferp bp);
 /* file.c ----------------------------------------------------------------- */
 extern int	exist_file(char *filename);
 extern int	is_regular_file(char *filename);
-extern int	expand_path(char *path, char *cwdir, char *dir, char *fname);
-extern char *	compact_path(char *buf, char *path);
-extern char *	get_current_dir(char *buf);
+extern int	expand_path(char *path, char *cwdir, pathbuffer_t *dir,
+			    pathbuffer_t *fname);
+extern pathbuffer_t *	compact_path(pathbuffer_t *buf, char *path);
+extern pathbuffer_t *	get_current_dir(pathbuffer_t *buf);
 extern void	open_file(char *path, int lineno);
 extern void	read_from_disk(char *filename);
 extern int	find_file(char *filename);

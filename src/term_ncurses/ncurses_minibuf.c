@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.2 2003/04/24 15:12:00 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.3 2003/04/24 15:36:52 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -39,6 +39,7 @@
 #endif
 
 #include "zile.h"
+#include "pathbuffer.h"
 #include "extern.h"
 
 #include "term_ncurses.h"
@@ -293,13 +294,13 @@ static char *rot_vminibuf_read(char *prompt, char *value, historyp hp,
 				case HISTORY_MATCHED:
 				case HISTORY_MATCHEDNONUNIQUE:
 					if (hp->fl_dir)
-						len = i = hp->matchsize + strlen(hp->path);
+						len = i = hp->matchsize + strlen(pathbuffer_str(hp->path));
 					else
 						len = i = hp->matchsize;
 					*max = len + 1;
 					s = (char *)zmalloc(*max);
 					if (hp->fl_dir) {
-						strcpy(s, hp->path);
+						strcpy(s, pathbuffer_str(hp->path));
 						strncat(s, hp->match, hp->matchsize);
 					} else
 						strncpy(s, hp->match, hp->matchsize);

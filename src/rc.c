@@ -1,4 +1,4 @@
-/*	$Id: rc.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: rc.c,v 1.3 2003/04/24 15:36:51 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -37,6 +37,7 @@
 
 #include "zile.h"
 #include "extern.h"
+#include "pathbuffer.h"
 
 static FILE *rc_file;
 static char *rc_name;
@@ -45,17 +46,20 @@ static int lineno = 1;
 static void error(char *fmt, ...)
 {
 	va_list ap;
-	char msg1[PATH_MAX+100], msg2[50];
+	pathbuffer_t *msg1;
+	char msg2[50];
 
-	sprintf(msg1, "zile:%s:%d: ", rc_name, lineno);
+	msg1 = pathbuffer_create(0);
+	pathbuffer_fput(msg1, "zile:%s:%d: ", rc_name, lineno);
 
 	va_start(ap, fmt);
 	vsprintf(msg2, fmt, ap);
 	va_end(ap);
 
-	minibuf_error("%s%s", msg1, msg2);
+	minibuf_error("%s%s", pathbuffer_str(msg1), msg2);
 
 	waitkey_discard(3 * 1000);
+	pathbuffer_free(msg1);
 }
 
 static int skip_ws(int c)
@@ -117,14 +121,17 @@ static void parse_rc(void)
 
 void read_rc_file(void)
 {
-	char buf[PATH_MAX];
+	pathbuffer_t *buf;
 
-	strcpy(buf, getenv("HOME"));
-	strcat(buf, "/.zilerc");
-	rc_name = buf;
+	buf = pathbuffer_create(0);
+	pathbuffer_put(buf, getenv("HOME"));
+	pathbuffer_append(buf, "/.zilerc");
+	rc_name = pathbuffer_str(buf);
 
-	if ((rc_file = fopen(buf, "r")) != NULL) {
+	if ((rc_file = fopen(rc_name, "r")) != NULL) {
 		parse_rc();
 		fclose(rc_file);
 	}
+
+	pathbuffer_free(buf);
 }

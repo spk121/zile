@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.2 2003/04/24 15:11:59 rrt Exp $	*/
+/*	$Id: file.c,v 1.3 2003/04/24 15:36:50 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2001 Sandro Sigala.  All rights reserved.
@@ -47,6 +47,7 @@
 #include <utime.h>
 
 #include "zile.h"
+#include "pathbuffer.h"
 #include "extern.h"
 
 int exist_file(char *filename)
@@ -75,6 +76,16 @@ int is_regular_file(char *filename)
 	return FALSE;
 }
 
+#define CHECK_DP_AND_ENLARGE   do {                                           \
+                                 if (dp == end_of_dp) {                       \
+				   size_t length;                             \
+                                   length = (size_t)(dp-pathbuffer_str(dir)); \
+				   pathbuffer_realloc_larger(dir);            \
+				   dp = pathbuffer_str(dir) + length;         \
+				   end_of_dp = dp + pathbuffer_size(dir);     \
+			         }                                            \
+                               } while(0)
+
 /*
  * This functions does some corrections and expansions to
  * the passed path:
@@ -83,20 +94,29 @@ int is_regular_file(char *filename)
  * - replaces the `//' with `/' (restarting from the root directory);
  * - removes the `..' and `.' entries.
  */
-int expand_path(char *path, char *cwdir, char *dir, char *fname)
+int expand_path(char *path, char *cwdir, pathbuffer_t *dir,
+		pathbuffer_t *fname)
 {
 	char buf[1024];
 	struct passwd *pw;
 	char *sp, *dp, *fp, *p;
+	char *end_of_dp;
 
-	sp = path, dp = dir, fp = fname;
+	sp = path;
+	dp = pathbuffer_str(dir);
+	end_of_dp = dp + pathbuffer_size(dir);
+	fp = pathbuffer_str(fname);
 
 	if (*sp != '/') {
 		p = cwdir;
-		while (*p != '\0')
+		while (*p != '\0') {
+			CHECK_DP_AND_ENLARGE;
 			*dp++ = *p++;
-		if (*(dp - 1) != '/')
+		}
+		if (*(dp - 1) != '/') {
+			CHECK_DP_AND_ENLARGE;
 			*dp++ = '/';
+		}
 	}
 
 	while (sp != '\0')
@@ -107,10 +127,12 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
 				 */
 				while (*++sp == '/')
 					;
-				dp = dir;
+				dp = pathbuffer_str(dir);
+				CHECK_DP_AND_ENLARGE;
 				*dp++ = '/';
 			} else {
 				++sp;
+				CHECK_DP_AND_ENLARGE;
 				*dp++ = '/';
 			}
 		} else if (*sp == '~') {
@@ -119,13 +141,15 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
 				 * Got `~/'.  Restart from this point
 				 * and insert the user home directory.
 				 */
-				dp = dir;
+				dp = pathbuffer_str(dir);
 				if ((pw = getpwuid(getuid())) == NULL)
 					return FALSE;
 				if (strcmp(pw->pw_dir, "/") != 0) {
 					p = pw->pw_dir;
-					while (*p != '\0')
+					while (*p != '\0') {
+						CHECK_DP_AND_ENLARGE;
 						*dp++ = *p++;
+					}
 				}
 				++sp;
 			} else {
@@ -133,7 +157,7 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
 				 * Got `~something'.  Restart from this point
 				 * and insert that user home directory.
 				 */
-				dp = dir;
+				dp = pathbuffer_str(dir);
 				p = buf;
 				++sp;
 				while (*sp != '\0' && *sp != '/')
@@ -142,8 +166,10 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
 				if ((pw = getpwnam(buf)) == NULL)
 					return FALSE;
 				p = pw->pw_dir;
-				while (*p != '\0')
+				while (*p != '\0') {
+					CHECK_DP_AND_ENLARGE;
 					*dp++ = *p++;
+				}
 			}
 		} else if (*sp == '.') {
 			if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
@@ -152,9 +178,11 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
 					++sp;
 			} else if (*(sp + 1) == '.' &&
 				   (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
-				if (dp > dir && *(dp - 1) == '/')
+				if (dp > pathbuffer_str(dir) && 
+				    *(dp - 1) == '/')
 					--dp;
-				while (*(dp - 1) != '/' && dp > dir)
+				while (*(dp - 1) != '/' &&
+				       dp > pathbuffer_str(dir))
 					--dp;
 				sp += 2;
 				if (*sp == '/' && *(sp + 1) != '/')
@@ -167,20 +195,32 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
 			while (*p != '\0' && *p != '/')
 				p++;
 			if (*p == '\0') {
+				size_t fname_length;
+				fname_length = strlen(sp);
+				while (pathbuffer_size(fname) <
+				       fname_length + 1) {
+					pathbuffer_realloc_larger(fname);
+					fp = pathbuffer_str(fname);
+				}
 				/* Final filename. */
 				while ((*fp++ = *sp++) != '\0')
 					;
 				break;
 			} else {
 				/* Non-final directory. */
-				while (*sp != '/')
+				while (*sp != '/') {
+					CHECK_DP_AND_ENLARGE;
 					*dp++ = *sp++;
+				}
 			}
 		}
 
-	if (dp == dir)
+	if (dp == pathbuffer_str(dir)) {
+		CHECK_DP_AND_ENLARGE;
 		*dp++ = '/';
+	}
 
+	CHECK_DP_AND_ENLARGE;
 	*dp = '\0';
 	*fp = '\0';
 
@@ -191,14 +231,14 @@ int expand_path(char *path, char *cwdir, char *dir, char *fname)
  * Return a `~/foo' like path if the user is under his home directory,
  * else the unmodified path.
  */
-char *compact_path(char *buf, char *path)
+pathbuffer_t *compact_path(pathbuffer_t *buf, char *path)
 {
 	struct passwd *pw;
 	int i;
 
 	if ((pw = getpwuid(getuid())) == NULL) {
 		/* User not found in password file. */
-		strcpy(buf, path);
+		pathbuffer_put(buf, path);
 		return buf;
 	}
 
@@ -207,13 +247,13 @@ char *compact_path(char *buf, char *path)
 	 */
 	i = strlen(pw->pw_dir);
 	if (!strncmp(pw->pw_dir, path, i)) {
-		strcpy(buf, "~/");
+		pathbuffer_put(buf, "~/");
 		if (!strcmp(pw->pw_dir, "/"))
-			strcat(buf, path + 1);
+			pathbuffer_append(buf, path + 1);
 		else
-			strcat(buf, path + i + 1);
+			pathbuffer_append(buf, path + i + 1);
 	} else
-		strcpy(buf, path);
+		pathbuffer_put(buf, path);
 
 	return buf;
 }
@@ -221,7 +261,7 @@ char *compact_path(char *buf, char *path)
 /*
  * Return the current directory.
  */
-char *get_current_dir(char *buf)
+pathbuffer_t *get_current_dir(pathbuffer_t *buf)
 {
 	if (cur_bp->filename != NULL) {
 		/*
@@ -229,22 +269,27 @@ char *get_current_dir(char *buf)
 		 * directory name from it.
 		 */
 		char *p;
+		char *buf_p;
 
-		strcpy(buf, cur_bp->filename);
-		if ((p = strrchr(buf, '/')) != NULL) {
-			if (p != buf)
+		pathbuffer_put(buf, cur_bp->filename);
+		buf_p = pathbuffer_str(buf);
+		if ((p = strrchr(buf_p, '/')) != NULL) {
+			if (p != buf_p)
 				p[0] = '\0';
 			else
 				p[1] = '\0';
 		}
-		if (buf[strlen(buf) - 1] != '/')
-			strcat(buf, "/");
+		if (buf_p[strlen(buf_p) - 1] != '/')
+			pathbuffer_append(buf, "/");
 	} else {
 		/*
 		 * Get the current directory name from the system.
 		 */
-		getcwd(buf, PATH_MAX);
-		strcat(buf, "/");
+		while (getcwd(pathbuffer_str(buf), pathbuffer_size(buf)) ==
+		       NULL) {
+			pathbuffer_realloc_larger(buf);
+		}
+		pathbuffer_append(buf, "/");
 	}
 
 	return buf;
@@ -252,16 +297,23 @@ char *get_current_dir(char *buf)
 
 void open_file(char *path, int lineno)
 {
-	char buf[PATH_MAX], dir[PATH_MAX], fname[PATH_MAX];
+	pathbuffer_t *buf, *dir, *fname;
 
-	getcwd(buf, PATH_MAX);
-	if (!expand_path(path, buf, dir, fname)) {
+	buf = pathbuffer_create(0);
+	dir = pathbuffer_create(0);
+	fname = pathbuffer_create(0);
+	get_current_dir(buf);
+	if (!expand_path(path, pathbuffer_str(buf), dir, fname)) {
 		fprintf(stderr, "zile: %s: invalid filename or path\n", path);
 		zile_exit(1);
 	}
-	strcpy(buf, dir);
-	strcat(buf, fname);
-	find_file(buf);
+	pathbuffer_put(buf, pathbuffer_str(dir));
+	pathbuffer_append(buf, pathbuffer_str(fname));
+	pathbuffer_free(dir);
+	pathbuffer_free(fname);
+
+	find_file(pathbuffer_str(buf));
+	pathbuffer_free(buf);
 	if (lineno > 0)
 		ngotodown(lineno);
 	resync_redisplay();
@@ -538,14 +590,25 @@ Edit a file specified by the user.  Switch to a buffer visiting the file,
 creating one if none already exists.
 +*/
 {
-	char buf[PATH_MAX], *ms;
+	char *ms;
+	pathbuffer_t* buf;
 
+	buf = pathbuffer_create(0);
 	get_current_dir(buf);
-	if ((ms = minibuf_read_dir("Find file: ", buf)) == NULL)
+	if ((ms = minibuf_read_dir("Find file: ", pathbuffer_str(buf)))
+	    == NULL) {
+		pathbuffer_free(buf);
 		return cancel();
+	}
+	pathbuffer_free(buf);
 
-	if (ms[0] != '\0')
-		return find_file(ms);
+	if (ms[0] != '\0') {
+		int ret_value = find_file(ms);
+		free(ms);
+		return ret_value;
+	}
+
+	free(ms);
 	return FALSE;
 }
 
@@ -556,17 +619,27 @@ If the current buffer now contains an empty file that you just visited
 (presumably by mistake), use this command to visit the file you really want.
 +*/
 {
-	char buf[PATH_MAX], *ms;
+	char *ms;
+	pathbuffer_t* buf;
 
+	buf = pathbuffer_create(0);
 	get_current_dir(buf);
-	if ((ms = minibuf_read_dir("Find alternate: ", buf)) == NULL)
+	if ((ms = minibuf_read_dir("Find alternate: ", pathbuffer_str(buf)))
+	    == NULL) {
+		pathbuffer_free(buf);
 		return cancel();
+	}
+	pathbuffer_free(buf);
 
 	if (ms[0] != '\0' && check_modified_buffer(cur_bp)) {
+		int ret_value;
 		kill_buffer(cur_bp);
-		return find_file(ms);
+		ret_value = find_file(ms);
+		free(ms);
+		return ret_value;
 	}
 
+	free(ms);
 	return FALSE;
 }
 
@@ -821,23 +894,34 @@ Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
 +*/
 {
-	char buf[PATH_MAX], *ms;
+	char *ms;
+	pathbuffer_t *buf;
 
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
+	buf = pathbuffer_create(0);
 	get_current_dir(buf);
-	if ((ms = minibuf_read_dir("Insert file: ", buf)) == NULL)
+	if ((ms = minibuf_read_dir("Insert file: ", pathbuffer_str(buf)))
+	    == NULL) {
+		pathbuffer_free(buf);
 		return cancel();
+	}
+	pathbuffer_free(buf);
 
-	if (ms[0] == '\0')
+	if (ms[0] == '\0') {
+		free(ms);
 		return FALSE;
+	}
 
-	if (!insert_file(ms))
+	if (!insert_file(ms)) {
+		free(ms);
 		return FALSE;
-	
+	}
+
 	set_mark_command();
 
+	free(ms);
 	return TRUE;
 }
 
@@ -848,16 +932,19 @@ Set mark after the inserted text.
 static char *create_backup_filename(char *filename, int withrevs,
 				    int withdirectory)
 {
-	char buf[PATH_MAX];
+	pathbuffer_t *buf;
 	char *s;
 
+	buf = NULL;  /* to know if it has been used */
 	/* Add the backup directory path to the filename */
 	if (withdirectory) {
-		char dir[PATH_MAX], fname[PATH_MAX];
+		pathbuffer_t *dir, *fname;
 		char *bp, *backupdir;
 
 		backupdir = get_variable("backup-directory");
-		bp = buf;
+		buf = pathbuffer_create(strlen(backupdir) + strlen(filename) +
+					1);
+		bp = pathbuffer_str(buf);
 
 		while (*backupdir != '\0')
 			*bp++ = *backupdir++;
@@ -872,13 +959,17 @@ static char *create_backup_filename(char *filename, int withrevs,
 		}
 		*bp = '\0';
 
-		if (!expand_path(buf, "", dir, fname)) {
-			fprintf(stderr, "zile: %s: invalid backup directory\n", dir);
+		dir = pathbuffer_create(0);
+		fname = pathbuffer_create(0);
+		if (!expand_path(pathbuffer_str(buf), "", dir, fname)) {
+			fprintf(stderr, "zile: %s: invalid backup directory\n", pathbuffer_str(dir));
 			zile_exit(1);
 		}
-		strcpy(buf, dir);
-		strcat(buf, fname);
-		filename = buf;
+		pathbuffer_put(buf, pathbuffer_str(dir));
+		pathbuffer_append(buf, pathbuffer_str(fname));
+		pathbuffer_free(dir);
+		pathbuffer_free(fname);
+		filename = pathbuffer_str(buf);
  	}
 
 	s = (char *)zmalloc(strlen(filename) + 10);
@@ -898,6 +989,9 @@ static char *create_backup_filename(char *filename, int withrevs,
 		strcpy(s, filename);
 		strcat(s, "~");
 	}
+
+	if (buf != NULL)
+		pathbuffer_free(buf);
 
 	return s;
 }
@@ -1022,6 +1116,7 @@ static int write_to_disk(bufferp bp, char *filename)
 static int save_buffer(bufferp bp)
 {
 	char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
+	int ms_is_from_minibuffer = 0;
 
 	if (!(bp->flags & BFLAG_MODIFIED))
 		minibuf_write("(No changes need to be saved)");
@@ -1029,8 +1124,11 @@ static int save_buffer(bufferp bp)
 		if (bp->flags & BFLAG_NEEDNAME) {
 			if ((ms = minibuf_read_dir("File to save in: ", fname)) == NULL)
 				return cancel();
-			if (ms[0] == '\0')
+			ms_is_from_minibuffer = 1;
+			if (ms[0] == '\0') {
+				free(ms);
 				return FALSE;
+			}
 
 			set_buffer_filename(bp, ms);
 
@@ -1042,6 +1140,9 @@ static int save_buffer(bufferp bp)
 			bp->flags &= ~BFLAG_MODIFIED;
 		}
 		bp->flags &= ~BFLAG_TEMPORARY;
+
+		if (ms_is_from_minibuffer)
+			free(ms);
 	}
 
 	return TRUE;
@@ -1067,8 +1168,10 @@ Makes buffer visit that file, and marks it not modified.
 
 	if ((ms = minibuf_read_dir("Write file: ", fname)) == NULL)
 		return cancel();
-	if (ms[0] == '\0')
+	if (ms[0] == '\0') {
+		free(ms);
 		return FALSE;
+	}
 
 	set_buffer_filename(cur_bp, ms);
 
@@ -1079,6 +1182,7 @@ Makes buffer visit that file, and marks it not modified.
 		cur_bp->flags &= ~BFLAG_MODIFIED;
 	}
 
+	free(ms);
 	return TRUE;
 }
 
@@ -1202,14 +1306,17 @@ void zile_exit(int exitcode)
 	for (bp = head_bp; bp != NULL; bp = bp->next)
 		if (bp->flags & BFLAG_MODIFIED &&
 		    !(bp->flags & BFLAG_NOSAVE)) {
-			char buf[PATH_MAX];
+			pathbuffer_t *buf;
+			buf = pathbuffer_create(0);
 			if (bp->filename != NULL)
-				strcpy(buf, bp->filename);
+				pathbuffer_put(buf, bp->filename);
 			else
-				strcpy(buf, bp->name);
-			strcat(buf, ".ZILESAVE");
-			fprintf(stderr, "Saving %s...\r\n", buf);
-			raw_write_to_disk(bp, buf);
+				pathbuffer_put(buf, bp->name);
+			pathbuffer_append(buf, ".ZILESAVE");
+			fprintf(stderr, "Saving %s...\r\n",
+				pathbuffer_str(buf));
+			raw_write_to_disk(bp, pathbuffer_str(buf));
+			pathbuffer_free(buf);
 		}
 	exit(exitcode);
 }
@@ -1220,24 +1327,34 @@ Make the user specified directory become the current buffer's default
 directory.
 +*/
 {
-	char buf[PATH_MAX], *ms;
+	char *ms;
+	pathbuffer_t *buf;
 	struct stat st;
 
+	buf = pathbuffer_create(0);
 	get_current_dir(buf);
-	if ((ms = minibuf_read_dir("Change default directory: ", buf)) == NULL)
+	if ((ms = minibuf_read_dir("Change default directory: ",
+				   pathbuffer_str(buf))) == NULL) {
+		pathbuffer_free(buf);
 		return cancel();
+	}
+	pathbuffer_free(buf);
 
 	if (ms[0] != '\0') {
 		if (stat(ms, &st) != 0 || !S_ISDIR(st.st_mode)) {
 			minibuf_error("`@b%s@@' is not a directory", ms);
+			free(ms);
 			return FALSE;
 		}
 		if (chdir(ms) == -1) {
 			minibuf_write("@b%s@@: %s", ms, strerror(errno));
+			free(ms);
 			return FALSE;
 		}
+		free(ms);
 		return TRUE;
 	}
 
+	free(ms);
 	return FALSE;
 }
