@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.27 2004/05/10 16:02:13 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.1 2004/05/10 16:05:49 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -42,7 +42,7 @@
 #include "zile.h"
 #include "config.h"
 #include "extern.h"
-#include "term_ncurses.h"
+#include "term_ncurses/term_ncurses.h"
 
 #ifdef __FreeBSD__
 /*

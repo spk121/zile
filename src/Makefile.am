@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.10 2004/05/09 18:31:06 rrt Exp $
+## $Id: Makefile.am,v 1.11 2004/05/10 16:05:49 rrt Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -36,6 +36,7 @@ zile_SOURCES =					\
 	variables.c				\
 	window.c				\
 	term_minibuf.c				\
+	term_redisplay.c			\
 	zile.h
 
 zile_LDADD =					\
