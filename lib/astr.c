@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.14 2004/03/10 15:15:45 rrt Exp $	*/
+/*	$Id: astr.c,v 1.15 2004/03/11 13:50:14 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -50,33 +50,13 @@ astr astr_new(void)
 	return as;
 }
 
-void astr_resize(astr as, size_t reqsize)
+static void astr_resize(astr as, size_t reqsize)
 {
 	assert(as != NULL);
-	if (reqsize == 0)
-		reqsize = as->maxsize * ENLARGE_FACTOR;
 	if (reqsize > as->maxsize) {
 		as->maxsize = reqsize + ALLOCATION_CHUNK_SIZE;
 		as->text = (char *)xrealloc(as->text, as->maxsize + 1);
         }
-}
-
-astr astr_copy(castr as)
-{
-	astr dest;
-	assert(as != NULL);
-	dest = astr_new();
-	astr_assign(dest, as);
-	return dest;
-}
-
-astr astr_copy_cstr(const char *s)
-{
-	astr dest;
-	assert(s != NULL);
-	dest = astr_new();
-	astr_assign_cstr(dest, s);
-	return dest;
 }
 
 void astr_delete(astr as)
@@ -85,31 +65,6 @@ void astr_delete(astr as)
 	free(as->text);
 	as->text = NULL;
 	free(as);
-}
-
-void astr_clear(astr as)
-{
-	assert(as != NULL);
-	as->text[0] = '\0';
-	as->size = 0;
-}
-
-const char *(astr_cstr)(castr as)
-{
-	assert(as != NULL);
-	return as->text;
-}
-
-size_t (astr_size)(castr as)
-{
-	assert(as != NULL);
-	return as->size;
-}
-
-int (astr_cmp)(castr s1, castr s2)
-{
-	assert(s1 != NULL && s2 != NULL);
-	return strcmp(s1->text, s2->text);
 }
 
 static astr astr_assign_x(astr as, const char *s, size_t csize)
@@ -130,39 +85,6 @@ astr astr_assign_cstr(astr as, const char *s)
 {
 	assert(as != NULL && s != NULL);
 	return astr_assign_x(as, s, strlen(s));
-}
-
-static astr astr_insert_x(astr as, int pos, const char *s, size_t csize)
-{
-	astr dest = astr_new();
-	if (pos < 0) {
-		pos = as->size + pos;
-		if (pos < 0)
-			pos = 0;
-	}
-	if ((unsigned int)pos > as->size)
-		pos = as->size;
-	dest->size = as->size + csize;
-	astr_resize(dest, dest->size);
-	memcpy(dest->text, as->text, pos);
-	memcpy(dest->text + pos, s, csize);
-	strcpy(dest->text + pos + csize, as->text + pos);
-	free(as->text);
-	*as = *dest;
-	free(dest);
-	return as;
-}
-
-astr astr_insert(astr as, int pos, castr src)
-{
-	assert(as != NULL && src != NULL);
-	return astr_insert_x(as, pos, src->text, src->size);
-}
-
-astr astr_insert_cstr(astr as, int pos, const char *s)
-{
-	assert(as != NULL && s != NULL);
-	return astr_insert_x(as, pos, s, strlen(s));
 }
 
 static astr astr_append_x(astr as, const char *s, size_t csize)
@@ -192,26 +114,6 @@ astr astr_append_char(astr as, int c)
 	as->text[as->size] = c;
 	as->text[++as->size] = '\0';
 
-	return as;
-}
-
-astr astr_remove(astr as, int pos, size_t size)
-{
-	assert(as != NULL);
-	if (pos < 0) {
-		pos = as->size + pos;
-		if (pos < 0)
-			pos = 0;
-	}
-	if ((unsigned int)pos > as->size)
-		pos = as->size;
-
-	if (as->size - pos < size)
-		size = as->size - pos;
-	if (size > 0) {
-		strcpy(as->text + pos, as->text + pos + size);
-		as->size -= size;
-	}
 	return as;
 }
 
@@ -324,7 +226,7 @@ astr astr_fgets(astr as, FILE *f)
 {
 	int c;
 	assert(as != NULL);
-	astr_clear(as);
+	astr_truncate(as, 0);
 	if ((c = fgetc(f)) == EOF)
 		return NULL;
 	if (c == '\n')
@@ -406,12 +308,6 @@ int main(void)
 	astr_delete(as2);
 
 	astr_assign_cstr(as1, "12345");
-	astr_insert_cstr(as1, 3, "mid");
-	astr_insert_cstr(as1, 0, "begin");
-	astr_insert_cstr(as1, 100, "end");
-	assert_eq(as1, "begin123mid45end");
-
-	astr_assign_cstr(as1, "12345");
 	astr_delete(as2);
 	as2 = astr_substr(as1, -2, 5);
 	assert_eq(as2, "45");
@@ -433,17 +329,10 @@ int main(void)
 	astr_replace_cstr(as1, -1, 5, "foo");
 	assert_eq(as1, "123456foo");
 
-	astr_assign_cstr(as1, "1234567");
-	astr_remove(as1, 4, 10);
-	assert_eq(as1, "1234");
-
 	astr_assign_cstr(as1, "abc def de ab cd ab de fg");
 	while ((i = astr_find_cstr(as1, "de")) >= 0)
 	       astr_replace_cstr(as1, i, 2, "xxx");
 	assert_eq(as1, "abc xxxf xxx ab cd ab xxx fg");
-	while ((i = astr_find_cstr(as1, "ab")) >= 0)
-	       astr_remove(as1, i, 2);
-	assert_eq(as1, "c xxxf xxx  cd  xxx fg");
 
 	astr_fmt(as1, "%s * %d = ", "5", 3);
 	astr_afmt(as1, "%d", 15);

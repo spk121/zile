@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.12 2004/03/10 13:27:14 rrt Exp $	*/
+/*	$Id: help.c,v 1.13 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -255,7 +255,7 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 				break;
 			if (isfunc || astr_size(defval) > 0) {
 				astr_append(doc, buf);
-				astr_append_char(doc, '\n');
+				astr_append_cstr(doc, "\n");
 			} else
 				astr_assign(defval, buf);
 		} else if (!astr_cmp(buf, match))

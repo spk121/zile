@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.21 2004/03/09 23:28:26 rrt Exp $	*/
+/*	$Id: bind.c,v 1.22 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -179,7 +179,7 @@ static astr make_completion(int *keys, int numkeys)
 
 	for (i = 0; i < numkeys; i++) {
 		if (i > 0) {
-			astr_append_char(as, ' ');
+			astr_append_cstr(as, " ");
                         len++;
                 }
                 key = chordtostr(keys[i]);
@@ -187,7 +187,7 @@ static astr make_completion(int *keys, int numkeys)
                 astr_delete(key);
 	}
 
-	return astr_append_char(as, '-');
+	return astr_append_cstr(as, "-");
 }
 
 static leafp completion_scan(int c, int **keys, int *numkeys)
@@ -386,7 +386,8 @@ char *minibuf_read_function_name(const char *msg)
 			minibuf_error("No function name given");
 			return NULL;
 		} else {
-                        astr as = astr_copy_cstr(ms);
+                        astr as = astr_new();
+                        astr_assign_cstr(as, ms);
 			/* Complete partial words if possible. */
 			if (cp->try(cp, as) == COMPLETION_MATCHED)
 				ms = cp->match;
@@ -522,7 +523,7 @@ static void write_bindings_tree(leafp tree, alist keys)
                              alist_current_idx(keys) != -1;
                              alist_next(keys)) {
 				astr_append(key, alist_current(keys));
-				astr_append_char(key, ' ');
+				astr_append_cstr(key, " ");
 			}
 			astr_append(key, as);
                         astr_delete(as);

@@ -1,50 +1,3 @@
-.\" -*- nroff -*-
-.\" $Id: astr.3,v 1.9 2004/03/10 15:15:43 rrt Exp $
-.Dd May 17, 2003
-.Os
-.Dt ASTR 3
-.Sh NAME
-.Nm astr
-.Nd Dynamically allocated strings
-.Sh SYNOPSIS
-.Fd #include <astr.h>
-.Bd -literal
-
-typedef /* ... */ astr;
-typedef const /* ... */ castr;
-
-astr   astr_new(void);
-void   astr_resize(astr as, size_t reqsize);
-astr   astr_copy(castr as);
-astr   astr_copy_cstr(const char *s);
-void   astr_delete(astr as);
-void   astr_clear(astr as);
-char * astr_cstr(castr as);
-size_t astr_size(castr as);
-int    astr_cmp(castr s1, castr s2);
-astr   astr_assign(astr as, castr src);
-astr   astr_assign_cstr(astr as, const char *s);
-astr   astr_insert(astr as, int pos, castr src);
-astr   astr_insert_cstr(astr as, int pos, const char *s);
-astr   astr_append(astr as, castr src);
-astr   astr_append_cstr(astr as, const char *s);
-astr   astr_append_char(astr as, int c);
-astr   astr_remove(astr as, int pos, size_t size);
-astr   astr_truncate(astr as, size_t size);
-astr   astr_substr(castr as, int pos, size_t size);
-char   astr_last_char(castr as);
-int    astr_find(castr as, castr src);
-int    astr_find_cstr(castr as, const char *s);
-int    astr_rfind(castr as, castr src);
-int    astr_rfind_cstr(castr as, const char *s);
-astr   astr_replace(astr as, int pos, size_t size, castr src);
-astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
-astr   astr_fgets(astr as, FILE *f);
-astr   astr_vfmt(astr as, const char *fmt, va_list ap);
-astr   astr_vafmt(astr as, const char *fmt, va_list ap);
-astr   astr_fmt(astr as, const char *fmt, ...);
-astr   astr_afmt(astr as, const char *fmt, ...);
-
 .Sh DESCRIPTION
 The
 .Nm
@@ -74,48 +27,6 @@ will be used as function arguments to signal that they
 will not be modified by the function.
 .Pp
 The
-.Fn astr_new
-function allocates a new string with zero length.
-.Pp
-The
-.Fn astr_resize
-function enlarges a string if it is smaller than the given size.
-.Pp
-The
-.Fn astr_copy
-and
-.Fn astr_copy_cstr
-functions allocate a new string copying the contents from the argument
-string
-.Fa as
-and
-.Fa s ,
-respectively.
-.Pp
-The
-.Fn astr_delete
-function deallocates the previously allocated string
-.Fa as .
-.Pp
-The
-.Fn astr_clear
-function truncates the argument string
-.Fa as
-to zero length.
-.Pp
-The
-.Fn astr_cstr
-function converts the argument string
-.Fa as
-into a C null-terminated string.  The returned string should
-not be modified.
-.Pp
-The
-.Fn astr_size
-function returns the length of the argument string
-.Fa as .
-.Pp
-The
 .Fn astr_cmp
 function compares the argument strings and returns an integer less than,
 equal to, or greater than zero if
@@ -133,16 +44,6 @@ to the string
 overwritting any previously existing text.
 .Pp
 The
-.Fn astr_insert ,
-and
-.Fn astr_insert_cstr
-functions insert the contents of the argument string or character
-into the string
-.Fa as
-at the specified position
-.Fa pos .
-.Pp
-The
 .Fn astr_append ,
 .Fn astr_append_cstr ,
 and
@@ -150,22 +51,6 @@ and
 functions append the contents of the argument string or character
 at the end of the string
 .Fa as .
-.Pp
-The
-.Fn astr_remove
-function removes from the argument string
-.Fa as
-the text of size
-.Fa size
-starting from the position
-.Fa pos .
-.Pp
-The
-.Fn astr_truncate
-function truncates the argument string
-.Fa as
-to the specified length
-.Fa size .
 .Pp
 The
 .Fn astr_substr
@@ -250,23 +135,6 @@ Where not otherwise specified, the
 functions return the first argument string, usually named
 .Fa as
 in the function prototype.
-.Sh DEBUGGING
-If you would like to debug your program, you should define the macro
-.Fa ASTR_NO_MACRO_DEFS
-before including the header of this library, i.e.
-.Bd -literal -offset indent
-#define ASTR_NO_MACRO_DEFS
-#include <astr.h>
-.Ed
-.Pp
-This prevents defining at least the following function macros that makes
-code faster but debugging harder:
-.Fn astr_cstr ,
-.Fn astr_size ,
-.Fn astr_last_char ,
-.Fn astr_cmp .
-Side effects (like incrementing the argument) in parameters of these macros
-should be avoided.
 .Sh IMPLEMENTATION
 Internally, each
 .Nm
@@ -327,5 +195,3 @@ astr_append_char(s, '!');
 printf("s: '%s'\\n", astr_cstr(s));
 astr_delete(s);
 .Ed
-.Sh AUTHORS
-Sandro Sigala <sandro@sigala.it>

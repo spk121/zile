@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: minibuf.c,v 1.14 2004/03/09 16:21:11 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.15 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -126,33 +126,34 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 	expand_path(value, astr_cstr(rbuf), dir, fname);
 	astr_append_cstr(dir, astr_cstr(fname));
 	compact_path(rbuf, astr_cstr(dir));
+        astr_delete(dir);
+        astr_delete(fname);
 
 	cp = new_completion(TRUE);
 	p = cur_tp->minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
 	free_completion(cp);
+        astr_delete(rbuf);
 	free(buf);
 
-	if (p == NULL) {
-		astr_delete(dir);
-		astr_delete(fname);
-		astr_delete(rbuf);
-		return p;
+	if (p != NULL) {
+                /* Add history element.  */
+                add_history_element(&files_history, p);
+
+                rbuf = astr_new();
+                agetcwd(rbuf);
+                dir = astr_new();
+                fname = astr_new();
+
+                expand_path(p, astr_cstr(rbuf), dir, fname);
+                astr_assign(rbuf, dir);
+                astr_append(rbuf, fname);
+
+                astr_delete(dir);
+                astr_delete(fname);
+                p = zstrdup(astr_cstr(rbuf));
+                astr_delete(rbuf);
 	}
 
-	/* Add history element.  */
-	add_history_element(&files_history, p);
-
-	agetcwd(rbuf);
-        astr_clear(dir);
-        astr_clear(fname);
-	expand_path(p, astr_cstr(rbuf), dir, fname);
-	astr_assign_cstr(rbuf, astr_cstr(dir));
-	astr_append_cstr(rbuf, astr_cstr(fname));
-
-	astr_delete(dir);
-	astr_delete(fname);
-        p = zstrdup(astr_cstr(rbuf));
-        astr_delete(rbuf);
         return p;
 }
 
@@ -173,9 +174,9 @@ int minibuf_read_forced(const char *fmt, const char *errmsg,
 			return -1;
 		} else {
 			char *s;
-                        astr as;
+                        astr as = astr_new();
 			/* Complete partial words if possible. */
-                        as = astr_copy_cstr(p);
+                        astr_assign_cstr(as, p);
 			if (cp->try(cp, as) == COMPLETION_MATCHED)
 				p = cp->match;
                         astr_delete(as);

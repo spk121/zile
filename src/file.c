@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.20 2004/03/10 13:01:12 rrt Exp $	*/
+/*	$Id: file.c,v 1.21 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -93,11 +93,9 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 	const char *sp = path;
 
 	if (*sp != '/') {
-		const char *p = cwdir;
-		while (*p != '\0')
-			astr_append_char(dir, *p++);
+                astr_append_cstr(dir, cwdir);
 		if (astr_last_char(dir) != '/')
-			astr_append_char(dir, '/');
+			astr_append_cstr(dir, "/");
 	}
 
 	while (*sp != '\0') {
@@ -108,23 +106,20 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 				 */
 				while (*sp == '/')
 					sp++;
-                                astr_clear(dir);
+                                astr_truncate(dir, 0);
 			}
-                        astr_append_char(dir, '/');
+                        astr_append_cstr(dir, "/");
 		} else if (*sp == '~') {
 			if (*(sp + 1) == '/') {
 				/*
 				 * Got `~/'.  Restart from this point
 				 * and insert the user home directory.
 				 */
-				astr_clear(dir);
+				astr_truncate(dir, 0);
 				if ((pw = getpwuid(getuid())) == NULL)
 					return FALSE;
-				if (strcmp(pw->pw_dir, "/") != 0) {
-					const char *p = pw->pw_dir;
-					while (*p != '\0')
-						astr_append_char(dir, *p++);
-				}
+				if (strcmp(pw->pw_dir, "/") != 0)
+                                        astr_append_cstr(dir, pw->pw_dir);
 				++sp;
 			} else {
 				/*
@@ -133,7 +128,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 				 */
                                 const char *p;
                                 astr as = astr_new();
-				astr_clear(dir);
+				astr_truncate(dir, 0);
 				++sp;
 				while (*sp != '\0' && *sp != '/')
 					astr_append_char(as, *sp++);
@@ -141,9 +136,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
                                 astr_delete(as);
 				if (pw == NULL)
 					return FALSE;
-				p = pw->pw_dir;
-				while (*p != '\0')
-					astr_append_char(dir, *p++);
+                                astr_append_cstr(dir, pw->pw_dir);
 			}
 		} else if (*sp == '.') {
 			if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
@@ -181,7 +174,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 	}
 
 	if (astr_size(dir) == 0)
-		astr_append_char(dir, '/');
+		astr_append_cstr(dir, "/");
 
 	return TRUE;
 }
@@ -234,13 +227,13 @@ astr get_current_dir(astr buf, int interactive)
                 if (p != -1)
                         astr_truncate(buf, p ? p : 1);
 		if (astr_last_char(buf) != '/')
-			astr_append_char(buf, '/');
+			astr_append_cstr(buf, "/");
 	} else {
 		/*
 		 * Get the current directory name from the system.
 		 */
 		agetcwd(buf);
-		astr_append_char(buf, '/');
+		astr_append_cstr(buf, "/");
 	}
 
 	return buf;
@@ -985,10 +978,9 @@ static char *create_backup_filename(const char *filename, int withrevs,
 		backupdir = get_variable("backup-directory");
 		buf = astr_new();
 
-		while (*backupdir != '\0')
-			astr_append_char(buf, *backupdir++);
+                astr_append_cstr(buf, backupdir);
 		if (astr_last_char(buf) != '/')
-			astr_append_char(buf, '/');
+			astr_append_cstr(buf, "/");
 		while (*filename != '\0') {
 			if (*filename == '/')
 				astr_append_char(buf, '!');

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.28 2004/03/10 11:00:51 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.29 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -546,7 +546,7 @@ int universal_argument(int keytype, int xarg)
 		astr_assign_cstr(as, "C-u");
 
 	for (;;) {
-		astr_append_char(as, '-'); /* Add the '-' character. */
+		astr_append_cstr(as, "-"); /* Add the '-' character. */
 		c = do_completion(as, &compl);
 		astr_truncate(as, astr_size(as) - 1); /* Remove the '-' character. */
 
@@ -761,7 +761,7 @@ static void astr_append_region(astr s)
 	if (r.size > 0) {
 		t = copy_text_block(r.start.n, r.start.o, r.size);
 		if (t) {
-			for (c=0; c<r.size; c++)
+			for (c = 0; c < r.size; c++)
 				astr_append_char(s, t[c]);
 			free(t);
 		}
@@ -1575,7 +1575,7 @@ command to insert any output into the current buffer.
 	while (astr_fgets(s, pipe) != NULL) {
 		++lines;
 		astr_append(out, s);
-		astr_append_char(out, '\n');
+		astr_append_cstr(out, "\n");
 	}
 	astr_delete(s);
 	pclose(pipe);
@@ -1663,7 +1663,7 @@ it as the contents of the region.
 	while (astr_fgets(s, pipe) != NULL) {
 		++lines;
 		astr_append(out, s);
-		astr_append_char(out, '\n');
+		astr_append_cstr(out, "\n");
 	}
 	astr_delete(s);
 	pclose(pipe);

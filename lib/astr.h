@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.10 2004/03/10 15:15:46 rrt Exp $	*/
+/*	$Id: astr.h,v 1.11 2004/03/11 13:50:14 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -31,24 +31,47 @@
 typedef struct astr_s *astr;
 typedef const struct astr_s *castr;
 
+/*
+ * Allocate a new string with zero length.
+ */
 extern astr   astr_new(void);
-extern void   astr_resize(astr as, size_t reqsize);
-extern astr   astr_copy(castr as);
-extern astr   astr_copy_cstr(const char *s);
+
+/*
+ * Deallocate the previously allocated string as.
+ */
 extern void   astr_delete(astr as);
-extern void   astr_clear(astr as);
-extern const char * astr_cstr(castr as);
-extern size_t astr_size(castr as);
-extern int    astr_cmp(castr s1, castr s2);
+
+/*
+ * Convert as into a C null-terminated string.
+ * as[0] to as[astr_size(as) - 1] inclusive may be read and modified.
+ */
+#define astr_cstr(as)		((const char *)as->text)
+
+/*
+ * Return the length of the argument string as.
+ */
+#define astr_size(as)		((const int)as->size)
+
+/*
+ * Return the address of the pos'th character of as. If pos is >= 0,
+ * than 0, count from the left; if less than zero count from the
+ * right. 0 means the character after the end of the string.
+ *
+ * If pos is not in the range 1 ..
+ */
+extern char * astr_idx(castr as, int pos);
+#define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
 extern astr   astr_assign(astr as, castr src);
 extern astr   astr_assign_cstr(astr as, const char *s);
-extern astr   astr_insert(astr as, int pos, castr src);
-extern astr   astr_insert_cstr(astr as, int pos, const char *s);
 extern astr   astr_append(astr as, castr src);
 extern astr   astr_append_cstr(astr as, const char *s);
 extern astr   astr_append_char(astr as, int c);
-extern astr   astr_remove(astr as, int pos, size_t size);
+
+/*
+ * Truncate as to given length.
+ */
 extern astr   astr_truncate(astr as, size_t size);
+
 extern astr   astr_substr(castr as, int pos, size_t size);
 extern char   astr_last_char(castr as);
 extern int    astr_find(castr as, castr src);
@@ -81,10 +104,6 @@ struct astr_s {
  * Fast macro definitions.
  */
 
-#define astr_cstr(as)		((const char *)as->text)
-#define astr_size(as)		((const int)as->size)
-#define astr_last_char(as)	(as->text[as->size - 1])
-#define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
 
 #endif /* !ASTR_NO_MACRO_DEFS */
 

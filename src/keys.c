@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.9 2004/03/09 18:52:30 rrt Exp $	*/
+/*	$Id: keys.c,v 1.10 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -293,7 +293,7 @@ astr simplify_key(char *key)
 	for (j = 0; j < i; j++) {
                 astr as;
 		if (j > 0)
-			astr_append_char(dest, ' ');
+			astr_append_cstr(dest, " ");
 		as = chordtostr(keys[j]);
                 astr_append(dest, as);
                 astr_delete(as);

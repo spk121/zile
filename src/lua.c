@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lua.c,v 1.2 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: lua.c,v 1.3 2004/03/11 13:50:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -95,8 +95,10 @@ int zlua_do(const char *cmd, astr *out)
                 err = lua_pcall(L, 0, 1, 0);
 
         res = lua_tostring(L, -1);
-        if (res)
-                *out = astr_copy_cstr(res);
+        if (res) {
+                *out = astr_new();
+                astr_assign_cstr(*out, res);
+        }
         lua_settop(L, stk);
 
         return err;
