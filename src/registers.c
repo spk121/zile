@@ -1,4 +1,4 @@
-/*	$Id: registers.c,v 1.5 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: registers.c,v 1.6 2004/02/17 01:09:52 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -100,12 +100,14 @@ Puts point before and mark after the inserted text.
 		return FALSE;
 	}
 
+	set_mark_command();
+
 	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	for (uni = 0; uni < last_uniarg; ++uni)
 		insert_register(reg);
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-	set_mark_command();
+	exchange_point_and_mark();
 	desactivate_mark();
 
 	return TRUE;
