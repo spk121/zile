@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.16 2004/12/17 11:53:53 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.17 2004/12/20 18:51:29 rrt Exp $	*/
 
 #include "config.h"
 
@@ -82,7 +82,7 @@ static Buffer *new_buffer(void)
 	bp->mark = bp->markers = NULL;
 
         /* Set default EOL string. */
-        strcpy(bp->eol, "\n");
+        bp->eol[0] = '\n';
 
         return bp;
 }

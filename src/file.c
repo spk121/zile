@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.46 2004/12/17 11:53:53 rrt Exp $        */
+/*      $Id: file.c,v 1.47 2004/12/20 18:51:29 rrt Exp $        */
 
 #include "config.h"
 
@@ -288,11 +288,10 @@ void read_from_disk(const char *filename)
 {
         Line *lp;
         FILE *fp;
-        int i, size;
+        int i, size, eol = FALSE;
         char buf[BUFSIZ + 1];
 
         buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
-        memset(cur_bp->eol, '\0', 3); /* Blank the EOL string. */
 
         if ((fp = fopen(filename, "r")) == NULL) {
                 if (errno != ENOENT) {
@@ -312,16 +311,19 @@ void read_from_disk(const char *filename)
                                 lp = fadd_newline(lp);
                                 
                                 if (buf[i + 1] != buf[i] && (buf[i + 1] == '\n' || buf[i + 1] == '\r')) {
-                                        if (cur_bp->eol[0] == '\0') {
+                                        if (!eol) {
                                                 cur_bp->eol[0] = buf[i];
                                                 cur_bp->eol[1] = buf[i + 1];
+                                                eol = TRUE;
                                         }
                                         i++;
-                                } else if (cur_bp->eol[0] == '\0')
+                                } else if (!eol) {
                                         cur_bp->eol[0] = buf[i];
-
+                                        cur_bp->eol[1] = '\0';
+                                        eol = TRUE;
+                                }
                         }
-
+                        
         lp->next = cur_bp->limitp;
         cur_bp->limitp->prev = lp;
         cur_bp->pt.p = cur_bp->limitp->next;
