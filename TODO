@@ -5,7 +5,6 @@ HIGH PRIORITY
 To implement and document the following functions (dummy functions
 already exist):
 
-X1("mark-word", mark_word,				"M-@")
 X1("backward-sentence", backward_sentence,		"M-a")
 X1("forward-sentence", forward_sentence,		"M-e")
 X1("kill-sentence", kill_sentence,			"M-k")
@@ -14,10 +13,14 @@ X1("backward-paragraph", backward_paragraph,		"M-[")
 X1("forward-paragraph", forward_paragraph,		"M-]")
 X1("mark-paragraph", mark_paragraph,			"M-h")
 X1("fill-paragraph", fill_paragraph,			"M-q")
-X1("transpose-chars", transpose_chars,			"C-t")
-X1("transpose-words", transpose_words,			"M-t")
-X1("transpose-sexps", transpose_sexps,			"C-M-t")
-X1("transpose-lines", transpose_lines,			"C-x C-t")
+
+* Complete universal-argument functionality for:
+
+delete-horizontal-space
+transpose-chars
+transpose-words
+transpose-sexps
+transpose-lines
 
 ------------------------------------------------------------------------------
 
@@ -31,22 +34,11 @@ X1("kill-rectangle", kill_rectangle,			"C-xrk")
   should be replaced with
 	"bar Bar BAR"
 
-* overwrite-mode: support the following Emacs functionality:
-In overwrite mode, printing characters typed in replace existing text
-on a one-for-one basis, rather than pushing it to the right.  At the
-end of a line, such characters extend the line.  Before a tab,
-such characters insert until the tab is filled in.
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C-q still inserts characters in overwrite mode; this
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-is supposed to make it easier to insert characters when necessary.
-
 * Josef 'Jupp' Schugt <jupp@gmx.de>:
   - Mail Mode:
 	* Replace "*emphasis*" and "_emphasis_" by " emphasis " where the
 	  former is rendered bold and the latter underscored.
 	* Signatures support.
-  - Status line: the clock is only updated when a key is pressed.
   - Small HTML support: during saving HTML files, change
 		<!-- hhmts start -->
 		<!-- hhmts end -->
