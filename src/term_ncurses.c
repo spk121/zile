@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.8 2004/07/11 00:29:37 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.9 2004/09/20 13:42:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -46,7 +46,9 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-Font ZILE_REVERSE = A_REVERSE, ZILE_BOLD = A_BOLD;
+Font ZILE_NORMAL = 0;
+Font ZILE_REVERSE = A_REVERSE;
+Font ZILE_BOLD = A_BOLD;
 
 Font C_FG_BLACK;
 Font C_FG_RED;
