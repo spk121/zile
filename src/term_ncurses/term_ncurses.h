@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.8 2004/05/10 16:02:13 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.9 2004/05/10 16:15:14 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -63,6 +63,7 @@ extern void term_mvaddch(int y, int x, char c);
 extern void term_mvaddstr(int y, int x, char *s);
 extern void term_attrset(Font f);
 extern int term_printw(const char *fmt, ...);
+extern void term_beep(void);
 
 extern int ncurses_init(void);
 extern int ncurses_open(void);
@@ -75,8 +76,6 @@ extern void ncurses_refresh(void);
 extern void ncurses_redisplay(void);
 extern void ncurses_full_redisplay(void);
 extern void ncurses_show_about(const char *splash, const char *minibuf);
-extern void ncurses_clear(void);
-extern void ncurses_beep(void);
 extern void ncurses_minibuf_write(const char *fmt);
 extern char *ncurses_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
 extern void ncurses_minibuf_clear(void);

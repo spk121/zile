@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_misc.c,v 1.20 2004/05/10 16:02:13 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.21 2004/05/10 16:15:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -157,11 +157,6 @@ int ncurses_close(void)
 	return TRUE;
 }
 
-void ncurses_refresh(void)
-{
-	refresh();
-}
-
 static void show_splash_screen(const char *splash)
 {
 	int i, bold = 0, red = 0;
@@ -201,14 +196,4 @@ void ncurses_show_about(const char *splash, const char *minibuf)
 		minibuf_clear();
 	} else
 		minibuf_write(minibuf);
-}
-
-void ncurses_clear(void)
-{
-	erase();
-}
-
-void ncurses_beep(void)
-{
-	beep();
 }

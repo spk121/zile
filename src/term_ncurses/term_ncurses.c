@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.12 2004/05/10 16:02:13 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.13 2004/05/10 16:15:14 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -55,12 +55,12 @@ static Terminal thisterm = {
 	ncurses_xgetkey,
 	ncurses_ungetkey,
 	ncurses_refresh_cached_variables,
-	ncurses_refresh,
+	term_refresh,
 	ncurses_redisplay,
 	ncurses_full_redisplay,
 	ncurses_show_about,
-	ncurses_clear,
-	ncurses_beep,
+	term_clear,
+	term_beep,
 	ncurses_minibuf_write,
 	ncurses_minibuf_read,
 	ncurses_minibuf_clear,
@@ -156,4 +156,9 @@ int term_printw(const char *fmt, ...)
         res = vw_printw(stdscr, fmt, valist);
         va_end(valist);
         return res;
+}
+
+void term_beep(void)
+{
+	beep();
 }
