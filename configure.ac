@@ -53,10 +53,6 @@ AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd strerror strstr)
-dnl Check if ncurses library is available as libncurses or libcurses
-AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
-	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-		AC_MSG_FAILURE([cannot find neither libncurses.a or libcurses.a]))])
 
 dnl ==================================================================
 dnl Check for GNU Regex library
@@ -117,23 +113,29 @@ AC_ARG_ENABLE(curses,
 AC_HELP_STRING([--disable-curses], [don't use curses interface]),
 [
 if test $enableval = yes; then
+        curses=true
         AC_MSG_RESULT(yes)
         AC_DEFINE(CURSES, 1, [Define this to use curses.])
-        AC_CHECK_HEADER(ncurses.h,,
-	[AC_CHECK_HEADER(curses.h,,
+        AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
+	[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
 	        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
+        dnl Check if ncurses library is available as libncurses or libcurses
+        AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+	        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
+		AC_MSG_FAILURE([cannot find either libncurses.a or libcurses.a]))])
 else
+        curses=false
         AC_MSG_RESULT(no)
         AC_CHECK_HEADERS([termios.h] [term.h])
 fi
 ],[
 AC_MSG_RESULT(yes)
 AC_DEFINE(CURSES, 1, [Define this to use curses.])
-AC_CHECK_HEADER(ncurses.h,,
-        [AC_CHECK_HEADER(curses.h,,
+AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
+        [AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
         AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
 ])
-AM_CONDITIONAL(CURSES, test x$curses = xtrue)
+AM_CONDITIONAL(CURSES, test x$curses = xfalse)
 
 dnl ==================================================================
 dnl Extra definitions for config.h
