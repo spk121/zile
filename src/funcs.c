@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.87 2005/02/27 22:50:33 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.88 2005/04/04 11:29:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1241,10 +1241,12 @@ static int setcase_word(int rcase)
   int gotword;
   size_t i, size;
 
-  if (!forward_word())
-    return FALSE;
-  if (!backward_word())
-    return FALSE;
+  if (!ISWORDCHAR(following_char())) {
+    if (!forward_word())
+      return FALSE;
+    if (!backward_word())
+      return FALSE;
+  }
 
   i = cur_bp->pt.o;
   while (i < astr_len(cur_bp->pt.p->item)) {
