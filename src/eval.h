@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.h,v 1.4 2005/01/22 18:26:10 rrt Exp $	*/
+/*	$Id: eval.h,v 1.5 2005/01/22 18:31:39 rrt Exp $	*/
 
 #include "lists.h"
 
@@ -32,12 +32,12 @@ typedef struct evalLookupNode {
 
 le *evaluateBranch(le *trybranch);
 le *evaluateNode(le *node);
-le *evaluateDefun( le *fcn, le *params);
+le *evaluateDefun(le *fcn, le *params);
 
 int countNodes(le *branch);
 
 int evalCastLeToInt(const le *levalue);
-le *evalCastIntToLe( int intvalue);
+le *evalCastIntToLe(int intvalue);
 
 le *eval_cb_nothing(int argc, le *branch);
 
