@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.59 2005/01/12 12:53:44 rrt Exp $	*/
+/*	$Id: main.c,v 1.60 2005/01/14 01:09:11 rrt Exp $	*/
 
 #include "config.h"
 
@@ -129,12 +129,12 @@ static void sanity_checks(void)
   /* The functions `read_rc_file' and `help_with_tutorial' rely on a
      usable `HOME' environment variable. */
   if (getenv("HOME") == NULL) {
-    fprintf(stderr, "fatal error: please set `HOME' to point to your home directory\n");
+    fprintf(stderr, "zile: please set `HOME' to point to your home directory\n");
     exit(1);
   }
 
   if (strlen(getenv("HOME")) + 12 > PATH_MAX) {
-    fprintf(stderr, "fatal error: `HOME' is longer than the longest pathname your system supports\n");
+    fprintf(stderr, "zile: `HOME' is longer than the longest pathname your system supports\n");
     exit(1);
   }
 }
