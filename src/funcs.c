@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.60 2005/01/12 12:53:43 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.61 2005/01/12 23:26:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -68,18 +68,14 @@ DEFUN("transient-mark-mode", transient_mark_mode)
     With arg, turn Transient Mark mode on if arg is positive, off otherwise.
     +*/
 {
-  if (!(thisflag & FLAG_SET_UNIARG)) {
+  if (!(lastflag & FLAG_SET_UNIARG)) {
     if (transient_mark_mode())
       set_variable("transient-mark-mode", "false");
     else
       set_variable("transient-mark-mode", "true");
-  }
-  else {
-    if (transient_mark_mode() > 0)
-      set_variable("transient-mark-mode", "true");
-    else
-      set_variable("transient-mark-mode", "false");
-  }
+  } else
+    set_variable("transient-mark-mode", uniarg > 0 ? "true" : "false");
+
   activate_mark();
   return TRUE;
 }
@@ -377,20 +373,14 @@ DEFUN("quoted-insert", quoted_insert)
 
 int universal_argument(int keytype, int xarg)
 {
-  int i, arg, sgn, compl;
-  astr as = astr_new();
+  int i = 0, arg = 4, sgn = 1, compl = 0;
   int c, digit;
-
-  i = 0;
-  arg = 4;
-  sgn = 1;
-  compl = 0;
+  astr as = astr_new();
 
   if (keytype == KBD_META) {
     astr_cpy_cstr(as, "ESC");
     term_unget(xarg + '0');
-  }
-  else
+  } else
     astr_cpy_cstr(as, "C-u");
 
   for (;;) {
@@ -398,10 +388,10 @@ int universal_argument(int keytype, int xarg)
     c = do_completion(as, &compl);
     astr_truncate(as, astr_len(as) - 1); /* Remove the '-' character. */
 
-    /* Cancelled.  */
+    /* Cancelled. */
     if (c == KBD_CANCEL)
       return cancel();
-    /* Digit pressed.  */
+    /* Digit pressed. */
     else if (isdigit(c & 0xff)) {
       digit = (c & 0xff) - '0';
 
@@ -416,35 +406,25 @@ int universal_argument(int keytype, int xarg)
         arg = arg * 10 + digit;
 
       i++;
-    }
-    else if (c == (KBD_CTL | 'u')) {
+    } else if (c == (KBD_CTL | 'u')) {
       astr_cat_cstr(as, " C-u");
       if (i == 0)
         arg *= 4;
-    }
-    else if (c == '-') {
-      /* After any number && if sign doesn't change */
+    } else if (c == '-') {
+      /* After any number && if sign doesn't change. */
       if (i == 0 && sgn > 0) {
         sgn = -sgn;
         astr_cat_cstr(as, " -");
-        /* The default "arg" isn't -4, is -1 */
+        /* The default negative arg isn't -4, it's -1. */
         arg = 1;
+      } else if (i != 0) {
+        /* If i == 0 do nothing (the Emacs behavior is a little
+           strange in this case, it waits for one more key that is
+           eaten, and then goes back to the normal state). */
+        term_unget(c);
+        break;
       }
-      else {
-        if (i == 0) {
-          /* Nothing (the Emacs behavior
-             is a little strange in this
-             case, it waits for one more
-             key that is eaten, and then
-             back to normal state).  */
-        }
-        else {
-          term_unget(c);
-          break;
-        }
-      }
-    }
-    else {
+    } else {
       term_unget(c);
       break;
     }
