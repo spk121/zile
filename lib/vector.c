@@ -18,10 +18,9 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vector.c,v 1.2 2004/03/09 16:15:11 rrt Exp $	*/
+/*	$Id: vector.c,v 1.3 2004/10/23 15:36:03 rrt Exp $	*/
 
 #include <stddef.h>
-#include <stdint.h>
 #include <stdlib.h>
 
 #include "config.h"
@@ -76,5 +75,5 @@ vec_index(vector *v, size_t idx)
                 v = resize(v, idx >= v->size * 2 ? idx + 1 : v->size * 2);
         if (idx >= vec_items(v))
                 vec_items(v) = idx + 1;
-        return (void *)((uint8_t *)v->array + idx * vec_itemsize(v));
+        return (void *)((char *)v->array + idx * vec_itemsize(v));
 }
