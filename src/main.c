@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.21 2004/04/05 22:31:13 rrt Exp $	*/
+/*	$Id: main.c,v 1.22 2004/04/16 09:34:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -42,7 +42,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "term_ncurses/term_ncurses.h"
-#include "term_terminfo/term_terminfo.h"
 
 #ifndef PATH_MAX
 #define PATH_MAX	_POSIX_PATH_MAX
