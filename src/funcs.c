@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.24 2004/02/23 02:11:30 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.25 2004/03/09 16:29:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -529,7 +529,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 int universal_argument(int keytype, int xarg)
 {
 	int i, arg, sgn, compl;
-	char buf[1024];
+	astr as = astr_new();
 	int c, digit;
 
 	i = 0;
@@ -538,16 +538,16 @@ int universal_argument(int keytype, int xarg)
 	compl = 0;
 
 	if (keytype == KBD_META) {
-		strcpy(buf, "ESC");
+		astr_assign_cstr(as, "ESC");
 		cur_tp->ungetkey(xarg + '0');
 	}
 	else
-		strcpy(buf, "C-u");
+		astr_assign_cstr(as, "C-u");
 
 	for (;;) {
-		strcat(buf, "-"); /* Add the '-' character.  */
-		c = do_completion(buf, &compl);
-		buf[strlen(buf) - 1] = '\0'; /* Remove the '-' character.  */
+		astr_append_char(as, '-'); /* Add the '-' character. */
+		c = do_completion(as, &compl);
+		astr_truncate(as, astr_size(as) - 1); /* Remove the '-' character. */
 
 		/* Cancelled.  */
 		if (c == KBD_CANCEL)
@@ -557,9 +557,9 @@ int universal_argument(int keytype, int xarg)
 			digit = (c & 0xff) - '0';
 
 			if (c & KBD_META)
-				strcat(buf, " ESC");
+				astr_append_cstr(as, " ESC");
 
-			sprintf(buf+strlen(buf), " %d", digit);
+			astr_afmt(as, " %d", digit);
 
 			if (i == 0)
 				arg = digit;
@@ -569,7 +569,7 @@ int universal_argument(int keytype, int xarg)
 			i++;
 		}
 		else if (c == (KBD_CTL | 'u')) {
-			sprintf(buf+strlen(buf), " C-u");
+			astr_append_cstr(as, " C-u");
 			if (i == 0)
 				arg *= 4;
 		}
@@ -577,7 +577,7 @@ int universal_argument(int keytype, int xarg)
 			/* After any number && if sign doesn't change */
 			if (i == 0 && sgn > 0) {
 				sgn = -sgn;
-				strcat(buf, " -");
+				astr_append_cstr(as, " -");
 				/* The default "arg" isn't -4, is -1 */
 				arg = 1;
 			}
@@ -602,10 +602,9 @@ int universal_argument(int keytype, int xarg)
 	}
 
 	last_uniarg = arg * sgn;
-
 	thisflag |= FLAG_SET_UNIARG;
-
 	minibuf_clear();
+        astr_delete(as);
 
 	return TRUE;
 }
