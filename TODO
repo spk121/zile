@@ -9,8 +9,8 @@ X1("backward-sentence", backward_sentence,		"M-a")
 X1("forward-sentence", forward_sentence,		"M-e")
 X1("kill-sentence", kill_sentence,			"M-k")
 X1("backward-kill-sentence", backward_kill_sentence,	"C-x\\DEL")
-X1("backward-paragraph", backward_paragraph,		"M-[")
-X1("forward-paragraph", forward_paragraph,		"M-]")
+X1("backward-paragraph", backward_paragraph,		"M-{")
+X1("forward-paragraph", forward_paragraph,		"M-}")
 X1("mark-paragraph", mark_paragraph,			"M-h")
 X1("fill-paragraph", fill_paragraph,			"M-q")
 
@@ -31,8 +31,7 @@ LOW PRIORITY
 
 X1("kill-rectangle", kill_rectangle,			"C-xrk")
 
-* Allow search and replace not to follow case (case-replace,
-  case-fold-search)
+* Allow search and replace not to follow case (case-fold-search, case-replace)
 * Regex pattern matching for replace functions.
 * Unicode support.
 
