@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.33 2004/10/14 23:29:38 rrt Exp $        */
+/*      $Id: zile.h,v 1.34 2004/12/09 00:51:13 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -207,7 +207,7 @@ enum {
         COMPLETION_NOTMATCHED,
         COMPLETION_MATCHED,
         COMPLETION_MATCHEDNONUNIQUE,
-        COMPLETION_NONUNIQUE,
+        COMPLETION_NONUNIQUE
 };
 
 struct Completion {
