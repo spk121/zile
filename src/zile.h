@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.12 2004/01/07 00:45:20 rrt Exp $	*/
+/*	$Id: zile.h,v 1.13 2004/01/21 02:08:18 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -29,11 +29,11 @@
 
 #include "alist.h"
 #include "astr.h"
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif
+/* #if HAVE_NCURSES_H */
+/* #include <ncurses.h> */
+/* #else */
+/* #include <curses.h> */
+/* #endif */
 
 #undef TRUE
 #define TRUE				1
@@ -185,6 +185,8 @@ struct region {
 #define BFLAG_AUTOFILL			(0001000)
 /* Do not display the EOB marker in this buffer. */
 #define BFLAG_NOEOB			(0002000)
+/* The buffer is in Isearch loop. */
+#define BFLAG_ISEARCH			(0004000)
 
 /* Mutually exclusive buffer major modes. */
 
@@ -305,7 +307,7 @@ struct history {
 #define MINIBUF_UNSET_COLOR	'\2'
 
 struct terminal {
-	SCREEN *screen;
+	void *	screen;
 	int	width, height;
 
 	int	(*init)(void);
