@@ -6,15 +6,6 @@
 * The method of resolving the `C-h' problem by replacing it with `M-h'
   is not a ``Good Thing''(TM).
 
-* There are many statically allocated buffers that may overflow in the
-  near future:
-
-        src/bind.c
-        src/registers.c
-        src/keys.c
-        src/funcs.c
-        src/variables.c
-
 * The background colors are not handled very well under X Window
   terminals (reported by users, but cannot reproduce).
 
