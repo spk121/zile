@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.11 2004/12/20 12:48:53 rrt Exp $   */
+/*      $Id: completion.c,v 1.12 2004/12/20 13:17:25 rrt Exp $   */
 
 #include "config.h"
 
@@ -280,7 +280,7 @@ static int completion_reread(Completion *cp, astr as)
 /*
  * Match completions.
  */
-int completion_try(Completion *cp, astr search)
+int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
         int i, j, ssize, fullmatches = 0, partmatches = 0;
         char *p, c;
@@ -331,7 +331,8 @@ int completion_try(Completion *cp, astr search)
         if (fullmatches == 1 && partmatches > 1) {
                 cp->match = alist_first(cp->matches);
                 cp->matchsize = strlen(cp->match);
-                popup_completion(cp, FALSE, partmatches);
+                if (popup_when_complete)
+                        popup_completion(cp, FALSE, partmatches);
                 return COMPLETION_MATCHEDNONUNIQUE;
         }
 

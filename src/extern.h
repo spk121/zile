@@ -155,7 +155,7 @@ Completion *new_completion(int fileflag);
 void free_completion(Completion *cp);
 void completion_scroll_up(Completion *cp);
 void completion_scroll_down(Completion *cp);
-int completion_try(Completion *cp, astr search);
+int completion_try(Completion *cp, astr search, int popup_when_complete);
 
 /* history.c -------------------------------------------------------------- */
 void free_history_elements(History *hp);

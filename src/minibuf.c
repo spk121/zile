@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.26 2004/12/20 12:48:53 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.27 2004/12/20 13:17:25 rrt Exp $     */
 
 #include "config.h"
 
@@ -184,7 +184,7 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
                         astr as = astr_new();
                         /* Complete partial words if possible. */
                         astr_cpy_cstr(as, p);
-                        if (completion_try(cp, as) == COMPLETION_MATCHED)
+                        if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
                                 p = cp->match;
                         astr_delete(as);
                         for (s = alist_first(cp->completions); s != NULL;

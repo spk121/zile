@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.38 2004/12/20 12:48:53 rrt Exp $	*/
+/*	$Id: bind.c,v 1.39 2004/12/20 13:17:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -416,7 +416,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
                         astr as = astr_new();
                         astr_cpy_cstr(as, ms);
 			/* Complete partial words if possible. */
-			if (completion_try(cp, as) == COMPLETION_MATCHED)
+			if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
 				ms = cp->match;
                         astr_delete(as);
 			for (p = alist_first(cp->completions); p != NULL;
