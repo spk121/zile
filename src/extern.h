@@ -145,11 +145,12 @@ void free_minibuf(void);
 void minibuf_error(const char *fmt, ...);
 void minibuf_write(const char *fmt, ...);
 char *minibuf_read(const char *fmt, const char *value, ...);
+int minibuf_read_yesno(const char *fmt, ...);
 int minibuf_read_boolean(const char *fmt, ...);
 char *minibuf_read_color(const char *fmt, ...);
 char *minibuf_read_dir(const char *fmt, const char *value, ...);
 char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
-int minibuf_read_yesno(const char *fmt, ...);
+void minibuf_clear(void);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *new_completion(int fileflag);
@@ -203,7 +204,6 @@ int term_xgetkey(int mode, int arg);
 int term_ungetkey(int c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-void term_minibuf_clear(void);
 void term_refresh_cached_variables(void);
 
 /* undo.c ----------------------------------------------------------------- */
