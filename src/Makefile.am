@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.31 2005/01/19 01:24:27 rrt Exp $
+## $Id: Makefile.am,v 1.32 2005/01/21 23:37:04 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -7,8 +7,8 @@ else
 regex = regex.o
 endif
 
-TESTS = astr htable
-check_PROGRAMS = astr htable dotests
+TESTS = astr htable tests
+check_PROGRAMS = astr htable
 
 alist_CPPFLAGS = -DTEST
 alist_LDADD = zmalloc.o
@@ -108,6 +108,3 @@ paths.h:
 	        ! "cmp paths.h paths.h.tmp -s" ; then	\
 		mv paths.h.tmp paths.h ;		\
 	fi
-
-dotests:
-	./tests test1 test2 test3
