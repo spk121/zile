@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.9 2003/11/28 21:24:30 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.10 2003/12/08 21:48:44 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -241,6 +241,8 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
 	}
 
 	agetcwd(rbuf);
+        astr_clear(dir);
+        astr_clear(fname);
 	expand_path(p, astr_cstr(rbuf), dir, fname);
 	astr_assign_cstr(rbuf, astr_cstr(dir));
 	astr_append_cstr(rbuf, astr_cstr(fname));
