@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.8 2004/03/20 17:50:20 rrt Exp $
+## $Id: Makefile.am,v 1.9 2004/04/04 20:33:12 rrt Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -14,7 +14,6 @@ zile_SOURCES =					\
 	editfns.h				\
 	extern.h				\
 	file.c					\
-	fontlock.c				\
 	funcs.c					\
 	glue.c					\
 	help.c					\

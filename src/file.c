@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.27 2004/04/04 19:48:53 rrt Exp $	*/
+/*	$Id: file.c,v 1.28 2004/04/04 20:33:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -422,11 +422,6 @@ Some examples of correlated files are the following:
 	return FALSE;
 }
 
-static void find_file_hooks(const char *filename)
-{
-        FUNCALL(text_mode);
-}
-
 int find_file(const char *filename)
 {
 	Buffer *bp;
@@ -457,7 +452,6 @@ int find_file(const char *filename)
 
 	switch_to_buffer(bp);
 	read_from_disk(filename);
-	find_file_hooks(filename);
 
 	thisflag |= FLAG_NEED_RESYNC;
 
@@ -939,7 +933,7 @@ static int raw_write_to_disk(Buffer *bp, const char *filename)
  */
 static int write_to_disk(Buffer *bp, char *filename)
 {
-	int fd, backupsimple, backuprevs, backupwithdir;
+	int fd, backupsimple, backupwithdir;
 	Line *lp;
 
 	backupsimple = is_variable_equal("backup-method", "simple");
@@ -948,7 +942,7 @@ static int write_to_disk(Buffer *bp, char *filename)
 	/*
 	 * Make backup of original file.
 	 */
-	if (!(bp->flags & BFLAG_BACKUP) && (backupsimple || backuprevs)
+	if (!(bp->flags & BFLAG_BACKUP) && backupsimple
 	    && (fd = open(filename, O_RDWR, 0)) != -1) {
 		char *bfilename;
 		close(fd);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.32 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.33 2004/04/04 20:33:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -259,8 +259,6 @@ Turn on the mode for editing text intended for humans to read.
 +*/
 {
 	cur_bp->mode = BMODE_TEXT;
-	if (cur_bp->flags & BFLAG_FONTLOCK)
-		FUNCALL(font_lock_mode);
 	if (lookup_bool_variable("text-mode-auto-fill"))
 		cur_bp->flags |= BFLAG_AUTOFILL;
 
@@ -1290,9 +1288,6 @@ static int setcase_word(int rcase)
 	}
 
 	cur_bp->flags |= BFLAG_MODIFIED;
-
-	if (cur_bp->flags & BFLAG_FONTLOCK)
-		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 
 	return TRUE;
 }

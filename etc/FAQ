@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/03/14 14:36:06 $
+		   Last updated: $Date: 2004/04/04 20:33:12 $
 
 ------------------------------------------------------------------------------
 
@@ -9,14 +9,13 @@ INDEX
 1. General questions
    1.1. What does `Zile' mean?
    1.2. What is the Zile license?
-   1.3. What is the Zile internal macro language?
-   1.4. What about a GUI version of Zile?
-   1.5. Why another clone of Emacs?  Why not just use Emacs?
-   1.6. Why did you choose such difficult key sequences?
-   1.7. Zile is bogus.
-   1.8. I like the xyz function of (X)Emacs but in Zile isn't implemented.
-   1.9. How small does Zile get?
-   1.10. Does Zile support the Unicode / UTF-8 encodings?
+   1.3. What about a GUI version of Zile?
+   1.4. Why another clone of Emacs?  Why not just use Emacs?
+   1.5. Why did you choose such difficult key sequences?
+   1.6. Zile has a bug!
+   1.7. I like the xyz function of (X)Emacs but it's not in Zile!
+   1.8. How small does Zile get?
+   1.9. Does Zile support the Unicode / UTF-8 encodings?
 
 2. Functionality
    2.1. How to quit Zile?
@@ -26,17 +25,12 @@ INDEX
    2.5. What does `C-something' or `M-something' mean?
    2.6. The colors are not displayed on my screen.
    2.7. What are the available variables that can be modified?
-   2.8. Zile resets the fontlock on every `C-l' press.
-   2.9. How to display non-English characters?
-   2.10. Zile doesn't handle filenames with non-English characters.
-   2.11. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
-   2.12. How to enable Auto Fill Mode in Text Mode at startup?
-   2.13. How to change the binding of a function?
-   2.14. How to implement a new Font Lock xyz Mode?
-   2.15. Why not implementing a HTML Mode?
-   2.16. How to enable Mail Mode with Font Lock at startup?
-   2.17. The Zile screen is not resized in a X Window terminal.
-   2.18. The highlighting looks weird.
+   2.8. How to display non-English characters?
+   2.9. Zile doesn't handle filenames with non-English characters.
+   2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   2.11. How to enable Auto Fill Mode in Text Mode at startup?
+   2.12. How to change the binding of a function?
+   2.13. The Zile screen is not resized in a X Window terminal.
 
 3. Compiling
    3.1. Can I compile Zile with the old Berkeley curses?
@@ -49,78 +43,63 @@ INDEX
 
 1.1. What does `Zile' mean?
 
-    It stands for `Zile Is Lossy Emacs'.  It is just another recursive
-    acronym like GNU (GNU's Not Unix).
+    It stands for `Zile Is Lossy Emacs'. It is just another recursive
+    acronym like GNU.
 
 1.2. What is the Zile license?
 
-    Zile is released under the GNU General Public License.  For
-    more information, see http://www.gnu.org/.
+    Zile is released under the GNU General Public License. For more
+    information, see http://www.gnu.org/.
 
-1.3. What is the Zile internal macro language?
-
-    Zile is written in C only.  It doesn't currently support any macro
-    language like Lisp under Emacs or SLang under Jed.
-
-1.4. What about a GUI version of Zile?
-
-    See question 1.8.
-
-1.5. Why another clone of Emacs?  Why not just use Emacs?
+1.3. Why another clone of Emacs?  Why not just use Emacs?
 
     From the features list in the Info documentation:
 
-	``Small but fast and powerful.  It is very useful for small
+	``Small but fast and powerful. It is very useful for small
 	footprint installations (like on floppy disk) or quick editing
 	sessions.''
 
-    That's why sometimes (X)Emacs isn't the best editor to use :-)
-    I use XEmacs myself when I do coding, but I use Zile when I have,
-    let's say, to quick edit the dot files in the home directory; I don't
-    want to wait 5 seconds to load XEmacs for doing a 2 seconds editing...
+    That's why sometimes (X)Emacs isn't the best editor to use :-) I
+    use XEmacs myself when I do coding, but I use Zile when I have,
+    let's say, to quick edit the dot files in the home directory; I
+    don't want to wait 5 seconds to load XEmacs for doing a 2 seconds
+    editing...
 
-1.6. Why did you choose such difficult key sequences?
+1.4. Why did you choose such difficult key sequences?
 
-    Ask rms@gnu.org.
+    To be the same as Emacs.
 
-1.7. Zile is bogus.
+1.5. Zile has a bug!
 
-    Any bug reports should be sent to the author at the Internet email
-    address <zile-devel@lists.sourceforge.net>.  Patches are appreciated.
+    Bug reports can be sent to the developers at
+    <zile-devel@lists.sourceforge.net>, or entered directly into
+    Bugzilla at http://sourceforge.net/projects/zile. Patches are
+    appreciated.
 
-1.8. I like the xyz function of (X)Emacs but in Zile isn't implemented.
+1.6. I like the xyz function of (X)Emacs but it's not in Zile!
 
     Zile was written to be small but fast and powerful enough.
 
-    In general, if you need something more powerful, use Emacs or XEmacs.
+    In general, if you need something more powerful, use Emacs or
+    XEmacs. You could also try Jed, which emulates Emacs, is not much
+    bigger than Zile, and has syntax highlighting, a macro language
+    and more (http://www.jedsoft.org/jed/).
+
     If you still think that a certain function should be implemented
-    in Zile, please send a message to the author (see question 1.7).
+    in Zile, please send a message to the developers (see question
+    1.5).
 
-1.9. How small does Zile get?
+1.7. How small does Zile get?
 
-    Just for fun, I've tried different gcc flags and compiled the 1.6 sources;
-    the sizes reported here are of the stripped binary.
+    On Fedora Core 1/i386, Zile 1.7 built with gcc 3.3.2 -O2 weighs in
+    at 92,206 bytes when stripped. This is how Zile will typically be
+    built.
 
-    System: SuSE Linux 7.2 (i386)
-    Compiler: gcc version 2.95.3 20010315 (SuSE)
+1.8. Does Zile support the Unicode / UTF-8 encodings?
 
-    +-------------------------------------------+---------------+
-    | Flags                         		|  Binary size	|
-    +-------------------------------------------+---------------+
-    | (none)					|    124364	|
-    | -O					|     96380	|
-    | -O -m386 -malign-functions=0		|     92188	|
-    | -O2 (*)					|     97852	|
-    | -O3					|    121692	|
-    +-------------------------------------------+---------------+
-
-    (*) This is the default on many systems.
-
-1.10. Does Zile support the Unicode / UTF-8 encodings?
-
-   Currently Zile doesn't include any code for Unicode support.  A major
-   rewrite of the editor with ad-hoc support for multibyte sequences
-   is planned in the future.
+   Currently Zile doesn't include any code for Unicode support. A
+   major rewrite of the editor with ad-hoc support for multibyte
+   sequences is planned in the future.
 
 ------------------------------------------------------------------------------
 
@@ -128,8 +107,8 @@ INDEX
 
 2.1. How to quit Zile?
 
-    Type `C-x C-c' (that means holding CONTROL while typing X, releasing them,
-    then holding CONTROL while typing C)
+    Type `C-x C-c' (that means holding CONTROL while typing X,
+    releasing them, then holding CONTROL while typing C)
 
 2.2. How to return to the shell without leaving Zile?
 
@@ -139,10 +118,10 @@ INDEX
 
     From the tutorial (`C-h t'):
 
-    If Zile gets into an infinite (or simply very long) computation which
-    you don't want to finish, you can stop it safely by typing `C-g'.
-    You can also use `C-g' to discard a numeric argument or the beginning of
-    a command that you don't want to finish.
+    If Zile gets into an infinite (or simply very long) computation
+    which you don't want to finish, you can stop it safely by typing
+    `C-g'. You can also use `C-g' to discard a numeric argument or the
+    beginning of a command that you don't want to finish.
 
 2.4. How to undo the previous command?
 
@@ -152,16 +131,19 @@ INDEX
 
     From the tutorial (`C-h t'):
 
-    C-<chr>  means hold the CONTROL key while typing the character <chr>
-	     Thus, `C-f' would be: hold the CONTROL key and type `f'.
-    M-<chr>  means hold the META or EDIT or ALT key down while typing <chr>.
-	     If there is no META, EDIT or ALT key, instead press and release
-	     the ESC key and then type <chr>.  We write <ESC> for the ESC key.
+    C-<chr> means hold the CONTROL key while typing the character
+	     <chr> Thus, `C-f' would be: hold the CONTROL key and type
+	     `f'.
+    M-<chr> means hold the META or EDIT or ALT key down while typing
+	     <chr>. If there is no META, EDIT or ALT key, instead
+	     press and release the ESC key and then type <chr>. We
+	     write <ESC> for the ESC key.
 
 2.6. The colors are not displayed on my screen.
 
-    Enable the `colors' variable into your `~/.zilerc' file.  If it is already
-    enabled, check your `TERM' environment variable and the ncurses manual.
+    Enable the `colors' variable into your `~/.zilerc' file. If it is
+    already enabled, check your `TERM' environment variable and the
+    ncurses manual.
 
     If you are using Zile under xterm, you might need to set the
     `TERM' variable to `xterm-color' or something like.
@@ -171,30 +153,25 @@ INDEX
     Check out the `zilerc.sample' file (type `C-h s') for a full list
     of modifiable variables.
 
-    You might also see the list of defined variables with the
-    command `list-variables' (or the key sequence `C-h l v').
+    You might also see the list of defined variables with the command
+    `list-variables' (or the key sequence `C-h l v').
 
-2.8. Zile resets the fontlock on every `C-l' press.
-
-    Disable the `auto-font-lock-refresh' variable in your `~/.zilerc'
-    initialization file.
-
-2.9. How to display non-English characters?
+2.8. How to display non-English characters?
 
     Put the following line in your `~/.zilerc' file:
 
     	displayable-characters = "0x20-0x7e,0xa1-0xff"
 
-2.10. Zile doesn't handle filenames with non-English characters.
+2.9. Zile doesn't handle filenames with non-English characters.
 
     Try to set the LANG environment variable according to your locale,
-    before running Zile.  For example, for a French environment, try:
+    before running Zile. For example, for a French environment, try:
 
 	export LANG=fr_FR	(with a Bourne-like shell)
 
 	setenv LANG fr_FR	(with a C-like shell).
 
-2.11. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
     You might try adding the following line to your `~/.zilerc' file:
 
@@ -202,97 +179,24 @@ INDEX
 
     and using the alternative key sequences (`M-h' instead of `C-h').
 
-2.12. How to enable Auto Fill Mode in Text Mode at startup?
+2.11. How to change the binding of a function?
 
-    Add the following line to your `~/.zilerc' file:
+    Unfortunately no run-time option exists, yet. If you would like to
+    change a key binding of Zile, you have to edit the
+    `src/tbl_funcs.h' file and recompile the sources.
 
-	text-mode-auto-fill = true
-
-    The same thing applies to Mail Mode:
-
-	mail-mode-auto-fill = true
-
-2.13. How to change the binding of a function?
-
-    Unfortunately no run-time option exists, yet.
-    If you would like to change a key binding of Zile, you have to
-    edit the `src/tbl_funcs.h' file and recompile the sources.
-
-2.14. How to implement a new Font Lock xyz Mode?
-
-    The current implementation of Font Lock is difficult to extend and/or
-    modify because all the modes are hand written in C (this is faster
-    than regex pattern matching, though) and require a recompilation
-    of the code.
-
-    If you would like to write a new mode `xyz', you have to modify at least
-    the following files:
-
-    zile.h: add a
-
-	#define BMODE_XYZ
-
-    then grep all the sources for references to `BMODE_C' and add proper
-    support for your new mode `BMODE_XYZ'.
-
-    tbl_funcs.h: add a
-
-	X0("xyz-mode", xyz_mode)
-
-    funcs.c: implement a function like:
-
-	DEFUN("xyz-mode", xyz_mode)
-
-    (`c-mode' can be used as example).
-
-    fontlock.c: implement a `xyz_set_anchors' function
-    (`cpp_set_anchors' can be used as example).
-
-    fontlock_xyz.gperf, Makefile.in: You might need to write a keyword list
-    for your programming language, then take a look at `fontlock_c.gperf' and
-    at `Makefile.in', to see how it works.
-
-    term_ncurses/ncurses_redisplay.c: Implement a `draw_line_xyz' function
-    (`draw_line_cpp' can be used as example).
-
-2.15. Why not implementing a HTML Mode?
-
-    HTML parsing is difficult to implement and a big DTD model
-    describing the syntax should be included for each HTML version:
-    2.0, 3.0, 4.0, 4.01, XML, CSS, ...  I want to keep the Zile
-    package size smaller (below the 300k).  Hint: use (X)Emacs.
-
-2.16. How to enable Mail Mode with Font Lock at startup?
-
-    If you would like to interface Zile with your mail client, e.g. Pine,
-    you might add a line like this in your mail client configuration:
-
-	editor = zile -f mail-mode
-
-    Zile will automatically turn on Mail Mode at startup.
-
-    You might also want to disable backups in mail editing, to avoid
-    polluting the /tmp directory with useless backup files:
-
-	editor = zile -v backup-method=none -f mail-mode
-
-2.17. The Zile screen is not resized in a X Window terminal.
+2.13. The Zile screen is not resized in a X Window terminal.
 
     There are two possibilities:
+
     (1) Your terminal application does not send the signal `SIGWINCH'
-        to Zile (and other applications).  To be sure, you might check if
-        also other text-mode applications, like `vim' and `joe', do not
-        resize their windows.
-    (2) Your ncurses library does not support the `KEY_RESIZE' pseudo key.
-        This is because your version is old or was not compiled
+        to Zile (and other applications). To be sure, you might check
+        if also other text-mode applications, like `vim' and `joe', do
+        not resize their windows.
+
+    (2) Your ncurses library does not support the `KEY_RESIZE' pseudo
+        key. This is because your version is old or was not compiled
         with the flag `--enable-sigwinch' to `configure'.
-
-2.18. The highlighting looks weird.
-
-     Type `C-l' for making Zile reparse the whole file.  If this doesn't
-     fix the problem you have probably found a bug in the Font Lock
-     engine of Zile (please remember that Font Lock is somewhat limited
-     in Shell Mode).
 
 ------------------------------------------------------------------------------
 
@@ -300,24 +204,25 @@ INDEX
 
 3.1. Can I compile Zile with the old Berkeley curses?
 
-    No, you can't.  The 4.4BSD or prior versions of curses are obsolete.
-    Zile supports only ncurses (tested with version 5.3).
+    No, you can't. The 4.4BSD or prior versions of curses are
+    obsolete. Zile supports only ncurses (tested with version 5.3).
 
 3.2. Zile doesn't compile correctly under the Foobar operating system.
 
-    I have tested Zile under SuSE Linux 7.2 only.  Since it is
-    written in ANSI C, should be fairly easy to port it under other UNIX-like
-    operating systems.  If you get Zile running under any other OS, please
-    send a message to the Zile author telling him that (you might send him
-    the patches you done to the Zile sources if you want them included in the
-    next release).
+    We have tested Zile under Linux only. Since it is written in ANSI
+    C, should be fairly easy to port it under other UNIX-like
+    operating systems. If you get Zile running under some other OS,
+    please send a message to the Zile developers telling them that
+    (you might send him the patches you have made to the Zile sources
+    if you want them included in the next release).
 
     Zile is also known to work under the following operating systems:
+
 	* FreeBSD
 	* NetBSD
 	* OpenBSD
 	* Solaris
-	* Windows 9x with Cygwin
+	* Windows with Cygwin
 
 3.3. Can I compile Zile under Cygwin?
 
@@ -325,5 +230,6 @@ INDEX
 
 	#include <getopt.h>
 
-    line in the `etc/mkdoc.c' and `src/main.c' files, if the compiler complains
-    about the `getopt' function prototype and/or the `optarg' variable.
+    line in the `etc/mkdoc.c' and `src/main.c' files, if the compiler
+    complains about the `getopt' function prototype and/or the
+    `optarg' variable.

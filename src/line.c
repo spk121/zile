@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.27 2004/03/14 14:36:05 rrt Exp $	*/
+/*	$Id: line.c,v 1.28 2004/04/04 20:33:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -136,9 +136,6 @@ int intercalate_char(int c)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
-	if (cur_bp->flags & BFLAG_FONTLOCK)
-		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-
 	return TRUE;
 }
 
@@ -169,9 +166,6 @@ int insert_char(int c)
 			++cur_bp->pt.o;
 
 			cur_bp->flags |= BFLAG_MODIFIED;
-
-			if (cur_bp->flags & BFLAG_FONTLOCK)
-				font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 
 			return TRUE;
 		}
@@ -292,11 +286,6 @@ static int common_insert_newline(int move_pt)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
-	if (cur_bp->flags & BFLAG_FONTLOCK) {
-		font_lock_reset_anchors(cur_bp, cur_bp->pt.p->prev);
-		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-	}
-
 	thisflag |= FLAG_NEED_RESYNC;
 
 	return TRUE;
@@ -377,12 +366,8 @@ void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
 		}
 	}
 
-	if (modified) {
+	if (modified)
 		cur_bp->flags |= BFLAG_MODIFIED;
-
-		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, *lp);
-	}
 }
 
 /*
@@ -534,9 +519,6 @@ int delete_char(void)
 
 		adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, -1);
 
-		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-
 		cur_bp->flags |= BFLAG_MODIFIED;
 
 		return TRUE;
@@ -583,9 +565,6 @@ int delete_char(void)
 		adjust_markers_for_delline(lp1, lp2, lp1len);
 
 		cur_bp->flags |= BFLAG_MODIFIED;
-
-		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 
 		thisflag |= FLAG_NEED_RESYNC;
 
@@ -653,13 +632,9 @@ int backward_delete_char_overwrite(void)
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
-		if (cur_bp->flags & BFLAG_FONTLOCK)
-			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-
 		return TRUE;
-	} else {
+	} else
 		return backward_delete_char();
-	}
 }
 
 DEFUN("backward-delete-char", backward_delete_char)

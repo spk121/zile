@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.8 2004/04/04 19:48:53 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.9 2004/04/04 20:33:12 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -21,12 +21,6 @@ be useful when `C-h' is already bound to Backspace or Delete.\n\
 \n\
 Please note that changing this variable at run-time has no effect; you\n\
 need instead to modify your `~/.zilerc' configuration file and restart Zile.")
-X("auto-font-lock",			"b", "true", "\
-Automatically turn on Font Lock Mode when a C/C++ source file or shell\n\
-script is opened.")
-X("auto-font-lock-refresh",		"b", "true", "\
-If enabled, the file will be reparsed by font lock on every C-l press.\n\
-This may be disabled on slow machines.")
 X("backup-directory",			"", "~/.backup", "\
 Specify target backup directory.  Directory must be existent.\n\
 This value is used only when the `backup-with-directory' value is true.")

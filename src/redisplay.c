@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.6 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: redisplay.c,v 1.7 2004/04/04 20:33:12 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -74,8 +74,6 @@ The desired position of point is always relative to the current window.
 +*/
 {
 	recenter(cur_wp);
-	if (cur_bp->flags & BFLAG_FONTLOCK && lookup_bool_variable("auto-font-lock-refresh"))
-		FUNCALL(font_lock_refresh);
 	cur_tp->full_redisplay();
 	return TRUE;
 }

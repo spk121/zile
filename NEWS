@@ -1,5 +1,9 @@
 Changes between Zile 1.7 BETA 3 - Zile 1.7 BETA 4
 
+* Fontlock removed.
+* Versioned backups removed.
+* FAQ overhauled.
+
 Changes between Zile 1.7 BETA 2 - Zile 1.7 BETA 3
 
 * Changed Zile license from BSD to GNU GPL.

@@ -14,12 +14,18 @@ X1("forward-paragraph", forward_paragraph,		"M-]")
 X1("mark-paragraph", mark_paragraph,			"M-h")
 X1("fill-paragraph", fill_paragraph,			"M-q")
 
+Plus these (which don't have dummy functions yet):
+
+X1("name-last-kbd-macro", name_last_kbd_macro,          "")
+
 * Complete universal-argument functionality for:
 
 transpose-chars
 transpose-words
 transpose-sexps
 transpose-lines
+
+* Allow the user to modify/define key bindings.
 
 ------------------------------------------------------------------------------
 
@@ -29,26 +35,8 @@ X1("kill-rectangle", kill_rectangle,			"C-xrk")
 
 * Allow search and replace not to follow case (case-replace,
   case-fold-search)
-
-* Josef 'Jupp' Schugt <jupp@gmx.de>:
-  - Mail Mode:
-	* Replace "*emphasis*" and "_emphasis_" by " emphasis " where the
-	  former is rendered bold and the latter underscored.
-	* Signatures support.
-  - Small HTML support: during saving HTML files, change
-		<!-- hhmts start -->
-		<!-- hhmts end -->
-	to:
-		<!-- hhmts start -->
-		Last modified: Mon Apr  1 20:17:57 UTC 2002
-		<!-- hhmts end -->
-	If the "Last modified:" line is already present, it is updated.
-* Paragraph formatting.
-* Allow the user to modify/define key bindings.
 * Regex pattern patching for search/replace functions.
-* Automatic indentation for C/C++ modes.
-* Reimplement syntax highlighting using regex pattern matching.
-* Parser for `-*- C -*-' and `-*- C++ -*-' like headers.
+* Unicode support.
 
 ------------------------------------------------------------------------------
 
@@ -57,5 +45,4 @@ VERY LOW PRIORITY (may require a rewrite)
 * Use a kernel of editing functions for low level editing; all other
   high level functions should call these functions to access the data.
 * Buffer oriented structures vs. line oriented structures (like now).
-* Unicode support.
 * Mouse support.

@@ -60,10 +60,6 @@ int check_modified_buffer(Buffer *bp);
 void kill_buffer(Buffer *kill_bp);
 void zile_exit(int exitcode);
 
-/* fontlock.c ------------------------------------------------------------- */
-void font_lock_reset_anchors(Buffer *bp, Line *lp);
-Anchor find_last_anchor(Buffer *bp, Line *lp);
-
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);
 int set_mark_command(void);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.23 2004/03/14 14:36:03 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.24 2004/04/04 20:33:12 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -403,7 +403,6 @@ static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 static void draw_window(int topline, Window *wp)
 {
 	int i, startcol, lineno;
-        int lastanchor;
 	Line *lp;
 	Region r;
 	int highlight;
@@ -417,9 +416,6 @@ static void draw_window(int topline, Window *wp)
 	for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
 	     i > 0 && lp->prev != wp->bp->limitp; lp = lp->prev, --i, --lineno)
 		;
-
-	if (wp->bp->flags & BFLAG_FONTLOCK)
-		lastanchor = find_last_anchor(wp->bp, lp->prev);
 
 	cur_tab_width = wp->bp->tab_width;
 
@@ -441,14 +437,7 @@ static void draw_window(int topline, Window *wp)
 		else
 			startcol = 0;
 #endif
-		if (wp->bp->flags & BFLAG_FONTLOCK && lp->anchors != NULL) {
-			switch (wp->bp->mode) {
-			default:
-				draw_line(i, startcol, wp, lp, lineno, &r, highlight);
-			}
-		}
-		else
-			draw_line(i, startcol, wp, lp, lineno, &r, highlight);
+                draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
 		/*
 		 * Draw the `[EOB]' end of buffer marker if

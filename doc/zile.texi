@@ -599,12 +599,6 @@ If the current buffer now contains an empty file that you just visited
 @item find-file
 Edit a file specified by the user.  Switch to a buffer visiting the file,
 creating one if none already exists.
-@item font-lock-mode
-Toggle @i{Font Lock Mode}.
-When @i{Font Lock Mode} is enabled, text is fontified as you type it.
-@item font-lock-refresh
-Refresh the @i{Font Lock Mode} internal structures.
-This may be called when the fontification looks weird.
 @item forward-char
 Move point right one character.
 On reaching end of buffer, stop and signal error.
@@ -928,14 +922,6 @@ Please note that changing this variable at run-time has no effect; you
 need instead to modify your @file{~/.zilerc} configuration file and
 restart Zile.
 Default value is @samp{false}.
-@item auto-font-lock
-Automatically turn on @i{Font Lock Mode} when a source file or
-shell script is opened.
-Default value is @samp{true}.
-@item auto-font-lock-refresh
-If enabled, the file will be reparsed by @i{Font Lock} on every @kbd{C-l}
-press. This may be disabled on slow machines.
-Default value is @samp{true}.
 @item backup-directory
 Specify target backup directory.  Directory must be existent.
 This value is used only when the @samp{backup-with-directory} value is true.

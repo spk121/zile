@@ -69,40 +69,11 @@ expand-tabs = false
 colors = true
 
 # The color of the status line [default: white]
-# For a list of colors, see below.
-status-line-color = white
-
-# Font Lock fonts
 # Available colors are:
 #     black, blue, cyan, green, magenta, red, white, yellow,
 #     light-black, light-blue, light-cyan, light-green, light-magenta,
 #     light-red, light-white, light-yellow
-font-character = green			# [default: green]
-font-character-delimiters = white	# [default: white]
-font-comment = red			# [default: red]
-font-directive = blue			# [default: blue]
-font-here-document = green		# [default: green]
-font-identifier = white			# [default: white]
-font-keyword = magenta			# [default: magenta]
-font-number = cyan			# [default: cyan]
-font-other = white			# [default: white]
-font-string = green			# [default: green]
-font-string-delimiters = white		# [default: white]
-# The colors used in Mail Mode (if Mail Mode was compiled-in)
-font-mail1 = green			# [default: green]
-font-mail2 = red			# [default: red]
-font-mail3 = cyan			# [default: cyan]
-font-mail4 = magenta			# [default: magenta]
-font-mail5 = blue			# [default: blue]
-
-# Enable automatic Font Lock Mode [default: true]
-# Font Lock can also be toggled using the `M-x font-lock-mode' command.
-auto-font-lock = true
-
-# Enable automatic Font Lock refresh [default: true]
-# If enabled, the file will be reparsed by Font Lock on every C-l press.
-# This may be disabled on slow machines.
-auto-font-lock-refresh = true
+status-line-color = white
 
 # The character prepended to quoted text in mails [default: ">"]
 # Used by Font Lock in Mail Mode (if Mail Mode was compiled-in).
