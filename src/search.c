@@ -1,4 +1,4 @@
-/*	$Id: search.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: search.c,v 1.8 2004/02/14 10:22:56 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -245,6 +245,8 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
 	return FALSE;
 }
 
+static char *last_search = NULL;
+
 DEFUN("search-forward", search_forward)
 /*+
 Search forward from point for the user specified text.
@@ -252,17 +254,17 @@ Search forward from point for the user specified text.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Search: ", "")) == NULL)
+	if ((ms = minibuf_read("Search: ", last_search)) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-/* 	if (last_search != NULL) */
-/* 		free(last_search); */
-/* 	last_search = zstrdup(ms); */
+	if (last_search != NULL)
+		free(last_search);
+	last_search = zstrdup(ms);
 
 	if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms, FALSE)) {
-		minibuf_error("Failing search: `@v%s@@'", ms);
+		minibuf_error("Failing search: `%s'", ms);
 		return FALSE;
 	}
 
@@ -276,17 +278,17 @@ Search backward from point for the user specified text.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Search backward: ", "")) == NULL)
+	if ((ms = minibuf_read("Search backward: ", last_search)) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-/* 	if (last_search != NULL) */
-/* 		free(last_search); */
-/* 	last_search = zstrdup(ms); */
+	if (last_search != NULL)
+		free(last_search);
+	last_search = zstrdup(ms);
 
 	if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms, FALSE)) {
-		minibuf_error("Failing search: `@v%s@@'", ms);
+		minibuf_error("Failing search: `%s'", ms);
 		return FALSE;
 	}
 
@@ -300,17 +302,17 @@ Search forward from point for regular expression REGEXP.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Regexp search: ", "")) == NULL)
+	if ((ms = minibuf_read("Regexp search: ", last_search)) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-/* 	if (last_search != NULL) */
-/* 		free(last_search); */
-/* 	last_search = zstrdup(ms); */
+	if (last_search != NULL)
+		free(last_search);
+	last_search = zstrdup(ms);
 
 	if (!search_forward(cur_bp->pt.p, cur_bp->pt.o, ms, TRUE)) {
-		minibuf_error("Failing regexp search: `@v%s@@'", ms);
+		minibuf_error("Failing regexp search: `%s'", ms);
 		return FALSE;
 	}
 
@@ -324,17 +326,17 @@ Search backward from point for match for regular expression REGEXP.
 {
 	char *ms;
 
-	if ((ms = minibuf_read("Regexp search backward: ", "")) == NULL)
+	if ((ms = minibuf_read("Regexp search backward: ", last_search)) == NULL)
 		return cancel();
 	if (ms[0] == '\0')
 		return FALSE;
 
-/* 	if (last_search != NULL) */
-/* 		free(last_search); */
-/* 	last_search = zstrdup(ms); */
+	if (last_search != NULL)
+		free(last_search);
+	last_search = zstrdup(ms);
 
 	if (!search_backward(cur_bp->pt.p, cur_bp->pt.o, ms, TRUE)) {
-		minibuf_error("Failing regexp search backward: `@v%s@@'", ms);
+		minibuf_error("Failing regexp search backward: `%s'", ms);
 		return FALSE;
 	}
 
@@ -432,12 +434,12 @@ static int isearch(int dir, int regexp)
 				/* Find next match. */
 				cur = cur_bp->pt;
 				/* Save search string. */
-/* 				if (last_search != NULL) */
-/* 					free(last_search); */
-/* 				last_search = zstrdup(astr_cstr(pattern)); */
+				if (last_search != NULL)
+					free(last_search);
+				last_search = zstrdup(astr_cstr(pattern));
 			}
-/* 			else if (last_search != NULL) */
-/* 				astr_assign_cstr(pattern, last_search); */
+			else if (last_search != NULL)
+				astr_assign_cstr(pattern, last_search);
 		} else if (c & KBD_META || c & KBD_CTL || c > KBD_TAB) {
 			if (c == KBD_RET && astr_size(pattern) == 0) {
 				if (dir == ISEARCH_FORWARD) {
@@ -458,9 +460,9 @@ static int isearch(int dir, int regexp)
 				cur_bp->mark->pt = start;
 
 				/* Save search string. */
-/* 				if (last_search != NULL) */
-/* 					free(last_search); */
-/* 				last_search = zstrdup(astr_cstr(pattern)); */
+				if (last_search != NULL)
+					free(last_search);
+				last_search = zstrdup(astr_cstr(pattern));
 
 				minibuf_write("Mark saved when search started");
 			} else
@@ -558,7 +560,7 @@ Replace occurrences of a string with other text.
 	if (find[0] == '\0')
 		return FALSE;
 
-	if ((repl = minibuf_read("Replace `@v%s@@' with: ", "", find)) == NULL)
+	if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
 		return cancel();
 
 	if (!strcmp(find, repl)) {
@@ -600,7 +602,7 @@ what to do with it.
 	if (find[0] == '\0')
 		return FALSE;
 
-	if ((repl = minibuf_read("Query replace `@v%s@@' with: ", "", find)) == NULL)
+	if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
 		return cancel();
 
 	if (!strcmp(find, repl)) {
@@ -618,7 +620,7 @@ what to do with it.
 				resync_redisplay();
 			cur_tp->redisplay();
 			for (;;) {
-				minibuf_write("Query replacing `@v%s@@' with `@v%s@@' (y, n, !, ., q)? ", find, repl);
+				minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
 				c = cur_tp->getkey();
 				switch (c) {
 				case KBD_CANCEL:
