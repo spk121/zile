@@ -15,8 +15,8 @@
 
 @titlepage
 @title The Zile Manual
-@subtitle Edition 2.0 for Zile version 2.0
-@subtitle December 2004
+@subtitle for Zile version 2.1
+@subtitle January 2005
 @author Sandro Sigala and Reuben Thomas
 
 @dircategory Text editors
@@ -27,7 +27,7 @@
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1997-2004 Sandro Sigala
-Copyright @copyright{} 2003-2004 Reuben Thomas
+Copyright @copyright{} 2003-2005 Reuben Thomas
 Copyright @copyright{} 2004 David A. Capello
 @end titlepage
 

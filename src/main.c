@@ -1,6 +1,8 @@
 /* Startup functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
-
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004-2005 Reuben Thomas.
+   All rights reserved.
+  
    This file is part of Zile.
 
    Zile is free software; you can redistribute it and/or modify it under
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.55 2005/01/11 22:29:19 rrt Exp $	*/
+/*	$Id: main.c,v 1.56 2005/01/12 01:02:17 rrt Exp $	*/
 
 #include "config.h"
 
@@ -87,7 +89,7 @@ static char about_splash_str[] = "\
 \n\
 %Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>%\n\
 %Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>%\n\
-%Copyright (C) 2003-2004 Reuben Thomas <rrt@sc3d.org>%\n\
+%Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>%\n\
 \n\
 Type %C-x C-c% to exit Zile.\n\
 Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\
@@ -124,10 +126,8 @@ static void about_screen(void)
  */
 static void sanity_checks(void)
 {
-  /*
-   * The functions `read_rc_file' and `help_tutorial' rely
-   * on a usable `HOME' environment variable.
-   */
+  /* The functions `read_rc_file' and `help_tutorial' rely on a usable
+     `HOME' environment variable. */
   if (getenv("HOME") == NULL) {
     fprintf(stderr, "fatal error: please set `HOME' to point to your home-directory\n");
     exit(1);
@@ -258,10 +258,8 @@ int main(int argc, char **argv)
         open_file(*argv++, line - 1);
     }
   else
-    /*
-     * Show the splash screen only if there isn't any file
-     * specified on command line.
-     */
+    /* Show the splash screen only if there isn't any file specified
+       on command line. */
     about_screen();
 
   setup_main_screen(argc);
