@@ -26,14 +26,14 @@ dnl Checks for functions.
 dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf strrstr)
-AC_CHECK_FUNCS(getcwd)
+AC_CHECK_FUNCS(getcwd fchmod fchown)
 
 dnl ==================================================================
 dnl Checks for header files.
 dnl ==================================================================
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h limits.h)
+AC_CHECK_HEADERS(fcntl.h limits.h getopt.h)
 
 dnl ==================================================================
 dnl Check for GNU Regex library
