@@ -2,7 +2,6 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
 AC_INIT(zile, 2.1CVS, zile-devel@lists.sourceforge.net)
-AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
@@ -19,9 +18,7 @@ dnl ==================================================================
 
 AC_PROG_CC
 BFD_CC_FOR_BUILD
-AC_C_INLINE
 AC_PROG_INSTALL
-AC_PROG_RANLIB
 AC_PATH_PROG(MAKEINFO, makeinfo)
 
 dnl ==================================================================
