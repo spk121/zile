@@ -1,4 +1,4 @@
-/*	$Id: keys.c,v 1.4 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: keys.c,v 1.5 2004/01/21 01:18:12 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -260,7 +260,7 @@ static int strtokey0(char *buf, int *len)
 	if (*p == '\\') {
 		switch (*++p) {
 		case '\\':
-			key = '\\', ++p;
+			key = '\\';
 			break;
 		case 'C':
 			if (p[1] == '-')
