@@ -7,6 +7,13 @@ AC_PROG_CC
 AC_C_INLINE
 AC_PROG_INSTALL
 AC_PROG_RANLIB
+AC_CHECK_PROG(MAKEINFO, makeinfo, yes, no)
+if test $MAKEINFO = yes; then
+	MAKEINFO='makeinfo'
+else
+	# for silly people without texinfo
+	MAKEINFO='@echo'
+fi
 
 dnl This is enabled by default, since only ncurses is supported yet.
 AC_DEFINE(USE_NCURSES)
