@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.45 2005/01/16 13:07:43 rrt Exp $	*/
+/*	$Id: bind.c,v 1.46 2005/01/26 15:19:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,7 +48,6 @@ struct leaf {
   Function func;
 
   /* Leaf vector, number of items, max number of items. */
-  /* XXX Use vector type */
   leafp *vec;
   int vecnum, vecmax;
 };
