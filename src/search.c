@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.31 2005/01/16 13:07:44 rrt Exp $	*/
+/*	$Id: search.c,v 1.32 2005/01/25 21:37:36 rrt Exp $	*/
 
 #include "config.h"
 
@@ -591,9 +591,7 @@ DEFUN("query-replace", query_replace)
     return FALSE;
   }
 
-  /*
-   * Spaghetti code follows... :-(
-   */
+  /* Spaghetti code follows... :-( */
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
     if (!noask) {
       int c;
@@ -602,17 +600,9 @@ DEFUN("query-replace", query_replace)
       for (;;) {
         minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
         c = term_getkey();
-        switch (c) {
-        case KBD_CANCEL:
-        case KBD_RET:
-        case ' ':
-        case 'y':
-        case 'n':
-        case 'q':
-        case '.':
-        case '!':
+        if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y' || c == 'n' ||
+            c == 'q' || c == '.' || c == '!')
           goto exitloop;
-        }
         minibuf_error("Please answer y, n, !, . or q.");
         waitkey(WAITKEY_DEFAULT);
       }
