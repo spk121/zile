@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.16 2004/11/14 21:52:27 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.17 2004/11/14 21:57:54 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -45,10 +45,6 @@ X("fill-column",			"", "72", "\
 The default fill column (used in Auto Fill Mode).")
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
-X("novice-level",			"b", "true", "\
-Enable this if you are new to Emacs in general.\n\
-Setting this variable to false disables the message in the scratch\n\
-buffer.")
 X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\

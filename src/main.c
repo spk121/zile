@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.44 2004/11/14 21:52:27 rrt Exp $	*/
+/*	$Id: main.c,v 1.45 2004/11/14 21:57:54 rrt Exp $	*/
 
 #include "config.h"
 
@@ -157,8 +157,7 @@ static void about_screen(void)
 		replace_string(about_minibuf_str, "C-h", "M-h");
 	}
 
-	if (!lookup_bool_variable("novice-level") &&
-	    !lookup_bool_variable("skip-splash-screen")) {
+	if (!lookup_bool_variable("skip-splash-screen")) {
 		show_splash_screen(about_splash_str);
 		minibuf_write(about_minibuf_str);
 		waitkey(20 * 10);
@@ -271,7 +270,7 @@ static void setup_main_screen(int argc)
 		FUNCALL(list_buffers);
 	}
 	else {
-		if (argc < 1 && lookup_bool_variable("novice-level")) {
+		if (argc < 1) {
 			insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\

@@ -931,10 +931,6 @@ Default value is @samp{72}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
 value is @samp{false}.
-@item novice-level
-Enable this if you are novice to Emacs in general.
-If this is disabled the message in the scratch buffer will be disabled.
-Default value is @samp{true}.
 @item skip-splash-screen
 If enabled, the splash screen at startup will be avoided.
 Default value is @samp{false}.

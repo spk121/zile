@@ -1,9 +1,5 @@
 # .zilerc sample configuration
 
-# Enable this if you are novice to Emacs in general [default: true]
-# Disabling this disables the message in the the scratch buffer.
-novice-level = true
-
 # Do not display the splash screen at startup [default: false]
 skip-splash-screen = false
 
