@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.64 2005/02/07 23:18:24 rrt Exp $        */
+/*      $Id: zile.h,v 1.65 2005/02/15 00:46:28 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -362,7 +362,9 @@ typedef size_t Font;
             uniarg = evalCastLeToInt(value_le); \
             leWipe(value_le); \
           }
-#define END_DEFUN }
+#define END_DEFUN \
+          leWipe(branch); \
+        }
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
