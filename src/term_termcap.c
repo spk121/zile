@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.67 2005/02/21 16:25:22 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.68 2005/02/27 17:47:54 rrt Exp $	*/
 
 #include "config.h"
 
@@ -346,14 +346,11 @@ void term_init(void)
 
   norm_string = astr_new();
   astr_cat_cstr(norm_string, me_string);
-
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
 }
 
 void term_close(void)
 {
-  printf("%s", ke_string); /* Put keypad back in normal mode. */
-
   /* Free memory and finish with termcap. */
   free(screen.array);
   free(screen.oarray);
@@ -365,9 +362,12 @@ void term_close(void)
   term_suspend();
 }
 
-/* Suspend the term ready to go back to the shell */
+/*
+ * Suspend the term ready to go back to the shell
+ */
 void term_suspend(void)
 {
+  printf("%s", ke_string); /* Put keypad back in normal mode. */
   setattr(TCSADRAIN, &ostate);
 }
 
@@ -384,6 +384,7 @@ static void winch_sig_handler(int signo)
 void term_resume(void)
 {
   setattr(TCSADRAIN, &nstate);
+  printf("%s", ks_string); /* Activate keypad (including cursor keys). */
   winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
 }
 
