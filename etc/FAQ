@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/04/05 17:18:14 $
+		   Last updated: $Date: 2004/04/05 17:30:35 $
 
 ------------------------------------------------------------------------------
 
@@ -195,8 +195,8 @@ INDEX
 
     (1) Your terminal application does not send the signal `SIGWINCH'
         to Zile (and other applications). To be sure, you might check
-        if also other text-mode applications, like `vim' and `joe', do
-        not resize their windows.
+        if other terminal applications, like `vim' and `joe', also
+        fail to resize their windows.
 
     (2) Your ncurses library does not support the `KEY_RESIZE' pseudo
         key. This is because your version is old or was not compiled

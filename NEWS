@@ -1,6 +1,6 @@
 Changes between Zile 1.7 BETA 3 - Zile 1.7 BETA 4
 
-* Fontlock removed.
+* Major modes and fontlock removed.
 * Versioned backups removed.
 * FAQ overhauled.
 

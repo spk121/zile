@@ -607,32 +607,11 @@ Right after you visit or save a file, that part of the mode line shows
 no stars, just dashes.
 
 The part of the mode line inside the parentheses is to tell you what
-editing modes you are in.  The default mode is Text which is
-what you are using now.  It is an example of a "major mode".  
+editing modes you are in.  Each mode can be turned on or off by
+itself, independent of all other modes.
 
-Zile has many different major modes.  Some of them are meant for
-editing different languages and/or kinds of text, such as C mode,
-Text mode, etc.  At any time one and only one major mode is active,
-and its name can always be found in the mode line just where
-"Text" is now.
-
-Each major mode is the name of an extended command, which is how you can
-switch to that mode.  For example, M-x text-mode is a command to
-switch to Text mode.
-
-If you are going to be editing English text, such as this file, you
-should probably use Text Mode.
->> Type M-x text-mode<Return>.
-
-Major modes are called major because there are also minor modes.
-Minor modes are alternatives not to the major modes, just minor
-modifications of them.  Each minor mode can be turned on or off by
-itself, independent of all other minor modes, and independent of your
-major mode.  So you can use no minor modes, or one minor mode, or any
-combination of several minor modes.
-
-One minor mode which is very useful, especially for editing English
-text, is Auto Fill mode.  When this mode is on, Zile breaks the line
+One mode which is very useful, especially for editing plain text,
+is Auto Fill mode.  When this mode is on, Zile breaks the line
 in between words automatically whenever you insert text and make a
 line that is too wide.
 

@@ -847,8 +847,6 @@ The variable @samp{tab-width} controls the spacing of tab stops.
 Insert a tabulation at the current point position into
 the current buffer.  Convert the tabulation into spaces
 if the @samp{expand-tabs} variable is bound and set to true.
-@item text-mode
-Turn on the @i{Text Mode} for editing text intended for humans to read.
 @item toggle-read-only
 Change whether this buffer is visiting its file read-only.
 @item transient-mark-mode

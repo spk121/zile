@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.15 2004/04/05 16:06:55 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.16 2004/04/05 17:30:35 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -120,7 +120,6 @@ X1("switch-to-buffer", switch_to_buffer,		"\\C-xb")
 X1("switch-to-correlated-buffer", switch_to_correlated_buffer, "\\F11")
 X0("tabify", tabify)
 X1("tab-to-tab-stop", tab_to_tab_stop,			"\\M-i")
-X0("text-mode", text_mode)
 X1("toggle-read-only", toggle_read_only,		"\\C-x\\C-q")
 X0("transient-mark-mode", transient_mark_mode)
 X1("transpose-chars", transpose_chars,			"\\C-t")

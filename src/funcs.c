@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.36 2004/04/05 17:18:14 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.37 2004/04/05 17:30:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -240,17 +240,6 @@ automatically breaks the line at a previous space.
 	if (cur_bp->flags & BFLAG_AUTOFILL)
 		cur_bp->flags &= ~BFLAG_AUTOFILL;
 	else
-		cur_bp->flags |= BFLAG_AUTOFILL;
-
-	return TRUE;
-}
-
-DEFUN("text-mode", text_mode)
-/*+
-Turn on the mode for editing text intended for humans to read.
-+*/
-{
-	if (lookup_bool_variable("auto-fill-mode"))
 		cur_bp->flags |= BFLAG_AUTOFILL;
 
 	return TRUE;
