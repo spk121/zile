@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.49 2004/11/14 00:00:07 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.50 2004/11/14 16:29:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -386,7 +386,7 @@ int universal_argument(int keytype, int xarg)
 
 	if (keytype == KBD_META) {
 		astr_cpy_cstr(as, "ESC");
-		term_unget_char(xarg + '0');
+		term_unget(xarg + '0');
 	}
 	else
 		astr_cpy_cstr(as, "C-u");
@@ -437,13 +437,13 @@ int universal_argument(int keytype, int xarg)
 					   back to normal state).  */
 				}
 				else {
-					term_unget_char(c);
+					term_unget(c);
 					break;
 				}
 			}
 		}
 		else {
-			term_unget_char(c);
+			term_unget(c);
 			break;
 		}
 	}

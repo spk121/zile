@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.36 2004/11/14 15:22:39 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.37 2004/11/14 16:29:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -449,7 +449,7 @@ static int translate_key(char *s, int nbytes)
         }
 
         for (i = nbytes - 1; i >= used; i--)
-                term_unget_char(s[i]);
+                term_unget(s[i]);
 
         return key;
 }
@@ -492,7 +492,7 @@ static int xgetkey(int mode, int dsecs)
         if (mode & GETKEY_NONFILTERED) {
                 int i;
                 for (i = nbytes - 1; i >= 0; i--)
-                        term_unget_char(keys[i]);
+                        term_unget(keys[i]);
                 return keys[nbytes - 1];
         } else {
                 int key = translate_key(keys, nbytes);
@@ -536,7 +536,7 @@ int term_getkey(void)
         return term_xgetkey(0, 0);
 }
 
-void term_unget_char(int c)
+void term_unget(int c)
 {
 	if (keyp == key_buf)
 		return;

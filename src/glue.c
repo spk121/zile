@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.14 2004/10/16 20:17:03 rrt Exp $	*/
+/*	$Id: glue.c,v 1.15 2004/11/14 16:29:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ void waitkey(int dsecs)
 	int c;
 
 	if ((c = term_xgetkey(GETKEY_DELAYED, dsecs)) != KBD_NOKEY)
-		term_unget_char(c);
+		term_unget(c);
 }
 
 /*
