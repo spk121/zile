@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.7 2004/10/05 19:38:15 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.8 2004/10/05 20:42:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -290,13 +290,15 @@ static int xgetkey(int mode, int arg)
         FD_ZERO(&rfds);
         FD_SET(STDIN_FILENO, &rfds);
 
+        fflush(stdout);
+
         if (mode & GETKEY_DELAYED) {
                 struct timeval tv;
                 tv.tv_sec = arg / 1000;
                 tv.tv_usec = (arg % 1000) * 1000;
-/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv); */
+                ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv);
         } else
-/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, NULL); */
+                ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, NULL);
 
 	if (ret < 0)
 		return KBD_NOKEY;
