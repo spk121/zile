@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.54 2005/01/27 01:33:19 rrt Exp $        */
+/*      $Id: zile.h,v 1.55 2005/01/27 16:18:59 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -72,8 +72,8 @@ typedef int (*Function)(int uniarg);
 /* Point and Marker. */
 struct Point {
   Line *p;                      /* Line pointer. */
-  size_t n;                   /* Line number. */
-  size_t o;                   /* Offset. */
+  size_t n;                     /* Line number. */
+  size_t o;                     /* Offset. */
 };
 
 struct Marker {
