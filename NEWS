@@ -1,4 +1,4 @@
-Changes between Zile 1.7 BETA 3 - Zile 2.0-a1
+Changes between Zile 1.7 BETA 3 - Zile 2.0
 
 * Major modes and fontlock removed.
 * Versioned backups and many other small frivolous features removed.
@@ -6,6 +6,9 @@ Changes between Zile 1.7 BETA 3 - Zile 2.0-a1
 * Many TODOs done, including functions added (notably fill-paragraph).
 * Massive code cleanup.
 * Build system overhauled.
+* Support for different line endings.
+* Port to EPOC.
+* ncurses terminal replaced by termcap; allegro terminal added.
 
 Changes between Zile 1.7 BETA 2 - Zile 1.7 BETA 3
 
