@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.17 2005/01/27 01:33:18 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.18 2005/01/29 12:21:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,9 +36,9 @@
 /* Write minibuf prompt, assuming cursor starts at column 0. */
 static void xminibuf_write(const char *s)
 {
-  int x = 0;
+  size_t x;
 
-  for (; *s != '\0' && x < ZILE_COLS; s++) {
+  for (x = 0; *s != '\0' && x < ZILE_COLS; s++) {
     term_addch(*(unsigned char *)s);
     ++x;
   }
@@ -69,7 +69,7 @@ static void draw_minibuf_read(const char *prompt, const char *value,
   term_addnstr(value + n, min(ZILE_COLS - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
         
-  if ((int)strlen(value + n) >= ZILE_COLS - prompt_len - margin) {
+  if (strlen(value + n) >= ZILE_COLS - prompt_len - margin) {
     term_move(ZILE_LINES - 1, ZILE_COLS - 1);
     term_addch('$');
   }

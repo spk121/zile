@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.36 2005/01/27 01:33:18 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.37 2005/01/29 12:17:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -205,7 +205,7 @@ static char *make_mode_line_flags(Window *wp)
  */
 static void calculate_start_column(Window *wp)
 {
-  int col = 0, lastcol = 0, t = tab_width(wp->bp);
+  size_t col = 0, lastcol = 0, t = tab_width(wp->bp);
   int rpfact, lpfact;
   char *buf, *rp, *lp, *p;
   Point pt = window_pt(wp);
@@ -258,7 +258,8 @@ static char *make_screen_pos(Window *wp, char **buf)
 
 static void draw_status_line(size_t line, Window *wp)
 {
-  int i, someflag = 0;
+  size_t i;
+  int someflag = 0;
   char *buf;
   Point pt = window_pt(wp);
 
@@ -360,7 +361,7 @@ void term_tidy(void)
  */
 void term_addnstr(const char *s, size_t len)
 {
-  int i;
+  size_t i;
   for (i = 0; i < len; i++)
     term_addch(*s++);
 }
