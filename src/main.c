@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.46 2004/11/14 22:07:29 rrt Exp $	*/
+/*	$Id: main.c,v 1.47 2004/11/14 23:32:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,7 +48,12 @@
 #include "extern.h"
 
 #ifndef PATH_MAX
+#ifdef _POSIX_PATH_MAX
 #define PATH_MAX	_POSIX_PATH_MAX
+#else
+/* Guess if all else fails */
+#define PATH_MAX	254
+#endif
 #endif
 
 #define ZILE_VERSION_STRING	"Zile " VERSION
@@ -299,8 +304,6 @@ int main(int argc, char **argv)
 	int c;
 	int qflag = 0;
 	char *uarg = NULL;
-	struct sigaction segv_sig;
-	struct sigaction other_sig;
 	alist fargs = alist_new();
 	alist vargs = alist_new();
 
@@ -335,20 +338,12 @@ int main(int argc, char **argv)
         /*
          * Set up signal handling
          */
-	segv_sig.sa_handler = segv_sig_handler;
-	sigemptyset(&segv_sig.sa_mask);
-        segv_sig.sa_flags = SA_RESTART;
-
-	other_sig.sa_handler = other_sig_handler;
-	sigemptyset(&other_sig.sa_mask);
-	other_sig.sa_flags = SA_RESTART;
-
-	sigaction(SIGFPE, &segv_sig, NULL);
-	sigaction(SIGSEGV, &segv_sig, NULL);
-	sigaction(SIGHUP, &other_sig, NULL);
-	sigaction(SIGINT, &other_sig, NULL);
-	sigaction(SIGQUIT, &other_sig, NULL);
-	sigaction(SIGTERM, &other_sig, NULL);
+        signal(SIGFPE, segv_sig_handler);
+        signal(SIGSEGV, segv_sig_handler);
+        signal(SIGHUP, other_sig_handler);
+        signal(SIGINT, other_sig_handler);
+        signal(SIGQUIT, other_sig_handler);
+        signal(SIGTERM, other_sig_handler);
 
 	term_init();
 
