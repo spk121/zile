@@ -20,12 +20,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.15 2004/10/11 03:02:06 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.16 2004/10/11 12:57:43 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
 #include "config.h"
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -64,7 +65,7 @@ int ZILE_LINES;
 static char *cm_string;
 static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
-static int auto_wrap;
+astr norm_string;
 static struct termios ostate, nstate;
 
 void term_move(int y, int x)
@@ -81,39 +82,68 @@ void term_clrtoeol(void)
         screen.curx = x;
 }
 
-static void doattr(Font f) {
+static const char *getattr(Font f) {
         if (f == ZILE_NORMAL)
-                printf("%s%s", se_string, me_string);
-        if (f & ZILE_BOLD)
-                printf("%s", so_string);
-        if (f & ZILE_REVERSE)
-                printf("%s", mr_string);
+                return astr_cstr(norm_string);
+        else if (f & ZILE_BOLD)
+                return so_string;
+        else if (f & ZILE_REVERSE)
+                return mr_string;
+        assert(0);
+        return "";
 }
 
+/*
+ * Refresh the screen.  This is basically a poor person's ncurses.
+ * To minimise the number of system calls, the output is collected in a string.
+ * To minimise the time taken to draw the screen, only those
+ * characters that have changed are output, and unnecessary cursor
+ * positioning and font changes are elided.
+ * Because the output is collected in a string, tputs cannot be used,
+ * so no padding is done, so this code will not work on slow
+ * terminals.  Hopefully there aren't many of those left.
+ */
 void term_refresh(void)
 {
-        int i, j;
+        int i, j, skipped = 0;
+        Font of = ZILE_NORMAL;
+        astr as = astr_new();
 
+        /* Start at the top left of the screen with no highlighting. */
+        astr_cat_cstr(as, tgoto(cm_string, 0, 0));
+        astr_cat_cstr(as, getattr(ZILE_NORMAL));
+
+        /* Add the rest of the screen. */
         for (i = 0; i < termp->height; i++)
                 for (j = 0; j < termp->width; j++) {
                         int offset = i * termp->width + j;
                         int n = screen.array[offset];
-                        int o = screen.oarray[offset];
 
-                        if (o != n) {
+                        if (screen.oarray[offset] != n) {
                                 char c = n & 0xff;
                                 Font f = n & ~0xff;
 
-                                tputs(tgoto(cm_string, j, i), 1, putchar);
+                                if (skipped)
+                                        astr_cat_cstr(as, tgoto(cm_string, j, i));
+                                skipped = 0;
         
                                 screen.oarray[offset] = n;
 
-                                doattr(f);
-                                putchar(c ? c : ' ');
-                        }
+                                if (f != of)
+                                        astr_cat_cstr(as, getattr(f));
+                                of = f;
+                                
+                                astr_cat_char(as, c ? c : ' ');
+                        } else
+                                skipped = 1;
                 }
 
-        tputs(tgoto(cm_string, screen.curx, screen.cury), 1, putchar);        
+        /* Put the cursor back where it should be. */
+        astr_cat_cstr(as, tgoto(cm_string, screen.curx, screen.cury));
+
+        /* Display the output. */
+        printf("%s", astr_cstr(as));
+        astr_delete(as);
 }
 
 void term_clear(void)
@@ -224,7 +254,6 @@ void term_init(void)
 
         /* Extract information we will use. */
         cm_string = tgetstr("cm", &tcap);
-        auto_wrap = tgetflag("am");
         so_string = tgetstr("so", &tcap);
         se_string = tgetstr("se", &tcap);
 	mr_string = tgetstr("mr", &tcap);
@@ -234,6 +263,10 @@ void term_init(void)
         ku_string = tgetstr("kr", &tcap);
         kd_string = tgetstr("kd", &tcap);
         /* TODO: Use km, mm, mo for Meta key. */
+
+        norm_string = astr_new();
+        astr_cat_cstr(norm_string, se_string);
+        astr_cat_cstr(norm_string, me_string);
 
         /* Save terminal flags. */
         if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
@@ -263,7 +296,7 @@ void term_close(void)
 	term_move(ZILE_LINES - 1, 0);
 	term_clrtoeol();
 	term_refresh();
-        doattr(ZILE_NORMAL);
+        printf(getattr(ZILE_NORMAL));
 
 	/* Free memory and finish with termcap. */
 	free_rotation_buffers();
