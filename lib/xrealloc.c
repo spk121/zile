@@ -1,6 +1,5 @@
-/* $Id: xrealloc.c,v 1.4 2004/03/08 14:32:18 rrt Exp $ */
+/* $Id: xrealloc.c,v 1.5 2004/03/08 14:32:50 rrt Exp $ */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
