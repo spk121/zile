@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.21 2004/11/14 21:34:56 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.22 2004/11/14 22:35:21 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -90,7 +90,7 @@ X2("next-line", next_line,				"\\C-n", "\\DOWN")
 X1("other-window", other_window,			"\\C-xo")
 X1("overwrite-mode", overwrite_mode,			"\\INS")
 X2("previous-line", previous_line,			"\\C-p", "\\UP")
-X0("query-replace", query_replace)
+X1("query-replace", query_replace,			"\\M-%")
 X1("quoted-insert", quoted_insert,			"\\C-q")
 X1("recenter", recenter,				"\\C-l")
 X0("replace-string", replace_string)
