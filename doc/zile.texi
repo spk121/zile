@@ -325,10 +325,6 @@ Show a tutorial window.  Bound to @code{help-tutorial}.
 Describe a variable.  Bound to @code{describe-variable}.
 @item C-h C-d
 Show informations about getting the latest version.  Bound to @code{describe-function}.
-@item C-h C-h, @key{F10}
-Toggle @i{Mini Help} window.  Bound to @code{toggle-minihelp-window}.
-@item C-h C-r, @key{F9}
-Rotate @i{Mini Help} contents.  Bound to @code{rotate-minihelp-contents}.
 @item C-j
 Equivalent to <RET> followed by <TAB>.  Bound to @code{newline-and-indent}.
 @item C-k, @key{F6}
@@ -709,10 +705,6 @@ The place mark goes is the same place @kbd{C-M-f} would
 move to with the same argument.
 @item mark-word
 Set mark argument words away from point.
-@item minihelp-rotate-contents
-Show the next @i{Mini Help} entry.
-@item minihelp-toggle-window
-Toggle the @i{Mini Help} window.
 @item newline
 Insert a newline at the current point position into
 the current buffer.
