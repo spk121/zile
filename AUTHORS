@@ -31,8 +31,7 @@ The Zile team would like to thank:
 * Gerd Bavendiek <bav@epost.de> for suggestions and bug reports
 * Dale DePriest <daled@cadence.com> for suggestions
 * Florian Nykrin <flo.n@gmx.de> for suggestions and bug reports
-* Josef 'Jupp' Schugt <jupp@gmx.de> for suggestions, bug fixes and
-  the C# Mode (C sharp)
+* Josef 'Jupp' Schugt <jupp@gmx.de> for suggestions and bug fixes
 * Alexander Glasmacher <alexander.glasmacher@web.de> for bug fixes
 * Abel Morabito <amorabito@funescoop.com.ar> for suggestions
 * Jacques A. Vidrine <n@nectar.com> for suggestions
@@ -40,9 +39,13 @@ The Zile team would like to thank:
 * Falk Hueffner <falk@debian.org> for bug reports
 * Staffan Johansson <e9drift@etek.chalmers.se> for bug reports
 * db <db@mosey.org> for suggestions
-* Marius Nita <marius@cs.pdx.edu> for the Java Mode and the
-  `shrink-window' feature
+* Marius Nita <marius@cs.pdx.edu> for the `shrink-window' feature
 * Alan James <alan@tomun.org> for suggestions
 * Joseph Boyd <k963@bonbon.net> for the `back-to-indentation' feature
+* Eberhard Mattes <em1@users.sourceforge.net> for the epocemx POSIX
+  emulation layer for EPOC, which made the EPOC port possible.
+* Dmitri Brechalov <dmych@users.sourceforge.net> for his eEmacs
+  editor (based on various microEmacs versions) for EPOC, from
+  which code was stolen for zile's epocemx terminal interface.
 
 and everyone else who has reported bugs and made suggestions.
