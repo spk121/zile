@@ -5,7 +5,8 @@
 #{"Zile"},(0x101F9331),2,0,0
 
 "doc/BANNER.EPOC"-"",FT,TA
-"src/zile"-"!:\zile.exe"
+"src/zile"-"!:\emx\bin\zile.exe"
+"zile.lnk"-"!:\zile.exe"
 "doc/AUTODOC"-"!:\emx\share\zile\AUTODOC"
 "doc/FAQ"-"!:\emx\share\zile\FAQ"
 "doc/HELP"-"!:\emx\share\zile\HELP"
