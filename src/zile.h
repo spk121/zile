@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.45 2005/01/16 13:07:44 rrt Exp $        */
+/*      $Id: zile.h,v 1.46 2005/01/17 18:15:34 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -262,7 +262,6 @@ typedef unsigned long Font;
  * Designed to fit in an int, leaving room for a char underneath. */
 #define ZILE_NORMAL		0x000
 #define ZILE_REVERSE		0x100
-#define ZILE_BOLD		0x200
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.

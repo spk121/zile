@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.4 2005/01/16 13:04:58 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.5 2005/01/17 18:15:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -85,8 +85,6 @@ void term_clrtoeol(void)
 static const char *getattr(Font f) {
   if (f == ZILE_NORMAL)
     return astr_cstr(norm_string);
-  else if (f & ZILE_BOLD)
-    return so_string;
   else if (f & ZILE_REVERSE)
     return mr_string;
   assert(0);

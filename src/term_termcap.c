@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.45 2005/01/16 13:04:58 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.46 2005/01/17 18:15:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -66,7 +66,7 @@ int ZILE_COLS;   /* Current number of columns on screen. */
 int ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
-static char *so_string, *se_string, *mr_string, *me_string;
+static char *mr_string, *me_string;
 
 static int key_code[] = {
   KBD_LEFT, KBD_RIGHT, KBD_UP, KBD_DOWN,
@@ -108,8 +108,6 @@ void term_clrtoeol(void)
 static const char *getattr(Font f) {
   if (f == ZILE_NORMAL)
     return astr_cstr(norm_string);
-  else if (f & ZILE_BOLD)
-    return so_string;
   else if (f & ZILE_REVERSE)
     return mr_string;
   assert(0);
@@ -224,15 +222,10 @@ void term_attrset(int attrs, ...)
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++) {
     Font f = va_arg(valist, Font);
-    switch (f) {
-    case ZILE_NORMAL:
+    if (f == ZILE_NORMAL)
       screen.font = ZILE_NORMAL;
-      break;
-    case ZILE_REVERSE:
-    case ZILE_BOLD:
+    else if (f == ZILE_REVERSE)
       screen.font |= f;
-      break;
-    }
   }
   va_end(valist);
 }
@@ -356,8 +349,6 @@ void term_init(void)
   ke_string = tgetstr_safe("ke", &tcap);
   cm_string = tgetstr_safe("cm", &tcap);
   ce_string = tgetstr_safe("ce", &tcap);
-  so_string = tgetstr_safe("so", &tcap);
-  se_string = tgetstr_safe("se", &tcap);
   mr_string = tgetstr_safe("mr", &tcap);
   me_string = tgetstr_safe("me", &tcap);
 
@@ -368,7 +359,6 @@ void term_init(void)
   /* Assume the Meta key is present and on, and generates ESC */
 
   norm_string = astr_new();
-  astr_cat_cstr(norm_string, se_string);
   astr_cat_cstr(norm_string, me_string);
 
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
