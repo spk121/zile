@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.22 2004/10/13 15:52:19 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.23 2004/10/13 15:53:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -237,7 +237,7 @@ static char *get_tcap(void)
         return tcap;
 }
 
-static void term_read_screen_size(void)
+static void read_screen_size(void)
 {
         char *tcap = get_tcap();
         ZILE_COLS = tgetnum("co");
@@ -260,7 +260,7 @@ void term_init(void)
 {
         char *tcap = get_tcap();
         
-        term_read_screen_size();
+        read_screen_size();
         termp->width = ZILE_COLS;
         termp->height = ZILE_LINES;
 
@@ -456,7 +456,7 @@ static int *ungetkey_p = ungetkey_buf;
 static void winch_sig_handler(int signo)
 {
         (void)signo;
-        term_read_screen_size();
+        read_screen_size();
         resize_windows();
         termp->width = ZILE_COLS;
         termp->height = ZILE_LINES;
