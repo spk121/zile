@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.65 2005/01/27 01:33:17 rrt Exp $        */
+/*      $Id: file.c,v 1.66 2005/01/29 13:06:27 rrt Exp $        */
 
 #include "config.h"
 
@@ -229,7 +229,7 @@ astr get_current_dir(int interactive)
   if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
-    size_t p;
+    int p;
 
     buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
     p = astr_rfind_cstr(buf, "/");
