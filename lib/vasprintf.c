@@ -81,6 +81,7 @@ you use strange formats.
 #include <ctype.h>
 #include <limits.h>
 
+#include "config.h"
 
 #define ALLOC_CHUNK 2048
 #define ALLOC_SECURITY_MARGIN 1024   /* big value because some platforms have very big 'G' exponant */
