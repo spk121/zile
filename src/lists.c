@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.7 2005/01/19 01:21:04 rrt Exp $	*/
+/*	$Id: lists.c,v 1.8 2005/01/22 00:10:20 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -75,7 +75,8 @@ le *leAddHead(le *list, le *element)
     return list;
 
   element->list_next = list;
-  if (list) list->list_prev = element;
+  if (list)
+    list->list_prev = element;
   return element;
 }
     
