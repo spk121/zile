@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.14 2004/03/08 15:37:18 rrt Exp $	*/
+/*	$Id: bind.c,v 1.15 2004/03/08 15:39:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -138,7 +138,7 @@ void bind_key(char *key, Function func)
 	}
 }
 
-static leafp search_key0(leafp tree, int *keys, int n)
+static leafp search_key(leafp tree, int *keys, int n)
 {
 	leafp p;
 
@@ -146,23 +146,11 @@ static leafp search_key0(leafp tree, int *keys, int n)
 		if (n == 1)
 			return p;
 		else
-			return search_key0(p, &keys[1], n - 1);
+			return search_key(p, &keys[1], n - 1);
 	}
 
 	return NULL;
 }
-
-#if 0
-static leafp search_key(char *key)
-{
-	int keys[64], i;
-
-	if ((i = keytovec(key, keys)) > 0)
-		return search_key0(leaf_tree, keys, i);
-	else
-		return NULL;
-}
-#endif
 
 #if DEBUG
 static void prspaces(int i)
@@ -247,7 +235,7 @@ static leafp completion_scan(int c, int keys[], int *numkeys)
 	*numkeys = 1;
 
 	for (;;) {
-		if ((p = search_key0(leaf_tree, keys, *numkeys)) == NULL)
+		if ((p = search_key(leaf_tree, keys, *numkeys)) == NULL)
 			return NULL;
 		if (p->func == NULL) {
 			char buf[64];
