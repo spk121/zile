@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.17 2005/01/10 14:09:45 rrt Exp $	*/
+/*	$Id: basic.c,v 1.18 2005/01/11 23:10:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -415,23 +415,14 @@ int ngotodown(int n)
   return TRUE;
 }
 
-/* The number of lines to scroll down or up. */
-#define SCROLL_LINES	cur_wp->eheight
-
 int scroll_down(void)
 {
-  if (cur_bp->pt.n > 0) {
-    if (ngotoup(SCROLL_LINES)) {
-      /* XXX */
-      return TRUE;
-    } else
-      return FALSE;
-  } else {
+  if (cur_bp->pt.n > 0)
+    return ngotoup(cur_wp->eheight) ? TRUE : FALSE;
+  else {
     minibuf_error("Beginning of buffer");
     return FALSE;
   }
-
-  return TRUE;
 }
 
 DEFUN("scroll-down", scroll_down)
@@ -453,18 +444,12 @@ DEFUN("scroll-down", scroll_down)
 
 int scroll_up(void)
 {
-  if (cur_bp->pt.n < cur_bp->num_lines) {
-    if (ngotodown(SCROLL_LINES)) {
-      /* XXX */
-      return TRUE;
-    } else
-      return FALSE;
-  } else {
+  if (cur_bp->pt.n < cur_bp->num_lines)
+    return ngotodown(cur_wp->eheight) ? TRUE : FALSE;
+  else {
     minibuf_error("End of buffer");
     return FALSE;
   }
-
-  return TRUE;
 }
 
 DEFUN("scroll-up", scroll_up)
