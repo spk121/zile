@@ -20,15 +20,7 @@
 #ifndef __REGEXP_LIBRARY_H__
 #define __REGEXP_LIBRARY_H__
 
-/* POSIX says that <sys/types.h> must be included (by the caller) before
-   <regex.h>.  */
-
-#ifdef VMS
-/* VMS doesn't have `size_t' in <sys/types.h>, even though POSIX says it
-   should be there.  */
 #include <stddef.h>
-#endif
-
 
 /* The following bits are used to determine the regexp syntax we
    recognize.  The set/not-set meanings are chosen so that Emacs syntax
@@ -389,32 +381,22 @@ typedef struct
    unfortunately clutters up the declarations a bit, but I think it's
    worth it.  */
 
-#if __STDC__
-
-#define _RE_ARGS(args) args
-
-#else /* not __STDC__ */
-
-#define _RE_ARGS(args) ()
-
-#endif /* not __STDC__ */
-
 /* Sets the current default syntax to SYNTAX, and return the old syntax.
    You can also simply assign to the `re_syntax_options' variable.  */
-extern reg_syntax_t re_set_syntax _RE_ARGS ((reg_syntax_t syntax));
+extern reg_syntax_t re_set_syntax (reg_syntax_t syntax);
 
 /* Compile the regular expression PATTERN, with length LENGTH
    and syntax given by the global `re_syntax_options', into the buffer
    BUFFER.  Return NULL if successful, and an error string if not.  */
 extern const char *re_compile_pattern
-  _RE_ARGS ((const char *pattern, int length,
-             struct re_pattern_buffer *buffer));
+  (const char *pattern, int length,
+   struct re_pattern_buffer *buffer);
 
 
 /* Compile a fastmap for the compiled pattern in BUFFER; used to
    accelerate searches.  Return 0 if successful and -2 if was an
    internal error.  */
-extern int re_compile_fastmap _RE_ARGS ((struct re_pattern_buffer *buffer));
+extern int re_compile_fastmap (struct re_pattern_buffer *buffer);
 
 
 /* Search in the string STRING (with length LENGTH) for the pattern
@@ -423,30 +405,30 @@ extern int re_compile_fastmap _RE_ARGS ((struct re_pattern_buffer *buffer));
    match, or -2 for an internal error.  Also return register
    information in REGS (if REGS and BUFFER->no_sub are nonzero).  */
 extern int re_search
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string,
-            int length, int start, int range, struct re_registers *regs));
+  (struct re_pattern_buffer *buffer, const char *string,
+   int length, int start, int range, struct re_registers *regs);
 
 
 /* Like `re_search', but search in the concatenation of STRING1 and
    STRING2.  Also, stop searching at index START + STOP.  */
 extern int re_search_2
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string1,
-             int length1, const char *string2, int length2,
-             int start, int range, struct re_registers *regs, int stop));
+  (struct re_pattern_buffer *buffer, const char *string1,
+   int length1, const char *string2, int length2,
+   int start, int range, struct re_registers *regs, int stop);
 
 
 /* Like `re_search', but return how many characters in STRING the regexp
    in BUFFER matched, starting at position START.  */
 extern int re_match
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string,
-             int length, int start, struct re_registers *regs));
+  (struct re_pattern_buffer *buffer, const char *string,
+   int length, int start, struct re_registers *regs));
 
 
 /* Relates to `re_match' as `re_search_2' relates to `re_search'.  */
 extern int re_match_2 
-  _RE_ARGS ((struct re_pattern_buffer *buffer, const char *string1,
-             int length1, const char *string2, int length2,
-             int start, struct re_registers *regs, int stop));
+  (struct re_pattern_buffer *buffer, const char *string1,
+    int length1, const char *string2, int length2,
+    int start, struct re_registers *regs, int stop);
 
 
 /* Set REGS to hold NUM_REGS registers, storing them in STARTS and
@@ -462,7 +444,7 @@ extern int re_match_2
    PATTERN_BUFFER will allocate its own register data, without
    freeing the old data.  */
 extern void re_set_registers
-  _RE_ARGS ((struct re_pattern_buffer *buffer, struct re_registers *regs,
-             unsigned num_regs, regoff_t *starts, regoff_t *ends));
+  (struct re_pattern_buffer *buffer, struct re_registers *regs,
+    unsigned num_regs, regoff_t *starts, regoff_t *ends);
 
 #endif /* not __REGEXP_LIBRARY_H__ */
