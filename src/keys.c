@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.11 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: keys.c,v 1.12 2004/04/05 13:27:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -259,7 +259,7 @@ int strtochord(char *buf, int *len)
 /*
  * Convert a key sequence string into a key code sequence.
  */
-int keytovec(char *key, int **keys)
+int keystrtovec(char *key, int **keys)
 {
         vector *v = vec_new(sizeof(int));
 	int size;
@@ -280,6 +280,25 @@ int keytovec(char *key, int **keys)
 }
 
 /*
+ * Convert a key code sequence into a key code sequence string.
+ */
+astr keyvectostr(int *keys, int numkeys)
+{
+	int i;
+        astr as = astr_new();
+
+	for (i = 0; i < numkeys; i++) {
+                astr key = chordtostr(keys[i]);
+                astr_cat(as, key);
+                astr_delete(key);
+                if (i > 0)
+                        astr_cat_char(as, ' ');
+	}
+
+	return as;
+}
+
+/*
  * Convert a key like "\\C-xrs" to "C-x r s"
  */
 astr simplify_key(char *key)
@@ -289,7 +308,7 @@ astr simplify_key(char *key)
 
 	if (key == NULL)
 		return dest;
-	i = keytovec(key, &keys);
+	i = keystrtovec(key, &keys);
 	for (j = 0; j < i; j++) {
                 astr as;
 		if (j > 0)

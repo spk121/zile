@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.24 2004/04/05 00:50:47 rrt Exp $	*/
+/*	$Id: bind.c,v 1.25 2004/04/05 13:27:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -127,7 +127,7 @@ static void bind_key_string(char *key, Function func)
 {
 	int numkeys, *keys;
 
-	if ((numkeys = keytovec(key, &keys)) > 0) {
+	if ((numkeys = keystrtovec(key, &keys)) > 0) {
 		bind_key_vec(leaf_tree, keys, numkeys, func);
                 free(keys);
 	}
@@ -358,19 +358,55 @@ static struct fentry *bsearch_function(char *name)
 	return bsearch(&key, fentry_table, fentry_table_size, sizeof fentry_table[0], bind_compar);
 }
 
-char *minibuf_read_function_name(const char *msg)
+static Function get_function(char *name)
 {
 	unsigned int i;
-	char *p, *ms;
+	for (i = 0; i < fentry_table_size; ++i)
+		if (!strcmp(name, fentry_table[i].name))
+			return fentry_table[i].func;
+	return NULL;
+}
+
+static char *get_function_name(Function p)
+{
+	unsigned int i;
+	for (i = 0; i < fentry_table_size; ++i)
+		if (fentry_table[i].func == p)
+			return fentry_table[i].name;
+	return NULL;
+}
+
+int execute_function(char *name, int uniarg)
+{
+        Function func = get_function(name);
+        if (func) {
+                func(uniarg);
+                return TRUE;
+        }
+        return FALSE;
+}
+
+/*
+ * Read a function name from the minibuffer.
+ */
+char *minibuf_read_function_name(const char *fmt, ...)
+{
+	va_list ap;
+	unsigned int i;
+	char *buf, *p, *ms;
 	fentryp entryp;
 	Completion *cp;
+
+	va_start(ap, fmt);
+	buf = minibuf_format(fmt, ap);
+	va_end(ap);
 
 	cp = new_completion(FALSE);
 	for (i = 0; i < fentry_table_size; ++i)
 		alist_append(cp->completions, zstrdup(fentry_table[i].name));
 
 	for (;;) {
-		ms = minibuf_read_completion(msg, "", cp, &functions_history);
+		ms = minibuf_read_completion(buf, "", cp, &functions_history);
 
 		if (ms == NULL) {
 			free_completion(cp);
@@ -414,34 +450,6 @@ char *minibuf_read_function_name(const char *msg)
 	return entryp->name;
 }
 
-static Function get_function(char *name)
-{
-	unsigned int i;
-	for (i = 0; i < fentry_table_size; ++i)
-		if (!strcmp(name, fentry_table[i].name))
-			return fentry_table[i].func;
-	return NULL;
-}
-
-static char *get_function_name(Function p)
-{
-	unsigned int i;
-	for (i = 0; i < fentry_table_size; ++i)
-		if (fentry_table[i].func == p)
-			return fentry_table[i].name;
-	return NULL;
-}
-
-int execute_function(char *name, int uniarg)
-{
-        Function func = get_function(name);
-        if (func) {
-                func(uniarg);
-                return TRUE;
-        }
-        return FALSE;
-}
-
 DEFUN("execute-extended-command", execute_extended_command)
 /*+
 Read function name, then read its arguments and call it.
@@ -465,7 +473,7 @@ Read function name, then read its arguments and call it.
 
 DEFUN("global-set-key", global_set_key)
 /*+
-Bind a function to a key sequence.
+Bind a command to a key sequence.
 Read key sequence and function name, and bind the function to the key
 sequence.
 +*/
@@ -473,12 +481,16 @@ sequence.
 	int c, *keys, numkeys, ok = FALSE;
         leafp p;
         Function func;
+        char *name;
+        astr as;
 
-        /* XXX minibuffer message */
+        minibuf_write("Set key globally:");
         c = cur_tp->getkey();
         p = completion_scan(c, &keys, &numkeys);
 
-	char *name = minibuf_read_function_name("Bind function: ");
+        as = keyvectostr(keys, numkeys);
+	name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
+        astr_delete(as);
 	if (name == NULL)
 		return FALSE;
 

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: minibuf.c,v 1.16 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: minibuf.c,v 1.17 2004/04/05 13:27:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,7 +38,7 @@ static History files_history;
  * Minibuffer wrapper functions.
  *--------------------------------------------------------------------------*/
 
-static char *minibuf_format(const char *fmt, va_list ap)
+char *minibuf_format(const char *fmt, va_list ap)
 {
 	char *buf;
 	vasprintf(&buf, fmt, ap);
@@ -106,7 +106,10 @@ char *minibuf_read(const char *fmt, const char *value, ...)
 	return p;
 }
 
-/* The returned buffer must be freed by the caller. */
+/*
+ * Read a directory from the minibuffer.
+ * The returned buffer must be freed by the caller.
+ */
 char *minibuf_read_dir(const char *fmt, const char *value, ...)
 {
 	va_list ap;

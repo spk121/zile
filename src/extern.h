@@ -18,9 +18,9 @@ int scroll_up(void);
 int do_completion(astr as, int *compl);
 int execute_function(char *name, int uniarg);
 void free_bindings(void);
+char *minibuf_read_function_name(const char *fmt, ...);
 char *get_function_by_key_sequence(void);
 void init_bindings(void);
-char *minibuf_read_function_name(const char *msg);
 void process_key(int c);
 
 /* buffer.c --------------------------------------------------------------- */
@@ -90,7 +90,8 @@ char *getln(FILE *fp);
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr(int key);
 int strtochord(char *buf, int *len);
-int keytovec(char *key, int **keyvec);
+int keystrtovec(char *key, int **keyvec);
+astr keyvectostr(int *keys, int numkeys);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
@@ -143,6 +144,7 @@ void set_marker_insertion_type(Marker *marker, int type);
 int marker_insertion_type(Marker *marker);
 
 /* minibuf.c -------------------------------------------------------------- */
+char *minibuf_format(const char *fmt, va_list ap);
 void free_minibuf(void);
 void minibuf_clear(void);
 void minibuf_error(const char *fmt, ...);

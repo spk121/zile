@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.13 2004/04/05 00:50:47 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.14 2004/04/05 13:27:44 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -35,7 +35,6 @@ X1("delete-window", delete_window,			"\\C-x0")
 X0("delete-region", delete_region)
 X2("describe-function", describe_function,		"\\C-hd", "\\C-hf")
 X1("describe-key", describe_key,			"\\C-hk")
-X1("describe-key-briefly", describe_key_briefly,	"\\C-hc")
 X1("describe-variable", describe_variable,		"\\C-hv")
 X1("downcase-region", downcase_region,			"\\C-x\\C-l")
 X1("downcase-word", downcase_word,			"\\M-l")

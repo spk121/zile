@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.15 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: help.c,v 1.16 2004/04/05 13:27:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -354,7 +354,7 @@ Display the full documentation of a variable.
 
 DEFUN("describe-key", describe_key)
 /*+
-Display documentation of the function invoked by a key sequence.
+Display documentation of the command invoked by a key sequence.
 +*/
 {
 	char *name;
@@ -366,7 +366,7 @@ Display documentation of the function invoked by a key sequence.
 		return FALSE;
 	}
 
-	minibuf_write("Key sequence is bound to `%s'", name);
+	minibuf_write("Key sequence runs the command `%s'", name);
 
 	if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
 		return FALSE;
@@ -377,24 +377,6 @@ Display documentation of the function invoked by a key sequence.
 			  name, doc);
 	astr_delete(bufname);
 	astr_delete(doc);
-
-	return TRUE;
-}
-
-DEFUN("describe-key-briefly", describe_key_briefly)
-/*+
-Display the name of the function invoked by a key sequence.
-+*/
-{
-	char *name;
-
-	minibuf_write("Describe key briefly:");
-	if ((name = get_function_by_key_sequence()) == NULL) {
-		minibuf_error("Key sequence is undefined");
-		return FALSE;
-	}
-
-	minibuf_write("Key sequence runs the command `%s'", name);
 
 	return TRUE;
 }
