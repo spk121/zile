@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.c,v 1.6 2005/01/25 00:28:39 rrt Exp $	*/
+/*	$Id: parser.c,v 1.7 2005/01/25 00:52:05 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -46,7 +46,7 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
       do {
         c = getachar();
       } while (c != EOF && c != '\n');
-  } while (c == ' ' || c == '\t');
+  } while (c != EOF && (c == ' ' || c == '\t'));
 
   /* Snag token */
   if (c == '(') {
@@ -121,32 +121,32 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
     tok = snagAToken(getachar, ungetachar, &tokenid);
 
     switch (tokenid) {
-    case (T_NONE):
+    case T_NONE:
       break;
 
-    case (T_QUOTE):
+    case T_QUOTE:
       isquoted = 1;
       break;
 
-    case (T_OPENPAREN):
+    case T_OPENPAREN:
       list = leAddBranchElement(list,
                                 parseInFile(getachar, ungetachar, NULL, line),
                                 isquoted);
       isquoted = 0;
       break;
 
-    case (T_NEWLINE):
+    case T_NEWLINE:
       isquoted = 0;
       *line = *line +1;
       break;
 
-    case (T_WORD):
+    case T_WORD:
       list = leAddDataElement(list, astr_cstr(tok), isquoted);
       isquoted = 0;
       break;
 	    
-    case (T_CLOSEPAREN):
-    case (T_EOF):
+    case T_CLOSEPAREN:
+    case T_EOF:
       isquoted = 0;
       astr_delete(tok);
       return list;
