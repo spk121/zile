@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.11 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.12 2005/01/29 12:40:35 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -30,15 +30,9 @@ void resync_redisplay(void)
 {
   int delta = cur_bp->pt.n - cur_wp->lastpointn;
 
-  if (delta > 0) {
-    if (cur_wp->topdelta + delta < cur_wp->eheight)
-      cur_wp->topdelta += delta;
-    else if (cur_bp->pt.n > cur_wp->eheight / 2)
-      cur_wp->topdelta = cur_wp->eheight / 2;
-    else
-      cur_wp->topdelta = cur_bp->pt.n;
-  } else if (delta < 0) {
-    if (cur_wp->topdelta + delta >= 0)
+  if (delta) {
+    if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||
+        (delta < 0 && cur_wp->topdelta >= (size_t)(-delta)))
       cur_wp->topdelta += delta;
     else if (cur_bp->pt.n > cur_wp->eheight / 2)
       cur_wp->topdelta = cur_wp->eheight / 2;
