@@ -1,4 +1,4 @@
-/*	$Id: basic.c,v 1.6 2004/02/03 01:22:01 dacap Exp $	*/
+/*	$Id: basic.c,v 1.7 2004/02/04 02:52:12 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -38,6 +38,9 @@
 #include "zile.h"
 #include "extern.h"
 
+/* Goal-column to arrive when {prev,next}-line functions are used.  */
+static int cur_goalc;
+
 DEFUN("beginning-of-line", beginning_of_line)
 /*+
 Move point to beginning of current line.
@@ -57,7 +60,10 @@ Move point to end of current line.
 {
 	cur_wp->pointo = cur_wp->pointp->size;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
+        /* Change the `goalc' to the end of line for next
+           `{prev,next}-line' calls.  */
+	thisflag |= FLAG_DONE_CPCN | FLAG_HIGHLIGHT_REGION_STAYS;
+	cur_goalc = INT_MAX;
 
 	return TRUE;
 }
@@ -104,15 +110,14 @@ static void goto_goalc(int goalc)
 	cur_wp->pointo = p - sp;
 }
 
-static int cur_goalc;
-
 int previous_line(void)
 {
 	if (cur_wp->pointp->prev != cur_bp->limitp) {
 		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
 		if (!(lastflag & FLAG_DONE_CPCN)) {
-                        if (cur_wp->pointo == cur_wp->pointp->size)
+                        if (cur_wp->pointo > 0 &&
+			    cur_wp->pointo == cur_wp->pointp->size)
                                 cur_goalc = INT_MAX;
                         else
                                 cur_goalc = get_goalc();
@@ -166,7 +171,8 @@ int next_line(void)
 		thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
 		if (!(lastflag & FLAG_DONE_CPCN)) {
-                        if (cur_wp->pointo == cur_wp->pointp->size)
+                        if (cur_wp->pointo > 0 &&
+			    cur_wp->pointo == cur_wp->pointp->size)
                                 cur_goalc = INT_MAX;
                         else
                                 cur_goalc = get_goalc();
@@ -203,8 +209,10 @@ column, or at the end of the line if it is not long enough.
 	      cur_wp->pointo == cur_wp->pointp->size)) {
 		for (uni = 0; uni < uniarg; ++uni)
 			if (!next_line()) {
+                                int old = cur_goalc;
                                 thisflag |= FLAG_DONE_CPCN;
                                 FUNCALL(end_of_line);
+                                cur_goalc = old;
 				break;
 			}
 	}
