@@ -1,4 +1,4 @@
-/*	$Id: minibuf.c,v 1.8 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: minibuf.c,v 1.9 2003/11/28 21:24:30 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -347,7 +347,7 @@ int minibuf_read_boolean(const char *fmt, ...)
 	free_history(hp);
 	free(buf);
 
-	return retvalue;	
+	return retvalue;
 }
 
 char *minibuf_read_color(const char *fmt, ...)
@@ -479,7 +479,7 @@ static void default_history_scroll_up(historyp hp)
 	cur_bp = wp->bp;
 	if (cur_wp->pointn == cur_bp->num_lines || !FUNCALL(scroll_up))
 		gotobob();
-	cur_wp = old_wp; 
+	cur_wp = old_wp;
 	cur_bp = old_wp->bp;
 
 	cur_tp->redisplay();
@@ -500,7 +500,7 @@ static void default_history_scroll_down(historyp hp)
 		gotoeob();
 		resync_redisplay();
 	}
-	cur_wp = old_wp; 
+	cur_wp = old_wp;
 	cur_bp = old_wp->bp;
 
 	cur_tp->redisplay();
