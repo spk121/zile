@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.62 2005/01/23 14:11:38 rrt Exp $        */
+/*      $Id: file.c,v 1.63 2005/01/23 18:39:03 rrt Exp $        */
 
 #include "config.h"
 
@@ -35,9 +35,7 @@
 #if HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <pwd.h>
 #include <stdarg.h>
 #include <stdio.h>

@@ -20,15 +20,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.26 2005/01/14 16:56:57 rrt Exp $	*/
+/*	$Id: help.c,v 1.27 2005/01/23 18:39:03 rrt Exp $	*/
 
 #include "config.h"
 
 #include <assert.h>
 #include <ctype.h>
-#if HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

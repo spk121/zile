@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.48 2005/01/21 23:25:36 rrt Exp $        */
+/*      $Id: zile.h,v 1.49 2005/01/23 18:39:03 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -347,7 +347,7 @@ typedef unsigned long Font;
 #define GCC_UNUSED
 #endif
 
-/* Define an interactive function (callable with `M-x'). */
+/* Define an interactive function. */
 #define DEFUN(zile_func, c_func)                \
         int F_ ## c_func(int uniarg GCC_UNUSED)
 

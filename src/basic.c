@@ -20,14 +20,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.18 2005/01/11 23:10:04 rrt Exp $	*/
+/*	$Id: basic.c,v 1.19 2005/01/23 18:39:03 rrt Exp $	*/
 
 #include "config.h"
 
 #include <assert.h>
-#ifdef HAVE_LIMITS_H
 #include <limits.h>
-#endif
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -150,13 +148,13 @@ DEFUN("previous-line", previous_line)
     column, or at the end of the line if it is not long enough.
     +*/
 {
-  int uni;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(next_line, -uniarg);
 
   if (!bobp()) {
-    for (uni = 0; uni < uniarg; ++uni)
+    for (i = 0; i < uniarg; i++)
       if (!previous_line()) {
         thisflag |= FLAG_DONE_CPCN;
         FUNCALL(beginning_of_line);
@@ -200,13 +198,13 @@ DEFUN("next-line", next_line)
     column, or at the end of the line if it is not long enough.
     +*/
 {
-  int uni;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(previous_line, -uniarg);
 
   if (!eobp()) {
-    for (uni = 0; uni < uniarg; ++uni)
+    for (i = 0; i < uniarg; i++)
       if (!next_line()) {
         int old = cur_goalc;
         thisflag |= FLAG_DONE_CPCN;
@@ -321,14 +319,12 @@ int backward_char(void)
 {
   if (!bolp()) {
     cur_bp->pt.o--;
-
     return TRUE;
   } else if (!bobp()) {
     thisflag |= FLAG_NEED_RESYNC;
     cur_bp->pt.p = list_prev(cur_bp->pt.p);
     cur_bp->pt.n--;
     FUNCALL(end_of_line);
-
     return TRUE;
   }
 
@@ -337,16 +333,16 @@ int backward_char(void)
 
 DEFUN("backward-char", backward_char)
   /*+
-    Move point left one character.
+    Move point left N characters (right if N is negative).
     On attempt to pass beginning or end of buffer, stop and signal error.
     +*/
 {
-  int uni;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(forward_char, -uniarg);
 
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; i++)
     if (!backward_char()) {
       minibuf_error("Beginning of buffer");
       return FALSE;
@@ -359,32 +355,30 @@ int forward_char(void)
 {
   if (!eolp()) {
     cur_bp->pt.o++;
-
     return TRUE;
   } else if (!eobp()) {
     thisflag |= FLAG_NEED_RESYNC;
     cur_bp->pt.p = list_next(cur_bp->pt.p);
     cur_bp->pt.n++;
     FUNCALL(beginning_of_line);
-
     return TRUE;
   }
-  else
-    return FALSE;
+
+  return FALSE;
 }
 
 DEFUN("forward-char", forward_char)
   /*+
-    Move point right one character.
+    Move point right N characters (left if N is negative).
     On reaching end of buffer, stop and signal error.
     +*/
 {
-  int uni;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(backward_char, -uniarg);
 
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; i++)
     if (!forward_char()) {
       minibuf_error("End of buffer");
       return FALSE;
@@ -430,12 +424,12 @@ DEFUN("scroll-down", scroll_down)
     Scroll text of current window downward near full screen.
     +*/
 {
-  int uni;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(scroll_up, -uniarg);
 
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; i++)
     if (!scroll_down())
       return FALSE;
 
@@ -457,12 +451,12 @@ DEFUN("scroll-up", scroll_up)
     Scroll text of current window upward near full screen.
     +*/
 {
-  int uni;
+  int i;
 
   if (uniarg < 0)
     return FUNCALL_ARG(scroll_down, -uniarg);
 
-  for (uni = 0; uni < uniarg; ++uni)
+  for (i = 0; i < uniarg; i++)
     if (!scroll_up())
       return FALSE;
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.8 2005/01/23 14:14:56 rrt Exp $	*/
+/*	$Id: eval.c,v 1.9 2005/01/23 18:39:03 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -78,7 +78,7 @@ evalLookupNode evalTable[] = {
   { NULL	, NULL			}
 };
 
-    
+
 le *evaluateBranch(le *trybranch)
 {
   le *keyword;
@@ -97,12 +97,11 @@ le *evaluateBranch(le *trybranch)
     return leNIL;
   }
 
-  for (tryit=0; evalTable[tryit].word; tryit++) {
+  for (tryit = 0; evalTable[tryit].word; tryit++)
     if (strcmp(evalTable[tryit].word, keyword->data) == 0) {
       leWipe(keyword);
-      return(evalTable[tryit].callback(countNodes(trybranch), trybranch));
+      return evalTable[tryit].callback(countNodes(trybranch), trybranch);
     }
-  }
 
   leWipe(keyword);
   return evaluateNode(trybranch);
@@ -535,7 +534,7 @@ le *eval_cb_cdr(int argc, le *branch)
   temp->list_next = NULL;
   leWipe(temp);
 
-  return(result);
+  return result;
 }
     
 le *eval_cb_cons(int argc, le *branch)
@@ -575,7 +574,7 @@ le *eval_cb_list(int argc, le *branch)
   le *result = NULL;
 
   if (branch == NULL)
-    return(leNIL);
+    return leNIL;
 
   currelement = branch->list_next;
   while (currelement) {
@@ -616,7 +615,7 @@ int eval_cb_lists_same(le *list1, le *list2)
     /* if one has data and the other doesn't, fail */
     if ((list1->data && list2->data == NULL)
         || (list2->data && list1->data == NULL))
-      return(0);
+      return 0;
 
     /* if the data is different, fail */
     if (list1->data && list2->data)
@@ -705,11 +704,9 @@ le *eval_cb_whenunless_helper(enum whenunless which, int argc, le *branch)
       leWipe(retval);
       return leNIL ;
     }
-  } else {
+  } else if (strcmp(retval->data, "NIL") == 0)
     /* when: it wasn't false... bail */
-    if (strcmp(retval->data, "NIL") == 0)
-      return(retval);
-  }
+    return retval;
 
   trythis = branch->list_next->list_next;
   while (trythis) {
@@ -725,12 +722,12 @@ le *eval_cb_whenunless_helper(enum whenunless which, int argc, le *branch)
     
 le *eval_cb_unless(int argc, le *branch)
 {
-  return(eval_cb_whenunless_helper(WU_UNLESS, argc, branch));
+  return eval_cb_whenunless_helper(WU_UNLESS, argc, branch);
 }
     
 le *eval_cb_when(int argc, le *branch)
 {
-  return(eval_cb_whenunless_helper(WU_WHEN, argc, branch));
+  return eval_cb_whenunless_helper(WU_WHEN, argc, branch);
 }
     
 le *eval_cb_cond(int argc, le *branch)
@@ -756,7 +753,7 @@ le *eval_cb_cond(int argc, le *branch)
 
     if (strcmp(retval->data, "NIL")) {
       if (newargc == 1)
-        return(retval);
+        return retval;
 
       tryblock = trythis->branch->list_next;
       while (tryblock) {
