@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.24 2005/01/26 23:52:43 rrt Exp $	*/
+/*	$Id: glue.c,v 1.25 2005/01/26 23:54:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -61,7 +61,7 @@ void waitkey(unsigned delay)
 char *copy_text_block(unsigned startn, unsigned starto, size_t size)
 {
   char *buf, *dp;
-  int max_size, n, i;
+  size_t max_size, n, i;
   Line *lp;
 
   max_size = 10;
