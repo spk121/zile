@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.11 2005/01/29 13:16:33 rrt Exp $	*/
+/*	$Id: astr.c,v 1.12 2005/02/05 13:49:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -257,7 +257,7 @@ astr astr_fgets(FILE *f)
 astr astr_vafmt(astr as, const char *fmt, va_list ap)
 {
   char *buf;
-  vasprintf(&buf, fmt, ap);
+  zvasprintf(&buf, fmt, ap);
   astr_cat_cstr(as, buf);
   free(buf);
   return as;

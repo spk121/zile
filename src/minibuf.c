@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.36 2005/01/27 01:33:17 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.37 2005/02/05 13:49:06 rrt Exp $     */
 
 #include "config.h"
 
@@ -40,7 +40,7 @@ static History files_history;
 char *minibuf_format(const char *fmt, va_list ap)
 {
   char *buf;
-  vasprintf(&buf, fmt, ap);
+  zvasprintf(&buf, fmt, ap);
   return buf;
 }
 

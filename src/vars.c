@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.9 2005/01/28 02:38:32 rrt Exp $	*/
+/*	$Id: vars.c,v 1.10 2005/02/05 13:49:06 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -65,7 +65,7 @@ void variableSetString(le **varlist, char *key, char *value)
 {
   if (key && value) {
     le *temp = leNew(value);
-    variableSet(varlist, key, temp);	
+    variableSet(varlist, key, temp);
     leWipe(temp);
   }
 }
@@ -74,7 +74,7 @@ void variableSetNumber(le **varlist, char *key, int value)
 {
   char *buf;
 
-  asprintf(&buf, "%d", value);
+  zasprintf(&buf, "%d", value);
   variableSetString(varlist, key, buf);
   free(buf);
 }
@@ -97,7 +97,7 @@ char *variableGetString(le *varlist, char *key)
 astr variableDump(le *varlist)
 {
   astr as = astr_new();
-  
+
   for (; varlist; varlist = varlist->list_next) {
     if (varlist->branch) {
       astr_afmt(as, "%s \t", varlist->data);

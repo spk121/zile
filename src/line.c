@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.59 2005/02/05 01:49:14 rrt Exp $	*/
+/*	$Id: line.c,v 1.60 2005/02/05 13:49:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -274,7 +274,7 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen,
     memcpy(astr_char((*lp)->item, (ptrdiff_t)offset), newtext, newlen);
     cur_bp->flags |= BFLAG_MODIFIED;
   }
-                
+
   if (replace_case)
     free((char *)newtext);
 }
@@ -293,7 +293,7 @@ void fill_break_line(void)
   /* If we're not beyond fill-column, stop now. */
   if (get_goalc() <= fillcol)
     return;
-  
+
   /* Move cursor back to fill column */
   old_col = cur_bp->pt.o;
   while (get_goalc() > fillcol + 1) {
@@ -321,7 +321,7 @@ void fill_break_line(void)
       }
     }
   }
-  
+
   if (break_col >= 1) {
     /* Break line. */
     size_t last_col = cur_bp->pt.o - break_col;
@@ -440,7 +440,7 @@ void bprintf(const char *fmt, ...)
   va_list ap;
   char *buf;
   va_start(ap, fmt);
-  vasprintf(&buf, fmt, ap);
+  zvasprintf(&buf, fmt, ap);
   va_end(ap);
   insert_string(buf);
   free(buf);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.69 2005/02/05 01:49:13 rrt Exp $        */
+/*      $Id: file.c,v 1.70 2005/02/05 13:49:04 rrt Exp $        */
 
 #include "config.h"
 
@@ -783,7 +783,7 @@ static int copy_file(const char *source, const char *dest)
     return FALSE;
   }
 
-  if (asprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
+  if (zasprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
     minibuf_error("Cannot allocate temporary file name `%s'",
                   strerror(errno));
     return FALSE;

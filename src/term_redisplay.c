@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.38 2005/02/03 02:17:01 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.39 2005/02/05 13:49:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -41,11 +41,11 @@ static size_t point_screen_column;
 static int make_char_printable(char **buf, size_t c)
 {
   if (c == '\0')
-    return asprintf(buf, "^@");
+    return zasprintf(buf, "^@");
   else if (c <= '\32')
-    return asprintf(buf, "^%c", 'A' + c - 1);
+    return zasprintf(buf, "^%c", 'A' + c - 1);
   else
-    return asprintf(buf, "\\%o", c & 0xff);
+    return zasprintf(buf, "\\%o", c & 0xff);
 }
 
 static void outch(int c, Font font, size_t *x)
@@ -246,13 +246,13 @@ static char *make_screen_pos(Window *wp, char **buf)
   Point pt = window_pt(wp);
 
   if (wp->bp->num_lines <= wp->eheight && wp->topdelta == pt.n)
-    asprintf(buf, "All");
+    zasprintf(buf, "All");
   else if (pt.n == wp->topdelta)
-    asprintf(buf, "Top");
+    zasprintf(buf, "Top");
   else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
-    asprintf(buf, "Bot");
+    zasprintf(buf, "Bot");
   else
-    asprintf(buf, "%2d%%", (int)((float)pt.n / wp->bp->num_lines * 100));
+    zasprintf(buf, "%2d%%", (int)((float)pt.n / wp->bp->num_lines * 100));
 
   return *buf;
 }
@@ -381,7 +381,7 @@ int term_printw(const char *fmt, ...)
   int res = 0;
   va_list ap;
   va_start(ap, fmt);
-  res = vasprintf(&buf, fmt, ap);
+  res = zvasprintf(&buf, fmt, ap);
   va_end(ap);
   term_addnstr(buf, strlen(buf));
   free(buf);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.18 2005/01/29 00:23:14 rrt Exp $	*/
+/*	$Id: eval.c,v 1.19 2005/02/05 13:49:04 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -63,28 +63,28 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
 #undef X3
 
 static evalLookupNode evalTable[] = {
-  { "+" 	, eval_cb_add		},
-  { "-" 	, eval_cb_subtract	},
-  { "*" 	, eval_cb_multiply	},
-  { "/" 	, eval_cb_divide	},
-  { "%" 	, eval_cb_modulus	},
+  { "+"	, eval_cb_add		},
+  { "-"	, eval_cb_subtract	},
+  { "*"	, eval_cb_multiply	},
+  { "/"	, eval_cb_divide	},
+  { "%"	, eval_cb_modulus	},
 
-  { "<" 	, eval_cb_lt		},
-  { "<=" 	, eval_cb_lt_eq		},
-  { ">" 	, eval_cb_gt		},
-  { ">=" 	, eval_cb_gt_eq		},
-  { "=" 	, eval_cb_eqsign	},
+  { "<"	, eval_cb_lt		},
+  { "<="	, eval_cb_lt_eq		},
+  { ">"	, eval_cb_gt		},
+  { ">="	, eval_cb_gt_eq		},
+  { "="	, eval_cb_eqsign	},
 
-  { "and" 	, eval_cb_and		},
-  { "or" 	, eval_cb_or		},
-  { "not" 	, eval_cb_not		},
-  { "null" 	, eval_cb_not		},
+  { "and"	, eval_cb_and		},
+  { "or"	, eval_cb_or		},
+  { "not"	, eval_cb_not		},
+  { "null"	, eval_cb_not		},
 
-  { "atom" 	, eval_cb_atom		},
-  { "car" 	, eval_cb_car		},
-  { "cdr" 	, eval_cb_cdr		},
-  { "cons" 	, eval_cb_cons		},
-  { "list" 	, eval_cb_list		},
+  { "atom"	, eval_cb_atom		},
+  { "car"	, eval_cb_car		},
+  { "cdr"	, eval_cb_cdr		},
+  { "cons"	, eval_cb_cons		},
+  { "list"	, eval_cb_list		},
   { "equal"	, eval_cb_equal		},
 
   { "if"	, eval_cb_if		},
@@ -118,7 +118,7 @@ static evalLookupNode evalTable[] = {
 #undef X1
 #undef X2
 #undef X3
-  
+
   { NULL	, NULL			}
 };
 
@@ -144,7 +144,7 @@ le *evaluateBranch(le *trybranch)
 
   if (trybranch->branch)
     keyword = evaluateBranch(trybranch->branch);
-  else 
+  else
     keyword = leNew(trybranch->data);
 
   if (keyword->data == NULL) {
@@ -159,20 +159,20 @@ le *evaluateBranch(le *trybranch)
 
   return evaluateNode(trybranch);
 }
-    
+
 le *evaluateNode(le *node)
 {
   le *value;
 
   if (node == NULL)
     return leNIL;
-  
+
   if (node->branch != NULL) {
     if (node->quoted)
       value = leDup(node->branch);
     else
       value = evaluateBranch(node->branch);
-        
+
   } else {
     le *temp = variableGet(defunList, node->data);
 
@@ -190,7 +190,7 @@ le *evaluateNode(le *node)
 
   return value;
 }
-    
+
 le *evaluateDefun(le *fcn, le *params)
 {
   le *function;
@@ -209,7 +209,7 @@ le *evaluateDefun(le *fcn, le *params)
   /* allocate another function definition, since we're gonna hack it */
   function = leDup(fcn);
 
-  /* pass 1:  tag each node properly. 
+  /* pass 1:  tag each node properly.
      for each parameter: (fcn)
      - look for it in the tree, tag those with the value */
   count = 0;
@@ -236,7 +236,7 @@ le *evaluateDefun(le *fcn, le *params)
 
   /* then evaluate the resulting tree */
   result = evaluateBranch(function->list_next);
-	
+
   /* free any space allocated */
   leWipe(function);
 
@@ -244,7 +244,7 @@ le *evaluateDefun(le *fcn, le *params)
   return result;
 }
 
-    
+
 int countNodes(le *branch)
 {
   int count;
@@ -253,29 +253,29 @@ int countNodes(le *branch)
   return count;
 }
 
-    
+
 int evalCastLeToInt(const le *levalue)
 {
   if (levalue == NULL || levalue->data == NULL)
     return 0;
-	
+
   return atoi(levalue->data);
 }
-    
+
 le *evalCastIntToLe(int intvalue)
 {
   char *buf;
   le *list;
 
-  asprintf(&buf, "%d", intvalue);
+  zasprintf(&buf, "%d", intvalue);
   list = leNew(buf);
   free(buf);
 
   return list;
 }
 
-    
-int eval_cume_helper(enum cumefcn function, int value, le *branch) 
+
+int eval_cume_helper(enum cumefcn function, int value, le *branch)
 {
   int newvalue = 0;
   le *value_le;
@@ -284,7 +284,7 @@ int eval_cume_helper(enum cumefcn function, int value, le *branch)
     return 0;
 
   for (; branch; branch = branch->list_next) {
-    value_le = evaluateNode(branch); 
+    value_le = evaluateNode(branch);
     newvalue = evalCastLeToInt(value_le);
     leWipe(value_le);
 
@@ -308,7 +308,7 @@ int eval_cume_helper(enum cumefcn function, int value, le *branch)
 
   return value;
 }
-    
+
 le *eval_cb_add(int argc, le *branch)
 {
   if (branch == NULL || argc < 2)
@@ -316,7 +316,7 @@ le *eval_cb_add(int argc, le *branch)
 
   return evalCastIntToLe(eval_cume_helper(C_ADD, 0, branch->list_next));
 }
-    
+
 le *eval_cb_subtract(int argc, le *branch)
 {
   int firstitem = 0;
@@ -331,10 +331,10 @@ le *eval_cb_subtract(int argc, le *branch)
 
   if (argc == 2)
     return evalCastIntToLe(-firstitem);
-	
+
   return evalCastIntToLe(eval_cume_helper(C_SUBTRACT, firstitem, branch->list_next->list_next));
 }
-    
+
 le *eval_cb_multiply(int argc, le *branch)
 {
   if (branch == NULL || argc < 2)
@@ -342,7 +342,7 @@ le *eval_cb_multiply(int argc, le *branch)
 
   return evalCastIntToLe(eval_cume_helper(C_MULTIPLY, 1, branch->list_next));
 }
-    
+
 le *eval_cb_divide(int argc, le *branch)
 {
   int firstitem = 0;
@@ -406,7 +406,7 @@ le *eval_cb_lt(int argc, le *branch)
 {
   return eval_cb_boolean(argc, branch, lt_helper);
 }
-    
+
 static int lt_eq_helper(int a, int b)
 {
   return a <= b;
@@ -416,7 +416,7 @@ le *eval_cb_lt_eq(int argc, le *branch)
 {
   return eval_cb_boolean(argc, branch, lt_eq_helper);
 }
-    
+
 static int gt_helper(int a, int b)
 {
   return a > b;
@@ -465,7 +465,7 @@ le *eval_cb_and(int argc, le *branch)
 
   return result;
 }
-    
+
 le *eval_cb_or(int argc, le *branch)
 {
   le *result = NULL;
@@ -484,7 +484,7 @@ le *eval_cb_or(int argc, le *branch)
 
   return result;
 }
-    
+
 le *eval_cb_not(int argc, le *branch)
 {
   le *result = NULL;
@@ -506,12 +506,12 @@ le *eval_cb_not(int argc, le *branch)
     leWipe(result);
     return leNIL;
   }
-	
+
   leWipe(result);
   return leT;
 }
 
-    
+
 le *eval_cb_atom(int argc, le *branch)
 {
   le *result = NULL;
@@ -529,7 +529,7 @@ le *eval_cb_atom(int argc, le *branch)
   leWipe(result);
   return leNIL;
 }
-    
+
 le *eval_cb_car(int argc, le *branch)
 {
   le *result = NULL;
@@ -565,7 +565,7 @@ le *eval_cb_car(int argc, le *branch)
 
   return result;
 }
-    
+
 le *eval_cb_cdr(int argc, le *branch)
 {
   le *result = NULL;
@@ -587,7 +587,7 @@ le *eval_cb_cdr(int argc, le *branch)
 
   return result;
 }
-    
+
 le *eval_cb_cons(int argc, le *branch)
 {
   le *result1 = NULL;
@@ -610,13 +610,13 @@ le *eval_cb_cons(int argc, le *branch)
     le *temp = leNew(NULL);
     temp->branch = result1;
     result1 = temp;
-  } 
+  }
   result1->list_next = result2;
   result2->list_prev = result1;
 
   return result1;
 }
-    
+
 le *eval_cb_list(int argc, le *branch)
 {
   le *currelement = NULL;
@@ -625,7 +625,7 @@ le *eval_cb_list(int argc, le *branch)
   le *result = NULL;
 
   (void)argc;
-  
+
   if (branch == NULL)
     return leNIL;
 
@@ -642,7 +642,7 @@ le *eval_cb_list(int argc, le *branch)
       temp->branch = result;
       result = temp;
     }
-    
+
     if (finaltree == NULL) {
       finaltree = result;
       lastadded = result;
@@ -651,13 +651,13 @@ le *eval_cb_list(int argc, le *branch)
       result->list_prev = lastadded;
       lastadded = result;
     }
-	    
+
     currelement = currelement->list_next;
   }
 
   return finaltree ? finaltree : leNIL;
 }
-    
+
 int eval_cb_lists_same(le *list1, le *list2)
 {
   while (list1) {
@@ -694,7 +694,7 @@ int eval_cb_lists_same(le *list1, le *list2)
 
   return 1;
 }
-    
+
 le *eval_cb_equal(int argc, le *branch)
 {
   le *list1 = NULL;
@@ -715,7 +715,7 @@ le *eval_cb_equal(int argc, le *branch)
   return (retval == 1) ? leT : leNIL;
 }
 
-    
+
 le *eval_cb_if(int argc, le *branch)
 {
   le *retcond = NULL;
@@ -739,7 +739,7 @@ le *eval_cb_if(int argc, le *branch)
   leWipe(retcond);
   return evaluateNode(branch->list_next->list_next);
 }
-    
+
 le *eval_cb_whenunless_helper(enum whenunless which, int argc, le *branch)
 {
   le *retval = NULL;
@@ -772,17 +772,17 @@ le *eval_cb_whenunless_helper(enum whenunless which, int argc, le *branch)
 
   return retval;
 }
-    
+
 le *eval_cb_unless(int argc, le *branch)
 {
   return eval_cb_whenunless_helper(WU_UNLESS, argc, branch);
 }
-    
+
 le *eval_cb_when(int argc, le *branch)
 {
   return eval_cb_whenunless_helper(WU_WHEN, argc, branch);
 }
-    
+
 le *eval_cb_cond(int argc, le *branch)
 {
   le *retval = NULL;
@@ -823,8 +823,8 @@ le *eval_cb_cond(int argc, le *branch)
 
   return retval;
 }
-    
-    
+
+
 le *eval_cb_princ(int argc, le *branch)
 {
   le *retblock = NULL;
@@ -838,11 +838,11 @@ le *eval_cb_princ(int argc, le *branch)
       leDumpReformat(retblock); /* XXX */
     }
   }
-  
+
   return retblock;
 }
-    
-    
+
+
 le *eval_cb_eval(int argc, le *branch)
 {
   le *temp;
@@ -855,7 +855,7 @@ le *eval_cb_eval(int argc, le *branch)
   leWipe(temp);
   return retval;
 }
-    
+
 le *eval_cb_prog(int argc, le *branch, int returnit)
 {
   le *curr;
@@ -877,23 +877,23 @@ le *eval_cb_prog(int argc, le *branch, int returnit)
 
   return retval ? retval : tempval;
 }
-    
+
 le *eval_cb_prog1(int argc, le *branch)
 {
   return eval_cb_prog(argc, branch, 1);
 }
-    
+
 le *eval_cb_prog2(int argc, le *branch)
 {
   return eval_cb_prog(argc, branch, 2);
 }
-    
+
 le *eval_cb_progn(int argc, le *branch)
 {
   return eval_cb_prog(argc, branch, 0);
 }
 
-    
+
 le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
 {
   le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
@@ -902,7 +902,7 @@ le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
     for (current = branch->list_next; current; current = current->list_next->list_next) {
       if (newvalue != leNIL)
         leWipe(newvalue);
-      
+
       newvalue = evaluateNode(current->list_next);
 
       variableSet(&mainVarList,
@@ -919,18 +919,18 @@ le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
 
   return newvalue;
 }
-    
+
 le* eval_cb_set(int argc, le *branch)
 {
   return eval_cb_set_helper(S_SET, argc, branch);
 }
-    
+
 le *eval_cb_setq(int argc, le *branch)
 {
   return eval_cb_set_helper(S_SETQ, argc, branch);
 }
-    
-    
+
+
 le *eval_cb_defun(int argc, le *branch)
 {
   if (branch == NULL || argc < 4 || branch->list_next->data == NULL)
@@ -960,7 +960,7 @@ static le *eval_expression(char *expr)
 {
   le *list = lisp_read_string(expr);
   astr as = leDumpEval(list, 0);
-  
+
   if (lastflag & FLAG_SET_UNIARG)
     insert_string(astr_cstr(as));
   else

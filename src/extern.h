@@ -260,6 +260,9 @@ Point window_pt(Window *wp);
 void *zmalloc(size_t size);
 void *zrealloc(void *ptr, size_t size);
 char *zstrdup(const char *s);
+int zvasprintf(char **ptr, const char *fmt, va_list vargs);
+int zasprintf(char **ptr, const char *fmt, ...);
+
 
 /*
  * Declare external Zile functions.
@@ -287,6 +290,5 @@ char *zstrdup(const char *s);
 #ifndef HAVE_VASPRINTF
 #include <stdarg.h>
 
-int asprintf(char **ptr, const char *fmt, ...);
 int vasprintf(char **ptr, const char *fmt, va_list vargs);
 #endif

@@ -459,11 +459,11 @@ static int dispatch(xprintf_struct *s)
   case 'X':
     switch (modifier) {
     case -1 :
-      return print_it(s, approx_width, format_string, va_arg(s->vargs, int));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
     case 'l':
-      return print_it(s, approx_width, format_string, va_arg(s->vargs, long int));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, long int));
     case 'h':
-      return print_it(s, approx_width, format_string, va_arg(s->vargs, int));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
       /* 'int' instead of 'short int' because default promotion is 'int' */
     default:
       INCOHERENT();
@@ -472,7 +472,7 @@ static int dispatch(xprintf_struct *s)
     /* char */
   case 'c':
     if (modifier != -1)
-      return print_it(s,approx_width,format_string,va_arg(s->vargs, int));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
     INCOHERENT();
     /* 'int' instead of 'char' because default promotion is 'int' */
 
@@ -485,9 +485,9 @@ static int dispatch(xprintf_struct *s)
     switch (modifier) {
     case -1 : /* because of default promotion, no modifier means 'l' */
     case 'l':
-      return print_it(s, approx_width, format_string, va_arg(s->vargs, double));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, double));
     case 'L':
-      return print_it(s, approx_width, format_string, va_arg(s->vargs, long double));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, long double));
     default:
       INCOHERENT();
     }
@@ -499,7 +499,7 @@ static int dispatch(xprintf_struct *s)
     /* pointer */
   case 'p':
     if (modifier == -1)
-      return print_it(s, approx_width, format_string, va_arg(s->vargs, void *));
+      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, void *));
     INCOHERENT();
 
     /* store */
@@ -602,19 +602,6 @@ static int core(xprintf_struct *s)
   if (s->buffer_base != NULL)
     free(s->buffer_base);
   return EOF;
-}
-
-/*############################## asprintf ################################*/
-int asprintf(char **ptr, const char * format_string, ...)
-{
-  va_list vargs;
-  int retval;
-
-  va_start(vargs, format_string);
-  retval = vasprintf(ptr, format_string, vargs);
-  va_end(vargs);
-
-  return retval;
 }
 
 /*############################# vasprintf ################################*/
