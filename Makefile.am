@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.15 2005/01/01 02:06:03 rrt Exp $
+## $Id: Makefile.am,v 1.16 2005/01/03 11:06:39 rrt Exp $
 
 SUBDIRS = doc src
 
@@ -12,7 +12,7 @@ EXTRA_DIST =					\
 	THANKS					\
 	zile.pkg
 
-CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
+CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src
 
 dist-epoc:
 	emxsis zile.pkg
