@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.13 2005/01/09 00:18:20 rrt Exp $	*/
+/*	$Id: keys.c,v 1.14 2005/01/09 00:19:37 rrt Exp $	*/
 
 #include "config.h"
 
@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "zile.h"
 #include "extern.h"
