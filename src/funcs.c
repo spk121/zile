@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.67 2005/01/19 18:43:39 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.68 2005/01/21 23:25:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -678,8 +678,6 @@ static int transpose_subr(Function f)
     astr_append_region(s2);
     FUNCALL(delete_region);
   }
-
-  set_marker_insertion_type(p2, TRUE);
 
   /* Insert the second string in the first position. */
   if (s2) {

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: marker.c,v 1.5 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: marker.c,v 1.6 2005/01/21 23:25:36 rrt Exp $	*/
 
 #include "config.h"
 
@@ -109,14 +109,4 @@ Marker *point_max_marker(void)
   Marker *marker = make_marker();
   move_marker(marker, cur_bp, point_max());
   return marker;
-}
-
-void set_marker_insertion_type(Marker *marker, int type)
-{
-  marker->type = type;
-}
-
-int marker_insertion_type(Marker *marker)
-{
-  return marker->type;
 }

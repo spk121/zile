@@ -154,8 +154,6 @@ Marker *copy_marker(Marker *marker);
 Marker *point_marker(void);
 Marker *point_min_marker(void);
 Marker *point_max_marker(void);
-void set_marker_insertion_type(Marker *marker, int type);
-int marker_insertion_type(Marker *marker);
 
 /* minibuf.c -------------------------------------------------------------- */
 char *minibuf_format(const char *fmt, va_list ap);

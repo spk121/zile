@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.47 2005/01/20 16:55:02 rrt Exp $	*/
+/*	$Id: line.c,v 1.48 2005/01/21 23:25:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -35,9 +35,25 @@
 #include "zile.h"
 #include "extern.h"
 
-static void adjust_markers_for_offset(Line *lp, int pointo, int offset);
-static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len);
-static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len);
+
+static void adjust_markers(Line *lp1, Line *lp2, int pointo, int dir, int offset)
+{
+  Marker *pt = point_marker(), *marker;
+
+  for (marker = cur_bp->markers; marker; marker = marker->next)
+    if (marker->pt.p == lp2 &&
+        ((dir == -1) ? TRUE :
+         ((dir == 1) ? marker->pt.o > pointo :
+          marker->pt.o >= pointo + (offset < 0)))) {
+      marker->pt.p = lp1;
+      marker->pt.o -= pointo * dir - offset;
+      marker->pt.n += dir;
+    } else if (marker->pt.n > cur_bp->pt.n)
+      marker->pt.n += dir;
+
+  cur_bp->pt = pt->pt;
+  free_marker(pt);
+}
 
 /* Insert the character at the current position and move the text at its right
  * whatever the insert/overwrite mode is.
@@ -93,7 +109,7 @@ int insert_char(int c)
   }
 
   (void)intercalate_char(c);
-  adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, 1);
+  adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
 
   return TRUE;
 }
@@ -183,7 +199,7 @@ int intercalate_newline()
   astr_cpy(lp2->item, astr_substr(lp1->item, lp1len, lp2len));
   astr_truncate(lp1->item, lp1len);
 
-  adjust_markers_for_addline(lp1, lp2, lp1len);
+  adjust_markers(lp2, lp1, lp1len, 1, 0);
 
   cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -231,7 +247,7 @@ void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext,
   if (newsize != orgsize) {
     cur_bp->flags |= BFLAG_MODIFIED;
     astr_replace_cstr((*lp)->item, offset, orgsize, newtext);
-    adjust_markers_for_offset(*lp, offset, newsize - orgsize);
+    adjust_markers(*lp, *lp, offset, 0, newsize - orgsize);
   } else {
     if (memcmp(astr_char((*lp)->item, offset), newtext, newsize) != 0) {
       memcpy(astr_char((*lp)->item, offset), newtext, newsize);
@@ -404,7 +420,7 @@ int delete_char(void)
      */
     astr_remove(cur_bp->pt.p->item, cur_bp->pt.o, 1);
 
-    adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, -1);
+    adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
 
     cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -428,7 +444,7 @@ int delete_char(void)
     astr_delete(list_behead(lp1));
     --cur_bp->num_lines;
 
-    adjust_markers_for_delline(lp1, lp2, lp1len);
+    adjust_markers(lp1, lp2, lp1len, -1, 0);
 
     cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -656,72 +672,4 @@ DEFUN("newline-and-indent", newline_and_indent)
     FUNCALL(indent_command);
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   return ret;
-}
-
-/*---------------------------------------------------------------------
-                            Adjust markers
------------------------------------------------------------------------*/
-
-#define CMP_MARKER_OFFSET(marker, offset, extra)			\
-	(((!(marker)->type) && (marker)->pt.o > (offset))		\
-	 || ((marker)->type && (marker)->pt.o >= (offset)+(extra)))
-
-static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
-{
-  Marker *pt, *marker;
-  pt = point_marker();
-  set_marker_insertion_type(pt, TRUE);
-
-  /* Update the markers.  */
-  for (marker = cur_bp->markers; marker; marker = marker->next) {
-    if (marker->pt.p == lp &&
-        CMP_MARKER_OFFSET(marker, pointo, ((offset < 0) ? 1 : 0)))
-      marker->pt.o += offset;
-  }
-
-  cur_bp->pt = pt->pt;
-  free_marker(pt);
-}
-
-static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len)
-{
-  Marker *pt, *marker;
-  pt = point_marker();
-  set_marker_insertion_type(pt, FALSE);
-
-  /* Update the markers.  */
-  for (marker = cur_bp->markers; marker; marker = marker->next) {
-    if (marker->pt.p == lp1 &&
-        CMP_MARKER_OFFSET(marker, lp1len, 0)) {
-      marker->pt.p = lp2;
-      marker->pt.o -= lp1len;
-      marker->pt.n++;
-    }
-    else if (marker->pt.n > cur_bp->pt.n)
-      marker->pt.n++;
-  }
-
-  cur_bp->pt = pt->pt;
-  free_marker(pt);
-}
-
-static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len)
-{
-  Marker *pt, *marker;
-  pt = point_marker();
-  set_marker_insertion_type(pt, TRUE);
-
-  /* Update the markers.  */
-  for (marker = cur_bp->markers; marker; marker = marker->next) {
-    if (marker->pt.p == lp2) {
-      marker->pt.p = lp1;
-      marker->pt.o += lp1len;
-      marker->pt.n--;
-    }
-    else if (marker->pt.n > cur_bp->pt.n)
-      marker->pt.n--;
-  }
-
-  cur_bp->pt = pt->pt;
-  free_marker(pt);
 }

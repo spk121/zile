@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.47 2005/01/19 00:41:01 rrt Exp $        */
+/*      $Id: zile.h,v 1.48 2005/01/21 23:25:36 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -80,7 +80,6 @@ struct Marker {
   Buffer *bp;             /* Buffer that points into. */
   Point pt;               /* Point position. */
   Marker *next;           /* Used to chain all markers in the buffer. */
-  unsigned type : 1;      /* Insertion type (1=after text). */
 };
 
 /* Undo delta types. */
@@ -105,8 +104,7 @@ struct Undo {
   int type;
 
   /* Where the undo delta need to be applied.
-     Warning!: Do not use the "pt.p" field.
-  */
+     Warning!: Do not use the "pt.p" field. */
   Point pt;
 
   /* Flag indicating that reverting this undo leaves the buffer
