@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.11 2004/10/08 23:56:03 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.12 2004/10/10 17:08:56 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 /* TODO: Sort out use of select */
@@ -54,8 +54,10 @@ static Terminal thisterm = {
 typedef struct {
         int curx, cury;  /* cursor x and y. */
         Font font;       /* current font. */
-        int *array;      /* contents of screen (8 low bits is
-                            character, rest is Zile font code. */
+        int *array, *oarray; /* contents of screen (8 low bits is
+                                character, rest is Zile font code).
+                                array is current, oarray is last
+                                displayed contents. */
 } Screen;
 
 static Screen screen;
@@ -89,22 +91,29 @@ void term_refresh(void)
 {
         int i, j;
 
-        tputs(tgoto(cm_string, 0, 0), 1, putchar);
-        
         for (i = 0; i < termp->height; i++)
                 for (j = 0; j < termp->width; j++) {
-                        int n = screen.array[i * termp->width + j];
-                        char c = n & 0xff;
-                        Font f = n & ~0xff;
+                        int offset = i * termp->width + j;
+                        int n = screen.array[offset];
+                        int o = screen.oarray[offset];
 
-                        if (f == ZILE_NORMAL)
-                                printf("%s%s", se_string, me_string);
-                        if (f & ZILE_BOLD)
-                                printf("%s", so_string);
-                        if (f & ZILE_REVERSE)
-                                printf("%s", mr_string);
+                        if (o != n) {
+                                char c = n & 0xff;
+                                Font f = n & ~0xff;
 
-                        putchar(c ? c : ' ');
+                                tputs(tgoto(cm_string, j, i), 1, putchar);
+        
+                                screen.oarray[offset] = n;
+
+                                if (f == ZILE_NORMAL)
+                                        printf("%s%s", se_string, me_string);
+                                if (f & ZILE_BOLD)
+                                        printf("%s", so_string);
+                                if (f & ZILE_REVERSE)
+                                        printf("%s", mr_string);
+
+                                putchar(c ? c : ' ');
+                        }
                 }
 
         tputs(tgoto(cm_string, screen.curx, screen.cury), 1, putchar);        
@@ -182,6 +191,7 @@ static void term_init_screen(void)
                 free(screen.array);
 
         screen.array = zmalloc(termp->width * termp->height * sizeof(int));
+        screen.oarray = zmalloc(termp->width * termp->height * sizeof(int));
         screen.curx = screen.cury = 0;
 }
 
