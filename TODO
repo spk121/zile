@@ -1,8 +1,5 @@
 HIGH PRIORITY
 
-* BUGFIX: move code to deal with ~/ and ~user from expand_path to
-  default_completion_reread (and factor out into a separate function).
-
 * Functions/bindings to implement and document (dummy functions
   already exist):
 
