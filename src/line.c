@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.19 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: line.c,v 1.20 2004/02/14 10:15:28 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -94,7 +94,7 @@ Line *resize_line(Line *lp, int maxsize)
 	newlp->next->prev = newlp;
 
 	/*
-	 * Update all things pointing to the modified line.
+	 * Update all markers pointing to the modified line.
 	 */
 	adjust_markers_for_linep(lp, newlp);
 
@@ -742,16 +742,12 @@ static int indent_relative(void)
 	/* Find previous non-blank line.  */
 	do {
 		if (!FUNCALL_ARG(forward_line, -1)) {
-/* 			restore_excursion(); */
 			cur_bp->pt = old_point->pt;
 			free_marker(old_point);
 
 			return insert_tab();
 		}
 	} while (is_blank_line());
-
-	/* Reference line.  */
-/* 	ref_line = point_marker(); */
 
 	/* Find the first blank char.  */
 	while (!eolp()) {
@@ -774,14 +770,12 @@ static int indent_relative(void)
 		target_goalc = get_goalc();
 	}
 	else {
-/* 		restore_excursion(); */
 		cur_bp->pt = old_point->pt;
 		free_marker(old_point);
 
 		return insert_tab();
 	}
 
-/* 	restore_excursion(); */
 	cur_bp->pt = old_point->pt;
 	free_marker(old_point);
 
@@ -841,6 +835,9 @@ int c_indent_command(void)
 #endif
 
 DEFUN("indent-command", indent_command)
+/*+
+Indent line in proper way for current major mode or insert a tab.
++*/
 {
 	if (cur_bp->mode == BMODE_TEXT
 #if ENABLE_MAIL_MODE
@@ -864,7 +861,7 @@ DEFUN("indent-command", indent_command)
 		 || cur_bp->mode == BMODE_JAVA
 #endif
 		) {
-		return c_indent_command ();
+		return c_indent_command();
 	}
 #endif
 	else {
