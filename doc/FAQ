@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2005/01/22 12:31:52 $
+		   Last updated: $Date: 2005/01/23 13:40:58 $
 
 ------------------------------------------------------------------------------
 
@@ -8,33 +8,28 @@ INDEX
 
 1. General questions
    1.1. What does `Zile' mean?
-   1.2. What is the Zile license?
-   1.3. What about a GUI version of Zile?
-   1.4. Why another clone of Emacs?  Why not just use Emacs?
-   1.5. Where can I get the latest version?
-   1.6. Why did you choose such difficult key sequences?
-   1.7. Zile has a bug!
-   1.8. I like the xyz function of (X)Emacs but it's not in Zile!
-   1.9. How small does Zile get?
-   1.10. Does Zile support the Unicode / UTF-8 encodings?
+   1.2. What is Zile's license?
+   1.3. Why another clone of Emacs?  Why not just use Emacs?
+   1.4. Where can I get the latest version?
+   1.5. Why did you choose such difficult key sequences?
+   1.6. Zile has a bug!
+   1.7. I like the xyz function of (X)Emacs but it's not in Zile!
+   1.8. How small does Zile get?
+   1.9. Does Zile support Unicode/UTF-8?
+   1.10. Zile doesn't compile.
 
 2. Functionality
-   2.1. How to quit Zile?
-   2.2. How to return to the shell without leaving Zile?
+   2.1. How do I quit Zile?
+   2.2. How do I return to the shell without leaving Zile?
    2.3. Zile is hung.
-   2.4. How to undo the previous command?
+   2.4. How do I undo the previous command?
    2.5. What does `C-something' or `M-something' mean?
-   2.6. What are the available variables that can be modified?
-   2.7. How to display non-English characters?
-   2.8. Zile doesn't handle filenames with non-English characters.
+   2.6. What settings can I change?
+   2.7. How do I display non-ASCII characters?
+   2.8. Zile doesn't handle filenames with non-ASCII characters.
    2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
-   2.10. How to enable Auto Fill Mode at startup?
-   2.11. How to change the binding of a function?
-   2.12. The Zile screen is not resized in a X Window terminal.
-
-3. Compiling
-   3.1. Zile doesn't compile correctly under the Foobar operating system.
-   3.2. Can I compile Zile under Cygwin?
+   2.10. How do I enable Auto Fill Mode at startup?
+   2.11. The Zile screen is not resized when I resize my terminal.
 
 ------------------------------------------------------------------------------
 
@@ -45,7 +40,7 @@ INDEX
     It stands for `Zile Is Lossy Emacs'. It is just another recursive
     acronym like GNU.
 
-1.2. What is the Zile license?
+1.2. What is Zile's license?
 
     Zile is released under the GNU General Public License. For more
     information, see http://www.gnu.org/licenses/gpl.html.
@@ -55,24 +50,24 @@ INDEX
     From the features list in the Info documentation:
 
 	``Small but fast and powerful. It is very useful for small
-	footprint installations (like on floppy disk) or quick editing
+	footprint installations (e.g. on floppy disk) or quick editing
 	sessions.''
 
     That's why sometimes Emacs isn't the best editor to use :-)  I
     use XEmacs myself when I do coding, but I use Zile when I have,
     let's say, to quick edit the dot files in the home directory; I
-    don't want to wait 5 seconds to load XEmacs for doing a 2 seconds
-    editing...
+    don't want to wait 5 seconds to load XEmacs for doing a 2-second
+    edit...
 
-1.4. Why did you choose such difficult key sequences?
-
-    To be the same as Emacs.
-
-1.5. Where can I get the latest version?
+1.4. Where can I get the latest version?
 
     The Zile project is hosted on SourceForge at:
 
 	http://zile.sourceforge.net/
+
+1.5. Why did you choose such difficult key sequences?
+
+    To be the same as Emacs.
 
 1.6. Zile has a bug!
 
@@ -92,7 +87,7 @@ INDEX
 
     If you still think that a certain function should be implemented
     in Zile, please send a message to the developers (see question
-    1.5).
+    1.6).
 
 1.8. How small does Zile get?
 
@@ -100,20 +95,30 @@ INDEX
     at 92,206 bytes when stripped. This is how Zile will typically be
     built.
 
-1.9. Does Zile support Unicode?
+1.9. Does Zile support Unicode/UTF-8?
 
-    No.  Support for Unicode is planned in the future.
+    No. Support for Unicode is planned in the future.
+
+1.10. Zile doesn't compile.
+
+    We have tested Zile under GNU/Linux only (other than the EPOC
+    port), although it should work on any POSIX-compliant OS that
+    supports termcap or Allegro. If you get Zile running under an OS
+    not listed here, please send a message to the Zile developers
+    telling them that (you might also send any patches you have made
+    to the Zile sources if you want them included in the next
+    release).
 
 ------------------------------------------------------------------------------
 
 2. Functionality
 
-2.1. How to quit Zile?
+2.1. How do I quit Zile?
 
     Type `C-x C-c' (that means holding CONTROL while typing X,
     releasing them, then holding CONTROL while typing C)
 
-2.2. How to return to the shell without leaving Zile?
+2.2. How do I return to the shell without leaving Zile?
 
     Type `C-x C-z' or simply `C-z'.
 
@@ -126,7 +131,7 @@ INDEX
     `C-g'. You can also use `C-g' to discard a numeric argument or the
     beginning of a command that you don't want to finish.
 
-2.4. How to undo the previous command?
+2.4. How do I undo the previous command?
 
     Type `C-x u'.
 
@@ -142,18 +147,16 @@ INDEX
 	     press and release the ESC key and then type <chr>. We
 	     write <ESC> for the ESC key.
 
-2.6. What are the available variables that can be modified?
+2.6. What settings can I change?
 
     Check out the `zilerc.sample' file (type `C-h s') for a full list
-    of modifiable variables.
+    of variables.
 
-2.7. How to display non-English characters?
+2.7. How do I display non-ASCII characters?
 
     Zile uses the operating system's locale support, so you need to
     set an appropriate locale. However, Zile only works with 8-bit
     locales at present; support for Unicode is planned.
-
-2.8. Zile doesn't handle filenames with non-English characters.
 
     Try to set the LANG environment variable according to your locale,
     before running Zile. For example, for a French environment, try:
@@ -162,59 +165,27 @@ INDEX
 
 	setenv LANG fr_FR	(with a C-like shell).
 
+2.8. Zile doesn't handle filenames with non-ASCII characters.
+
+    See the answer to question 2.7.
+
 2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
-    You might try adding the following line to your `~/.zilerc' file:
+    Add the following line to your `~/.zilerc' file:
 
 	alternative-bindings = true
 
-    and using the alternative key sequences (`M-h' instead of `C-h').
+    and use the alternative key sequences (`M-h' instead of `C-h').
 
-2.10. How to enable Auto Fill Mode at startup?
+2.10. How do I enable Auto Fill Mode at startup?
 
     Add the following line to your `~/.zilerc' file:
 
 	auto-fill-mode = true
 
-2.11. How to change the binding of a function?
-
-    Use global-set-key.
-
-2.12. The Zile screen is not resized in a X Window terminal.
+2.11. The Zile screen is not resized when I resize my terminal.
 
     Your terminal application does not send the signal `SIGWINCH' to
     Zile (and other applications). To be sure, you might check if other
     terminal applications, like `vim' and `joe', also fail to resize
     their windows.
-
-------------------------------------------------------------------------------
-
-3. Compiling
-
-3.1. Zile doesn't compile correctly under the Foobar operating system.
-
-    We have tested Zile under GNU/Linux only (other than the EPOC
-    port). Since it is written in ANSI C, should be fairly easy to
-    port it under other UNIX-like operating systems. If you get Zile
-    running under some other OS, please send a message to the Zile
-    developers telling them that (you might send him the patches you
-    have made to the Zile sources if you want them included in the
-    next release).
-
-    Zile is also known to work under the following operating systems:
-
-	* FreeBSD
-	* NetBSD
-	* OpenBSD
-	* Solaris
-	* Windows with Cygwin
-
-3.2. Can I compile Zile under Cygwin?
-
-    Yes, you can. You might need to put a
-
-	#include <getopt.h>
-
-    line in the `etc/mkdoc.c' and `src/main.c' files, if the compiler
-    complains about the `getopt' function prototype and/or the
-    `optarg' variable.
