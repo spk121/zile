@@ -1,11 +1,5 @@
 HIGH PRIORITY
 
-* Functions/bindings to implement and document (dummy functions
-  already exist):
-
-X1("fill-paragraph", fill_paragraph,                    "M-q")   
-X1("name-last-kbd-macro", name_last_kbd_macro,          "")
-
 * Complete universal-argument functionality for:
 
 transpose-chars
@@ -24,11 +18,16 @@ X1("backward-sentence", backward_sentence,              "M-a")
 X1("forward-sentence", forward_sentence,                "M-e")
 X1("kill-sentence", kill_sentence,                      "M-k")
 X1("backward-kill-sentence", backward_kill_sentence,    "C-x\\DEL")
-X1("kill-rectangle", kill_rectangle,                    "C-xrk")
+X1("name-last-kbd-macro", name_last_kbd_macro,          "")
 
-* Allow search and replace not to follow case (case-fold-search, case-replace)
+* Add function key support to termcap, and remove code for keys that
+  cannot be supported.
+* Allow search and replace not to follow case (case-fold-search,
+  case-replace).
 * Regex pattern matching for replace functions.
-* Unicode support.
+* Add undo compaction, so that functions implemented in terms of other
+  functions can have a single undo action.
+* Add Unicode support.
 
 ------------------------------------------------------------------------------
 
@@ -36,9 +35,8 @@ LOW PRIORITY (may require a rewrite)
 
 * Use a kernel of editing functions for low level editing; all other
   high level functions should call these functions to access the data.
-* Buffer oriented structures vs. line oriented structures (like now).
-* Mouse support.
-* Undoing insertions of binary files can be very slow.
-* The method of resolving the `C-h' problem by replacing it with `M-h'
-  is not a ``Good Thing''(TM).
-* The macros do not work for interactive commands.
+* Use buffer oriented structures rather than line oriented structures.
+* Add mouse support.
+* Speed up insertion of binary files.
+* Find a better method of resolving the `C-h'/`M-h' problem.
+* Make macros work for interactive commands.

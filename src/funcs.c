@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.46 2004/10/13 16:04:06 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.47 2004/10/16 21:04:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -386,7 +386,7 @@ int universal_argument(int keytype, int xarg)
 
 	if (keytype == KBD_META) {
 		astr_cpy_cstr(as, "ESC");
-		term_ungetkey(xarg + '0');
+		term_unget_char(xarg + '0');
 	}
 	else
 		astr_cpy_cstr(as, "C-u");
@@ -437,13 +437,13 @@ int universal_argument(int keytype, int xarg)
 					   back to normal state).  */
 				}
 				else {
-					term_ungetkey(c);
+					term_unget_char(c);
 					break;
 				}
 			}
 		}
 		else {
-			term_ungetkey(c);
+			term_unget_char(c);
 			break;
 		}
 	}
@@ -1182,10 +1182,12 @@ Move backward to start of paragraph.  With argument N, do it N times.
 {
         if (uniarg < 0)
                 return FUNCALL_ARG(forward_paragraph, -uniarg);
-        else
-                do {
-                        while (previous_line() && !eolp());
-                } while (--uniarg > 0);
+
+        do {
+                while (previous_line() && !is_empty_line());
+        } while (--uniarg > 0);
+
+        FUNCALL(beginning_of_line);
 
         return TRUE;
 }
@@ -1197,11 +1199,16 @@ Move forward to end of paragraph.  With argument N, do it N times.
 {
         if (uniarg < 0)
                 return FUNCALL_ARG(backward_paragraph, -uniarg);
-        else
-                do {
-                        while (next_line() && !eolp());
-                } while (--uniarg > 0);
+        
+        do {
+                while (next_line() && !is_empty_line());
+        } while (--uniarg > 0);
 
+        if (is_empty_line())
+                FUNCALL(beginning_of_line);
+        else
+                FUNCALL(end_of_line);
+        
         return TRUE;
 }
 
@@ -1222,8 +1229,54 @@ DEFUN("fill-paragraph", fill_paragraph)
 Fill paragraph at or after point.
 +*/
 {
-	/* XXX */
-	return FALSE;
+        Point pt = cur_bp->pt;
+        Line *end_lp;
+        
+        FUNCALL(forward_paragraph);
+        end_lp = cur_bp->pt.p;
+        FUNCALL(backward_paragraph);
+
+        if (cur_bp->pt.p != end_lp)
+                while (1) {
+                        FUNCALL(end_of_line);
+                        if (get_goalc() > cur_bp->fill_column) {
+                                int moving = cur_bp->pt.p == pt.p;
+                                fill_break_line();
+
+                                /* Relocate point if it may have moved. */
+                                if (moving)
+                                        while (pt.o > astr_len(pt.p->text)) {
+                                                pt.o -= astr_len(pt.p->text);
+                                                pt.p = pt.p->next;
+                                                pt.n++;
+                                        }
+                        } else {
+                                next_line();
+                                FUNCALL(end_of_line);
+                        }
+
+                        if (cur_bp->pt.p == end_lp)
+                                break;
+
+                        if (cur_bp->pt.p->next != end_lp) {
+                                int moving = cur_bp->pt.p->next == pt.p;
+                                int cur_len = astr_len(cur_bp->pt.p->text);
+                                
+                                insert_char(' ');
+                                delete_char();
+
+                                /* Relocate point if it moved. */
+                                if (moving) {
+                                        pt.p = cur_bp->pt.p;
+                                        pt.o += cur_len;
+                                        pt.n--;
+                                }
+                        }
+                }
+
+        cur_bp->pt = pt;
+
+        return TRUE;
 }
 
 #define UPPERCASE		1
@@ -1484,8 +1537,8 @@ it as the contents of the region.
 		return FALSE;
 
 	cmd = astr_new();
-/*	if (cur_bp->mark != NULL) { /\* Region selected; filter text. *\/ */
-	{
+
+        {
 		Region r;
 		char *p;
 		int fd;
@@ -1504,9 +1557,7 @@ it as the contents of the region.
 		close(fd);
 
 		astr_afmt(cmd, "%s 2>&1 <%s", ms, tempfile);
-	}
-/*	else */
-/*		astr_afmt(cmd, "%s 2>&1 </dev/null", ms); */
+        }
 
 	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
 		minibuf_error("Cannot open pipe to process");
@@ -1523,15 +1574,13 @@ it as the contents of the region.
 	}
 	astr_delete(s);
 	pclose(pipe);
-/*	if (cur_bp->mark != NULL) */
-		remove(tempfile);
+        remove(tempfile);
 
 	if (lines == 0)
 		minibuf_write("(Shell command succeeded with no output)");
 	else { /* lines >= 1 */
 		if (lastflag & FLAG_SET_UNIARG) {
 			undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-			/* if (cur_bp->mark != NULL)  */
 			{
 				Region r;
 				calculate_region(&r);
