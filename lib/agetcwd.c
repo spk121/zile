@@ -1,4 +1,4 @@
-/*	$Id: agetcwd.c,v 1.1 2003/05/19 21:51:54 rrt Exp $	*/
+/*	$Id: agetcwd.c,v 1.2 2003/09/30 22:51:53 rrt Exp $	*/
 
 /*
  * Copyright (c) 2003 Reuben Thomas.  All rights reserved.
@@ -25,6 +25,7 @@
  */
 
 #include <stdlib.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -37,9 +38,13 @@ char *agetcwd(void)
         size_t len = 256;
 #endif
         char *buf = (char *)xmalloc(len);
-        while (getcwd(buf, len) == NULL) {
+        char *res;
+        while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
                 len *= 2;
                 buf = xrealloc(buf, len);
         }
+        /* If there was an error, return the empty string */
+        if (res == NULL)
+                *buf = '\0';
         return buf;
 }
