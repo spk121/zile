@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.24 2005/01/09 23:56:04 rrt Exp $	*/
+/*	$Id: help.c,v 1.25 2005/01/12 10:55:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -78,7 +78,7 @@ DEFUN("help-config-sample", help_config_sample)
   return show_file(PATH_DATA "/zilerc.sample");
 }
 
-DEFUN("help-faq", help_faq)
+DEFUN("view-zile-FAQ", view_zile_FAQ)
   /*+
     Show the Zile Frequently Asked Questions (FAQ).
     +*/
@@ -86,7 +86,7 @@ DEFUN("help-faq", help_faq)
   return show_file(PATH_DATA "/FAQ");
 }
 
-DEFUN("help-tutorial", help_tutorial)
+DEFUN("help-with-tutorial", help_with_tutorial)
   /*+
     Show a tutorial window.
     +*/

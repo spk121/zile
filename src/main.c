@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.57 2005/01/12 10:39:40 rrt Exp $	*/
+/*	$Id: main.c,v 1.58 2005/01/12 10:55:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -126,10 +126,10 @@ static void about_screen(void)
  */
 static void sanity_checks(void)
 {
-  /* The functions `read_rc_file' and `help_tutorial' rely on a usable
-     `HOME' environment variable. */
+  /* The functions `read_rc_file' and `help_with_tutorial' rely on a
+     usable `HOME' environment variable. */
   if (getenv("HOME") == NULL) {
-    fprintf(stderr, "fatal error: please set `HOME' to point to your home-directory\n");
+    fprintf(stderr, "fatal error: please set `HOME' to point to your home directory\n");
     exit(1);
   }
 
