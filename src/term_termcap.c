@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.38 2004/11/15 22:19:45 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.39 2004/12/08 23:47:27 rrt Exp $	*/
 
 #include "config.h"
 
@@ -456,8 +456,9 @@ static char *keyp = key_buf + MAX_KEY_BUF;
 static int xgetkey(int mode, int dsecs)
 {
         size_t nbytes;
-        char keys[MAX_KEY_BUF + max_key_chars];
+        char *keys = zmalloc(MAX_KEY_BUF + max_key_chars);
         int len = MAX_KEY_BUF - (keyp - key_buf);
+        int key = KBD_NOKEY;
 
         if (mode & GETKEY_DELAYED) {
                 nstate.c_cc[VTIME] = dsecs;  /* Wait up to arg deciseconds... */
@@ -480,20 +481,21 @@ static int xgetkey(int mode, int dsecs)
         if (len < max_key_chars)  /* Don't get more chars if we already have the maximum for a keystroke. */
                 nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
 
-	if (nbytes < 0)
-		return KBD_NOKEY;
-
-        if (mode & GETKEY_NONFILTERED) {
-                int i;
-                for (i = nbytes - 1; i >= 0; i--)
-                        term_unget(keys[i]);
-                return keys[nbytes - 1];
-        } else {
-                int key = translate_key(keys, nbytes);
-                while (key == KBD_META)
-                        key = term_getkey() | KBD_META;
-                return key;
+	if (nbytes >= 0) {
+                if (mode & GETKEY_NONFILTERED) {
+                        int i;
+                        for (i = nbytes - 1; i >= 0; i--)
+                                term_unget(keys[i]);
+                        key = keys[nbytes - 1];
+                } else {
+                        key = translate_key(keys, nbytes);
+                        while (key == KBD_META)
+                                key = term_getkey() | KBD_META;
+                }
         }
+
+        free(keys);
+        return key;
 }
 
 static void winch_sig_handler(int signo)
