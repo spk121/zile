@@ -270,8 +270,6 @@ Insert a new line.  Bound to @code{newline}.
 Delete the previous character.  Bound to @code{backward-delete-char}.
 @item @key{INS}
 Toggle @i{Overwrite Mode}.  Bound to @code{overwrite-mode}.
-@item @key{F11}
-Switch to a correlated buffer.  Bound to @code{switch-to-correlated-buffer}.
 @item C-@@, C-@key{SPC}, @key{F5}
 Set mark.  Bound to @code{set-mark-command}.
 @item C-\
@@ -295,7 +293,7 @@ Describe briefly a key sequence.  Bound to @code{describe-key-briefly}.
 @item C-h d, C-h f
 Describe a function.  Bound to @code{describe-function}.
 @item C-h h, @key{F1}
-Show an help window.  Bound to @code{help}.
+Show a help window.  Bound to @code{help}.
 @item C-h k
 Describe a key sequence.  Bound to @code{describe-key}.
 @item C-h l b
@@ -602,7 +600,7 @@ Show a help window.
 @item help-config-sample
 Show a configuration file sample.
 @item view-zile-FAQ
-Show the Zile @i{Frequently Asked Questions} (FAQ).
+Show the Zile @i{Frequently Asked Questions} list (FAQ).
 @item help-latest-version
 Show informations about getting the latest version.
 @item help-tutorial
@@ -808,15 +806,6 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 Stop Zile and return to superior process.
 @item switch-to-buffer
 Select to the user specified buffer in the current window.
-@item switch-to-correlated-buffer
-Find and open a file correlated with the current buffer.
-Some examples of correlated files are the following:
-@example
-anyfile.c  --> anyfile.h
-anyfile.h  --> anyfile.c
-anyfile.in --> anyfile
-anyfile    --> anyfile.in
-@end example
 @item tabify
 Convert multiple spaces in region to tabs when possible.
 A group of spaces is partially replaced by tabs
