@@ -20,11 +20,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.6 2005/01/22 18:26:10 rrt Exp $	*/
+/*	$Id: eval.c,v 1.7 2005/01/23 00:25:01 rrt Exp $	*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "zile.h"
+#include "extern.h"
 #include "eval.h"
 #include "vars.h"
 
@@ -205,26 +208,30 @@ int countNodes(le * branch)
 }
 
     
-int evalCastLeToInt( const le * levalue )
+int evalCastLeToInt(const le * levalue)
 {
-  if (!levalue) return( 0 );
-  if (!levalue->data) return( 0 );
+  if (levalue == NULL || levalue->data == NULL)
+    return 0;
 	
-  return( atoi(levalue->data) );
+  return atoi(levalue->data);
 }
     
-le * evalCastIntToLe( int intvalue )
+le *evalCastIntToLe(int intvalue)
 {
-  char buffer[80];
-  sprintf (buffer, "%d", intvalue);
+  char *buf;
+  le *list;
 
-  return( leNew(buffer) );
+  asprintf(&buf, "%d", intvalue);
+  list = leNew(buf);
+  free(buf);
+
+  return list;
 }
 
     
-le * eval_cb_nothing( int argc, le * branch )
+le *eval_cb_nothing(int argc, le *branch)
 {
-  return( leNew( "T" ));
+  return leNew("T");
 }
     
 int
