@@ -101,6 +101,7 @@ int insert_char(int c);
 int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);
 int insert_tab(void);
+void fill_break_line(void);
 int insert_newline(void);
 int intercalate_newline(void);
 void insert_string(const char *s);

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.34 2004/10/06 17:28:06 rrt Exp $	*/
+/*	$Id: line.c,v 1.35 2004/10/14 23:30:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -288,7 +288,7 @@ void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext,
  * Split the current line so that the text width is less
  * than the value specified by `fill-column'.
  */
-static void auto_fill_break_line(void)
+void fill_break_line(void)
 {
 	int break_col, last_col, excess = 0;
 
@@ -327,7 +327,7 @@ the current buffer.
 	for (uni = 0; uni < uniarg; ++uni) {
                 if (cur_bp->flags & BFLAG_AUTOFILL &&
                     get_goalc() > cur_bp->fill_column)
-                        auto_fill_break_line();
+                        fill_break_line();
 		if (!insert_newline()) {
 			ret = FALSE;
 			break;
@@ -369,7 +369,7 @@ int self_insert_command(int c)
 	if (c <= 255) {
                 if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
                     get_goalc() > cur_bp->fill_column)
-                        auto_fill_break_line();
+                        fill_break_line();
 		insert_char(c);
                 return TRUE;
 	} else {
