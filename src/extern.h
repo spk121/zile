@@ -125,6 +125,9 @@ int backward_delete_char(void);
 void free_registers(void);
 void free_kill_ring(void);
 
+/* lithp.c ---------------------------------------------------------------- */
+void lithp(char* file);
+
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
 void add_kbd_macro(Function func, int set_uniarg, int uniarg);
