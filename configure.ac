@@ -1,20 +1,25 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT([zile], [1.7], [sandro@sigala.it])
-AC_CONFIG_SRCDIR([src/main.c])
-AC_CONFIG_HEADER([config.h])
+
+AC_INIT(src/main.c)
+dnl Every other copy of the package version number gets its value from here
+AM_INIT_AUTOMAKE(zile, 1.7)
+dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
+AM_CONFIG_HEADER(config.h)
+
+AC_SUBST(VERSION)
+
+ISODATE=`date +%Y-%m-%d`
+AC_SUBST(ISODATE)
+
+AC_CANONICAL_HOST
 
 dnl Checks for programs.
 AC_PROG_CC
 AC_C_INLINE
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-AC_CHECK_PROG(MAKEINFO, makeinfo, yes, no)
-if test $MAKEINFO = yes; then
-	MAKEINFO='makeinfo'
-else
-	# for silly people without texinfo
-	MAKEINFO='@echo'
-fi
+AC_PATH_PROG(MAKEINFO, makeinfo)
+AC_PATH_PROG(GPERF, gperf)
 
 dnl Checks for libraries.
 AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf)
@@ -77,6 +82,7 @@ AC_ARG_ENABLE(c-mode,
 AC_HELP_STRING([--enable-c-mode], [include C Mode]),
 [
 if test $enableval = yes; then
+	enable_c_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_C_MODE)
 else
@@ -84,18 +90,21 @@ else
 fi
 ], [
 if test $allfeatures = yes; then
+	enable_c_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_C_MODE, 1, [Define this to include C Mode.])
 else
 	AC_MSG_RESULT(no)
 fi
 ])
+AM_CONDITIONAL(ENABLE_C_MODE, test x$enable_c_mode = xtrue)
 
 AC_MSG_CHECKING([if the C++ Mode should be included])
 AC_ARG_ENABLE(cpp-mode,
 AC_HELP_STRING([--enable-cpp-mode], [include C++ Mode]),
 [
 if test $enableval = yes; then
+	enable_cpp_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_CPP_MODE)
 else
@@ -103,12 +112,14 @@ else
 fi
 ], [
 if test $allfeatures = yes; then
+	enable_cpp_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_CPP_MODE, 1, [Define this to include C++ Mode.])
 else
 	AC_MSG_RESULT(no)
 fi
 ])
+AM_CONDITIONAL(ENABLE_CPP_MODE, test x$enable_cpp_mode = xtrue)
 
 AC_MSG_CHECKING([if the Shell Mode should be included])
 AC_ARG_ENABLE(shell-mode,
@@ -134,6 +145,7 @@ AC_ARG_ENABLE(csharp-mode,
 AC_HELP_STRING([--enable-csharp-mode], [include C Sharp Mode]),
 [
 if test $enableval = yes; then
+	enable_csharp_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_CSHARP_MODE)
 else
@@ -141,18 +153,21 @@ else
 fi
 ], [
 if test $allfeatures = yes; then
+	enable_csharp_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_CSHARP_MODE, 1, [Define this to include C# Mode.])
 else
 	AC_MSG_RESULT(no)
 fi
 ])
+AM_CONDITIONAL(ENABLE_CSHARP_MODE, test x$enable_csharp_mode = xtrue)
 
 AC_MSG_CHECKING([if the Java Mode should be included])
 AC_ARG_ENABLE(java-mode,
 AC_HELP_STRING([--enable-java-mode], [include Java Mode]),
 [
 if test $enableval = yes; then
+	enable_java_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_JAVA_MODE)
 else
@@ -160,12 +175,14 @@ else
 fi
 ], [
 if test $allfeatures = yes; then
+	enable_java_mode=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_JAVA_MODE, 1, [Define this to include Java Mode.])
 else
 	AC_MSG_RESULT(no)
 fi
 ])
+AM_CONDITIONAL(ENABLE_JAVA_MODE, test x$enable_java_mode = xtrue)
 
 AC_MSG_CHECKING([if the Mail Mode should be included])
 AC_ARG_ENABLE(mail-mode,
@@ -223,6 +240,9 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
 
 rm -f src/paths.h
 
-AC_CONFIG_FILES([doc/Makefile lib/Makefile etc/Makefile src/Makefile \
-          src/term_ncurses/Makefile Makefile])
-AC_OUTPUT
+AC_OUTPUT(Makefile \
+	  doc/Makefile \
+	  lib/Makefile \
+	  etc/Makefile \
+	  src/Makefile \
+	  src/term_ncurses/Makefile)
