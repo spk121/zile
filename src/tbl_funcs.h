@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.25 2005/01/12 10:55:34 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.26 2005/01/13 07:31:04 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -54,7 +54,6 @@ X0("goto-char", goto_char)
 X1("goto-line", goto_line,				"\\M-g")
 X2("help", help,					"\\C-hh", "\\F1")
 X1("help-config-sample", help_config_sample,		"\\C-hs")
-X1("view-zile-FAQ", view_zile_FAQ,			"\\C-hF")
 X1("help-with-tutorial", help_with_tutorial,		"\\C-ht")
 X1("indent-command", indent_command,			"\\TAB")
 X0("insert-buffer", insert_buffer)
@@ -124,6 +123,7 @@ X1("universal-argument", universal_argument,		"\\C-u")
 X0("untabify", untabify)
 X1("upcase-region", upcase_region,			"\\C-x\\C-u")
 X1("upcase-word", upcase_word,				"\\M-u")
+X1("view-zile-FAQ", view_zile_FAQ,			"\\C-hF")
 X1("write-file", write_file,				"\\C-x\\C-w")
 X2("yank", yank,					"\\C-y", "\\F8")
 X0("zile-version", zile_version)
