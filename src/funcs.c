@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.53 2005/01/09 18:11:13 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.54 2005/01/09 18:19:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -35,7 +35,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "editfns.h"
 
 int cancel(void)
 {

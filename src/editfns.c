@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.6 2005/01/09 18:11:13 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.7 2005/01/09 18:19:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -27,7 +27,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "editfns.h"
 
 static list mark_ring = NULL;	/* Mark-ring.  */
 

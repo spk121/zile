@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.38 2005/01/03 00:45:27 rrt Exp $	*/
+/*	$Id: line.c,v 1.39 2005/01/09 18:19:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,7 +34,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "editfns.h"
 
 static void adjust_markers_for_offset(Line *lp, int pointo, int offset);
 static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type);

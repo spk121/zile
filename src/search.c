@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.25 2004/12/20 11:15:39 rrt Exp $	*/
+/*	$Id: search.c,v 1.26 2005/01/09 18:19:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "editfns.h"
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #else

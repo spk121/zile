@@ -44,6 +44,21 @@ void activate_mark(void);
 void deactivate_mark(void);
 int is_mark_actived(void);
 
+/* editfns.c -------------------------------------------------------------- */
+void push_mark(void);
+void pop_mark(void);
+void set_mark(void);
+int is_empty_line(void);
+int is_blank_line(void);
+int char_after(Point *pt);
+int char_before(Point *pt);
+int following_char(void);
+int preceding_char(void);
+int bobp(void);
+int eobp(void);
+int bolp(void);
+int eolp(void);
+
 /* file.c ----------------------------------------------------------------- */
 int exist_file(const char *filename);
 int is_regular_file(const char *filename);

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: marker.c,v 1.3 2004/03/09 16:20:28 rrt Exp $	*/
+/*	$Id: marker.c,v 1.4 2005/01/09 18:19:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -28,7 +28,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "editfns.h"
 
 Marker *make_marker(void)
 {
