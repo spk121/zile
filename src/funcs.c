@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.15 2004/02/05 09:25:48 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.16 2004/02/06 01:48:39 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -745,7 +745,7 @@ static void insert_region (astr s)
 	}
 }
 
-static int transpose_subr (funcp f)
+static int transpose_subr(funcp f)
 {
 	linep markp;
 	int marko;
@@ -768,20 +768,20 @@ static int transpose_subr (funcp f)
 		if (cur_wp->pointo == cur_wp->pointp->size) {
 			if (cur_wp->pointo == 0)
 				forward_after_del1 = 2;
-			f (-1);
+			f(-1);
 		}
 	}
 	/* For transpose-lines.  */
 	else if (f == F_forward_line) {
 		/* If we are in first line, go to next line.  */
 		if (cur_wp->pointp->prev == cur_bp->limitp) {
-			f (1);
+			f(1);
 		}
 	}
 
 	/* Backward.  */
-	if (!f (-1)) {
-		minibuf_error ("Beginning of buffer");
+	if (!f(-1)) {
+		minibuf_error("Beginning of buffer");
 		return FALSE;
 	}
 
@@ -792,7 +792,7 @@ static int transpose_subr (funcp f)
 	o1 = cur_wp->pointo;
 
 	/* Check end of buffer.  */
-	if (!f (2)) {
+	if (!f(2)) {
 		/* For transpose-lines.  */
 		if (f == F_forward_line) {
 			if (!seq_started) {
@@ -1064,11 +1064,11 @@ With argument, do this that many times.
 			       ((c=='\"') && double_quote) ||		\
 			       ((c=='\'') && single_quote))
 
-#define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
-			       ISCLOSEBRACKETCHAR (c))
+#define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR(c) ||	\
+			       ISCLOSEBRACKETCHAR(c))
 
 #define CONTROL_SEXP_LEVEL(open, close)					 \
-	if (open (c)) {							 \
+	if (open(c)) {							 \
 		if (level == 0 && gotsexp)				 \
 			return TRUE;					 \
 									 \
@@ -1087,13 +1087,13 @@ With argument, do this that many times.
 		if (c == '\'') single_quote ^= 1;			 \
 									 \
 		if (level < 0) {					 \
-			minibuf_error ("Scan error: \"Containing "	 \
-				       "expression ends prematurely\""); \
+			minibuf_error("Scan error: \"Containing "	 \
+				      "expression ends prematurely\"");  \
 			return FALSE;					 \
 		}							 \
 	}
 
-static int forward_sexp (void)
+static int forward_sexp(void)
 {
 	int gotsexp = FALSE;
 	int level = 0;
@@ -1113,14 +1113,14 @@ static int forward_sexp (void)
 				c = 'a';
 			}
 
-			CONTROL_SEXP_LEVEL (ISOPENBRACKETCHAR,
-					    ISCLOSEBRACKETCHAR);
+			CONTROL_SEXP_LEVEL(ISOPENBRACKETCHAR,
+					   ISCLOSEBRACKETCHAR);
 
 			cur_wp->pointo++;
 
 			if (!ISSEXPCHAR (c)) {
 				if (gotsexp && level == 0) {
-					if (!ISSEXPSEPARATOR (c))
+					if (!ISSEXPSEPARATOR(c))
 						cur_wp->pointo--;
 					return TRUE;
 				}
@@ -1133,7 +1133,7 @@ static int forward_sexp (void)
 		cur_wp->pointo = cur_wp->pointp->size;
 		if (!next_line()) {
 			if (level != 0)
-				minibuf_error ("Scan error: \"Unbalanced parentheses\"");
+				minibuf_error("Scan error: \"Unbalanced parentheses\"");
 			break;
 		}
 		cur_wp->pointo = 0;
@@ -1153,10 +1153,10 @@ move backward across N balanced expressions.
 	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
-		return FUNCALL_ARG (backward_sexp, -uniarg);
+		return FUNCALL_ARG(backward_sexp, -uniarg);
 
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!forward_sexp ())
+		if (!forward_sexp())
 			return FALSE;
 
 	return TRUE;
@@ -1173,7 +1173,7 @@ static int backward_sexp(void)
 		if (cur_wp->pointo == 0) {
 			if (!previous_line()) {
 				if (level != 0)
-					minibuf_error ("Scan error: \"Unbalanced parentheses\"");
+					minibuf_error("Scan error: \"Unbalanced parentheses\"");
 				break;
 			}
 			cur_wp->pointo = cur_wp->pointp->size;
@@ -1189,14 +1189,14 @@ static int backward_sexp(void)
 				c = 'a';
 			}
 
-			CONTROL_SEXP_LEVEL (ISCLOSEBRACKETCHAR,
-					    ISOPENBRACKETCHAR);
+			CONTROL_SEXP_LEVEL(ISCLOSEBRACKETCHAR,
+					   ISOPENBRACKETCHAR);
 
 			--cur_wp->pointo;
 
 			if (!ISSEXPCHAR (c)) {
 				if (gotsexp && level == 0) {
-					if (!ISSEXPSEPARATOR (c))
+					if (!ISSEXPSEPARATOR(c))
 						cur_wp->pointo++;
 					return TRUE;
 				}
@@ -1221,10 +1221,10 @@ move forward across N balanced expressions.
 	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
 
 	if (uniarg < 0)
-		return FUNCALL_ARG (forward_sexp, -uniarg);
+		return FUNCALL_ARG(forward_sexp, -uniarg);
 
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!backward_sexp ())
+		if (!backward_sexp())
 			return FALSE;
 
 	return TRUE;
@@ -1235,8 +1235,12 @@ DEFUN("mark-word", mark_word)
 Set mark argument words away from point.
 +*/
 {
-	FUNCALL (set_mark_command);
-	return FUNCALL_ARG (forward_word, uniarg);
+	int ret;
+	FUNCALL(set_mark_command);
+	ret = FUNCALL_ARG(forward_word, uniarg);
+	if (ret)
+	  FUNCALL(exchange_point_and_mark);
+	return ret;
 }
 
 DEFUN("mark-sexp", mark_sexp)
@@ -1246,8 +1250,12 @@ The place mark goes is the same place C-M-f would
 move to with the same argument.
 +*/
 {
-	FUNCALL (set_mark_command);
-	return FUNCALL_ARG (forward_sexp, uniarg);
+	int ret;
+	FUNCALL(set_mark_command);
+	ret = FUNCALL_ARG(forward_sexp, uniarg);
+	if (ret)
+	  FUNCALL(exchange_point_and_mark);
+	return ret;
 }
 
 DEFUN("forward-line", forward_line)
@@ -1256,8 +1264,8 @@ Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
-	FUNCALL (beginning_of_line);
-	return FUNCALL_ARG (next_line, uniarg);
+	FUNCALL(beginning_of_line);
+	return FUNCALL_ARG(next_line, uniarg);
 }
 
 DEFUN("backward-sentence", backward_sentence)
