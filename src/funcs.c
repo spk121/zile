@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.18 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.19 2004/02/14 10:08:15 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -1204,7 +1204,7 @@ static int backward_sexp(void)
 DEFUN("backward-sexp", backward_sexp)
 /*+
 Move backward across one balanced expression (sexp).
-With argumenet, do it that many times.  Negative arg -N means
+With argument, do it that many times.  Negative arg -N means
 move forward across N balanced expressions.
 +*/
 {
