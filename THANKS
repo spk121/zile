@@ -7,8 +7,8 @@ The Zile team would like to thank:
   and suggestions
 * George Young <gryoung@nortel.ca> for bug reports
 * Jim Buchanan <c22jrb@dawg.delcoelect.com> for suggestions
-* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes,
-  the `goto-line' function, Debian package and continuous support
+* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
+  `goto-line' function, Debian package and continuous support
 * Nicolas Duboc <nicolas@duboc.net> for maintaining the Debian
   package, and fixing and reporting several bugs
 * Tim Middelkoop <mtim@arranvale.com> for the backup directory feature
@@ -16,7 +16,7 @@ The Zile team would like to thank:
 * Christian Weisgerber <naddy@mips.inka.de> for bug reports and fixes
 * Pawel A. Gajda <mis@k2.net.pl> for bug reports
 * Jason Evans <jasone@canonware.com> for bug reports
-* Mattias R"onnblom <hofors@lysator.liu.se> for bug reports
+* Mattias Rönnblom <hofors@lysator.liu.se> for bug reports
 * Rouge Alain <alain.rouge@enac.fr> for suggestions and bug reports
 * Gerd Bavendiek <bav@epost.de> for suggestions and bug reports
 * Dale DePriest <daled@cadence.com> for suggestions
@@ -33,12 +33,12 @@ The Zile team would like to thank:
 * Alan James <alan@tomun.org> for suggestions
 * Joseph Boyd <k963@bonbon.net> for the `back-to-indentation' feature
 * Eberhard Mattes <em1@users.sourceforge.net> for the epocemx POSIX
-  emulation layer for EPOC, which made the EPOC port possible.
-* Dmitri Brechalov <dmych@users.sourceforge.net> for his eEmacs
-  editor (based on various microEmacs versions) for EPOC, from
-  which code was stolen for zile's epocemx terminal interface.
+  emulation layer for EPOC, which made the EPOC port possible
+* Dmitri Brechalov <dmych@users.sourceforge.net> for his eEmacs editor
+  (based on various microEmacs versions) for EPOC, from which code was
+  stolen for zile's epocemx terminal interface
 * Richard Smith <richard@ex-parrot.com> for autotools code (mostly
   stolen from binutils) to build mkdoc for the build platform when
-  cross-compiling.
+  cross-compiling
 
 and everyone else who has reported bugs and made suggestions.
