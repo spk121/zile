@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.3 2004/10/16 20:36:50 rrt Exp $
+## $Id: Makefile.am,v 1.4 2004/11/01 21:33:16 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
@@ -52,4 +52,4 @@ refcard.ps: refcard.tex
 	dvips -o refcard.ps -ta4 -tlandscape refcard.dvi
 
 clean-local:
-	-rm -f mkdoc AUTODOC HELP *.o
+	-rm -f mkdoc AUTODOC HELP *.o *.dvi *.ps *.log *.aux
