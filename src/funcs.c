@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.16 2004/02/06 01:48:39 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.17 2004/02/06 04:20:09 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -1239,7 +1239,7 @@ Set mark argument words away from point.
 	FUNCALL(set_mark_command);
 	ret = FUNCALL_ARG(forward_word, uniarg);
 	if (ret)
-	  FUNCALL(exchange_point_and_mark);
+		FUNCALL(exchange_point_and_mark);
 	return ret;
 }
 
@@ -1254,7 +1254,7 @@ move to with the same argument.
 	FUNCALL(set_mark_command);
 	ret = FUNCALL_ARG(forward_sexp, uniarg);
 	if (ret)
-	  FUNCALL(exchange_point_and_mark);
+		FUNCALL(exchange_point_and_mark);
 	return ret;
 }
 
@@ -1264,8 +1264,23 @@ Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
-	FUNCALL(beginning_of_line);
-	return FUNCALL_ARG(next_line, uniarg);
+        FUNCALL(beginning_of_line);
+
+        if (uniarg == 0)
+                uniarg = 1;
+
+        if (uniarg < 0) {
+                while (uniarg++)
+                        if (!previous_line())
+                                return FALSE;
+        }
+        else if (uniarg > 0) {
+                while (uniarg--)
+                        if (!next_line())
+                                return FALSE;
+        }
+
+        return TRUE;
 }
 
 DEFUN("backward-sentence", backward_sentence)
