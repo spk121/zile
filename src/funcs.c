@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.64 2005/01/14 17:22:55 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.65 2005/01/17 18:09:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,13 +36,6 @@
 #include "zile.h"
 #include "extern.h"
 
-int cancel(void)
-{
-  deactivate_mark();
-  minibuf_error("Quit");
-  return FALSE;
-}
-
 DEFUN("suspend-zile", suspend_zile)
   /*+
     Stop Zile and return to superior process.
@@ -52,6 +45,13 @@ DEFUN("suspend-zile", suspend_zile)
   raise(SIGTSTP);
   term_full_redisplay();
   return TRUE;
+}
+
+int cancel(void)
+{
+  deactivate_mark();
+  minibuf_error("Quit");
+  return FALSE;
 }
 
 DEFUN("keyboard-quit", keyboard_quit)
@@ -197,18 +197,14 @@ DEFUN("list-buffers", list_buffers)
 
 DEFUN("overwrite-mode", overwrite_mode)
   /*+
-    In overwrite mode, printing characters typed in replace existing text
-    on a one-for-one basis, rather than pushing it to the right.  At the
-    end of a line, such characters extend the line.
-    C-q still inserts characters in overwrite mode; this
-    is supposed to make it easier to insert characters when necessary.
+    In overwrite mode, printing characters typed in replace existing
+    text on a one-for-one basis, rather than pushing it to the right.
+    At the end of a line, such characters extend the line.
+    C-q still inserts characters in overwrite mode; this is supposed
+    to make it easier to insert characters when necessary.
     +*/
 {
-  if (cur_bp->flags & BFLAG_OVERWRITE)
-    cur_bp->flags &= ~BFLAG_OVERWRITE;
-  else
-    cur_bp->flags |= BFLAG_OVERWRITE;
-
+  cur_bp->flags ^= BFLAG_OVERWRITE;
   return TRUE;
 }
 
@@ -217,11 +213,7 @@ DEFUN("toggle-read-only", toggle_read_only)
     Change whether this buffer is visiting its file read-only.
     +*/
 {
-  if (cur_bp->flags & BFLAG_READONLY)
-    cur_bp->flags &= ~BFLAG_READONLY;
-  else
-    cur_bp->flags |= BFLAG_READONLY;
-
+  cur_bp->flags ^= BFLAG_READONLY;
   return TRUE;
 }
 
@@ -232,11 +224,7 @@ DEFUN("auto-fill-mode", auto_fill_mode)
     automatically breaks the line at a previous space.
     +*/
 {
-  if (cur_bp->flags & BFLAG_AUTOFILL)
-    cur_bp->flags &= ~BFLAG_AUTOFILL;
-  else
-    cur_bp->flags |= BFLAG_AUTOFILL;
-
+  cur_bp->flags ^= BFLAG_AUTOFILL;
   return TRUE;
 }
 

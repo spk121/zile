@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.26 2005/01/16 13:07:43 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.27 2005/01/17 18:09:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -147,6 +147,9 @@ Buffer *create_buffer(const char *name)
 
   bp->next = head_bp;
   head_bp = bp;
+
+  if (lookup_bool_variable("auto-fill-mode"))
+    bp->flags ^= BFLAG_AUTOFILL;
 
   return bp;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.60 2005/01/16 13:07:43 rrt Exp $        */
+/*      $Id: file.c,v 1.61 2005/01/17 18:09:22 rrt Exp $        */
 
 #include "config.h"
 
@@ -367,7 +367,6 @@ int find_file(const char *filename)
   bp = create_buffer(s);
   free(s);
   bp->filename = zstrdup(filename);
-  bp->flags = 0;
 
   switch_to_buffer(bp);
   read_from_disk(filename);

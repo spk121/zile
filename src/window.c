@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.15 2005/01/14 22:31:49 rrt Exp $	*/
+/*	$Id: window.c,v 1.16 2005/01/17 18:09:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -276,10 +276,8 @@ void create_first_window(void)
    * Create the scratch buffer.
    */
   bp = create_buffer("*scratch*");
-  bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
+  bp->flags |= BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
   cur_bp = bp;
-  if (lookup_bool_variable("auto-fill-mode"))
-    FUNCALL(auto_fill_mode);
 
   wp = window_new();
   cur_wp = head_wp = wp;
