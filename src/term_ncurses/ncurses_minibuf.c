@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_minibuf.c,v 1.20 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.21 2004/05/09 18:00:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -29,11 +29,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif
 
 #include "zile.h"
 #include "extern.h"
@@ -43,11 +38,11 @@ void ncurses_minibuf_clear(void)
 {
 	int y, x;
 
-	getyx(stdscr, y, x);
-	move(LINES - 1, 0);
-	clrtoeol();
-	move(y, x);
-	refresh();
+        term_getyx(&y, &x);
+	term_move(ZILE_LINES - 1, 0);
+	term_clrtoeol();
+	term_move(y, x);
+	term_refresh();
 }
 
 static void xminibuf_write(const char *fmt)
@@ -55,10 +50,10 @@ static void xminibuf_write(const char *fmt)
 	int y, x;
 	const unsigned char *p = fmt;
 
-	getyx(stdscr, y, x);
+	term_getyx(&y, &x);
 
-	for (; *p != '\0' && x < COLS; p++) {
-		addch(*p);
+	for (; *p != '\0' && x < ZILE_COLS; p++) {
+		term_addch(*p);
 		++x;
 	}
 }
@@ -68,38 +63,38 @@ void ncurses_minibuf_write(const char *fmt)
 	int y, x;
 
 	/* Save the current cursor position. */
-	getyx(stdscr, y, x);
+	term_getyx(&y, &x);
 
-	move(LINES - 1, 0);
+	term_move(ZILE_LINES - 1, 0);
 	xminibuf_write(fmt);
-	clrtoeol();
+	term_clrtoeol();
 
 	/* Restore the previous cursor position. */
-	move(y, x);
+	term_move(y, x);
 }
 
 static void draw_minibuf_read(const char *prompt, const char *value, int prompt_len,
 			      char *match, int pointo)
 {
-	move(LINES - 1, 0);
-	clrtoeol();
+	term_move(ZILE_LINES - 1, 0);
+	term_clrtoeol();
 	xminibuf_write(prompt);
 
-	if (prompt_len + pointo + 1 < COLS) {
-		addnstr(value, COLS - prompt_len - 1);
-		addstr(match);
-		if ((int)strlen(value) >= COLS - prompt_len - 1)
-			mvaddch(LINES - 1, COLS - 1, '$');
-		move(LINES - 1, prompt_len + pointo);
+	if (prompt_len + pointo + 1 < ZILE_COLS) {
+		term_addnstr(value, ZILE_COLS - prompt_len - 1);
+		term_addstr(match);
+		if ((int)strlen(value) >= ZILE_COLS - prompt_len - 1)
+			term_mvaddch(ZILE_LINES - 1, ZILE_COLS - 1, '$');
+		term_move(ZILE_LINES - 1, prompt_len + pointo);
 	} else {
 		int n;
-		addch('$');
-		n = pointo - pointo % (COLS - prompt_len - 2);
-		addnstr(value + n, COLS - prompt_len - 2);
-		addstr(match);
-		if ((int)strlen(value + n) >= COLS - prompt_len - 2)
-			mvaddch(LINES - 1, COLS - 1, '$');
-		move(LINES - 1, prompt_len + 1 + pointo % (COLS - prompt_len - 2));
+		term_addch('$');
+		n = pointo - pointo % (ZILE_COLS - prompt_len - 2);
+		term_addnstr(value + n, ZILE_COLS - prompt_len - 2);
+		term_addstr(match);
+		if ((int)strlen(value + n) >= ZILE_COLS - prompt_len - 2)
+			term_mvaddch(ZILE_LINES - 1, ZILE_COLS - 1, '$');
+		term_move(ZILE_LINES - 1, prompt_len + 1 + pointo % (ZILE_COLS - prompt_len - 2));
 	}
 }
 
@@ -147,13 +142,13 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 			FUNCALL(suspend_zile);
 			break;
 		case KBD_RET:
-			move(LINES-1, 0);
-			clrtoeol();
+			term_move(ZILE_LINES-1, 0);
+			term_clrtoeol();
 			if (saved) free(saved);
 			return *p;
 		case KBD_CANCEL:
-			move(LINES-1, 0);
-			clrtoeol();
+			term_move(ZILE_LINES-1, 0);
+			term_clrtoeol();
 			if (saved) free(saved);
 			return NULL;
 		case KBD_CTL | 'a':

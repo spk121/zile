@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.25 2004/04/05 00:50:30 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.26 2004/05/09 18:00:34 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -60,22 +60,10 @@
 /*
  * The cached variables.
  */
-static chtype font_character;
-static chtype font_character_delimiters;
-static chtype font_comment;
-static chtype font_directive;
-static chtype font_here_document;
-static chtype font_identifier;
-static chtype font_keyword;
-static chtype font_number;
-static chtype font_other;
-static chtype font_string;
-static chtype font_string_delimiters;
 static chtype status_line_color;
 static int display_time;
 static char *display_time_format;
 static char *displayable_characters;
-static int show_eob_marker;
 
 static int is_displayable[256];
 static int cur_tab_width;
@@ -230,23 +218,11 @@ void ncurses_refresh_cached_variables(void)
 	/*
 	 * Refresh the font cache.
 	 */
-	font_character = get_font("font-character");
-	font_character_delimiters = get_font("font-character-delimiters");
-	font_comment = get_font("font-comment");
-	font_directive = get_font("font-directive");
-	font_here_document = get_font("font-here-document");
-	font_identifier = get_font("font-identifier");
-	font_keyword = get_font("font-keyword");
-	font_number = get_font("font-number");
-	font_other = get_font("font-other");
-	font_string = get_font("font-string");
-	font_string_delimiters = get_font("font-string-delimiters");
 	status_line_color = get_font("status-line-color");
 	display_time = lookup_bool_variable("display-time");
 	display_time_format = get_variable("display-time-format");
 	displayable_characters = get_variable("displayable-characters");
 	parse_displayable_chars(displayable_characters);
-	show_eob_marker = lookup_bool_variable("show-eob-marker");
 }
 
 static int make_char_printable(char **buf, unsigned int c)
@@ -300,18 +276,18 @@ static void outch(int c, chtype font, int *x)
 	int j, w;
 	char *buf;
 
-	if (*x >= COLS)
+	if (*x >= ZILE_COLS)
 		return;
 
 	if (c == '\t')
-		for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < COLS; w--)
-			addch(' ' | font), ++(*x);
+		for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZILE_COLS; w--)
+			term_addch(' ' | font), ++(*x);
 	else if (is_displayable[(unsigned char)c])
-		addch(pc_to_ascii[(unsigned char)c] | font), ++(*x);
+		term_addch(pc_to_ascii[(unsigned char)c] | font), ++(*x);
 	else {
 		j = make_char_printable(&buf, c);
-		for (w = 0; w < j && *x < COLS; ++w)
-			addch(buf[w] | font), ++(*x);
+		for (w = 0; w < j && *x < ZILE_COLS; ++w)
+			term_addch(buf[w] | font), ++(*x);
                 free(buf);
 	}
 }
@@ -339,8 +315,8 @@ static int in_region(int lineno, int x, Region *r)
 static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
                              int highlight, int x, int i)
 {
-	if (x >= COLS) {
-		mvaddch(line, COLS-1, '$');
+	if (x >= ZILE_COLS) {
+		term_mvaddch(line, ZILE_COLS-1, '$');
 	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
 			if (in_region(lineno, i, r))
@@ -356,7 +332,7 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 {
 	int x, j;
 
-	move(line, 0);
+	term_move(line, 0);
 	for (x = 0, j = startcol; j < lp->size && x < wp->ewidth; ++j) {
 		if (highlight && in_region(lineno, j, r))
 			outch(lp->text[j], C_FG_WHITE_BG_BLUE, &x);
@@ -366,21 +342,6 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 
 	draw_end_of_line(line, wp, lineno, r, highlight, x, j);
 }
-
-/*
- * This hack is required for Font Lock because the full line must
- * be parsed always also when is displayed only one truncated fraction.
- */
-
-#define OUTCH(c, font)							    \
-do {									    \
-	if (i >= startcol) {						    \
-		if (highlight && in_region(lineno, i, r))	            \
-			outch(c, (font & A_BOLD) | C_FG_WHITE_BG_BLUE, &x); \
-		else							    \
-			outch(c, font, &x);				    \
-	}								    \
-} while (0)
 
 static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 {
@@ -424,8 +385,8 @@ static void draw_window(int topline, Window *wp)
 	 */
 	for (i = topline; i < wp->eheight + topline; ++i, ++lineno) {
 		/* Clear the line. */
-		move(i, 0);
-		clrtoeol();
+		term_move(i, 0);
+		term_clrtoeol();
 		/* If at the end of the buffer, don't write any text. */
 		if (lp == wp->bp->limitp)
 			continue;
@@ -439,28 +400,9 @@ static void draw_window(int topline, Window *wp)
 #endif
                 draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
-		/*
-		 * Draw the `[EOB]' end of buffer marker if
-		 * the `show-eob-marker' variable is enabled
-		 * and the marker is on the current page.
-		 */
-		if (lp->next == wp->bp->limitp
-		    && !(wp->bp->flags & BFLAG_NOEOB) && show_eob_marker) {
-			static chtype eob_str[] = {
-				'['|C_FG_CYAN|A_BOLD,
-				'E'|C_FG_CYAN,
-				'O'|C_FG_CYAN,
-				'B'|C_FG_CYAN,
-				']'|C_FG_CYAN|A_BOLD,
-				'\0'
-			};
-			int y, x;
-			getyx(stdscr, y, x);
-			addchnstr(eob_str, COLS-x > 5 ? 5 : COLS-x);
-		}
 #ifdef ENABLE_FULL_HSCROLL
 		if (point_start_column > 0)
-			mvaddch(i, 0, '$');
+			term_mvaddch(i, 0, '$');
 #endif
 		lp = lp->next;
 	}
@@ -564,11 +506,11 @@ static void draw_status_line(int line, Window *wp)
 
 	attrset(A_REVERSE | status_line_color);
 
-	move(line, 0);
+	term_move(line, 0);
 	for (i = 0; i < wp->ewidth; ++i)
-		addch('-');
+		term_addch('-');
 
-	move(line, 0);
+	term_move(line, 0);
 	printw("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
 
         if (wp->bp->flags & BFLAG_AUTOFILL) {
@@ -633,7 +575,7 @@ static void do_redisplay(void)
 	if (point_start_column > 0)
 		mvaddch(cur_topline + cur_wp->topdelta, 0, '$');
 #endif
-	move(cur_topline + cur_wp->topdelta, point_screen_column);
+	term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
 void ncurses_redisplay(void)

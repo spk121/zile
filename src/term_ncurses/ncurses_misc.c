@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_misc.c,v 1.18 2004/04/05 22:31:19 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.19 2004/05/09 18:00:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -82,7 +82,7 @@ static void resize_windows(int width, int height)
 void ncurses_resize_windows(void)
 {
 	/* Resize the Zile windows. */
-	resize_windows(COLS, LINES);
+	resize_windows(ZILE_COLS, ZILE_LINES);
 	FUNCALL(recenter);
 }
 
@@ -91,8 +91,8 @@ int ncurses_init(void)
 	ncurses_tp->screen = newterm(NULL, stdout, stdin);
 	set_term(ncurses_tp->screen);
 
-	ncurses_tp->width = COLS;
-	ncurses_tp->height = LINES;
+	ncurses_tp->width = ZILE_COLS;
+	ncurses_tp->height = ZILE_LINES;
 
 	return TRUE;
 }
@@ -146,8 +146,8 @@ extern void ncurses_free_rotation_buffers(void);
 int ncurses_close(void)
 {
 	/* Clear last line.  */
-	move(LINES - 1, 0);
-	clrtoeol();
+	term_move(ZILE_LINES - 1, 0);
+	term_clrtoeol();
 	refresh();
 
 	/* Free memory and finish with ncurses.  */
@@ -169,12 +169,12 @@ static void show_splash_screen(const char *splash)
 	int i, bold = 0, red = 0;
 	const char *p;
 
-	for (i = 0; i < LINES - 2; ++i) {
-		move(i, 0);
-		clrtoeol();
+	for (i = 0; i < ZILE_LINES - 2; ++i) {
+		term_move(i, 0);
+		term_clrtoeol();
 	}
 
-	move(0, 0);
+	term_move(0, 0);
 	for (i = 0, p = splash; *p != '\0'; ++p)
 		switch (*p) {
 		case '%':
@@ -186,10 +186,10 @@ static void show_splash_screen(const char *splash)
 			red ^= 1;
 			break;
 		case  '\n':
-			move(++i, 0);
+			term_move(++i, 0);
 			break;
 		default:
-			addch(*p);
+			term_addch(*p);
 		}
 }
 

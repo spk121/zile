@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.10 2004/02/17 23:20:31 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.11 2004/05/09 18:00:34 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -83,3 +83,43 @@ static Terminal thisterm = {
 };
 
 Terminal *ncurses_tp = &thisterm;
+
+void term_getyx(int *y, int *x)
+{
+        getyx(stdscr, *y, *x);
+}
+
+void term_move(int y, int x)
+{
+        move(y, x);
+}
+
+void term_clrtoeol(void)
+{
+        clrtoeol();
+}
+
+void term_refresh(void)
+{
+        refresh();
+}
+
+void term_addch(char c)
+{
+        addch(c);
+}
+
+void term_addnstr(char *s, int len)
+{
+        addnstr(s, len);
+}
+
+void term_addstr(char *s)
+{
+        addstr(s);
+}
+
+void term_mvaddch(int y, int x, char c)
+{
+        mvaddch(y, x, c);
+}

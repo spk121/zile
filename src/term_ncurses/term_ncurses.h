@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.6 2004/02/17 20:21:19 ssigala Exp $	*/
+/*	$Id: term_ncurses.h,v 1.7 2004/05/09 18:00:34 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -40,4 +40,15 @@
 #define C_FG_WHITE		COLOR_PAIR(ZILE_COLOR_WHITE)
 #define C_FG_WHITE_BG_BLUE	COLOR_PAIR(ZILE_COLOR_BLUEBG)
 
+extern int LINES, COLS;
+
+#define ZILE_LINES              LINES
+#define ZILE_COLS               COLS
+
 extern Terminal *ncurses_tp;
+
+void term_getyx(int *y, int *x);
+void term_move(int y, int x);
+void term_clrtoeol(void);
+void term_refresh(void);
+void term_addch(char c);
