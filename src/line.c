@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.57 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: line.c,v 1.58 2005/01/28 02:07:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -75,7 +75,7 @@ int intercalate_char(int c)
  */
 int insert_char(int c)
 {
-  int t = tab_width(cur_bp);
+  size_t t = tab_width(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -221,7 +221,7 @@ int insert_newline(void)
  */
 static int check_case(const char *s, size_t len)
 {
-  int i;
+  size_t i;
 
   if (!isupper(*s))
     return 0;
@@ -238,7 +238,7 @@ static int check_case(const char *s, size_t len)
  */
 static void recase(char *str, size_t len, const char *tmpl, size_t tmpl_len)
 {
-  int i;
+  size_t i;
   int tmpl_case = check_case(tmpl, tmpl_len);
 
   if (tmpl_case >= 1)
@@ -280,34 +280,58 @@ void line_replace_text(Line **lp, size_t offset, size_t oldlen,
 }
 
 /*
- * Split the current line so that the text width is less
- * than the value specified by `fill-column'.
+ * If point is greater than fill-column, then split the line at the
+ * right-most space character at or before fill-column, if there is
+ * one, or at the left-most at or after fill-column, if not. If the
+ * line contains no spaces, no break is made.
  */
 void fill_break_line(void)
 {
-  size_t break_col, last_col, excess = 0;
+  size_t i, break_col = 0, excess = 0, old_col;
+  size_t fillcol = get_variable_number("fill-column");
 
+  /* If we're not beyond fill-column, stop now. */
+  if (get_goalc() <= fillcol)
+    return;
+  
   /* Move cursor back to fill column */
-  while (get_goalc() > get_variable_number("fill-column") + 1) {
+  old_col = cur_bp->pt.o;
+  while (get_goalc() > fillcol + 1) {
     cur_bp->pt.o--;
     excess++;
   }
 
   /* Find break point moving left from fill-column. */
-  for (break_col = cur_bp->pt.o; break_col > 0; --break_col) {
-    int c = *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(break_col - 1));
-    if (isspace(c))
+  for (i = cur_bp->pt.o; i > 0; i--) {
+    int c = *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(i - 1));
+    if (isspace(c)) {
+      break_col = i;
       break;
+    }
   }
 
-  if (break_col > 1) {
+  /* If no break point moving left from fill-column, find first
+     possible moving right. */
+  if (break_col == 0) {
+    for (i = cur_bp->pt.o + 1; i < astr_len(cur_bp->pt.p->item); i++) {
+      int c = *astr_char(cur_bp->pt.p->item, (ptrdiff_t)(i - 1));
+      if (isspace(c)) {
+        break_col = i;
+        break;
+      }
+    }
+  }
+  
+  if (break_col >= 1) {
     /* Break line. */
-    last_col = cur_bp->pt.o - break_col;
+    size_t last_col = cur_bp->pt.o - break_col;
     cur_bp->pt.o = break_col;
     FUNCALL(delete_horizontal_space);
     insert_newline();
     cur_bp->pt.o = last_col + excess;
-  }
+  } else
+    /* Undo fiddling with point. */
+    cur_bp->pt.o = old_col;
 }
 
 DEFUN("newline", newline)
@@ -321,7 +345,7 @@ DEFUN("newline", newline)
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni) {
     if (cur_bp->flags & BFLAG_AUTOFILL &&
-        get_goalc() > get_variable_number("fill-column"))
+        get_goalc() > (size_t)get_variable_number("fill-column"))
       fill_break_line();
     if (!insert_newline()) {
       ret = FALSE;
@@ -381,7 +405,7 @@ int self_insert_command(int c)
 
   if (c <= 255) {
     if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
-        get_goalc() > get_variable_number("fill-column"))
+        get_goalc() > (size_t)get_variable_number("fill-column"))
       fill_break_line();
     insert_char(c);
     return TRUE;
@@ -601,8 +625,7 @@ DEFUN("just-one-space", just_one_space)
 
 static int indent_relative(void)
 {
-  int target_goalc;
-  int cur_goalc = get_goalc();
+  size_t target_goalc, cur_goalc = get_goalc();
   Marker *old_point;
 
   if (warn_if_readonly_buffer())
@@ -611,7 +634,7 @@ static int indent_relative(void)
   deactivate_mark();
   old_point = point_marker();
 
-  /* Find previous non-blank line.  */
+  /* Find previous non-blank line. */
   do {
     if (!FUNCALL_ARG(forward_line, -1)) {
       cur_bp->pt = old_point->pt;

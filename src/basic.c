@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.23 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: basic.c,v 1.24 2005/01/28 02:07:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -70,9 +70,9 @@ DEFUN("end-of-line", end_of_line)
 /*
  * Get the goal column.  Take care of expanding tabulations.
  */
-int get_goalc_bp(Buffer *bp, Point pt)
+size_t get_goalc_bp(Buffer *bp, Point pt)
 {
-  int col = 0, t = tab_width(bp), i;
+  size_t col = 0, t = tab_width(bp), i;
   const char *sp = astr_cstr(pt.p->item);
 
   for (i = 0; i < pt.o; i++) {
@@ -84,12 +84,12 @@ int get_goalc_bp(Buffer *bp, Point pt)
   return col;
 }
 
-int get_goalc_wp(Window *wp)
+size_t get_goalc_wp(Window *wp)
 {
   return get_goalc_bp(wp->bp, window_pt(wp));
 }
 
-int get_goalc(void)
+size_t get_goalc(void)
 {
   return get_goalc_bp(cur_bp, cur_bp->pt);
 }

@@ -1,7 +1,7 @@
 /* basic.c ---------------------------------------------------------------- */
-int get_goalc_bp(Buffer *bp, Point pt);
-int get_goalc_wp(Window *wp);
-int get_goalc(void);
+size_t get_goalc_bp(Buffer *bp, Point pt);
+size_t get_goalc_wp(Window *wp);
+size_t get_goalc(void);
 int backward_char(void);
 int forward_char(void);
 void goto_line(int to_line);
