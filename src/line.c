@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.62 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: line.c,v 1.63 2005/02/09 00:23:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -180,6 +180,7 @@ int intercalate_newline()
 {
   Line *lp1, *lp2;
   size_t lp1len, lp2len;
+  astr as;
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -197,8 +198,9 @@ int intercalate_newline()
   ++cur_bp->num_lines;
 
   /* Move the text after the point into the new line. */
-  astr_cpy(lp2->item,
-           astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len));
+  as = astr_substr(lp1->item, (ptrdiff_t)lp1len, lp2len);
+  astr_cpy(lp2->item, as);
+  astr_delete(as);
   astr_truncate(lp1->item, (ptrdiff_t)lp1len);
 
   adjust_markers(lp2, lp1, lp1len, 1, 0);
