@@ -200,7 +200,6 @@ int term_xgetkey(int mode, int arg);
 int term_ungetkey(int c);
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-void term_refresh_cached_variables(void);
 void resize_windows(void);
 void free_rotation_buffers(void);
 void show_splash_screen(const char *splash);

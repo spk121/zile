@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.17 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: variables.c,v 1.18 2004/10/11 01:17:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -218,11 +218,8 @@ Set a variable value to the user specified value.
 			waitkey(2 * 1000);
 		} else
 			cur_bp->fill_column = i;
-	} else {
+	} else
 		set_variable(var, val);
-		/* Force refresh of cached variables. */
-		term_refresh_cached_variables();
-	}
 
 	return TRUE;
 }
