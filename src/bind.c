@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.29 2004/10/05 21:47:15 rrt Exp $	*/
+/*	$Id: bind.c,v 1.30 2004/10/13 16:04:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -155,11 +155,13 @@ int do_completion(astr as, int *compl)
 		c = waitkey_discard(500);
 		if (c == KBD_NOKEY) {
 			minibuf_write("%s", astr_cstr(as));
+                        term_refresh();
 			c = term_getkey();
 			*compl = 1;
 		}
 	} else {
 		minibuf_write("%s", astr_cstr(as));
+                term_refresh();
 		c = term_getkey();
 	}
 	minibuf_clear();
@@ -485,6 +487,7 @@ sequence.
         astr as;
 
         minibuf_write("Set key globally:");
+        term_refresh();
         c = term_getkey();
         p = completion_scan(c, &keys, &numkeys);
 

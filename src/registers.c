@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.11 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: registers.c,v 1.12 2004/10/13 16:04:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -47,6 +47,7 @@ Copy region into the user specified register.
 	int reg;
 
 	minibuf_write("Copy to register: ");
+        term_refresh();
 	if ((reg = term_getkey()) == KBD_CANCEL)
 		return cancel();
 	minibuf_clear();
@@ -86,6 +87,7 @@ Puts point before and mark after the inserted text.
 		return FALSE;
 
 	minibuf_write("Insert register: ");
+        term_refresh();
 	if ((reg = term_getkey()) == KBD_CANCEL)
 		return cancel();
 	minibuf_clear();
