@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.81 2005/02/02 02:15:22 rrt Exp $	*/
+/*	$Id: main.c,v 1.82 2005/02/03 02:17:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -78,6 +78,7 @@ static void loop(void)
     term_refresh();
 
     minibuf_clear();
+    term_redraw_cursor();       /* Leave cursor in the right place. */
 
     thisflag = 0;
     if (lastflag & FLAG_DEFINING_MACRO)
@@ -392,5 +393,5 @@ int main(int argc, char **argv)
 }
 
 #ifdef ALLEGRO
-END_OF_MAIN();
+END_OF_MAIN()
 #endif

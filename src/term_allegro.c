@@ -21,13 +21,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.22 2005/01/30 02:43:25 dacap Exp $	*/
+/*	$Id: term_allegro.c,v 1.23 2005/02/03 02:17:01 rrt Exp $	*/
 
 #include "config.h"
 
 #include <stdio.h>
 #include <stddef.h>
 #include <stdarg.h>
+#include <string.h>
 #include <allegro.h>
 #include <allegro/internal/aintern.h>
 
@@ -43,7 +44,7 @@ static Terminal thisterm = {
   NULL,
 
   /* Uninitialized width and height. */
-  -1, -1,
+  0, 0,
 };
 
 Terminal *termp = &thisterm;
@@ -96,12 +97,10 @@ END_OF_STATIC_FUNCTION(inc_cur_time)
 
 static void draw_cursor(int state)
 {
-  if (cursor_state &&
-      cur_x >= 0 && cur_x < ZILE_COLS &&
-      cur_y >= 0 && cur_y < ZILE_LINES) {
+  if (cursor_state && cur_x < ZILE_COLS && cur_y < ZILE_LINES) {
     if (state)
-      rectfill(screen, cur_x*FW, cur_y*FH,
-               cur_x*FW+FW-1, cur_y*FH+FH-1,
+      rectfill(screen, (int)(cur_x * FW), (int)(cur_y * FH),
+               (int)(cur_x * FW + FW - 1), (int)(cur_y * FH + FH - 1),
                makecol(170, 170, 170));
     else {
       int fg, bg, c = new_scr[cur_y*ZILE_COLS+cur_x];
@@ -110,7 +109,7 @@ static void draw_cursor(int state)
       font->vtable->render_char
         (font, ((c&0xff) < ' ') ? ' ' : (c&0xff),
          fg, bg, screen,
-         cur_x*FW, cur_y*FH);
+         (int)(cur_x * FW), (int)(cur_y * FH));
     }
   }
 }
@@ -123,28 +122,28 @@ void term_move(size_t y, size_t x)
 
 void term_clrtoeol(void)
 {
-  if (cur_x >= 0 && cur_x < ZILE_COLS &&
-      cur_y >= 0 && cur_y < ZILE_LINES) {
-    int x;
-    for (x=cur_x; x<ZILE_COLS; x++)
-      new_scr[cur_y*ZILE_COLS+x] = 0;
+  if (cur_x < ZILE_COLS && cur_y < ZILE_LINES) {
+    size_t x;
+    for (x = cur_x; x < ZILE_COLS; x++)
+      new_scr[cur_y * ZILE_COLS + x] = 0;
   }
 }
 
 void term_refresh(void)
 {
-  int x, y, c, i, bg, fg;
+  int c, i, bg, fg;
+  size_t x, y;
   i = 0;
-  for (y=0; y<ZILE_LINES; y++)
-    for (x=0; x<ZILE_COLS; x++) {
+  for (y = 0; y<ZILE_LINES; y++)
+    for (x = 0; x < ZILE_COLS; x++) {
       if (new_scr[i] != cur_scr[i]) {
         c = cur_scr[i] = new_scr[i];
         _get_color(c, &fg, &bg);
         text_mode(bg);
         font->vtable->render_char
           (font,
-           ((c&0xff) < ' ') ? ' ' : (c&0xff),
-           fg, bg, screen, x*FW, y*FH);
+           ((c & 0xff) < ' ') ? ' ' : (c & 0xff),
+           fg, bg, screen, (int)(x * FW), (int)(y * FH));
       }
       i++;
     }
@@ -152,13 +151,12 @@ void term_refresh(void)
 
 void term_clear(void)
 {
-  memset(new_scr, 0, sizeof(short)*ZILE_COLS*ZILE_LINES);
+  memset(new_scr, 0, sizeof(short) * ZILE_COLS * ZILE_LINES);
 }
 
 void term_addch(int c)
 {
-  if (cur_x >= 0 && cur_x < ZILE_COLS &&
-      cur_y >= 0 && cur_y < ZILE_LINES) {
+  if (cur_x < ZILE_COLS && cur_y < ZILE_LINES) {
     int color = 0;
 
     if (c & 0x0f00)
@@ -167,7 +165,7 @@ void term_addch(int c)
       color |= cur_color & 0x0f00;
     else
       color |= ZILE_NORMAL;
-                
+
     if (c & 0xf000)
       color |= c & 0xf000;
     else
@@ -180,8 +178,7 @@ void term_addch(int c)
 
 void term_attrset(size_t attrs, ...)
 {
-  int i;
-  size_t a = 0;
+  size_t i, a = 0;
   va_list valist;
   va_start(valist, attrs);
   for (i = 0; i < attrs; i++)
@@ -288,7 +285,7 @@ static int translate_key(int c)
   case KEY_RIGHT: return KBD_RIGHT;
   case KEY_UP: return KBD_UP;
   case KEY_DOWN: return KBD_DOWN;
-  case KEY_SPACE: 
+  case KEY_SPACE:
     if (key_shifts & KB_CTRL_FLAG)
       return '@' | KBD_CTL;
     else
@@ -317,9 +314,9 @@ static int translate_key(int c)
 static int ungetkey_buf[MAX_UNGETKEY_BUF];
 static int *ungetkey_p = ungetkey_buf;
 
-static int hooked_readkey(int timeout)
+static int hooked_readkey(size_t timeout)
 {
-  int beg_time = cur_time;
+  size_t beg_time = cur_time;
   term_refresh();
 
   cursor_state = TRUE;
@@ -332,9 +329,9 @@ static int hooked_readkey(int timeout)
   return readkey();
 }
 
-static int _term_getkey(int timeout)
+static size_t _term_getkey(size_t timeout)
 {
-  int key;
+  size_t key;
 
   if (ungetkey_p > ungetkey_buf)
     return *--ungetkey_p;
@@ -349,7 +346,7 @@ static int _term_getkey(int timeout)
   return key;
 }
 
-int term_getkey(void)
+size_t term_getkey(void)
 {
   return _term_getkey(0);
 }
@@ -371,19 +368,19 @@ static int xgetkey(int mode, size_t timeout)
   return c;
 }
 
-int term_xgetkey(int mode, size_t timeout)
+size_t term_xgetkey(int mode, size_t timeout)
 {
-  int c;
+  size_t key;
 
   if (ungetkey_p > ungetkey_buf)
     return *--ungetkey_p;
 
-  c = xgetkey(mode, timeout);
+  key = xgetkey(mode, timeout);
 
-  return c;
+  return key;
 }
 
-void term_ungetkey(int key)
+void term_ungetkey(size_t key)
 {
   if (ungetkey_p - ungetkey_buf < MAX_UNGETKEY_BUF &&
       key != KBD_NOKEY)

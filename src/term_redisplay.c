@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.37 2005/01/29 12:17:19 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.38 2005/02/03 02:17:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,6 +34,7 @@
 #include "extern.h"
 
 static size_t cur_tab_width;
+static size_t cur_topline;
 static size_t point_start_column;
 static size_t point_screen_column;
 
@@ -56,7 +57,7 @@ static void outch(int c, Font font, size_t *x)
     return;
 
   term_attrset(1, font);
-                
+
   if (c == '\t')
     for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZILE_COLS; w--)
       term_addch(' '), ++(*x);
@@ -297,10 +298,10 @@ static void draw_status_line(size_t line, Window *wp)
 
 void term_redisplay(void)
 {
-  size_t topline, cur_topline = 0;
+  size_t topline;
   Window *wp;
 
-  topline = 0;
+  cur_topline = topline = 0;
 
   calculate_start_column(cur_wp);
 
@@ -318,7 +319,12 @@ void term_redisplay(void)
     topline += wp->fheight;
   }
 
-  term_move(cur_topline + cur_wp->topdelta, point_screen_column);
+  term_redraw_cursor();
+}
+
+void term_redraw_cursor(void)
+{
+        term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
 void term_full_redisplay(void)

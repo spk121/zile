@@ -218,6 +218,7 @@ void term_resume(void);
 void term_move(size_t y, size_t x);
 void term_clrtoeol(void);
 void term_refresh(void);
+void term_redraw_cursor(void);
 void term_clear(void);
 void term_addch(int c);
 void term_attrset(size_t attrs, ...);
