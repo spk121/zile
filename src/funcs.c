@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.23 2004/02/18 16:21:54 ssigala Exp $	*/
+/*	$Id: funcs.c,v 1.24 2004/02/23 02:11:30 dacap Exp $	*/
 
 #include "config.h"
 
@@ -744,7 +744,7 @@ Move point to the first non-whitespace character on this line.
 	}
 	return TRUE;
 }
-
+
 /***********************************************************************
 			  Tranpose functions
  ***********************************************************************/
@@ -968,7 +968,7 @@ With argument 0, interchanges line point is in with line mark is in.
 	minibuf_error("transpose-lines doesn't support uniarg yet");
 	return FALSE;
 }
-
+
 /***********************************************************************
 			  Move through words
  ***********************************************************************/
@@ -1058,7 +1058,7 @@ With argument, do this that many times.
 
 	return TRUE;
 }
-
+
 /***********************************************************************
 	       Move through balanced expressions (sexp)
  ***********************************************************************/
