@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.27 2004/05/20 22:34:50 rrt Exp $        */
+/*      $Id: zile.h,v 1.28 2004/09/20 13:38:14 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -59,9 +59,6 @@ typedef struct Terminal Terminal;
 /* We could define an enum "Anchor", but sizeof(enum)==2,
    while sizeof(char)==1. */
 typedef unsigned char Anchor;
-
-/* Font type, really terminal dependent, but needed in extern.h XXX */
-typedef unsigned long Font;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
@@ -370,5 +367,7 @@ struct Terminal {
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
         F_ ## c_func(uniarg)
+
+#include "zterm.h" /* for Font type */
 
 #endif /* !ZILE_H */

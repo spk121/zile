@@ -20,7 +20,11 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.h,v 1.2 2004/07/10 22:49:16 rrt Exp $	*/
+/*	$Id: term_termcap.h,v 1.3 2004/09/20 13:38:14 rrt Exp $	*/
+
+
+/* Type of font attributes */
+typedef char *Font;
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -39,7 +43,7 @@ extern int LINES, COLS;
 
 extern Terminal *termp;
 
-extern Font ZILE_REVERSE, ZILE_BOLD;
+extern Font ZILE_NORMAL, ZILE_REVERSE, ZILE_BOLD;
 extern Font C_FG_BLACK;
 extern Font C_FG_RED;
 extern Font C_FG_GREEN;

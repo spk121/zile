@@ -18,7 +18,11 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.h,v 1.1 2004/09/03 02:09:08 dacap Exp $	*/
+/*	$Id: term_allegro.h,v 1.2 2004/09/20 13:38:14 rrt Exp $	*/
+
+
+/* Type of font attributes */
+typedef unsigned long Font;
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -37,6 +41,7 @@ extern int al_LINES, al_COLS;
 
 extern Terminal *termp;
 
+#define ZILE_NORMAL		0x0000
 #define ZILE_REVERSE		0x1000
 #define ZILE_BOLD		0x2000
 
