@@ -1,4 +1,4 @@
-/*	$Id: ncurses_key.c,v 1.6 2004/01/28 09:24:23 rrt Exp $	*/
+/*	$Id: ncurses_key.c,v 1.7 2004/01/29 10:36:01 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -29,12 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
 #include <curses.h>
-#endif
 
 #include "zile.h"
 #include "extern.h"

@@ -1,4 +1,4 @@
-/*	$Id: term_ncurses.c,v 1.6 2004/01/07 00:45:20 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.7 2004/01/29 10:36:01 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -31,12 +31,7 @@
 #include "config.h"
 
 #include <stddef.h>
-
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
 #include <curses.h>
-#endif
 
 #include "zile.h"
 #include "extern.h"

@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.10 2003/11/28 22:46:09 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.11 2004/01/29 10:36:01 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -31,12 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
 #include <curses.h>
-#endif
 
 #include "zile.h"
 #include "extern.h"

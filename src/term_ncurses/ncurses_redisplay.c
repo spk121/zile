@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.11 2004/01/28 14:40:55 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.12 2004/01/29 10:36:01 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -38,12 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#if HAVE_NCURSES_H
-#include <ncurses.h>
-#else
 #include <curses.h>
-#endif
 
 #include "zile.h"
 #include "extern.h"
