@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.18 2004/03/03 01:50:34 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.19 2004/03/09 16:27:26 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -45,6 +45,7 @@
 #endif
 
 #include "zile.h"
+#include "config.h"
 #include "extern.h"
 #include "term_ncurses.h"
 
@@ -340,7 +341,7 @@ static void outch(int c, chtype font, int *x)
 	}
 }
 
-static int in_region(Window *wp, Line *lp, int lineno, int x, Region *r)
+static int in_region(int lineno, int x, Region *r)
 {
 	if (lineno >= r->start.n && lineno <= r->end.n) {
 		if (r->start.n == r->end.n) {
@@ -360,15 +361,14 @@ static int in_region(Window *wp, Line *lp, int lineno, int x, Region *r)
 	return FALSE;
 }
 
-static void draw_end_of_line(int line, Window *wp, Line *lp,
-			     int lineno, Region *r, int highlight,
-			     int x, int i)
+static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
+                             int highlight, int x, int i)
 {
 	if (x >= COLS) {
 		mvaddch(line, COLS-1, '$');
 	} else if (highlight) {
 		for (; x < wp->ewidth; ++i) {
-			if (in_region(wp, lp, lineno, i, r))
+			if (in_region(lineno, i, r))
 				outch(' ', C_FG_WHITE_BG_BLUE, &x);
 			else
 				x++;
@@ -383,13 +383,13 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 
 	move(line, 0);
 	for (x = 0, j = startcol; j < lp->size && x < wp->ewidth; ++j) {
-		if (highlight && in_region(wp, lp, lineno, j, r))
+		if (highlight && in_region(lineno, j, r))
 			outch(lp->text[j], C_FG_WHITE_BG_BLUE, &x);
 		else
 			outch(lp->text[j], C_FG_WHITE, &x);
 	}
 
-	draw_end_of_line(line, wp, lp, lineno, r, highlight, x, j);
+	draw_end_of_line(line, wp, lineno, r, highlight, x, j);
 }
 
 #if ENABLE_NONTEXT_MODES
@@ -528,7 +528,7 @@ static void draw_line_cpp(int line, int startcol, Window *wp, Line *lp,
 			nonspace = TRUE;
 	}
 
-	draw_end_of_line(line, wp, lp, lineno, r, highlight, x, i);
+	draw_end_of_line(line, wp, lineno, r, highlight, x, i);
 }
 #endif /* ENABLE_CLIKE_MODES */
 
@@ -633,7 +633,7 @@ static void draw_line_shell(int line, int startcol, Window *wp, Line *lp,
 		}
 	}
 
-	draw_end_of_line(line, wp, lp, lineno, r, highlight, x, i);
+	draw_end_of_line(line, wp, lineno, r, highlight, x, i);
 }
 #endif /* ENABLE_SHELL_MODE */
 
