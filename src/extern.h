@@ -19,7 +19,7 @@ int do_completion(astr as);
 int execute_function(char *name, int uniarg);
 char *minibuf_read_function_name(const char *fmt, ...);
 char *get_function_by_key_sequence(void);
-void process_key(int c);
+void process_key(size_t key);
 void init_bindings(void);
 void free_bindings(void);
 Function get_function(char *name);

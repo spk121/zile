@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.50 2005/01/29 00:25:41 rrt Exp $	*/
+/*	$Id: bind.c,v 1.51 2005/01/29 12:44:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -193,23 +193,23 @@ static leafp completion_scan(int c, size_t **keys, size_t *numkeys)
   return p;
 }
 
-void process_key(int c)
+void process_key(size_t key)
 {
   int uni;
   size_t *keys = NULL, numkeys;
   leafp p;
 
-  if (c == KBD_NOKEY)
+  if (key == KBD_NOKEY)
     return;
 
-  if (c & KBD_META && isdigit(c & 255)) {
+  if (key & KBD_META && isdigit(key & 255)) {
     /* Got an ESC x sequence where `x' is a digit. */
-    universal_argument(KBD_META, (c & 255) - '0');
-  } else if ((p = completion_scan(c, &keys, &numkeys)) == NULL) {
+    universal_argument(KBD_META, (key & 255) - '0');
+  } else if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
     /* There are no bindings for the pressed key. */
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     for (uni = 0; uni < last_uniarg; ++uni) {
-      if (!self_insert_command(c)) {
+      if (!self_insert_command(key)) {
         astr as = make_completion(keys, numkeys);
         astr_truncate(as, -1);
         minibuf_error("%s not defined.", astr_cstr(as));
@@ -219,7 +219,7 @@ void process_key(int c)
         return;
       }
       if (thisflag & FLAG_DEFINING_MACRO)
-        add_kbd_macro(self_insert_command, FALSE, c);
+        add_kbd_macro(self_insert_command, FALSE, key);
     }
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   } else {

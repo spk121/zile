@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.57 2005/01/29 00:36:57 rrt Exp $        */
+/*      $Id: zile.h,v 1.58 2005/01/29 12:44:48 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -196,7 +196,7 @@ struct Window {
   Buffer *bp;
 
   /* The top line delta and last point line number. */
-  int topdelta;
+  size_t topdelta;
   int lastpointn;
 
   /* The point line pointer, line number and offset (used to

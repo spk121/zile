@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.77 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: main.c,v 1.78 2005/01/29 12:44:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -188,11 +188,14 @@ static void other_sig_handler(int signo)
   zile_exit(2);
 }
 
+#ifdef HAVE_SIGACTION
 static struct sigaction act; /* For use by signal handlers */
 
 /* What do we do when we catch the suspend signal */
 static void suspend_sig_handler(int signal)
 {
+  assert(signal == SIGTSTP);
+
   term_tidy();
   term_suspend();
         
@@ -213,12 +216,15 @@ static void signal_init(void);
 /* Restore the suspend handler when we come back into the prog */
 static void cont_sig_handler(int signal)
 {
+  assert(signal == SIGCONT);
+
   term_resume();
   term_full_redisplay();
 
   /* Simplest just to reinitialise everything. */
   signal_init();
 }
+#endif
 
 static void signal_init(void)
 {
@@ -229,6 +235,7 @@ static void signal_init(void)
   signal(SIGQUIT, other_sig_handler);
   signal(SIGTERM, other_sig_handler);
 
+#ifdef HAVE_SIGACTION
   /* If we don't do this, it seems other stuff interrupts the
      suspend handler! Without it, suspending zile under e.g.
      pine or mutt freezes the process. */
@@ -238,6 +245,7 @@ static void signal_init(void)
   sigaction(SIGTSTP, &act, NULL);
   act.sa_handler = cont_sig_handler;
   sigaction(SIGCONT, &act, NULL);
+#endif
 }
 
 /* Options table */
