@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.22 2004/04/16 09:34:41 rrt Exp $	*/
+/*	$Id: main.c,v 1.23 2004/04/20 02:10:45 dacap Exp $	*/
 
 #include "config.h"
 
@@ -135,9 +135,6 @@ static void select_terminal(int term)
         switch (term) {
         case 0:
                 cur_tp = ncurses_tp;
-                break;
-        case 1:
-                cur_tp = terminfo_tp;
                 break;
         default:
 		fprintf(stderr, "fatal error: bad terminal type chosen\n");
@@ -389,7 +386,7 @@ int main(int argc, char **argv)
         /*
          * Initialise terminal.
          */
-	select_terminal(1);
+	select_terminal(0);
 	cur_tp->init();
 
 	init_variables();
