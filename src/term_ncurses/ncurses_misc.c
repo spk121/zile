@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.12 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.13 2004/02/14 10:26:13 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -208,16 +208,12 @@ static void show_splash_screen(const char *splash)
 	for (i = 0, p = splash; *p != '\0'; ++p)
 		switch (*p) {
 		case '%':
-			if (bold)
-				attrset(0), bold = 0;
-			else
-				attrset(A_BOLD), bold = 1;
+			attrset(bold ? 0: A_BOLD);
+			bold ^= 1;
 			break;
 		case '$':
-			if (red)
-				attrset(0), red = 0;
-			else
-				attrset(A_BOLD | C_FG_RED), red = 1;
+			attrset(red ? 0: A_BOLD | C_FG_RED);
+			red ^= 1;
 			break;
 		case  '\n':
 			move(++i, 0);
