@@ -1,15 +1,15 @@
 Begin4
 Title:		zile - Zile Is Lossy Emacs
-Version:	1.6.2
+Version:	1.7-b1
 Entered-date:	06MAY03
 Description:	Emacs-clone editor
 Keywords:	zile emacs clone text editor
 Author:		sandro@sigala.it (Sandro Sigala)
 Maintained-by:	rrt@sc3d.org (Reuben Thomas)
 Primary-site:	http://zile.sourceforge.net
-		248k zile-1.6.2.tar.gz
+		269k zile-1.7-b1.tar.gz
 Alternate-site: ftp://sunsite.unc.edu/pub/Linux/apps/editors/emacs/clones
-		248k zile-1.6.2.tar.gz
+		269k zile-1.7-b1.tar.gz
 Platforms:	ANSI C compiler, ncurses
 Copying-policy:	BSD
 End
