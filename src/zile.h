@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.36 2004/12/20 12:48:54 rrt Exp $        */
+/*      $Id: zile.h,v 1.37 2004/12/27 01:10:07 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -106,10 +106,13 @@ struct Undo {
         int type;
 
         /* Where the undo delta need to be applied.
-         *
-         * Warning!: Do not use the "pt.p" field.
+           Warning!: Do not use the "pt.p" field.
          */
         Point pt;
+
+        /* Flag indicating that reverting this undo leaves the buffer
+           in an unchanged state. */
+        int unchanged;
 
         /* The undo delta. */
         union {
@@ -167,7 +170,6 @@ struct Buffer {
         /* The undo deltas recorded for this buffer. */
         Undo *next_undop;
         Undo *last_undop;
-        Undo *save_undop;  /* next_undop at last save */
 
         /* Buffer flags. */
         int flags;

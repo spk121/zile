@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.13 2004/10/06 16:32:22 rrt Exp $        */
+/*      $Id: undo.c,v 1.14 2004/12/27 01:10:07 rrt Exp $        */
 
 #include "config.h"
 
@@ -51,9 +51,12 @@ void undo_save(int type, Point pt, int arg1, int arg2)
         up = (Undo *)zmalloc(sizeof(Undo));
 
         up->type = type;
-
         up->pt = pt;
 
+        /* If the buffer is currently unchanged, record the fact. */
+        if (!(cur_bp->flags & BFLAG_MODIFIED))
+                up->unchanged = TRUE;
+        
         switch (type) {
         case UNDO_INSERT_CHAR:
         case UNDO_REPLACE_CHAR:
@@ -79,6 +82,7 @@ void undo_save(int type, Point pt, int arg1, int arg2)
 
         up->next = cur_bp->last_undop;
         cur_bp->last_undop = up;
+
         if (!doing_undo)
                 cur_bp->next_undop = up;
 }
@@ -161,6 +165,11 @@ static Undo *revert_action(Undo *up)
 
         doing_undo = FALSE;
 
+        /* If reverting this undo action leaves the buffer unchanged,
+           unset the modified flag. */
+        if (up->unchanged)
+                cur_bp->flags &= ~BFLAG_MODIFIED;
+        
         return up->next;
 }
 
@@ -184,13 +193,7 @@ Repeat this command to undo more changes.
                 return FALSE;
         }
 
-        /*
-         * Switch to next undo entry; unset the BFLAG_MODIFIED flag
-         * if all the undo deltas were applied.
-         */
         cur_bp->next_undop = revert_action(cur_bp->next_undop);
-        if (cur_bp->next_undop == cur_bp->save_undop)
-                cur_bp->flags &= ~BFLAG_MODIFIED;
 
         minibuf_write("Undo!");
 

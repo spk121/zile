@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.48 2004/12/24 13:52:04 rrt Exp $        */
+/*      $Id: file.c,v 1.49 2004/12/27 01:10:06 rrt Exp $        */
 
 #include "config.h"
 
@@ -894,16 +894,26 @@ static int save_buffer(Buffer *bp)
                         bp->flags &= ~BFLAG_NEEDNAME;
                 } else
                         ms = bp->filename;
+
                 if (write_to_disk(bp, ms)) {
+                        Undo *up;
+                
                         minibuf_write("Wrote %s", ms);
                         bp->flags &= ~BFLAG_MODIFIED;
+
+                        /* Set unchanged flags to FALSE except for the
+                           last undo action, which is set to TRUE. */
+                        up = bp->last_undop;
+                        if (up)
+                                up->unchanged = TRUE;
+                        for (up = up->next; up; up = up->next)
+                                up->unchanged = FALSE;
                 }
+
                 bp->flags &= ~BFLAG_TEMPORARY;
 
                 if (ms_is_from_minibuffer)
                         free(ms);
-
-                bp->save_undop = bp->next_undop;
         }
 
         return TRUE;
