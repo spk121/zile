@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.14 2004/03/13 16:44:46 rrt Exp $	*/
+/*	$Id: astr.h,v 1.15 2004/03/13 17:26:40 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -44,7 +44,7 @@
  */
 
 /*
- * The dynamic string type
+ * The dynamic string type.
  */
 typedef struct astr_s *astr;
 
@@ -85,7 +85,7 @@ extern astr   astr_substr(const astr as, int pos, size_t size);
 /*
  * Do strcmp on the contents of s1 and s2
  */
-#define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
+#define astr_cmp(s1, s2)	(strcmp((s1)->text, (s2)->text))
 
 /*
  * Assign the contents of the argument string or to the string as.
@@ -139,6 +139,7 @@ extern astr   astr_fgets(FILE *f);
 extern astr   astr_vafmt(astr as, const char *fmt, va_list ap);
 extern astr   astr_afmt(astr as, const char *fmt, ...);
 
+
 /*
  * Internal data structure
  *
@@ -154,5 +155,6 @@ struct astr_s {
 	size_t	size;
 	size_t	maxsize;
 };
+
 
 #endif /* !ASTR_H */
