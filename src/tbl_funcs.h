@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.12 2004/04/04 20:33:12 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.13 2004/04/05 00:50:47 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -54,6 +54,7 @@ X1("forward-paragraph", forward_paragraph,		"\\M-]")
 X1("forward-sentence", forward_sentence,		"\\M-e")
 X1("forward-sexp", forward_sexp,			"\\C-\\M-f")
 X1("forward-word", forward_word,			"\\M-f")
+X0("global-set-key", global_set_key)
 X0("goto-char", goto_char)
 X1("goto-line", goto_line,				"\\M-g")
 X2("help", help,					"\\C-hh", "\\F1")

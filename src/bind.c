@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.23 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: bind.c,v 1.24 2004/04/05 00:50:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,6 +48,7 @@ struct leaf {
 	Function func;
 
 	/* Leaf vector, number of items, max number of items. */
+        /* XXX Use vector type */
 	leafp *vec;
 	int vecnum, vecmax;
 };
@@ -104,7 +105,7 @@ static void add_leaf(leafp tree, leafp p)
 	++tree->vecnum;
 }
 
-static int bind_key0(leafp tree, int *keys, int n, Function func)
+static void bind_key_vec(leafp tree, int *keys, int n, Function func)
 {
 	leafp p, s;
 
@@ -112,28 +113,22 @@ static int bind_key0(leafp tree, int *keys, int n, Function func)
 		p = new_leaf(n == 1 ? 1 : 5);
 		p->key = keys[0];
 		add_leaf(tree, p);
-		if (n == 1) {
+		if (n == 1)
 			p->func = func;
-			return TRUE;
-		} else
-			return bind_key0(p, &keys[1], n - 1, func);
+		else
+			bind_key_vec(p, &keys[1], n - 1, func);
 	} else if (n > 1)
-		return bind_key0(s, &keys[1], n - 1, func);
+		bind_key_vec(s, &keys[1], n - 1, func);
 	else
-		return FALSE;
+		s->func = func;
 }
 
-void bind_key(char *key, Function func)
+static void bind_key_string(char *key, Function func)
 {
-	int i, *keys;
+	int numkeys, *keys;
 
-	if ((i = keytovec(key, &keys)) > 0) {
-		if (leaf_tree == NULL)
-			leaf_tree = new_leaf(10);
-		if (!bind_key0(leaf_tree, keys, i, func)) {
-			minibuf_error("Error: key %s already bound", key);
-			waitkey(2 * 1000);
-		}
+	if ((numkeys = keytovec(key, &keys)) > 0) {
+		bind_key_vec(leaf_tree, keys, numkeys, func);
                 free(keys);
 	}
 }
@@ -305,6 +300,8 @@ void init_bindings(void)
 {
 	unsigned int i, j;
 
+        leaf_tree = new_leaf(10);
+
 	if (lookup_bool_variable("alternative-bindings")) {
 		alternative_bindings = 1;
 		for (i = 0; i < fentry_table_size; ++i)
@@ -326,7 +323,7 @@ void init_bindings(void)
 	for (i = 0; i < fentry_table_size; i++)
 		for (j = 0; j < 3; ++j)
 			if (fentry_table[i].key[j] != NULL)
-				bind_key(fentry_table[i].key[j],
+				bind_key_string(fentry_table[i].key[j],
 					 fentry_table[i].func);
 }
 
@@ -417,17 +414,32 @@ char *minibuf_read_function_name(const char *msg)
 	return entryp->name;
 }
 
-int execute_function(char *name, int uniarg)
+static Function get_function(char *name)
 {
 	unsigned int i;
-
 	for (i = 0; i < fentry_table_size; ++i)
-		if (!strcmp(name, fentry_table[i].name)) {
-			fentry_table[i].func(uniarg);
-			return TRUE;
-		}
+		if (!strcmp(name, fentry_table[i].name))
+			return fentry_table[i].func;
+	return NULL;
+}
 
-	return FALSE;
+static char *get_function_name(Function p)
+{
+	unsigned int i;
+	for (i = 0; i < fentry_table_size; ++i)
+		if (fentry_table[i].func == p)
+			return fentry_table[i].name;
+	return NULL;
+}
+
+int execute_function(char *name, int uniarg)
+{
+        Function func = get_function(name);
+        if (func) {
+                func(uniarg);
+                return TRUE;
+        }
+        return FALSE;
 }
 
 DEFUN("execute-extended-command", execute_extended_command)
@@ -451,13 +463,34 @@ Read function name, then read its arguments and call it.
 	return execute_function(name, last_uniarg);
 }
 
-static char *get_function_name(Function p)
+DEFUN("global-set-key", global_set_key)
+/*+
+Bind a function to a key sequence.
+Read key sequence and function name, and bind the function to the key
+sequence.
++*/
 {
-	unsigned int i;
-	for (i = 0; i < fentry_table_size; ++i)
-		if (fentry_table[i].func == p)
-			return fentry_table[i].name;
-	return NULL;
+	int c, *keys, numkeys, ok = FALSE;
+        leafp p;
+        Function func;
+
+        /* XXX minibuffer message */
+        c = cur_tp->getkey();
+        p = completion_scan(c, &keys, &numkeys);
+
+	char *name = minibuf_read_function_name("Bind function: ");
+	if (name == NULL)
+		return FALSE;
+
+        func = get_function(name);
+        if (func) {
+                bind_key_vec(leaf_tree, keys, numkeys, func);
+                ok = TRUE;
+        } else
+                minibuf_error("No such function `%d'", name);
+
+        free(keys);
+        return ok;
 }
 
 char *get_function_by_key_sequence(void)

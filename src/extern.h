@@ -15,7 +15,6 @@ int scroll_down(void);
 int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
-void bind_key(char *key, Function func);
 int do_completion(astr as, int *compl);
 int execute_function(char *name, int uniarg);
 void free_bindings(void);
