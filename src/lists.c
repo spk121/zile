@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.8 2005/01/22 00:10:20 rrt Exp $	*/
+/*	$Id: lists.c,v 1.9 2005/01/22 01:04:56 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -193,8 +193,8 @@ astr leDump(le *list, int indent)
     if (list->data) {
       for (c = 0; c<indent; c++)
         astr_cat_char(as, ' ');
-      astr_afmt(as, "%s %s\n", list->data,
-             list->quoted == 1 ? "quoted" : "");
+      astr_afmt(as, "%s%s\n", list->data,
+             list->quoted == 1 ? " quoted" : "");
     } else
       leDump(list->branch, indent + 4);
   }
@@ -212,11 +212,11 @@ astr leDumpEvalTree(le *list, int indent)
       astr_cat_char(as, ' ');
 
     if (list->data)
-      astr_afmt(as, "%s %s\n", list->data,
-                list->quoted == 1 ? "quoted" : "");
+      astr_afmt(as, "%s%s\n", list->data,
+                list->quoted == 1 ? " quoted" : "");
     else {
       le *le_value = evaluateBranch(list->branch);
-      astr_afmt(as, "B: %s", list->quoted ? "quoted " : "");
+      astr_afmt(as, "B:%s", list->quoted ? " quoted " : "");
       astr_cat_delete(as, leDumpReformat(le_value));
       astr_cat_cstr(as, "\n");
       leWipe(le_value);
