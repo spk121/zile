@@ -282,8 +282,7 @@ typedef enum
         /* Fail unless at end of line.  */
   endline,
 
-        /* Succeeds if at beginning of buffer (if emacs) or at beginning
-           of string to be matched (if not).  */
+        /* Succeeds if at beginning of string to be matched.  */
   begbuf,
 
         /* Analogously, for end of buffer/string.  */
@@ -1095,7 +1094,7 @@ regex_compile (pattern, size, syntax, bufp)
   /* Always count groups, whether or not bufp->no_sub is set.  */
   bufp->re_nsub = 0;
 
-#if !defined (emacs) && !defined (SYNTAX_TABLE)
+#if !defined (SYNTAX_TABLE)
   /* Initialize the syntax table.  */
    init_syntax_once ();
 #endif
@@ -3028,21 +3027,6 @@ typedef union
 
 /* Matching routines.  */
 
-#ifndef emacs   /* Emacs never uses this.  */
-/* re_match is like re_match_2 except it takes only a single string.  */
-
-int
-re_match (bufp, string, size, pos, regs)
-     struct re_pattern_buffer *bufp;
-     const char *string;
-     int size, pos;
-     struct re_registers *regs;
- {
-  return re_match_2 (bufp, NULL, 0, string, size, pos, regs, size);
-}
-#endif /* not emacs */
-
-
 /* re_match_2 matches the compiled pattern in BUFP against the
    the (virtual) concatenation of STRING1 and STRING2 (of length SIZE1
    and SIZE2, respectively).  We start matching at POS, and stop
@@ -4511,65 +4495,7 @@ re_compile_pattern (pattern, length, bufp)
   return re_error_msg[(int) ret];
 }
 
-/* Entry points compatible with 4.2 BSD regex library.  We don't define
-   them if this is an Emacs or POSIX compilation.  */
-
-#if !defined (emacs) && !defined (_POSIX_SOURCE)
-
-/* BSD has one and only one pattern buffer.  */
-static struct re_pattern_buffer re_comp_buf;
-
-char *
-re_comp (s)
-    const char *s;
-{
-  reg_errcode_t ret;
-
-  if (!s)
-    {
-      if (!re_comp_buf.buffer)
-	return "No previous regular expression";
-      return 0;
-    }
-
-  if (!re_comp_buf.buffer)
-    {
-      re_comp_buf.buffer = (unsigned char *) malloc (200);
-      if (re_comp_buf.buffer == NULL)
-        return "Memory exhausted";
-      re_comp_buf.allocated = 200;
-
-      re_comp_buf.fastmap = (char *) malloc (1 << BYTEWIDTH);
-      if (re_comp_buf.fastmap == NULL)
-	return "Memory exhausted";
-    }
-
-  /* Since `re_exec' always passes NULL for the `regs' argument, we
-     don't need to initialize the pattern buffer fields which affect it.  */
-
-  /* Match anchors at newlines.  */
-  re_comp_buf.newline_anchor = 1;
-
-  ret = regex_compile (s, strlen (s), re_syntax_options, &re_comp_buf);
-
-  /* Yes, we're discarding `const' here.  */
-  return (char *) re_error_msg[(int) ret];
-}
-
-
-int
-re_exec (s)
-    const char *s;
-{
-  const int len = strlen (s);
-  return
-    0 <= re_search (&re_comp_buf, s, len, 0, len, (struct re_registers *) 0);
-}
-#endif /* not emacs and not _POSIX_SOURCE */
-
 /* POSIX.2 functions.  Don't define these for Emacs.  */
-
-#ifndef emacs
 
 /* regcomp takes a regular expression as a string and compiles it.
 
@@ -4809,13 +4735,3 @@ regfree (preg)
     free (preg->translate);
   preg->translate = NULL;
 }
-
-#endif /* not emacs  */
-
-/*
-Local variables:
-make-backup-files: t
-version-control: t
-trim-versions-without-asking: nil
-End:
-*/
