@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.10 2004/10/05 18:13:29 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.11 2004/10/05 18:51:12 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -30,7 +30,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #include "zile.h"
 #include "config.h"
@@ -49,8 +48,6 @@
  * The cached variables.
  */
 static Font status_line_color;
-static int display_time;
-static char *display_time_format;
 static char *displayable_characters;
 
 static int is_displayable[256];
@@ -207,8 +204,6 @@ void term_refresh_cached_variables(void)
 	 * Refresh the font cache.
 	 */
 	status_line_color = get_font("status-line-color");
-	display_time = lookup_bool_variable("display-time");
-	display_time_format = get_variable("display-time-format");
 	displayable_characters = get_variable("displayable-characters");
 	parse_displayable_chars(displayable_characters);
 }
@@ -477,22 +472,6 @@ static char *make_screen_pos(Window *wp, char **buf)
 	return *buf;
 }
 
-/*
- * Format the time section of status line.
- */
-#define TIME_STR_LEN 80
-static char *make_time_str(void)
-{
-	const char *fmt;
-        char *buf = zmalloc(TIME_STR_LEN);
-	time_t t;
-	if ((fmt = display_time_format) == NULL)
-		fmt = "%I:%M:%p";
-	time(&t);
-	strftime(buf, TIME_STR_LEN, fmt, localtime(&t));
-	return buf;
-}
-
 static void draw_status_line(int line, Window *wp)
 {
 	int i, someflag = 0;
@@ -527,13 +506,6 @@ static void draw_status_line(int line, Window *wp)
 	       pt.n+1, get_goalc_wp(wp),
 	       make_screen_pos(wp, &buf));
         free(buf);
-
-	if (display_time) {
-		buf = make_time_str();
-		term_move(line, wp->ewidth - strlen(buf) - 2);
-		term_addnstr(buf, strlen(buf));
-                free(buf);
-	}
 
 	term_attrset(1, ZILE_NORMAL);
 }

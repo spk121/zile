@@ -172,7 +172,6 @@ Some examples:
 expand-tabs = false
 colors = true
 tab-width = 8    # This is another comment.
-display-time-format = "%I:%M%p"
 @end example
 
 @c ---------------------------------------------------------------------------
@@ -948,68 +947,6 @@ Please note that changing this variable at run-time has no effect; you
 need instead to modify your @file{~/.zilerc} configuration file and
 restart Zile.
 Default value is @samp{true}.
-@item display-time
-If enabled the time is displayed in the status line.
-Default value is @samp{true}.
-@item display-time-format
-The format of the displayed time in the status line.
-
-Conversion specifiers are introduced by a @samp{%} character, and are replaced
-in the time format string as follows:
-
-@c LINT IGNORE
-@table @samp
-@item %a
-The abbreviated weekday name according to the current locale.
-@item %A
-The full weekday name according to the current locale.
-@item %b
-The abbreviated month name according to the current locale.
-@item %B
-The full month name according to the current locale.
-@item %c
-The preferred date and time representation for the current locale.
-@item %d
-The day of the month as a decimal number (range 01 to 31).
-@item %H
-The hour as a decimal number using a 24-hour clock (range 00 to 23).
-@item %I
-The hour as a decimal number using a 12-hour clock (range 01 to 12).
-@item %j
-The day of the year as a decimal number (range 001 to 366).
-@item %m
-The month as a decimal number (range 01 to 12).
-@item %M
-The minute as a decimal number.
-@item %p
-Either `am' or `pm' according to the given time value, or the
-corresponding strings for the current locale.
-@item %S
-The second as a decimal number.
-@item %U
-The week number of the current year as a decimal number, starting
-with the first Sunday as the first day of the first week.
-@item %W
-The week number of the current year as a decimal number, starting
-with the first Monday as the first day of the first week.
-@item %w
-The day of the week as a decimal, Sunday being 0.
-@item %x
-The preferred date representation for the current locale without the time.
-@item %X
-The preferred time representation for the current locale without the date.
-@item %y
-The year as a decimal number without a century (range 00 to 99).
-@item %Y
-The year as a decimal number including the century.
-@item %Z
-The time zone or name or abbreviation.
-@item %%
-A literal @samp{%} character.
-@end table
-@c LINT END IGNORE
-
-Default value is @samp{%I:%M%p}.
 @item displayable-characters
 Specify the set of characters that can be shown as-is on the screen.
 The characters not included in this set are shown as octal

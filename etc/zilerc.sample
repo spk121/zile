@@ -29,11 +29,6 @@ fill-column = 72
 # Automatically enable the Auto Fill Mode [default: false]
 auto-fill-mode = false
 
-# Display time in status line [default: true]
-display-time = true
-# Display time format (see strftime(3) man page) [default: %I:%M%p]
-display-time-format = "%I:%M%p"
-
 # Specify the file backup method [default: simple]
 #
 # Possible values are: none and simple.

@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.12 2004/05/09 18:07:41 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.13 2004/10/05 18:51:12 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -41,41 +41,6 @@ X("beep",				"b", "true", "\
 If enabled, a sound will be emitted on any error.")
 X("colors",				"b", "true", "\
 If your terminal supports colors, you should leave this enabled.")
-X("display-time",			"b", "true", "\
-If enabled the time is displayed in the status line.")
-X("display-time-format",		"", "%I:%M%p", "\
-The format of the displayed time in the status line.\n\
-\n\
-Conversion specifiers are introduced by a `%' character, and are replaced\n\
-in the time format string as follows:\n\
-\n\
-   %a	The abbreviated weekday name according to the current locale.\n\
-   %A	The full weekday name according to the current locale.\n\
-   %b	The abbreviated month name according to the current locale.\n\
-   %B	The full month name according to the current locale.\n\
-   %c	The preferred date and time representation for the current locale.\n\
-   %d	The day of the month as a decimal number (range 01 to 31).\n\
-   %H	The hour as a decimal number using a 24-hour clock (range 00 to 23).\n\
-   %I	The hour as a decimal number using a 12-hour clock (range 01 to 12).\n\
-   %j	The day of the year as a decimal number (range 001 to 366).\n\
-   %m	The month as a decimal number (range 01 to 12).\n\
-   %M	The minute as a decimal number.\n\
-   %p	Either `am' or `pm' according to the given time value, or the\n\
-	corresponding strings for the current locale.\n\
-   %S	The second as a decimal number.\n\
-   %U	The week number of the current year as a decimal number, starting\n\
-	with the first Sunday as the first day of the first week.\n\
-   %W	The week number of the current year as a decimal number, starting\n\
-	with the first Monday as the first day of the first week.\n\
-   %w	The day of the week as a decimal, Sunday being 0.\n\
-   %x	The preferred date representation for the current locale without\n\
-	the time.\n\
-   %X	The preferred time representation for the current locale without\n\
-	the date.\n\
-   %y	The year as a decimal number without a century (range 00 to 99).\n\
-   %Y	The year as a decimal number including the century.\n\
-   %Z	The time zone or name or abbreviation.\n\
-   %%	A literal `%' character.")
 X("displayable-characters",		"", "0x20-0x7e", "\
 Specify the set of characters that can be shown as-is on the screen.\n\
 The characters not included in this set are shown as octal\n\

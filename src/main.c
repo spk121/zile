@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.32 2004/09/03 02:09:08 dacap Exp $	*/
+/*	$Id: main.c,v 1.33 2004/10/05 18:51:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -101,19 +101,13 @@ static void check_list(Window *wp)
 
 static void loop(void)
 {
-	int c;
-
 	for (;;) {
 		if (lastflag & FLAG_NEED_RESYNC)
 			resync_redisplay();
 #if DEBUG
 		check_list(cur_wp);
 #endif
-		/* Redisplay every second to update clock. */
-		do {
-			term_redisplay();
-			c = waitkey_discard(1000);
-		} while (c == KBD_NOKEY);
+                term_redisplay();
 
 		minibuf_clear();
 
@@ -121,7 +115,7 @@ static void loop(void)
 		if (lastflag & FLAG_DEFINING_MACRO)
 			thisflag |= FLAG_DEFINING_MACRO;
 
-		process_key(c);
+		process_key(term_getkey());
 
 		if (thisflag & FLAG_QUIT_ZILE)
 			break;
@@ -160,7 +154,7 @@ Type %C-h C-h% or %F10% to show a mini help window.\n\
 Type %C-h C-d% for information on getting the latest version.\n\
 Type %C-h t% for a tutorial on using Zile.\n\
 Type %C-h s% for a sample configuration file.\n\
-Type %C-g% anytime to cancel the current operation.\n\
+Type %C-g% at any time to cancel the current operation.\n\
 \n\
 %C-x% means hold the CTRL key while typing the character %x%.\n\
 %M-x% means hold the META or EDIT or ALT key down while typing %x%.\n\
@@ -369,10 +363,6 @@ int main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
-	/*
-	 * With this call `display-time-format' variable will be formatted
-	 * by strftime() according to the current locale.
-	 */
 	setlocale(LC_ALL, "");
 
 	sanity_checks();
