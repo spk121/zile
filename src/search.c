@@ -1,6 +1,7 @@
 /* Incremental search and replace functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
-   Copyright (c) 2004 David A. Capello.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004 David A. Capello.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -19,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.17 2004/09/20 01:07:35 dacap Exp $	*/
+/*	$Id: search.c,v 1.18 2004/09/25 22:43:18 rrt Exp $	*/
 
 #include "config.h"
 
