@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.75 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.76 2005/01/28 00:47:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -237,12 +237,8 @@ DEFUN("set-fill-column", set_fill_column)
 {
   if (uniarg > 1)
     variableSetNumber(cur_bp->vars, "fill-column", uniarg);
-  else if (cur_bp->pt.o > 1)
+  else
     variableSetNumber(cur_bp->vars, "fill-column", (int)(cur_bp->pt.o + 1));
-  else {
-    minibuf_error("Invalid fill column");
-    return FALSE;
-  }
 
   return TRUE;
 }
