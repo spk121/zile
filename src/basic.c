@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.12 2004/10/06 16:32:19 rrt Exp $	*/
+/*	$Id: basic.c,v 1.13 2004/10/13 21:22:36 rrt Exp $	*/
 
 #include "config.h"
 
@@ -427,9 +427,7 @@ int scroll_down(void)
 			return TRUE;
 		} else
 			return FALSE;
-	} else if (!bolp())
-		FUNCALL(beginning_of_line);
-	else {
+	} else {
 		minibuf_error("Beginning of buffer");
 		return FALSE;
 	}
@@ -462,9 +460,7 @@ int scroll_up(void)
 			return TRUE;
 		} else
 			return FALSE;
-	} else if (!eolp())  /* XXX Emacs doesn't make this .-dacap */
-		FUNCALL(end_of_line);
-	else {
+	} else {
 		minibuf_error("End of buffer");
 		return FALSE;
 	}
