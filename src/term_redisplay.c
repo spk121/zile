@@ -20,9 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.14 2004/10/08 13:30:45 rrt Exp $	*/
-
-#define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
+/*	$Id: term_redisplay.c,v 1.15 2004/10/10 17:18:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -318,22 +316,16 @@ static void draw_window(int topline, Window *wp)
 		/* If at the end of the buffer, don't write any text. */
 		if (lp == wp->bp->limitp)
 			continue;
-#ifdef ENABLE_FULL_HSCROLL
+
 		startcol = point_start_column;
-#else
-		if (lp == pt.p)
-			startcol = point_start_column;
-		else
-			startcol = 0;
-#endif
+
                 draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
-#ifdef ENABLE_FULL_HSCROLL
 		if (point_start_column > 0) {
 			term_move(i, 0);
 			term_addch('$');
                 }
-#endif
+
 		lp = lp->next;
 	}
 }
@@ -474,13 +466,6 @@ void term_redisplay(void)
 
 		topline += wp->fheight;
 	}
-
-#ifndef ENABLE_FULL_HSCROLL
-	if (point_start_column > 0) {
-                term_move(cur_topline + cur_wp->topdelta, 0);
-                term_addch('$');
-        }
-#endif
 
         term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
