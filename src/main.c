@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.66 2005/01/17 22:43:24 rrt Exp $	*/
+/*	$Id: main.c,v 1.67 2005/01/18 19:10:24 rrt Exp $	*/
 
 #include "config.h"
 
@@ -180,6 +180,58 @@ static void other_sig_handler(int signo)
   zile_exit(2);
 }
 
+static struct sigaction act; /* For use by signal handlers */
+
+/* What do we do when we catch the suspend signal */
+static void suspend_sig_handler(int signal)
+{
+  term_tidy();
+  term_suspend();
+        
+  /* Trap SIGHUP and SIGTERM so we can properly deal with them while
+     suspended */
+  act.sa_handler = other_sig_handler;
+  sigaction(SIGHUP, &act, NULL);
+  sigaction(SIGTERM, &act, NULL);
+
+  /* We used to re-enable the default SIG_DFL and raise SIGTSTP, but 
+     then we could be (and were) interrupted in the middle of the call.
+     So we do it the mutt way instead */
+  kill(0, SIGSTOP);
+}
+
+static void signal_init(void);
+
+/* Restore the suspend handler when we come back into the prog */
+static void cont_sig_handler(int signal)
+{
+  term_resume();
+  term_full_redisplay();
+
+  /* Simplest just to reinitialise everything. */
+  signal_init();
+}
+
+static void signal_init(void)
+{
+  /* Set up signal handling */
+  signal(SIGSEGV, segv_sig_handler);
+  signal(SIGHUP, other_sig_handler);
+  signal(SIGINT, other_sig_handler);
+  signal(SIGQUIT, other_sig_handler);
+  signal(SIGTERM, other_sig_handler);
+
+  /* If we don't do this, it seems other stuff interrupts the
+     suspend handler! Without it, suspending zile under e.g.
+     pine or mutt freezes the process. */
+  sigfillset(&act.sa_mask);
+
+  act.sa_handler = suspend_sig_handler;
+  sigaction(SIGTSTP, &act, NULL);
+  act.sa_handler = cont_sig_handler;
+  sigaction(SIGCONT, &act, NULL);
+}
+
 /*
  * Output the command line syntax.
  */
@@ -255,13 +307,7 @@ int main(int argc, char **argv)
   argc -= optind;
   argv += optind;
 
-  /* Set up signal handling */
-  signal(SIGFPE, segv_sig_handler);
-  signal(SIGSEGV, segv_sig_handler);
-  signal(SIGHUP, other_sig_handler);
-  signal(SIGINT, other_sig_handler);
-  signal(SIGQUIT, other_sig_handler);
-  signal(SIGTERM, other_sig_handler);
+  signal_init();
 
   setlocale(LC_ALL, "");
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.65 2005/01/17 18:09:23 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.66 2005/01/18 19:10:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -41,9 +41,7 @@ DEFUN("suspend-zile", suspend_zile)
     Stop Zile and return to superior process.
     +*/
 {
-  term_tidy();  
   raise(SIGTSTP);
-  term_full_redisplay();
   return TRUE;
 }
 
