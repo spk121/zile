@@ -1,4 +1,4 @@
-/*	$Id: search.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: search.c,v 1.5 2004/01/21 02:09:37 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -217,8 +217,13 @@ static int isearch(int dir)
 	linep curp = startp;
 	int curo = starto;
 	int curn = startn;
+	linep old_markp = cur_wp->bp->markp;
+
+	/* Isearch mode */
+	cur_wp->bp->flags |= BFLAG_ISEARCH;
 
 	for (;;) {
+		cur_tp->redisplay();
 		astr_fmt(buf, "%sI-search%s: %s",
 			 last ? "" : "Failing ",
 			 (dir == ISEARCH_FORWARD) ? "" : " backward",
@@ -244,7 +249,15 @@ static int isearch(int dir)
 			cur_wp->pointo = starto;
 			cur_wp->pointn = startn;
 			thisflag |= FLAG_NEED_RESYNC;
-			minibuf_write("Quit: I-search");
+#if 0
+			minibuf_write ("Quit: I-search");
+#else
+			/* "Quit" (also it calls ding() and stops
+                           recording macros).  */
+			cancel ();
+			/* Restore old mark position.  */
+			cur_wp->bp->markp = old_markp;
+#endif
 			break;
 		} else if (c == KBD_BS) {
 			if (astr_size(pattern) > 0) {
@@ -302,8 +315,10 @@ static int isearch(int dir)
 			last = TRUE;
 		if (thisflag & FLAG_NEED_RESYNC)
 			resync_redisplay();
-		cur_tp->redisplay();
 	}
+
+	/* done */
+	cur_wp->bp->flags &= ~BFLAG_ISEARCH;
 
 	astr_delete(buf);
 	astr_delete(pattern);
