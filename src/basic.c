@@ -1,4 +1,4 @@
-/*	$Id: basic.c,v 1.7 2004/02/04 02:52:12 dacap Exp $	*/
+/*	$Id: basic.c,v 1.8 2004/02/06 04:18:17 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -48,7 +48,10 @@ Move point to beginning of current line.
 {
 	cur_wp->pointo = 0;
 
-	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
+        /* Change the `goalc' to the beginning of line for next
+           `prev/next-line' calls.  */
+	thisflag |= FLAG_DONE_CPCN | FLAG_HIGHLIGHT_REGION_STAYS;
+	cur_goalc = 0;
 
 	return TRUE;
 }
@@ -61,7 +64,7 @@ Move point to end of current line.
 	cur_wp->pointo = cur_wp->pointp->size;
 
         /* Change the `goalc' to the end of line for next
-           `{prev,next}-line' calls.  */
+           `prev/next-line' calls.  */
 	thisflag |= FLAG_DONE_CPCN | FLAG_HIGHLIGHT_REGION_STAYS;
 	cur_goalc = INT_MAX;
 
