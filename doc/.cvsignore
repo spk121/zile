@@ -5,5 +5,5 @@ mkdoc
 AUTODOC
 HELP
 zile.info
-zilerc.texi
+dotzile.texi
 zile.1

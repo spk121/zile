@@ -160,7 +160,7 @@ variables; see the next subsection for an example.
 
 This is the initialization file that comes with the Zile sources.
 
-@include zilerc.texi
+@include dotzile.texi
 
 @c ---------------------------------------------------------------------------
 @node Getting help, Key names, Initialization file, Top
