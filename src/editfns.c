@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.2 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: editfns.c,v 1.3 2004/03/13 17:27:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -65,7 +65,7 @@ void pop_mark(void)
 	free_marker(m);
 
 	/* Empty list?  */
-	if (alist_isempty(mark_ring)) {
+	if (alist_count(mark_ring) == 0) {
 		alist_delete(mark_ring);
 		mark_ring = NULL;
 	}

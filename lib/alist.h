@@ -18,45 +18,118 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.h,v 1.4 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: alist.h,v 1.5 2004/03/13 17:27:50 rrt Exp $	*/
 
 #ifndef ALIST_H
 #define ALIST_H
 
 #include <stddef.h>
 
+/*
+ * The alist library provides doubly-linked lists of arbitary objects
+ * (represented by void * pointers).
+ *
+ * List items are indexed from zero.
+ *
+ * The list type, alist, is a pointer type.
+ */
+
+/*
+ * The list type.
+ */
 typedef struct alist_s *alist;
 
+/*
+ * Allocate a new empty list.
+ */
 extern alist	alist_new(void);
-extern alist	alist_copy(alist al);
+
+/*
+ * Deallocate al.
+ */
 extern void	alist_delete(alist al);
+
+/*
+ * Remove all the items from al.
+ */
 extern void	alist_clear(alist al);
-extern int	alist_count(alist al);
-extern int	alist_isempty(alist al);
+
+/*
+ * Return the number of items in al.
+ */
+#define alist_count(al)		((al)->size)
+
+/*
+ * Return the first item of al.
+ */
 extern void *	alist_first(alist al);
+
+/*
+ * Return the last item of al.
+ */
 extern void *	alist_last(alist al);
+
+/*
+ * Return the previous item of al.
+ */
 extern void *	alist_prev(alist al);
+
+/*
+ * Return the next item of al.
+ */
 extern void *	alist_next(alist al);
-extern void *	alist_current(alist al);
-extern int	alist_current_idx(alist al);
+
+/*
+ * Return the current item of al.
+ */
+#define alist_current(al)	(((al)->current != NULL) ? (al)->current->p : NULL)
+
+/*
+ * Return the index of the current item in al.
+ */
+#define alist_current_idx(al)	(((al)->current != NULL) ? (al)->idx : -1)
+
+/*
+ * Insert p before position i in al.
+ */
 extern void	alist_insert(alist al, unsigned int i, void *p);
-extern void	alist_prepend(alist al, void *p);
+
+/*
+ * Append p to al.
+ */
 extern void	alist_append(alist al, void *p);
-extern int	alist_remove(alist al);
-extern int	alist_remove_ptr(alist al, void *p);
-extern int	alist_remove_idx(alist al, unsigned int i);
-extern void *	alist_take(alist al);
-extern void *	alist_take_idx(alist al, unsigned int i);
+
+/*
+ * Prepend p to al.
+ */
+extern void	alist_prepend(alist al, void *p);
+
+/*
+ * Remove the current item from al.
+ */
+extern void	alist_remove(alist al);
+
+/*
+ * Sort al using the comparison function cmp. The contents of the list
+ * are sorted in ascending order according to cmp, which must return
+ * an integer less than, equal to, or greater than zero if the first
+ * argument is respectively less than, equal to, or greater than the
+ * second. The sort is not stable (equal elements may end up in a
+ * different order from in the original list).
+ */
 extern void	alist_sort(alist al, int (*cmp)(const void *p1, const void *p2));
+
+/*
+ * Return the item in al at index i.
+ */
 extern void *	alist_at(alist al, unsigned int i);
-extern int	alist_find(alist al, void *p);
+
 
 /*
  * Internal data structures
  *
  * You should never access directly to the following data.
  */
-
 typedef struct aentry_s *aentry;
 
 struct aentry_s {
@@ -73,21 +146,5 @@ struct alist_s {
 	size_t	size;
 };
 
-#ifndef ALIST_NO_MACRO_DEFS
-
-/*
- * Fast macro definitions.
- */
-
-#define alist_isempty(al)	(al->size == 0)
-#define alist_count(al)		(al->size)
-#define alist_first(al)		(al->idx = 0, (al->current = al->head) != NULL ? al->current->p : NULL)
-#define alist_last(al)		((al->current = al->tail) != NULL ? (al->idx = al->size - 1, al->current->p) : NULL)
-#define alist_prev(al)		((al->current != NULL) ? (al->current = al->current->prev, (al->current != NULL) ? --al->idx, al->current->p : NULL) : NULL)
-#define alist_next(al)		((al->current != NULL) ? (al->current = al->current->next, (al->current != NULL) ? ++al->idx, al->current->p : NULL) : NULL)
-#define alist_current(al)	((al->current != NULL) ? al->current->p : NULL)
-#define alist_current_idx(al)	((al->current != NULL) ? al->idx : -1)
-
-#endif /* !ALIST_NO_MACRO_DEFS */
 
 #endif /* !ALIST_H */

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.18 2004/02/23 01:54:47 dacap Exp $	*/
+/*	$Id: main.c,v 1.19 2004/03/13 17:27:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -371,7 +371,7 @@ int main(int argc, char **argv)
 		 * specified on command line and no function was specified
 		 * with the `-f' flag.
 		 */
-		if (!hflag && alist_isempty(fargs))
+		if (!hflag && alist_count(fargs) == 0)
 			about_screen();
 	} else {
 		while (*argv) {

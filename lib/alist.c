@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: alist.c,v 1.4 2004/03/09 22:36:55 rrt Exp $	*/
+/*	$Id: alist.c,v 1.5 2004/03/13 17:27:50 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -76,17 +76,6 @@ alist alist_new(void)
 	return al;
 }
 
-alist alist_copy(alist src)
-{
-	alist al;
-	aentry ae;
-	assert(src != NULL);
-	al = alist_new();
-	for (ae = src->head; ae != NULL; ae = ae->next)
-		alist_append(al, ae->p);
-	return al;
-}
-
 void alist_delete(alist al)
 {
 	assert(al != NULL);
@@ -107,17 +96,7 @@ void alist_clear(alist al)
 	al->size = 0;
 }
 
-int (alist_count)(alist al)
-{
-	return al->size;
-}
-
-int (alist_isempty)(alist al)
-{
-	return al->size == 0;
-}
-
-void *(alist_first)(alist al)
+void *alist_first(alist al)
 {
 	assert(al != NULL);
 	al->current = al->head;
@@ -127,7 +106,7 @@ void *(alist_first)(alist al)
 	return NULL;
 }
 
-void *(alist_last)(alist al)
+void *alist_last(alist al)
 {
 	assert(al != NULL);
 	al->current = al->tail;
@@ -138,7 +117,7 @@ void *(alist_last)(alist al)
 	return NULL;
 }
 
-void *(alist_prev)(alist al)
+void *alist_prev(alist al)
 {
 	assert(al != NULL);
 	if (al->current != NULL) {
@@ -152,7 +131,7 @@ void *(alist_prev)(alist al)
 	return NULL;
 }
 
-void *(alist_next)(alist al)
+void *alist_next(alist al)
 {
 	assert(al != NULL);
 	if (al->current != NULL) {
@@ -164,21 +143,6 @@ void *(alist_next)(alist al)
 			return NULL;
 	}
 	return NULL;
-}
-
-void *(alist_current)(alist al)
-{
-	assert(al != NULL);
-	if (al->current != NULL)
-		return al->current->p;
-	return NULL;
-}
-
-int (alist_current_idx)(alist al)
-{
-	if (al->current != NULL)
-		return al->idx;
-	return -1;
 }
 
 void alist_insert(alist al, unsigned int i, void *p)
@@ -250,66 +214,14 @@ static void take_off(alist al, aentry ae)
 	--al->size;
 }
 
-int alist_remove(alist al)
+void alist_remove(alist al)
 {
 	aentry ae;
 	assert(al != NULL);
 	if ((ae = al->current) == NULL)
-		return -1;
+		return;
 	take_off(al, ae);
 	aentry_delete(ae);
-	return 0;
-}
-
-int alist_remove_ptr(alist al, void *p)
-{
-	aentry ae;
-	assert(al != NULL);
-	if ((ae = find_aentry_ptr(al, p)) != NULL) {
-		take_off(al, ae);
-		aentry_delete(ae);
-		return 0;
-	}
-	return -1;
-}
-
-int alist_remove_idx(alist al, unsigned int i)
-{
-	aentry ae;
-	assert(al != NULL);
-	if (i >= al->size)
-		return -1;
-	ae = find_aentry(al, i);
-	take_off(al, ae);
-	aentry_delete(ae);
-	return 0;
-}
-
-void *alist_take(alist al)
-{
-	aentry ae;
-	void *p;
-	assert(al != NULL);
-	if ((ae = al->current) == NULL)
-		return NULL;
-	take_off(al, ae);
-	p = ae->p;
-	aentry_delete(ae);
-	return p;
-}
-
-void *alist_take_idx(alist al, unsigned int i)
-{
-	aentry ae;
-	void *p;
-	assert(al != NULL);
-	if (i >= al->size)
-		return NULL;
-	ae = find_aentry(al, i);
-	take_off(al, ae);
-	p = ae->p;
-	aentry_delete(ae);
-	return p;
 }
 
 void alist_sort(alist al, int (*cmp)(const void *p1, const void *p2))
@@ -337,17 +249,6 @@ void *alist_at(alist al, unsigned int i)
 		return NULL;
 	ae = find_aentry(al, i);
 	return ae->p;
-}
-
-int alist_find(alist al, void *p)
-{
-	aentry ae;
-	unsigned int count;
-	assert(al != NULL);
-	for (ae = al->head, count = 0; ae != NULL; ae = ae->next, ++count)
-		if (ae->p == p)
-			return count;
-	return -1;
 }
 
 #ifdef TEST
