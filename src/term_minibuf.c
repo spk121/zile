@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.9 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.10 2004/10/11 22:10:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -59,7 +59,7 @@ static void draw_minibuf_read(const char *prompt, const char *value, int prompt_
 	xminibuf_write(prompt);
 
 	if (prompt_len + pointo + 1 < ZILE_COLS) {
-		term_addnstr(value, ZILE_COLS - prompt_len - 1);
+		term_addnstr(value, min(ZILE_COLS - prompt_len - 1, strlen(value)));
 		term_addnstr(match, strlen(match));
 		if ((int)strlen(value) >= ZILE_COLS - prompt_len - 1) {
                         term_move(ZILE_LINES - 1, ZILE_COLS - 1);
@@ -70,7 +70,7 @@ static void draw_minibuf_read(const char *prompt, const char *value, int prompt_
 		int n;
 		term_addch('$');
 		n = pointo - pointo % (ZILE_COLS - prompt_len - 2);
-		term_addnstr(value + n, ZILE_COLS - prompt_len - 2);
+		term_addnstr(value + n, min(ZILE_COLS - prompt_len - 2, strlen(value)));
 		term_addnstr(match, strlen(match));
 		if ((int)strlen(value + n) >= ZILE_COLS - prompt_len - 2) {
                         term_move(ZILE_LINES - 1, ZILE_COLS - 1);
@@ -78,6 +78,8 @@ static void draw_minibuf_read(const char *prompt, const char *value, int prompt_
                 }
 		term_move(ZILE_LINES - 1, prompt_len + 1 + pointo % (ZILE_COLS - prompt_len - 2));
 	}
+
+        term_refresh();
 }
 
 static char *rot_vminibuf_read(const char *prompt, const char *value,
