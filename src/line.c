@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.20 2004/02/14 10:15:28 dacap Exp $	*/
+/*	$Id: line.c,v 1.21 2004/02/16 01:06:10 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -345,7 +345,12 @@ static void replace_text_case(char *to, int tlen, char *from, int flen)
         memcpy(to, from, tail);
 }
 
-void line_replace_text(Line **lp, int offset, int orgsize, char *newtext)
+/* This routine replaces text in the line "lp" with "newtext".  If
+ * "replace_case" is TRUE it will replace only the case of characters
+ * comparing with original text the "newtext".  */
+
+void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
+		       int replace_case)
 {
 	int modified = FALSE, newsize, newmaxsize, trailing_size;
 
@@ -363,13 +368,23 @@ void line_replace_text(Line **lp, int offset, int orgsize, char *newtext)
 		if (trailing_size > 0)
 			memmove((*lp)->text + offset + newsize,
 				(*lp)->text + offset + orgsize, trailing_size);
-		replace_text_case((*lp)->text + offset, orgsize, newtext, newsize);
+
+		if (!replace_case)
+			memcpy((*lp)->text + offset, newtext, newsize);
+		else
+			replace_text_case((*lp)->text + offset, orgsize,
+					  newtext, newsize);
+
 		(*lp)->size = newmaxsize;
 
 		adjust_markers_for_offset(*lp, offset, newsize-orgsize);
 	} else { /* The new text size is equal to old text size. */
 		if (memcmp((*lp)->text + offset, newtext, newsize) != 0) {
-			replace_text_case((*lp)->text + offset, orgsize, newtext, newsize);
+			if (!replace_case)
+				memcpy((*lp)->text + offset, newtext, newsize);
+			else
+				replace_text_case((*lp)->text + offset,
+						  orgsize, newtext, newsize);
 			modified = TRUE;
 		}
 	}
@@ -749,26 +764,21 @@ static int indent_relative(void)
 		}
 	} while (is_blank_line());
 
-	/* Find the first blank char.  */
-	while (!eolp()) {
-		if (isspace(following_char()) &&
-		    (get_goalc() > cur_goalc))
-			break;
+	/* Go to `cur_goalc' in that non-blank line.  */
+	while (!eolp() && (get_goalc() < cur_goalc))
 		forward_char();
-	}
+
+	/* Now find the first blank char.  */
+	while (!eolp() && (!isspace(following_char())))
+		forward_char();
 
 	/* Find first non-blank char */
-	while (!eolp()) {
-		if ((!isspace(following_char())) &&
-		    (get_goalc() > cur_goalc))
-			break;
+	while (!eolp() && (isspace(following_char())))
 		forward_char();
-	}
 
 	/* Target column.  */
-	if (!eolp()) {
+	if (!eolp())
 		target_goalc = get_goalc();
-	}
 	else {
 		cur_bp->pt = old_point->pt;
 		free_marker(old_point);
@@ -779,10 +789,22 @@ static int indent_relative(void)
 	cur_bp->pt = old_point->pt;
 	free_marker(old_point);
 
-	/* Insert spaces.  XXX and tabs .-dacap */
+	/* Insert spaces.  */
 	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	while (get_goalc() < target_goalc)
 		insert_char_in_insert_mode(' ');
+
+	/* Tabify.  */
+	push_mark();
+	set_mark();
+	activate_mark();
+	while (!bolp() && isspace(preceding_char()))
+		backward_char();
+	exchange_point_and_mark();
+	FUNCALL(tabify);
+	desactivate_mark();
+	pop_mark();
+
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return TRUE;
@@ -920,7 +942,7 @@ static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
 
 	/* Update the markers.  */
 	for (marker=cur_bp->markers; marker; marker=marker->next) {
-		if (marker->pt.p == cur_bp->pt.p &&
+		if (marker->pt.p == lp &&
 		    CMP_MARKER_OFFSET(marker, pointo, ((offset < 0) ? 1: 0)))
 			marker->pt.o += offset;
 	}
