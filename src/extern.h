@@ -15,7 +15,7 @@ int scroll_down(void);
 int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
-int do_completion(astr as);
+size_t do_completion(astr as);
 int execute_function(char *name, int uniarg);
 char *minibuf_read_function_name(const char *fmt, ...);
 char *get_function_by_key_sequence(void);

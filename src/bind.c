@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.51 2005/01/29 12:44:56 rrt Exp $	*/
+/*	$Id: bind.c,v 1.52 2005/01/29 13:05:32 rrt Exp $	*/
 
 #include "config.h"
 
@@ -142,15 +142,15 @@ static leafp search_key(leafp tree, size_t *keys, size_t n)
   return NULL;
 }
 
-int do_completion(astr as)
+size_t do_completion(astr as)
 {
-  int c;
+  size_t key;
 
   minibuf_write("%s", astr_cstr(as));
-  c = term_getkey();
+  key = term_getkey();
   minibuf_clear();
 
-  return c;
+  return key;
 }
 
 static astr make_completion(size_t *keys, size_t numkeys)

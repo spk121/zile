@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.79 2005/01/28 02:38:32 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.80 2005/01/29 13:05:32 rrt Exp $	*/
 
 #include "config.h"
 
@@ -352,29 +352,29 @@ DEFUN("quoted-insert", quoted_insert)
 
 int universal_argument(int keytype, int xarg)
 {
-  int i = 0, arg = 4, sgn = 1;
-  int c, digit;
+  int i = 0, arg = 4, sgn = 1, digit;
+  size_t key;
   astr as = astr_new();
 
   if (keytype == KBD_META) {
     astr_cpy_cstr(as, "ESC");
-    term_ungetkey(xarg + '0');
+    term_ungetkey((size_t)(xarg + '0'));
   } else
     astr_cpy_cstr(as, "C-u");
 
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
-    c = do_completion(as);
+    key = do_completion(as);
     astr_truncate(as, -1); /* Remove the '-' character. */
 
     /* Cancelled. */
-    if (c == KBD_CANCEL)
+    if (key == KBD_CANCEL)
       return cancel();
     /* Digit pressed. */
-    else if (isdigit(c & 0xff)) {
-      digit = (c & 0xff) - '0';
+    else if (isdigit(key & 0xff)) {
+      digit = (key & 0xff) - '0';
 
-      if (c & KBD_META)
+      if (key & KBD_META)
         astr_cat_cstr(as, " ESC");
 
       astr_afmt(as, " %d", digit);
@@ -385,11 +385,11 @@ int universal_argument(int keytype, int xarg)
         arg = arg * 10 + digit;
 
       i++;
-    } else if (c == (KBD_CTL | 'u')) {
+    } else if (key == (KBD_CTL | 'u')) {
       astr_cat_cstr(as, " C-u");
       if (i == 0)
         arg *= 4;
-    } else if (c == '-') {
+    } else if (key == '-') {
       /* After any number && if sign doesn't change. */
       if (i == 0 && sgn > 0) {
         sgn = -sgn;
@@ -400,11 +400,11 @@ int universal_argument(int keytype, int xarg)
         /* If i == 0 do nothing (the Emacs behavior is a little
            strange in this case, it waits for one more key that is
            eaten, and then goes back to the normal state). */
-        term_ungetkey(c);
+        term_ungetkey(key);
         break;
       }
     } else {
-      term_ungetkey(c);
+      term_ungetkey(key);
       break;
     }
   }
@@ -1178,7 +1178,7 @@ DEFUN("fill-paragraph", fill_paragraph)
   }
 
   FUNCALL(end_of_line);
-  while (get_goalc() > get_variable_number("fill-column") + 1)
+  while (get_goalc() > (size_t)get_variable_number("fill-column") + 1)
     fill_break_line();
 
   thisflag &= ~FLAG_DONE_CPCN;
