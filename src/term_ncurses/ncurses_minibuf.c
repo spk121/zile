@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.9 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.10 2003/11/28 22:46:09 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -374,7 +374,7 @@ char *ncurses_minibuf_read(const char *prompt, const char *value, historyp hp)
 		cur_bp = wp->bp;
 		if (hp->fl_close)
 			FUNCALL(delete_window);
-		else
+		else if (hp->old_bp)
 			switch_to_buffer(hp->old_bp);
 		cur_wp = old_wp;
 		cur_bp = old_wp->bp;
