@@ -271,9 +271,13 @@ Point window_pt(Window *wp);
 
 /*--------------------------------------------------------------------------
  * Missing functions.
+ *
+ * The functions here are used in tools, where config.h is not available.
  *--------------------------------------------------------------------------*/
 
 #ifndef HAVE_VASPRINTF
+#include <stdarg.h>
+
 int asprintf(char **ptr, const char *fmt, ...);
 int vasprintf(char **ptr, const char *fmt, va_list vargs);
 #endif
