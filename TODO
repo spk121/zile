@@ -19,8 +19,7 @@ X1("kill-sentence", kill_sentence,                      "M-k")
 X1("backward-kill-sentence", backward_kill_sentence,    "C-x\\DEL")
 X1("name-last-kbd-macro", name_last_kbd_macro,          "")
 
-* Add function key support to termcap, and remove code for keys that
-  cannot be supported.
+* Add function key support to termcap.
 * Allow search and replace not to follow case (case-fold-search,
   case-replace).
 * Regex pattern matching for replace functions.

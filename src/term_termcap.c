@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.28 2004/10/24 19:15:44 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.29 2004/10/24 22:37:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -65,11 +65,31 @@ static int max_key_chars = 0; /* Length of longest key code. */
 int ZILE_COLS;   /* Current number of columns on screen. */
 int ZILE_LINES;  /* Current number of rows on screen. */
 
+static char *empty_string = "";
+
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
-static char *kl_string, *kr_string, *ku_string, *kd_string;
-static char *empty_string = "";
-static int kl_string_len, kr_string_len, ku_string_len, kd_string_len;
+
+static int key_code[] = {
+        KBD_LEFT, KBD_RIGHT, KBD_UP, KBD_DOWN,
+        KBD_HOME, KBD_END, KBD_PGUP, KBD_PGDN,
+        KBD_BS, KBD_DEL, KBD_INS,
+/* KBD_F1, KBD_F2, KBD_F3, KBD_F4,
+   KBD_F5, KBD_F6, KBD_F7, KBD_F8,
+   KBD_F9, KBD_F10, KBD_F11, KBD_F12, */
+};
+
+#define KEYS (sizeof(key_code) / sizeof(key_code[0]))
+
+static char *key_cap_name[KEYS] = {
+        "kl", "kr", "ku", "kd",
+        "kh", "kH", "kP", "kN",
+        "kb", "kD", "kI",
+};
+
+static char *key_cap[KEYS];
+static int key_len[KEYS];
+
 astr norm_string;
 static struct termios ostate, nstate;
 
@@ -294,6 +314,7 @@ static void setattr(int flags)
 
 void term_init(void)
 {
+        int i;
         char *tcap;
 
         tcap_ptr = tcap = get_tcap();
@@ -332,15 +353,12 @@ void term_init(void)
         se_string = tgetstr_safe("se", &tcap);
 	mr_string = tgetstr_safe("mr", &tcap);
 	me_string = tgetstr_safe("me", &tcap);
-        kl_string = tgetstr_note_len("kl", &tcap);
-        kl_string_len = strlen(kl_string);
-        kr_string = tgetstr_note_len("kr", &tcap);
-        kr_string_len = strlen(kr_string);
-        ku_string = tgetstr_note_len("ku", &tcap);
-        ku_string_len = strlen(ku_string);
-        kd_string = tgetstr_note_len("kd", &tcap);
-        kd_string_len = strlen(kd_string);
-        /* We assume the Meta key is present and on. */
+
+        for (i = 0; i < KEYS; i++) {
+                key_cap[i] = tgetstr_note_len(key_cap_name[i], &tcap);
+                key_len[i] = strlen(key_cap[i]);
+        }
+        /* Assume the Meta key is present and on, and generates ESC */
 
         norm_string = astr_new();
         astr_cat_cstr(norm_string, se_string);
@@ -392,67 +410,35 @@ static int translate_key(char *s, int nbytes)
                         return KBD_TAB;
                 case '\15':
                         return KBD_RET;
-                case '\37':
-                        return KBD_CTL | (*s ^ 0x40);
                 case '\33':		/* META */
                         return KBD_META;
-/*	case KEY_PPAGE:		/\* PGUP *\/ */
-/*		return KBD_PGUP; */
-/*	case KEY_NPAGE:		/\* PGDN *\/ */
-/*		return KBD_PGDN; */
-/*	case KEY_HOME:		/\* HOME *\/ */
-/*		return KBD_HOME; */
-/*	case KEY_END:		/\* END *\/ */
-/*		return KBD_END; */
-/*	case KEY_DC:		/\* DEL *\/ */
-/*		return KBD_DEL; */
-/*	case KEY_BACKSPACE:	/\* BS *\/ */
+                case '\37':
+                        return KBD_CTL | '_';
                 case 0177:		/* BS */
                         return KBD_BS;
-/*	case KEY_IC:		/\* INSERT *\/ */
-/*		return KBD_INS; */
-/*	case KEY_F(1): */
-/*		return KBD_F1; */
-/*	case KEY_F(2): */
-/*		return KBD_F2; */
-/*	case KEY_F(3): */
-/*		return KBD_F3; */
-/*	case KEY_F(4): */
-/*		return KBD_F4; */
-/*	case KEY_F(5): */
-/*		return KBD_F5; */
-/*	case KEY_F(6): */
-/*		return KBD_F6; */
-/*	case KEY_F(7): */
-/*		return KBD_F7; */
-/*	case KEY_F(8): */
-/*		return KBD_F8; */
-/*	case KEY_F(9): */
-/*		return KBD_F9; */
-/*	case KEY_F(10): */
-/*		return KBD_F10; */
-/*	case KEY_F(11): */
-/*		return KBD_F11; */
-/*	case KEY_F(12): */
-/*		return KBD_F12; */
                 default:
                         return *s;
                 }
-        } else if (strncmp(s, kl_string, min(kl_string_len, nbytes)) == 0) {
-                key = KBD_LEFT;
-                used = kl_string_len;
-        } else if (strncmp(s, kr_string, min(kr_string_len, nbytes)) == 0) {
-                key = KBD_RIGHT;
-                used = kr_string_len;
-        } else if (strncmp(s, ku_string, min(ku_string_len, nbytes)) == 0) {
-                key = KBD_UP;
-                used = ku_string_len;
-        } else if (strncmp(s, kd_string, min(kd_string_len, nbytes)) == 0) {
-                key = KBD_DOWN;
-                used = kd_string_len;
-        } else if (nbytes > 1) {
-                key = translate_key(s, 1);
-                used = 1;
+        } else {
+                for (i = 0; i < KEYS; i++) {
+                        if (key_len[i] > 0 &&
+                            strncmp(s, key_cap[i], min(key_len[i], nbytes)) == 0) {
+                                key = key_code[i];
+                                used = key_len[i];
+                                break;
+                        }
+                }
+                if (used == 0 && nbytes > 1) {
+#ifdef DEBUG
+                        int i;
+                        fprintf(stderr, "key code ");
+                        for (i = 0; i < nbytes; i++)
+                                fprintf(stderr, "%d ", s[i]);
+                        fprintf(stderr, "\n");
+#endif
+                        key = translate_key(s, 1);
+                        used = 1;
+                }
         }
 
         for (i = nbytes - 1; i >= used; i--)
