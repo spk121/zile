@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.48 2004/11/13 23:57:13 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.49 2004/11/14 00:00:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1232,6 +1232,8 @@ Fill paragraph at or after point.
         Point pt = cur_bp->pt;
         Line *end_lp;
         
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+
         FUNCALL(forward_paragraph);
         end_lp = cur_bp->pt.p;
         FUNCALL(backward_paragraph);
@@ -1276,6 +1278,8 @@ Fill paragraph at or after point.
 
         cur_bp->pt = pt;
         thisflag &= ~(FLAG_DONE_CPCN | FLAG_NEED_RESYNC);
+
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
         return TRUE;
 }
