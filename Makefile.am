@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.2 2004/01/27 16:53:13 rrt Exp $
+## $Id: Makefile.am,v 1.3 2004/02/01 02:19:29 dacap Exp $
 
 SUBDIRS = doc lib etc src
 
@@ -11,7 +11,6 @@ EXTRA_DIST =					\
 	KNOWNBUGS				\
 	NEWS					\
 	README					\
-	README.compile				\
 	TODO					\
 	zile.lsm
 
