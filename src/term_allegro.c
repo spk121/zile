@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.9 2004/11/14 16:29:07 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.10 2004/11/15 22:19:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -250,13 +250,7 @@ void term_init(void)
 
 void term_close(void)
 {
-	/* Clear last line. */
-	term_move(ZILE_LINES - 1, 0);
-	term_clrtoeol();
-	term_refresh();
-
 	/* Free memory and finish with allegro. */
-	free_rotation_buffers();
 	termp->screen = NULL;
 	free(cur_scr);
 	free(new_scr);

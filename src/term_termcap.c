@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.37 2004/11/14 16:29:07 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.38 2004/11/15 22:19:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -376,15 +376,9 @@ void term_init(void)
 
 void term_close(void)
 {
-	/* Clear last line. */
-	term_move(ZILE_LINES - 1, 0);
-	term_clrtoeol();
-	term_refresh();
-        printf(getattr(ZILE_NORMAL));
         printf("%s", ke_string); /* Put keypad back in normal mode. */
 
 	/* Free memory and finish with termcap. */
-	free_rotation_buffers();
         free(screen.array);
         free(screen.oarray);
 	termp->screen = NULL;
