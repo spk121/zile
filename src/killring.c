@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.10 2004/03/10 11:00:51 rrt Exp $	*/
+/*	$Id: killring.c,v 1.11 2004/10/06 16:32:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -82,7 +82,7 @@ static int kill_line(int literally)
 			return FALSE;
 
 		undo_save(UNDO_INSERT_BLOCK, cur_bp->pt,
-			  cur_bp->pt.p->size - cur_bp->pt.o, 0);
+			  astr_len(cur_bp->pt.p->text) - cur_bp->pt.o, 0);
 		undo_nosave = TRUE;
 		while (!eolp()) {
 			kill_ring_push(following_char());

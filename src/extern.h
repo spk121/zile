@@ -95,10 +95,9 @@ astr keyvectostr(int *keys, int numkeys);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
-Line *new_line(int maxsize);
-Line *resize_line(Line *lp, int maxsize);
+Line *new_line(void);
 void free_line(Line *lp);
-void line_replace_text(Line **lp, int offset, int orgsize, char *newtext, int replace_case);
+void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext, int replace_case);
 int insert_char(int c);
 int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.35 2004/09/26 10:55:12 rrt Exp $        */
+/*      $Id: file.c,v 1.36 2004/10/06 16:32:19 rrt Exp $        */
 
 #include "config.h"
 
@@ -263,37 +263,13 @@ void open_file(char *path, int lineno)
 }
 
 /*
- * Add the character `c' to the end of the line `lp'.
- * Reallocate the line if there is no more space left for the addition.
- */
-static Line *fadd_char(Line *lp, int c)
-{
-        Line *lp1;
-
-        if (lp->size + 1 >= lp->maxsize) {
-                lp->maxsize += 10;
-                lp1 = (Line *)zrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
-                if (lp != lp1) {
-                        if (cur_bp->limitp->next == lp)
-                                cur_bp->limitp->next = lp1;
-                        lp1->prev->next = lp1;
-                        lp1->next->prev = lp1;
-                        lp = lp1;
-                }
-        }
-        lp->text[lp->size++] = c;
-
-        return lp;
-}
-
-/*
  * Add a newline at the end of the line `lp'.
  */
 static Line *fadd_newline(Line *lp)
 {
         Line *lp1;
 
-        lp1 = new_line(1);
+        lp1 = new_line();
         lp1->next = lp->next;
         lp1->next->prev = lp1;
         lp->next = lp1;
@@ -327,7 +303,7 @@ void read_from_disk(const char *filename)
         while ((size = read(fd, buf, BUFSIZ)) > 0)
                 for (i = 0; i < size; i++)
                         if (buf[i] != '\n')
-                                lp = fadd_char(lp, buf[i]);
+                                astr_cat_char(lp->text, buf[i]);
                         else
                                 lp = fadd_newline(lp);
 
@@ -675,14 +651,13 @@ Kill the current buffer or the user specified one.
 static void insert_buffer(Buffer *bp)
 {
         Line *lp;
-        char *p;
-        int size = calculate_buffer_size(bp);
+        int size = calculate_buffer_size(bp), i;
 
         undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
         undo_nosave = TRUE;
         for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                for (p = lp->text; p < lp->text + lp->size; ++p)
-                        insert_char(*p);
+                for (i = 0; i < astr_len(lp->text); i++)
+                        insert_char(*astr_char(lp->text, i));
                 if (lp->next != bp->limitp)
                         insert_newline();
         }
@@ -910,7 +885,7 @@ static int raw_write_to_disk(Buffer *bp, const char *filename)
 
         /* Save all the lines. */
         for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                write(fd, lp->text, lp->size);
+                write(fd, lp->text, astr_len(lp->text));
                 if (lp->next != bp->limitp)
                         write(fd, "\n", 1);
         }
@@ -953,7 +928,7 @@ static int write_to_disk(Buffer *bp, char *filename)
 
         /* Save all the lines. */
         for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                write(fd, lp->text, lp->size);
+                write(fd, lp->text, astr_len(lp->text));
                 if (lp->next != bp->limitp)
                         write(fd, "\n", 1);
         }

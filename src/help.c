@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.18 2004/05/09 18:01:57 rrt Exp $	*/
+/*	$Id: help.c,v 1.19 2004/10/06 16:32:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "paths.h"
-#include "astr.h"
 
 DEFUN("zile-version", zile_version)
 /*+
@@ -57,11 +56,12 @@ static int minihelp_page = 1;
 static void fix_alternative_keys(Buffer *bp)
 {
 	Line *lp;
-	char *p;
+	int i;
 	for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next)
-		for (p = lp->text; p - lp->text < lp->size - 2; ++p)
-			if (p[0] == 'C' && p[1] == '-' && p[2] == 'h')
-				p[0] = 'M', p += 2;
+		for (i = 0; i < astr_len(lp->text) - 2; i++)
+			if (*astr_char(lp->text, i) == 'C' && *astr_char(lp->text, i + 1) == '-' &&
+                            *astr_char(lp->text, i + 2) == 'h')
+                                *astr_char(lp->text, 0) = 'M', i += 2;
 }
 
 /*

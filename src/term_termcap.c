@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.8 2004/10/05 20:42:33 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.9 2004/10/06 16:32:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -30,6 +30,7 @@
 #include <termcap.h>
 #include <termios.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/select.h>
 
 /* Avoid clash with zile function. */
@@ -127,9 +128,9 @@ void term_beep(void)
 void term_init(void)
 {
         /* termcap buffer, conventionally big enough. */
-        char *tcap = (char *)malloc(2048);
+        char *tcap = (char *)zmalloc(2048);
         char *term = getenv("TERM");
-        int res;
+        int flags, res;
 
         if (!term) {
                 fprintf(stderr, "No terminal type in TERM.\n");
@@ -168,6 +169,8 @@ void term_init(void)
                 fprintf(stderr, "Can't read terminal capabilites\n");
                 zile_exit(1);
         }
+
+        /* Set up terminal. */
         nstate.c_iflag &= ~(IGNBRK|BRKINT|PARMRK|ISTRIP
                             |INLCR|IGNCR|ICRNL|IXON);
         nstate.c_oflag &= ~OPOST;
@@ -180,6 +183,18 @@ void term_init(void)
                 fprintf(stderr, "Can't set terminal mode\n");
                 zile_exit(1);
         }
+
+        /* Set stdin to non-blocking, so we can check how much input there is. */
+/*         flags = fcntl(STDIN_FILENO, F_GETFL); */
+/*         if (flags < 0) { */
+/*                 fprintf(stderr, "Can't read stdin fcntl settings\n"); */
+/*                 zile_exit(1); */
+/*         } */
+/*         res = fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK); */
+/*         if (res < 0) { */
+/*                 fprintf(stderr, "Can't set stdin fcntl settings\n"); */
+/*                 zile_exit(1); */
+/*         } */
 }
 
 int term_open(void)
@@ -208,9 +223,9 @@ int term_close(void)
 	return TRUE;
 }
 
-static int translate_key(int c)
+static int translate_key(char *s, int bytes)
 {
-	switch (c) {
+	switch (*s) {
 	case '\0':		/* C-@ */
 		return KBD_CTL | '@';
 	case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
@@ -219,13 +234,13 @@ static int translate_key(int c)
 	case '\20': case '\21': case '\22': case '\23': case '\24':
 	case '\25': case '\26': case '\27': case '\30': case '\31':
 	case '\32':		/* C-a ... C-z */
-		return KBD_CTL | ('a' + c - 1);
+		return KBD_CTL | ('a' + *s - 1);
 	case '\11':
 		return KBD_TAB;
 	case '\15':
 		return KBD_RET;
 	case '\37':
-		return KBD_CTL | (c ^ 0x40);
+		return KBD_CTL | (*s ^ 0x40);
 	case '\33':		/* META */
 		return KBD_META;
 /*	case KEY_PPAGE:		/\* PGUP *\/ */
@@ -276,16 +291,16 @@ static int translate_key(int c)
 /*	case KEY_F(12): */
 /*		return KBD_F12; */
 	default:
-		if (c > 255)
-			return KBD_NOKEY;	/* Undefined behaviour. */
-		return c;
+		return *s;
 	}
 }
 
 static int xgetkey(int mode, int arg)
 {
-        int key, ret;
+        int ret;
+        size_t nbytes;
         fd_set rfds;
+        char keys[16];          /* Array hopefully larger than the longest keycode sequence. */
 
         FD_ZERO(&rfds);
         FD_SET(STDIN_FILENO, &rfds);
@@ -296,24 +311,28 @@ static int xgetkey(int mode, int arg)
                 struct timeval tv;
                 tv.tv_sec = arg / 1000;
                 tv.tv_usec = (arg % 1000) * 1000;
-                ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv);
-        } else
-                ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, NULL);
+/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, &tv); */
+        } else;
+/*                 ret = select(STDIN_FILENO + 1, &rfds, NULL, NULL, NULL); */
 
 	if (ret < 0)
 		return KBD_NOKEY;
 
-        key = getchar();
+/*         nbytes = fread(keys, sizeof(char), sizeof(keys), stdin); */
+        nbytes = 1;
+        *keys = getchar();
 
-        if ((mode & GETKEY_NONFILTERED) == 0) {
-                key = translate_key(key);
+        if (mode & GETKEY_NONFILTERED)
+                return keys[nbytes - 1];
+        else {
+                int key = translate_key(keys, nbytes);
                 while (key == KBD_META) {
-                        key = translate_key(getchar());
+                        char c = getchar();
+                        key = translate_key(&c, 1);
                         key |= KBD_META;
                 }
+                return key;
         }
-
-        return key;
 }
 
 #define MAX_UNGETKEY_BUF	16

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: point.c,v 1.2 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: point.c,v 1.3 2004/10/06 16:32:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,13 +55,13 @@ int point_dist(Point pt1, Point pt2)
 		swap_point(&pt1, &pt2);
 
 	for (lp=pt1.p; ; lp=lp->next) {
-		size += lp->size;
+		size += astr_len(lp->text);
 
 		if (lp == pt1.p)
 			size -= pt1.o;
 
 		if (lp == pt2.p) {
-			size -= (lp->size - pt2.o);
+			size -= astr_len(lp->text) - pt2.o;
 			break;
 		}
 		else
@@ -96,7 +96,7 @@ Point point_max(void)
 {
 	Point pt = { cur_bp->limitp->prev,
 		     cur_bp->num_lines,
-		     cur_bp->limitp->prev->size };
+		     astr_len(cur_bp->limitp->prev->text) };
 	return pt;
 }
 
@@ -132,7 +132,7 @@ Point line_beginning_position(int count)
 Point line_end_position(int count)
 {
 	Point pt = line_beginning_position(count);
-	pt.o = pt.p->size;
+	pt.o = astr_len(pt.p->text);
 	return pt;
 }
 

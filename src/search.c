@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.18 2004/09/25 22:43:18 rrt Exp $	*/
+/*	$Id: search.c,v 1.19 2004/10/06 16:32:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "astr.h"
 #include "editfns.h"
 #ifdef HAVE_REGEX_H
 #include <regex.h>
@@ -110,11 +109,11 @@ static char *re_find_substr(const char *s1, size_t s1size,
 	old_syntax = re_set_syntax(RE_SYNTAX_EMACS);
 
 	search_regs.num_regs = 1;
-	search_regs.start = malloc(sizeof(regoff_t));
-	search_regs.end = malloc(sizeof(regoff_t));
+	search_regs.start = zmalloc(sizeof(regoff_t));
+	search_regs.end = zmalloc(sizeof(regoff_t));
 
 	pattern.translate = NULL;
-/*	pattern.fastmap = (char *)malloc(1 << 8); */
+/*	pattern.fastmap = (char *)zmalloc(1 << 8); */
 	pattern.fastmap = NULL;
 	pattern.buffer = NULL;
 	pattern.allocated = 0;
@@ -173,32 +172,26 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
 
 	for (lp = startp; lp != cur_bp->limitp; lp = lp->next) {
 		if (lp == startp) {
-			sp = lp->text + starto;
-			s1size = lp->size - starto;
+			sp = astr_char(lp->text, starto);
+			s1size = astr_len(lp->text) - starto;
 		} else {
-			sp = lp->text;
-			s1size = lp->size;
+			sp = astr_cstr(lp->text);
+			s1size = astr_len(lp->text);
 		}
 		if (s1size < 1)
 			continue;
 
-		if (regexp) {
+		if (regexp)
 			sp2 = re_find_substr(sp, s1size, s, s2size,
-					     sp == lp->text, TRUE, FALSE);
-			if (sp2 != NULL) {
-				goto_linep(lp);
-				cur_bp->pt.o = sp2 - lp->text;
-				return TRUE;
-			}
-		}
-		else {
+					     sp == astr_cstr(lp->text), TRUE, FALSE);
+                else
 			sp2 = find_substr(sp, s1size, s, s2size);
-			if (sp2 != NULL) {
-				goto_linep(lp);
-				cur_bp->pt.o = sp2 - lp->text + s2size;
-				return TRUE;
-			}
-		}
+                        
+                if (sp2 != NULL) {
+                        goto_linep(lp);
+                        cur_bp->pt.o = sp2 - astr_cstr(lp->text); /* + s2size */
+                        return TRUE;
+                }
 	}
 
 	return FALSE;
@@ -214,31 +207,25 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
 		return FALSE;
 
 	for (lp = startp; lp != cur_bp->limitp; lp = lp->prev) {
-		sp = lp->text;
+		sp = astr_cstr(lp->text);
 		if (lp == startp)
 			s1size = starto;
 		else
-			s1size = lp->size;
+			s1size = astr_len(lp->text);
 		if (s1size < 1)
 			continue;
 
-		if (regexp) {
-			sp2 = re_find_substr(sp, s1size, s, s2size,
-					     TRUE, s1size == (size_t)lp->size, TRUE);
-			if (sp2 != NULL) {
-				goto_linep(lp);
-				cur_bp->pt.o = sp2 - lp->text;
-				return TRUE;
-			}
-		}
-		else {
+		if (regexp)
+                        sp2 = re_find_substr(sp, s1size, s, s2size,
+					     TRUE, s1size == (size_t)astr_len(lp->text), TRUE);
+		else
 			sp2 = rfind_substr(sp, s1size, s, s2size);
-			if (sp2 != NULL) {
-				goto_linep(lp);
-				cur_bp->pt.o = sp2 - lp->text;
-				return TRUE;
-			}
-		}
+
+                if (sp2 != NULL) {
+                        goto_linep(lp);
+                        cur_bp->pt.o = sp2 - astr_cstr(lp->text);
+                        return TRUE;
+                }
 	}
 
 	return FALSE;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.11 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: basic.c,v 1.12 2004/10/06 16:32:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -75,13 +75,13 @@ Move point to end of current line.
  */
 int get_goalc_bp(Buffer *bp, Point pt)
 {
-	int col = 0, t = bp->tab_width;
-	char *sp = pt.p->text, *p = sp;
+	int col = 0, t = bp->tab_width, i;
+	const char *sp = astr_cstr(pt.p->text);
 
-	while (p < sp + pt.o) {
-		if (*p == '\t')
+	for (i = 0; i < pt.o; i++) {
+		if (sp[i] == '\t')
 			col |= t - 1;
-		++col, ++p;
+		++col;
 	}
 
 	return col;
@@ -103,22 +103,21 @@ int get_goalc(void)
  */
 static void goto_goalc(int goalc)
 {
-	int col = 0, t = cur_bp->tab_width, w;
-	char *sp = cur_bp->pt.p->text, *p = sp;
+	int col = 0, t = cur_bp->tab_width, w, i;
+	const char *sp = astr_cstr(cur_bp->pt.p->text);
 
-	while (p < sp + cur_bp->pt.p->size) {
-		if (col == goalc)
+	for (i = 0; i < astr_len(cur_bp->pt.p->text); i++) {
+                if (col == goalc)
 			break;
-		else if (*p == '\t') {
+		else if (sp[i] == '\t') {
 			for (w = t - col % t; w > 0; w--)
 				if (++col == goalc)
 					break;
 		} else
 			++col;
-		++p;
 	}
 
-	cur_bp->pt.o = p - sp;
+	cur_bp->pt.o = i;
 }
 
 int previous_line(void)

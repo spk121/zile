@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.11 2004/03/10 11:00:51 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.12 2004/10/06 16:32:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -67,13 +67,13 @@ static Buffer *new_buffer(void)
 	} else
 		bp->fill_column = 70;
 
-	/* Allocate a minimal space for a line. */
-	bp->pt.p = new_line(1);
+	/* Allocate a line. */
+	bp->pt.p = new_line();
 	bp->pt.n = 0;
 	bp->pt.o = 0;
 
-	/* Allocate a null line for the limit marker. */
-	bp->limitp = new_line(0);
+	/* Allocate the limit marker. */
+	bp->limitp = new_line();
 
 	bp->limitp->prev = bp->limitp->next = bp->pt.p;
 	bp->pt.p->prev = bp->pt.p->next = bp->limitp;
@@ -306,7 +306,7 @@ int zap_buffer_content(void)
 	Window *wp;
 	Line *new_lp, *old_lp, *next_lp;
 
-	new_lp = new_line(1);
+	new_lp = new_line();
 	new_lp->next = new_lp->prev = cur_bp->limitp;
 
 	old_lp = cur_bp->limitp->next;
@@ -438,7 +438,7 @@ int calculate_buffer_size(Buffer *bp)
 		return 0;
 
 	for (;;) {
-		size += lp->size;
+		size += astr_len(lp->text);
 		lp = lp->next;
 		if (lp == bp->limitp)
 			break;

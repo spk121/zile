@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.12 2004/10/05 19:34:50 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.13 2004/10/06 16:32:22 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -313,11 +313,11 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 	int x, j;
 
 	term_move(line, 0);
-	for (x = 0, j = startcol; j < lp->size && x < wp->ewidth; ++j) {
+	for (x = 0, j = startcol; j < astr_len(lp->text) && x < wp->ewidth; ++j) {
 		if (highlight && in_region(lineno, j, r))
-			outch(lp->text[j], C_FG_WHITE_BG_BLUE, &x);
+			outch(*astr_char(lp->text, j), C_FG_WHITE_BG_BLUE, &x);
 		else
-			outch(lp->text[j], C_FG_WHITE, &x);
+			outch(*astr_char(lp->text, j), C_FG_WHITE, &x);
 	}
 
 	draw_end_of_line(line, wp, lineno, r, highlight, x, j);
@@ -418,10 +418,10 @@ static void calculate_start_column(Window *wp)
 	char *buf, *rp, *lp, *p;
 	Point pt = window_pt(wp);
 
-	rp = pt.p->text + pt.o;
+	rp = astr_char(pt.p->text, pt.o);
 	rpfact = pt.o / (wp->ewidth / 3);
 
-	for (lp = rp; lp >= pt.p->text; --lp) {
+	for (lp = rp; lp >= astr_cstr(pt.p->text); --lp) {
 		for (col = 0, p = lp; p < rp; ++p)
 			if (*p == '\t') {
 				col |= t - 1;
@@ -433,10 +433,10 @@ static void calculate_start_column(Window *wp)
                                 free(buf);
                         }
 
-		lpfact = (lp - pt.p->text) / (wp->ewidth / 3);
+		lpfact = (lp - astr_cstr(pt.p->text)) / (wp->ewidth / 3);
 
 		if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2)) {
-			point_start_column = lp + 1 - pt.p->text;
+			point_start_column = lp + 1 - astr_cstr(pt.p->text);
 			point_screen_column = lastcol;
 			return;
 		}

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.29 2004/09/25 02:06:01 dacap Exp $        */
+/*      $Id: zile.h,v 1.30 2004/10/06 16:32:22 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -80,20 +80,8 @@ struct Marker {
 };
 
 struct Line {
-        /* The previous line and next line pointers. */
-        Line *prev, *next;
-
-        /* The used size and the allocated space size. */
-        int size;
-        int maxsize;
-
-        /*
-         * The text space label; must be the last entry of the structure!
-         *
-         * Using this trick we can avoid allocating two memory areas for each
-         * line (one for the structure and one for the contained text).
-         */
-        char text[1];
+        Line *prev, *next;      /* The previous line and next line pointers. */
+        astr text;              /* The text. */
 };
 
 /* Undo delta types. */

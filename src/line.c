@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.32 2004/10/05 19:32:39 rrt Exp $	*/
+/*	$Id: line.c,v 1.33 2004/10/06 16:32:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,64 +36,23 @@
 #include "extern.h"
 #include "editfns.h"
 
-static void adjust_markers_for_linep(Line *lp, Line *newlp);
 static void adjust_markers_for_offset(Line *lp, int pointo, int offset);
 static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type);
 static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len);
 
 /*
  * This function creates a new line structure for holding a line
- * of buffer text.  If called with `maxsize == 0', it does not allocate
- * a text space at all (this trick is used for allocating the
- * buffer limit marker `bp->limitp').
+ * of buffer text.
  *
  * The '\n' is not stored in the text buffer since it is implicit.
- *
- * The tail of the line structure is used for storing the text buffer.
  */
-Line *new_line(int maxsize)
+Line *new_line(void)
 {
-	Line *lp;
-	size_t size = sizeof *lp + maxsize - sizeof lp->text;
+	Line *lp = (Line *)zmalloc(sizeof(Line));
 
-	lp = (Line *)zmalloc(size);
-	memset(lp, 0, size);
-
-	lp->size = 0;
-	lp->maxsize = maxsize;
+	lp->text = astr_new();
 
 	return lp;
-}
-
-/*
- * This function resizes the text buffer of the line by reallocating
- * the whole line structure.  If the pointer returned by realloc()
- * is different from the original one, scan all the windows looking
- * for the references to the old pointer and update their value.
- */
-Line *resize_line(Line *lp, int maxsize)
-{
-	Line *newlp;
-
-	newlp = (Line *)zrealloc(lp, sizeof *lp + maxsize - sizeof lp->text);
-	newlp->maxsize = maxsize;
-
-	/*
-	 * Little optimization: if the reallocated pointer
-	 * is equal to the original, perform no other operations.
-	 */
-	if (newlp == lp)
-		return newlp;
-
-	newlp->prev->next = newlp;
-	newlp->next->prev = newlp;
-
-	/*
-	 * Update all markers pointing to the modified line.
-	 */
-	adjust_markers_for_linep(lp, newlp);
-
-	return newlp;
 }
 
 /*
@@ -101,6 +60,7 @@ Line *resize_line(Line *lp, int maxsize)
  */
 void free_line(Line *lp)
 {
+        astr_delete(lp->text);
 	free(lp);
 }
 
@@ -113,24 +73,9 @@ int intercalate_char(int c)
 	if (warn_if_readonly_buffer())
 		return FALSE;
 
-	/*
-	 * Resize the line if required.
-	 */
-	if (cur_bp->pt.p->size + 1 >= cur_bp->pt.p->maxsize)
-		resize_line(cur_bp->pt.p, cur_bp->pt.p->maxsize + 10);
-	/*
-	 * Move the line text one position forward after the
-	 * point if required.
-	 * This code assumes that memmove(d, s, 0) does nothing.
-	 */
-	memmove(cur_bp->pt.p->text + cur_bp->pt.o + 1,
-		cur_bp->pt.p->text + cur_bp->pt.o,
-		cur_bp->pt.p->size - cur_bp->pt.o);
-
 	undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
-	cur_bp->pt.p->text[cur_bp->pt.o] = c;
 
-	++cur_bp->pt.p->size;
+        astr_insert_char(cur_bp->pt.p->text, cur_bp->pt.o, c);
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -151,16 +96,16 @@ int insert_char(int c)
 		   && isn't a \t
 		      || tab width isn't correct
 		      || current char is a \t && we are in the tab limit.  */
-		if ((cur_bp->pt.o < cur_bp->pt.p->size)
-		    && ((cur_bp->pt.p->text[cur_bp->pt.o] != '\t')
+		if ((cur_bp->pt.o < astr_len(cur_bp->pt.p->text))
+		    && ((*astr_char(cur_bp->pt.p->text, cur_bp->pt.o) != '\t')
 			|| (cur_bp->tab_width < 1)
-			|| ((cur_bp->pt.p->text[cur_bp->pt.o] == '\t')
+			|| ((*astr_char(cur_bp->pt.p->text, cur_bp->pt.o) == '\t')
 			    && ((get_goalc() % cur_bp->tab_width)
 				== cur_bp->tab_width-1)))) {
 			/* Replace the character.  */
 			undo_save(UNDO_REPLACE_CHAR, cur_bp->pt,
-				  cur_bp->pt.p->text[cur_bp->pt.o], 0);
-			cur_bp->pt.p->text[cur_bp->pt.o] = c;
+				  *astr_char(cur_bp->pt.p->text, cur_bp->pt.o), 0);
+			*astr_char(cur_bp->pt.p->text, cur_bp->pt.o) = c;
 			++cur_bp->pt.o;
 
 			cur_bp->flags |= BFLAG_MODIFIED;
@@ -253,27 +198,18 @@ static int common_insert_newline(int move_pt)
 
 	undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
 
-	/*
-	 * Calculate the two line lengths.
-	 */
+	/* Calculate the two line lengths. */
 	lp1len = cur_bp->pt.o;
-	lp2len = cur_bp->pt.p->size - lp1len;
+	lp2len = astr_len(cur_bp->pt.p->text) - lp1len;
 
 	lp1 = cur_bp->pt.p;
-	lp2 = new_line(lp2len ? lp2len : 1);
+	lp2 = new_line();
 
-	/*
-	 * Copy the text after the point into the new line.
-	 * This code assumes that memcpy(d, s, 0) does nothing.
-	 */
-	memcpy(lp2->text, lp1->text + lp1len, lp2len);
+	/* Move the text after the point into the new line. */
+	astr_cpy(lp2->text, astr_substr(lp1->text, lp1len, lp2len));
+        astr_truncate(lp1->text, lp1len);
 
-	lp1->size -= lp2len;
-	lp2->size = lp2len;
-
-	/*
-	 * Update line linked list.
-	 */
+	/* Update line linked list. */
 	lp2->next = lp1->next;
 	lp2->next->prev = lp2;
 	lp2->prev = lp1;
@@ -302,70 +238,50 @@ int intercalate_newline(void)
 	return common_insert_newline(FALSE);
 }
 
-/* Replace a text string in the same case as the original */
+/* Recase s according to case of template. */
 /* XXX At the moment this is not the same as Emacs (doesn't check that
  * replacement string contains no upper case) but is consistent with
- * search. See TODO file */
-static void replace_text_case(char *to, int tlen, char *from, int flen)
+ * search.  See TODO file. */
+static void recase(char *s, char *template, int len)
 {
         int i;
-        int overlap = min(tlen, flen);
-        int tail = max(flen - overlap, 0);
 
-        for (i = 0; i < overlap; i++) {
-                if (isupper(*to))
-                        *to++ = toupper(*from++);
-                else
-                        *to++ = *from++;
+        for (i = 0; i < len; i++, s++) {
+                if (isupper(*template++))
+                        *s = toupper(*s);
         }
-        memcpy(to, from, tail);
 }
 
 /* This routine replaces text in the line "lp" with "newtext".  If
- * "replace_case" is TRUE it will replace only the case of characters
- * comparing with original text the "newtext".  */
-void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
+ * "replace_case" is TRUE then the new characters will be the same
+ * case as the old. */
+void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext,
 		       int replace_case)
 {
-	int modified = FALSE, newsize, newmaxsize, trailing_size;
+	int newsize = strlen(newtext);
 
 	if (orgsize == 0)
 		return;
-	assert(orgsize >= 1);
+	assert(orgsize > 0);
 
-	newsize = strlen(newtext);
-	if (newsize != orgsize) { /* Reallocation of line may be required. */
-		modified = TRUE;
-		newmaxsize = (*lp)->size - orgsize + newsize;
-		if (newmaxsize > (*lp)->maxsize)
-			*lp = resize_line(*lp, newmaxsize + 1);
-		trailing_size = (*lp)->size - (offset + orgsize);
-		if (trailing_size > 0)
-			memmove((*lp)->text + offset + newsize,
-				(*lp)->text + offset + orgsize, trailing_size);
+        if (replace_case) {
+                newtext = strdup(newtext);
+                recase((char *)newtext, astr_char((*lp)->text, offset), min(orgsize, newsize));
+        }
 
-		if (!replace_case)
-			memcpy((*lp)->text + offset, newtext, newsize);
-		else
-			replace_text_case((*lp)->text + offset, orgsize,
-					  newtext, newsize);
-
-		(*lp)->size = newmaxsize;
-
-		adjust_markers_for_offset(*lp, offset, newsize-orgsize);
-	} else { /* The new text size is equal to old text size. */
-		if (memcmp((*lp)->text + offset, newtext, newsize) != 0) {
-			if (!replace_case)
-				memcpy((*lp)->text + offset, newtext, newsize);
-			else
-				replace_text_case((*lp)->text + offset,
-						  orgsize, newtext, newsize);
-			modified = TRUE;
+	if (newsize != orgsize) {
+                cur_bp->flags |= BFLAG_MODIFIED;
+                astr_replace_cstr((*lp)->text, offset, orgsize, newtext);
+		adjust_markers_for_offset(*lp, offset, newsize - orgsize);
+	} else {
+		if (memcmp(astr_char((*lp)->text, offset), newtext, newsize) != 0) {
+                        memcpy(astr_char((*lp)->text, offset), newtext, newsize);
+                        cur_bp->flags |= BFLAG_MODIFIED;
 		}
 	}
-
-	if (modified)
-		cur_bp->flags |= BFLAG_MODIFIED;
+                
+        if (replace_case)
+                free((char *)newtext);
 }
 
 /*
@@ -384,7 +300,7 @@ static void auto_fill_break_line(void)
 
         /* Find break point moving left from fill-column. */
         for (break_col = cur_bp->pt.o; break_col > 0; --break_col) {
-                int c = cur_bp->pt.p->text[break_col - 1];
+                int c = *astr_char(cur_bp->pt.p->text, break_col - 1);
                 if (isspace(c))
                         break;
         }
@@ -502,17 +418,14 @@ int delete_char(void)
 			return FALSE;
 
 		undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
-			  cur_bp->pt.p->text[cur_bp->pt.o], 0);
+			  *astr_char(cur_bp->pt.p->text, cur_bp->pt.o), 0);
 
 		/*
 		 * Move the text one position backward after the point,
 		 * if required.
 		 * This code assumes that memmove(d, s, 0) does nothing.
 		 */
-		memmove(cur_bp->pt.p->text + cur_bp->pt.o,
-			cur_bp->pt.p->text + cur_bp->pt.o + 1,
-			cur_bp->pt.p->size - cur_bp->pt.o - 1);
-		--cur_bp->pt.p->size;
+                astr_remove(cur_bp->pt.p->text, cur_bp->pt.o, 1);
 
 		adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, -1);
 
@@ -530,22 +443,11 @@ int delete_char(void)
 
 		lp1 = cur_bp->pt.p;
 		lp2 = cur_bp->pt.p->next;
-		lp1len = lp1->size;
-		lp2len = lp2->size;
+		lp1len = astr_len(lp1->text);
 
-		/*
-		 * Resize line if required.
-		 */
-		if (lp1len + lp2len + 1 >= lp1->maxsize)
-			lp1 = resize_line(lp1, lp1len + lp2len + 1);
-
-		if (lp2len > 0) {
-			/*
-			 * Move the next line text into the current line.
-			 */
-			memcpy(lp1->text + lp1len, lp2->text, lp2len);
-			lp1->size += lp2len;
-		}
+		if (lp2len > 0)
+			/* Move the next line text into the current line. */
+			astr_cat(lp1->text, lp2->text);
 
 		/*
 		 * Update line linked list.
@@ -796,22 +698,6 @@ Indentation is done using the `indent-command' function.
 #define CMP_MARKER_OFFSET(marker, offset, extra)			\
 	(((!(marker)->type) && (marker)->pt.o > (offset))		\
 	 || ((marker)->type && (marker)->pt.o >= (offset)+(extra)))
-
-static void adjust_markers_for_linep(Line *lp, Line *newlp)
-{
-	Marker *pt, *marker;
-	pt = point_marker();
-	set_marker_insertion_type(pt, TRUE);
-
-	/* Update the markers.  */
-	for (marker=cur_bp->markers; marker; marker=marker->next) {
-		if (marker->pt.p == lp)
-			marker->pt.p = newlp;
-	}
-
-	cur_bp->pt = pt->pt;
-	free_marker(pt);
-}
 
 static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
 {

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.12 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: glue.c,v 1.13 2004/10/06 16:32:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -72,8 +72,8 @@ int waitkey_discard(int msecs)
  */
 char *copy_text_block(int startn, int starto, size_t size)
 {
-	char *buf, *sp, *dp;
-	int max_size, n;
+	char *buf, *dp;
+	int max_size, n, i;
 	Line *lp;
 
 	max_size = 10;
@@ -90,21 +90,19 @@ char *copy_text_block(int startn, int starto, size_t size)
 			lp = lp->next;
 		while (++n < startn);
 
-	sp = lp->text + starto;
-
-	while (dp - buf < (int)size) {
+	for (i = starto; dp - buf < (int)size;) {
 		if (dp - buf + 1 > max_size) {
 			int save_off = dp - buf;
 			max_size += 10;
 			buf = (char *)zrealloc(buf, max_size);
 			dp = buf + save_off;
 		}
-		if (sp < lp->text + lp->size)
-			*dp++ = *sp++;
+		if (i < astr_len(lp->text))
+			*dp++ = *astr_char(lp->text, i++);
 		else {
 			*dp++ = '\n';
 			lp = lp->next;
-			sp = lp->text;
+			i = 0;
 		}
 	}
 
