@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.19 2004/02/14 10:08:15 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.20 2004/02/16 01:03:44 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -630,7 +630,8 @@ by 4 each time.
 
 static void edit_tab_line(Line **lp, int lineno, int offset, int size, int action)
 {
-	char *src, *dest;
+	char *src, *dest, *p;
+	int col;
 
 	if (size == 0)
 		return;
@@ -641,15 +642,25 @@ static void edit_tab_line(Line **lp, int lineno, int offset, int size, int actio
 	strncpy(src, (*lp)->text + offset, size);
 	src[size] = '\0';
 
+	/* Get offset's column.  */
+	col = 0;
+	p = (*lp)->text;
+	while (p < (*lp)->text + offset) {
+		if (*p == '\t')
+			col |= cur_bp->tab_width - 1;
+		++col, ++p;
+	}
+
+	/* Call un/tabify function.  */
 	if (action == TAB_UNTABIFY)
-		untabify_string(dest, src, offset, cur_bp->tab_width);
+		untabify_string(dest, src, col, cur_bp->tab_width);
 	else
-		tabify_string(dest, src, offset, cur_bp->tab_width);
+		tabify_string(dest, src, col, cur_bp->tab_width);
 
 	if (strcmp(src, dest) != 0) {
 		undo_save(UNDO_REPLACE_BLOCK, make_point(lineno, offset),
 			  size, strlen(dest));
-		line_replace_text(lp, offset, size, dest);
+		line_replace_text(lp, offset, size, dest, FALSE);
 	}
 	free(src);
 	free(dest);
@@ -673,23 +684,31 @@ static int edit_tab_region(int action)
 
 	undo_save(UNDO_START_SEQUENCE, marker->pt, 0, 0);
 	for (lp = r.start.p, lineno = r.start.n; ; lp = lp->next, ++lineno) {
-		if (lp == r.start.p) {
-			if (lp == r.end.p) /* Region on a sole line. */
+		/* First line.  */
+		if (lineno == r.start.n) {
+			/* Region on a sole line. */
+			if (lineno == r.end.n)
 				edit_tab_line(&lp, lineno, r.start.o,
-					      r.end.o - r.start.o, action);
-			else /* Region is multi-line. */
-				edit_tab_line(&lp, lineno, r.start.o, lp->size,
-					      action);
-		} else if (lp == r.end.p) /* Last line of multi-line region. */
+					      r.size, action);
+			/* Region is multi-line. */
+			else
+				edit_tab_line(&lp, lineno, r.start.o,
+					      lp->size - r.start.o, action);
+		}
+		/* Last line of multi-line region. */
+		else if (lineno == r.end.n)
 			edit_tab_line(&lp, lineno, 0, r.end.o, action);
-		else /* Middle line of multi-line region. */
-			edit_tab_line(&lp, lineno, r.start.o,
-				      lp->size - r.start.o, action);
-		if (lp == r.end.p)
+		/* Middle line of multi-line region. */
+		else
+			edit_tab_line(&lp, lineno, 0, lp->size, action);
+		/* Done?  */
+		if (lineno == r.end.n)
 			break;
 	}
+	cur_bp->pt = marker->pt;
 	undo_save(UNDO_END_SEQUENCE, marker->pt, 0, 0);
 	free_marker(marker);
+	desactivate_mark();
 
 	return TRUE;
 }
