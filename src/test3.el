@@ -85,7 +85,7 @@
 (+ 0 x)
 
 (setq x 5)
-(setq y (1+(+ 0 x)))
+(setq y (+ 1 (+ 0 x)))
 (x) (y)
 
 (+ 4 '(+ 3 4 '5 6 7))
@@ -199,8 +199,8 @@
 
 (setq a '(f 0 o))
 (setq b (+ 3 4))
-(setq c (+ 3 4) d (1+ b) e '(4 5 6))
-(setq f (+ 3 4) g (1+ b) h)
+(setq c (+ 3 4) d (+ 1 b) e '(4 5 6))
+(setq f (+ 3 4) g (+ 1 b) h)
 
 (setq g '(a b c d))
 (set 'b '(a b c d))
@@ -244,7 +244,7 @@ addthree 3)
 (defun three (x) (+ 2 1))
 (three 4)
 (setq x (+ 4 5))
-(setq x (1+ x))
+(setq x (+ 1 x))
 (defun addthree (x) (+ x 3))
 
 (addthree 4)
