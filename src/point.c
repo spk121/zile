@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: point.c,v 1.3 2004/10/06 16:32:22 rrt Exp $	*/
+/*	$Id: point.c,v 1.4 2004/12/09 00:51:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -27,7 +27,10 @@
 
 Point make_point(int lineno, int offset)
 {
-	Point pt = { cur_bp->limitp->next, lineno, offset };
+	Point pt;
+        pt.p = cur_bp->limitp->next;
+        pt.n = lineno;
+        pt.o = offset;
 	while (lineno > 0) {
 		pt.p = pt.p->next;
 		lineno--;
@@ -88,15 +91,19 @@ void swap_point(Point *pt1, Point *pt2)
 
 Point point_min(void)
 {
-	Point pt = { cur_bp->limitp->next, 0, 0 };
+	Point pt;
+        pt.p = cur_bp->limitp->next;
+        pt.n = 0;
+        pt.o = 0;
 	return pt;
 }
 
 Point point_max(void)
 {
-	Point pt = { cur_bp->limitp->prev,
-		     cur_bp->num_lines,
-		     astr_len(cur_bp->limitp->prev->text) };
+	Point pt;
+        pt.p = cur_bp->limitp->prev;
+	pt.n = cur_bp->num_lines;
+        pt.o = astr_len(cur_bp->limitp->prev->text);
 	return pt;
 }
 
