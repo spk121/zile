@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.2 2004/01/29 10:37:00 rrt Exp $
+## $Id: Makefile.am,v 1.3 2004/02/04 02:49:31 dacap Exp $
 
 SUBDIRS = term_ncurses
 INCLUDES = -I$(top_srcdir)/lib
@@ -55,8 +55,7 @@ zile_LDADD =					\
 	$(fontlock_c)				\
 	$(fontlock_cpp)				\
 	$(fontlock_csharp)			\
-	$(fontlock_java)			\
-	$(lua)
+	$(fontlock_java)
 
 man_MANS = zile.1
 
