@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.38 2004/10/12 00:19:47 rrt Exp $        */
+/*      $Id: file.c,v 1.39 2004/10/12 12:29:50 rrt Exp $        */
 
 #include "config.h"
 
@@ -875,22 +875,23 @@ static int copy_file(const char *source, const char *dest)
         return TRUE;
 }
 
-static int raw_write_to_disk(Buffer *bp, const char *filename)
+static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
         int fd;
         Line *lp;
 
-        if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0600)) < 0)
+        if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)
                 return FALSE;
 
         /* Save all the lines. */
         for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                write(fd, lp->text, astr_len(lp->text));
+                write(fd, astr_cstr(lp->text), astr_len(lp->text));
                 if (lp->next != bp->limitp)
                         write(fd, "\n", 1);
         }
 
-        close(fd);
+        if (close(fd) < 0)
+                return FALSE;
 
         return TRUE;
 }
@@ -902,7 +903,6 @@ static int raw_write_to_disk(Buffer *bp, const char *filename)
 static int write_to_disk(Buffer *bp, char *filename)
 {
         int fd, backupsimple, backupwithdir;
-        Line *lp;
 
         backupsimple = is_variable_equal("backup-method", "simple");
         backupwithdir = lookup_bool_variable("backup-with-directory");
@@ -921,19 +921,10 @@ static int write_to_disk(Buffer *bp, char *filename)
                 bp->flags |= BFLAG_BACKUP;
         }
 
-        if ((fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644)) < 0) {
+        if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
                 minibuf_error("%s: %s", filename, strerror(errno));
                 return FALSE;
         }
-
-        /* Save all the lines. */
-        for (lp = bp->limitp->next; lp != bp->limitp; lp = lp->next) {
-                write(fd, lp->text, astr_len(lp->text));
-                if (lp->next != bp->limitp)
-                        write(fd, "\n", 1);
-        }
-
-        close(fd);
 
         return TRUE;
 }
@@ -1142,7 +1133,7 @@ void zile_exit(int exitcode)
                         astr_cat_cstr(buf, ".ZILESAVE");
                         fprintf(stderr, "Saving %s...\r\n",
                                 astr_cstr(buf));
-                        raw_write_to_disk(bp, astr_cstr(buf));
+                        raw_write_to_disk(bp, astr_cstr(buf), 0600);
                         astr_delete(buf);
                 }
         exit(exitcode);
