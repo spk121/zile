@@ -16,7 +16,6 @@ X1("fill-paragraph", fill_paragraph,			"M-q")
 
 * Complete universal-argument functionality for:
 
-delete-horizontal-space
 transpose-chars
 transpose-words
 transpose-sexps
