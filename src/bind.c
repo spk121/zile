@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.52 2005/01/29 13:05:32 rrt Exp $	*/
+/*	$Id: bind.c,v 1.53 2005/01/29 13:14:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -69,7 +69,7 @@ static leafp leaf_new(int vecmax)
 
 static leafp search_leaf(leafp tree, size_t key)
 {
-  int i;
+  size_t i;
 
   for (i = 0; i < tree->vecnum; ++i)
     if (tree->vec[i]->key == key)
@@ -80,7 +80,7 @@ static leafp search_leaf(leafp tree, size_t key)
 
 static void add_leaf(leafp tree, leafp p)
 {
-  int i;
+  size_t i;
 
   /* Reallocate vector if there is not enough space. */
   if (tree->vecnum + 1 >= tree->vecmax) {
@@ -156,7 +156,7 @@ size_t do_completion(astr as)
 static astr make_completion(size_t *keys, size_t numkeys)
 {
   astr as = astr_new(), key;
-  int i, len = 0;
+  size_t i, len = 0;
 
   for (i = 0; i < numkeys; i++) {
     if (i > 0) {
@@ -171,12 +171,12 @@ static astr make_completion(size_t *keys, size_t numkeys)
   return astr_cat_cstr(as, "-");
 }
 
-static leafp completion_scan(int c, size_t **keys, size_t *numkeys)
+static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)
 {
   leafp p;
   vector *v = vec_new(sizeof(size_t));
 
-  vec_item(v, 0, size_t) = c;
+  vec_item(v, 0, size_t) = key;
   *numkeys = 1;
 
   do {
@@ -204,12 +204,12 @@ void process_key(size_t key)
 
   if (key & KBD_META && isdigit(key & 255)) {
     /* Got an ESC x sequence where `x' is a digit. */
-    universal_argument(KBD_META, (key & 255) - '0');
+    universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   } else if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
     /* There are no bindings for the pressed key. */
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     for (uni = 0; uni < last_uniarg; ++uni) {
-      if (!self_insert_command(key)) {
+      if (!self_insert_command((ptrdiff_t)key)) {
         astr as = make_completion(keys, numkeys);
         astr_truncate(as, -1);
         minibuf_error("%s not defined.", astr_cstr(as));
@@ -219,7 +219,7 @@ void process_key(size_t key)
         return;
       }
       if (thisflag & FLAG_DEFINING_MACRO)
-        add_kbd_macro(self_insert_command, FALSE, key);
+        add_kbd_macro(self_insert_command, FALSE, (ptrdiff_t)key);
     }
     undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   } else {
@@ -311,7 +311,7 @@ void init_bindings(void)
 
 static void recursive_free_bindings(leafp p)
 {
-  int i;
+  size_t i;
   for (i = 0; i < p->vecnum; ++i)
     recursive_free_bindings(p->vec[i]);
   free(p->vec);
@@ -452,16 +452,16 @@ DEFUN("global-set-key", global_set_key)
     sequence.
     +*/
 {
-  int c, ok = FALSE;
-  size_t *keys, numkeys;
+  int  ok = FALSE;
+  size_t key, *keys, numkeys;
   leafp p;
   Function func;
   char *name;
   astr as;
 
   minibuf_write("Set key globally:");
-  c = term_getkey();
-  p = completion_scan(c, &keys, &numkeys);
+  key = term_getkey();
+  p = completion_scan(key, &keys, &numkeys);
 
   as = keyvectostr(keys, numkeys);
   name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
@@ -483,7 +483,7 @@ DEFUN("global-set-key", global_set_key)
 char *get_function_by_key_sequence(void)
 {
   leafp p;
-  int c = term_getkey();
+  size_t c = term_getkey();
   size_t *keys, numkeys;
 
   if (c & KBD_META && isdigit(c & 255))
@@ -531,7 +531,7 @@ DEFUN("list-functions", list_functions)
 
 static void write_bindings_tree(leafp tree, list keys)
 {
-  int i;
+  size_t i;
   list l;
   astr as = chordtostr(tree->key);
 
