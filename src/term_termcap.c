@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.26 2004/10/16 20:37:31 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.27 2004/10/23 14:10:09 rrt Exp $	*/
 
 #include "config.h"
 
@@ -68,6 +68,7 @@ int ZILE_LINES;  /* Current number of rows on screen. */
 static char *ks_string, *ke_string, *cm_string;
 static char *so_string, *se_string, *mr_string, *me_string;
 static char *kl_string, *kr_string, *ku_string, *kd_string;
+static char *empty_string = "";
 static int kl_string_len, kr_string_len, ku_string_len, kd_string_len;
 astr norm_string;
 static struct termios ostate, nstate;
@@ -94,7 +95,7 @@ static const char *getattr(Font f) {
         else if (f & ZILE_REVERSE)
                 return mr_string;
         assert(0);
-        return "";
+        return empty_string;
 }
 
 /*
@@ -264,8 +265,9 @@ static void term_init_screen(void)
 static char *tgetstr_note_len(const char *cap, char **tcap)
 {
         char *s = tgetstr(cap, tcap);
-        max_key_chars = max(max_key_chars, strlen(s));
-        return s;
+        if (s)
+                max_key_chars = max(max_key_chars, strlen(s));
+        return s ? s : empty_string;
 }
 
 static void setattr(int flags)
