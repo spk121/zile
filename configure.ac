@@ -82,7 +82,7 @@ dnl ==================================================================
 dnl Turn on additional compiler warnings
 dnl ==================================================================
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -Wstrict-prototypes"
+  CFLAGS="$CFLAGS -Wall -Wmissing-prototypes -Wstrict-prototypes -pedantic"
 fi
 
 dnl ==================================================================
