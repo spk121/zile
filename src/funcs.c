@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.7 2003/11/28 23:07:02 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.8 2004/01/21 01:42:22 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -236,11 +236,6 @@ C-q still inserts characters in overwrite mode; this
 is supposed to make it easier to insert characters when necessary.
 +*/
 {
-	/*
-	 * XXX Emacs behaviour:
-	 * ``Before a tab, such characters insert until the tab is
-	 * filled in.''
-	 */
 	if (cur_bp->flags & BFLAG_OVERWRITE)
 		cur_bp->flags &= ~BFLAG_OVERWRITE;
 	else
@@ -480,12 +475,12 @@ static int quoted_insert_octal(int c1)
 		c2 = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
 		if (c2 == KBD_CANCEL)
 			return FALSE;
-		minibuf_write("C-q %d -", c1 - '0');
+		minibuf_write("C-q %d-", c1 - '0');
 	} while (c2 == KBD_NOKEY);
 
 	if (!isdigit(c2) || c2 - '0' >= 8) {
-		insert_char(c1 - '0');
-		insert_char(c2);
+		insert_char_in_insert_mode(c1 - '0');
+		insert_char_in_insert_mode(c2);
 		return TRUE;
 	}
 
@@ -493,16 +488,16 @@ static int quoted_insert_octal(int c1)
 		c3 = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
 		if (c3 == KBD_CANCEL)
 			return FALSE;
-		minibuf_write("C-q %d %d -", c1 - '0', c2 - '0');
+		minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
 	} while (c3 == KBD_NOKEY);
 
 	if (!isdigit(c3) || c3 - '0' >= 8) {
-		insert_char((c1 - '0') * 8 + (c2 - '0'));
-		insert_char(c3);
+		insert_char_in_insert_mode((c1 - '0') * 8 + (c2 - '0'));
+		insert_char_in_insert_mode(c3);
 		return TRUE;
 	}
 
-	insert_char((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
+	insert_char_in_insert_mode((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
 
 	return TRUE;
 }
@@ -518,7 +513,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 
 	do {
 		c = cur_tp->xgetkey(GETKEY_DELAYED | GETKEY_NONFILTERED, 500);
-		minibuf_write("C-q -");
+		minibuf_write("C-q-");
 	} while (c == KBD_NOKEY);
 
 	if (isdigit(c) && c - '0' < 8)
@@ -526,7 +521,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 	else if (c == '\r')
 		insert_newline();
 	else
-		insert_char(c);
+		insert_char_in_insert_mode(c);
 
 	minibuf_clear();
 
