@@ -1,0 +1,9 @@
+#! /bin/sh
+# Run the Lisp test scripts
+
+for i in $*; do
+  ./zile --batch --load=$i.el > $i.stdout
+  if ! diff $i.stdout $i.output; then
+    exit 1
+  fi
+done

@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.30 2005/01/19 00:40:49 rrt Exp $
+## $Id: Makefile.am,v 1.31 2005/01/19 01:24:27 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -7,8 +7,8 @@ else
 regex = regex.o
 endif
 
-TESTS = alist astr htable
-check_PROGRAMS = alist astr htable
+TESTS = astr htable
+check_PROGRAMS = astr htable dotests
 
 alist_CPPFLAGS = -DTEST
 alist_LDADD = zmalloc.o
@@ -17,7 +17,7 @@ astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
 
 htable_CPPFLAGS = -DTEST
-htable_LDADD = zmalloc.o alist.o
+htable_LDADD = zmalloc.o list.o
 
 bin_PROGRAMS = zile
 
@@ -108,3 +108,6 @@ paths.h:
 	        ! "cmp paths.h paths.h.tmp -s" ; then	\
 		mv paths.h.tmp paths.h ;		\
 	fi
+
+dotests:
+	./tests test1 test2 test3

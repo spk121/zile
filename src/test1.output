@@ -1,0 +1,14 @@
+==== File test1.el
+
+(setq world world hi Hello comma , exclamation !)
+==> (!)
+
+(list hi comma world exclamation)
+==> (Hello , world !)
+=======
+Variables:
+exclamation 	(!)
+comma 	(,)
+hi 	(Hello)
+world 	(world)
+defuns:
