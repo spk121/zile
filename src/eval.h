@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.h,v 1.8 2005/01/25 00:54:42 rrt Exp $	*/
+/*	$Id: eval.h,v 1.9 2005/01/29 00:23:14 rrt Exp $	*/
 
 #include "lists.h"
 
@@ -30,6 +30,7 @@ typedef struct evalLookupNode {
   eval_cb callback;
 } evalLookupNode;
 
+eval_cb lookupFunction(char *name);
 le *evaluateBranch(le *trybranch);
 le *evaluateNode(le *node);
 le *evaluateDefun(le *fcn, le *params);

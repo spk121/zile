@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.17 2005/01/28 02:38:31 rrt Exp $	*/
+/*	$Id: eval.c,v 1.18 2005/01/29 00:23:14 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -62,7 +62,7 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
 #undef X2
 #undef X3
 
-evalLookupNode evalTable[] = {
+static evalLookupNode evalTable[] = {
   { "+" 	, eval_cb_add		},
   { "-" 	, eval_cb_subtract	},
   { "*" 	, eval_cb_multiply	},
@@ -123,10 +123,21 @@ evalLookupNode evalTable[] = {
 };
 
 
+eval_cb lookupFunction(char *name)
+{
+  int i;
+  for (i = 0; evalTable[i].word; i++)
+    if (!strcmp(evalTable[i].word, name))
+      return evalTable[i].callback;
+
+  return NULL;
+}
+
+
 le *evaluateBranch(le *trybranch)
 {
   le *keyword;
-  int tryit = 0;
+  eval_cb prim;
 
   if (trybranch == NULL)
     return NULL;
@@ -141,13 +152,11 @@ le *evaluateBranch(le *trybranch)
     return leNIL;
   }
 
-  for (tryit = 0; evalTable[tryit].word; tryit++)
-    if (strcmp(evalTable[tryit].word, keyword->data) == 0) {
-      leWipe(keyword);
-      return evalTable[tryit].callback(countNodes(trybranch), trybranch);
-    }
-
+  prim = lookupFunction(keyword->data);
   leWipe(keyword);
+  if (prim)
+    return prim(countNodes(trybranch), trybranch);
+
   return evaluateNode(trybranch);
 }
     
