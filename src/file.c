@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.6 2003/05/23 09:37:25 ssigala Exp $	*/
+/*	$Id: file.c,v 1.7 2003/05/25 22:01:26 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -91,7 +91,6 @@ int is_regular_file(const char *filename)
 int expand_path(const char *path, const char *cwdir, astr dir,
 		astr fname)
 {
-	char buf[1024];
 	struct passwd *pw;
 	const char *sp;
         const char *p;
@@ -140,17 +139,23 @@ int expand_path(const char *path, const char *cwdir, astr dir,
 				 * Got `~something'.  Restart from this point
 				 * and insert that user home directory.
 				 */
-				char *p = buf;
+                                const char *p;
+                                astr as = astr_new();
 				astr_clear(dir);
 				++sp;
-				while (*sp != '\0' && *sp != '/')
-					*p++ = *sp++;
-				*p = '\0';
-				if ((pw = getpwnam(buf)) == NULL)
+                                if ((p = strchr(sp, '/'))) {
+                                        astr_replace_cstr(as, 0, p - sp, sp);
+                                        sp = p;
+                                } else {
+                                        astr_assign_cstr(as, sp);
+                                        sp += strlen(sp);
+                                }
+				if ((pw = getpwnam(astr_cstr(as))) == NULL)
 					return FALSE;
 				p = pw->pw_dir;
 				while (*p != '\0')
 					astr_append_char(dir, *p++);
+                                astr_delete(as);
 			}
 		} else if (*sp == '.') {
 			if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
