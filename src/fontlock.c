@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: fontlock.c,v 1.9 2004/02/17 23:19:42 rrt Exp $	*/
+/*	$Id: fontlock.c,v 1.10 2004/02/18 09:47:41 rrt Exp $	*/
 
 /*
  * In the future these routines may be rewritten using regex pattern
@@ -114,10 +114,13 @@ static void cpp_set_anchors(Line *lp, Anchor *lastanchor)
 			*ap++ = ANCHOR_NULL;
 			++sp;
 			while (sp < lp->text + lp->size - 1 && *sp != '\'') {
-				*ap++ = ANCHOR_NULL;
-				if (*++sp == '\\' && sp < lp->text + lp->size - 1) {
+				if (*sp == '\\') {
 					*ap++ = ANCHOR_NULL;
 					++sp;
+				}
+				if (sp < lp->text + lp->size - 1) {
+					*ap++ = ANCHOR_NULL;
+					sp++;
 				}
 			}
 		} else if (*sp == '"') {
