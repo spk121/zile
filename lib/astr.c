@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.19 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: astr.c,v 1.20 2004/04/05 16:01:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -99,8 +99,9 @@ astr astr_cpy_cstr(astr as, const char *s)
 static astr astr_cat_x(astr as, const char *s, size_t csize)
 {
 	astr_resize(as, as->size + csize);
-	strcpy(as->text + as->size, s);
+	strncpy(as->text + as->size, s, csize);
 	as->size += csize;
+        as->text[as->size] = '\0';
 	return as;
 }
 
@@ -127,7 +128,6 @@ astr astr_cat_char(astr as, int c)
 	astr_resize(as, as->size + 1);
 	as->text[as->size] = c;
 	as->text[++as->size] = '\0';
-
 	return as;
 }
 
@@ -138,25 +138,15 @@ astr astr_truncate(astr as, size_t size)
 		as->size = size;
 		as->text[size] = '\0';
 	}
-
 	return as;
 }
 
 astr astr_substr(const astr as, int pos, size_t size)
 {
-	astr dest;
 	assert(as != NULL);
-	dest = astr_new();
         pos = astr_pos(as, pos);
-
-	if (as->size - pos < size)
-		size = as->size - pos;
-	if (size > 0) {
-		astr_resize(dest, size);
-		memcpy(dest->text, as->text + pos, size);
-		dest->size = size;
-	}
-	return dest;
+	assert(size + pos <= as->size);
+        return astr_ncat_cstr(astr_new(), astr_char(as, pos), size);
 }
 
 int astr_find(const astr as, const astr src)
@@ -183,38 +173,6 @@ int astr_rfind_cstr(const astr as, const char *s)
 	assert(as != NULL && s != NULL);
         sp = strrstr(as->text, s);
 	return (sp == NULL) ? -1 : sp - as->text;
-}
-
-static astr astr_replace_x(astr as, int pos, size_t size, const char *s, size_t csize)
-{
-	astr dest = astr_new();
-        pos = astr_pos(as, pos);
-
-	if (as->size - pos < size)
-		size = as->size - pos;
-	if (size > 0) {
-		dest->size = as->size - size + csize;
-		astr_resize(dest, dest->size);
-		memcpy(dest->text, as->text, pos);
-		memcpy(dest->text + pos, s, csize);
-		strcpy(dest->text + pos + csize, as->text + pos + size);
-	}
-	free(as->text);
-	*as = *dest;
-	free(dest);
-	return as;
-}
-
-astr astr_replace(astr as, int pos, size_t size, const astr src)
-{
-	assert(as != NULL && src != NULL);
-	return astr_replace_x(as, pos, size, src->text, src->size);
-}
-
-astr astr_replace_cstr(astr as, int pos, size_t size, const char *s)
-{
-	assert(as != NULL && s != NULL);
-	return astr_replace_x(as, pos, size, s, strlen(s));
 }
 
 astr astr_fgets(FILE *f)

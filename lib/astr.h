@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.16 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: astr.h,v 1.17 2004/04/05 16:01:51 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -119,13 +119,6 @@ extern int    astr_find_cstr(const astr as, const char *s);
  */
 extern int    astr_rfind(const astr as, const astr src);
 extern int    astr_rfind_cstr(const astr as, const char *s);
-
-/*
- * Replace up to size characters of as with the argument string,
- * starting from position pos.
- */
-extern astr   astr_replace(astr as, int pos, size_t size, const astr src);
-extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 
 /*
  * Read a string from the stream f and return it. The trailing newline
