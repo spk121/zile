@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.26 2005/01/12 12:53:44 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.27 2005/01/13 07:31:32 rrt Exp $	*/
 
 #include "config.h"
 
@@ -309,10 +309,8 @@ void term_redisplay(void)
 
     draw_window(topline, wp);
 
-    /*
-     * Draw the status line only if there is available space
-     * after the buffer text space.
-     */
+    /* Draw the status line only if there is available space after the
+       buffer text space. */
     if (wp->fheight - wp->eheight > 0)
       draw_status_line(topline + wp->eheight, wp);
 
