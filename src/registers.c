@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.8 2004/03/09 16:24:10 rrt Exp $	*/
+/*	$Id: registers.c,v 1.9 2004/03/09 22:43:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -118,16 +118,17 @@ static void write_registers_list(va_list ap)
 	bprintf("%-8s %8s\n", "--------", "----");
 	for (i = count = 0; i < NUM_REGISTERS; ++i)
 		if (regs[i].text != NULL) {
-			char buf[24];
+			astr as = astr_new();
 			++count;
 			if (isprint(i))
-				sprintf(buf, "`%c'", i);
+				astr_afmt(as, "`%c'", i);
 			else
-				sprintf(buf, "`\\%o'", i);
-			bprintf("%-8s %8d\n", buf, regs[i].size);
+				astr_afmt(as, "`\\%o'", i);
+			bprintf("%-8s %8d\n", astr_cstr(as), regs[i].size);
+                        astr_delete(as);
 		}
 	if (!count)
-		bprintf("No register defined\n");
+		bprintf("No registers defined\n");
 }
 
 DEFUN("list-registers", list_registers)
