@@ -1,4 +1,4 @@
-/*	$Id: variables.c,v 1.4 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: variables.c,v 1.5 2004/01/07 00:36:14 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -63,11 +63,20 @@ void init_variables(void)
 
 void free_variables(void)
 {
+	alist al;
+	hpair *pair;
+
+	al = htable_list(var_table);
+	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
+		unset_variable(pair->key);
+	alist_delete(al);
+
 	htable_delete(var_table);
 }
 
 void set_variable(char *var, char *val)
 {
+	unset_variable(var);
 	htable_store(var_table, var, zstrdup(val));
 }
 
@@ -167,7 +176,7 @@ static char *get_variable_format(char *var)
 		if (!strcmp(p->var, var))
 			return p->fmt;
 
-	return NULL;
+	return "";
 }
 
 DEFUN("set-variable", set_variable)
@@ -197,7 +206,7 @@ Set a variable value to the user specified value.
 		if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
 			return cancel();
 		val = (i == TRUE) ? "true" : "false";
-	} else { /* Non color, boolean or such fixed value varabile. */
+	} else { /* Non color, boolean or such fixed value variable. */
 		if ((val = minibuf_read("Set %s to value: ", buf, var)) == NULL)
 			return cancel();
 	}
