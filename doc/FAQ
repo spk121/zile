@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/12/18 23:10:29 $
+		   Last updated: $Date: 2004/12/20 13:53:58 $
 
 ------------------------------------------------------------------------------
 
@@ -152,7 +152,9 @@ INDEX
 
 2.7. How to display non-English characters?
 
-    TODO. (With appropriate locale setting.)
+    Zile uses the operating system's locale support, so you need to
+    set an appropriate locale. However, Zile only works with 8-bit
+    locales at present; support for Unicode is planned.
 
 2.8. Zile doesn't handle filenames with non-English characters.
 
