@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.7 2003/05/25 22:01:26 rrt Exp $	*/
+/*	$Id: file.c,v 1.8 2003/06/24 12:22:39 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -49,6 +49,7 @@
 #include <unistd.h>
 #endif
 #include <utime.h>
+#include <ctype.h>
 
 #include "zile.h"
 #include "agetcwd.h"
