@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: astr.h,v 1.18 2004/04/23 20:34:55 rrt Exp $        */
+/*      $Id: astr.h,v 1.19 2004/10/06 16:28:14 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -85,7 +85,8 @@ extern astr   astr_substr(const astr as, int pos, size_t size);
 /*
  * Do strcmp on the contents of s1 and s2
  */
-#define astr_cmp(s1, s2)        (strcmp((s1)->text, (s2)->text))
+#define astr_cmp(as1, as2)      (strcmp((as1)->text, (as2)->text))
+#define astr_cmp_cstr(as, s)    (strcmp((as)->text, (s)))
 
 /*
  * Assign the contents of the argument string to the string as.
@@ -99,7 +100,27 @@ extern astr   astr_cpy_cstr(astr as, const char *s);
 extern astr   astr_cat(astr as, const astr src);
 extern astr   astr_cat_cstr(astr as, const char *s);
 extern astr   astr_ncat_cstr(astr as, const char *s, size_t len);
-extern astr   astr_cat_char(astr as, int c);
+extern astr   astr_cat_char(astr as, char c);
+
+/*
+ * Replace size characters of as, starting at pos, with the argument
+ * string or character.
+ */
+extern astr   astr_replace(astr as, int pos, size_t size, const astr src);
+extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
+extern astr   astr_replace_char(astr as, int pos, size_t size, int c);
+
+/*
+ * Insert the contents of the argument string or character in as.
+ */
+extern astr   astr_insert(astr as, int pos, const astr src);
+extern astr   astr_insert_cstr(astr as, int pos, const char *s);
+extern astr   astr_insert_char(astr as, int pos, char c);
+
+/*
+ * Remove size chars from as at position pos.
+ */
+extern astr   astr_remove(astr as, int pos, size_t size);
 
 /*
  * Truncate as to given length.

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.23 2004/07/28 01:18:51 dacap Exp $	*/
+/*	$Id: astr.c,v 1.24 2004/10/06 16:28:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,6 +55,7 @@ static void astr_resize(astr as, size_t reqsize)
 
 static int astr_pos(astr as, int pos)
 {
+        assert(as != NULL);
 	if (pos < 0)
 		pos = as->len + pos;
 	assert(pos >=0 && pos <= (int)as->len);
@@ -86,13 +87,13 @@ static astr astr_cpy_x(astr as, const char *s, size_t csize)
 
 astr astr_cpy(astr as, const astr src)
 {
-	assert(as != NULL && src != NULL);
+	assert(src != NULL);
 	return astr_cpy_x(as, src->text, src->len);
 }
 
 astr astr_cpy_cstr(astr as, const char *s)
 {
-	assert(as != NULL && s != NULL);
+	assert(s != NULL);
 	return astr_cpy_x(as, s, strlen(s));
 }
 
@@ -107,13 +108,12 @@ static astr astr_cat_x(astr as, const char *s, size_t csize)
 
 astr astr_cat(astr as, const astr src)
 {
-	assert(as != NULL && src != NULL);
+	assert(src != NULL);
 	return astr_cat_x(as, src->text, src->len);
 }
 
 astr astr_ncat_cstr(astr as, const char *s, size_t len)
 {
-	assert(as != NULL && s != NULL);
 	return astr_cat_x(as, s, len);
 }
 
@@ -122,7 +122,7 @@ astr astr_cat_cstr(astr as, const char *s)
 	return astr_ncat_cstr(as, s, strlen(s));
 }
 
-astr astr_cat_char(astr as, int c)
+astr astr_cat_char(astr as, char c)
 {
 	assert(as != NULL);
 	astr_resize(as, as->len + 1);
@@ -131,21 +131,11 @@ astr astr_cat_char(astr as, int c)
 	return as;
 }
 
-astr astr_truncate(astr as, size_t size)
-{
-	assert(as != NULL);
-	if (size < as->len) {
-		as->len = size;
-		as->text[size] = '\0';
-	}
-	return as;
-}
-
 astr astr_substr(const astr as, int pos, size_t size)
 {
 	assert(as != NULL);
         pos = astr_pos(as, pos);
-	assert(size + pos <= as->len);
+	assert(pos + size <= as->len);
         return astr_ncat_cstr(astr_new(), astr_char(as, pos), size);
 }
 
@@ -173,6 +163,69 @@ int astr_rfind_cstr(const astr as, const char *s)
 	assert(as != NULL && s != NULL);
         sp = strrstr(as->text, s);
 	return (sp == NULL) ? -1 : sp - as->text;
+}
+
+static astr astr_replace_x(astr as, int pos, size_t size, const char *s, size_t csize)
+{
+	astr tail;
+        pos = astr_pos(as, pos);
+	if (as->len - pos < size)
+		size = as->len - pos;
+/*         fprintf(stderr, "%d %d %d\n", size, pos, as->len); */
+        tail = astr_substr(as, pos + size, astr_len(as) - (pos + size));
+        astr_truncate(as, pos);
+        astr_ncat_cstr(as, s, csize);
+        return astr_cat(as, tail);
+}
+
+astr astr_replace(astr as, int pos, size_t size, const astr src)
+{
+	assert(src != NULL);
+	return astr_replace_x(as, pos, size, src->text, src->len);
+}
+
+astr astr_replace_cstr(astr as, int pos, size_t size, const char *s)
+{
+	assert(s != NULL);
+	return astr_replace_x(as, pos, size, s, strlen(s));
+}
+
+astr astr_replace_char(astr as, int pos, size_t size, int c)
+{
+	return astr_replace_x(as, pos, size, (const char *)&c, 1);
+}
+
+astr astr_insert(astr as, int pos, const astr src)
+{
+        assert(src != NULL);
+        return astr_replace_x(as, pos, 0, src->text, src->len);
+}
+
+astr astr_insert_cstr(astr as, int pos, const char *s)
+{
+        assert(s != NULL);
+        return astr_replace_x(as, pos, 0, s, strlen(s));
+}
+
+astr astr_insert_char(astr as, int pos, char c)
+{
+        return astr_replace_x(as, pos, 0, &c, 1);
+}
+
+astr astr_remove(astr as, int pos, size_t size)
+{
+        return astr_replace_x(as, pos, size, "", 0);
+}
+
+/* Don't define in terms of astr_remove, to avoid endless recursion */
+astr astr_truncate(astr as, size_t size)
+{
+	assert(as != NULL);
+	if (size < as->len) {
+		as->len = size;
+		as->text[size] = '\0';
+	}
+	return as;
 }
 
 astr astr_fgets(FILE *f)
@@ -212,7 +265,7 @@ astr astr_afmt(astr as, const char *fmt, ...)
 
 void assert_eq(astr as, const char *s)
 {
-	if (!astr_eq_cstr(as, s))
+	if (astr_cmp_cstr(as, s))
 		printf("test failed: \"%s\" != \"%s\"\n", as->text, s);
 }
 
@@ -222,54 +275,93 @@ int main(void)
 	int i;
 
 	as1 = astr_new();
-	astr_assign_cstr(as1, "hello world");
-	astr_append_char(as1, '!');
+	astr_cpy_cstr(as1, "hello world");
+	astr_cat_char(as1, '!');
 	assert_eq(as1, "hello world!");
 
 	as3 = astr_substr(as1, 6, 5);
 	assert_eq(as3, "world");
 
 	as2 = astr_new();
-	astr_assign_cstr(as2, "The ");
-	astr_append(as2, as3);
-	astr_append_char(as2, '.');
+	astr_cpy_cstr(as2, "The ");
+	astr_cat(as2, as3);
+	astr_cat_char(as2, '.');
 	assert_eq(as2, "The world.");
 
 	astr_delete(as3);
 	as3 = astr_substr(as1, -6, 5);
 	assert_eq(as3, "world");
 
-	astr_assign_cstr(as1, "12345");
+	astr_cpy_cstr(as1, "12345");
 	astr_delete(as2);
 
-	astr_assign_cstr(as1, "12345");
-	astr_delete(as2);
-	as2 = astr_substr(as1, -2, 5);
-	assert_eq(as2, "45");
+        astr_cpy_cstr(as1, "12345");
+        astr_insert_cstr(as1, 3, "mid");
+        astr_insert_cstr(as1, 0, "begin");
+        astr_cat_cstr(as1, "end");
+        assert_eq(as1, "begin123mid45end");
 
-	astr_assign_cstr(as1, "12345");
-	astr_delete(as2);
-	as2 = astr_substr(as1, -10, 5);
-	assert_eq(as2, "12345");
+        astr_cpy_cstr(as1, "12345");
+        astr_insert_char(as1, -2, 'x');
+        astr_insert_char(as1, -6, 'y');
+        astr_insert_char(as1, 7, 'z');
+        assert_eq(as1, "y123x45z");
 
-	astr_assign_cstr(as1, "1234567");
+	astr_cpy_cstr(as1, "1234567");
 	astr_replace_cstr(as1, -4, 2, "foo");
 	assert_eq(as1, "123foo67");
 
-	astr_assign_cstr(as1, "1234567");
+	astr_cpy_cstr(as1, "1234567");
 	astr_replace_cstr(as1, 1, 3, "foo");
 	assert_eq(as1, "1foo567");
 
-	astr_assign_cstr(as1, "1234567");
+	astr_cpy_cstr(as1, "1234567");
 	astr_replace_cstr(as1, -1, 5, "foo");
 	assert_eq(as1, "123456foo");
 
-	astr_assign_cstr(as1, "abc def de ab cd ab de fg");
+	astr_cpy_cstr(as1, "1234567");
+	astr_remove(as1, 4, 10);
+	assert_eq(as1, "1234");
+
+	astr_cpy_cstr(as1, "abc def de ab cd ab de fg");
+	while ((i = astr_find_cstr(as1, "de")) >= 0)
+	       astr_replace_cstr(as1, i, 2, "xxx");
+	assert_eq(as1, "abc xxxf xxx ab cd ab xxx fg");
+	while ((i = astr_find_cstr(as1, "ab")) >= 0)
+	       astr_remove(as1, i, 2);
+	assert_eq(as1, "c xxxf xxx  cd  xxx fg");
+	while ((i = astr_find_cstr(as1, "  ")) >= 0)
+	       astr_replace_char(as1, i, 2, ' ');
+	assert_eq(as1, "c xxxf xxx cd xxx fg");
+
+        astr_cpy_cstr(as1, "12345");
+	as2 = astr_substr(as1, -2, 2);
+	assert_eq(as2, "45");
+
+	astr_cpy_cstr(as1, "12345");
+	astr_delete(as2);
+	as2 = astr_substr(as1, -5, 5);
+	assert_eq(as2, "12345");
+
+	astr_cpy_cstr(as1, "1234567");
+	astr_replace_cstr(as1, -4, 2, "foo");
+	assert_eq(as1, "123foo67");
+
+	astr_cpy_cstr(as1, "1234567");
+	astr_replace_cstr(as1, 1, 3, "foo");
+	assert_eq(as1, "1foo567");
+
+	astr_cpy_cstr(as1, "1234567");
+	astr_replace_cstr(as1, -1, 5, "foo");
+	assert_eq(as1, "123456foo");
+
+	astr_cpy_cstr(as1, "abc def de ab cd ab de fg");
 	while ((i = astr_find_cstr(as1, "de")) >= 0)
 	       astr_replace_cstr(as1, i, 2, "xxx");
 	assert_eq(as1, "abc xxxf xxx ab cd ab xxx fg");
 
-	astr_fmt(as1, "%s * %d = ", "5", 3);
+        astr_cpy_cstr(as1, "");
+	astr_afmt(as1, "%s * %d = ", "5", 3);
 	astr_afmt(as1, "%d", 15);
 	assert_eq(as1, "5 * 3 = 15");
 
