@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.10 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: search.c,v 1.11 2004/02/20 16:04:27 rrt Exp $	*/
 
 #include "config.h"
 
@@ -112,7 +112,7 @@ static char *re_find_substr(const char *s1, size_t s1size,
 	search_regs.end = malloc(sizeof(regoff_t));
 
 	pattern.translate = NULL;
-/* 	pattern.fastmap = (char *)malloc(1 << 8); */
+/*	pattern.fastmap = (char *)malloc(1 << 8); */
 	pattern.fastmap = NULL;
 	pattern.buffer = NULL;
 	pattern.allocated = 0;
