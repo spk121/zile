@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.12 2004/03/09 16:23:30 rrt Exp $	*/
+/*	$Id: rc.c,v 1.13 2004/03/13 16:31:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -47,7 +47,7 @@ static void error(char *fmt, ...)
 	char *msg2;
 
 	msg1 = astr_new();
-	astr_fmt(msg1, "zile:%s:%d: ", rc_name, lineno);
+	astr_afmt(msg1, "zile:%s:%d: ", rc_name, lineno);
 
 	va_start(ap, fmt);
 	vasprintf(&msg2, fmt, ap);

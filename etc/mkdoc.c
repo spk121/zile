@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.5 2004/03/11 13:50:13 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.6 2004/03/13 16:31:20 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -66,10 +66,10 @@ FILE *output_file;
 static void fdecl(const char *name)
 {
 	astr doc = astr_new();
-	astr buf = astr_new();
-	unsigned int s = 0, i;
+	astr buf;
+	unsigned s = 0, i;
 
-	while (astr_fgets(buf, input_file) != NULL) {
+	while ((buf = astr_fgets(input_file)) != NULL) {
 		if (s == 1) {
 			if (!strncmp(astr_cstr(buf), "+*/", 3))
 				break;
@@ -80,20 +80,19 @@ static void fdecl(const char *name)
 			s = 1;
 		else if (astr_cstr(buf)[0] == '{')
 			break;
+                astr_delete(buf);
 	}
 
 	for (i = 0; i < fentry_table_size; ++i)
 		if (!strcmp(name, fentry_table[i].name))
 			fentry_table[i].doc = doc;
-
-	astr_delete(buf);
 }
 
 static void parse(void)
 {
-	astr buf = astr_new();
+	astr buf;
 
-	while (astr_fgets(buf, input_file) != NULL) {
+	while ((buf = astr_fgets(input_file)) != NULL) {
 		if (!strncmp(astr_cstr(buf), "DEFUN(", 6)) {
 			int i, j;
                         astr sub;
@@ -108,9 +107,8 @@ static void parse(void)
                         astr_delete(sub);
 			fdecl(astr_cstr(buf));
 		}
+                astr_delete(buf);
 	}
-
-	astr_delete(buf);
 }
 
 static void dump_help(void)

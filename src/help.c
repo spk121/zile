@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.13 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: help.c,v 1.14 2004/03/13 16:31:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -81,11 +81,12 @@ static int read_minihelp_page(Buffer *bp)
 	set_temporary_buffer(bp);
 
 	fname = astr_new();
-	astr_fmt(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
+	astr_afmt(fname, "%s%d", PATH_DATA "/MINIHELP", minihelp_page);
 	if (!exist_file(astr_cstr(fname))) {
 		minihelp_page = 1;
-		astr_fmt(fname, "%s%d", PATH_DATA "/MINIHELP",
-				minihelp_page);
+                astr_truncate(fname, 0);
+		astr_afmt(fname, "%s%d", PATH_DATA "/MINIHELP",
+                          minihelp_page);
 		if (!exist_file(astr_cstr(fname))) {
 			minibuf_error("Unable to read file `%s'",
 				      astr_cstr(fname));
@@ -234,25 +235,25 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 	astr buf, match, doc;
 	int reading_doc = 0;
 
-	buf = astr_new();
-	match = astr_new();
-	doc = astr_new();
-
 	if ((f = fopen(PATH_DATA "/AUTODOC", "r")) == NULL) {
 		minibuf_error("Unable to read file `%s'",
 			      PATH_DATA "/AUTODOC");
 		return NULL;
 	}
 
+	match = astr_new();
 	if (isfunc)
-		astr_fmt(match, "\fF_%s", name);
+		astr_afmt(match, "\fF_%s", name);
 	else
-		astr_fmt(match, "\fV_%s", name);
+		astr_afmt(match, "\fV_%s", name);
 
-	while (astr_fgets(buf, f) != NULL)
-		if (reading_doc) {
-			if (astr_cstr(buf)[0] == '\f')
-				break;
+	doc = astr_new();
+	while ((buf = astr_fgets(f)) != NULL) {
+                if (reading_doc) {
+                        if (*astr_char(buf, 0) == '\f') {
+                                astr_delete(buf);
+                                break;
+                        }
 			if (isfunc || astr_size(defval) > 0) {
 				astr_append(doc, buf);
 				astr_append_cstr(doc, "\n");
@@ -260,10 +261,10 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
 				astr_assign(defval, buf);
 		} else if (!astr_cmp(buf, match))
 			reading_doc = 1;
+                astr_delete(buf);
+        }
 
 	fclose(f);
-
-	astr_delete(buf);
 	astr_delete(match);
 
 	if (!reading_doc) {
@@ -301,7 +302,7 @@ Display the full documentation of a function.
 		return FALSE;
 
 	bufname = astr_new();
-	astr_fmt(bufname, "*Help: function `%s'*", name);
+	astr_afmt(bufname, "*Help: function `%s'*", name);
 	write_temp_buffer(astr_cstr(bufname), write_function_description,
 			  name, doc);
 	astr_delete(bufname);
@@ -335,11 +336,13 @@ Display the full documentation of a variable.
 		return FALSE;
 
 	defval = astr_new();
-	if ((doc = get_funcvar_doc(name, defval, FALSE)) == NULL)
+	if ((doc = get_funcvar_doc(name, defval, FALSE)) == NULL) {
+                astr_delete(defval);
 		return FALSE;
+        }
 
 	bufname = astr_new();
-	astr_fmt(bufname, "*Help: variable `%s'*", name);
+	astr_afmt(bufname, "*Help: variable `%s'*", name);
 	write_temp_buffer(astr_cstr(bufname), write_variable_description,
 			  name, defval, doc);
 	astr_delete(bufname);
@@ -369,7 +372,7 @@ Display documentation of the function invoked by a key sequence.
 		return FALSE;
 
 	bufname = astr_new();
-	astr_fmt(bufname, "*Help: function `%s'*", name);
+	astr_afmt(bufname, "*Help: function `%s'*", name);
 	write_temp_buffer(astr_cstr(bufname), write_function_description,
 			  name, doc);
 	astr_delete(bufname);

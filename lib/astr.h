@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.12 2004/03/13 13:26:15 rrt Exp $	*/
+/*	$Id: astr.h,v 1.13 2004/03/13 16:31:20 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -55,12 +55,12 @@ extern void   astr_delete(astr as);
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_size(as) - 1] inclusive may be read and modified.
  */
-#define astr_cstr(as)		((const char *)as->text)
+#define astr_cstr(as)		((const char *)((as)->text))
 
 /*
  * Return the length of the argument string as.
  */
-#define astr_size(as)		((const int)as->size)
+#define astr_size(as)		((const int)((as)->size))
 
 /*
  * Return the address of the pos'th character of as. If pos is >= 0,
@@ -98,16 +98,54 @@ extern astr   astr_append_char(astr as, int c);
  */
 extern astr   astr_truncate(astr as, size_t size);
 
+/* .Pp */
+/* The */
+/* .Fn astr_find */
+/* and */
+/* .Fn astr_find_cstr */
+/* functions find the first occurrence of the argument string or character */
+/* into the argument */
+/* .Fa as , */
+/* returning the position starting from the beginning of the string. */
+/* .Pp */
+/* The */
+/* .Fn astr_rfind */
+/* and */
+/* .Fn astr_rfind_cstr */
+/* functions find the first occurrence of the argument string or character */
+/* into the argument */
+/* .Fa as , */
+/* returning the position starting from the end of the string. */
+/* .Pp */
+/* The */
+/* .Fn astr_replace , */
+/* and */
+/* .Fn astr_replace_cstr */
+/* functions replace up to */
+/* .Fa size */
+/* characters of the argument string */
+/* .Fa as , */
+/* starting from the position */
+/* .Fa pos , */
+/* with the argument string or character. */
 extern int    astr_find(const astr as, const astr src);
 extern int    astr_find_cstr(const astr as, const char *s);
 extern int    astr_rfind(const astr as, const astr src);
 extern int    astr_rfind_cstr(const astr as, const char *s);
 extern astr   astr_replace(astr as, int pos, size_t size, const astr src);
 extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
-extern astr   astr_fgets(astr as, FILE *f);
-extern astr   astr_vfmt(astr as, const char *fmt, va_list ap);
+
+/*
+ * Read a string from the stream f and return it. The trailing newline
+ * is removed from the string. If the stream is at eof when astr_fgets
+ * is called, it returns NULL.
+ */
+extern astr   astr_fgets(FILE *f);
+
+/*
+ * Append formatted text to the argument string
+ */
 extern astr   astr_vafmt(astr as, const char *fmt, va_list ap);
-extern astr   astr_fmt(astr as, const char *fmt, ...);
 extern astr   astr_afmt(astr as, const char *fmt, ...);
 
 /*

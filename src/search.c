@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.12 2004/03/09 16:25:19 rrt Exp $	*/
+/*	$Id: search.c,v 1.13 2004/03/13 16:31:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -366,7 +366,8 @@ static int isearch(int dir, int regexp)
 	for (;;) {
 		cur_tp->redisplay();
 		/* Make the minibuf message.  */
-		astr_fmt(buf, "%sI-search%s: %s",
+                astr_truncate(buf, 0);
+		astr_afmt(buf, "%sI-search%s: %s",
 			 (last ?
 			  (regexp ? "Regexp ": "") :
 			  (regexp ? "Failing regexp ": "Failing ")),

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.10 2004/03/09 23:27:49 rrt Exp $	*/
+/*	$Id: variables.c,v 1.11 2004/03/13 16:31:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -191,9 +191,9 @@ Set a variable value to the user specified value.
 
 	/* `tab-width' and `fill-column' are local to buffers. */
 	if (!strcmp(var, "tab-width"))
-		astr_fmt(as, "%d", cur_bp->tab_width);
+		astr_afmt(as, "%d", cur_bp->tab_width);
 	else if (!strcmp(var, "fill-column"))
-		astr_fmt(as, "%d", cur_bp->fill_column);
+		astr_afmt(as, "%d", cur_bp->fill_column);
 	else
 		astr_assign_cstr(as, get_variable(var));
 	fmt = get_variable_format(var);

@@ -1,68 +1,4 @@
 .Pp
-The
-.Fn astr_last_char
-function returns the last character in the string.
-.Pp
-The
-.Fn astr_find
-and
-.Fn astr_find_cstr
-functions find the first occurrence of the argument string or character
-into the argument
-.Fa as ,
-returning the position starting from the beginning of the string.
-.Pp
-The
-.Fn astr_rfind
-and
-.Fn astr_rfind_cstr
-functions find the first occurrence of the argument string or character
-into the argument
-.Fa as ,
-returning the position starting from the end of the string.
-.Pp
-The
-.Fn astr_replace ,
-and
-.Fn astr_replace_cstr
-functions replace up to
-.Fa size
-characters of the argument string
-.Fa as ,
-starting from the position
-.Fa pos ,
-with the argument string or character.
-.Pp
-The
-.Fn astr_fgets
-function reads a string from the file
-.Fa f
-and stores it into the string
-.Fa as .
-The trailing newline is removed from the string.
-The
-.Fn astr_fgets
-function returns the argument
-.Fa as
-string, and
-.Fa NULL
-when end of file occurs while no characters have been read.
-.Pp
-The
-.Fn astr_fmt
-and
-.Fn astr_vfmt
-functions write formatted text into the argument string
-.Fa as .
-Previously existing text will be overwritten.
-.Pp
-The
-.Fn astr_afmt
-and
-.Fn astr_vafmt
-functions append formatted text to the argument string
-.Fa as .
-.Pp
 Where not otherwise specified, the
 .Nm
 functions return the first argument string, usually named
@@ -109,13 +45,13 @@ Filtering files:
 astr s;
 int i;
 s = astr_new();
-while (astr_fgets(s, stdin) != NULL) {
+while (astr_size(astr_fgets(stdin) != NULL) {
 	while ((i = astr_find_cstr(s, "vi")) >= 0)
 		astr_replace_cstr(s, i, 2, "emacs");
-	astr_fputs(s, stdout);
-	putc('\\n', stdout);
+	puts(astr_cstr(s));
+	putchar('\n');
+        astr_delete(s);
 }
-astr_delete(s);
 .Ed
 .Pp
 Miscellaneous operations on strings:

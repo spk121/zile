@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.16 2004/03/13 13:26:15 rrt Exp $	*/
+/*	$Id: astr.c,v 1.17 2004/03/13 16:31:20 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -217,28 +217,17 @@ astr astr_replace_cstr(astr as, int pos, size_t size, const char *s)
 	return astr_replace_x(as, pos, size, s, strlen(s));
 }
 
-astr astr_fgets(astr as, FILE *f)
+astr astr_fgets(FILE *f)
 {
 	int c;
-	assert(as != NULL);
-	astr_truncate(as, 0);
-	if ((c = fgetc(f)) == EOF)
-		return NULL;
-	if (c == '\n')
-		return as;
-	astr_append_char(as, c);
+	astr as;
+
+        if (feof(f))
+                return NULL;
+        as = astr_new();
 	while ((c = fgetc(f)) != EOF && c != '\n')
 		astr_append_char(as, c);
 	return as;
-}
-
-astr astr_vfmt(astr as, const char *fmt, va_list ap)
-{
-	char *buf;
-	vasprintf(&buf, fmt, ap);
-	astr_assign_cstr(as, buf);
-	free(buf);
-        return as;
 }
 
 astr astr_vafmt(astr as, const char *fmt, va_list ap)
@@ -248,15 +237,6 @@ astr astr_vafmt(astr as, const char *fmt, va_list ap)
 	astr_append_cstr(as, buf);
 	free(buf);
         return as;
-}
-
-astr astr_fmt(astr as, const char *fmt, ...)
-{
-	va_list ap;
-	va_start(ap, fmt);
-        astr_vfmt(as, fmt, ap);
-	va_end(ap);
-	return as;
 }
 
 astr astr_afmt(astr as, const char *fmt, ...)

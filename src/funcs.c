@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.29 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.30 2004/03/13 16:31:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1563,7 +1563,7 @@ command to insert any output into the current buffer.
 		return FALSE;
 
 	cmd = astr_new();
-	astr_fmt(cmd, "%s 2>&1 </dev/null", ms);
+	astr_afmt(cmd, "%s 2>&1 </dev/null", ms);
 	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
 		minibuf_error("Cannot open pipe to process");
 		return FALSE;
@@ -1571,13 +1571,12 @@ command to insert any output into the current buffer.
 	astr_delete(cmd);
 
 	out = astr_new();
-	s = astr_new();
-	while (astr_fgets(s, pipe) != NULL) {
+	while ((s = astr_fgets(pipe)) != NULL) {
 		++lines;
 		astr_append(out, s);
 		astr_append_cstr(out, "\n");
+                astr_delete(s);
 	}
-	astr_delete(s);
 	pclose(pipe);
 
 	if (lines == 0)
@@ -1647,10 +1646,10 @@ it as the contents of the region.
 
 		close(fd);
 
-		astr_fmt(cmd, "%s 2>&1 <%s", ms, tempfile);
+		astr_afmt(cmd, "%s 2>&1 <%s", ms, tempfile);
 	}
 /*	else */
-/*		astr_fmt(cmd, "%s 2>&1 </dev/null", ms); */
+/*		astr_afmt(cmd, "%s 2>&1 </dev/null", ms); */
 
 	if ((pipe = popen(astr_cstr(cmd), "r")) == NULL) {
 		minibuf_error("Cannot open pipe to process");
@@ -1659,11 +1658,11 @@ it as the contents of the region.
 	astr_delete(cmd);
 
 	out = astr_new();
-	s = astr_new();
-	while (astr_fgets(s, pipe) != NULL) {
+	while (astr_size(s = astr_fgets(pipe)) > 0) {
 		++lines;
 		astr_append(out, s);
 		astr_append_cstr(out, "\n");
+                astr_delete(s);
 	}
 	astr_delete(s);
 	pclose(pipe);
