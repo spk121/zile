@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.15 2005/01/09 23:56:03 rrt Exp $   */
+/*      $Id: completion.c,v 1.16 2005/01/10 00:24:59 rrt Exp $   */
 
 #include "config.h"
 
@@ -37,7 +37,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "agetcwd.h"
 
 /*----------------------------------------------------------------------
  *                       Completion functions

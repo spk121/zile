@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.51 2005/01/09 23:56:03 rrt Exp $        */
+/*      $Id: file.c,v 1.52 2005/01/10 00:24:59 rrt Exp $        */
 
 #include "config.h"
 
@@ -50,7 +50,6 @@
 #include <ctype.h>
 
 #include "zile.h"
-#include "agetcwd.h"
 #include "extern.h"
 
 int exist_file(const char *filename)
@@ -77,6 +76,24 @@ int is_regular_file(const char *filename)
     return TRUE;
 
   return FALSE;
+}
+
+/* Safe getcwd */
+astr agetcwd(astr as)
+{
+  size_t len = PATH_MAX;
+  char *buf = (char *)zmalloc(len);
+  char *res;
+  while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
+    len *= 2;
+    buf = zrealloc(buf, len);
+  }
+  /* If there was an error, return the empty string */
+  if (res == NULL)
+    *buf = '\0';
+  astr_cpy_cstr(as, buf);
+  free(buf);
+  return as;
 }
 
 /*

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.29 2005/01/09 23:56:05 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.30 2005/01/10 00:24:59 rrt Exp $     */
 
 #include "config.h"
 
@@ -30,7 +30,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "agetcwd.h"
 
 static History files_history;
 
