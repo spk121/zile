@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.25 2004/10/16 20:19:13 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.26 2004/10/16 20:37:31 rrt Exp $	*/
 
 #include "config.h"
 
@@ -476,14 +476,6 @@ static int xgetkey(int mode, int dsecs)
         if (len < max_key_chars)  /* Don't get more chars if we already have the maximum for a keystroke. */
                 nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
 
-        {
-                int i;
-                fprintf(stderr, "\n!");
-                for (i = 0; i < nbytes; i++)
-                        fprintf(stderr, "%d ", keys[i]);
-                fprintf(stderr, "\n");
-        }
-        
 	if (nbytes < 0)
 		return KBD_NOKEY;
 
