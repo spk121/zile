@@ -20,6 +20,8 @@ Changes between Zile 1.7 BETA 2 - Zile 1.7
       first column).
     * Modified `universal_argument' to Emacs behavior.
     * Fixed overflow for long variable names in configuration file.
+* Various bug-fixes
+* Search and replace (query-replace and replace-string) respect case.
 
 Changes between Zile 1.6.1 - Zile 1.7 BETA 2
 

@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.15 2004/01/29 15:24:11 rrt Exp $	*/
+/*	$Id: line.c,v 1.16 2004/02/03 23:41:33 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -174,7 +174,7 @@ int insert_char(int c)
 			|| ((cur_wp->pointp->text[cur_wp->pointo] == '\t')
 			    && ((get_text_goalc (cur_wp) % cur_bp->tab_width)
 				== cur_bp->tab_width-1)))) {
-			/* Replace the charater.  */
+			/* Replace the character.  */
 			undo_save(UNDO_REPLACE_CHAR,
 				  cur_wp->pointn, cur_wp->pointo,
 				  cur_wp->pointp->text[cur_wp->pointo], 0);
@@ -193,7 +193,7 @@ int insert_char(int c)
 		/*
 		 * Fall through the "insertion" mode of a character
 		 * at the end of the line, since it is totally
-		 * equivalent also in "overwrite" mode.
+		 * equivalent to "overwrite" mode.
 		 */
 	}
 
@@ -372,6 +372,25 @@ int intercalate_newline(void)
 	return common_insert_newline(1);
 }
 
+/* Replace a text string in the same case as the original */
+/* XXX At the moment this is not the same as Emacs (doesn't check that
+ * replacement string contains no upper case) but is consistent with
+ * search. See TODO file */
+static void replace_text_case(char *to, int tlen, char *from, int flen)
+{
+        int i;
+        int overlap = min(tlen, flen);
+        int tail = max(tlen, flen) - overlap;
+
+        for (i = 0; i < overlap; i++) {
+                if (isupper(*to))
+                        *to++ = toupper(*from++);
+                else
+                        *to++ = *from++;
+        }
+        memcpy(to, from, tail);
+}
+
 void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
 {
 	int modified = FALSE, newsize, newmaxsize, trailing_size;
@@ -391,7 +410,7 @@ void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
 		if (trailing_size > 0)
 			memmove((*lp)->text + offset + newsize,
 				(*lp)->text + offset + orgsize, trailing_size);
-		memcpy((*lp)->text + offset, newtext, newsize);
+		replace_text_case((*lp)->text + offset, orgsize, newtext, newsize);
 		(*lp)->size = newmaxsize;
 
 		/*
@@ -403,7 +422,7 @@ void line_replace_text(linep *lp, int offset, int orgsize, char *newtext)
 				wp->pointo += newsize - orgsize;
 	} else { /* The new text size is equal to old text size. */
 		if (memcmp((*lp)->text + offset, newtext, newsize) != 0) {
-			memcpy((*lp)->text + offset, newtext, newsize);
+			replace_text_case((*lp)->text + offset, orgsize, newtext, newsize);
 			modified = TRUE;
 		}
 	}

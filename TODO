@@ -27,11 +27,8 @@ LOW PRIORITY
 
 X1("kill-rectangle", kill_rectangle,			"C-xrk")
 
-* Make query & replace case friendly, e.g., if you specify to replace
-  `foo' with `bar', the string
-	"foo Foo FOO"
-  should be replaced with
-	"bar Bar BAR"
+* Allow search and replace not to follow case (case-replace,
+  case-fold-search)
 
 * Josef 'Jupp' Schugt <jupp@gmx.de>:
   - Mail Mode:
