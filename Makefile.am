@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.3 2004/02/01 02:19:29 dacap Exp $
+## $Id: Makefile.am,v 1.4 2004/02/17 20:46:41 ssigala Exp $
 
 SUBDIRS = doc lib etc src
 
 EXTRA_DIST =					\
-	COPYRIGHT				\
+	COPYING					\
 	CREDITS					\
 	HISTORY					\
 	INSTALL					\
