@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.61 2005/01/30 17:46:16 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.62 2005/01/30 20:24:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -157,7 +157,7 @@ void term_refresh(void)
         if (skipped)
           astr_cat_cstr(as, tgoto(cm_string, (int)j, (int)i));
         skipped = FALSE;
-        
+
         screen.oarray[offset] = n;
 
         if (f != of)
@@ -267,7 +267,7 @@ static void read_screen_size(void)
 static void term_init_screen(void)
 {
   size_t size = termp->width * termp->height;
-        
+
   screen.array = zmalloc(size * sizeof(size_t));
   screen.oarray = zmalloc(size * sizeof(size_t));
   screen.curx = screen.cury = 0;
@@ -301,7 +301,7 @@ void term_init(void)
   size_t i;
   char *tcap;
 
-  key_buf = astr_new();  
+  key_buf = astr_new();
   tcap_ptr = tcap = get_tcap();
 
   read_screen_size();
@@ -442,8 +442,9 @@ static size_t translate_key(char *s, size_t nbytes)
     }
   }
 
-  for (i = nbytes - 1; i >= used; i--)
-    term_ungetkey((size_t)s[i]);
+  if (nbytes)
+    for (i = nbytes - 1; i >= used; i--)
+      term_ungetkey((size_t)s[i]);
 
   return key;
 }
@@ -521,7 +522,7 @@ void term_ungetkey(size_t key)
 {
   if (key != KBD_NOKEY) {
     char c = 0;
-    
+
     if (key & KBD_CTL)
       switch (key & 0xff) {
       case '@':
@@ -543,7 +544,7 @@ void term_ungetkey(size_t key)
       c = key & 0xff;
 
     astr_insert_char(key_buf, 0, c);
-      
+
     if (key & KBD_META)
       astr_insert_char(key_buf, 0, '\033');
   }
