@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.21 2005/01/16 13:07:44 rrt Exp $	*/
+/*	$Id: glue.c,v 1.22 2005/01/23 14:11:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -216,24 +216,6 @@ void goto_point(Point pt)
       FUNCALL(forward_char);
     while (cur_bp->pt.o < pt.o);
 }
-
-#ifdef DEBUG
-/*
- * Append a debug message to `zile.dbg'.
- */
-void ztrace(const char *fmt, ...)
-{
-  static FILE *dbgfile = NULL;
-  va_list ap;
-  if (dbgfile == NULL) {
-    if ((dbgfile = fopen("zile.dbg", "w")) == NULL)
-      return;
-  }
-  va_start(ap, fmt);
-  vfprintf(dbgfile, fmt, ap);
-  va_end(ap);
-}
-#endif
 
 /*
  * Read an arbitrary length string.

@@ -90,15 +90,6 @@ char *replace_string(char *s, char *match, char *subst);
 void tabify_string(char *dest, char *src, int scol, int tw);
 void untabify_string(char *dest, char *src, int scol, int tw);
 void goto_point(Point pt);
-void *zmalloc(size_t size);
-void *zrealloc(void *ptr, size_t size);
-char *zstrdup(const char *s);
-#ifdef DEBUG
-void ztrace(const char *fmt, ...);
-#define ZTRACE(arg)	ztrace arg
-#else
-#define ZTRACE(arg)	(void)0
-#endif
 char *getln(FILE *fp);
 
 /* keys.c ----------------------------------------------------------------- */
@@ -252,6 +243,11 @@ void free_windows(void);
 Window *popup_window(void);
 void set_current_window (Window *wp);
 Point window_pt(Window *wp);
+
+/* zmalloc.c -------------------------------------------------------------- */
+void *zmalloc(size_t size);
+void *zrealloc(void *ptr, size_t size);
+char *zstrdup(const char *s);
 
 /*
  * Declare external Zile functions.

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.61 2005/01/17 18:09:22 rrt Exp $        */
+/*      $Id: file.c,v 1.62 2005/01/23 14:11:38 rrt Exp $        */
 
 #include "config.h"
 
@@ -269,12 +269,12 @@ void open_file(char *path, int lineno)
   dir = astr_new();
   fname = astr_new();
   buf = get_current_dir(FALSE);
-  ZTRACE(("original filename: %s, cwd: %s\n", path, astr_cstr(buf)));
+
   if (!expand_path(path, astr_cstr(buf), dir, fname)) {
     fprintf(stderr, "zile: %s: invalid filename or path\n", path);
     zile_exit(1);
   }
-  ZTRACE(("new filename: %s, dir: %s\n", astr_cstr(fname), astr_cstr(dir)));
+
   astr_cpy_cstr(buf, astr_cstr(dir));
   astr_cat_cstr(buf, astr_cstr(fname));
   astr_delete(dir);
