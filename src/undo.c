@@ -1,4 +1,4 @@
-/*	$Id: undo.c,v 1.5 2003/10/24 23:32:09 ssigala Exp $	*/
+/*	$Id: undo.c,v 1.6 2004/01/21 01:14:14 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -124,8 +124,7 @@ static undop revert_action(undop up)
 		undo_save(UNDO_START_SEQUENCE, up->pointn, up->pointo, 0, 0);
 		up = up->next;
 		while (up->type != UNDO_START_SEQUENCE) {
-			revert_action(up);
-			up = up->next;
+			up = revert_action(up);
 		}
 		undo_save(UNDO_END_SEQUENCE, up->pointn, up->pointo, 0, 0);
 		goto_point(up->pointn, up->pointo);
