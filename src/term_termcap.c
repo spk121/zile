@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.34 2004/11/13 00:09:30 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.35 2004/11/13 23:39:36 rrt Exp $	*/
 
 #include "config.h"
 
@@ -130,7 +130,7 @@ static const char *getattr(Font f) {
  */
 void term_refresh(void)
 {
-        int i, j, skipped;
+        int i, j, skipped, eol;
         Font of = ZILE_NORMAL;
         astr as = astr_new();
 
@@ -140,6 +140,13 @@ void term_refresh(void)
 
         /* Add the rest of the screen. */
         for (i = 0; i < termp->height; i++) {
+                eol = FALSE;
+                /*
+                 * The eol flag may seem unnecessary; it is used (rather than
+                 * breaking out of the loop when EOL is reached) to allow the
+                 * rest of the line to be updated in the array (it should be
+                 * all zeros).
+                 */
                 astr_cat_cstr(as, tgoto(cm_string, 0, i));
                 skipped = FALSE;
 
@@ -152,7 +159,6 @@ void term_refresh(void)
                         if (screen.oarray[offset] != n) {
                                 if (skipped)
                                         astr_cat_cstr(as, tgoto(cm_string, j, i));
-                                skipped = FALSE;
         
                                 screen.oarray[offset] = n;
 
@@ -160,11 +166,15 @@ void term_refresh(void)
                                         astr_cat_cstr(as, getattr(f));
                                 of = f;
 
-                                if (c)
+                                if (c) {
                                         astr_cat_char(as, c);
-                                else {
-                                        astr_cat_cstr(as, ce_string);
-                                        break;
+                                        skipped = FALSE;
+                                } else {
+                                        if (!eol) {
+                                                astr_cat_cstr(as, ce_string);
+                                                eol = TRUE;
+                                                skipped = TRUE;
+                                        }
                                 }
                         } else
                                 skipped = TRUE;
