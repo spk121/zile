@@ -1,4 +1,4 @@
-/*	$Id: fontlock.c,v 1.5 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: fontlock.c,v 1.6 2004/01/23 01:34:43 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -313,9 +313,10 @@ int find_last_anchor(bufferp bp, linep lp)
 			continue;
 		for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
 			if (*p != ANCHOR_NULL) {
+#if ENABLE_SHELL_MODE
 				if ((bp->mode == BMODE_SHELL) && (*p == ANCHOR_BEGIN_HEREDOC))
 					make_heredoc_string(lp, lp->text + (p - lp->anchors), NULL);
-				
+#endif
 				return *p;
 			}
 	}
