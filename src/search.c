@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.11 2004/02/20 16:04:27 rrt Exp $	*/
+/*	$Id: search.c,v 1.12 2004/03/09 16:25:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,6 +36,7 @@
 #include "zile.h"
 #include "extern.h"
 #include "astr.h"
+#include "editfns.h"
 #ifdef HAVE_REGEX_H
 #include <regex.h>
 #else
@@ -222,7 +223,7 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
 
 		if (regexp) {
 			sp2 = re_find_substr(sp, s1size, s, s2size,
-					     TRUE, s1size == lp->size, TRUE);
+					     TRUE, s1size == (size_t)lp->size, TRUE);
 			if (sp2 != NULL) {
 				goto_linep(lp);
 				cur_bp->pt.o = sp2 - lp->text;
