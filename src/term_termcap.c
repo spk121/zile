@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.64 2005/02/05 01:49:15 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.65 2005/02/09 00:26:24 rrt Exp $	*/
 
 #include "config.h"
 
@@ -450,13 +450,15 @@ static size_t translate_key(char *s, size_t nbytes)
 static size_t _xgetkey(int mode, size_t dsecs)
 {
   size_t nbytes;
-  char *keys = zmalloc(max_key_chars);
+  char *keys;
   size_t key = KBD_NOKEY;
 
   if (nkeys > 0) {
     nkeys--;
     return key_buf[nkeys];
   }
+
+  keys = zmalloc(max_key_chars);
 
   if (mode & GETKEY_DELAYED) {
     nstate.c_cc[VTIME] = dsecs; /* Wait up to dsecs deciseconds... */
