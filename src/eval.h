@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.h,v 1.6 2005/01/23 14:14:56 rrt Exp $	*/
+/*	$Id: eval.h,v 1.7 2005/01/24 13:56:14 rrt Exp $	*/
 
 #include "lists.h"
 
@@ -103,6 +103,6 @@ le *eval_cb_setq(int argc, le *branch);
 
 le *eval_cb_defun(int argc, le *branch);
 
-le *leNIL;
+le *leNIL, *leT;
 void eval_init(void);
 void eval_finalise(void);

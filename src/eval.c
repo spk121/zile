@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.9 2005/01/23 18:39:03 rrt Exp $	*/
+/*	$Id: eval.c,v 1.10 2005/01/24 13:56:14 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -31,6 +31,30 @@
 #include "extern.h"
 #include "eval.h"
 #include "vars.h"
+
+#define X(zile_name, c_name) \
+  static le * eval_cb_ ## c_name (int argc, le *branch) \
+  { \
+  int uniarg = 0, ret = FALSE; \
+  if (argc == 1) { \
+    le *value_le = evaluateNode(branch); \
+    uniarg = evalCastLeToInt(value_le); \
+    leWipe(value_le); \
+  } \
+  if (argc < 2) \
+    F_ ## c_name(uniarg); \
+  return ret ? leT : leNIL; \
+  }
+#define X0(zile_name, c_name)                    X(zile_name, c_name)
+#define X1(zile_name, c_name, key1)              X(zile_name, c_name)
+#define X2(zile_name, c_name, key1, key2)        X(zile_name, c_name)
+#define X3(zile_name, c_name, key1, key2, key3)  X(zile_name, c_name)
+#include "tbl_funcs.h"
+#undef X
+#undef X0
+#undef X1
+#undef X2
+#undef X3
 
 evalLookupNode evalTable[] = {
   { "+" 	, eval_cb_add		},
@@ -75,6 +99,20 @@ evalLookupNode evalTable[] = {
 
   { "defun"	, eval_cb_defun		},
 
+#define X0(zile_name, c_name) \
+	{ zile_name, eval_cb_ ## c_name },
+#define X1(zile_name, c_name, key1) \
+	{ zile_name, eval_cb_ ## c_name },
+#define X2(zile_name, c_name, key1, key2) \
+	{ zile_name, eval_cb_ ## c_name },
+#define X3(zile_name, c_name, key1, key2, key3) \
+	{ zile_name, eval_cb_ ## c_name },
+#include "tbl_funcs.h"
+#undef X0
+#undef X1
+#undef X2
+#undef X3
+  
   { NULL	, NULL			}
 };
 
@@ -343,7 +381,7 @@ static le *eval_cb_boolean(int argc, le *branch, eval_boolean f)
   value2 = evalCastLeToInt(letemp);
   leWipe(letemp);
 
-  return f(value1, value2) ? leNew("T") : leNIL;
+  return f(value1, value2) ? leT : leNIL;
 }
 
 static int lt_helper(int a, int b)
@@ -446,7 +484,7 @@ le *eval_cb_not(int argc, le *branch)
   if (result->data) {
     if (strcmp (result->data, "NIL") == 0) {
       leWipe(result);
-      return leNew("T");
+      return leT;
     } else {
       leWipe(result);
       return leNIL;
@@ -457,7 +495,7 @@ le *eval_cb_not(int argc, le *branch)
   }
 	
   leWipe(result);
-  return leNew("T");
+  return leT;
 }
 
     
@@ -472,7 +510,7 @@ le *eval_cb_atom(int argc, le *branch)
 
   if (countNodes(result) == 1) {
     leWipe(result);
-    return leNew("T");
+    return leT;
   }
 
   leWipe(result);
@@ -659,7 +697,7 @@ le *eval_cb_equal(int argc, le *branch)
   leWipe(list1);
   leWipe(list2);
 
-  return (retval == 1) ? leNew("T") : leNIL;
+  return (retval == 1) ? leT : leNIL;
 }
 
     
@@ -894,10 +932,12 @@ le *eval_cb_defun(int argc, le *branch)
 void eval_init(void)
 {
   leNIL = leNew("NIL");
+  leT = leNew("T");
 }
 
 
 void eval_finalise(void)
 {
   leReallyWipe(leNIL);
+  leReallyWipe(leT);
 }
