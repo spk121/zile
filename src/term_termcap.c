@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.4 2004/07/11 00:29:37 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.5 2004/09/20 13:40:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,8 +48,9 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-/* XXX TODO */
-Font ZILE_REVERSE = 0, ZILE_BOLD = 0;
+Font ZILE_NORMAL;
+Font ZILE_REVERSE;
+Font ZILE_BOLD;
 
 Font C_FG_BLACK;
 Font C_FG_RED;
@@ -61,7 +62,9 @@ Font C_FG_CYAN;
 Font C_FG_WHITE;
 Font C_FG_WHITE_BG_BLUE;
 
-static char *cl_string, *cm_string, *ce_string, *se_string, *so_string;
+static char *cl_string, *cm_string, *ce_string;
+static char *so_string, *se_string;
+static char *kl_string, *kr_string, *ku_string, *kd_string;
 static int auto_wrap;
 static struct termios ostate, nstate;
 
@@ -101,7 +104,7 @@ void term_addnstr(const char *s, int len)
 
 void term_attrset(Font f)
 {
-        /* XXX TODO */
+	printf(f);
 }
 
 int term_printw(const char *fmt, ...)
@@ -149,8 +152,14 @@ void term_init(void)
         cm_string = tgetstr("cm", &tcap);
         auto_wrap = tgetflag("am");
         ce_string = tgetstr("ce", &tcap);
-        se_string = tgetstr("se", &tcap);
         so_string = tgetstr("so", &tcap);
+        se_string = tgetstr("se", &tcap);
+	ZILE_REVERSE = tgetstr("mr", &tcap);
+	ZILE_NORMAL = tgetstr("me", &tcap);
+        kl_string = tgetstr("kl", &tcap);
+        kr_string = tgetstr("ku", &tcap);
+        ku_string = tgetstr("kr", &tcap);
+        kd_string = tgetstr("kd", &tcap);
 
         /* Extract information that termcap functions use. */
         temp = tgetstr("pc", &tcap);
@@ -230,10 +239,6 @@ static int translate_key(int c)
 		return KBD_RET;
 	case '\37':
 		return KBD_CTL | (c ^ 0x40);
-#ifdef __linux__
-	case 0627:		/* C-z */
-		return KBD_CTL | 'z';
-#endif
 	case '\33':		/* META */
 		return KBD_META;
 /*	case KEY_PPAGE:		/\* PGUP *\/ */
