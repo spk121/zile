@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.44 2005/01/11 22:33:28 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.45 2005/01/16 13:04:58 rrt Exp $	*/
 
 #include "config.h"
 
@@ -534,7 +534,7 @@ int term_getkey(void)
 
 void term_unget(int c)
 {
-  if (keyp == key_buf)
+  if (keyp == key_buf || c == KBD_NOKEY)
     return;
 
   if (c & KBD_CTL)

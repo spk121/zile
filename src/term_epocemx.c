@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.3 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.4 2005/01/16 13:04:58 rrt Exp $	*/
 
 #include "config.h"
 
@@ -408,6 +408,6 @@ int term_getkey(void)
 
 void term_unget(int key)
 {
-  if (keyp < key_buf + MAX_KEY_BUF)
+  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
     *keyp++ = key;
 }
