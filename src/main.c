@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.68 2005/01/18 21:55:15 rrt Exp $	*/
+/*	$Id: main.c,v 1.69 2005/01/18 22:44:29 rrt Exp $	*/
 
 #include "config.h"
 
@@ -137,7 +137,7 @@ static void setup_main_screen(int argc)
   int c = 0;
 
   for (bp = head_bp; bp; bp = bp->next) {
-    /* Last buffer that isn't *scratch*.  */
+    /* Last buffer that isn't *scratch*. */
     if (bp->next && !bp->next->next)
       last_bp = bp;
     c++;
