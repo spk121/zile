@@ -4,7 +4,7 @@
 &EN
 #{"Zile"},(0x101F9331),2,0,0
 
-"InstallEPOC.txt"-"",FT,TA
+"doc/BANNER.EPOC"-"",FT,TA
 "src/zile"-"!:\zile.exe"
 "doc/AUTODOC"-"!:\emx\share\AUTODOC"
 "doc/FAQ"-"!:\emx\share\FAQ"
