@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.59 2005/01/14 17:15:06 rrt Exp $        */
+/*      $Id: file.c,v 1.60 2005/01/16 13:07:43 rrt Exp $        */
 
 #include "config.h"
 
@@ -360,7 +360,7 @@ int find_file(const char *filename)
 
   if (!is_regular_file(filename)) {
     minibuf_error("%s is not a regular file", filename);
-    waitkey();
+    waitkey(WAITKEY_DEFAULT);
     return FALSE;
   }
 
@@ -867,7 +867,7 @@ static int write_to_disk(Buffer *bp, char *filename)
     close(fd);
     bfilename = create_backup_filename(filename, backupwithdir);
     if (!copy_file(filename, astr_cstr(bfilename)))
-      waitkey();
+      waitkey(WAITKEY_DEFAULT);
     astr_delete(bfilename);
     bp->flags |= BFLAG_BACKUP;
   }
@@ -997,7 +997,7 @@ static int save_some_buffers(void)
           }
 
           minibuf_error("Please answer y, n, !, . or q.");
-          waitkey();
+          waitkey(WAITKEY_DEFAULT);
         }
 
       exitloop:

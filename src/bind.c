@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.44 2005/01/14 22:31:34 rrt Exp $	*/
+/*	$Id: bind.c,v 1.45 2005/01/16 13:07:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -407,7 +407,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
         }
       if ((entryp = bsearch_function(ms)) == NULL) {
         minibuf_error("Undefined function name `%s'", ms);
-        waitkey();
+        waitkey(WAITKEY_DEFAULT);
       } else {
         /* Add history element. */
         add_history_element(&functions_history,

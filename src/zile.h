@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.44 2005/01/11 22:34:09 rrt Exp $        */
+/*      $Id: zile.h,v 1.45 2005/01/16 13:07:44 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -361,4 +361,7 @@ typedef unsigned long Font;
 #define FUNCALL_ARG(c_func, uniarg)             \
         F_ ## c_func(uniarg)
 
+/* Default waitkey pause in ds */
+#define WAITKEY_DEFAULT 20
+        
 #endif /* !ZILE_H */

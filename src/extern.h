@@ -83,7 +83,7 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
-void waitkey(void);
+void waitkey(unsigned delay);
 char *copy_text_block(int startn, int starto, size_t size);
 astr shorten_string(char *s, int maxlen);
 char *replace_string(char *s, char *match, char *subst);

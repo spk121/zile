@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.19 2005/01/15 00:32:38 rrt Exp $	*/
+/*	$Id: rc.c,v 1.20 2005/01/16 13:07:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ static void error(char *fmt, ...)
 
   minibuf_error("%s%s", astr_cstr(msg1), msg2);
 
-  waitkey();
+  waitkey(WAITKEY_DEFAULT);
   astr_delete(msg1);
   free(msg2);
 }
