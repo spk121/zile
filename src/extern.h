@@ -205,7 +205,7 @@ void term_redisplay(void);
 void term_full_redisplay(void);
 void show_splash_screen(const char *splash);
 void term_tidy(void);
-void term_addnstr(const char *s, int len);
+void term_addnstr(const char *s, size_t len);
 int term_printw(const char *fmt, ...);
 
 /* term_{allegro,epocemx,termcap}.c --------------------------------------- */

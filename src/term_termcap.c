@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.56 2005/01/26 23:10:35 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.57 2005/01/26 23:45:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -61,8 +61,8 @@ Terminal *termp = &thisterm;
 
 static size_t max_key_chars = 0; /* Length of longest key code. */
 
-int ZILE_COLS;   /* Current number of columns on screen. */
-int ZILE_LINES;  /* Current number of rows on screen. */
+unsigned ZILE_COLS;   /* Current number of columns on screen. */
+unsigned ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;

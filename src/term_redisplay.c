@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.33 2005/01/26 23:04:48 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.34 2005/01/26 23:45:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -33,21 +33,21 @@
 #include "config.h"
 #include "extern.h"
 
-static int cur_tab_width;
-static int point_start_column;
-static int point_screen_column;
+static unsigned cur_tab_width;
+static unsigned point_start_column;
+static unsigned point_screen_column;
 
-static int make_char_printable(char **buf, unsigned int c)
+static int make_char_printable(char **buf, unsigned c)
 {
   if (c == '\0')
     return asprintf(buf, "^@");
   else if (c <= '\32')
     return asprintf(buf, "^%c", 'A' + c - 1);
   else
-    return asprintf(buf, "\\%o", c & 255);
+    return asprintf(buf, "\\%o", c & 0xff);
 }
 
-static void outch(int c, Font font, int *x)
+static void outch(int c, Font font, unsigned *x)
 {
   int j, w;
   char *buf;
@@ -63,7 +63,7 @@ static void outch(int c, Font font, int *x)
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
-    j = make_char_printable(&buf, c);
+    j = make_char_printable(&buf, (unsigned)c);
     for (w = 0; w < j && *x < ZILE_COLS; ++w)
       term_addch(buf[w]), ++(*x);
     free(buf);
@@ -72,7 +72,7 @@ static void outch(int c, Font font, int *x)
   term_attrset(1, ZILE_NORMAL);
 }
 
-static int in_region(int lineno, int x, Region *r)
+static int in_region(unsigned lineno, unsigned x, Region *r)
 {
   if (lineno >= r->start.n && lineno <= r->end.n) {
     if (r->start.n == r->end.n) {
@@ -92,8 +92,8 @@ static int in_region(int lineno, int x, Region *r)
   return FALSE;
 }
 
-static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
-                             int highlight, int x, int i)
+static void draw_end_of_line(unsigned line, Window *wp, unsigned lineno, Region *r,
+                             int highlight, unsigned x, unsigned i)
 {
   if (x >= ZILE_COLS) {
     term_move(line, ZILE_COLS - 1);
@@ -108,20 +108,20 @@ static void draw_end_of_line(int line, Window *wp, int lineno, Region *r,
   }
 }
 
-static void draw_line(int line, int startcol, Window *wp, Line *lp,
-		      int lineno, Region *r, int highlight)
+static void draw_line(unsigned line, unsigned startcol, Window *wp, Line *lp,
+		      unsigned lineno, Region *r, int highlight)
 {
-  int x, j;
+  unsigned x, i;
 
   term_move(line, 0);
-  for (x = 0, j = startcol; j < astr_len(lp->item) && x < wp->ewidth; ++j) {
-    if (highlight && in_region(lineno, j, r))
-      outch(*astr_char(lp->item, j), ZILE_REVERSE, &x);
+  for (x = 0, i = startcol; i < astr_len(lp->item) && x < wp->ewidth; i++) {
+    if (highlight && in_region(lineno, i, r))
+      outch(*astr_char(lp->item, i), ZILE_REVERSE, &x);
     else
-      outch(*astr_char(lp->item, j), ZILE_NORMAL, &x);
+      outch(*astr_char(lp->item, i), ZILE_NORMAL, &x);
   }
 
-  draw_end_of_line(line, wp, lineno, r, highlight, x, j);
+  draw_end_of_line(line, wp, lineno, r, highlight, x, i);
 }
 
 static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
@@ -142,9 +142,9 @@ static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
     swap_point(&r->end, &r->start);
 }
 
-static void draw_window(int topline, Window *wp)
+static void draw_window(unsigned topline, Window *wp)
 {
-  int i, startcol, lineno;
+  unsigned i, startcol, lineno;
   Line *lp;
   Region r;
   int highlight;
@@ -221,7 +221,7 @@ static void calculate_start_column(Window *wp)
       } else if (isprint(*p))
         ++col;
       else {
-        col += make_char_printable(&buf, *p);
+        col += make_char_printable(&buf, (unsigned)*p);
         free(buf);
       }
 
@@ -256,7 +256,7 @@ static char *make_screen_pos(Window *wp, char **buf)
   return *buf;
 }
 
-static void draw_status_line(int line, Window *wp)
+static void draw_status_line(unsigned line, Window *wp)
 {
   int i, someflag = 0;
   char *buf;
@@ -296,7 +296,7 @@ static void draw_status_line(int line, Window *wp)
 
 void term_redisplay(void)
 {
-  int topline, cur_topline = 0;
+  unsigned topline, cur_topline = 0;
   Window *wp;
 
   topline = 0;
@@ -328,7 +328,7 @@ void term_full_redisplay(void)
 
 void show_splash_screen(const char *splash)
 {
-  int i;
+  unsigned i;
   const char *p;
 
   for (i = 0; i < ZILE_LINES - 2; ++i) {
@@ -358,7 +358,7 @@ void term_tidy(void)
 /*
  * Add a string to the terminal
  */
-void term_addnstr(const char *s, int len)
+void term_addnstr(const char *s, size_t len)
 {
   int i;
   for (i = 0; i < len; i++)

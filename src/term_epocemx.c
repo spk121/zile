@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.8 2005/01/25 18:01:27 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.9 2005/01/26 23:45:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -60,8 +60,8 @@ static Screen screen;
 
 Terminal *termp = &thisterm;
 
-int ZILE_COLS;   /* Current number of columns on screen. */
-int ZILE_LINES;  /* Current number of rows on screen. */
+unsigned ZILE_COLS;   /* Current number of columns on screen. */
+unsigned ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;

@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: list.h,v 1.2 2005/01/10 00:24:03 rrt Exp $	*/
+/*	$Id: list.h,v 1.3 2005/01/26 23:45:00 rrt Exp $	*/
 
 #ifndef LIST_H
 #define LIST_H
@@ -39,7 +39,7 @@ list list_append(list l, void *i);
 void *list_head(list l);
 void *list_behead(list l);
 void *list_betail(list l);
-void *list_at(list l, unsigned int n);
+void *list_at(list l, unsigned n);
 void list_sort(list l, int (*cmp)(const void *p1, const void *p2));
 
 #define list_first(l) ((l)->next)

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.18 2005/01/25 18:01:27 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.19 2005/01/26 23:45:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -48,7 +48,7 @@ static Terminal thisterm = {
 
 Terminal *termp = &thisterm;
 
-int ZILE_LINES, ZILE_COLS;
+unsigned ZILE_LINES, ZILE_COLS;
 
 /* current position and color */
 static int cur_x = 0, cur_y = 0;

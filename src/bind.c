@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.46 2005/01/26 15:19:33 rrt Exp $	*/
+/*	$Id: bind.c,v 1.47 2005/01/26 23:44:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -279,7 +279,7 @@ static int alternative_bindings = 0;
 
 void init_bindings(void)
 {
-  unsigned int i, j;
+  unsigned i, j;
 
   leaf_tree = leaf_new(10);
 
@@ -332,7 +332,7 @@ static struct fentry *bsearch_function(char *name)
 
 static Function get_function(char *name)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < fentry_table_size; ++i)
     if (!strcmp(name, fentry_table[i].name))
       return fentry_table[i].func;
@@ -341,7 +341,7 @@ static Function get_function(char *name)
 
 static char *get_function_name(Function p)
 {
-  unsigned int i;
+  unsigned i;
   for (i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].func == p)
       return fentry_table[i].name;
@@ -364,7 +364,7 @@ int execute_function(char *name, int uniarg)
 char *minibuf_read_function_name(const char *fmt, ...)
 {
   va_list ap;
-  unsigned int i;
+  unsigned i;
   char *buf, *ms;
   list p;
   fentryp entryp;
@@ -500,7 +500,7 @@ char *get_function_by_key_sequence(void)
 
 static void write_functions_list(va_list ap)
 {
-  unsigned int i, j;
+  unsigned i, j;
   astr key;
 
   (void)ap;

@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: list.c,v 1.4 2005/01/11 00:07:27 rrt Exp $	*/
+/*	$Id: list.c,v 1.5 2005/01/26 23:45:00 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <assert.h>
@@ -136,7 +136,7 @@ void *list_betail(list l)
 
 /* Return the nth item of l, or l->item (usually NULL) if that is out
    of range */
-void *list_at(list l, unsigned int n)
+void *list_at(list l, unsigned n)
 {
   int i;
   list p;
