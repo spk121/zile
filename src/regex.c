@@ -2033,11 +2033,7 @@ re_compile_fastmap (bufp)
       /* We should never be about to go beyond the end of the pattern.  */
       assert (p < pend);
 
-#ifdef SWITCH_ENUM_BUG
-      switch ((int) ((re_opcode_t) *p++))
-#else
       switch ((re_opcode_t) *p++)
-#endif
 	{
 
         /* I guess the idea here is to simply not bother with a fastmap
@@ -2893,11 +2889,7 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
         }
 
       /* Otherwise match next pattern command.  */
-#ifdef SWITCH_ENUM_BUG
-      switch ((int) ((re_opcode_t) *p++))
-#else
       switch ((re_opcode_t) *p++)
-#endif
 	{
         /* Ignore these.  Used to ignore the n of succeed_n's which
            currently have n == 0.  */
@@ -3893,4 +3885,24 @@ re_compile_pattern (pattern, length, bufp)
   ret = regex_compile (pattern, length, re_syntax_options, bufp);
 
   return re_error_msg[(int) ret];
+}
+
+/* Free dynamically allocated space used by PREG.  */
+void regfree(regex_t *preg)
+{
+  if (preg->buffer != NULL)
+    free (preg->buffer);
+  preg->buffer = NULL;
+
+  preg->allocated = 0;
+  preg->used = 0;
+
+  if (preg->fastmap != NULL)
+    free (preg->fastmap);
+  preg->fastmap = NULL;
+  preg->fastmap_accurate = 0;
+
+  if (preg->translate != NULL)
+    free (preg->translate);
+  preg->translate = NULL;
 }

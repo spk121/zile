@@ -421,7 +421,7 @@ extern int re_search_2
    in BUFFER matched, starting at position START.  */
 extern int re_match
   (struct re_pattern_buffer *buffer, const char *string,
-   int length, int start, struct re_registers *regs));
+   int length, int start, struct re_registers *regs);
 
 
 /* Relates to `re_match' as `re_search_2' relates to `re_search'.  */
@@ -446,5 +446,7 @@ extern int re_match_2
 extern void re_set_registers
   (struct re_pattern_buffer *buffer, struct re_registers *regs,
     unsigned num_regs, regoff_t *starts, regoff_t *ends);
+
+extern void regfree (regex_t *preg);
 
 #endif /* not __REGEXP_LIBRARY_H__ */
