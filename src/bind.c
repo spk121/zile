@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.63 2005/02/17 16:03:58 rrt Exp $	*/
+/*	$Id: bind.c,v 1.64 2005/02/27 22:50:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -215,7 +215,7 @@ void process_key(size_t key)
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     } else {
-      p->func((lastflag & FLAG_SET_UNIARG) != 0, evalCastIntToLe(last_uniarg));
+      p->func((lastflag & FLAG_SET_UNIARG) != 0, last_uniarg);
       _last_command = p->func;
     }
 
@@ -435,7 +435,7 @@ static int execute_function(char *name, int uniarg)
   Macro *mp;
 
   if ((func = get_function(name)))
-    return func(uniarg ? 1 : 0, evalCastIntToLe(uniarg));
+    return func(uniarg ? 1 : 0, uniarg);
   else if ((mp = get_macro(name)))
     return call_macro(mp);
   else
@@ -468,7 +468,7 @@ DEFUN_INT("execute-extended-command", execute_extended_command)
 }
 END_DEFUN
 
-DEFUN("global-set-key", global_set_key)
+DEFUN_INT("global-set-key", global_set_key)
   /*+
     Bind a command to a key sequence.
     Read key sequence and function name, and bind the function to the key
@@ -479,23 +479,16 @@ DEFUN("global-set-key", global_set_key)
   size_t key, *keys = NULL, numkeys;
   leafp p;
   Function func;
-  char *name, *keystr = NULL;
+  char *name;
   astr as;
 
-  if (uniused) {
-    if (argc != 3)
-      return FALSE;
-    keystr = evaluateNode(branch->list_next)->data;
-    name = evaluateNode(branch->list_next->list_next)->data;
-  } else {
-    minibuf_write("Set key globally: ");
-    key = getkey();
-    p = completion_scan(key, &keys, &numkeys);
+  minibuf_write("Set key globally: ");
+  key = getkey();
+  p = completion_scan(key, &keys, &numkeys);
 
-    as = keyvectostr(keys, numkeys);
-    name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
-    astr_delete(as);
-  }
+  as = keyvectostr(keys, numkeys);
+  name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
+  astr_delete(as);
 
   if (name == NULL)
     return FALSE;
@@ -503,10 +496,7 @@ DEFUN("global-set-key", global_set_key)
   func = get_function(name);
   if (func) {
     ok = TRUE;
-    if (uniused)
-      bind_key_string(keystr, func);
-    else
-      bind_key_vec(leaf_tree, keys, numkeys, func);
+    bind_key_vec(leaf_tree, keys, numkeys, func);
   } else
     minibuf_error("No such function `%d'", name);
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.10 2005/02/05 13:49:06 rrt Exp $	*/
+/*	$Id: vars.c,v 1.11 2005/02/27 22:50:33 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -32,7 +32,6 @@
 
 
 le *mainVarList = NULL;
-le *defunList = NULL;
 
 
 le *variableFind(le *varlist, char *key)

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.65 2005/02/15 00:46:28 rrt Exp $        */
+/*      $Id: zile.h,v 1.66 2005/02/27 22:50:33 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -65,7 +65,7 @@ typedef struct Terminal Terminal;
  * The type of a Zile exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*Function)(int argc, le *branch);
+typedef int (*Function)(int argc, int uniarg);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -348,31 +348,28 @@ typedef size_t Font;
 #endif
 #endif
 
+/* Avoid warnings about unused `uniarg' parameters. */
+#undef GCC_UNUSED
+#ifdef __GNUC__
+#define GCC_UNUSED __attribute__ ((unused))
+#else
+#define GCC_UNUSED
+#endif
+
 /* Define an interactive function. */
-/* N.B. The function type is actually eval_cb. */
-#define DEFUN(zile_func, c_func) \
-        int F_ ## c_func(int argc, le *branch) \
-        { \
-          int uniused = argc > 1;
 #define DEFUN_INT(zile_func, c_func) \
-	DEFUN(zile_func, c_func) \
-          int uniarg = 1; \
-          if (uniused) { \
-            le *value_le = evaluateNode(branch); \
-            uniarg = evalCastLeToInt(value_le); \
-            leWipe(value_le); \
-          }
+        int F_ ## c_func(int uniused GCC_UNUSED, int uniarg GCC_UNUSED) \
+        {
 #define END_DEFUN \
-          leWipe(branch); \
         }
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-        F_ ## c_func(0, evalCastIntToLe(1))
+        F_ ## c_func(FALSE, 1)
 
 /* Call an interactive function with an universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
-        F_ ## c_func(uniused, evalCastIntToLe(uniarg))
+        F_ ## c_func(uniused, uniarg)
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20

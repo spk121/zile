@@ -269,7 +269,7 @@ int zasprintf(char **ptr, const char *fmt, ...);
  * Declare external Zile functions.
  */
 #define X0(zile_name, c_name)			\
-	extern int F_ ## c_name(int argc, le *branch);
+	extern int F_ ## c_name(int argc, int uniarg);
 #define X1(zile_name, c_name, k1)		\
 	X0(zile_name, c_name)
 #define X2(zile_name, c_name, k1, k2)		\

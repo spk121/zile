@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.84 2005/02/08 19:28:00 rrt Exp $	*/
+/*	$Id: main.c,v 1.85 2005/02/27 22:50:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -376,7 +376,6 @@ int main(int argc, char **argv)
 
   /* Free Lisp state. */
   variableFree(mainVarList);
-  variableFree(defunList);
   lisp_finalise();
 
   /* Free all the memory allocated. */

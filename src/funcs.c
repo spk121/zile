@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.86 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.87 2005/02/27 22:50:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -600,18 +600,18 @@ static int transpose_subr(Function f)
   /* For transpose-chars. */
   if (f == F_forward_char) {
     if (eolp())
-      f(1, evalCastIntToLe(-1));
+      f(FALSE, -1);
   }
   /* For transpose-lines. */
   else if (f == F_forward_line) {
     /* If we are in first line, go to next line. */
     if (list_prev(cur_bp->pt.p) == cur_bp->lines) {
-      f(0, NULL);
+      f(FALSE, 0);
     }
   }
 
   /* Backward. */
-  if (!f(1, evalCastIntToLe(-1))) {
+  if (!f(TRUE, -1)) {
     minibuf_error("Beginning of buffer");
     free_marker(p0);
     return FALSE;
@@ -626,7 +626,7 @@ static int transpose_subr(Function f)
 
   /* Check end of buffer (only to check if we could make the
      operation). */
-  if (!f(1, evalCastIntToLe(2))) {
+  if (!f(TRUE, 2)) {
     /* For transpose-lines. */
     if (f == F_forward_line) {
       if (!seq_started) {
@@ -657,7 +657,7 @@ static int transpose_subr(Function f)
   goto_point(p1->pt);
 
   /* Forward. */
-  f(0, NULL);
+  f(FALSE, 0);
 
   /* Save and delete 1st marked region. */
   s1 = astr_new();
@@ -671,7 +671,7 @@ static int transpose_subr(Function f)
   FUNCALL(delete_region);
 
   /* Forward. */
-  f(0, NULL);
+  f(FALSE, 0);
 
   /* For transpose-lines. */
   if (f == F_forward_line) {
@@ -682,7 +682,7 @@ static int transpose_subr(Function f)
     set_mark();
 
     /* Backward. */
-    f(1, evalCastIntToLe(-1));
+    f(TRUE, -1);
     p2 = point_marker();
 
     /* Save and delete the marked region. */

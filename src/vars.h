@@ -20,14 +20,13 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.h,v 1.6 2005/01/28 02:38:32 rrt Exp $	*/
+/*	$Id: vars.h,v 1.7 2005/02/27 22:50:33 rrt Exp $	*/
 
 #include <stdio.h>
 #include "lists.h"
 #include "astr.h"
 
 extern le *mainVarList;
-extern le *defunList;
 
 le *variableFind(le *varlist, char *key);
 #define variableFree(L) \
