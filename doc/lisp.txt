@@ -1,0 +1,73 @@
+                              Zile Lisp
+                              ---------
+
+                          Supported Commands
+
+Misc:
+
+;	; foo		comment - skipped during parsing
+
+A	(A)		returns the value
+
+Variables, Functions:
+set	(set A B ... )	sets A to B, evaluating both.  Returns B.
+setf	(setf A B ... )	sets A to B, evaluating only B.  Returns B.
+setq	(setq x 4 y 3)	same as 'setf'
+defun	(defun A B C)	defines a function called A with parameter list B
+			and code block C.  Returns A.
+	(A X Y)		Calling the above (if there were two parameters.)
+			Wrong number of parameters returns NIL w/o evaluating
+
+Numbers:
+
++	(+ A B C)	add a list
+-	(- A B C)       subtract a list
+*	(* A B C)       multiply a list
+/	(/ A B C)       divide a list
+%	(% A B)		After A is divided by B, what's the leftover?
+
+
+Comparisons:
+
+<	(<  A B)	returns T if A <  B, otherwise NIL
+<=	(<= A B)	returns T if A <= B, otherwise NIL
+>	(>  A B)	returns T if A >  B, otherwise NIL
+>=	(>= A B)	returns T if A >= B, otherwise NIL
+=	(=  A B)	returns T if A == B, otherwise NIL
+
+and	(and A B)	eval's the arguments until it hits a NIL
+or	(or A B)	eval's the arguments while args are NIL
+not	(not A)		returns the opposite of A (T->NIL),(NIL->T)
+null	(null A)	same as 'not'
+
+if 	(if A B C)	if A is true, then B else C. if there's no C, return NIL
+unless	(unless A B C)	unless A is true, do B, C and any others.
+when	(when A B C)	when A is true, do B, C and any others.
+cond	(cond (A B C))  if A is true then do B,C... otherwise, try the next set
+
+
+Evaluations:
+
+eval	(eval (A B))	evaluates (A B) as if it were directly input
+prog1	(prog1 A B C)	evaluates all parts, returns the first's return value
+prog2	(prog2 A B C)	evaluates all parts, returns the second's return value
+progn	(progn A B C)	evaluates all parts, returns the last's return value
+
+
+Lists:
+
+quote	quote (A B)	returns the element instead of evaluating it
+'	'(A B)		same as 'quote'
+
+atom 	(atom E)	returns T if E evaluates to an atom, not a list
+equal	(equal A B)	returns T if A and B have the same structure and atoms
+
+car 	(car E)		returns the head of list E
+cdr 	(cdr E)		returns all but the head of list E
+cons 	(cons A B)	returns a appended to the head of list B
+list	(list A B)	returns a list of the elements as passed in
+
+
+Output:
+
+princ	(princ A B)	print out the list entries and atoms

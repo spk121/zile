@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.13 2005/01/22 12:31:53 rrt Exp $
+## $Id: Makefile.am,v 1.14 2005/01/23 14:00:58 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -16,6 +16,7 @@ EXTRA_DIST =					\
 	TUTORIAL				\
 	dotzile.sample				\
 	dotzile.texi				\
+	lisp.txt				\
 	zlint					\
 	zile.1.in				\
 	mkdoc.c					\
