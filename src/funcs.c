@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.58 2005/01/11 23:02:07 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.59 2005/01/12 00:28:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -132,6 +132,7 @@ static void print_buf(Buffer *old_bp, Buffer *bp)
 void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
 {
   Window *wp, *old_wp = cur_wp;
+  Buffer *new_bp;
   va_list ap;
 
   /* Popup a window with the buffer "name".  */
@@ -143,7 +144,9 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
   }
 
   /* Remove all the content of that buffer.  */
-  zap_buffer_content();
+  new_bp = create_buffer(cur_bp->name);
+  kill_buffer(cur_bp);
+  cur_bp = new_bp;
 
   /* Make the buffer like a temporary one.  */
   cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;

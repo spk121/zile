@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.22 2005/01/12 00:16:42 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.23 2005/01/12 00:28:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -284,16 +284,6 @@ void switch_to_buffer(Buffer *bp)
   move_buffer_to_head(bp);
 
   thisflag |= FLAG_NEED_RESYNC;
-}
-
-/*
- * Remove the buffer contents and remove markers pointing to it.
- */
-void zap_buffer_content(void)
-{
-  Buffer *new_bp = create_buffer(cur_bp->name);
-  kill_buffer(cur_bp);
-  cur_bp = new_bp;
 }
 
 /*
