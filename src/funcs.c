@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.14 2004/02/04 12:02:55 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.15 2004/02/05 09:25:48 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -802,8 +802,8 @@ static int transpose_subr (funcp f)
 
 			/* When last line has characters. */
 			if (cur_wp->pointp->size > 0)
-				/* We must insert the '\n' in the end
-				   of line (not in the beginning) */
+				/* We must insert the '\n' at the end
+				   of line (not at the beginning) */
 				FUNCALL(end_of_line);
 
 			/* Insert a newline */
