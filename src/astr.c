@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.12 2005/02/05 13:49:04 rrt Exp $	*/
+/*	$Id: astr.c,v 1.13 2005/02/09 00:23:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -179,14 +179,19 @@ int astr_rfind_cstr(const astr as, const char *s)
 static astr astr_replace_x(astr as, ptrdiff_t pos, size_t size, const char *s, size_t csize)
 {
   astr tail;
+
   assert(as != NULL);
+
   pos = astr_pos(as, pos);
   if (as->len - pos < size)
     size = as->len - pos;
   tail = astr_substr(as, pos + (ptrdiff_t)size, astr_len(as) - (pos + size));
   astr_truncate(as, pos);
   astr_ncat_cstr(as, s, csize);
-  return astr_cat(as, tail);
+  astr_cat(as, tail);
+  astr_delete(tail);
+
+  return as;
 }
 
 astr astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src)
