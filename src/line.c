@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.10 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: line.c,v 1.11 2004/01/21 01:39:08 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -164,12 +164,17 @@ int insert_char(int c)
 		return FALSE;
 
 	if (cur_bp->flags & BFLAG_OVERWRITE) {
-		if (cur_wp->pointo < cur_wp->pointp->size) {
-			/*
-			 * XXX Emacs behaviour:
-			 * "Before a tab, such characters insert until
-			 * the tab is filled in."
-			 */
+		/* Current character isn't the end of line
+		   && isn't a \t
+		      || tab width isn't correct
+		      || current char is a \t && we are in the tab limit.  */
+		if ((cur_wp->pointo < cur_wp->pointp->size)
+		    && ((cur_wp->pointp->text[cur_wp->pointo] != '\t')
+			|| (cur_bp->tab_width < 1)
+			|| ((cur_wp->pointp->text[cur_wp->pointo] == '\t')
+			    && ((get_text_goalc (cur_wp) % cur_bp->tab_width)
+				== cur_bp->tab_width-1)))) {
+			/* Replace the charater.  */
 			undo_save(UNDO_REPLACE_CHAR,
 				  cur_wp->pointn, cur_wp->pointo,
 				  cur_wp->pointp->text[cur_wp->pointo], 0);
@@ -816,12 +821,52 @@ int backward_delete_char(void)
 	return FALSE;
 }
 
+int backward_delete_char_overwrite(void)
+{
+	windowp wp;
+
+	if ((cur_wp->pointo > 0) && (cur_wp->pointo < cur_wp->pointp->size)) {
+		if (warn_if_readonly_buffer())
+			return FALSE;
+
+		cur_wp->pointo--;
+		if (cur_wp->pointp->text[cur_wp->pointo] == '\t') {
+			int c;
+
+			undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+			for (c=0; c<cur_bp->tab_width; c++)
+				insert_char (' ');
+			undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+		}
+		else {
+			insert_char (' ');
+		}
+		cur_wp->pointo--;
+
+		cur_bp->flags |= BFLAG_MODIFIED;
+
+#if ENABLE_NONTEXT_MODES
+		if (cur_bp->flags & BFLAG_FONTLOCK)
+			font_lock_reset_anchors(cur_bp, cur_wp->pointp);
+#endif
+
+		return TRUE;
+	} else {
+		return backward_delete_char ();
+	}
+}
+
 DEFUN("backward-delete-char", backward_delete_char)
 /*+
 Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
+	 /* In overwrite-mode and isn't called by delete_char().  */
+	int (*f) () = (cur_bp->flags & BFLAG_OVERWRITE &&
+		       (last_uniarg > 0)) ?
+		backward_delete_char_overwrite:
+		backward_delete_char;
 	int uni, ret = TRUE;
 
 	if (uniarg < 0)
@@ -829,7 +874,7 @@ Join lines if the character is a newline.
 
 	undo_save(UNDO_START_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	for (uni = 0; uni < uniarg; ++uni)
-		if (!backward_delete_char()) {
+		if (!(*f) ()) {
 			ret = FALSE;
 			break;
 		}
