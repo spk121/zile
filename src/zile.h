@@ -1,6 +1,6 @@
 /* Main types and definitions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.43 2005/01/10 15:01:07 rrt Exp $        */
+/*      $Id: zile.h,v 1.44 2005/01/11 22:34:09 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -175,7 +175,7 @@ struct Buffer {
   int fill_column;
   unsigned mark_active : 1;
 
-  /* The total number of lines ('\n' newlines) in buffer. */
+  /* The total number of lines in the buffer. */
   int num_lines;
 
   /* The name of the buffer and the file name. */
