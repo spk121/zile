@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.41 2004/10/16 20:17:03 rrt Exp $	*/
+/*	$Id: main.c,v 1.42 2004/11/01 21:24:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -51,8 +51,7 @@
 #define PATH_MAX	_POSIX_PATH_MAX
 #endif
 
-#define ZILE_VERSION_STRING \
-	"Zile " VERSION
+#define ZILE_VERSION_STRING	"Zile " VERSION
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
