@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.43 2004/10/08 13:30:45 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.44 2004/10/12 22:03:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1121,15 +1121,14 @@ Precisely, if point is on line I, move to the start of line I + N.
 {
 	FUNCALL(beginning_of_line);
 
-	if (uniarg == 0)
-		uniarg = 1;
-
 	if (uniarg < 0) {
 		while (uniarg++)
 			if (!previous_line())
 				return FALSE;
-	}
-	else if (uniarg > 0) {
+	} else {
+                if (uniarg == 0)
+                        uniarg = 1;
+
 		while (uniarg--)
 			if (!next_line())
 				return FALSE;
@@ -1179,8 +1178,14 @@ DEFUN("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.  With argument N, do it N times.
 +*/
 {
-	/* XXX */
-	return FALSE;
+        if (uniarg < 0)
+                return FUNCALL_ARG(forward_paragraph, -uniarg);
+        else
+                do {
+                        while (previous_line() && !eolp());
+                } while (--uniarg > 0);
+
+        return TRUE;
 }
 
 DEFUN("forward-paragraph", forward_paragraph)
@@ -1188,8 +1193,14 @@ DEFUN("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
-	/* XXX */
-	return FALSE;
+        if (uniarg < 0)
+                return FUNCALL_ARG(backward_paragraph, -uniarg);
+        else
+                do {
+                        while (next_line() && !eolp());
+                } while (--uniarg > 0);
+
+        return TRUE;
 }
 
 DEFUN("mark-paragraph", mark_paragraph)
