@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.6 2004/06/30 22:52:41 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.7 2004/07/10 23:52:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -45,20 +45,19 @@ void term_minibuf_clear(void)
 	term_refresh();
 }
 
-static void xminibuf_write(const char *fmt)
+static void xminibuf_write(const char *s)
 {
 	int y, x;
-	const unsigned char *p = fmt;
 
 	term_getyx(&y, &x);
 
-	for (; *p != '\0' && x < ZILE_COLS; p++) {
-		term_addch(*p);
+	for (; *s != '\0' && x < ZILE_COLS; s++) {
+		term_addch(*(unsigned char *)s);
 		++x;
 	}
 }
 
-void term_minibuf_write(const char *fmt)
+void term_minibuf_write(const char *s)
 {
 	int y, x;
 
@@ -66,7 +65,7 @@ void term_minibuf_write(const char *fmt)
 	term_getyx(&y, &x);
 
 	term_move(ZILE_LINES - 1, 0);
-	xminibuf_write(fmt);
+	xminibuf_write(s);
 	term_clrtoeol();
 
 	/* Restore the previous cursor position. */
