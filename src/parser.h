@@ -20,16 +20,19 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: parser.h,v 1.4 2005/01/25 00:54:45 rrt Exp $	*/
+/*	$Id: parser.h,v 1.5 2005/02/09 00:25:04 rrt Exp $	*/
+
+#ifndef PARSER_H
+#define PARSER_H
 
 #include <stdio.h>
 #include "lists.h"
 
-enum tokenname { 
+enum tokenname {
   T_EOF,
-  T_CLOSEPAREN, 
-  T_OPENPAREN, 
-  T_NEWLINE, 
+  T_CLOSEPAREN,
+  T_OPENPAREN,
+  T_NEWLINE,
   T_QUOTE,
   T_WORD
 };
@@ -39,3 +42,5 @@ typedef void (*ungetcCallback)(int c);
 
 struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar,
             struct le * list, int *line);
+
+#endif
