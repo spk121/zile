@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.17 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: keys.c,v 1.18 2005/01/29 12:51:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -236,7 +236,8 @@ static int strtokey(char *buf, size_t *len)
  */
 int strtochord(char *buf, size_t *len)
 {
-  size_t key, l;
+  int key;
+  size_t l;
 
   key = strtokey(buf, &l);
   if (key == -1) {
@@ -247,7 +248,7 @@ int strtochord(char *buf, size_t *len)
   *len = l;
 
   if (key == KBD_CTL || key == KBD_META) {
-    size_t k = strtochord(buf + l, &l);
+    int k = strtochord(buf + l, &l);
     if (k == -1) {
       *len = 0;
       return -1;
@@ -287,7 +288,7 @@ int keystrtovec(char *key, size_t **keys)
  */
 astr keyvectostr(size_t *keys, size_t numkeys)
 {
-  int i;
+  size_t i;
   astr as = astr_new();
 
   for (i = 0; i < numkeys; i++) {

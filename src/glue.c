@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.27 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: glue.c,v 1.28 2005/01/29 12:55:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -79,7 +79,7 @@ char *copy_text_block(size_t startn, size_t starto, size_t size)
     while (++n < startn);
 
   for (i = starto; dp - buf < (int)size;) {
-    if (dp - buf + 1 > max_size) {
+    if (dp >= buf + max_size) {
       int save_off = dp - buf;
       max_size += 10;
       buf = (char *)zrealloc(buf, max_size);
@@ -141,7 +141,7 @@ char *replace_string(char *s, char *match, char *subst)
 void tabify_string(char *dest, char *src, size_t scol, size_t tw)
 {
   char *sp, *dp;
-  int dcol = scol, ocol = scol;
+  size_t dcol = scol, ocol = scol;
 
   for (sp = src, dp = dest;; ++sp)
     switch (*sp) {
