@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.17 2004/03/09 16:30:00 rrt Exp $	*/
+/*	$Id: bind.c,v 1.18 2004/03/09 18:52:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -218,7 +218,7 @@ static astr make_completion(int *keys, int numkeys)
 			astr_append_char(as, ' ');
                         len++;
                 }
-                key = keytostr(keys[i]);
+                key = chordtostr(keys[i]);
 		astr_append(as, key);
                 astr_delete(key);
 	}
@@ -516,7 +516,7 @@ char *get_function_by_key_sequence(void)
 static void write_functions_list(va_list ap)
 {
 	unsigned int i, j;
-	char key[64];
+	astr key;
 
         (void)ap;
 	bprintf("%-30s%s\n", "Function", "Bindings");
@@ -524,9 +524,10 @@ static void write_functions_list(va_list ap)
 	for (i = 0; i < fentry_table_size; ++i) {
 		bprintf("%-30s", fentry_table[i].name);
 		for (j = 0; j < 3; ++j) {
-			simplify_key(key, fentry_table[i].key[j]);
-			if (*key != '\0')
-				bprintf("%s%s", !j ? "": ", ", key);
+			key = simplify_key(fentry_table[i].key[j]);
+			if (astr_size(key) > 0)
+				bprintf("%s%s", !j ? "": ", ", astr_cstr(key));
+                        astr_delete(key);
 		}
 		bprintf("\n");
 	}
@@ -547,7 +548,7 @@ static void write_bindings_tree(leafp tree, int level)
 	static astr keys[8];
 	int i, j;
 
-	keys[level] = keytostr(tree->key);
+	keys[level] = chordtostr(tree->key);
 	for (i = 0; i < tree->vecnum; ++i) {
                 astr as;
 		leafp p = tree->vec[i];
@@ -557,7 +558,7 @@ static void write_bindings_tree(leafp tree, int level)
 				strcat(key, astr_cstr(keys[j]));
 				strcat(key, " ");
 			}
-			as = keytostr(p->key);
+			as = chordtostr(p->key);
 			strcat(key, astr_cstr(as));
                         astr_delete(as);
 			bprintf("%-15s %s\n", key, get_function_name(p->func));

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: keys.c,v 1.8 2004/03/09 16:30:00 rrt Exp $	*/
+/*	$Id: keys.c,v 1.9 2004/03/09 18:52:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,9 +32,9 @@
 #include "extern.h"
 
 /*
- * Convert a key into its ASCII representation
+ * Convert a key chord into its ASCII representation
  */
-astr keytostr(int key)
+astr chordtostr(int key)
 {
 	astr as = astr_new();
 
@@ -128,144 +128,113 @@ astr keytostr(int key)
 }
 
 /*
- * Convert a single key to the right key code.
- * Used internally by `strtokey()'.
+ * Array of key names in lexical order
  */
-static int strtokey0(char *buf, int *len)
+static const char *keyname[] = {
+        "\\BS",
+        "\\C-",
+        "\\DEL",
+        "\\DOWN",
+        "\\END",
+        "\\F1",
+        "\\F10",
+        "\\F11",
+        "\\F12",
+        "\\F2",
+        "\\F3",
+        "\\F4",
+        "\\F5",
+        "\\F6",
+        "\\F7",
+        "\\F8",
+        "\\F9",
+        "\\HOME",
+        "\\INS",
+        "\\LEFT",
+        "\\M-",
+        "\\PGDN",
+        "\\PGUP",
+        "\\RET",
+        "\\RIGHT",
+        "\\TAB",
+        "\\UP",
+        "\\\\",
+};
+
+/*
+ * Array of key codes in the same order as keyname above
+ */
+static int keycode[] = {
+        KBD_BS,
+        KBD_CTL,
+        KBD_DEL,
+        KBD_DOWN,
+        KBD_END,
+        KBD_F1,
+        KBD_F10,
+        KBD_F11,
+        KBD_F12,
+        KBD_F2,
+        KBD_F3,
+        KBD_F4,
+        KBD_F5,
+        KBD_F6,
+        KBD_F7,
+        KBD_F8,
+        KBD_F9,
+        KBD_HOME,
+        KBD_INS,
+        KBD_LEFT,
+        KBD_META,
+        KBD_PGDN,
+        KBD_PGUP,
+        KBD_RET,
+        KBD_RIGHT,
+        KBD_TAB,
+        KBD_UP,
+        '\\',
+};
+
+/*
+ * String prefix comparison.
+ */
+static int bstrcmp_prefix(const void *s, const void *t)
 {
-	char *p = buf;
-	int key;
-
-	key = -1;
-
-	if (*p == '\\') {
-		switch (*++p) {
-		case '\\':
-			key = '\\';
-			break;
-		case 'C':
-			if (p[1] == '-')
-				key = KBD_CTL, ++p;
-			break;
-		case 'M':
-			if (p[1] == '-')
-				key = KBD_META, ++p;
-			break;
-		case 'P':
-			if (p[1] == 'G') {
-				if (p[2] == 'U' && p[3] == 'P')
-					key = KBD_PGUP, p += 3;
-				else if (p[2] == 'D' && p[3] == 'N')
-					key = KBD_PGDN, p += 3;
-			}
-			break;
-		case 'H':
-			if (p[1] == 'O' && p[2] == 'M' && p[3] == 'E')
-				key = KBD_HOME, p += 3;
-			break;
-		case 'E':
-			if (p[1] == 'N' && p[2] == 'D')
-				key = KBD_END, p += 2;
-			break;
-		case 'D':
-			if (p[1] == 'E' && p[2] == 'L')
-				key = KBD_DEL, p += 2;
-			else if (p[1] == 'O' && p[2] == 'W' && p[3] == 'N')
-				key = KBD_DOWN, p += 3;
-			break;
-		case 'B':
-			if (p[1] == 'S')
-				key = KBD_BS, ++p;
-			break;
-		case 'I':
-			if (p[1] == 'N' && p[2] == 'S')
-				key = KBD_INS, p += 2;
-			break;
-		case 'L':
-			if (p[1] == 'E' && p[2] == 'F' && p[3] == 'T')
-				key = KBD_LEFT, p += 3;
-			break;
-		case 'R':
-			if (p[1] == 'I' && p[2] == 'G' && p[3] == 'H'
-			    && p[4] == 'T')
-				key = KBD_RIGHT, p += 4;
-			else if (p[1] == 'E' && p[2] == 'T')
-				key = KBD_RET, p += 2;
-			break;
-		case 'T':
-			if (p[1] == 'A' && p[2] == 'B')
-				key = KBD_TAB, p += 2;
-			break;
-		case 'U':
-			if (p[1] == 'P')
-				key = KBD_UP, ++p;
-			break;
-		case 'F':
-			switch (p[1]) {
-			case '1':
-				switch (p[2]) {
-				case '0':
-					key = KBD_F10, p += 2;
-					break;
-				case '1':
-					key = KBD_F11, p += 2;
-					break;
-				case '2':
-					key = KBD_F12, p += 2;
-					break;
-				default:
-					key = KBD_F1, ++p;
-				}
-				break;
-			case '2':
-				key = KBD_F2, ++p;
-				break;
-			case '3':
-				key = KBD_F3, ++p;
-				break;
-			case '4':
-				key = KBD_F4, ++p;
-				break;
-			case '5':
-				key = KBD_F5, ++p;
-				break;
-			case '6':
-				key = KBD_F6, ++p;
-				break;
-			case '7':
-				key = KBD_F7, ++p;
-				break;
-			case '8':
-				key = KBD_F8, ++p;
-				break;
-			case '9':
-				key = KBD_F9, ++p;
-				break;
-			}
-			break;
-		}
-
-		if (key == -1)
-			*len = 0;
-		else
-			*len = p - buf + 1;
-
-		return key;
-	}
-
-	*len = 1;
-
-	return *buf;
+        return strncmp(*(const char **)s, *(const char **)t,
+                       strlen(*(const char **)t));
 }
 
 /*
- * Convert a key to the right key code.
+ * Convert a key string to its key code.
  */
-int strtokey(char *buf, int *len)
+static int strtokey(char *buf, int *len)
+{
+        if (*buf == '\\') {
+                char **p = bsearch(&buf, keyname,
+                                   sizeof(keyname) / sizeof(keyname[0]),
+                                   sizeof(char *),
+                                   bstrcmp_prefix);
+                if (p == NULL) {
+                        *len = 0;
+                        return -1;
+                } else {
+                        *len = strlen(*p);
+                        return keycode[p - (char **)keyname];
+                }
+	} else {
+                *len = 1;
+                return *buf;
+        }
+}
+
+/*
+ * Convert a key chord string to its key code.
+ */
+int strtochord(char *buf, int *len)
 {
 	int key, l;
 
-	key = strtokey0(buf, &l);
+	key = strtokey(buf, &l);
 	if (key == -1) {
 		*len = 0;
 		return -1;
@@ -275,7 +244,7 @@ int strtokey(char *buf, int *len)
 
 	if (key == KBD_CTL || key == KBD_META) {
 		int k;
-		k = strtokey(buf + l, &l);
+		k = strtochord(buf + l, &l);
 		if (k == -1) {
 			*len = 0;
 			return -1;
@@ -288,7 +257,7 @@ int strtokey(char *buf, int *len)
 }
 
 /*
- * Convert a key sequence into the right key code sequence.
+ * Convert a key sequence string into a key code sequence.
  */
 int keytovec(char *key, int **keys)
 {
@@ -297,9 +266,9 @@ int keytovec(char *key, int **keys)
 
 	for (size = 0; *key != '\0'; size++) {
                 int len;
-                int keycode = strtokey(key, &len);
-                vec_item(v, size, int) = keycode;
-		if ((vec_item(v, size, int) = keycode) == -1) {
+                int code = strtochord(key, &len);
+                vec_item(v, size, int) = code;
+		if ((vec_item(v, size, int) = code) == -1) {
                         vec_delete(v);
 			return -1;
                 }
@@ -313,20 +282,20 @@ int keytovec(char *key, int **keys)
 /*
  * Convert a key like "\\C-xrs" to "C-x r s"
  */
-char *simplify_key(char *dest, char *key)
+astr simplify_key(char *key)
 {
 	int i, j, *keys;
+        astr dest = astr_new();
 
-	dest[0] = '\0';
 	if (key == NULL)
 		return dest;
 	i = keytovec(key, &keys);
 	for (j = 0; j < i; j++) {
                 astr as;
 		if (j > 0)
-			strcat(dest, " ");
-		as = keytostr(keys[j]);
-		strcat(dest, astr_cstr(as));
+			astr_append_char(dest, ' ');
+		as = chordtostr(keys[j]);
+                astr_append(dest, as);
                 astr_delete(as);
 	}
         if (i > 0)

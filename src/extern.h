@@ -110,10 +110,10 @@ void ztrace(const char *fmt, ...);
 #endif
 
 /* keys.c ----------------------------------------------------------------- */
-astr keytostr(int key);
-int strtokey(char *buf, int *len);
+astr chordtostr(int key);
+int strtochord(char *buf, int *len);
 int keytovec(char *key, int **keyvec);
-char *simplify_key(char *dest, char *key);
+astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
 Line *new_line(int maxsize);
