@@ -1,15 +1,17 @@
 HIGH PRIORITY
 
+None at present.
+
+------------------------------------------------------------------------------
+
+MEDIUM PRIORITY
+
 * Complete universal-argument functionality for:
 
 transpose-chars
 transpose-words
 transpose-sexps
 transpose-lines
-
-------------------------------------------------------------------------------
-
-MEDIUM PRIORITY
 
 * Functions/bindings to implement and document (dummy functions
   already exist):
