@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.10 2004/05/10 16:39:56 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.1 2004/05/10 16:49:50 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
