@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.13 2004/05/10 16:15:14 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.14 2004/05/10 16:39:56 rrt Exp $	*/
 
 /*
  * This module exports only the `ncurses_tp' pointer.
@@ -48,9 +48,9 @@ static Terminal thisterm = {
 	-1, -1,
 
 	/* Pointers to ncurses terminal functions. */
-	ncurses_init,
-	ncurses_open,
-        ncurses_close,
+	term_init,
+	term_open,
+        term_close,
 	ncurses_getkey,
 	ncurses_xgetkey,
 	ncurses_ungetkey,
@@ -79,19 +79,6 @@ Font C_FG_MAGENTA;
 Font C_FG_CYAN;
 Font C_FG_WHITE;
 Font C_FG_WHITE_BG_BLUE;
-
-void term_init(void)
-{
-        C_FG_BLACK = COLOR_PAIR(ZILE_COLOR_BLACK);
-        C_FG_RED = COLOR_PAIR(ZILE_COLOR_RED);
-        C_FG_GREEN = COLOR_PAIR(ZILE_COLOR_GREEN);
-        C_FG_YELLOW = COLOR_PAIR(ZILE_COLOR_YELLOW);
-        C_FG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUE);
-        C_FG_MAGENTA = COLOR_PAIR(ZILE_COLOR_MAGENTA);
-        C_FG_CYAN = COLOR_PAIR(ZILE_COLOR_CYAN);
-        C_FG_WHITE = COLOR_PAIR(ZILE_COLOR_WHITE);
-        C_FG_WHITE_BG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUEBG);
-}
 
 void term_getyx(int *y, int *x)
 {
@@ -161,4 +148,82 @@ int term_printw(const char *fmt, ...)
 void term_beep(void)
 {
 	beep();
+}
+
+void term_init(void)
+{
+        C_FG_BLACK = COLOR_PAIR(ZILE_COLOR_BLACK);
+        C_FG_RED = COLOR_PAIR(ZILE_COLOR_RED);
+        C_FG_GREEN = COLOR_PAIR(ZILE_COLOR_GREEN);
+        C_FG_YELLOW = COLOR_PAIR(ZILE_COLOR_YELLOW);
+        C_FG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUE);
+        C_FG_MAGENTA = COLOR_PAIR(ZILE_COLOR_MAGENTA);
+        C_FG_CYAN = COLOR_PAIR(ZILE_COLOR_CYAN);
+        C_FG_WHITE = COLOR_PAIR(ZILE_COLOR_WHITE);
+        C_FG_WHITE_BG_BLUE = COLOR_PAIR(ZILE_COLOR_BLUEBG);
+
+        ncurses_tp->screen = newterm(NULL, stdout, stdin);
+	set_term(ncurses_tp->screen);
+
+	ncurses_tp->width = ZILE_COLS;
+	ncurses_tp->height = ZILE_LINES;
+}
+
+static void init_colors(void)
+{
+	int fg = COLOR_WHITE;
+	int bg = COLOR_BLACK;
+
+#ifdef NCURSES_VERSION
+	if (use_default_colors() == OK) {
+		fg = -1;
+		bg = -1;
+	}
+#endif
+
+	/* "WHITE" is used as synonym of "DEFAULT". */
+	init_pair(ZILE_COLOR_WHITE, fg, bg);
+
+	init_pair(ZILE_COLOR_BLACK,   COLOR_BLACK,   bg);
+	init_pair(ZILE_COLOR_RED,     COLOR_RED,     bg);
+	init_pair(ZILE_COLOR_GREEN,   COLOR_GREEN,   bg);
+	init_pair(ZILE_COLOR_YELLOW,  COLOR_YELLOW,  bg);
+	init_pair(ZILE_COLOR_BLUE,    COLOR_BLUE,    bg);
+	init_pair(ZILE_COLOR_MAGENTA, COLOR_MAGENTA, bg);
+	init_pair(ZILE_COLOR_CYAN,    COLOR_CYAN,    bg);
+
+	init_pair(ZILE_COLOR_BLUEBG,  COLOR_CYAN,    COLOR_BLUE);
+}
+
+int term_open(void)
+{
+	int colors = lookup_bool_variable("colors") && has_colors();
+
+	if (colors)
+		start_color();
+	noecho();
+	nonl();
+	raw();
+	intrflush(stdscr, FALSE);
+	keypad(stdscr, TRUE);
+	if (colors)
+		init_colors();
+
+	return TRUE;
+}
+
+int term_close(void)
+{
+	/* Clear last line.  */
+	term_move(ZILE_LINES - 1, 0);
+	term_clrtoeol();
+	refresh();
+
+	/* Free memory and finish with ncurses.  */
+	ncurses_free_rotation_buffers();
+	endwin();
+	delscreen(ncurses_tp->screen);
+	ncurses_tp->screen = NULL;
+
+	return TRUE;
 }

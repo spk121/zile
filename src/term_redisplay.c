@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.1 2004/05/10 16:05:49 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.2 2004/05/10 16:39:54 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -582,4 +582,91 @@ void ncurses_full_redisplay(void)
 {
 	term_clear();
 	do_redisplay();
+}
+
+static void resize_windows(int width, int height)
+{
+	Window *wp;
+	int hdelta = height - ncurses_tp->height;
+
+	/* Resize windows horizontally. */
+	for (wp = head_wp; wp != NULL; wp = wp->next)
+		wp->fwidth = wp->ewidth = width;
+
+	/* Resize windows vertically. */
+	if (hdelta > 0) { /* Increase windows height. */
+		for (wp = head_wp; hdelta > 0; wp = wp->next) {
+			if (wp == NULL)
+				wp = head_wp;
+			++wp->fheight;
+			++wp->eheight;
+			--hdelta;
+		}
+	} else { /* Decrease windows height. */
+		int decreased = TRUE;
+		while (decreased) {
+			decreased = FALSE;
+			for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+				if (wp->fheight > 2) {
+					--wp->fheight;
+					--wp->eheight;
+					++hdelta;
+					decreased = TRUE;
+				}
+		}
+	}
+
+	/*
+	 * Sometimes Zile cannot reduce the windows height to a certain
+	 * value (too small); take care of this case.
+	 */
+	ncurses_tp->width = width;
+	ncurses_tp->height = height - hdelta;
+}
+
+void ncurses_resize_windows(void)
+{
+	resize_windows(ZILE_COLS, ZILE_LINES);
+	FUNCALL(recenter);
+}
+
+static void show_splash_screen(const char *splash)
+{
+	int i, bold = 0, red = 0;
+	const char *p;
+
+	for (i = 0; i < ZILE_LINES - 2; ++i) {
+		term_move(i, 0);
+		term_clrtoeol();
+	}
+
+	term_move(0, 0);
+	for (i = 0, p = splash; *p != '\0'; ++p)
+		switch (*p) {
+		case '%':
+			term_attrset(bold ? 0: ZILE_BOLD);
+			bold ^= 1;
+			break;
+		case '$':
+			term_attrset(red ? 0: ZILE_BOLD | C_FG_RED);
+			red ^= 1;
+			break;
+		case  '\n':
+			term_move(++i, 0);
+			break;
+		default:
+			term_addch(*p);
+		}
+}
+
+void ncurses_show_about(const char *splash, const char *minibuf)
+{
+	if (!lookup_bool_variable("novice-level") &&
+	    !lookup_bool_variable("skip-splash-screen")) {
+		show_splash_screen(splash);
+		minibuf_write(minibuf);
+		waitkey(20 * 1000);
+		minibuf_clear();
+	} else
+		minibuf_write(minibuf);
 }

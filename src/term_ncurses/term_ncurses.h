@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.h,v 1.9 2004/05/10 16:15:14 rrt Exp $	*/
+/*	$Id: term_ncurses.h,v 1.10 2004/05/10 16:39:56 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
@@ -51,6 +51,8 @@ extern Font C_FG_WHITE;
 extern Font C_FG_WHITE_BG_BLUE;
 
 extern void term_init(void);
+extern int term_open(void);
+extern int term_close(void);
 extern void term_getyx(int *y, int *x);
 extern void term_move(int y, int x);
 extern void term_clrtoeol(void);
@@ -65,9 +67,6 @@ extern void term_attrset(Font f);
 extern int term_printw(const char *fmt, ...);
 extern void term_beep(void);
 
-extern int ncurses_init(void);
-extern int ncurses_open(void);
-extern int ncurses_close(void);
 extern int ncurses_getkey(void);
 extern int ncurses_xgetkey(int mode, int arg);
 extern int ncurses_ungetkey(int c);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.24 2004/05/09 19:32:38 rrt Exp $        */
+/*      $Id: zile.h,v 1.25 2004/05/10 16:39:54 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -280,7 +280,7 @@ struct Terminal {
                          ncurses-specific code or data here. */
         int width, height;
 
-        int (*init)(void);
+        void (*init)(void);
         int (*open)(void);
         int (*close)(void);
         int (*getkey)(void);
