@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.14 2005/01/16 13:04:58 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.15 2005/01/17 23:07:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,11 +37,6 @@
 /* Font width and height */
 #define FW		(8)	/* font_length (font, ...) */
 #define FH		(8)	/* font_height (font) */
-
-/* Font codes */
-#define ZA_NORMAL		0x0000
-#define ZA_REVERSE		0x1000
-#define ZA_BOLD			0x2000
 
 static Terminal thisterm = {
   /* Unitialised screen pointer */
