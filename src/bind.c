@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.33 2004/11/14 20:52:05 rrt Exp $	*/
+/*	$Id: bind.c,v 1.34 2004/11/14 20:57:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -347,12 +347,6 @@ void free_bindings(void)
 	unsigned int i, j;
 
 	recursive_free_bindings(leaf_tree);
-
-	if (alternative_bindings)
-		for (i = 0; i < fentry_table_size; ++i)
-			for (j = 0; j < 3; ++j)
-				if (fentry_table[i].key[j] != NULL)
-					free(fentry_table[i].key[j]);
 
 	free_history_elements(&functions_history);
 }
