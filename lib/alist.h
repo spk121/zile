@@ -1,4 +1,4 @@
-/*	$Id: alist.h,v 1.2 2003/05/06 22:28:41 rrt Exp $	*/
+/*	$Id: alist.h,v 1.3 2004/01/29 02:59:22 dacap Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -86,7 +86,7 @@ struct alist_s {
 #define alist_isempty(al)	(al->size == 0)
 #define alist_count(al)		(al->size)
 #define alist_first(al)		(al->idx = 0, (al->current = al->head) != NULL ? al->current->p : NULL)
-#define alist_last(al)		((al->current = al->tail) != NULL ? (al->idx = al->size - 1, a->current->p) : NULL)
+#define alist_last(al)		((al->current = al->tail) != NULL ? (al->idx = al->size - 1, al->current->p) : NULL)
 #define alist_prev(al)		((al->current != NULL) ? (al->current = al->current->prev, (al->current != NULL) ? --al->idx, al->current->p : NULL) : NULL)
 #define alist_next(al)		((al->current != NULL) ? (al->current = al->current->next, (al->current != NULL) ? ++al->idx, al->current->p : NULL) : NULL)
 #define alist_current(al)	((al->current != NULL) ? al->current->p : NULL)
