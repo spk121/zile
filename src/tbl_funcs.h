@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.28 2005/01/22 11:27:17 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.29 2005/01/24 22:50:51 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -39,6 +39,7 @@ X1("end-kbd-macro", end_kbd_macro,			"\\C-x)")
 X1("end-of-buffer", end_of_buffer,			"\\M->")
 X2("end-of-line", end_of_line,				"\\C-e", "\\END")
 X1("enlarge-window", enlarge_window,			"\\C-x^")
+X1("eval-expression", eval_expression,                  "\\M-:")
 X1("exchange-point-and-mark", exchange_point_and_mark,	"\\C-x\\C-x")
 X1("execute-extended-command", execute_extended_command,"\\M-x")
 X1("fill-paragraph", fill_paragraph,			"\\M-q")

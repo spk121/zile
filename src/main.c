@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.74 2005/01/23 18:39:03 rrt Exp $	*/
+/*	$Id: main.c,v 1.75 2005/01/24 22:50:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -125,10 +125,11 @@ static void about_screen(void)
   }
 
   minibuf_write(about_minibuf_str);
-  if (!lookup_bool_variable("skip-splash-screen"))
+  if (!lookup_bool_variable("skip-splash-screen")) {
     show_splash_screen(about_splash_str);
-  term_refresh();
-  waitkey(20 * 10);
+    term_refresh();
+    waitkey(20 * 10);
+  }
 }
 
 static void setup_main_screen(int argc, astr as)
@@ -252,9 +253,9 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int c;
-  int bflag = FALSE, qflag = FALSE, eflag = FALSE;
+  int c, bflag = FALSE, qflag = FALSE, eflag = FALSE;
   astr as = astr_new();
+  le *list;
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
@@ -268,11 +269,15 @@ int main(int argc, char **argv)
       qflag = TRUE;
       break;
     case 'e':
-      astr_cat_delete(as, lisp_read_string(optarg));
+      list = lisp_read_string(optarg);
+      astr_cat_delete(as, lisp_dump(list));
+      leWipe(list);
       eflag = TRUE;
       break;
     case 'l':
-      astr_cat_delete(as, lisp_read_file(optarg));
+      list = lisp_read_file(optarg);
+      astr_cat_delete(as, lisp_dump(list));
+      leWipe(list);
       eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
     case 'q':
@@ -323,7 +328,7 @@ int main(int argc, char **argv)
     if (!qflag) {
       astr as = get_home_dir();
       astr_cat_cstr(as, "/.zile");
-      lisp_read_file(astr_cstr(as));
+      astr_delete(lisp_dump(lisp_read_file(astr_cstr(as))));
       astr_delete(as);
     }
 

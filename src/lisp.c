@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.3 2005/01/22 18:28:59 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.4 2005/01/24 22:50:50 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -30,33 +30,26 @@
 #include "eval.h"
 
 
-static const char *s;
-
-astr lisp_read(getcCallback getcp, ungetcCallback ungetcp)
+le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
 {
-  astr as = astr_new();
   int lineno = 0;
   struct le *list = NULL;
 
   list = parseInFile(getcp, ungetcp, list, &lineno);
 
-  /* Evaluate the read-in lists and add the result, variables and
-     defuns to the output string. */
-  astr_cat_delete(as, leDumpEval(list, 0));
-  astr_cat_cstr(as, "Variables:\n");
-  astr_cat_delete(as, variableDump(mainVarList));
-  astr_cat_cstr(as, "defuns:\n");
-  astr_cat_delete(as, variableDump(defunList));
-
-  leWipe(list);
-
-  return as;
+  return list;
 }
 
 
+static const char *s;
+
 static int getc_string(void)
 {
-  return *s++;
+  int c = *s++;
+  if (c)
+    return c;
+  s--;
+  return EOF;
 }
 
 static void ungetc_string(int c)
@@ -64,7 +57,7 @@ static void ungetc_string(int c)
   s--;
 }
 
-astr lisp_read_string(const char *string)
+le *lisp_read_string(const char *string)
 {
   assert(string);
   s = string;
@@ -84,18 +77,30 @@ static void ungetc_file(int c)
   ungetc(c, fp);
 }
     
-astr lisp_read_file(const char *file)
+le *lisp_read_file(const char *file)
+{
+  le *list;
+  fp = fopen(file, "r");
+
+  if (fp == NULL)
+    return NULL;
+
+  list = lisp_read(getc_file, ungetc_file);
+  fclose(fp);
+
+  return list;
+}
+
+
+astr lisp_dump(le *list)
 {
   astr as = astr_new();
-  fp = fopen(file, "r");
-  astr_afmt(as, "==== File %s\n", file);
 
-  if (!fp)
-    astr_afmt(as, "ERROR: Couldn't open \"%s\".\n", file);
-  else {
-    astr_cat_delete(as, lisp_read(getc_file, ungetc_file));
-    fclose(fp);
-  }
+  astr_cat_delete(as, leDumpEval(list, 0));
+  astr_cat_cstr(as, "Variables:\n");
+  astr_cat_delete(as, variableDump(mainVarList));
+  astr_cat_cstr(as, "Defuns:\n");
+  astr_cat_delete(as, variableDump(defunList));
 
   return as;
 }

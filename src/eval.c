@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.10 2005/01/24 13:56:14 rrt Exp $	*/
+/*	$Id: eval.c,v 1.11 2005/01/24 22:50:47 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -36,13 +36,13 @@
   static le * eval_cb_ ## c_name (int argc, le *branch) \
   { \
   int uniarg = 0, ret = FALSE; \
-  if (argc == 1) { \
+  if (argc == 2) { \
     le *value_le = evaluateNode(branch); \
     uniarg = evalCastLeToInt(value_le); \
     leWipe(value_le); \
   } \
-  if (argc < 2) \
-    F_ ## c_name(uniarg); \
+  if (argc < 3) \
+    F_ ## c_name((argc == 1) ? 1 : uniarg); \
   return ret ? leT : leNIL; \
   }
 #define X0(zile_name, c_name)                    X(zile_name, c_name)
@@ -940,4 +940,27 @@ void eval_finalise(void)
 {
   leReallyWipe(leNIL);
   leReallyWipe(leT);
+}
+
+
+DEFUN("eval-expression", eval_expression)
+  /*+
+    Evaluate EVAL-EXPRESSION-ARG and print value in the echo area.
+    Value is also consed on to front of the variable `values'.
+    Optional argument EVAL-EXPRESSION-INSERT-VALUE, if non-nil, means
+    insert the result into the current buffer instead of printing it in
+    the echo area.
+    +*/
+{
+  char *expr;
+  le *list;
+
+  if ((expr = minibuf_read("Eval: ", "")) == NULL)
+    return FALSE;
+
+  list = lisp_read_string(expr);
+  astr_delete(leDumpEval(list, 0));
+  leWipe(list);
+
+  return list == NULL;
 }

@@ -118,9 +118,10 @@ void free_registers(void);
 void free_kill_ring(void);
 
 /* lisp.c ----------------------------------------------------------------- */
-astr lisp_read(getcCallback getcp, ungetcCallback ungetcp);
-astr lisp_read_string(const char *string);
-astr lisp_read_file(const char *file);
+le *lisp_read(getcCallback getcp, ungetcCallback ungetcp);
+le *lisp_read_string(const char *string);
+le *lisp_read_file(const char *file);
+astr lisp_dump(le *list);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
