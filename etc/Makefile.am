@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.1 2004/01/23 01:45:57 dacap Exp $
+## $Id: Makefile.am,v 1.2 2004/03/13 16:26:19 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
@@ -41,7 +41,7 @@ HELP: $(top_srcdir)/doc/zile.texi
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
-CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
+AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
 AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
