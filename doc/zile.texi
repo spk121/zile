@@ -942,7 +942,7 @@ This value is used only when the @samp{backup-with-directory} value is true.
 Default value is @samp{~/.backup}.
 @item backup-method
 Specify the file backup method.
-Possible values are: @samp{none}, @samp{simple} and @samp{revision}.
+Possible values are: @samp{none} and @samp{simple}.
 @c LINT IGNORE
 @table @samp
 @item none
@@ -951,11 +951,6 @@ If @samp{none} is specified, Zile will not create backup files.
 If @samp{simple} is specified, Zile will create a backup file with a
 tilde @samp{~} appended to the name (e.g.: on saving @file{foo.c} it will
 create the backup @file{foo.c~}).
-@item revision
-If @samp{revision} is specified, Zile will create a new backup file on
-each file saving preserving the old backups of the original file
-(e.g.: on saving @file{foo.c} it will create the backup @file{foo.c.~1~},
-then on next save @file{foo.c.~2~}, etc.).
 @end table
 @c LINT END IGNORE
 Default value is @samp{simple}.
@@ -1133,17 +1128,6 @@ Enable this if you are novice to Emacs in general.
 Disabling this variable the @i{Mini Help}
 window and the message in the scratch buffer will be disabled.
 Default value is @samp{true}.
-@item revisions-delete
-Specify the action when the number of revisions exceed the value
-specified in @samp{revisions-kept}.
-If @samp{ask} is specified, ask confirmation to delete.
-If @samp{noask} is specified, delete excess backup versions silently.
-Any other value prevents any trimming.
-Default value is @samp{ask}.
-@item revisions-kept
-The number of oldest versions to keep when a new numbered backup
-is made (used only when @samp{backup-method} is set to @samp{revision}).
-Default value is @samp{5}.
 @item show-eob-marker
 If enabled, a marker will be displayed at the end of the buffer.
 Default value is @samp{true}.

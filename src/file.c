@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.26 2004/03/29 22:47:01 rrt Exp $	*/
+/*	$Id: file.c,v 1.27 2004/04/04 19:48:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -809,77 +809,10 @@ Set mark after the inserted text.
 	return TRUE;
 }
 
-static int ask_delete_old_revisions(const char *filename)
-{
-	int c;
-	minibuf_write("Delete excess backup versions of %s? (y or n) ", filename);
-	c = cur_tp->getkey();
-	while (c != 'y') {
-		if (c == 'n' || c == 'q' || c == KBD_CANCEL)
-			return FALSE;
-		minibuf_write("Please answer y or n.  Delete excess backup versions of %s? (y or n) ", filename);
-		c = cur_tp->getkey();
-	}
-	return TRUE;
-}
-
-static int get_new_revision(const char *filename)
-{
-	int i, fd, first, latest, maxrev;
-        int count = 0;
-	char *buf = (char *)zmalloc(strlen(filename) + 10);
-
-	/* Find the latest existing revision. */
-	for (i = 999; i >= 1; --i) { /* XXX need to fix this. */
-		sprintf(buf, "%s.~%d~", filename, i);
-		if ((fd = open(buf, O_RDONLY, 0)) != -1) {
-			close(fd);
-			break;
-		}
-	}
-	latest = i + 1;
-	first = 0;
-	/* Count the existing revisions. */
-	for (i = 1; i <= latest; ++i) {
-		sprintf(buf, "%s.~%d~", filename, i);
-		if ((fd = open(buf, O_RDONLY, 0)) != -1) {
-			close(fd);
-			if (first == 0)
-				first = i;
-			++count;
-		}
-	}
-	maxrev = atoi(get_variable("revisions-kept"));
-	maxrev = max(maxrev, 2);
-	if (count >= maxrev) {
-		char *action = get_variable("revisions-delete");
-		int no = count - maxrev + 1;
-		int confirm = FALSE;
-		if (!strcmp(action, "ask"))
-			confirm = ask_delete_old_revisions(filename);
-		else if (!strcmp(action, "noask"))
-			confirm = TRUE;
-		if (confirm) {
-			for (i = 1; i < latest && no > 0; ++i) {
-				sprintf(buf, "%s.~%d~", filename, i);
-				if ((fd = open(buf, O_RDONLY, 0)) != -1) {
-					close(fd);
-					remove(buf);
-					--no;
-				}
-			}
-		}
-	}
-
-	free(buf);
-
-	return latest;
-}
-
 /*
  * Create a backup filename according to user specified variables.
  */
-static char *create_backup_filename(const char *filename, int withrevs,
+static char *create_backup_filename(const char *filename,
 				    int withdirectory)
 {
 	astr buf;
@@ -918,15 +851,9 @@ static char *create_backup_filename(const char *filename, int withrevs,
 		filename = astr_cstr(buf);
 	}
 
-	s = (char *)zmalloc(strlen(filename) + 10);
-
-	if (withrevs) {
-		int n = get_new_revision(filename);
-		sprintf(s, "%s.~%d~", filename, n);
-	} else { /* simple backup */
-		strcpy(s, filename);
-		strcat(s, "~");
-	}
+	s = (char *)zmalloc(strlen(filename) + 1);
+        strcpy(s, filename);
+        strcat(s, "~");
 
 	if (buf != NULL)
 		astr_delete(buf);
@@ -1016,7 +943,6 @@ static int write_to_disk(Buffer *bp, char *filename)
 	Line *lp;
 
 	backupsimple = is_variable_equal("backup-method", "simple");
-	backuprevs = is_variable_equal("backup-method", "revision");
 	backupwithdir = lookup_bool_variable("backup-with-directory");
 
 	/*
@@ -1026,8 +952,7 @@ static int write_to_disk(Buffer *bp, char *filename)
 	    && (fd = open(filename, O_RDWR, 0)) != -1) {
 		char *bfilename;
 		close(fd);
-		bfilename = create_backup_filename(filename, backuprevs,
-						   backupwithdir);
+		bfilename = create_backup_filename(filename, backupwithdir);
 		if (!copy_file(filename, bfilename))
 			waitkey_discard(3 * 1000);
 		free(bfilename);

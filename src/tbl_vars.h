@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.7 2004/03/14 14:36:05 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.8 2004/04/04 19:48:53 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -33,16 +33,12 @@ This value is used only when the `backup-with-directory' value is true.")
 X("backup-method",			"", "simple", "\
 Specify the file backup method.\n\
 \n\
-Possible values are: none, simple and revision.\n\
+Possible values are: none and simple.\n\
 \n\
  - If `none' is specified, Zile will not create backup files.\n\
  - If `simple' is specified, Zile will create a backup file with a\n\
    tilde `~' appended to the name (e.g.: on saving `foo.c' it will\n\
-   create the backup `foo.c~').\n\
- - If `revision' is specified, Zile will create a new backup file on\n\
-   each file saving preserving the old backups of the original file\n\
-   (e.g.: on saving `foo.c' it will create the backup `foo.c~1~', then\n\
-   on next save `foo.c~2~', etc.).")
+   create the backup `foo.c~').")
 X("backup-with-directory",		"b", "false", "\
 If enabled Zile will backup files to a user specified directory;\n\
 the directory must exist and must be specified in the\n\
@@ -140,16 +136,6 @@ X("novice-level",			"b", "true", "\
 Enable this if you are novice to Emacs in general.\n\
 Disabling this variable the Mini Help window and the message in\n\
 the scratch buffer will be disabled.")
-X("revisions-delete",			"", "ask", "\
-Specify the action when the number of revisions exceed the value\n\
-specified in `revisions-kept'.\n\
-\n\
-- If `ask' is specified, ask confirmation to delete.\n\
-- If `noask' is specified, delete excess backup versions silently.\n\
-- Any other value prevents any trimming.")
-X("revisions-kept",			"", "5", "\
-Number of oldest versions to keep when a new numbered backup is made\n\
-(used only when `backup-method' is set to `revision').")
 X("show-eob-marker",			"b", "true", "\
 If enabled, a marker will be displayed at the end of the buffer.")
 X("skip-splash-screen",			"b", "false", "\

@@ -41,16 +41,12 @@ show-eob-marker = true
 
 # Specify the file backup method [default: simple]
 #
-# Possible values are: none, simple and revision.
+# Possible values are: none and simple.
 #
 # * If `none' is specified, Zile will not create backup files.
 # * If `simple' is specified, Zile will create a backup file with a
 #   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
 #   create the backup `foo.c~').
-# * If `revision' is specified, Zile will create a new backup file on
-#   each file saving preserving the old backups of the original file
-#   (e.g.: on saving `foo.c' it will create the backup `foo.c.~1~', then
-#   on next save `foo.c.~2~', etc.).
 backup-method = simple
 
 # Enable backup directory for backup files [default: false]
@@ -62,19 +58,6 @@ backup-with-directory = false
 # Specify target backup directory [default: "~/.backup"]
 # Directory must be existent.
 backup-directory = "~/.backup"
-
-# Maximum number of revisions [default: 5]
-# Number of oldest versions to keep when a new numbered backup
-# is made (used only when `backup-method' is set to `revision').
-revisions-kept = 5
-
-# Specify the action when the number of revisions exceed the value
-# specified in `revisions-kept' [default: ask]
-#
-# * If `ask' is specified, ask confirmation to delete.
-# * If `noask' is specified, delete excess backup versions silently.
-# * Any other value prevents any trimming.
-revisions-delete = ask
 
 # Expand tabs [default: false]
 # If disabled, Zile will insert hard tabs (the character \t),
