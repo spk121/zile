@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.26 2005/01/22 12:32:04 rrt Exp $	*/
+/*	$Id: variables.c,v 1.27 2005/01/23 14:09:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -78,11 +78,6 @@ int lookup_bool_variable(char *var)
 
   if ((p = get_variable(var)) != NULL)
     return !strcmp(p, "true");
-
-#if DEBUG
-  minibuf_error("Warning: used uninitialized variable `%s'", var);
-  waitkey(WAITKEY_DEFAULT);
-#endif
 
   return FALSE;
 }
