@@ -44,8 +44,8 @@ extern int	exist_file(const char *filename);
 extern int	is_regular_file(const char *filename);
 extern int	expand_path(const char *path, const char *cwdir, astr dir,
 			    astr fname);
-extern astr 	compact_path(astr buf, const char *path);
-extern astr 	get_current_dir(astr buf, int interactive);
+extern astr	compact_path(astr buf, const char *path);
+extern astr	get_current_dir(astr buf, int interactive);
 extern void	open_file(char *path, int lineno);
 extern void	read_from_disk(const char *filename);
 extern int	find_file(const char *filename);
@@ -130,6 +130,10 @@ extern int	delete_char(void);
 extern int	backward_delete_char(void);
 extern void	free_registers(void);
 extern void	free_kill_ring(void);
+
+/* lua.c ------------------------------------------------------------------ */
+extern int	zlua_do(const char *s, astr *out);
+extern void	zlua_open(void);
 
 /* macro.c ---------------------------------------------------------------- */
 extern void	cancel_kbd_macro(void);

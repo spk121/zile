@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.11 2004/01/29 07:23:10 rrt Exp $	*/
+/*	$Id: main.c,v 1.12 2004/01/29 10:40:22 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -309,6 +309,11 @@ int main(int argc, char **argv)
 	select_terminal();
 	cur_tp->init();
 
+#if ENABLE_LUA
+        /* Initialise Lua */
+        zlua_open();
+#endif
+
 	init_variables();
 	if (!qflag)
 		read_rc_file(uarg);
@@ -363,6 +368,11 @@ then enter the text in that file's own buffer.\n\
 
 	/* Run the main Zile loop (read key, process key, read key, ...). */
 	loop();
+
+#if ENABLE_LUA
+        /* Finalise Lua */
+        zlua_close();
+#endif
 
 	/* Free all the memory allocated. */
 	alist_delete(fargs);

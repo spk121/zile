@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.5 2004/01/21 01:57:13 dacap Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.6 2004/01/29 10:40:22 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -45,6 +45,9 @@ X1("backward-sexp", backward_sexp,			"\\C-\\M-b")
 X1("backward-word", backward_word,			"\\M-b")
 X1("beginning-of-buffer", beginning_of_buffer,		"\\M-<")
 X2("beginning-of-line", beginning_of_line,		"\\C-a", "\\HOME")
+#if ENABLE_LUA
+X0("lua", lua)
+#endif
 #if ENABLE_C_MODE
 X0("c-mode", c_mode)
 #endif
