@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.14 2005/01/09 23:56:06 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.15 2005/01/12 00:16:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -189,7 +189,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
       }
 
       if (cp->fl_poppedup) {
-        completion_scroll_down(cp);
+        completion_scroll_down();
         thistab = lasttab;
       }
       break;
@@ -201,7 +201,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
       }
 
       if (cp->fl_poppedup) {
-        completion_scroll_up(cp);
+        completion_scroll_up();
         thistab = lasttab;
       }
       break;
@@ -250,7 +250,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 
       if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
           && cp->fl_poppedup) {
-        completion_scroll_up(cp);
+        completion_scroll_up();
         thistab = lasttab;
       } else {
         astr as = astr_new();

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.43 2005/01/10 15:01:06 rrt Exp $	*/
+/*	$Id: line.c,v 1.44 2005/01/12 00:16:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -212,7 +212,7 @@ int intercalate_newline(void)
 /* Recase s according to case of template. */
 /* XXX At the moment this is not the same as Emacs (doesn't check that
  * replacement string contains no upper case) but is consistent with
- * search.  See TODO file. */
+ * search. See feature requests. */
 static void recase(char *s, char *template, int len)
 {
   int i;

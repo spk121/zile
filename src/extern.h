@@ -167,8 +167,8 @@ void minibuf_clear(void);
 /* completion.c ----------------------------------------------------------- */
 Completion *new_completion(int fileflag);
 void free_completion(Completion *cp);
-void completion_scroll_up(Completion *cp);
-void completion_scroll_down(Completion *cp);
+void completion_scroll_up(void);
+void completion_scroll_down(void);
 int completion_try(Completion *cp, astr search, int popup_when_complete);
 
 /* history.c -------------------------------------------------------------- */

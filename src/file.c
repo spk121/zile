@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.54 2005/01/10 14:09:45 rrt Exp $        */
+/*      $Id: file.c,v 1.55 2005/01/12 00:16:45 rrt Exp $        */
 
 #include "config.h"
 
@@ -101,7 +101,7 @@ astr agetcwd(astr as)
  * the passed path:
  * - Splits the path into the directory and the filename;
  * - Expands the `~/' and `~name/' expressions;
- * - replaces `//' with `/';
+ * - replaces the `//' with `/' (restarting from the root directory);
  * - removes the `..' and `.' entries.
  */
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
@@ -117,17 +117,17 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 
   while (*sp != '\0') {
     if (*sp == '/') {
-      /*
-       * Remove all but one '/'.
-       */
-      while (*++sp == '/');
+      if (*++sp == '/') {
+        /* Got `//'.  Restart from this point. */
+        while (*sp == '/')
+          sp++;
+        astr_truncate(dir, 0);
+      }
       astr_cat_char(dir, '/');
     } else if (*sp == '~') {
       if (*(sp + 1) == '/') {
-        /*
-         * Got `~/'.  Restart from this point
-         * and insert the user home directory.
-         */
+        /* Got `~/'. Restart from this point and insert the user's
+           home directory. */
         astr_truncate(dir, 0);
         if ((pw = getpwuid(getuid())) == NULL)
           return FALSE;
@@ -135,10 +135,8 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
           astr_cat_cstr(dir, pw->pw_dir);
         ++sp;
       } else {
-        /*
-         * Got `~something'.  Restart from this point
-         * and insert that user home directory.
-         */
+        /* Got `~something'.  Restart from this point and insert that
+           user's home directory. */
         astr as = astr_new();
         astr_truncate(dir, 0);
         ++sp;
@@ -505,13 +503,26 @@ void kill_buffer(Buffer *kill_bp)
     next_bp = head_bp;
 
   if (next_bp == kill_bp) {
+    Window *wp;
+    Buffer *new_bp = create_buffer(cur_bp->name);
     /*
-     * This is the sole buffer available, then
+     * If this is the sole buffer available, then
      * remove the contents and set the name to `*scratch*'
      * if it is not already set.
      */
     assert(cur_bp == kill_bp);
-    zap_buffer_content();
+
+    free_buffer(cur_bp);
+
+    /* Scan all the windows that have markers to this buffer. */
+    for (wp = head_wp; wp != NULL; wp = wp->next)
+      if (wp->bp == cur_bp) {
+        wp->bp = new_bp;
+        wp->topdelta = 0;
+        wp->saved_pt = NULL;    /* It was freed. */
+      }
+
+    cur_bp = new_bp;
     cur_bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
     if (strcmp(cur_bp->name, "*scratch*") != 0) {
       set_buffer_name(cur_bp, "*scratch*");
@@ -526,19 +537,15 @@ void kill_buffer(Buffer *kill_bp)
 
     assert(kill_bp != next_bp);
 
-    /*
-     * Search for windows displaying the buffer to kill.
-     */
+    /* Search for windows displaying the buffer to kill. */
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->bp == kill_bp) {
         wp->bp = next_bp;
-        /* The marker will be free.  */
-        wp->saved_pt = NULL;
+        wp->topdelta = 0;
+        wp->saved_pt = NULL;    /* The marker will be freed. */
       }
 
-    /*
-     * Remove the buffer from the buffer list.
-     */
+    /* Remove the buffer from the buffer list. */
     cur_bp = next_bp;
     if (head_bp == kill_bp)
       head_bp = head_bp->next;
@@ -548,7 +555,7 @@ void kill_buffer(Buffer *kill_bp)
         break;
       }
 
-    /* Free the buffer.  */
+    /* Free the buffer. */
     free_buffer(kill_bp);
 
     thisflag |= FLAG_NEED_RESYNC;

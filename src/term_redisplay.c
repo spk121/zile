@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.23 2005/01/10 14:09:47 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.24 2005/01/12 00:16:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -152,23 +152,22 @@ static void draw_window(int topline, Window *wp)
 
   calculate_highlight_region(wp, &r, &highlight);
 
-  /*
-   * Find the first line to display on the first screen line.
-   */
+  /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
        i > 0 && list_prev(lp) != wp->bp->lines; lp = list_prev(lp), --i, --lineno)
     ;
 
   cur_tab_width = wp->bp->tab_width;
 
-  /*
-   * Draw the window lines.
-   */
+  /* Draw the window lines. */
+  fprintf(stderr, "!!!%p %p\n", lp, wp->bp->lines);
   for (i = topline; i < wp->eheight + topline; ++i, ++lineno) {
     /* Clear the line. */
     term_move(i, 0);
     term_clrtoeol();
+
     /* If at the end of the buffer, don't write any text. */
+    fprintf(stderr, "%p %p\n", lp, wp->bp->lines);
     if (lp == wp->bp->lines)
       continue;
 

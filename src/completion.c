@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.17 2005/01/11 00:09:42 rrt Exp $   */
+/*      $Id: completion.c,v 1.18 2005/01/12 00:16:44 rrt Exp $   */
 
 #include "config.h"
 
@@ -82,11 +82,10 @@ void free_completion(Completion *cp)
 /*
  * Scroll completions up.
  */
-void completion_scroll_up(Completion *cp)
+void completion_scroll_up(void)
 {
   Window *wp, *old_wp = cur_wp;
 
-  (void)cp;
   wp = find_window("*Completions*");
   assert(wp != NULL);
   set_current_window(wp);
@@ -100,11 +99,10 @@ void completion_scroll_up(Completion *cp)
 /*
  * Scroll completions down.
  */
-void completion_scroll_down(Completion *cp)
+void completion_scroll_down(void)
 {
   Window *wp, *old_wp = cur_wp;
 
-  (void)cp;
   wp = find_window("*Completions*");
   assert(wp != NULL);
   set_current_window(wp);
@@ -177,7 +175,9 @@ static void popup_completion(Completion *cp, int allflag, int num)
   } else
     set_current_window(wp);
 
-  zap_buffer_content();
+  bp = create_buffer(cur_bp->name);
+  kill_buffer(cur_bp);
+  cur_bp = cur_wp->bp = bp;
   cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
   set_temporary_buffer(cur_bp);
 
@@ -185,10 +185,8 @@ static void popup_completion(Completion *cp, int allflag, int num)
     completion_print(cp->completions, list_length(cp->completions));
   else
     completion_print(cp->matches, num);
-
-  gotobob();
-
   cur_bp->flags |= BFLAG_READONLY;
+  gotobob();
 
   set_current_window(old_wp);
 

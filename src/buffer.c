@@ -1,6 +1,6 @@
 /* Buffer-oriented functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.21 2005/01/10 15:01:06 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.22 2005/01/12 00:16:42 rrt Exp $	*/
 
 #include "config.h"
 
@@ -45,12 +45,11 @@ static Buffer *new_buffer(void)
   char *s;
 
   bp = (Buffer *)zmalloc(sizeof(Buffer));
-  memset(bp, 0, sizeof(Buffer));
 
   if ((s = get_variable("tab-width")) != NULL) {
     bp->tab_width = atoi(s);
     if (bp->tab_width < 1) {
-      minibuf_error("Warning: wrong global tab-width value `%s'", s);
+      minibuf_error("Warning: bad global tab-width value `%s'", s);
       waitkey();
       bp->tab_width = 8;
     }
@@ -60,7 +59,7 @@ static Buffer *new_buffer(void)
   if ((s = get_variable("fill-column")) != NULL) {
     bp->fill_column = atoi(s);
     if (bp->fill_column < 2) {
-      minibuf_error("Warning: wrong global fill-column value `%s'", s);
+      minibuf_error("Warning: bad global fill-column value `%s'", s);
       waitkey();
       bp->fill_column = 70;
     }
@@ -288,45 +287,13 @@ void switch_to_buffer(Buffer *bp)
 }
 
 /*
- * Remove the buffer contents and reset the mark and the flags.
+ * Remove the buffer contents and remove markers pointing to it.
  */
 void zap_buffer_content(void)
 {
-  Window *wp;
-  Line *new_lp, *old_lp, *next_lp;
-
-  new_lp = list_new();
-  new_lp->item = astr_new();
-  list_next(new_lp) = list_prev(new_lp) = cur_bp->lines;
-
-  old_lp = list_next(cur_bp->lines);
-  list_next(cur_bp->lines) = list_prev(cur_bp->lines) = new_lp;
-  cur_bp->pt.p = new_lp;
-  cur_bp->pt.n = 0;
-  cur_bp->pt.o = 0;
-  cur_bp->flags = 0;
-  cur_bp->num_lines = 0;
-
-  /* Free markers (there are windows pointing to some of them). */
-  while (cur_bp->markers)
-    free_marker(cur_bp->markers);
-
-  cur_bp->mark = cur_bp->markers = NULL;
-
-  /* Free all the old lines. */
-  do {
-    next_lp = list_next(old_lp);
-    astr_delete(old_lp->item);
-    free(old_lp);
-    old_lp = next_lp;
-  } while (old_lp != cur_bp->lines);
-
-  /* Scan all the windows that have markers to this buffer. */
-  for (wp = head_wp; wp != NULL; wp = wp->next)
-    if (wp->bp == cur_bp) {
-      wp->topdelta = 0;
-      wp->saved_pt = NULL; /* It was freed. */
-    }
+  Buffer *new_bp = create_buffer(cur_bp->name);
+  kill_buffer(cur_bp);
+  cur_bp = new_bp;
 }
 
 /*
