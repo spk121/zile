@@ -1,7 +1,4 @@
-* Insertion of large chunks of text with `insert-buffer',
-  `insert-file' or `insert-register' can be very slow with Font Lock
-  Mode enabled. Undoing insertions of binary files can be very slow
-  too.
+* Undoing insertions of binary files can be very slow.
 
 * The method of resolving the `C-h' problem by replacing it with `M-h'
   is not a ``Good Thing''(TM).
