@@ -1,6 +1,6 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.10 2004/11/14 21:52:27 rrt Exp $
-.Dd Nov, 2003
+.\" $Id: zile.1.in,v 1.11 2005/01/12 00:38:06 rrt Exp $
+.Dd Jan, 2005
 .Os
 .Dt ZILE 1
 .Sh NAME
@@ -9,9 +9,7 @@
 .Sh SYNOPSIS
 .Nm zile
 .Op Fl hqV
-.Op Fl f Ar function
 .Op Fl u Ar rcfile
-.Op Fl v Ar variable=value
 .Op Ar +number
 .Op Ar
 .Sh DESCRIPTION
@@ -30,176 +28,12 @@ The options are as follows:
 For the first file the cursor will be positioned on the line specified by
 .Ar number
 (do not insert a space between the "+" sign and the number).
-.It Fl f Ar function
-Invoke the named internal function with no arguments.
 .It Fl q
 Do not load the user's initialization file.
 .It Fl u Ar rcfile
 Specify an alternate initialization file.
-.It Fl v Ar variable=value
-Set a Zile variable to the specified value (this overrides the value specified
-in the initialization file).
 .It Fl V
 Print version information on standard output then exit.
-.El
-.Sh COMMANDS
-.Bl -tag -width Fl
-.It Ic TAB
-insert a tab character
-.It Ic RET
-insert a new line
-.It Ic BS
-backspace
-.It Ic INS
-toggle overwrite mode
-.It Ic F11
-switch to a correlated buffer
-.It Ic C-@, C-SPC, F5
-set mark
-.It Ic C-a, HOME
-go to the beginning of line
-.It Ic C-b, LEFT
-move cursor to the previous char
-.It Ic C-d, DEL
-delete current char
-.It Ic C-e, END
-go to the end of line
-.It Ic C-f, RIGHT
-move cursor to the next char
-.It Ic C-g
-cancel current command
-.It Ic C-h F
-show the FAQ
-.It Ic C-h c
-describe briefly a key sequence
-.It Ic C-h d, C-h f
-describe a function
-.It Ic C-h h, F1
-show an help window
-.It Ic C-h k
-describe a key sequence
-.It Ic C-h l b
-show the defined bindings
-.It Ic C-h l f
-show the defined functions
-.It Ic C-h l r
-show the defined registers
-.It Ic C-h l v
-list defined variables
-.It Ic C-h s
-show a sample configuration file
-.It Ic C-h t
-show a tutorial window
-.It Ic C-h v
-describe a variable
-.It Ic C-k, F6
-kill line
-.It Ic C-l
-redraw display
-.It Ic C-n, DOWN
-move cursor to the next line
-.It Ic C-p, UP
-move cursor to the previous line
-.It Ic C-q
-read next input character and insert it
-.It Ic C-r
-search backward
-.It Ic C-s
-search forward
-.It Ic C-u
-begin a numeric argument for the following command
-.It Ic C-v, PGDN
-scroll up one screen page
-.It Ic C-w, F7
-kill region
-.It Ic C-x \&(
-start recording keyboard macro
-.It Ic C-x \&)
-end recording keyboard macro
-.It Ic C-x 0
-delete the current window
-.It Ic C-x 1
-delete the other open windows
-.It Ic C-x 2
-split current window
-.It Ic C-x ^
-enlarge current window
-.It Ic C-x b
-switch to a buffer
-.It Ic C-x e, F12
-execute the last recorded keyboard macro
-.It Ic C-x f
-set the fill column
-.It Ic C-x h
-mark whole buffer
-.It Ic C-x i
-insert the contents of a file
-.It Ic C-x k
-kill current buffer
-.It Ic C-x o
-select the other window
-.It Ic C-x r i
-insert register
-.It Ic C-x r s
-copy region to register
-.It Ic C-x s
-save modified buffers
-.It Ic C-x u, C-_, F4
-undo some previous changes
-.It Ic C-y, F8
-yank killed text
-.It Ic C-z, C-x C-z
-stop Zile and return to superior process
-.It Ic C-x C-b
-list buffers
-.It Ic C-x C-c
-save modified buffers and quit zile
-.It Ic C-x C-f, F2
-find a file for editing
-.It Ic C-x C-l
-convert the region to lower case
-.It Ic C-x C-q
-toggle read only mode
-.It Ic C-x C-s, F3
-save the current buffer
-.It Ic C-x C-u
-convert the region to upper case
-.It Ic C-x C-v
-kill the current buffer and find a file for editing
-.It Ic C-x C-w
-write buffer to a file
-.It Ic C-x C-x
-exchange point and mark
-.It Ic M-!
-execute an external command in inferior shell
-.It Ic M-|
-execute an external command on current region
-.It Ic M-<
-go to the beginning of buffer
-.It Ic M->
-go to the end of buffer
-.It Ic M-b
-move backward until encountering the end of a word
-.It Ic M-c
-capitalize the following word
-.It Ic M-f
-move point forward one word
-.It Ic M-g
-read line number and go there
-.It Ic M-l
-convert following word to lower case
-.It Ic M-m
-go to the first non-whitespace character on this line
-.It Ic M-s
-shrink current window
-.It Ic M-u
-convert following word to upper case
-.It Ic M-v, PGUP
-scroll down one screen page
-.It Ic M-w
-save the region as if killed, but don't kill it
-.It Ic M-x
-execute extended command
 .El
 .Sh FILES
 .Bl -tag -width Fl
