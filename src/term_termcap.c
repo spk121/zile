@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.32 2004/11/12 23:51:28 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.33 2004/11/12 23:56:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -130,7 +130,7 @@ static const char *getattr(Font f) {
  */
 void term_refresh(void)
 {
-        int i, j, skipped = FALSE, eol = FALSE;
+        int i, j, skipped, eol;
         Font of = ZILE_NORMAL;
         astr as = astr_new();
 
@@ -142,6 +142,8 @@ void term_refresh(void)
         for (i = 0; i < termp->height; i++) {
                 eol = FALSE;
                 astr_cat_cstr(as, tgoto(cm_string, 0, i));
+                skipped = FALSE;
+
                 for (j = 0; j < termp->width; j++) {
                         int offset = i * termp->width + j;
                         int n = screen.array[offset];
