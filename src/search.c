@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.19 2004/10/06 16:32:22 rrt Exp $	*/
+/*	$Id: search.c,v 1.20 2004/10/13 21:12:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -189,7 +189,7 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
                         
                 if (sp2 != NULL) {
                         goto_linep(lp);
-                        cur_bp->pt.o = sp2 - astr_cstr(lp->text); /* + s2size */
+                        cur_bp->pt.o = sp2 - astr_cstr(lp->text) + s2size;
                         return TRUE;
                 }
 	}
@@ -373,7 +373,8 @@ static int isearch(int dir, int regexp)
 		/* Write in minibuf.  */
 		minibuf_write("%s", astr_cstr(buf));
 		/* Redisplay (and leave the cursor in the correct position) */
-		term_redisplay();
+                term_redisplay();
+                term_refresh();
 
 		if (thisflag & FLAG_EXECUTING_MACRO) {
 			c = get_macro_key_data();
