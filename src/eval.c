@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.14 2005/01/25 16:47:27 rrt Exp $	*/
+/*	$Id: eval.c,v 1.15 2005/01/25 20:06:07 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -32,18 +32,24 @@
 #include "eval.h"
 #include "vars.h"
 
+
+static le *eval_cb_command_helper(Function f, int argc, le *branch)
+{
+  int uniarg = 0, ret = FALSE;
+  if (argc == 2) {
+    le *value_le = evaluateNode(branch);
+    uniarg = evalCastLeToInt(value_le);
+    leWipe(value_le);
+  }
+  if (argc < 3)
+    f((argc == 1) ? 1 : uniarg);
+  return ret ? leT : leNIL;
+}
+
 #define X(zile_name, c_name) \
-  static le * eval_cb_ ## c_name (int argc, le *branch) \
+  static le *eval_cb_ ## c_name(int argc, le *branch) \
   { \
-  int uniarg = 0, ret = FALSE; \
-  if (argc == 2) { \
-    le *value_le = evaluateNode(branch); \
-    uniarg = evalCastLeToInt(value_le); \
-    leWipe(value_le); \
-  } \
-  if (argc < 3) \
-    F_ ## c_name((argc == 1) ? 1 : uniarg); \
-  return ret ? leT : leNIL; \
+    return eval_cb_command_helper(F_ ## c_name, argc, branch); \
   }
 #define X0(zile_name, c_name)                    X(zile_name, c_name)
 #define X1(zile_name, c_name, key1)              X(zile_name, c_name)
