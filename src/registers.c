@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.7 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: registers.c,v 1.8 2004/03/09 16:24:10 rrt Exp $	*/
 
 #include "config.h"
 
@@ -113,6 +113,7 @@ static void write_registers_list(va_list ap)
 {
 	unsigned int i, count;
 
+        (void)ap;
 	bprintf("%-8s %8s\n", "Register", "Size");
 	bprintf("%-8s %8s\n", "--------", "----");
 	for (i = count = 0; i < NUM_REGISTERS; ++i)
