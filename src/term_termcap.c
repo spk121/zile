@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.49 2005/01/18 22:45:49 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.50 2005/01/18 22:49:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -319,7 +319,7 @@ void term_init(void)
   nstate.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
   nstate.c_cflag &= ~(CSIZE|PARENB);
   nstate.c_cflag |= CS8;
-  term_resume();
+  setattr(TCSADRAIN, &nstate);
 
   /* Unbuffered I/O so screen is always up-to-date. */
   setvbuf(stdout, NULL, _IONBF, 0);
