@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.20 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: killring.c,v 1.21 2005/02/06 20:09:32 rrt Exp $	*/
 
 #include "config.h"
 
@@ -114,6 +114,7 @@ static int kill_line(int literally)
 DEFUN("kill-line", kill_line)
   /*+
     Kill the rest of the current line; if no nonblanks there, kill thru newline.
+    With prefix argument, kill that many lines from point.
     +*/
 {
   int uni, ret = TRUE;
@@ -121,9 +122,8 @@ DEFUN("kill-line", kill_line)
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (uniarg == 1) {
-    kill_line(FALSE);
-  }
+  if (uniarg == 1)
+    kill_line(lookup_bool_variable("kill-whole-line"));
   else {
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     for (uni = 0; uni < uniarg; ++uni)

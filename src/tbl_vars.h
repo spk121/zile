@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.20 2005/01/26 18:34:17 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.21 2005/02/06 20:09:33 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -50,6 +50,8 @@ Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
+X("kill-whole-line",			"b", "false", "\
+If enabled, `kill-line' with no arg at beg of line kills the whole line.")
 X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\
