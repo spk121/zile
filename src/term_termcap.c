@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.18 2004/10/12 12:07:34 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.19 2004/10/12 22:39:03 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
@@ -285,7 +285,7 @@ void term_init(void)
         kr_string = tgetstr("kr", &tcap);
         ku_string = tgetstr("ku", &tcap);
         kd_string = tgetstr("kd", &tcap);
-        /* TODO: Use km, mm, mo for Meta key. */
+        /* We assume the Meta key is present and on. */
 
         norm_string = astr_new();
         astr_cat_cstr(norm_string, se_string);
@@ -387,8 +387,14 @@ static int translate_key(char *s, int nbytes)
                 return KBD_UP;
         else if (strcmp(s, kd_string) == 0)
                 return KBD_DOWN;
-        else
-                return KBD_NOKEY;
+        else if (nbytes > 1) {
+                int i;
+                for (i = 1; i < strlen(s); i++)
+                        term_ungetkey(s[i]);
+                return *s;
+        }
+
+        return KBD_NOKEY;
 }
 
 #define MAX_KEY_CHARS 16 /* Hopefully more than the longest keycode sequence. */
@@ -397,11 +403,7 @@ static int xgetkey(int mode, int arg)
 {
         int ret = 0;
         size_t nbytes;
-        fd_set rfds;
         char keys[MAX_KEY_CHARS];
-
-        FD_ZERO(&rfds);
-        FD_SET(STDIN_FILENO, &rfds);
 
         if (mode & GETKEY_DELAYED)
                 nstate.c_cc[VTIME] = 0;	 /* Wait indefinitely for at least one character. */
@@ -411,7 +413,7 @@ static int xgetkey(int mode, int arg)
                 nstate.c_cc[VTIME] = arg / 100;  /* Wait up to arg/100 10ths of a second. */
         }                
 
-        nbytes = read(STDIN_FILENO, keys, MAX_KEY_CHARS);
+        nbytes = fread(keys, sizeof(char), MAX_KEY_CHARS, stdin);
         keys[nbytes] = '\0';
         
 	if (ret < 0)
@@ -422,7 +424,7 @@ static int xgetkey(int mode, int arg)
         else {
                 int key = translate_key(keys, nbytes);
                 while (key == KBD_META) {
-                        char c = getchar();
+                        char c = term_getkey();
                         key = translate_key(&c, 1);
                         key |= KBD_META;
                 }
