@@ -49,7 +49,7 @@ int is_mark_actived(void);
 int exist_file(const char *filename);
 int is_regular_file(const char *filename);
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname);
-astr compact_path(astr buf, const char *path);
+astr compact_path(const char *path);
 astr get_current_dir(astr buf, int interactive);
 void open_file(char *path, int lineno);
 void read_from_disk(const char *filename);
