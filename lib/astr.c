@@ -1,4 +1,4 @@
-/*	$Id: astr.c,v 1.6 2003/06/24 09:42:13 rrt Exp $	*/
+/*	$Id: astr.c,v 1.7 2003/06/24 14:00:20 rrt Exp $	*/
 
 /*
  * Copyright (c) 2001 Sandro Sigala.  All rights reserved.
@@ -453,6 +453,7 @@ astr astr_vfmt(astr as, const char *fmt, va_list ap)
 	vasprintf(&buf, fmt, ap);
 	astr_assign_cstr(as, buf);
 	free(buf);
+        return as;
 }
 
 astr astr_vafmt(astr as, const char *fmt, va_list ap)
@@ -461,6 +462,7 @@ astr astr_vafmt(astr as, const char *fmt, va_list ap)
 	vasprintf(&buf, fmt, ap);
 	astr_append_cstr(as, buf);
 	free(buf);
+        return as;
 }
 
 astr astr_fmt(astr as, const char *fmt, ...)
