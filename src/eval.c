@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.2 2005/01/13 07:45:52 rrt Exp $	*/
+/*	$Id: eval.c,v 1.3 2005/01/14 23:45:27 rrt Exp $	*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -242,7 +242,7 @@ le * evalCastIntToLe( int intvalue )
 }
 
     
-le * eval_cb_nothing( const int argc, le * branch )
+le * eval_cb_nothing( int argc, le * branch )
 {
   return( leNew( "T" ));
 }
@@ -293,7 +293,7 @@ eval_cume_helper(
   return( value );
 }
     
-le * eval_cb_add( const int argc, le * branch )
+le * eval_cb_add( int argc, le * branch )
 {
   if (!branch || argc < 2) return( leNew( "NIL" ) );
 
@@ -307,7 +307,7 @@ le * eval_cb_add( const int argc, le * branch )
           );
 }
     
-le * eval_cb_subtract( const int argc, le * branch )
+le * eval_cb_subtract( int argc, le * branch )
 {
   int firstitem = 0;
   le * lefirst;
@@ -333,7 +333,7 @@ le * eval_cb_subtract( const int argc, le * branch )
           );
 }
     
-le * eval_cb_multiply( const int argc, le * branch )
+le * eval_cb_multiply( int argc, le * branch )
 {
   if (!branch || argc < 2) return( leNew( "NIL" ) );
 
@@ -347,7 +347,7 @@ le * eval_cb_multiply( const int argc, le * branch )
           );
 }
     
-le * eval_cb_divide( const int argc, le * branch )
+le * eval_cb_divide( int argc, le * branch )
 {
   int firstitem = 0;
   le * lefirst;
@@ -367,7 +367,7 @@ le * eval_cb_divide( const int argc, le * branch )
           );
 }
     
-le * eval_cb_oneplus( const int argc, le * branch )
+le * eval_cb_oneplus( int argc, le * branch )
 {
   le * retle;
   int value;
@@ -381,7 +381,7 @@ le * eval_cb_oneplus( const int argc, le * branch )
   return( evalCastIntToLe(value + 1) );
 }
     
-le * eval_cb_oneminus( const int argc, le * branch )
+le * eval_cb_oneminus( int argc, le * branch )
 {
   le * retle;
   int value;
@@ -396,7 +396,7 @@ le * eval_cb_oneminus( const int argc, le * branch )
 
 }
     
-le * eval_cb_modulus( const int argc, le * branch )
+le * eval_cb_modulus( int argc, le * branch )
 {
   le * letemp;
   int value1, value2;
@@ -415,7 +415,7 @@ le * eval_cb_modulus( const int argc, le * branch )
 }
 
     
-le * eval_cb_lt( const int argc, le * branch )
+le * eval_cb_lt( int argc, le * branch )
 {
   le * letemp;
   int value1, value2;
@@ -433,7 +433,7 @@ le * eval_cb_lt( const int argc, le * branch )
   return( leNew ( (value1 < value2 )?"T":"NIL" ) );
 }
     
-le * eval_cb_lt_eq( const int argc, le * branch )
+le * eval_cb_lt_eq( int argc, le * branch )
 {
   le * letemp;
   int value1, value2;
@@ -451,7 +451,7 @@ le * eval_cb_lt_eq( const int argc, le * branch )
   return( leNew ( (value1 <= value2 )?"T":"NIL" ) );
 }
     
-le * eval_cb_gt( const int argc, le * branch )
+le * eval_cb_gt( int argc, le * branch )
 {
   le * letemp;
   int value1, value2;
@@ -469,7 +469,7 @@ le * eval_cb_gt( const int argc, le * branch )
   return( leNew ( (value1 > value2 )?"T":"NIL" ) );
 }
     
-le * eval_cb_gt_eq( const int argc, le * branch )
+le * eval_cb_gt_eq( int argc, le * branch )
 {
   le * letemp;
   int value1, value2;
@@ -487,7 +487,7 @@ le * eval_cb_gt_eq( const int argc, le * branch )
   return( leNew ( (value1 >= value2 )?"T":"NIL" ) );
 }
     
-le * eval_cb_eqsign( const int argc, le * branch )
+le * eval_cb_eqsign( int argc, le * branch )
 {
   le * letemp;
   int value1, value2;
@@ -506,7 +506,7 @@ le * eval_cb_eqsign( const int argc, le * branch )
 }
 
     
-le * eval_cb_and( const int argc, le * branch )
+le * eval_cb_and( int argc, le * branch )
 {
   le * temp;
   le * result = NULL;
@@ -530,7 +530,7 @@ le * eval_cb_and( const int argc, le * branch )
   return( result );
 }
     
-le * eval_cb_or( const int argc, le * branch )
+le * eval_cb_or( int argc, le * branch )
 {
   le * temp;
   le * result = NULL;
@@ -554,7 +554,7 @@ le * eval_cb_or( const int argc, le * branch )
   return( result );
 }
     
-le * eval_cb_not( const int argc, le * branch )
+le * eval_cb_not( int argc, le * branch )
 {
   le * result = NULL;
   if (!branch || argc != 2 ) return( leNew( "NIL" ));
@@ -581,7 +581,7 @@ le * eval_cb_not( const int argc, le * branch )
 }
 
     
-le * eval_cb_atom( const int argc, le * branch )
+le * eval_cb_atom( int argc, le * branch )
 {
   le * result = NULL;
   if (!branch || argc != 2 ) return( leNew( "NIL" ));
@@ -596,7 +596,7 @@ le * eval_cb_atom( const int argc, le * branch )
   return( leNew( "NIL" ) );
 }
     
-le * eval_cb_car( const int argc, le * branch )
+le * eval_cb_car( int argc, le * branch )
 {
   le * result = NULL;
   le * temp = NULL;
@@ -633,7 +633,7 @@ le * eval_cb_car( const int argc, le * branch )
   return( result );
 }
     
-le * eval_cb_cdr( const int argc, le * branch )
+le * eval_cb_cdr( int argc, le * branch )
 {
   le * result = NULL;
   le * temp = NULL;
@@ -659,7 +659,7 @@ le * eval_cb_cdr( const int argc, le * branch )
   return( result );
 }
     
-le * eval_cb_cons( const int argc, le * branch )
+le * eval_cb_cons( int argc, le * branch )
 {
   le * result1 = NULL;
   le * result2 = NULL;
@@ -688,7 +688,7 @@ le * eval_cb_cons( const int argc, le * branch )
   return( result1 );
 }
     
-le * eval_cb_list( const int argc, le * branch )
+le * eval_cb_list( int argc, le * branch )
 {
   le * currelement = NULL;
   le * finaltree = NULL;
@@ -789,7 +789,7 @@ int eval_cb_lists_same( le * list1, le * list2 )
   return( 1 );
 }
     
-le * eval_cb_equal( const int argc, le * branch )
+le * eval_cb_equal( int argc, le * branch )
 {
   le * list1 = NULL;
   le * list2 = NULL;
@@ -809,7 +809,7 @@ le * eval_cb_equal( const int argc, le * branch )
 }
 
     
-le * eval_cb_if( const int argc, le * branch )
+le * eval_cb_if( int argc, le * branch )
 {
   le * retcond = NULL;
 
@@ -836,7 +836,7 @@ le * eval_cb_if( const int argc, le * branch )
 le *
 eval_cb_whenunless_helper(
                           enum whenunless which,
-                          const int argc, 
+                          int argc, 
                           le * branch
                           )
 {
@@ -875,7 +875,7 @@ eval_cb_whenunless_helper(
   return( retval );
 }
     
-le * eval_cb_unless( const int argc, le * branch )
+le * eval_cb_unless( int argc, le * branch )
 {
   return( eval_cb_whenunless_helper(
                                     WU_UNLESS,
@@ -883,7 +883,7 @@ le * eval_cb_unless( const int argc, le * branch )
                                     branch ) );
 }
     
-le * eval_cb_when( const int argc, le * branch )
+le * eval_cb_when( int argc, le * branch )
 {
   return( eval_cb_whenunless_helper(
                                     WU_WHEN,
@@ -891,7 +891,7 @@ le * eval_cb_when( const int argc, le * branch )
                                     branch ) );
 }
     
-le * eval_cb_cond( const int argc, le * branch )
+le * eval_cb_cond( int argc, le * branch )
 {
   le * retval = NULL;
   le * retblock = NULL;
@@ -935,7 +935,7 @@ le * eval_cb_cond( const int argc, le * branch )
   return( retval );
 }
     
-le * eval_cb_select( const int argc, le * branch )
+le * eval_cb_select( int argc, le * branch )
 {
   le * result;
 
@@ -972,34 +972,32 @@ le * eval_cb_select( const int argc, le * branch )
 }
 
     
-le * eval_cb_princ( const int argc, le * branch )
+le * eval_cb_princ(int argc, le *branch)
 {
-  le * thisnode;
-  le * retblock = NULL;
-  if (!branch || argc < 1 ) return( leNew( "NIL" ));
+  le *retblock = NULL;
 
-  thisnode = branch->list_next;
-  while (thisnode)
-    {
-      if (retblock)  leWipe( retblock );
+  if (branch != NULL && argc >= 1) {
+    le *thisnode;
+    for (thisnode = branch->list_next; thisnode; thisnode = thisnode->list_next) {
+      if (retblock)
+        leWipe(retblock);
       retblock = evaluateNode(thisnode);
-      leDumpReformat(stdout, retblock);
-
-      thisnode = thisnode->list_next;
+      leDumpReformat(retblock); /* XXX */
     }
-  return( retblock );
+  }
+  
+  return retblock;
 }
     
-le * eval_cb_terpri( const int argc, le * branch )
+le *eval_cb_terpri(int argc, le *branch)
 {
-  if (!branch || argc != 1 ) return( leNew( "NIL" ));
-
-  printf( "\n" );
-  return( leNew( "NIL" ) );
+  if (branch != NULL && argc == 1)
+    printf("\n");
+  return leNew("NIL");
 }
 
     
-le * eval_cb_eval( const int argc, le * branch )
+le * eval_cb_eval( int argc, le * branch )
 {
   le * temp;
   le * retval;
@@ -1011,7 +1009,7 @@ le * eval_cb_eval( const int argc, le * branch )
   return( retval );
 }
     
-le * eval_cb_prog( const int argc, le * branch, int returnit )
+le * eval_cb_prog( int argc, le * branch, int returnit )
 {
   le * curr;
   le * retval = NULL;
@@ -1038,24 +1036,24 @@ le * eval_cb_prog( const int argc, le * branch, int returnit )
   return( retval );
 }
     
-le * eval_cb_prog1( const int argc, le * branch )
+le * eval_cb_prog1( int argc, le * branch )
 {
   return( eval_cb_prog( argc, branch, 1 ));
 }
     
-le * eval_cb_prog2( const int argc, le * branch )
+le * eval_cb_prog2( int argc, le * branch )
 {
   return( eval_cb_prog( argc, branch, 2 ));
 }
     
-le * eval_cb_progn( const int argc, le * branch )
+le * eval_cb_progn( int argc, le * branch )
 {
   return( eval_cb_prog( argc, branch, -1 ));
 }
 
     
 le *eval_cb_set_helper(enum setfcn function,
-                       const int argc, 
+                       int argc, 
                        le * branch)
 {
   le *newkey, *newvalue = leNew("NIL"), *current;
@@ -1085,17 +1083,17 @@ le *eval_cb_set_helper(enum setfcn function,
   return leDup(newvalue);
 }
     
-le * eval_cb_set( const int argc, le * branch )
+le * eval_cb_set( int argc, le * branch )
 {
   return( eval_cb_set_helper( S_SET, argc, branch ) );
 }
     
-le * eval_cb_setq( const int argc, le * branch )
+le * eval_cb_setq( int argc, le * branch )
 {
   return( eval_cb_set_helper( S_SETQ, argc, branch ) );
 }
     
-le * eval_cb_enum( const int argc, le * branch )
+le * eval_cb_enum( int argc, le * branch )
 {
   le * current;
   int count = -1;
@@ -1126,7 +1124,7 @@ le * eval_cb_enum( const int argc, le * branch )
 }
 
     
-le *eval_cb_defun(const int argc, le * branch)
+le *eval_cb_defun(int argc, le * branch)
 {
   if (!branch || argc < 4)
     return leNew("NIL");
