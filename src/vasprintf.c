@@ -68,9 +68,6 @@ you use strange formats.
 
 */
 
-/*#########################################################################*/
-
-
 #include "config.h"
 
 #include <assert.h>
@@ -105,7 +102,6 @@ typedef struct {
   FILE *       fprintf_file;
 } xprintf_struct;
 
-/*########################### realloc_buff ################################*/
 /*
  *  Realloc buffer if needed
  *  Return value:  0 = ok
@@ -133,7 +129,6 @@ static int realloc_buff(xprintf_struct *s, size_t len)
   return 0;
 }
 
-/*############################ usual_char #################################*/
 /*
  *  Prints 'usual' characters    up to next '%'
  *                            or up to end of text
@@ -158,7 +153,6 @@ static int usual_char(xprintf_struct * s)
   return 0;
 }
 
-/*############################ print_it ###################################*/
 /*
  *  Return value: 0 = ok
  *                EOF = error
@@ -191,7 +185,6 @@ static int print_it(xprintf_struct *s, size_t approx_len,
   return 0;
 }
 
-/*############################## type_s ###################################*/
 /*
  *  Prints a string (%s)
  *  We need special handling because:
@@ -223,7 +216,6 @@ static int type_s(xprintf_struct *s, int width, int prec,
   return print_it(s, string_len, format_string, arg_string);
 }
 
-/*############################### getint ##################################*/
 /*
  *  Read a serie of digits. Stop when non-digit is found.
  *  Return value: the value read (between 0 and 32767).
@@ -246,7 +238,6 @@ static int getint(const char **string)
   return i;
 }
 
-/*############################## dispatch #################################*/
 /*
  *  Read a part of the format string. A part is 'usual characters' (ie "blabla")
  *  or '%%' escape sequence (to print a single '%') or any combination of
@@ -495,9 +486,8 @@ static int dispatch(xprintf_struct *s)
 #undef DESTTXT
 }
 
-/*################################ core ###################################*/
 /*
- *  Return value: number of *virtualy* written characters
+ *  Return value: number of *virtually* written characters
  *                EOF = error
  */
 static int core(xprintf_struct *s)
@@ -543,7 +533,7 @@ static int core(xprintf_struct *s)
     }
   }
 
-  /* for (v)asnprintf */
+  /* XXX for (v)asnprintf */
   dummy_base = s->buffer_base;
   save_len = 0;                 /* just to avoid a compiler warning */
 
@@ -574,7 +564,6 @@ static int core(xprintf_struct *s)
   return EOF;
 }
 
-/*############################# vasprintf ################################*/
 int vasprintf(char **ptr, const char *format_string, va_list vargs)
 {
   xprintf_struct s;
