@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.1 2004/06/30 22:52:41 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.2 2004/07/10 22:49:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -149,9 +149,9 @@ void term_init(void)
         cl_string = tgetstr("cl", &tcap);
         cm_string = tgetstr("cm", &tcap);
         auto_wrap = tgetflag("am");
-        ce_string = tgetstr ("ce", &tcap);
-        se_string = tgetstr ("se", &tcap);
-        so_string = tgetstr ("so", &tcap);
+        ce_string = tgetstr("ce", &tcap);
+        se_string = tgetstr("se", &tcap);
+        so_string = tgetstr("so", &tcap);
 
         /* Extract information that termcap functions use.  */
         temp = tgetstr("pc", &tcap);

@@ -1,5 +1,7 @@
 /* Exported terminal
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2004 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.h,v 1.1 2004/06/30 22:52:41 rrt Exp $	*/
+/*	$Id: term_termcap.h,v 1.2 2004/07/10 22:49:16 rrt Exp $	*/
 
 #define ZILE_COLOR_BLACK	0
 #define ZILE_COLOR_RED		1
