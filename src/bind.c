@@ -1,4 +1,4 @@
-/*	$Id: bind.c,v 1.5 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: bind.c,v 1.6 2004/01/21 01:16:05 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -245,9 +245,8 @@ static char *make_completion(char *buf, int *keys, int numkeys)
 		len += l - 1;
 	}
 
-	buf[len] = ' ';
-	buf[len+1] = '-';
-	buf[len+2] = '\0';
+	buf[len] = '-';
+	buf[len+1] = '\0';
 
 	return buf;
 }
