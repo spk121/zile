@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.3 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: htable.c,v 1.4 2004/03/09 16:13:39 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -281,9 +281,9 @@ int main(void)
 	assert(htable_store(ht, "foo", "foo data") == 0);
 	assert(htable_store_key(ht, "var1") == 0);
 	assert(htable_store_key(ht, "var2") == 0);
-	assert(htable_fetch(ht, "foo") != NULL && 
+	assert(htable_fetch(ht, "foo") != NULL &&
 	       !strcmp(htable_fetch(ht, "foo"), "foo data"));
-	assert(htable_fetch(ht, "hello") != NULL && 
+	assert(htable_fetch(ht, "hello") != NULL &&
 	       !strcmp(htable_fetch(ht, "hello"), "hello data"));
 	htable_dump(ht, stdout);
 	htable_delete(ht);
