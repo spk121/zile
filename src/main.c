@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.62 2005/01/14 23:43:09 rrt Exp $	*/
+/*	$Id: main.c,v 1.63 2005/01/15 00:34:27 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,6 +37,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <getopt.h> /* XXX */
 #include <signal.h>
 #if ALLEGRO
 #if HAVE_ALLEGRO_H
@@ -121,15 +122,6 @@ static void about_screen(void)
   minibuf_write(about_minibuf_str);
 }
 
-/*
- * Output the program syntax then exit.
- */
-static void usage(void)
-{
-  fprintf(stderr, "Usage: zile [-hqV] [-e EXPR] [-u RCFILE] [+NUMBER] [FILE...]\n");
-  exit(1);
-}
-
 static void setup_main_screen(int argc)
 {
   Buffer *bp, *last_bp = NULL;
@@ -181,29 +173,80 @@ static void other_sig_handler(int signo)
   zile_exit(2);
 }
 
+/*
+ * Output the command line syntax.
+ */
+static void usage(void)
+{
+  fprintf(stderr,
+          "Usage: zile [OPTION-OR-FILENAME]...\n"
+          "\n"
+          "Run Zile, the lightweight Emacs clone.\n"
+          "\n"
+          "Initialization options:\n"
+          "\n"
+          "--batch                do not do interactive display; implies -q\n"
+          "--help                 display this help message and exit\n"
+          "--no-init-file, -q     do not load ~/.zile\n"
+          "--version              display version information and exit\n"
+          "\n"
+          "Action options:\n"
+          "\n"
+          "FILE                   visit FILE using find-file\n"
+          "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+          "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
+          "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
+          );
+}
+
+/* Options table */
+struct option longopts[] = {
+    { "batch",        0, NULL, 'b' },
+    { "eval",         0, NULL, 'e' },
+    { "help",         0, NULL, 'h' },
+    { "load",         0, NULL, 'l' },
+    { "no-init-file", 0, NULL, 'q' },
+    { "version",      0, NULL, 'v' },
+    { 0, 0, 0, 0 }
+};
+
 int main(int argc, char **argv)
 {
   int c;
-  int qflag = 0;
-  char *uarg = NULL, *earg = NULL;
+  int bflag = 0, qflag = 0;
+  char *earg = NULL, *larg = NULL;
 
-  while ((c = getopt(argc, argv, "e:hqu:V")) != -1)
+  while ((c = getopt_long(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
+    case 'b':
+      bflag = TRUE;
+      qflag = TRUE;
+      break;
     case 'e':
       earg = optarg;
+      break;
+    case 'l':
+      larg = optarg;
+      break;
     case 'q':
-      qflag = 1;
+      qflag = TRUE;
       break;
-    case 'u':
-      uarg = optarg;
-      break;
-    case 'V':
-      fprintf(stderr, ZILE_VERSION_STRING "\n");
+    case 'v':
+      /* XXX Common up copyright strings with that above */
+      fprintf(stderr,
+              ZILE_VERSION_STRING "\n"
+              "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"
+              "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"
+              "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>\n"
+              "Zile comes with ABSOLUTELY NO WARRANTY.\n"
+              "You may redistribute copies of Zile\n"
+              "under the terms of the GNU General Public License.\n"
+              "For more information about these matters, see the file named COPYING.\n"
+              );
       return 0;
-    case '?':
-    default:
+    case 'h':
       usage();
-      /* NOTREACHED */
+      exit(0);
     }
   argc -= optind;
   argv += optind;
@@ -218,8 +261,8 @@ int main(int argc, char **argv)
 
   setlocale(LC_ALL, "");
 
-  if (earg) {
-    lithp(earg);
+  if (larg) {
+    lithp(larg);
     exit(0);
   }
 
@@ -227,7 +270,7 @@ int main(int argc, char **argv)
 
   init_variables();
   if (!qflag)
-    read_rc_file(uarg);
+    read_rc_file();
 
   /* Create the `*scratch*' buffer and initialize key bindings. */
   create_first_window();
