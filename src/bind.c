@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.28 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: bind.c,v 1.29 2004/10/05 21:47:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -152,7 +152,7 @@ int do_completion(astr as, int *compl)
 	int c;
 
 	if (!*compl) {
-		c = term_xgetkey(GETKEY_DELAYED, 500);
+		c = waitkey_discard(500);
 		if (c == KBD_NOKEY) {
 			minibuf_write("%s", astr_cstr(as));
 			c = term_getkey();
