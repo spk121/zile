@@ -28,7 +28,7 @@ dnl ==================================================================
 dnl Checks for functions.
 dnl ==================================================================
 
-AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup vasprintf strrstr fchown fchmod)
+AC_REPLACE_FUNCS(vasprintf strrstr)
 
 dnl ==================================================================
 dnl Checks for header files.
@@ -52,7 +52,7 @@ AC_FUNC_MEMCMP
 AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(getcwd strerror strstr)
+AC_CHECK_FUNCS(getcwd)
 
 dnl ==================================================================
 dnl Check for GNU Regex library
