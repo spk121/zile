@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.9 2005/01/22 01:04:56 rrt Exp $	*/
+/*	$Id: lists.c,v 1.10 2005/01/23 14:14:56 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -55,7 +55,7 @@ void leDelete(le *element)
   }
 }
     
-void leWipe(le *list)
+void leReallyWipe(le *list)
 {
   if (list) {
     /* free descendants */
@@ -67,6 +67,12 @@ void leWipe(le *list)
       free(list->data);
     free(list);
   }
+}
+
+void leWipe(le *list)
+{
+  if (list != leNIL)
+    leReallyWipe(list);
 }
     
 le *leAddHead(le *list, le *element)

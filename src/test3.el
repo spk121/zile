@@ -10,11 +10,6 @@
 (* 4 9)
 (/ 100 20)
 
-(1+ 30)
-(1- 30)
-
-(1+ (+ 20 30))
-(1- (+ 20 30))
 (% 2001 4)
 (% 4 2001)
 
@@ -184,7 +179,6 @@
 )
 
 (princ '"hello world")
-(terpri)
 (princ "this is also a test");
 
 (setq a 'b)
@@ -263,34 +257,3 @@ addthree 3)
 
 (seven)
 (seven2 ())
-
-(enum a b c d e)
-(enum)
-(enum ())
-(enum z y (e r t y) x)
-(enum aa bb aa cc)
-
- (gc)
- (pq)
-
-(setq x 4)
-
-(select)
-(select (+ x 1) 
-	(3 (setq a 'three)) 
-	(4 (setq a 'four)) 
-	(9 (setq a 'five)) 
-	(6 (setq a 'six))
-)
-
-(select (+ x 1) 
-	(5 (setq b 'five)) 
-	(6 (setq b 'six))
-)
-
-(select (+ x 1) 
-	(6 (setq b 'six))
-)
-
-(select (+ x 1) 
-)
