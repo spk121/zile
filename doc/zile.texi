@@ -482,6 +482,10 @@ Join lines if the character is a newline.
 @item backward-kill-word
 Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
+@item backward-sexp
+Move backward across one balanced expression (sexp).
+With argument, do it that many times.  Negative arg -N means
+move forward across N balanced expressions.
 @item backward-word
 Move backward until encountering the end of a word (forward if the
 argument is negative).
@@ -503,6 +507,10 @@ Turn on the @i{C# Mode} for editing C# (@i{C sharp}) code.
 @item call-last-kbd-macro
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.  Zero means repeat until error.
+@item capitalize-word
+Capitalize the following word (or argument N words), moving over.
+This gives the word(s) a first character in upper case and the rest
+lower case.
 @item cd
 Make the user specified directory become the current buffer's default
 directory.
@@ -510,11 +518,19 @@ directory.
 Save the region as if killed, but don't kill it.
 @item copy-to-register
 Copy region into the user specified register.
+@item delete-blank-lines
+On blank line, delete all surrounding blank lines, leaving just one.
+On isolated blank line, delete that one.
+On nonblank line, delete any immediately following blank lines.
 @item delete-char
 Delete the following character.
 Join lines if the character is a newline.
+@item delete-horizontal-space
+Delete all spaces and tabs around point.
 @item delete-other-windows
 Make the selected window fill the screen.
+@item just-one-space
+Delete all spaces and tabs around point, leaving one space.
 @item delete-window
 Remove the current window from the screen.
 @item describe-function
@@ -559,6 +575,13 @@ This may be called when the fontification looks weird.
 @item forward-char
 Move point right one character.
 On reaching end of buffer, stop and signal error.
+@item forward-line
+Move N lines forward (backward if N is negative).
+Precisely, if point is on line I, move to the start of line I + N.
+@item forward-sexp
+Move forward across one balanced expression (sexp).
+With argument, do it that many times.  Negative arg -N means
+move backward across N balanced expressions.
 @item forward-word
 Move point forward one word (backward if the argument is negative).
 With argument, do this that many times.
@@ -578,6 +601,8 @@ Show the Zile @i{Frequently Asked Questions} (FAQ).
 Show informations about getting the latest version.
 @item help-tutorial
 Show a tutorial window.
+@item indent-command
+Indent line in proper way for current major mode or insert a tab.
 @item insert-buffer
 Insert after point the contents of the user specified buffer.
 Puts mark after the inserted text.
@@ -589,16 +614,28 @@ Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
 @item isearch-backward
 Do incremental search backward.
+With a prefix argument, do a regular expression search instead.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
 Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
+@item isearch-backward-regexp
+Do incremental search forward for regular expression.
+With a prefix argument, do a regular string search instead.
+Like ordinary incremental search except that your input
+is treated as a regexp.  See @kbd{C-s} for more info.
 @item isearch-forward
 Do incremental search forward.
+With a prefix argument, do an incremental regular expression search instead.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
 Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
+@item isearch-forward-regexp
+Do incremental search forward for regular expression.
+With a prefix argument, do a regular string search instead.
+Like ordinary incremental search except that your input
+is treated as a regexp.  See @kbd{C-s} for more info.
 @item java-mode
 Turn on the @i{Java Mode} for editing Java code.
 @item keyboard-quit
@@ -619,6 +656,10 @@ you can use the killing commands to copy text from a read-only buffer.
 If the previous command was also a kill command,
 the text killed this time appends to the text killed last time
 to make one entry in the kill ring.
+@item kill-sexp
+Kill the sexp (balanced expression) following the cursor.
+With ARG, kill that many sexps after the cursor.
+Negative arg -N means kill N sexps before the cursor.
 @item kill-word
 Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
@@ -645,6 +686,12 @@ List defined variables.
 Turn on the @i{Mail Mode} for editing mails.
 @item mark-whole-buffer
 Put point at beginning and mark at end of buffer.
+@item mark-sexp
+Set mark argument sexps from point.
+The place mark goes is the same place @kbd{C-M-f} would
+move to with the same argument.
+@item mark-word
+Set mark argument words away from point.
 @item minihelp-rotate-contents
 Show the next @i{Mini Help} entry.
 @item minihelp-toggle-window
@@ -652,6 +699,9 @@ Toggle the @i{Mini Help} window.
 @item newline
 Insert a newline at the current point position into
 the current buffer.
+@item newline-and-indent
+Insert a newline, then indent according to major mode.
+Indentation is done using the @i{indent-command} function.
 @item next-line
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -698,8 +748,12 @@ Scroll text of current window downward near full screen.
 Scroll text of current window upward near full screen.
 @item search-backward
 Search backward from point for the user specified text.
+@item search-backward-regexp
+Search backward from point for match for regular expression REGEXP.
 @item search-forward
 Search forward from point for the user specified text.
+@item search-forward-regexp
+Search forward from point for regular expression REGEXP.
 @item self-insert-command
 Insert the character you type.
 @item set-fill-column
@@ -774,6 +828,20 @@ if the @samp{expand-tabs} variable is bound and set to true.
 Turn on the @i{Text Mode} for editing text intended for humans to read.
 @item toggle-read-only
 Change whether this buffer is visiting its file read-only.
+@item transient-mark-mode
+Toggle Transient Mark mode.
+With arg, turn Transient Mark mode on if arg is positive, off otherwise.
+@item transpose-chars
+Interchange characters around point, moving forward one character.
+If at end of line, the previous two chars are exchanged.
+@item transpose-lines
+Exchange current line and previous line, leaving point after both.
+With argument ARG, takes previous line and moves it past ARG lines.
+With argument 0, interchanges line point is in with line mark is in.
+@item transpose-sexps
+Like @kbd{M-t} but applies to sexps.
+@item transpose-words
+Interchange words around point, leaving point at end of them.
 @item undo
 Undo some previous changes.
 Repeat this command to undo more changes.
