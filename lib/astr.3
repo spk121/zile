@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: astr.3,v 1.7 2004/03/10 13:01:12 rrt Exp $
+.\" $Id: astr.3,v 1.8 2004/03/10 13:27:12 rrt Exp $
 .Dd May 17, 2003
 .Os
 .Dt ASTR 3
@@ -22,16 +22,11 @@ void   astr_clear(astr as);
 char * astr_cstr(castr as);
 size_t astr_size(castr as);
 int    astr_cmp(castr s1, castr s2);
-int    astr_eq(castr s1, castr s2);
-int    astr_eq_cstr(castr as, const char *s);
 astr   astr_assign(astr as, castr src);
 astr   astr_assign_cstr(astr as, const char *s);
 astr   astr_insert(astr as, int pos, castr src);
 astr   astr_insert_cstr(astr as, int pos, const char *s);
 astr   astr_insert_char(astr as, int pos, int c);
-astr   astr_prepend(astr as, castr src);
-astr   astr_prepend_cstr(astr as, const char *s);
-astr   astr_prepend_char(astr as, int c);
 astr   astr_append(astr as, castr src);
 astr   astr_append_cstr(astr as, const char *s);
 astr   astr_append_char(astr as, int c);
@@ -132,17 +127,6 @@ is found, respectively, to be less than, to match, or be greater than
 .Fa s2 .
 .Pp
 The
-.Fn astr_eq
-and
-.Fn astr_eq_cstr
-functions compare the argument strings and return an non-zero integer
-if
-.Fa s1
-is equal to
-.Fa s2 ,
-otherwise a zero value.
-.Pp
-The
 .Fn astr_assign ,
 and
 .Fn astr_assign_cstr
@@ -161,15 +145,6 @@ into the string
 .Fa as
 at the specified position
 .Fa pos .
-.Pp
-The
-.Fn astr_prepend ,
-.Fn astr_prepend_cstr ,
-and
-.Fn astr_prepend_char
-functions prepend the contents of the argument string or character
-at the beginning of the string
-.Fa as .
 .Pp
 The
 .Fn astr_append ,

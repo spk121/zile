@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.12 2004/03/10 13:01:12 rrt Exp $	*/
+/*	$Id: astr.c,v 1.13 2004/03/10 13:27:12 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -112,18 +112,6 @@ int (astr_cmp)(castr s1, castr s2)
 	return strcmp(s1->text, s2->text);
 }
 
-int (astr_eq)(castr s1, castr s2)
-{
-	assert(s1 != NULL && s2 != NULL);
-	return !strcmp(s1->text, s2->text);
-}
-
-int (astr_eq_cstr)(castr s1, const char *s2)
-{
-	assert(s1 != NULL && s2 != NULL);
-	return !strcmp(s1->text, s2);
-}
-
 static astr astr_assign_x(astr as, const char *s, size_t csize)
 {
 	astr_resize(as, csize);
@@ -184,21 +172,6 @@ astr astr_insert_char(astr as, int pos, int c)
         buf[1] = '\0';
 	assert(as != NULL);
 	return astr_insert_x(as, pos, buf, 1);
-}
-
-astr astr_prepend(astr as, castr src)
-{
-	return astr_insert(as, 0, src);
-}
-
-astr astr_prepend_cstr(astr as, const char *s)
-{
-	return astr_insert_cstr(as, 0, s);
-}
-
-astr astr_prepend_char(astr as, int c)
-{
-	return astr_insert_char(as, 0, c);
 }
 
 static astr astr_append_x(astr as, const char *s, size_t csize)
@@ -435,8 +408,7 @@ int main(void)
 	int i;
 
 	as1 = astr_new();
-	astr_assign_cstr(as1, " world");
-	astr_prepend_cstr(as1, "hello");
+	astr_assign_cstr(as1, "hello world");
 	astr_append_char(as1, '!');
 	assert_eq(as1, "hello world!");
 
@@ -444,8 +416,7 @@ int main(void)
 	assert_eq(as3, "world");
 
 	as2 = astr_new();
-	astr_assign_cstr(as2, " ");
-	astr_prepend_cstr(as2, "The");
+	astr_assign_cstr(as2, "The ");
 	astr_append(as2, as3);
 	astr_append_char(as2, '.');
 	assert_eq(as2, "The world.");

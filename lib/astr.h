@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.8 2004/03/10 13:01:12 rrt Exp $	*/
+/*	$Id: astr.h,v 1.9 2004/03/10 13:27:12 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -40,16 +40,11 @@ extern void   astr_clear(astr as);
 extern const char * astr_cstr(castr as);
 extern size_t astr_size(castr as);
 extern int    astr_cmp(castr s1, castr s2);
-extern int    astr_eq(castr s1, castr s2);
-extern int    astr_eq_cstr(castr as, const char *s);
 extern astr   astr_assign(astr as, castr src);
 extern astr   astr_assign_cstr(astr as, const char *s);
 extern astr   astr_insert(astr as, int pos, castr src);
 extern astr   astr_insert_cstr(astr as, int pos, const char *s);
 extern astr   astr_insert_char(astr as, int pos, int c);
-extern astr   astr_prepend(astr as, castr src);
-extern astr   astr_prepend_cstr(astr as, const char *s);
-extern astr   astr_prepend_char(astr as, int c);
 extern astr   astr_append(astr as, castr src);
 extern astr   astr_append_cstr(astr as, const char *s);
 extern astr   astr_append_char(astr as, int c);
