@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.25 2004/03/09 16:29:00 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.26 2004/03/09 23:10:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -100,57 +100,57 @@ static char *make_buffer_flags(Buffer *bp, int iscurrent)
 	return buf;
 }
 
-static char *make_buffer_mode(Buffer *bp)
+static astr make_buffer_mode(Buffer *bp)
 {
-	static char buf[32]; /* Make sure the buffer is large enough. */
+	astr as = astr_new();
 
 	switch (bp->mode) {
 #if ENABLE_C_MODE
 	case BMODE_C:
-		strcpy(buf, "C");
+		astr_assign_cstr(buf, "C");
 		break;
 #endif
 #if ENABLE_CPP_MODE
 	case BMODE_CPP:
-		strcpy(buf, "C++");
+		astr_assign_cstr(buf, "C++");
 		break;
 #endif
 #if ENABLE_CSHARP_MODE
 	case BMODE_CSHARP:
-		strcpy(buf, "C#");
+		astr_assign_cstr(buf, "C#");
 		break;
 #endif
 #if ENABLE_JAVA_MODE
 	case BMODE_JAVA:
-		strcpy(buf, "Java");
+		astr_assign_cstr(buf, "Java");
 		break;
 #endif
 #if ENABLE_SHELL_MODE
 	case BMODE_SHELL:
-		strcpy(buf, "Shell-script");
+		astr_assign_cstr(buf, "Shell-script");
 		break;
 #endif
 #if ENABLE_MAIL_MODE
 	case BMODE_MAIL:
-		strcpy(buf, "Mail");
+		astr_assign_cstr(buf, "Mail");
 		break;
 #endif
 	default:
-		strcpy(buf, "Text");
+		astr_assign_cstr(as, "Text");
 	}
 
 	if (bp->flags & BFLAG_FONTLOCK)
-		strcat(buf, " Font");
+		astr_append_cstr(as, " Font");
 
 	if (bp->flags & BFLAG_AUTOFILL)
-		strcat(buf, " Fill");
+		astr_append_cstr(as, " Fill");
 
-	return buf;
+	return as;
 }
 
 static void print_buf(Buffer *old_bp, Buffer *bp)
 {
-	char buf[80];
+        astr mode = make_buffer_mode(bp);
 
 	if (bp->name[0] == ' ')
 		return;
@@ -159,12 +159,13 @@ static void print_buf(Buffer *old_bp, Buffer *bp)
 		make_buffer_flags(bp, old_bp == bp),
 		bp->name,
 		calculate_buffer_size(bp),
-		make_buffer_mode(bp));
-	if (bp->filename != NULL)
-		insert_string(shorten_string(buf, bp->filename, 40));
-#if 0
-	bprintf(" [F: %o]", bp->flags);
-#endif
+		astr_cstr(mode));
+        astr_delete(mode);
+	if (bp->filename != NULL) {
+                astr shortname = shorten_string(bp->filename, 40);
+		insert_string(astr_cstr(shortname));
+                astr_delete(shortname);
+        }
 	insert_newline();
 }
 
@@ -209,8 +210,8 @@ static void write_buffers_list(va_list ap)
 	Window *old_wp = va_arg(ap, Window *);
 	Buffer *bp;
 
-	bprintf(" MR Buffer          Size  Mode	 File\n");
-	bprintf(" -- ------          ----  ----	 ----\n");
+	bprintf(" MR Buffer           Size    Mode         File\n");
+	bprintf(" -- ------           ----    ----         ----\n");
 
 	/* Print buffers. */
 	bp = old_wp->bp;

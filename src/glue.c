@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.9 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: glue.c,v 1.10 2004/03/09 23:10:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -115,18 +115,19 @@ char *copy_text_block(int startn, int starto, size_t size)
  * Return a string of maximum length `maxlen' beginning with a `...'
  * sequence if a cut is need.
  */
-char *shorten_string(char *dest, char *s, int maxlen)
+astr shorten_string(char *s, int maxlen)
 {
 	int len;
+        astr as = astr_new();
 
 	if ((len = strlen(s)) <= maxlen)
-		strcpy(dest, s);
+		astr_assign_cstr(as, s);
 	else {
-		strcpy(dest, "...");
-		strcpy(dest + 3, s + len - maxlen + 3);
+		astr_assign_cstr(as, "...");
+		astr_append_cstr(as, s + len - maxlen + 3);
 	}
 
-	return dest;
+	return as;
 }
 
 /*

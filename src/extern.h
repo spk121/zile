@@ -94,7 +94,7 @@ void ding(void);
 void waitkey(int msecs);
 int waitkey_discard(int msecs);
 char *copy_text_block(int startn, int starto, size_t size);
-char *shorten_string(char *dest, char *s, int maxlen);
+astr shorten_string(char *s, int maxlen);
 char *replace_string(char *s, char *match, char *subst);
 void tabify_string(char *dest, char *src, int scol, int tw);
 void untabify_string(char *dest, char *src, int scol, int tw);
