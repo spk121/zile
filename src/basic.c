@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.24 2005/01/28 02:07:04 rrt Exp $	*/
+/*	$Id: basic.c,v 1.25 2005/01/28 02:38:31 rrt Exp $	*/
 
 #include "config.h"
 
@@ -100,7 +100,8 @@ size_t get_goalc(void)
  */
 static void goto_goalc(int goalc)
 {
-  int col = 0, t = tab_width(cur_bp), w, i;
+  int col = 0, t = tab_width(cur_bp), w;
+  size_t i;
   const char *sp = astr_cstr(cur_bp->pt.p->item);
 
   for (i = 0; i < astr_len(cur_bp->pt.p->item); i++) {
@@ -215,7 +216,7 @@ DEFUN("next-line", next_line)
  * Go to the line `to_line', counting from 0.  Point will end up in
  * "random" column.
  */
-void goto_line(int to_line)
+void goto_line(size_t to_line)
 {
   if (cur_bp->pt.n > to_line)
     ngotoup(cur_bp->pt.n - to_line);
@@ -254,14 +255,14 @@ DEFUN("goto-line", goto_line)
     +*/
 {
   char *ms;
-  int to_line;
+  size_t to_line;
 
   do {
     if ((ms = minibuf_read("Goto line: ", "")) == NULL)
       return cancel();
-    if ((to_line = atoi(ms)) < 0)
+    if ((to_line = strtoul(ms, NULL, 10)) == ULONG_MAX)
       ding();
-  } while (to_line < 0);
+  } while (to_line == ULONG_MAX);
 
   goto_line(to_line - 1);
   cur_bp->pt.o = 0;

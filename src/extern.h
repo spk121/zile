@@ -4,7 +4,7 @@ size_t get_goalc_wp(Window *wp);
 size_t get_goalc(void);
 int backward_char(void);
 int forward_char(void);
-void goto_line(int to_line);
+void goto_line(size_t to_line);
 void gotobob(void);
 void gotoeob(void);
 int next_line(void);

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.16 2005/01/27 01:27:20 rrt Exp $	*/
+/*	$Id: eval.c,v 1.17 2005/01/28 02:38:31 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -615,6 +615,8 @@ le *eval_cb_list(int argc, le *branch)
   le *lastadded = NULL;
   le *result = NULL;
 
+  (void)argc;
+  
   if (branch == NULL)
     return leNIL;
 
@@ -894,9 +896,9 @@ le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
       
       newvalue = evaluateNode(current->list_next);
 
-      mainVarList = variableSet(mainVarList,
-                                function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
-                                newvalue);
+      variableSet(&mainVarList,
+                  function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
+                  newvalue);
 
       if (function == S_SET)
         leWipe(newkey);
@@ -925,9 +927,7 @@ le *eval_cb_defun(int argc, le *branch)
   if (branch == NULL || argc < 4 || branch->list_next->data == NULL)
     return leNIL;
 
-  defunList = variableSet(defunList,
-                          branch->list_next->data,
-                          branch->list_next->list_next);
+  variableSet(&defunList, branch->list_next->data, branch->list_next->list_next);
 
   return leNew(branch->list_next->data);
 }

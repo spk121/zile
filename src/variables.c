@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.28 2005/01/26 23:04:48 rrt Exp $	*/
+/*	$Id: variables.c,v 1.29 2005/01/28 02:38:32 rrt Exp $	*/
 
 #include "config.h"
 
@@ -58,7 +58,7 @@ void init_variables(void)
 
 void set_variable(char *var, char *val)
 {
-  mainVarList = variableSetString(mainVarList, var, val);
+  variableSetString(&mainVarList, var, val);
 }
 
 char *get_variable_bp(Buffer *bp, char *var)
@@ -163,13 +163,11 @@ DEFUN("set-variable", set_variable)
     +*/
 {
   char *var, *val, *fmt;
-  astr as = astr_new();
 
   var = minibuf_read_variable_name("Set variable: ");
   if (var == NULL)
     return FALSE;
 
-  astr_cpy_cstr(as, get_variable(var));
   fmt = get_variable_format(var);
   if (!strcmp(fmt, "b")) {
     int i;
@@ -177,16 +175,14 @@ DEFUN("set-variable", set_variable)
       return cancel();
     val = (i == TRUE) ? "true" : "false";
   } else { /* Non-boolean variable. */
-    if ((val = minibuf_read("Set %s to value: ", astr_cstr(as), var)) == NULL)
+    if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
       return cancel();
   }
-
-  astr_delete(as);
 
   /* `tab-width' and `fill-column' automatically become
      buffer-local when set in any fashion. */
   if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
-    cur_bp->vars = variableSetString(cur_bp->vars, var, val);
+    variableSetString(&cur_bp->vars, var, val);
   else
     set_variable(var, val);
 

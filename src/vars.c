@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: vars.c,v 1.8 2005/01/26 23:04:48 rrt Exp $	*/
+/*	$Id: vars.c,v 1.9 2005/01/28 02:38:32 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -45,43 +45,38 @@ le *variableFind(le *varlist, char *key)
   return NULL;
 }
 
-le *variableSet(le *varlist, char *key, le *value)
+void variableSet(le **varlist, char *key, le *value)
 {
   if (key && value) {
-    le *temp = variableFind(varlist, key);
+    le *temp = variableFind(*varlist, key);
 
     if (temp)
       leWipe(temp->branch);
     else {
       temp = leNew(key);
-      varlist = leAddHead(varlist, temp);
+      *varlist = leAddHead(*varlist, temp);
     }
 
     temp->branch = leDup(value);
   }
-
-  return varlist;
 }
 
-le *variableSetString(le *varlist, char *key, char *value)
+void variableSetString(le **varlist, char *key, char *value)
 {
   if (key && value) {
     le *temp = leNew(value);
-    varlist = variableSet(varlist, key, temp);	
+    variableSet(varlist, key, temp);	
     leWipe(temp);
   }
-  return varlist;
 }
 
-le *variableSetNumber(le *varlist, char *key, int value)
+void variableSetNumber(le **varlist, char *key, int value)
 {
   char *buf;
-  le *temp;
 
   asprintf(&buf, "%d", value);
-  temp = variableSetString(varlist, key, buf);
+  variableSetString(varlist, key, buf);
   free(buf);
-  return temp;
 }
 
 le *variableGet(le *varlist, char *key)
