@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.66 2005/01/29 13:06:27 rrt Exp $        */
+/*      $Id: file.c,v 1.67 2005/02/02 02:17:40 rrt Exp $        */
 
 #include "config.h"
 
@@ -225,7 +225,7 @@ astr compact_path(const char *path)
 astr get_current_dir(int interactive)
 {
   astr buf;
-  
+
   if (interactive && cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
@@ -315,7 +315,7 @@ void read_from_disk(const char *filename)
       else {
         lp = list_prepend(lp, astr_new());
         ++cur_bp->num_lines;
-                                
+
         if (i < size - 1 &&
             buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
                                      buf[i + 1] == '\r')) {
@@ -331,7 +331,7 @@ void read_from_disk(const char *filename)
           eol = TRUE;
         }
       }
-                        
+
   list_next(lp) = cur_bp->lines;
   list_prev(cur_bp->lines) = lp;
   cur_bp->pt.p = list_next(cur_bp->lines);
@@ -725,7 +725,7 @@ static astr create_backup_filename(const char *filename,
                                    int withdirectory)
 {
   astr res;
-        
+
   /* Add the backup directory path to the filename */
   if (withdirectory) {
     astr dir, fname, buf;
@@ -772,9 +772,10 @@ static astr create_backup_filename(const char *filename,
 static int copy_file(const char *source, const char *dest)
 {
   char buf[BUFSIZ];
-  int ifd, ofd, stat_valid;
+  int ifd, ofd, stat_valid, serrno;
   size_t len;
   struct stat st;
+  char *tname;
 
   ifd = open(source, O_RDONLY, 0);
   if (ifd < 0) {
@@ -782,21 +783,31 @@ static int copy_file(const char *source, const char *dest)
     return FALSE;
   }
 
-  ofd = open(dest, O_WRONLY | O_CREAT | O_TRUNC, 0600);
-  if (ifd < 0) {
+  if (asprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
+    minibuf_error("Can't allocate temp file name : %s",
+                  strerror(errno));
+    return FALSE;
+  }
+
+  ofd = mkstemp(tname);
+  if (ofd == -1) {
+    serrno = errno;
     close(ifd);
     minibuf_error("%s: unable to create backup", dest);
+    free(tname);
+    errno = serrno;
     return FALSE;
   }
 
   while ((len = read(ifd, buf, sizeof buf)) > 0)
     if (write(ofd, buf, len) < 0) {
-      minibuf_error("unable to write to backup %s", dest);
+      minibuf_error("Unable to write to backup file `%s'", dest);
       close(ifd);
       close(ofd);
       return FALSE;
     }
 
+  serrno = errno;
   stat_valid = fstat(ifd, &st) != -1;
 
 #if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
@@ -814,6 +825,17 @@ static int copy_file(const char *source, const char *dest)
   close(ifd);
   close(ofd);
 
+  if (stat_valid) {
+    if (rename(tname, dest) == -1) {
+      minibuf_error("Cannot rename temporary file `%s'", strerror(errno));
+      (void)unlink(tname);
+    }
+  } else if (unlink(tname) == -1)
+    minibuf_error("Cannot remove temporary file `%s'", strerror(errno));
+
+  free(tname);
+  errno = serrno;
+
   /* Recover file modification time. */
   if (stat_valid) {
     struct utimbuf t;
@@ -822,7 +844,7 @@ static int copy_file(const char *source, const char *dest)
     utime(dest, &t);
   }
 
-  return TRUE;
+  return stat_valid ? FALSE : TRUE;
 }
 
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
@@ -905,7 +927,7 @@ static int save_buffer(Buffer *bp)
 
     if (write_to_disk(bp, ms)) {
       Undo *up;
-                
+
       minibuf_write("Wrote %s", ms);
       bp->flags &= ~BFLAG_MODIFIED;
 
