@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.42 2005/01/13 00:16:15 rrt Exp $	*/
+/*	$Id: bind.c,v 1.43 2005/01/14 17:22:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -143,18 +143,12 @@ static leafp search_key(leafp tree, int *keys, int n)
   return NULL;
 }
 
-int do_completion(astr as, int *compl)
+int do_completion(astr as)
 {
   int c;
 
-  if (!*compl) {
-    minibuf_write("%s", astr_cstr(as));
-    c = term_getkey();
-    *compl = 1;
-  } else {
-    minibuf_write("%s", astr_cstr(as));
-    c = term_getkey();
-  }
+  minibuf_write("%s", astr_cstr(as));
+  c = term_getkey();
   minibuf_clear();
 
   return c;
@@ -180,7 +174,6 @@ static astr make_completion(int *keys, int numkeys)
 
 static leafp completion_scan(int c, int **keys, int *numkeys)
 {
-  int compl = 0;
   leafp p;
   vector *v = vec_new(sizeof(int));
 
@@ -192,7 +185,7 @@ static leafp completion_scan(int c, int **keys, int *numkeys)
       break;
     if (p->func == NULL) {
       astr as = make_completion(vec_array(v), *numkeys);
-      vec_item(v, (*numkeys)++, int) = do_completion(as, &compl);
+      vec_item(v, (*numkeys)++, int) = do_completion(as);
       astr_delete(as);
     }
   } while (p->func == NULL);

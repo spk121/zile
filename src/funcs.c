@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.63 2005/01/14 00:43:04 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.64 2005/01/14 17:22:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -370,7 +370,7 @@ DEFUN("quoted-insert", quoted_insert)
 
 int universal_argument(int keytype, int xarg)
 {
-  int i = 0, arg = 4, sgn = 1, compl = 0;
+  int i = 0, arg = 4, sgn = 1;
   int c, digit;
   astr as = astr_new();
 
@@ -382,7 +382,7 @@ int universal_argument(int keytype, int xarg)
 
   for (;;) {
     astr_cat_cstr(as, "-"); /* Add the '-' character. */
-    c = do_completion(as, &compl);
+    c = do_completion(as);
     astr_truncate(as, astr_len(as) - 1); /* Remove the '-' character. */
 
     /* Cancelled. */
