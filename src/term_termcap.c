@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.35 2004/11/13 23:39:36 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.36 2004/11/14 15:22:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -64,8 +64,6 @@ static int max_key_chars = 0; /* Length of longest key code. */
 
 int ZILE_COLS;   /* Current number of columns on screen. */
 int ZILE_LINES;  /* Current number of rows on screen. */
-
-static char *empty_string = "";
 
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
@@ -115,7 +113,7 @@ static const char *getattr(Font f) {
         else if (f & ZILE_REVERSE)
                 return mr_string;
         assert(0);
-        return empty_string;
+        return "";
 }
 
 /*
@@ -303,7 +301,7 @@ static void term_init_screen(void)
 static char *tgetstr_safe(const char *cap, char **tcap)
 {
         char *s = tgetstr(cap, tcap);
-        return s ? s : empty_string;
+        return s ? s : "";
 }
 
 static char *tgetstr_note_len(const char *cap, char **tcap)
