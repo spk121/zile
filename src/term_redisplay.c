@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.31 2005/01/18 21:55:22 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.32 2005/01/20 21:23:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -337,7 +337,7 @@ void show_splash_screen(const char *splash)
   }
 
   term_move(0, 0);
-  for (i = 0, p = splash; *p != '\0'; ++p)
+  for (i = 0, p = splash; *p != '\0' && i < termp->height - 2; ++p)
     if (*p == '\n')
       term_move(++i, 0);
     else
