@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.40 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: search.c,v 1.41 2005/01/29 12:22:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -398,7 +398,7 @@ void free_search_history(void)
 
 static int no_upper(const char *s, size_t len)
 {
-  int i;
+  size_t i;
 
   for (i = 0; i < len; i++)
     if (isupper(s[i]))
