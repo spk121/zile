@@ -1,4 +1,4 @@
-/*	$Id: ncurses_minibuf.c,v 1.12 2004/02/08 04:39:26 dacap Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.13 2004/02/14 10:27:35 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -38,22 +38,6 @@
 
 #include "term_ncurses.h"
 
-static chtype filter_color(unsigned char c)
-{
-	switch (c) {
-	case 'k': case 'K': return COLOR_BLACK;
-	case 'r': case 'R': return COLOR_RED;
-	case 'g': case 'G': return COLOR_GREEN;
-	case 'y': case 'Y': return COLOR_YELLOW;
-	case 'b': case 'B': return COLOR_BLUE;
-	case 'm': case 'M': return COLOR_MAGENTA;
-	case 'c': case 'C': return COLOR_CYAN;
-	case 'w': case 'W': return COLOR_WHITE;
-	}
-
-	return 0;
-}
-
 static size_t astrlen(const char *s)
 {
 	size_t size = 0;
@@ -87,25 +71,13 @@ static void xminibuf_write(const char *fmt)
 {
 	int y, x, bold;
 	const unsigned char *p = fmt;
-	chtype attr = 0, oldattr = 0;
 
 	getyx(stdscr, y, x);
 
-	for (; *p != '\0' && x < COLS; p++)
-		switch (*p) {
-		case MINIBUF_SET_COLOR:
-			++p;
-			bold = isupper(*p) ? A_BOLD : 0;
-			oldattr = attr;
-			attr = COLOR_PAIR(filter_color(*p)) | bold;
-			break;
-		case MINIBUF_UNSET_COLOR:
-			attr = oldattr;
-			break;
-		default:
-			addch(attr | *p);
-			++x;
-		}
+	for (; *p != '\0' && x < COLS; p++) {
+		addch(*p);
+		++x;
+	}
 }
 
 void ncurses_minibuf_write(const char *fmt)
@@ -131,23 +103,19 @@ static void draw_minibuf_read(const char *prompt, const char *value, int prompt_
 	xminibuf_write(prompt);
 
 	if (prompt_len + pointo + 1 < COLS) {
-		attrset(C_FG_RED|A_BOLD);
 		addnstr(value, COLS - prompt_len - 1);
-		attrset(0);
 		addstr(match);
 		if ((int)strlen(value) >= COLS - prompt_len - 1)
-			mvaddch(LINES - 1, COLS - 1, '>' | C_FG_GREEN|A_BOLD);
+			mvaddch(LINES - 1, COLS - 1, '$');
 		move(LINES - 1, prompt_len + pointo);
 	} else {
 		int n;
-		addch('<' | C_FG_GREEN|A_BOLD);
-		attrset(C_FG_RED|A_BOLD);
+		addch('$');
 		n = pointo - pointo % (COLS - prompt_len - 2);
 		addnstr(value + n, COLS - prompt_len - 2);
-		attrset(0);
 		addstr(match);
 		if ((int)strlen(value + n) >= COLS - prompt_len - 2)
-			mvaddch(LINES - 1, COLS - 1, '>' | C_FG_GREEN|A_BOLD);
+			mvaddch(LINES - 1, COLS - 1, '$');
 		move(LINES - 1, prompt_len + 1 + pointo % (COLS - prompt_len - 2));
 	}
 }
