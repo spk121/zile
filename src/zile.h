@@ -1,4 +1,4 @@
-/*	$Id: zile.h,v 1.13 2004/01/21 02:08:18 dacap Exp $	*/
+/*	$Id: zile.h,v 1.14 2004/01/28 10:50:21 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -29,11 +29,6 @@
 
 #include "alist.h"
 #include "astr.h"
-/* #if HAVE_NCURSES_H */
-/* #include <ncurses.h> */
-/* #else */
-/* #include <curses.h> */
-/* #endif */
 
 #undef TRUE
 #define TRUE				1
@@ -46,7 +41,7 @@
 #define max(a, b)			((a) > (b) ? (a) : (b))
 
 #ifndef PATH_MAX
-#define PATH_MAX 			_POSIX_PATH_MAX
+#define PATH_MAX			_POSIX_PATH_MAX
 #endif
 
 /*--------------------------------------------------------------------------
@@ -307,7 +302,8 @@ struct history {
 #define MINIBUF_UNSET_COLOR	'\2'
 
 struct terminal {
-	void *	screen;
+        void *	screen; /* Really a SCREEN *, but we don't want
+                           ncurses-specific code or data here */
 	int	width, height;
 
 	int	(*init)(void);
