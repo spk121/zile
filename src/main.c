@@ -2,7 +2,7 @@
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004-2005 Reuben Thomas.
    All rights reserved.
-  
+
    This file is part of Zile.
 
    Zile is free software; you can redistribute it and/or modify it under
@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.80 2005/01/30 14:35:20 rrt Exp $	*/
+/*	$Id: main.c,v 1.81 2005/02/02 02:15:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -198,14 +198,14 @@ static void suspend_sig_handler(int signal)
 
   term_tidy();
   term_suspend();
-        
+
   /* Trap SIGHUP and SIGTERM so we can properly deal with them while
      suspended */
   act.sa_handler = other_sig_handler;
   sigaction(SIGHUP, &act, NULL);
   sigaction(SIGTERM, &act, NULL);
 
-  /* We used to re-enable the default SIG_DFL and raise SIGTSTP, but 
+  /* We used to re-enable the default SIG_DFL and raise SIGTSTP, but
      then we could be (and were) interrupted in the middle of the call.
      So we do it the mutt way instead */
   kill(0, SIGSTOP);
@@ -269,7 +269,7 @@ int main(int argc, char **argv)
      expressions specified on the command-line. */
   eval_init();
   init_variables();
-  
+
   while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
     switch (c) {
     case 'b':

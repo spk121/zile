@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.82 2005/01/30 14:37:48 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.83 2005/02/02 02:16:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -714,7 +714,7 @@ DEFUN("transpose-chars", transpose_chars)
     Interchange characters around point, moving forward one character.
     With prefix arg ARG, effect is to take character before point
     and drag it forward past ARG other characters.  If no argument and at
-    end of line, the previous two chars are exchanged. 
+    end of line, the previous two chars are exchanged.
     +*/
 {
   if (warn_if_readonly_buffer())
@@ -1124,7 +1124,7 @@ DEFUN("forward-paragraph", forward_paragraph)
 {
   if (uniarg < 0)
     return FUNCALL_ARG(backward_paragraph, -uniarg);
-        
+
   do {
     while (next_line() && is_empty_line());
     while (next_line() && !is_empty_line());
@@ -1134,7 +1134,7 @@ DEFUN("forward-paragraph", forward_paragraph)
     FUNCALL(beginning_of_line);
   else
     FUNCALL(end_of_line);
-        
+
   return TRUE;
 }
 
@@ -1164,7 +1164,7 @@ DEFUN("fill-paragraph", fill_paragraph)
 {
   int i, start, end;
   Marker *m = point_marker();
-        
+
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
   FUNCALL(forward_paragraph);
