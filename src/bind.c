@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.18 2004/03/09 18:52:30 rrt Exp $	*/
+/*	$Id: bind.c,v 1.19 2004/03/09 19:06:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -397,7 +397,7 @@ static struct fentry *bsearch_function(char *name)
 	return bsearch(&key, fentry_table, fentry_table_size, sizeof fentry_table[0], bind_compar);
 }
 
-char *minibuf_read_function_name(char *msg)
+char *minibuf_read_function_name(const char *msg)
 {
 	unsigned int i;
 	char *p, *ms;
@@ -470,14 +470,16 @@ DEFUN("execute-extended-command", execute_extended_command)
 Read function name, then read its arguments and call it.
 +*/
 {
-	char msg[128], *name;
+	char *name;
+        astr msg = astr_new();
 
 	if (lastflag & FLAG_SET_UNIARG && last_uniarg != 0)
-		sprintf(msg, "%d M-x ", last_uniarg);
+		astr_afmt(msg, "%d M-x ", last_uniarg);
 	else
-		strcpy(msg, "M-x ");
+		astr_append_cstr(msg, "M-x ");
 
-	name = minibuf_read_function_name(msg);
+	name = minibuf_read_function_name(astr_cstr(msg));
+        astr_delete(msg);
 	if (name == NULL)
 		return FALSE;
 

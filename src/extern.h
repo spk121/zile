@@ -21,7 +21,7 @@ int execute_function(char *name, int uniarg);
 void free_bindings(void);
 char *get_function_by_key_sequence(void);
 void init_bindings(void);
-char *minibuf_read_function_name(char *msg);
+char *minibuf_read_function_name(const char *msg);
 void process_key(int c);
 
 /* buffer.c --------------------------------------------------------------- */
