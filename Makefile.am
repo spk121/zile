@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.12 2004/12/19 00:10:46 rrt Exp $
+## $Id: Makefile.am,v 1.13 2004/12/20 13:55:24 rrt Exp $
 
 SUBDIRS = doc src
 
@@ -9,7 +9,6 @@ EXTRA_DIST =					\
 	INSTALL					\
 	NEWS					\
 	README					\
-	TODO					\
 	THANKS					\
 	zile.pkg
 
