@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.16 2004/02/03 23:41:33 rrt Exp $	*/
+/*	$Id: line.c,v 1.17 2004/02/04 02:45:05 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -209,7 +209,7 @@ int insert_char(int c)
 		if (wp->pointp == cur_wp->pointp && wp->pointo >= pointo)
 			++wp->pointo;
 
-	if (cur_bp->markp == cur_wp->pointp && cur_bp->marko >= pointo)
+	if (cur_bp->markp == cur_wp->pointp && cur_bp->marko > pointo)
 		++cur_bp->marko;
 
 	return TRUE;
@@ -476,7 +476,7 @@ void insert_nstring(const char *s, size_t size)
 		if (*s == '\n')
 			insert_newline();
 		else
-			insert_char(*s);
+			insert_char_in_insert_mode(*s);
 	undo_nosave = FALSE;
 }
 
