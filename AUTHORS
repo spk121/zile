@@ -19,6 +19,8 @@ The Zile team would like to thank:
 * Jim Buchanan <c22jrb@dawg.delcoelect.com> for suggestions
 * Carsten Leonhardt <leo@debian.org> for a lot of bug fixes,
   the `goto-line' function, Debian package and continuous support
+* Nicolas Duboc <nicolas@duboc.net> for maintaining the Debian
+  package, and fixing and reporting several bugs
 * Tim Middelkoop <mtim@arranvale.com> for the backup directory feature
 * Jeff Sheinberg <jeffsh@erols.com> for bug reports
 * Christian Weisgerber <naddy@mips.inka.de> for bug reports and fixes
@@ -42,7 +44,5 @@ The Zile team would like to thank:
   `shrink-window' feature
 * Alan James <alan@tomun.org> for suggestions
 * Joseph Boyd <k963@bonbon.net> for the `back-to-indentation' feature
-* Nicolas Duboc <nicolas@duboc.net> for maintaining the Debian
-  package, and fixing and reporting several bugs
 
 and everyone else who has reported bugs and made suggestions.
