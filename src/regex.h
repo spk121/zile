@@ -465,18 +465,4 @@ extern void re_set_registers
   _RE_ARGS ((struct re_pattern_buffer *buffer, struct re_registers *regs,
              unsigned num_regs, regoff_t *starts, regoff_t *ends));
 
-/* 4.2 bsd compatibility.  */
-extern char *re_comp _RE_ARGS ((const char *));
-extern int re_exec _RE_ARGS ((const char *));
-
-/* POSIX compatibility.  */
-extern int regcomp _RE_ARGS ((regex_t *preg, const char *pattern, int cflags));
-extern int regexec
-  _RE_ARGS ((const regex_t *preg, const char *string, size_t nmatch,
-             regmatch_t pmatch[], int eflags));
-extern size_t regerror
-  _RE_ARGS ((int errcode, const regex_t *preg, char *errbuf,
-             size_t errbuf_size));
-extern void regfree _RE_ARGS ((regex_t *preg));
-
 #endif /* not __REGEXP_LIBRARY_H__ */
