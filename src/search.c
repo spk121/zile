@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.34 2005/01/26 00:25:20 rrt Exp $	*/
+/*	$Id: search.c,v 1.35 2005/01/26 00:52:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -45,21 +45,45 @@
 static History search_history;
 static History regexp_history;
 
-static char *find_substr(const char *s1, size_t s1size,
+static char *find_substr(int (*f)(int c),
+                         const char *s1, size_t s1size,
 			 const char *s2, size_t s2size)
 {
   const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
   const char *sp1, *sp2;
 
   for (; s1 <= e1 - s2size + 1; ++s1) {
-    if (tolower(*s1) != tolower(*s2))
+    if (f(*s1) != f(*s2))
       continue;
     sp1 = s1; sp2 = s2;
     for (;;) {
       ++sp1, ++sp2;
       if (sp2 > e2)
         return (char *)s1;
-      else if (tolower(*sp1) != tolower(*sp2))
+      else if (f(*sp1) != f(*sp2))
+        break;
+    }
+  }
+
+  return NULL;
+}
+
+static char *rfind_substr(int (*f)(int c),
+                          const char *s1, size_t s1size,
+			  const char *s2, size_t s2size)
+{
+  const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
+  const char *sp1, *sp2;
+
+  for (; e1 >= s1 + s2size - 1; --e1) {
+    if (f(*e1) != f(*e2))
+      continue;
+    sp1 = e1; sp2 = e2;
+    for (;;) {
+      --sp1, --sp2;
+      if (sp2 < s2)
+        return (char *)(sp1 + 1);
+      else if (f(*sp1) != f(*sp2))
         break;
     }
   }
@@ -68,28 +92,6 @@ static char *find_substr(const char *s1, size_t s1size,
 }
 
 static const char *re_find_err = NULL;
-
-static char *rfind_substr(const char *s1, size_t s1size,
-			  const char *s2, size_t s2size)
-{
-  const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
-  const char *sp1, *sp2;
-
-  for (; e1 >= s1 + s2size - 1; --e1) {
-    if (tolower(*e1) != tolower(*e2))
-      continue;
-    sp1 = e1; sp2 = e2;
-    for (;;) {
-      --sp1, --sp2;
-      if (sp2 < s2)
-        return (char *)(sp1 + 1);
-      else if (tolower(*sp1) != tolower(*sp2))
-        break;
-    }
-  }
-
-  return NULL;
-}
 
 static char *re_find_substr(const char *s1, size_t s1size,
 			    const char *s2, size_t s2size,
@@ -155,6 +157,14 @@ static void goto_linep(Line *lp)
     next_line();
 }
 
+/* Avoid macros */
+#undef tolower
+
+static int id(int c)
+{
+  return c;
+}
+
 static int search_forward(Line *startp, int starto, const char *s, int regexp)
 {
   Line *lp;
@@ -178,8 +188,10 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
     if (regexp)
       sp2 = re_find_substr(sp, s1size, s, s2size,
                            sp == astr_cstr(lp->item), TRUE, FALSE);
+    else if (lookup_bool_variable("case-fold-search"))
+      sp2 = find_substr(tolower, sp, s1size, s, s2size);
     else
-      sp2 = find_substr(sp, s1size, s, s2size);
+      sp2 = find_substr(id, sp, s1size, s, s2size);
                         
     if (sp2 != NULL) {
       goto_linep(lp);
@@ -212,8 +224,10 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
     if (regexp)
       sp2 = re_find_substr(sp, s1size, s, ssize,
                            TRUE, s1size == astr_len(lp->item), TRUE);
+    else if (lookup_bool_variable("case-fold-search"))
+      sp2 = rfind_substr(tolower, sp, s1size, s, ssize);
     else
-      sp2 = rfind_substr(sp, s1size, s, ssize);
+      sp2 = rfind_substr(id, sp, s1size, s, ssize);
 
     if (sp2 != NULL) {
       goto_linep(lp);
