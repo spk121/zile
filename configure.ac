@@ -163,7 +163,7 @@ if test x$allegro = xfalse; then
 	else
 	        curses=false
 	        AC_MSG_RESULT(no)
-	        AC_CHECK_HEADERS([termios.h] [term.h])
+	        AC_CHECK_HEADERS([termcap.h] [termios.h])
 	        AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
 			AC_MSG_FAILURE([cannot find libtermcap]))
 	fi
