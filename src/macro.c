@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: macro.c,v 1.9 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: macro.c,v 1.10 2005/01/29 13:15:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -30,6 +30,7 @@
 
 #include "zile.h"
 #include "extern.h"
+
 
 typedef struct Macro Macro;
 

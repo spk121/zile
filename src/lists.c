@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lists.c,v 1.15 2005/01/25 16:48:28 rrt Exp $	*/
+/*	$Id: lists.c,v 1.16 2005/01/29 13:15:39 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>
@@ -239,6 +239,7 @@ astr leDumpEval(le *list, int indent)
   le *start = list;
   astr as = astr_new();
 
+  (void)indent;
   for (; list; list = list->list_next) {
     if (list->branch) {
       le *le_value = evaluateBranch(list->branch);

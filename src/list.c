@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: list.c,v 1.6 2005/01/27 01:33:17 rrt Exp $	*/
+/*	$Id: list.c,v 1.7 2005/01/29 13:15:39 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <assert.h>
@@ -138,7 +138,7 @@ void *list_betail(list l)
    of range */
 void *list_at(list l, size_t n)
 {
-  int i;
+  size_t i;
   list p;
         
   assert(l != NULL);
