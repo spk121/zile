@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.41 2005/01/10 01:30:31 rrt Exp $        */
+/*      $Id: zile.h,v 1.42 2005/01/10 14:09:48 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -150,7 +150,7 @@ struct Buffer {
   /* The next buffer in buffer list. */
   Buffer *next;
 
-  /* limitp->next == first line; limitp->prev == last line. */
+  /* The lines of text. */
   Line *lines;
 
   /* The point. */

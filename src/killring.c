@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: killring.c,v 1.14 2005/01/10 01:31:53 rrt Exp $	*/
+/*	$Id: killring.c,v 1.15 2005/01/10 14:09:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -95,7 +95,7 @@ static int kill_line(int literally)
       return TRUE;
   }
 
-  if (cur_bp->pt.p->next != cur_bp->lines) {
+  if (list_next(cur_bp->pt.p) != cur_bp->lines) {
     if (!FUNCALL(delete_char))
       return FALSE;
 

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.28 2005/01/10 01:31:53 rrt Exp $	*/
+/*	$Id: search.c,v 1.29 2005/01/10 14:09:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -165,7 +165,7 @@ static int search_forward(Line *startp, int starto, const char *s, int regexp)
   if (s2size < 1)
     return FALSE;
 
-  for (lp = startp; lp != cur_bp->lines; lp = lp->next) {
+  for (lp = startp; lp != cur_bp->lines; lp = list_next(lp)) {
     if (lp == startp) {
       sp = astr_char(lp->item, starto);
       s1size = astr_len(lp->item) - starto;
@@ -201,7 +201,7 @@ static int search_backward(Line *startp, int starto, const char *s, int regexp)
   if (s2size < 1)
     return FALSE;
 
-  for (lp = startp; lp != cur_bp->lines; lp = lp->prev) {
+  for (lp = startp; lp != cur_bp->lines; lp = list_prev(lp)) {
     sp = astr_cstr(lp->item);
     if (lp == startp)
       s1size = starto;

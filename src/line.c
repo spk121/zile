@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.41 2005/01/10 01:31:53 rrt Exp $	*/
+/*	$Id: line.c,v 1.42 2005/01/10 14:09:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -200,18 +200,14 @@ static int common_insert_newline(int move_pt)
   lp2len = astr_len(cur_bp->pt.p->item) - lp1len;
 
   lp1 = cur_bp->pt.p;
-  lp2 = new_line();
+
+  /* Update line linked list. */
+  lp2 = list_prepend(lp1, astr_new());
+  ++cur_bp->num_lines;
 
   /* Move the text after the point into the new line. */
   astr_cpy(lp2->item, astr_substr(lp1->item, lp1len, lp2len));
   astr_truncate(lp1->item, lp1len);
-
-  /* Update line linked list. */
-  lp2->next = lp1->next;
-  lp2->next->prev = lp2;
-  lp2->prev = lp1;
-  lp1->next = lp2;
-  ++cur_bp->num_lines;
 
   adjust_markers_for_addline(lp1, lp2, lp1len, move_pt);
 
@@ -457,23 +453,14 @@ int delete_char(void)
     undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt, '\n', 0);
 
     lp1 = cur_bp->pt.p;
-    lp2 = cur_bp->pt.p->next;
+    lp2 = list_next(lp1);
     lp1len = astr_len(lp1->item);
 
     /* Move the next line text into the current line. */
-    astr_cat(lp1->item, lp2->item);
-
-    /*
-     * Update line linked list.
-     */
-    lp1->next = lp2->next;
-    lp1->next->prev = lp1;
+    lp2 = list_next(cur_bp->pt.p);
+    astr_cat(lp1->item, list_next(cur_bp->pt.p)->item);
+    astr_delete(list_behead(lp1));
     --cur_bp->num_lines;
-
-    /*
-     * Free the unlinked line.
-     */
-    free_line(lp2);
 
     adjust_markers_for_delline(lp1, lp2, lp1len);
 
@@ -706,9 +693,9 @@ DEFUN("newline-and-indent", newline_and_indent)
   return ret;
 }
 
-/***********************************************************************
-		       Adjust markers routines
-***********************************************************************/
+/*---------------------------------------------------------------------
+                            Adjust markers
+-----------------------------------------------------------------------*/
 
 #define CMP_MARKER_OFFSET(marker, offset, extra)			\
 	(((!(marker)->type) && (marker)->pt.o > (offset))		\
@@ -721,7 +708,7 @@ static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
   set_marker_insertion_type(pt, TRUE);
 
   /* Update the markers.  */
-  for (marker=cur_bp->markers; marker; marker=marker->next) {
+  for (marker = cur_bp->markers; marker; marker = marker->next) {
     if (marker->pt.p == lp &&
         CMP_MARKER_OFFSET(marker, pointo, ((offset < 0) ? 1: 0)))
       marker->pt.o += offset;
@@ -738,7 +725,7 @@ static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_
   set_marker_insertion_type(pt, pt_insertion_type);
 
   /* Update the markers.  */
-  for (marker=cur_bp->markers; marker; marker=marker->next) {
+  for (marker = cur_bp->markers; marker; marker = marker->next) {
     if (marker->pt.p == lp1 &&
         CMP_MARKER_OFFSET(marker, lp1len, 0)) {
       marker->pt.p = lp2;
@@ -760,7 +747,7 @@ static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len)
   set_marker_insertion_type(pt, TRUE);
 
   /* Update the markers.  */
-  for (marker=cur_bp->markers; marker; marker=marker->next) {
+  for (marker = cur_bp->markers; marker; marker = marker->next) {
     if (marker->pt.p == lp2) {
       marker->pt.p = lp1;
       marker->pt.o += lp1len;

@@ -34,7 +34,7 @@ Buffer *find_buffer(const char *name, int cflag);
 Buffer *get_next_buffer(void);
 char *make_buffer_name(const char *filename);
 void switch_to_buffer(Buffer *bp);
-int zap_buffer_content(void);
+void zap_buffer_content(void);
 int warn_if_readonly_buffer(void);
 int warn_if_no_mark(void);
 void set_temporary_buffer(Buffer *bp);

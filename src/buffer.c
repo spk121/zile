@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.19 2005/01/10 01:31:52 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.20 2005/01/10 14:09:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -75,8 +75,8 @@ static Buffer *new_buffer(void)
   /* Allocate the limit marker. */
   bp->lines = new_line();
 
-  bp->lines->prev = bp->lines->next = bp->pt.p;
-  bp->pt.p->prev = bp->pt.p->next = bp->lines;
+  list_prev(bp->lines) = list_next(bp->lines) = bp->pt.p;
+  list_prev(bp->pt.p) = list_next(bp->pt.p) = bp->lines;
 
   /* Markers. */
   bp->mark = bp->markers = NULL;
@@ -98,9 +98,9 @@ void free_buffer(Buffer *bp)
   /*
    * Free all the lines.
    */
-  lp = bp->lines->next;
+  lp = list_next(bp->lines);
   while (lp != bp->lines) {
-    next_lp = lp->next;
+    next_lp = list_next(lp);
     free_line(lp);
     lp = next_lp;
   }
@@ -221,9 +221,7 @@ Buffer *find_buffer(const char *name, int cflag)
  */
 Buffer *get_next_buffer(void)
 {
-  if (cur_bp->next != NULL)
-    return cur_bp->next;
-  return head_bp;
+  return cur_bp->next ? cur_bp->next : head_bp;
 }
 
 /*
@@ -304,50 +302,41 @@ void switch_to_buffer(Buffer *bp)
 /*
  * Remove the buffer contents and reset the mark and the flags.
  */
-int zap_buffer_content(void)
+void zap_buffer_content(void)
 {
   Window *wp;
   Line *new_lp, *old_lp, *next_lp;
 
   new_lp = new_line();
-  new_lp->next = new_lp->prev = cur_bp->lines;
+  list_next(new_lp) = list_prev(new_lp) = cur_bp->lines;
 
-  old_lp = cur_bp->lines->next;
-  cur_bp->lines->next = cur_bp->lines->prev = new_lp;
+  old_lp = list_next(cur_bp->lines);
+  list_next(cur_bp->lines) = list_prev(cur_bp->lines) = new_lp;
   cur_bp->pt.p = new_lp;
   cur_bp->pt.n = 0;
   cur_bp->pt.o = 0;
   cur_bp->flags = 0;
   cur_bp->num_lines = 0;
 
-  /*
-   * Free markers (remember that are windows pointing to some of
-   * this markers).
-   */
+  /* Free markers (there are windows pointing to some of them). */
   while (cur_bp->markers)
     free_marker(cur_bp->markers);
 
   cur_bp->mark = cur_bp->markers = NULL;
 
-  /*
-   * Free all the old lines.
-   */
+  /* Free all the old lines. */
   do {
-    next_lp = old_lp->next;
+    next_lp = list_next(old_lp);
     free_line(old_lp);
     old_lp = next_lp;
   } while (old_lp != cur_bp->lines);
 
-  /*
-   * Scan all the windows that have markers to this buffers.
-   */
+  /* Scan all the windows that have markers to this buffer. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
     if (wp->bp == cur_bp) {
       wp->topdelta = 0;
-      wp->saved_pt = NULL; /* It was freed.  */
+      wp->saved_pt = NULL; /* It was freed. */
     }
-
-  return TRUE;
 }
 
 /*
@@ -404,7 +393,7 @@ int calculate_region(Region *rp)
 
 /*
  * Set the specified buffer temporary flag and move the buffer
- * at the end of the buffer list.
+ * to the end of the buffer list.
  */
 void set_temporary_buffer(Buffer *bp)
 {
@@ -434,7 +423,7 @@ void set_temporary_buffer(Buffer *bp)
 
 int calculate_buffer_size(Buffer *bp)
 {
-  Line *lp = bp->lines->next;
+  Line *lp = list_next(bp->lines);
   int size = 0;
 
   if (lp == bp->lines)
@@ -442,7 +431,7 @@ int calculate_buffer_size(Buffer *bp)
 
   for (;;) {
     size += astr_len(lp->item);
-    lp = lp->next;
+    lp = list_next(lp);
     if (lp == bp->lines)
       break;
     ++size;

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.22 2005/01/10 01:31:53 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.23 2005/01/10 14:09:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -156,7 +156,7 @@ static void draw_window(int topline, Window *wp)
    * Find the first line to display on the first screen line.
    */
   for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && lp->prev != wp->bp->lines; lp = lp->prev, --i, --lineno)
+       i > 0 && list_prev(lp) != wp->bp->lines; lp = list_prev(lp), --i, --lineno)
     ;
 
   cur_tab_width = wp->bp->tab_width;
@@ -181,7 +181,7 @@ static void draw_window(int topline, Window *wp)
       term_addch('$');
     }
 
-    lp = lp->next;
+    lp = list_next(lp);
   }
 }
 

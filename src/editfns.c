@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.9 2005/01/10 01:31:52 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.10 2005/01/10 14:09:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -28,10 +28,9 @@
 #include "zile.h"
 #include "extern.h"
 
-static list mark_ring = NULL;	/* Mark-ring.  */
+static list mark_ring = NULL;	/* Mark ring. */
 
-/* Push the current mark in the mark-ring.  */
-
+/* Push the current mark in the mark-ring. */
 void push_mark(void)
 {
   if (!mark_ring)
@@ -48,13 +47,12 @@ void push_mark(void)
   }
 }
 
-/* Pop a mark from the mark-ring a put it as current mark.  */
-
+/* Pop a mark from the mark-ring a put it as current mark. */
 void pop_mark(void)
 {
   Marker *m = list_last(mark_ring)->item;
 
-  /* Replace the mark.  */
+  /* Replace the mark. */
   if (m->bp->mark)
     free_marker(m->bp->mark);
 
@@ -64,8 +62,7 @@ void pop_mark(void)
   free_marker(m);
 }
 
-/* Set the mark to the point position.  */
-
+/* Set the mark to the point position. */
 void set_mark(void)
 {
   if (!cur_bp->mark)
@@ -109,48 +106,42 @@ int char_before(Point *pt)
 }
 
 /* This function returns the character following point in the current
-   buffer.  */
-
+   buffer. */
 int following_char(void)
 {
   return char_after(&cur_bp->pt);
 }
 
 /* This function returns the character preceding point in the current
-   buffer.  */
-
+   buffer. */
 int preceding_char(void)
 {
   return char_before(&cur_bp->pt);
 }
 
 /* This function returns TRUE if point is at the beginning of the
-   buffer.  */
-
+   buffer. */
 int bobp(void)
 {
-  return (cur_bp->pt.p->prev == cur_bp->lines &&
+  return (list_prev(cur_bp->pt.p) == cur_bp->lines &&
           cur_bp->pt.o == 0);
 }
 
 /* This function returns TRUE if point is at the end of the
-   buffer.  */
-
+   buffer. */
 int eobp(void)
 {
-  return (cur_bp->pt.p->next == cur_bp->lines &&
+  return (list_next(cur_bp->pt.p) == cur_bp->lines &&
           cur_bp->pt.o == astr_len(cur_bp->pt.p->item));
 }
 
-/* Returns TRUE if point is at the beginning of a line.  */
-
+/* Returns TRUE if point is at the beginning of a line. */
 int bolp(void)
 {
   return cur_bp->pt.o == 0;
 }
 
-/* Returns TRUE if point is at the end of a line.  */
-
+/* Returns TRUE if point is at the end of a line. */
 int eolp(void)
 {
   return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);

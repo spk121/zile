@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.16 2005/01/10 01:31:52 rrt Exp $	*/
+/*	$Id: basic.c,v 1.17 2005/01/10 14:09:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -121,7 +121,7 @@ static void goto_goalc(int goalc)
 
 int previous_line(void)
 {
-  if (cur_bp->pt.p->prev != cur_bp->lines) {
+  if (list_prev(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
     if (!(lastflag & FLAG_DONE_CPCN)) {
@@ -131,7 +131,7 @@ int previous_line(void)
         cur_goalc = get_goalc();
     }
 
-    cur_bp->pt.p = cur_bp->pt.p->prev;
+    cur_bp->pt.p = list_prev(cur_bp->pt.p);
     cur_bp->pt.n--;
 
     goto_goalc(cur_goalc);
@@ -171,7 +171,7 @@ DEFUN("previous-line", previous_line)
 
 int next_line(void)
 {
-  if (cur_bp->pt.p->next != cur_bp->lines) {
+  if (list_next(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
     if (!(lastflag & FLAG_DONE_CPCN)) {
@@ -181,7 +181,7 @@ int next_line(void)
         cur_goalc = get_goalc();
     }
 
-    cur_bp->pt.p = cur_bp->pt.p->next;
+    cur_bp->pt.p = list_next(cur_bp->pt.p);
     cur_bp->pt.n++;
 
     goto_goalc(cur_goalc);
@@ -325,7 +325,7 @@ int backward_char(void)
     return TRUE;
   } else if (!bobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    cur_bp->pt.p = cur_bp->pt.p->prev;
+    cur_bp->pt.p = list_prev(cur_bp->pt.p);
     cur_bp->pt.n--;
     FUNCALL(end_of_line);
 
@@ -363,7 +363,7 @@ int forward_char(void)
     return TRUE;
   } else if (!eobp()) {
     thisflag |= FLAG_NEED_RESYNC;
-    cur_bp->pt.p = cur_bp->pt.p->next;
+    cur_bp->pt.p = list_next(cur_bp->pt.p);
     cur_bp->pt.n++;
     FUNCALL(beginning_of_line);
 
@@ -396,7 +396,7 @@ DEFUN("forward-char", forward_char)
 int ngotoup(int n)
 {
   for (; n > 0; n--)
-    if (cur_bp->pt.p->prev != cur_bp->lines)
+    if (list_prev(cur_bp->pt.p) != cur_bp->lines)
       FUNCALL(previous_line);
     else
       return FALSE;
@@ -407,7 +407,7 @@ int ngotoup(int n)
 int ngotodown(int n)
 {
   for (; n > 0; n--)
-    if (cur_bp->pt.p->next != cur_bp->lines)
+    if (list_next(cur_bp->pt.p) != cur_bp->lines)
       FUNCALL(next_line);
     else
       return FALSE;

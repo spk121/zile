@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.56 2005/01/10 01:31:52 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.57 2005/01/10 14:09:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -523,7 +523,7 @@ static int edit_tab_region(int action)
   marker = point_marker();
 
   undo_save(UNDO_START_SEQUENCE, marker->pt, 0, 0);
-  for (lp = r.start.p, lineno = r.start.n; ; lp = lp->next, ++lineno) {
+  for (lp = r.start.p, lineno = r.start.n; ; lp = list_next(lp), ++lineno) {
     /* First line.  */
     if (lineno == r.start.n) {
       /* Region on a sole line. */
@@ -627,7 +627,7 @@ static int transpose_subr(Function f)
   /* For transpose-lines. */
   else if (f == F_forward_line) {
     /* If we are in first line, go to next line. */
-    if (cur_bp->pt.p->prev == cur_bp->lines) {
+    if (list_prev(cur_bp->pt.p) == cur_bp->lines) {
       f(1);
     }
   }
@@ -1400,7 +1400,7 @@ static int setcase_region(int rcase)
         *astr_char(lp->item, i) = tolower(*astr_char(lp->item, i));
       ++i;
     } else {
-      lp = lp->next;
+      lp = list_next(lp);
       i = 0;
     }
   }

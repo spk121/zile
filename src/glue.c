@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.19 2005/01/10 01:31:53 rrt Exp $	*/
+/*	$Id: glue.c,v 1.20 2005/01/10 14:09:46 rrt Exp $	*/
 
 #include "config.h"
 
@@ -74,11 +74,11 @@ char *copy_text_block(int startn, int starto, size_t size)
   n = cur_bp->pt.n;
   if (n > startn)
     do
-      lp = lp->prev;
+      lp = list_prev(lp);
     while (--n > startn);
   else if (n < startn)
     do
-      lp = lp->next;
+      lp = list_next(lp);
     while (++n < startn);
 
   for (i = starto; dp - buf < (int)size;) {
@@ -92,7 +92,7 @@ char *copy_text_block(int startn, int starto, size_t size)
       *dp++ = *astr_char(lp->item, i++);
     else {
       *dp++ = '\n';
-      lp = lp->next;
+      lp = list_next(lp);
       i = 0;
     }
   }

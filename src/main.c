@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.53 2005/01/09 23:56:05 rrt Exp $	*/
+/*	$Id: main.c,v 1.54 2005/01/10 14:09:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -57,46 +57,11 @@ int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
 
-#if DEBUG
-/*
- * This function checks the line list of the specified buffer and
- * appends list informations to the `zile.abort' file if
- * some unexpected corruption is found.
- */
-static void check_list(Window *wp)
-{
-  Line *lp, *prevlp;
-
-  prevlp = wp->bp->limitp;
-  for (lp = wp->bp->limitp->next;; lp = lp->next) {
-    if (lp->prev != prevlp || prevlp->next != lp) {
-      FILE *f = fopen("zile.abort", "a");
-      fprintf(f, "---------- buffer `%s' corruption\n", wp->bp->name);
-      fprintf(f, "limitp = %p, limitp->prev = %p, limitp->next = %p\n", wp->bp->limitp, wp->bp->limitp->prev, wp->bp->limitp->next);
-      fprintf(f, "prevlp = %p, prevlp->prev = %p, prevlp->next = %p\n", prevlp, prevlp->prev, prevlp->next);
-      fprintf(f, "pointp = %p, pointp->prev = %p, pointp->next = %p\n", wp->bp->pt.p, wp->bp->pt.p->prev, wp->bp->pt.p->next);
-      fprintf(f, "lp = %p, lp->prev = %p, lp->next = %p\n", lp, lp->prev, lp->next);
-      fclose(f);
-      term_close();
-      fprintf(stderr, "\aAborting due to internal buffer structure corruption\n");
-      fprintf(stderr, "\aFor more information read the `zile.abort' file\n");
-      abort();
-    }
-    if (lp == wp->bp->limitp)
-      break;
-    prevlp = lp;
-  }
-}
-#endif /* DEBUG */
-
 static void loop(void)
 {
   for (;;) {
     if (lastflag & FLAG_NEED_RESYNC)
       resync_redisplay();
-#if DEBUG
-    check_list(cur_wp);
-#endif
     term_redisplay();
     term_refresh();
 

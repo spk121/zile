@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: point.c,v 1.6 2005/01/10 01:31:53 rrt Exp $	*/
+/*	$Id: point.c,v 1.7 2005/01/10 14:09:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -28,11 +28,11 @@
 Point make_point(int lineno, int offset)
 {
   Point pt;
-  pt.p = cur_bp->lines->next;
+  pt.p = list_next(cur_bp->lines);
   pt.n = lineno;
   pt.o = offset;
   while (lineno > 0) {
-    pt.p = pt.p->next;
+    pt.p = list_next(pt.p);
     lineno--;
   }
   return pt;
@@ -57,7 +57,7 @@ int point_dist(Point pt1, Point pt2)
   if (cmp_point(pt1, pt2) > 0)
     swap_point(&pt1, &pt2);
 
-  for (lp=pt1.p; ; lp=lp->next) {
+  for (lp = pt1.p; ; lp = list_next(lp)) {
     size += astr_len(lp->item);
 
     if (lp == pt1.p)
@@ -92,7 +92,7 @@ void swap_point(Point *pt1, Point *pt2)
 Point point_min(void)
 {
   Point pt;
-  pt.p = cur_bp->lines->next;
+  pt.p = list_next(cur_bp->lines);
   pt.n = 0;
   pt.o = 0;
   return pt;
@@ -101,9 +101,9 @@ Point point_min(void)
 Point point_max(void)
 {
   Point pt;
-  pt.p = cur_bp->lines->prev;
+  pt.p = list_prev(cur_bp->lines);
   pt.n = cur_bp->num_lines;
-  pt.o = astr_len(cur_bp->lines->prev->item);
+  pt.o = astr_len(list_prev(cur_bp->lines)->item);
   return pt;
 }
 
@@ -111,27 +111,16 @@ Point line_beginning_position(int count)
 {
   Point pt;
 
-  count--;
-
   /* Copy current point position without offset (beginning of
-   * line).  */
+   * line). */
   pt = cur_bp->pt;
   pt.o = 0;
 
-  if (count < 0) {
-    while (count && pt.p->prev != cur_bp->lines) {
-      pt.p = pt.p->prev;
-      pt.n--;
-      count++;
-    }
-  }
-  else if (count > 0) {
-    while (count && pt.p->next != cur_bp->lines) {
-      pt.p = pt.p->next;
-      pt.n++;
-      count--;
-    }
-  }
+  count--;
+  for (; count < 0 && list_prev(pt.p) != cur_bp->lines; pt.n--, count++)
+      pt.p = list_prev(pt.p);
+  for (; count > 0 && list_next(pt.p) != cur_bp->lines; pt.n++, count--)
+      pt.p = list_next(pt.p);
 
   return pt;
 }

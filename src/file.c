@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.53 2005/01/10 01:31:52 rrt Exp $        */
+/*      $Id: file.c,v 1.54 2005/01/10 14:09:45 rrt Exp $        */
 
 #include "config.h"
 
@@ -280,24 +280,6 @@ void open_file(char *path, int lineno)
 }
 
 /*
- * Add a newline at the end of the line `lp'.
- */
-static Line *fadd_newline(Line *lp)
-{
-  Line *lp1;
-
-  lp1 = new_line();
-  lp1->next = lp->next;
-  lp1->next->prev = lp1;
-  lp->next = lp1;
-  lp1->prev = lp;
-  lp = lp1;
-  ++cur_bp->num_lines;
-
-  return lp;
-}
-
-/*
  * Read the file contents into a buffer.
  * Return quietly if the file doesn't exist.
  */
@@ -325,7 +307,8 @@ void read_from_disk(const char *filename)
       if (buf[i] != '\n' && buf[i] != '\r')
         astr_cat_char(lp->item, buf[i]);
       else {
-        lp = fadd_newline(lp);
+        lp = list_prepend(lp, astr_new());
+        ++cur_bp->num_lines;
                                 
         if (i < size - 1 &&
             buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
@@ -343,9 +326,9 @@ void read_from_disk(const char *filename)
         }
       }
                         
-  lp->next = cur_bp->lines;
-  cur_bp->lines->prev = lp;
-  cur_bp->pt.p = cur_bp->lines->next;
+  list_next(lp) = cur_bp->lines;
+  list_prev(cur_bp->lines) = lp;
+  cur_bp->pt.p = list_next(cur_bp->lines);
 
   fclose(fp);
 }
@@ -609,10 +592,10 @@ static void insert_buffer(Buffer *bp)
 
   undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = TRUE;
-  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next) {
+  for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     for (i = 0; i < astr_len(lp->item); i++)
       insert_char(*astr_char(lp->item, i));
-    if (lp->next != bp->lines)
+    if (list_next(lp) != bp->lines)
       insert_newline();
   }
   undo_nosave = FALSE;
@@ -844,9 +827,9 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
     return FALSE;
 
   /* Save all the lines. */
-  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next) {
+  for (lp = list_next(bp->lines); lp != bp->lines; lp = list_next(lp)) {
     write(fd, astr_cstr(lp->item), astr_len(lp->item));
-    if (lp->next != bp->lines)
+    if (list_next(lp) != bp->lines)
       write(fd, bp->eol, eol_len);
   }
 
