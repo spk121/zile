@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.1 2004/12/18 22:09:25 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.2 2004/12/20 18:14:59 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -12,7 +12,12 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "astr.h"
+/* #include other sources so this program can be easily built on the
+   build host when cross-compiling */
+#include "../src/astr.c"
+#include "../src/strrstr.c"
+#include "../src/zmalloc.c"
+#include "../src/vasprintf.c"
 
 struct fentry {
 	char	*name;

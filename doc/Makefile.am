@@ -1,11 +1,7 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.4 2004/12/19 00:43:16 rrt Exp $
+## $Id: Makefile.am,v 1.5 2004/12/20 18:14:59 rrt Exp $
 
 info_TEXINFOS = zile.texi
-
-noinst_PROGRAMS = mkdoc
-mkdoc_SOURCES = mkdoc.c
-mkdoc_LDADD = $(top_srcdir)/src/astr.o $(top_srcdir)/src/strrstr.o $(top_srcdir)/src/zmalloc.o $(top_srcdir)/src/vasprintf.o
 
 ziledir = $(datadir)/zile
 zile_DATA =					\
@@ -28,6 +24,12 @@ HELP: $(top_srcdir)/doc/zile.texi
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
+mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
+	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ mkdoc.o
+
+mkdoc.o: mkdoc.c
+	$(CC_FOR_BUILD) -c -I. -I.. -I../src $(CFLAGS) $(srcdir)/mkdoc.c
+
 AUTODOC: $(AUTODOCSRCS) mkdoc
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
@@ -43,4 +45,4 @@ zilerc.texi: zilerc.sample
 all-local: HELP AUTODOC
 
 clean-local:
-	-rm -f mkdoc AUTODOC HELP *.o
+	-rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
