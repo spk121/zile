@@ -9,14 +9,12 @@ systems (a typical binary is about 100Kb) and quick editing sessions
 Zile is written in C; its only external dependency is a terminal
 library, either termcap, Allegro or epocemx.
 
+Zile is free software, licensed under the GNU GPL.
+
 See INSTALL for installation instructions (on EPOC, just install the
 SIS file).
 
-
-Zile is hosted on SourceForge at:
-
-http://zile.sourceforge.net/		(homepage)
-http://sourceforge.net/projects/zile	(project page)
+Zile is hosted on SourceForge at http://zile.sourceforge.net/
 
 Any questions, comments, or bug reports should be sent to the developers'
 mailing list <zile-devel@lists.sourceforge.net>.
