@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.31 2004/10/25 08:58:24 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.32 2004/11/12 23:51:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -141,6 +141,7 @@ void term_refresh(void)
         /* Add the rest of the screen. */
         for (i = 0; i < termp->height; i++) {
                 eol = FALSE;
+                astr_cat_cstr(as, tgoto(cm_string, 0, i));
                 for (j = 0; j < termp->width; j++) {
                         int offset = i * termp->width + j;
                         int n = screen.array[offset];
