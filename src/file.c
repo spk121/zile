@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.11 2003/10/24 23:32:08 ssigala Exp $	*/
+/*	$Id: file.c,v 1.12 2003/11/28 23:09:37 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -476,10 +476,11 @@ static int is_shell_file(const char *filename)
 }
 #endif
 
-#if ENABLE_NONTEXT_MODES
 static void find_file_hooks(const char *filename)
 {
+#if ENABLE_C_MODE
 	const char *c_file[] = { ".c", ".h", ".m", NULL };
+#endif
 #if ENABLE_CPP_MODE
 	const char *cpp_file[] = { ".C", ".H", ".cc", ".cpp",
 				   ".cxx", ".hpp", ".hh", NULL };
@@ -490,7 +491,9 @@ static void find_file_hooks(const char *filename)
 #if ENABLE_JAVA_MODE
 	const char *java_file[] = { ".java", ".JAVA", NULL };
 #endif
+#if ENABLE_SHELL_MODE
 	const char *shell_file[] = { ".sh", ".csh", NULL };
+#endif
 
 	if (0) {} /* Hack */
 #if ENABLE_C_MODE
@@ -514,8 +517,9 @@ static void find_file_hooks(const char *filename)
 		 is_shell_file(filename))
 		FUNCALL(shell_script_mode);
 #endif
+	else
+		FUNCALL(text_mode);
 }
-#endif /* ENABLE_NONTEXT_MODES */
 
 int find_file(const char *filename)
 {
@@ -547,9 +551,7 @@ int find_file(const char *filename)
 
 	switch_to_buffer(bp);
 	read_from_disk(filename);
-#if ENABLE_NONTEXT_MODES
 	find_file_hooks(filename);
-#endif
 
 	thisflag |= FLAG_NEED_RESYNC;
 
@@ -1031,7 +1033,7 @@ static char *create_backup_filename(const char *filename, int withrevs,
 		astr_delete(dir);
 		astr_delete(fname);
 		filename = astr_cstr(buf);
- 	}
+	}
 
 	s = (char *)zmalloc(strlen(filename) + 10);
 
@@ -1054,7 +1056,7 @@ static char *create_backup_filename(const char *filename, int withrevs,
  */
 static int copy_file(char *source, char *dest)
 {
-	char buf[BUFSIZ];	
+	char buf[BUFSIZ];
 	int ifd, ofd, len, stat_valid;
 	struct stat st;
 
@@ -1093,8 +1095,8 @@ static int copy_file(char *source, char *dest)
 	/* Recover file modification time. */
 	if (stat_valid) {
 		struct utimbuf t;
-		t.actime = st.st_atime; 
-		t.modtime = st.st_mtime; 
+		t.actime = st.st_atime;
+		t.modtime = st.st_mtime;
 		utime(dest, &t);
 	}
 
