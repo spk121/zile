@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.16 2004/05/20 22:34:50 rrt Exp $	*/
+/*	$Id: search.c,v 1.17 2004/09/20 01:07:35 dacap Exp $	*/
 
 #include "config.h"
 
@@ -364,7 +364,6 @@ static int isearch(int dir, int regexp)
 	cur_wp->bp->flags |= BFLAG_ISEARCH;
 
 	for (;;) {
-		term_redisplay();
 		/* Make the minibuf message.  */
                 astr_truncate(buf, 0);
 		astr_afmt(buf, "%sI-search%s: %s",
@@ -385,6 +384,8 @@ static int isearch(int dir, int regexp)
 		}
 		/* Write in minibuf.  */
 		minibuf_write("%s", astr_cstr(buf));
+		/* Redisplay (and leave the cursor in the correct position) */
+		term_redisplay();
 
 		if (thisflag & FLAG_EXECUTING_MACRO) {
 			c = get_macro_key_data();
