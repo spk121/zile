@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.h,v 1.11 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: astr.h,v 1.12 2004/03/13 13:26:15 rrt Exp $	*/
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -28,8 +28,18 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+/*
+ * The astr library provides dynamically allocated null-terminated C
+ * strings.
+ *
+ * The string type, astr, is a pointer type.
+ *
+ * String positions start at zero, as with ordinary C strings.
+ * Negative values are also allowed, and count from the end of the
+ * string. In particular, -1 refers to the last character of the
+ * string.
+ */
 typedef struct astr_s *astr;
-typedef const struct astr_s *castr;
 
 /*
  * Allocate a new string with zero length.
@@ -55,15 +65,31 @@ extern void   astr_delete(astr as);
 /*
  * Return the address of the pos'th character of as. If pos is >= 0,
  * than 0, count from the left; if less than zero count from the
- * right. 0 means the character after the end of the string.
- *
- * If pos is not in the range 1 ..
+ * right.
  */
-extern char * astr_idx(castr as, int pos);
+extern char * astr_char(const astr as, int pos);
+
+/*
+ * Return a new astr consisting of size characters from string as
+ * starting from position pos.
+ */
+extern astr   astr_substr(const astr as, int pos, size_t size);
+
+/*
+ * Do strcmp on the contents of s1 and s2
+ */
 #define astr_cmp(s1, s2)	(strcmp(s1->text, s2->text))
-extern astr   astr_assign(astr as, castr src);
+
+/*
+ * Assign the contents of the argument string or to the string as.
+ */
+extern astr   astr_assign(astr as, const astr src);
 extern astr   astr_assign_cstr(astr as, const char *s);
-extern astr   astr_append(astr as, castr src);
+
+/* Append the contents of the argument string or character at the end
+ * of the string as.
+ */
+extern astr   astr_append(astr as, const astr src);
 extern astr   astr_append_cstr(astr as, const char *s);
 extern astr   astr_append_char(astr as, int c);
 
@@ -72,13 +98,11 @@ extern astr   astr_append_char(astr as, int c);
  */
 extern astr   astr_truncate(astr as, size_t size);
 
-extern astr   astr_substr(castr as, int pos, size_t size);
-extern char   astr_last_char(castr as);
-extern int    astr_find(castr as, castr src);
-extern int    astr_find_cstr(castr as, const char *s);
-extern int    astr_rfind(castr as, castr src);
-extern int    astr_rfind_cstr(castr as, const char *s);
-extern astr   astr_replace(astr as, int pos, size_t size, castr src);
+extern int    astr_find(const astr as, const astr src);
+extern int    astr_find_cstr(const astr as, const char *s);
+extern int    astr_rfind(const astr as, const astr src);
+extern int    astr_rfind_cstr(const astr as, const char *s);
+extern astr   astr_replace(astr as, int pos, size_t size, const astr src);
 extern astr   astr_replace_cstr(astr as, int pos, size_t size, const char *s);
 extern astr   astr_fgets(astr as, FILE *f);
 extern astr   astr_vfmt(astr as, const char *fmt, va_list ap);
@@ -97,14 +121,5 @@ struct astr_s {
 	size_t	size;
 	size_t	maxsize;
 };
-
-#ifndef ASTR_NO_MACRO_DEFS
-
-/*
- * Fast macro definitions.
- */
-
-
-#endif /* !ASTR_NO_MACRO_DEFS */
 
 #endif /* !ASTR_H */

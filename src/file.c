@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.21 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: file.c,v 1.22 2004/03/13 13:26:16 rrt Exp $	*/
 
 #include "config.h"
 
@@ -94,7 +94,7 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 
 	if (*sp != '/') {
                 astr_append_cstr(dir, cwdir);
-		if (astr_last_char(dir) != '/')
+		if (*astr_char(dir, -1) != '/')
 			astr_append_cstr(dir, "/");
 	}
 
@@ -145,9 +145,9 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 					++sp;
 			} else if (*(sp + 1) == '.' &&
 				   (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
-			    if (astr_size(dir) >= 1 && astr_last_char(dir) == '/')
+			    if (astr_size(dir) >= 1 && *astr_char(dir, -1) == '/')
 					astr_truncate(dir, astr_size(dir) - 1);
-				while (astr_last_char(dir) != '/' &&
+				while (*astr_char(dir, -1) != '/' &&
 				       astr_size(dir) >= 1)
 					astr_truncate(dir, astr_size(dir) - 1);
 				sp += 2;
@@ -226,7 +226,7 @@ astr get_current_dir(astr buf, int interactive)
                 p = astr_rfind_cstr(buf, "/");
                 if (p != -1)
                         astr_truncate(buf, p ? p : 1);
-		if (astr_last_char(buf) != '/')
+		if (*astr_char(buf, -1) != '/')
 			astr_append_cstr(buf, "/");
 	} else {
 		/*
@@ -979,7 +979,7 @@ static char *create_backup_filename(const char *filename, int withrevs,
 		buf = astr_new();
 
                 astr_append_cstr(buf, backupdir);
-		if (astr_last_char(buf) != '/')
+		if (*astr_char(buf, -1) != '/')
 			astr_append_cstr(buf, "/");
 		while (*filename != '\0') {
 			if (*filename == '/')

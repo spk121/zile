@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.15 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: astr.c,v 1.16 2004/03/13 13:26:15 rrt Exp $	*/
 
 #ifdef TEST
 #undef NDEBUG
@@ -37,7 +37,6 @@
 #include "astr.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
-#define ENLARGE_FACTOR 2
 
 astr astr_new(void)
 {
@@ -59,6 +58,21 @@ static void astr_resize(astr as, size_t reqsize)
         }
 }
 
+static int astr_pos(astr as, int pos)
+{
+	if (pos < 0)
+		pos = as->size + pos;
+        assert(pos >=0 && pos <= (int)as->size);
+        return pos;
+}
+
+char *astr_char(const astr as, int pos)
+{
+        assert(as != NULL);
+        pos = astr_pos(as, pos);
+        return as->text + pos;
+}
+
 void astr_delete(astr as)
 {
 	assert(as != NULL);
@@ -75,7 +89,7 @@ static astr astr_assign_x(astr as, const char *s, size_t csize)
 	return as;
 }
 
-astr astr_assign(astr as, castr src)
+astr astr_assign(astr as, const astr src)
 {
 	assert(as != NULL && src != NULL);
 	return astr_assign_x(as, src->text, src->size);
@@ -95,7 +109,7 @@ static astr astr_append_x(astr as, const char *s, size_t csize)
 	return as;
 }
 
-astr astr_append(astr as, castr src)
+astr astr_append(astr as, const astr src)
 {
 	assert(as != NULL && src != NULL);
 	return astr_append_x(as, src->text, src->size);
@@ -128,18 +142,12 @@ astr astr_truncate(astr as, size_t size)
 	return as;
 }
 
-astr astr_substr(castr as, int pos, size_t size)
+astr astr_substr(const astr as, int pos, size_t size)
 {
 	astr dest;
 	assert(as != NULL);
 	dest = astr_new();
-	if (pos < 0) {
-		pos = as->size + pos;
-		if (pos < 0)
-			pos = 0;
-	}
-	if ((unsigned int)pos > as->size)
-		pos = as->size;
+        pos = astr_pos(as, pos);
 
 	if (as->size - pos < size)
 		size = as->size - pos;
@@ -151,19 +159,12 @@ astr astr_substr(castr as, int pos, size_t size)
 	return dest;
 }
 
-char (astr_last_char)(castr as)
-{
-	assert(as != NULL);
-	assert(as->size != 0);
-	return as->text[as->size - 1];
-}
-
-int astr_find(castr as, castr src)
+int astr_find(const astr as, const astr src)
 {
 	return astr_find_cstr(as, src->text);
 }
 
-int astr_find_cstr(castr as, const char *s)
+int astr_find_cstr(const astr as, const char *s)
 {
 	char *sp;
 	assert(as != NULL && s != NULL);
@@ -171,12 +172,12 @@ int astr_find_cstr(castr as, const char *s)
 	return (sp == NULL) ? -1 : sp - as->text;
 }
 
-int astr_rfind(castr as, castr src)
+int astr_rfind(const astr as, const astr src)
 {
 	return astr_rfind_cstr(as, src->text);
 }
 
-int astr_rfind_cstr(castr as, const char *s)
+int astr_rfind_cstr(const astr as, const char *s)
 {
 	char *sp;
 	assert(as != NULL && s != NULL);
@@ -187,13 +188,7 @@ int astr_rfind_cstr(castr as, const char *s)
 static astr astr_replace_x(astr as, int pos, size_t size, const char *s, size_t csize)
 {
 	astr dest = astr_new();
-	if (pos < 0) {
-		pos = as->size + pos;
-		if (pos < 0)
-			pos = 0;
-	}
-	if ((unsigned int)pos > as->size)
-		pos = as->size;
+        pos = astr_pos(as, pos);
 
 	if (as->size - pos < size)
 		size = as->size - pos;
@@ -210,7 +205,7 @@ static astr astr_replace_x(astr as, int pos, size_t size, const char *s, size_t 
 	return as;
 }
 
-astr astr_replace(astr as, int pos, size_t size, castr src)
+astr astr_replace(astr as, int pos, size_t size, const astr src)
 {
 	assert(as != NULL && src != NULL);
 	return astr_replace_x(as, pos, size, src->text, src->size);
