@@ -20,13 +20,6 @@ TMPFUNCST=`mktemp /tmp/$0.XXXXXX` || exit 1
 TMPVARST=`mktemp /tmp/$0.XXXXXX` || exit 1
 
 cat >$TMPFILE1 <<EOF
-#define ENABLE_NONTEXT_MODES 1
-#define ENABLE_C_MODE	 1
-#define ENABLE_CPP_MODE	 1
-#define ENABLE_CSHARP_MODE 1
-#define ENABLE_JAVA_MODE 1
-#define ENABLE_MAIL_MODE 1
-#define ENABLE_SHELL_MODE 1
 #define X0(z, c)			z
 #define X1(z, c, k1)			z
 #define X2(z, c, k1, k2)		z
@@ -38,13 +31,6 @@ cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
 
 cat >$TMPFILE1 <<EOF
-#define ENABLE_NONTEXT_MODES 1
-#define ENABLE_C_MODE	 1
-#define ENABLE_CPP_MODE	 1
-#define ENABLE_CSHARP_MODE 1
-#define ENABLE_JAVA_MODE 1
-#define ENABLE_MAIL_MODE 1
-#define ENABLE_SHELL_MODE 1
 #define X(v, t, d, c)	v
 EOF
 
