@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(zile, 2.0-a2, zile-devel@lists.sourceforge.net)
+AC_INIT(zile, 2.0-a3, zile-devel@lists.sourceforge.net)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE
 
