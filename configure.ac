@@ -29,6 +29,7 @@ dnl Checks for functions.
 dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf strrstr)
+AC_CHECK_FUNCS(getcwd)
 
 dnl ==================================================================
 dnl Checks for header files.
@@ -36,23 +37,6 @@ dnl ==================================================================
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h limits.h)
-
-dnl ==================================================================
-dnl Checks for typedefs, structures, and compiler characteristics.
-dnl ==================================================================
-
-AC_C_CONST
-AC_TYPE_SIZE_T
-
-dnl ==================================================================
-dnl Checks for library functions.
-dnl ==================================================================
-
-AC_FUNC_MEMCMP
-AC_FUNC_STRFTIME
-AC_FUNC_UTIME_NULL
-AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(getcwd)
 
 dnl ==================================================================
 dnl Check for GNU Regex library
@@ -172,26 +156,6 @@ dnl Extra definitions for config.h
 dnl ==================================================================
 
 AH_BOTTOM([
-#include <stddef.h>
-#include <stdarg.h>
-
-#ifndef HAVE_XMALLOC
-extern void *xmalloc(size_t);
-#endif
-
-#ifndef HAVE_XREALLOC
-extern void *xrealloc(void *, size_t);
-#endif
-
-#ifndef HAVE_XSTRDUP
-extern char *xstrdup(const char *);
-#endif
-
-#ifndef HAVE_VASPRINTF
-extern int asprintf(char **strp, const char *fmt, ...);
-extern int vasprintf(char **strp, const char *fmt, va_list ap);
-#endif
-
 #ifndef HAVE_STRRSTR
 extern char *strrstr(const char *, const char *);
 #endif
