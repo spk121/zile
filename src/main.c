@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.67 2005/01/18 19:10:24 rrt Exp $	*/
+/*	$Id: main.c,v 1.68 2005/01/18 21:55:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -100,7 +100,7 @@ static char about_splash_str[] = "\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
 Type `C-x C-c' to exit Zile.\n\
-Type `C-h h' or `F1' for help; `C-x u; to undo changes.\n\
+Type `C-h h' for help; `C-x u; to undo changes.\n\
 Type `C-h C-d' for information on getting the latest version.\n\
 Type `C-h t' for a tutorial on using Zile.\n\
 Type `C-h s' for a sample configuration file.\n\
@@ -110,11 +110,11 @@ Type `C-g' at any time to cancel the current operation.\n\
 `M-x' means hold the META or ALT key down while typing `x'.\n\
 If there is no META or ALT key, instead press and release\n\
 the ESC key and then type `x'.\n\
-Combinations like `C-h t' mean first do `C-h', then press `t'.\n\
+Combinations like `C-h h' mean first press `C-h', then `h'.\n\
 ";
 
 static char about_minibuf_str[] =
-"Welcome to Zile!  For help type `C-h h' or `F1'";
+"Welcome to Zile!  For help type `C-h h'";
 
 static void about_screen(void)
 {
@@ -124,9 +124,11 @@ static void about_screen(void)
     replace_string(about_minibuf_str, "C-h", "M-h");
   }
 
+  minibuf_write(about_minibuf_str);
   if (!lookup_bool_variable("skip-splash-screen"))
     show_splash_screen(about_splash_str);
-  minibuf_write(about_minibuf_str);
+  term_refresh();
+  waitkey(20 * 10);
 }
 
 static void setup_main_screen(int argc)
