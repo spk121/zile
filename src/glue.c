@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.15 2004/11/14 16:29:07 rrt Exp $	*/
+/*	$Id: glue.c,v 1.16 2004/11/14 23:57:54 rrt Exp $	*/
 
 #include "config.h"
 
@@ -47,24 +47,15 @@ void ding(void)
 }
 
 /*
- * Wait for `dsecs' deciseconds or until a key is pressed.
+ * Wait for two seconds or until a key is pressed.
  * The key is then available with term_getkey().
  */
-void waitkey(int dsecs)
+void waitkey(void)
 {
 	int c;
 
-	if ((c = term_xgetkey(GETKEY_DELAYED, dsecs)) != KBD_NOKEY)
+	if ((c = term_xgetkey(GETKEY_DELAYED, 20)) != KBD_NOKEY)
 		term_unget(c);
-}
-
-/*
- * Wait for `dsecs' deciseconds or until a key is pressed.
- * The key is returned (the editor doesn't see it).
- */
-int waitkey_discard(int dsecs)
-{
-	return term_xgetkey(GETKEY_DELAYED, dsecs);
 }
 
 /*

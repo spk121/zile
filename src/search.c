@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.23 2004/11/14 23:17:43 rrt Exp $	*/
+/*	$Id: search.c,v 1.24 2004/11/14 23:57:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -620,7 +620,7 @@ what to do with it.
 					goto exitloop;
 				}
 				minibuf_error("Please answer y, n, !, . or q.");
-				waitkey(2 * 10);
+				waitkey();
 			}
 		exitloop:
 			minibuf_clear();

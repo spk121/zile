@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: buffer.c,v 1.14 2004/10/16 20:17:03 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.15 2004/11/14 23:57:54 rrt Exp $	*/
 
 #include "config.h"
 
@@ -51,7 +51,7 @@ static Buffer *new_buffer(void)
 		bp->tab_width = atoi(s);
 		if (bp->tab_width < 1) {
 			minibuf_error("Warning: wrong global tab-width value `%s'", s);
-			waitkey(2 * 10);
+			waitkey();
 			bp->tab_width = 8;
 		}
 	} else
@@ -60,8 +60,8 @@ static Buffer *new_buffer(void)
 	if ((s = get_variable("fill-column")) != NULL) {
 		bp->fill_column = atoi(s);
 		if (bp->fill_column < 2) {
-			minibuf_error("warning: wrong global fill-column value `%s'", s);
-			waitkey(2 * 10);
+			minibuf_error("Warning: wrong global fill-column value `%s'", s);
+			waitkey();
 			bp->fill_column = 70;
 		}
 	} else

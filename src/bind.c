@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.36 2004/11/14 21:32:46 rrt Exp $	*/
+/*	$Id: bind.c,v 1.37 2004/11/14 23:57:52 rrt Exp $	*/
 
 #include "config.h"
 
@@ -152,13 +152,10 @@ int do_completion(astr as, int *compl)
 	int c;
 
 	if (!*compl) {
-		c = waitkey_discard(5);
-		if (c == KBD_NOKEY) {
-			minibuf_write("%s", astr_cstr(as));
-                        term_refresh();
-			c = term_getkey();
-			*compl = 1;
-		}
+                minibuf_write("%s", astr_cstr(as));
+                term_refresh();
+                c = term_getkey();
+                *compl = 1;
 	} else {
 		minibuf_write("%s", astr_cstr(as));
                 term_refresh();
@@ -430,7 +427,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
 				}
 			if ((entryp = bsearch_function(ms)) == NULL) {
 				minibuf_error("Undefined function name `%s'", ms);
-				waitkey(2 * 10);
+				waitkey();
 			} else {
 				/* Add history element.  */
 				add_history_element(&functions_history,

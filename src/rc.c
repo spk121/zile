@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: rc.c,v 1.15 2004/10/16 20:17:04 rrt Exp $	*/
+/*	$Id: rc.c,v 1.16 2004/11/14 23:57:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ static void error(char *fmt, ...)
 
 	minibuf_error("%s%s", astr_cstr(msg1), msg2);
 
-	waitkey_discard(3 * 10);
+	waitkey();
 	astr_delete(msg1);
         free(msg2);
 }
@@ -156,7 +156,7 @@ void read_rc_file(const char *filename)
 		rc_name = (char *)filename;
 		if ((rc_file = fopen(filename, "r")) == NULL) {
 			minibuf_error("Cannot open configuration file %s", filename);
-			waitkey_discard(3 * 10);
+			waitkey();
 		}
 	}
 
