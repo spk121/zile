@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.37 2004/04/05 17:30:35 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.38 2004/04/23 20:41:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -404,7 +404,7 @@ int universal_argument(int keytype, int xarg)
 	for (;;) {
 		astr_cat_cstr(as, "-"); /* Add the '-' character. */
 		c = do_completion(as, &compl);
-		astr_truncate(as, astr_size(as) - 1); /* Remove the '-' character. */
+		astr_truncate(as, astr_len(as) - 1); /* Remove the '-' character. */
 
 		/* Cancelled.  */
 		if (c == KBD_CANCEL)
@@ -732,14 +732,14 @@ static int transpose_subr(Function f)
 	/* Insert the second string in the first position.  */
 	if (s2) {
 		goto_point(p1->pt);
-		if (astr_size(s2) > 0)
+		if (astr_len(s2) > 0)
 			insert_string(astr_cstr(s2));
 	}
 
 	/* Insert the first string in the second position.  */
 	if (s1) {
 		goto_point(p2->pt);
-		if (astr_size(s1) > 0)
+		if (astr_len(s1) > 0)
 			insert_string(astr_cstr(s1));
 	}
 
@@ -1509,7 +1509,7 @@ it as the contents of the region.
 	astr_delete(cmd);
 
 	out = astr_new();
-	while (astr_size(s = astr_fgets(pipe)) > 0) {
+	while (astr_len(s = astr_fgets(pipe)) > 0) {
 		++lines;
 		astr_cat(out, s);
 		astr_cat_cstr(out, "\n");
