@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.9 2004/09/20 13:42:59 rrt Exp $	*/
+/*	$Id: term_ncurses.c,v 1.10 2004/09/20 14:22:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -90,9 +90,16 @@ void term_addnstr(const char *s, int len)
         addnstr(s, len);
 }
 
-void term_attrset(Font f)
+void term_attrset(int attrs, ...)
 {
-        attrset(f);
+	int i;
+	unsigned long a = 0;
+	va_list valist;
+	va_start(valist, attrs);
+	for (i = 0; i < attrs; i++)
+		a |= va_arg(valist, Font);
+	va_end(valist);
+        attrset(a);
 }
 
 int term_printw(const char *fmt, ...)

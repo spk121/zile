@@ -196,7 +196,7 @@ void term_full_redisplay(void);
 void term_clear(void);
 void term_addch(int c);
 void term_addnstr(const char *s, int len);
-void term_attrset(Font f);
+void term_attrset(int attrs, ...);
 int term_printw(const char *fmt, ...);
 void term_beep(void);
 int term_getkey(void);

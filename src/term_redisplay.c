@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.8 2004/06/30 22:52:41 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.9 2004/09/20 14:22:08 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -77,7 +77,7 @@ static Font strtochtype(char *s)
 		return C_FG_WHITE;
 	case 'l':
 		if (!strncmp(s, "light-", 6))
-			return strtochtype(s + 6)|ZILE_BOLD;
+			return strtochtype(s + 6); /* |ZILE_BOLD; */
 		return C_FG_WHITE;
 	case 'm':
 		if (!strcmp(s, "magenta"))
@@ -269,13 +269,13 @@ static void outch(int c, Font font, int *x)
 
 	if (c == '\t')
 		for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZILE_COLS; w--)
-			term_addch(' ' | font), ++(*x);
+			term_addch(' '), ++(*x);
 	else if (is_displayable[(unsigned char)c])
-		term_addch(pc_to_ascii[(unsigned char)c] | font), ++(*x);
+		term_addch(pc_to_ascii[(unsigned char)c]), ++(*x);
 	else {
 		j = make_char_printable(&buf, c);
 		for (w = 0; w < j && *x < ZILE_COLS; ++w)
-			term_addch(buf[w] | font), ++(*x);
+			term_addch(buf[w]), ++(*x);
                 free(buf);
 	}
 }
@@ -495,7 +495,7 @@ static void draw_status_line(int line, Window *wp)
 	char *buf;
 	Point pt = window_pt(wp);
 
-	term_attrset(ZILE_REVERSE | status_line_color);
+	term_attrset(2, ZILE_REVERSE, status_line_color);
 
 	term_move(line, 0);
 	for (i = 0; i < wp->ewidth; ++i)
@@ -531,7 +531,7 @@ static void draw_status_line(int line, Window *wp)
                 free(buf);
 	}
 
-	term_attrset(0);
+	term_attrset(1, ZILE_NORMAL);
 }
 
 void term_redisplay(void)
@@ -632,11 +632,14 @@ void show_splash_screen(const char *splash)
 	for (i = 0, p = splash; *p != '\0'; ++p)
 		switch (*p) {
 		case '%':
-			term_attrset(bold ? 0: ZILE_BOLD);
+			if (!bold)
+				term_attrset(1, ZILE_BOLD);
 			bold ^= 1;
 			break;
 		case '$':
-			term_attrset(red ? 0: ZILE_BOLD | C_FG_RED);
+		     	if (!red) {
+				term_attrset(2, ZILE_BOLD, C_FG_RED);
+			}
 			red ^= 1;
 			break;
 		case  '\n':

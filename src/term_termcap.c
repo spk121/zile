@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.5 2004/09/20 13:40:53 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.6 2004/09/20 14:22:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -102,9 +102,14 @@ void term_addnstr(const char *s, int len)
         printf("%.*s", len, s);
 }
 
-void term_attrset(Font f)
+void term_attrset(int attrs, ...)
 {
-	printf(f);
+	int i;
+	va_list valist;
+	va_start(valist, attrs);
+	for (i = 0; i < attrs; i++)
+		printf(va_arg(valist, Font));
+	va_end(valist);
 }
 
 int term_printw(const char *fmt, ...)
