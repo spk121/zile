@@ -1,4 +1,4 @@
-/*	$Id: file.c,v 1.12 2003/11/28 23:09:37 rrt Exp $	*/
+/*	$Id: file.c,v 1.13 2003/12/08 21:48:15 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -102,20 +102,17 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 			astr_append_char(dir, '/');
 	}
 
-	while (sp != '\0') {
+	while (*sp != '\0') {
 		if (*sp == '/') {
-			if (*(sp + 1) == '/') {
+			if (*++sp == '/') {
 				/*
 				 * Got `//'.  Restart from this point.
 				 */
-				while (*++sp == '/')
-					;
+				while (*sp == '/')
+					sp++;
                                 astr_clear(dir);
-				astr_append_char(dir, '/');
-			} else {
-				++sp;
-				astr_append_char(dir, '/');
 			}
+                        astr_append_char(dir, '/');
 		} else if (*sp == '~') {
 			if (*(sp + 1) == '/') {
 				/*
