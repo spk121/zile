@@ -310,6 +310,10 @@ extern int asprintf(char **strp, const char *fmt, ...);
 extern int vasprintf(char **strp, const char *fmt, va_list ap);
 #endif
 
+#ifndef HAVE_STRRCHR
+extern char *strrchar(const char *, const char *);
+#endif
+
 #if defined(ENABLE_C_MODE) || defined(ENABLE_CPP_MODE) || \
     defined(ENABLE_CSHARP_MODE) || defined(ENABLE_JAVA_MODE)
 #define ENABLE_CLIKE_MODES 1
