@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.22 2004/05/02 06:17:18 rrt Exp $	*/
+/*	$Id: astr.c,v 1.23 2004/07/28 01:18:51 dacap Exp $	*/
 
 #include "config.h"
 
@@ -275,7 +275,8 @@ int main(void)
 
 	printf("Input one string: ");
 	fflush(stdout);
-	astr_fgets(as1, stdin);
+	astr_delete(as1);
+	as1 = astr_fgets(stdin);
 	printf("You wrote: \"%s\"\n", astr_cstr(as1));
 
 	astr_delete(as1);
