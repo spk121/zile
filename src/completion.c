@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.6 2004/05/02 06:21:22 rrt Exp $   */
+/*      $Id: completion.c,v 1.7 2004/05/09 18:01:57 rrt Exp $   */
 
 #include "config.h"
 
@@ -194,8 +194,7 @@ static void popup_completion(Completion *cp, int allflag, int num)
         }
 
         zap_buffer_content();
-        cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO
-                | BFLAG_NOEOB;
+        cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
         set_temporary_buffer(cur_bp);
 
         if (allflag)

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.22 2004/04/23 21:18:55 rrt Exp $        */
+/*      $Id: zile.h,v 1.23 2004/05/09 18:01:57 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -175,9 +175,7 @@ struct Region {
                                      backed up. */
 #define BFLAG_NOUNDO    (0000200) /* Do not record undo informations. */
 #define BFLAG_AUTOFILL  (0000400) /* The buffer is in Auto Fill mode. */
-#define BFLAG_NOEOB     (0001000) /* Do not display the EOB marker in
-                                     this buffer. */
-#define BFLAG_ISEARCH   (0002000) /* The buffer is in Isearch loop. */
+#define BFLAG_ISEARCH   (0001000) /* The buffer is in Isearch loop. */
 
 struct Buffer {
         /* The next buffer in buffer list. */

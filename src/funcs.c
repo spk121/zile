@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.38 2004/04/23 20:41:40 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.39 2004/05/09 18:01:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -148,8 +148,7 @@ void write_temp_buffer(const char *name, void (*func)(va_list ap), ...)
 	zap_buffer_content();
 
 	/* Make the buffer like a temporary one.  */
-	cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO
-		| BFLAG_NOEOB;
+	cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
 	set_temporary_buffer(cur_bp);
 
 	/* Use the "callback" routine.  */

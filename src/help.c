@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.17 2004/04/23 20:41:40 rrt Exp $	*/
+/*	$Id: help.c,v 1.18 2004/05/09 18:01:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -76,8 +76,7 @@ static int read_minihelp_page(Buffer *bp)
 	switch_to_buffer(bp);
 	zap_buffer_content();
 	bp->flags = BFLAG_NOUNDO | BFLAG_READONLY | BFLAG_NOSAVE
-		| BFLAG_NEEDNAME | BFLAG_TEMPORARY | BFLAG_MODIFIED
-		| BFLAG_NOEOB;
+		| BFLAG_NEEDNAME | BFLAG_TEMPORARY | BFLAG_MODIFIED;
 	set_temporary_buffer(bp);
 
 	fname = astr_new();
