@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_key.c,v 1.9 2004/02/17 23:20:32 rrt Exp $	*/
+/*	$Id: ncurses_key.c,v 1.10 2004/03/13 19:59:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,17 +55,6 @@ static int translate_key(int c)
 		return KBD_RET;
 	case '\37':
 		return KBD_CTL | (c ^ 0x40);
-#if 0
-	case '\34': case '\35': case '\36': case '\37':
-	case '\40': case '\41': case '\42': case '\43': case '\44':
-	case '\45': case '\46': case '\47': case '\50': case '\51':
-	case '\52': case '\53': case '\54': case '\55': case '\56':
-	case '\57': case '\60': case '\61': case '\62': case '\63':
-	case '\64': case '\65': case '\66': case '\67': case '\70':
-	case '\71': case '\72': case '\73': case '\74': case '\75':
-	case '\76': case '\77': case '\100':
-		return KBD_CTL | (c ^ 0x40);
-#endif
 #ifdef __linux__
 	case 0627:		/* C-z */
 		return KBD_CTL | 'z';

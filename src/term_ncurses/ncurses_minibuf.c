@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_minibuf.c,v 1.18 2004/03/11 13:50:14 rrt Exp $	*/
+/*	$Id: ncurses_minibuf.c,v 1.19 2004/03/13 19:59:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -240,11 +240,6 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 					*p = zrealloc(*p, *max);
 					strcpy(*p, elem);
 				}
-#if 0
-				else {
-					minibuf_error("Beginning of history; no preceding item");
-				}
-#endif
 			}
 			break;
 		case KBD_DOWN:
@@ -266,11 +261,6 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 					free(saved);
 					saved = NULL;
 				}
-#if 0
-				else {
-					minibuf_error("End of history; no default item");
-				}
-#endif
 			}
 			break;
 		case KBD_TAB:

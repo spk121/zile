@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.21 2004/03/10 11:00:25 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.22 2004/03/13 19:59:50 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -225,7 +225,7 @@ static void parse_displayable_chars(const char *s)
 			is_displayable[(unsigned char)num] = 1;
 	}
 
-#if 0
+#if DEBUG
 	for (i = 0; i < 256; ++i)
 		fprintf(stderr, "0x%x 0%o = %d\n", i, i, is_displayable[i]);
 #endif

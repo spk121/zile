@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.23 2004/03/13 16:28:49 rrt Exp $	*/
+/*	$Id: file.c,v 1.24 2004/03/13 19:59:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -295,17 +295,6 @@ static Line *fadd_newline(Line *lp)
 {
 	Line *lp1;
 
-#if 0
-	lp->maxsize = lp->size ? lp->size : 1;
-	lp1 = (linep)zrealloc(lp, sizeof *lp + lp->maxsize - sizeof lp->text);
-	if (lp != lp1) {
-		if (cur_bp->limitp->next == lp)
-			cur_bp->limitp->next = lp1;
-		lp1->prev->next = lp1;
-		lp1->next->prev = lp1;
-		lp = lp1;
-	}
-#endif
 	lp1 = new_line(1);
 	lp1->next = lp->next;
 	lp1->next->prev = lp1;

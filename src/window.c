@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.7 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: window.c,v 1.8 2004/03/13 19:59:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -262,27 +262,6 @@ This command selects the window one step away in that order.
 	set_current_window((cur_wp->next != NULL) ? cur_wp->next: head_wp);
 	return TRUE;
 }
-
-#if 0		/* XXX WARNING! this uses the old API .-dacap */
-void new_window_buffer(bufferp bp)
-{
-	if (--cur_bp->num_windows == 0) {
-		/*
-		 * This is the only window that displays
-		 * the buffer.
-		 */
-		cur_bp->save_pointp = cur_wp->pointp;
-		cur_bp->save_pointn = cur_wp->pointn;
-		cur_bp->save_pointo = cur_wp->pointo;
-	}
-
-	cur_wp->bp = cur_bp = bp;
-	++bp->num_windows;
-	cur_wp->pointp = bp->pointp;
-	cur_wp->pointn = bp->pointn;
-	cur_wp->pointo = bp->pointo;
-}
-#endif
 
 /*
  * This function is called once in main(), for creating
