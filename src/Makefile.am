@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.20 2004/11/16 00:35:44 rrt Exp $
+## $Id: Makefile.am,v 1.21 2005/01/03 12:09:20 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -18,8 +18,6 @@ astr_LDADD = zmalloc.o strrstr.o
 
 htable_CPPFLAGS = -DTEST
 htable_LDADD = zmalloc.o alist.o
-
-INCLUDES = -I$(top_srcdir)/lib
 
 bin_PROGRAMS = zile
 
