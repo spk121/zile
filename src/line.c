@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.35 2004/10/14 23:30:44 rrt Exp $	*/
+/*	$Id: line.c,v 1.36 2004/12/17 11:31:10 rrt Exp $	*/
 
 #include "config.h"
 
@@ -333,6 +333,24 @@ the current buffer.
 			break;
 		}
         }
+	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+
+	return ret;
+}
+
+DEFUN("open-line", open_line)
+/*+
+Insert a newline and leave point before it.
++*/
+{
+	int uni, ret = TRUE;
+
+	undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!intercalate_newline()) {
+			ret = FALSE;
+			break;
+		}
 	undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
 	return ret;

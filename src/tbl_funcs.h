@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.22 2004/11/14 22:35:21 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.23 2004/12/17 11:31:10 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -87,6 +87,7 @@ X0("name-last-kbd-macro", name_last_kbd_macro)
 X1("newline", newline,					"\\RET")
 X1("newline-and-indent", newline_and_indent,		"\\C-j")
 X2("next-line", next_line,				"\\C-n", "\\DOWN")
+X1("open-line", open_line,				"\\C-o")
 X1("other-window", other_window,			"\\C-xo")
 X1("overwrite-mode", overwrite_mode,			"\\INS")
 X2("previous-line", previous_line,			"\\C-p", "\\UP")
