@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.50 2005/01/18 22:49:07 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.51 2005/01/19 18:45:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -475,7 +475,7 @@ static int xgetkey(int mode, int dsecs)
   if (nbytes >= 0) {
     if (mode & GETKEY_NONFILTERED) {
       int i;
-      for (i = nbytes - 1; i >= 0; i--)
+      for (i = nbytes - 2; i >= 0; i--)
         term_unget(keys[i]);
       key = keys[nbytes - 1];
     } else {
