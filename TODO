@@ -13,10 +13,6 @@ transpose-words
 transpose-sexps
 transpose-lines
 
-* Get tests in lib built and run. Need to issue commands like:
-
-   $(CC) $(CFLAGS) -DTEST -I.. -o $(MODULE) $(MODULE).c -lzile
-   
 ------------------------------------------------------------------------------
 
 MEDIUM PRIORITY
