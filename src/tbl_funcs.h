@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.16 2004/04/05 17:30:35 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.17 2004/05/06 22:16:53 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -87,6 +87,7 @@ X1("mark-sexp", mark_sexp,				"\\C-\\M-@")
 X1("mark-word", mark_word,				"\\M-@")
 X2("minihelp-rotate-contents", minihelp_rotate_contents,"\\C-h\\C-r", "\\F9")
 X2("minihelp-toggle-window", minihelp_toggle_window,	"\\C-h\\C-h", "\\F10")
+X0("name-last-kbd-macro", name_last_kbd_macro)
 X1("newline", newline,					"\\RET")
 X1("newline-and-indent", newline_and_indent,		"\\C-j")
 X2("next-line", next_line,				"\\C-n", "\\DOWN")

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: macro.c,v 1.7 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: macro.c,v 1.8 2004/05/06 22:16:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -160,6 +160,15 @@ The macro is now available for use via C-x e.
 	thisflag &= ~FLAG_DEFINING_MACRO;
 
 	return TRUE;
+}
+
+DEFUN("name-last-kbd-macro", name_last_kbd_macro)
+/*+
+Bind the last keyboard macro to a command with the given name.
++*/
+{
+	/* XXX */
+	return FALSE;
 }
 
 static int call_last_kbd_macro(void)
