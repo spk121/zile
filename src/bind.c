@@ -1,4 +1,4 @@
-/*	$Id: bind.c,v 1.6 2004/01/21 01:16:05 dacap Exp $	*/
+/*	$Id: bind.c,v 1.7 2004/01/21 12:26:13 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -293,7 +293,7 @@ void process_key(int c)
 			if (!self_insert_command(c)) {
 				char buf[64];
 				make_completion(buf, keys, numkeys);
-				buf[strlen(buf)-2] = '\0';
+				buf[strlen(buf)-1] = '\0';
 				minibuf_error("%s not defined.", buf);
 				undo_save(UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
 				return;
