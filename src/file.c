@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.71 2005/02/07 01:36:43 rrt Exp $        */
+/*      $Id: file.c,v 1.72 2005/04/05 17:03:20 rrt Exp $        */
 
 #include "config.h"
 
@@ -730,7 +730,7 @@ END_DEFUN
 static astr create_backup_filename(const char *filename,
                                    int withdirectory)
 {
-  astr res;
+  astr res, buf = astr_new();
 
   /* Add the backup directory path to the filename */
   if (withdirectory) {
@@ -738,7 +738,6 @@ static astr create_backup_filename(const char *filename,
     char *backupdir;
 
     backupdir = get_variable("backup-directory");
-    buf = astr_new();
 
     astr_cat_cstr(buf, backupdir);
     if (*astr_char(buf, -1) != '/')
@@ -762,12 +761,12 @@ static astr create_backup_filename(const char *filename,
     astr_delete(dir);
     astr_delete(fname);
     filename = astr_cstr(buf);
-    astr_delete(buf);
   }
 
   res = astr_new();
   astr_cat_cstr(res, filename);
   astr_cat_char(res, '~');
+  astr_delete(buf);
 
   return res;
 }
