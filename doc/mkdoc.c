@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.6 2005/01/22 01:03:07 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.7 2005/02/05 13:48:15 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -100,7 +100,7 @@ static void parse(void)
         fprintf(stderr, "mkdoc: invalid DEFUN() syntax\n");
         exit(1);
       }
-      sub = astr_substr(buf, i + 1, j - i - 1);
+      sub = astr_substr(buf, i + 1, (size_t)(j - i - 1));
       astr_cpy(buf, sub);
       astr_delete(sub);
       fdecl(astr_cstr(buf));
