@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: astr.c,v 1.7 2005/01/09 23:56:03 rrt Exp $	*/
+/*	$Id: astr.c,v 1.8 2005/01/19 00:37:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -131,6 +131,14 @@ astr astr_cat_char(astr as, char c)
   astr_resize(as, as->len + 1);
   as->text[as->len] = c;
   as->text[++as->len] = '\0';
+  return as;
+}
+
+astr astr_cat_delete(astr as, const astr src)
+{
+  assert(src != NULL);
+  astr_cat_x(as, src->text, src->len);
+  astr_delete(src);
   return as;
 }
 

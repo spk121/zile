@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: astr.h,v 1.3 2005/01/10 01:29:08 rrt Exp $        */
+/*      $Id: astr.h,v 1.4 2005/01/19 00:37:20 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -101,6 +101,11 @@ extern astr   astr_cat(astr as, const astr src);
 extern astr   astr_cat_cstr(astr as, const char *s);
 extern astr   astr_ncat_cstr(astr as, const char *s, size_t len);
 extern astr   astr_cat_char(astr as, char c);
+
+/*
+ * Append the contents of src to as and free src.
+ */
+extern astr   astr_cat_delete(astr as, const astr src);
 
 /*
  * Replace size characters of as, starting at pos, with the argument
