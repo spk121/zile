@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.18 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: file.c,v 1.19 2004/03/09 16:17:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -490,6 +490,8 @@ static void find_file_hooks(const char *filename)
 	const char *shell_file[] = { ".sh", ".csh", NULL };
 #endif
 
+        (void)filename; /* Avoid compiler warning if no non-text modes
+                           configured. */
 	if (0) {} /* Hack */
 #if ENABLE_C_MODE
 	else if (have_extension(filename, c_file))
