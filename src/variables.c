@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.9 2004/02/17 23:20:33 rrt Exp $	*/
+/*	$Id: variables.c,v 1.10 2004/03/09 23:27:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -182,7 +182,8 @@ DEFUN("set-variable", set_variable)
 Set a variable value to the user specified value.
 +*/
 {
-	char buf[128], *var, *val, *fmt;
+	char *var, *val, *fmt;
+        astr as = astr_new();
 
 	var = minibuf_read_variable_name("Set variable: ");
 	if (var == NULL)
@@ -190,11 +191,11 @@ Set a variable value to the user specified value.
 
 	/* `tab-width' and `fill-column' are local to buffers. */
 	if (!strcmp(var, "tab-width"))
-		sprintf(buf, "%d", cur_bp->tab_width);
+		astr_fmt(as, "%d", cur_bp->tab_width);
 	else if (!strcmp(var, "fill-column"))
-		sprintf(buf, "%d", cur_bp->fill_column);
+		astr_fmt(as, "%d", cur_bp->fill_column);
 	else
-		strcpy(buf, get_variable(var));
+		astr_assign_cstr(as, get_variable(var));
 	fmt = get_variable_format(var);
 	if (!strcmp(fmt, "c")) {
 		if ((val = minibuf_read_color("Set %s to value: ", var)) == NULL)
@@ -205,9 +206,11 @@ Set a variable value to the user specified value.
 			return cancel();
 		val = (i == TRUE) ? "true" : "false";
 	} else { /* Non color, boolean or such fixed value variable. */
-		if ((val = minibuf_read("Set %s to value: ", buf, var)) == NULL)
+		if ((val = minibuf_read("Set %s to value: ", astr_cstr(as), var)) == NULL)
 			return cancel();
 	}
+
+        astr_delete(as);
 
 	/*
 	 * The `tab-width' and `fill-column' variables are local
