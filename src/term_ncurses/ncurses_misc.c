@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.10 2004/02/05 10:14:43 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.11 2004/02/06 01:59:01 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -176,9 +176,9 @@ extern void ncurses_free_rotation_buffers(void);
 int ncurses_close(void)
 {
 	/* Clear last line.  */
-	move (LINES - 1, 0);
-	clrtoeol ();
-	refresh ();
+	move(LINES - 1, 0);
+	clrtoeol();
+	refresh();
 
 	/* Free memory and finish with ncurses.  */
 	ncurses_free_rotation_buffers();
