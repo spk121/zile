@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.15 2004/03/08 15:39:13 rrt Exp $	*/
+/*	$Id: bind.c,v 1.16 2004/03/08 15:43:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -191,18 +191,16 @@ void show_tree(void)
 int do_completion(char *s, int *compl)
 {
 	int c;
-	char buf[32];
 
-	strcpy(buf, s);
 	if (!*compl) {
 		c = cur_tp->xgetkey(GETKEY_DELAYED, 500);
 		if (c == KBD_NOKEY) {
-			minibuf_write("%s", buf);
+			minibuf_write("%s", s);
 			c = cur_tp->getkey();
 			*compl = 1;
 		}
 	} else {
-		minibuf_write("%s", buf);
+		minibuf_write("%s", s);
 		c = cur_tp->getkey();
 	}
 	minibuf_clear();
