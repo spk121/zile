@@ -4,4 +4,3 @@ Makefile.in
 zile
 zile.1
 paths.h
-fontlock_*.c
