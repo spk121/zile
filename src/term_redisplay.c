@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.28 2005/01/16 13:06:53 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.29 2005/01/18 12:06:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -356,4 +356,20 @@ void term_tidy(void)
   term_clrtoeol();
   term_attrset(1, ZILE_NORMAL);
   term_refresh();
+}
+
+/*
+ * printf on the terminal
+ */
+int term_printw(const char *fmt, ...)
+{
+  char *buf;
+  int res = 0;
+  va_list ap;
+  va_start(ap, fmt);
+  res = vasprintf(&buf, fmt, ap);
+  va_end(ap);
+  term_addnstr(buf, strlen(buf));
+  free(buf);
+  return res;
 }

@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.15 2005/01/17 23:07:12 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.16 2005/01/18 12:06:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -194,18 +194,6 @@ void term_attrset(int attrs, ...)
     a |= va_arg(valist, Font);
   va_end(valist);
   cur_color = a;
-}
-
-int term_printw(const char *fmt, ...)
-{
-  char buf[4096];
-  int res;
-  va_list valist;
-  va_start(valist, fmt);
-  res = vsprintf(buf, fmt, valist);
-  term_addnstr(buf, res);
-  va_end(valist);
-  return res;
 }
 
 void term_beep(void)

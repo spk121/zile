@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.5 2005/01/17 18:15:38 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.6 2005/01/18 12:06:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -210,19 +210,6 @@ void term_attrset(int attrs, ...)
     }
   }
   va_end(valist);
-}
-
-int term_printw(const char *fmt, ...)
-{
-  char *buf;
-  int res = 0;
-  va_list ap;
-  va_start(ap, fmt);
-  res = vasprintf(&buf, fmt, ap);
-  va_end(ap);
-  term_addnstr(buf, strlen(buf));
-  free(buf);
-  return res;
 }
 
 void term_beep(void)

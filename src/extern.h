@@ -203,28 +203,34 @@ void recenter(Window *wp);
 /* search.c --------------------------------------------------------------- */
 void free_search_history(void);
 
-/* term_*.c --------------------------------------------------------------- */
+/* term_minibuf.c --------------------------------------------------------- */
+void term_minibuf_write(const char *fmt);
+char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
+void free_rotation_buffers(void);
+
+/* term_redisplay.c ------------------------------------------------------- */
+void term_redisplay(void);
+void term_full_redisplay(void);
+void show_splash_screen(const char *splash);
+void term_tidy(void);
+int term_printw(const char *fmt, ...);
+
+/* term_{allegro,epocemx,termcap}.c --------------------------------------- */
 void term_init(void);
 void term_close(void);
+void term_suspend(void);
+void term_resume(void);
 void term_move(int y, int x);
 void term_clrtoeol(void);
 void term_refresh(void);
-void term_redisplay(void);
-void term_full_redisplay(void);
 void term_clear(void);
 void term_addch(int c);
 void term_addnstr(const char *s, int len);
 void term_attrset(int attrs, ...);
-int term_printw(const char *fmt, ...);
 void term_beep(void);
 int term_getkey(void);
 int term_xgetkey(int mode, int arg);
 void term_unget(int c);
-void term_minibuf_write(const char *fmt);
-char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
-void free_rotation_buffers(void);
-void show_splash_screen(const char *splash);
-void term_tidy(void);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

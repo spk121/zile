@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.46 2005/01/17 18:15:28 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.47 2005/01/18 12:06:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -228,19 +228,6 @@ void term_attrset(int attrs, ...)
       screen.font |= f;
   }
   va_end(valist);
-}
-
-int term_printw(const char *fmt, ...)
-{
-  char *buf;
-  int res = 0;
-  va_list ap;
-  va_start(ap, fmt);
-  res = vasprintf(&buf, fmt, ap);
-  va_end(ap);
-  term_addnstr(buf, strlen(buf));
-  free(buf);
-  return res;
 }
 
 void term_beep(void)
@@ -548,4 +535,17 @@ void term_unget(int c)
     *--keyp = c & 0xff;
   if (c & KBD_META)
     *--keyp = '\033';
+}
+
+/* Suspend the term ready to go back to the shell */
+void term_suspend(void)
+{
+  term_tidy();
+}
+
+/* Set up the term again */
+void term_resume(void)
+{
+  term_full_redisplay();
+  /* XXX need to call tcsetattr and winch handler */
 }
