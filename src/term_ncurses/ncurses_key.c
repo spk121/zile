@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_key.c,v 1.10 2004/03/13 19:59:50 rrt Exp $	*/
+/*	$Id: ncurses_key.c,v 1.11 2004/05/09 19:32:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -170,16 +170,6 @@ static int xgetkey(int mode, int arg)
                 wtimeout(stdscr, arg);
 		c = getch();
                 wtimeout(stdscr, -1);
-		break;
-	case GETKEY_NONBLOCKING:
-		nodelay(stdscr, TRUE);
-		c = ncurses_getkey();
-		nodelay(stdscr, FALSE);
-		break;
-	case GETKEY_NONFILTERED|GETKEY_NONBLOCKING:
-		nodelay(stdscr, TRUE);
-		c = getch();
-		nodelay(stdscr, FALSE);
 		break;
 	}
 	return c;

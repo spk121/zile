@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.23 2004/05/09 18:01:57 rrt Exp $        */
+/*      $Id: zile.h,v 1.24 2004/05/09 19:32:38 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -304,8 +304,7 @@ struct Terminal {
  *--------------------------------------------------------------------------*/
 
 #define GETKEY_DELAYED                  (0001)
-#define GETKEY_NONBLOCKING              (0002)
-#define GETKEY_NONFILTERED              (0004)
+#define GETKEY_NONFILTERED              (0002)
 
 /* Special value returned in non blocking mode, when no key is pressed. */
 #define KBD_NOKEY                       (-1)
