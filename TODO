@@ -27,6 +27,11 @@ transpose-lines
 
 MEDIUM PRIORITY
 
+* Strip binary during make install.
+
+* Functions/bindings to implement and document (dummy functions
+  already exist):
+
 X1("kill-rectangle", kill_rectangle,                    "C-xrk")
 
 * Allow search and replace not to follow case (case-fold-search, case-replace)
