@@ -1,6 +1,8 @@
 Changes from Zile 1.6.1 - Zile 1.6.2
 
 * Fixed a few core dumps.
+* Fixed some bugs with patches from Nicolas Duboc.
+* Fixed a build problem where dumb makes tried to build "-lncurses".
 
 Changes between Zile 1.6 - Zile 1.6.1
 
