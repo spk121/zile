@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.25 2004/04/05 13:27:44 rrt Exp $	*/
+/*	$Id: bind.c,v 1.26 2004/04/16 01:24:18 dacap Exp $	*/
 
 #include "config.h"
 
@@ -585,8 +585,9 @@ static void write_bindings_tree(leafp tree, alist keys)
 
 static void write_bindings_list(va_list ap)
 {
-        (void)ap;
         alist al = alist_new();
+
+        (void)ap;
 
         bprintf("%-15s %s\n", "Binding", "Function");
 	bprintf("%-15s %s\n", "-------", "--------");
