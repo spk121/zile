@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.77 2005/01/28 00:49:30 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.78 2005/01/28 01:02:10 rrt Exp $	*/
 
 #include "config.h"
 
@@ -235,10 +235,10 @@ DEFUN("set-fill-column", set_fill_column)
     that value, otherwise with the current column value.
     +*/
 {
-  if (!(lastflag & FLAG_SET_UNIARG))
-    variableSetNumber(cur_bp->vars, "fill-column", uniarg);
+  if (lastflag & FLAG_SET_UNIARG)
+    cur_bp->vars = variableSetNumber(cur_bp->vars, "fill-column", uniarg);
   else
-    variableSetNumber(cur_bp->vars, "fill-column", (int)(cur_bp->pt.o + 1));
+    cur_bp->vars = variableSetNumber(cur_bp->vars, "fill-column", (int)(cur_bp->pt.o + 1));
 
   return TRUE;
 }
