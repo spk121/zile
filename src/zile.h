@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.30 2004/10/06 16:32:22 rrt Exp $        */
+/*      $Id: zile.h,v 1.31 2004/10/06 17:26:57 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -319,7 +319,7 @@ struct Terminal {
  * Miscellaneous stuff.
  *--------------------------------------------------------------------------*/
 
-/* Avoid thousand warnings about unused `uniarg' parameters. */
+/* Avoid warnings about unused `uniarg' parameters. */
 #undef GCC_UNUSED
 #ifdef __GNUC__
 #define GCC_UNUSED __attribute__ ((unused))
