@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.22 2004/03/13 13:26:16 rrt Exp $	*/
+/*	$Id: file.c,v 1.23 2004/03/13 16:28:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -126,7 +126,6 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 				 * Got `~something'.  Restart from this point
 				 * and insert that user home directory.
 				 */
-                                const char *p;
                                 astr as = astr_new();
 				astr_truncate(dir, 0);
 				++sp;
