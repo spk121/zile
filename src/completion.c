@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.8 2004/05/20 22:34:50 rrt Exp $   */
+/*      $Id: completion.c,v 1.9 2004/10/06 17:30:33 rrt Exp $   */
 
 #include "config.h"
 
@@ -34,6 +34,10 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#include <pwd.h>
 
 #include "zile.h"
 #include "extern.h"
@@ -292,17 +296,69 @@ static int default_completion_try(Completion *cp, astr search)
         return COMPLETION_NOTMATCHED;
 }
 
+static astr expand_path_magic(astr as, astr *pdir)
+{
+        int i;
+        struct passwd *pw;
+        astr buf = astr_new();
+        
+        for (i = 0; i < astr_len(as); i++) {
+                if (*astr_char(as, i) == '/') {
+                        if (*astr_char(as, i + 1) == '/') {
+                                /* Got `//'.  Restart from this point. */
+                                while (*astr_char(as, i + 1) == '/')
+                                        i++;
+                                astr_truncate(buf, 0);
+                                /* Final '/' remains to be copied below */
+                        }
+                } else if (*astr_char(as, i) == '~') {
+                        if (*astr_char(as, i + 1) == '/') {
+                                /*
+                                 * Got `~/'.  Restart from this point
+                                 * and insert the user home directory.
+                                 */
+                                astr_truncate(*pdir, 0);
+                                if ((pw = getpwuid(getuid())) == NULL)
+                                        return FALSE;
+                                if (strcmp(pw->pw_dir, "/") != 0)
+                                        astr_cat_cstr(*pdir, pw->pw_dir);
+                                ++i;
+                        } else {
+                                /*
+                                 * Got `~something'.  Restart from this point
+                                 * and insert that user home directory.
+                                 */
+                                astr bs = astr_new();
+                                astr_truncate(*pdir, 0);
+                                ++i;
+                                while (*astr_char(as, i) != '\0' && *astr_char(as, i) != '/')
+                                        astr_cat_char(bs, *astr_char(as, i++));
+                                pw = getpwnam(astr_cstr(bs));
+                                astr_delete(bs);
+                                if (pw == NULL)
+                                        return FALSE;
+                                astr_cat_cstr(*pdir, pw->pw_dir);
+                        }
+                }
+                astr_cat_char(buf, *astr_char(as, i));
+        }
+        astr_cpy(as, buf);
+
+        return as;
+}
+
 /*
  * The default completion directory re-reading function.
+ * - Expands the `~/' and `~name/' expressions;
+ * - Restarts from root when it finds `//'
  */
 static int default_completion_reread(Completion *cp, astr as)
 {
-        astr buf, pdir, fname;
+        astr buf = astr_new(), fname = astr_new(), pdir = astr_new();
         DIR *dir;
         struct dirent *d;
         struct stat st;
         char *p;
-        int i;
 
         for (p = alist_first(cp->completions); p != NULL; p = alist_next(cp->completions))
                 free(p);
@@ -310,27 +366,7 @@ static int default_completion_reread(Completion *cp, astr as)
         alist_clear(cp->completions);
         cp->fl_sorted = 0;
 
-        buf = astr_new();
-        pdir = astr_new();
-        fname = astr_new();
-
-        for (i = 0; i < astr_len(as); i++){
-                if (*astr_char(as, i) == '/') {
-                        if (*astr_char(as, i + 1) == '/') {
-                                /*
-                                 * Got `//'.  Restart from this point.
-                                 */
-                                while (*astr_char(as, i + 1) == '/')
-                                        i++;
-                                astr_truncate(buf, 0);
-                                /* Final '/' remains to be copied
-                                   below */
-                        }
-                }
-                astr_cat_char(buf, *astr_char(as, i));
-        }
-        astr_cpy(as, buf);
-
+        as = expand_path_magic(as, &pdir);
         agetcwd(buf);
         if (!expand_path(astr_cstr(as), astr_cstr(buf), pdir, fname))
                 return FALSE;

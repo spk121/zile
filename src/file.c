@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.36 2004/10/06 16:32:19 rrt Exp $        */
+/*      $Id: file.c,v 1.37 2004/10/06 17:30:33 rrt Exp $        */
 
 #include "config.h"
 
@@ -83,13 +83,11 @@ int is_regular_file(const char *filename)
  * This functions does some corrections and expansions to
  * the passed path:
  * - Splits the path into the directory and the filename;
- * - Expands the `~/' and `~name/' expressions;
  * - replaces `//' with `/';
  * - removes the `..' and `.' entries.
  */
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 {
-        struct passwd *pw;
         const char *sp = path;
 
         if (*sp != '/') {
@@ -100,39 +98,9 @@ int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 
         while (*sp != '\0') {
                 if (*sp == '/') {
-                        /*
-                         * Remove all but one '/'.
-                         */
+                        /* Remove all but one '/'. */
                         while (*++sp == '/');
                         astr_cat_char(dir, '/');
-                } else if (*sp == '~') {
-                        if (*(sp + 1) == '/') {
-                                /*
-                                 * Got `~/'.  Restart from this point
-                                 * and insert the user home directory.
-                                 */
-                                astr_truncate(dir, 0);
-                                if ((pw = getpwuid(getuid())) == NULL)
-                                        return FALSE;
-                                if (strcmp(pw->pw_dir, "/") != 0)
-                                        astr_cat_cstr(dir, pw->pw_dir);
-                                ++sp;
-                        } else {
-                                /*
-                                 * Got `~something'.  Restart from this point
-                                 * and insert that user home directory.
-                                 */
-                                astr as = astr_new();
-                                astr_truncate(dir, 0);
-                                ++sp;
-                                while (*sp != '\0' && *sp != '/')
-                                        astr_cat_char(as, *sp++);
-                                pw = getpwnam(astr_cstr(as));
-                                astr_delete(as);
-                                if (pw == NULL)
-                                        return FALSE;
-                                astr_cat_cstr(dir, pw->pw_dir);
-                        }
                 } else if (*sp == '.') {
                         if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
                                 ++sp;
