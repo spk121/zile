@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.19 2005/01/13 00:16:16 rrt Exp $   */
+/*      $Id: completion.c,v 1.20 2005/01/14 01:03:02 rrt Exp $   */
 
 #include "config.h"
 
@@ -154,41 +154,30 @@ static void completion_print(list l, int size)
   }
 }
 
+static void write_completion(va_list ap)
+{
+  Completion *cp = va_arg(ap, Completion *);
+  int allflag = va_arg(ap, int);
+  int num = va_arg(ap, int); 
+  if (allflag)
+    completion_print(cp->completions, list_length(cp->completions));
+  else
+    completion_print(cp->matches, num);
+}
+
 /*
  * Popup the completion window.
  */
 static void popup_completion(Completion *cp, int allflag, int num)
 {
-  Window *wp, *old_wp = cur_wp;
-  Buffer *bp;
-
   cp->fl_poppedup = 1;
+  if (head_wp->next == NULL)
+    cp->fl_close = 1;
 
-  if ((wp = find_window("*Completions*")) == NULL) {
-    if (head_wp->next == NULL)
-      cp->fl_close = 1;
-    set_current_window(popup_window());
-    if (!cp->fl_close)
-      cp->old_bp = cur_bp;
-    bp = find_buffer("*Completions*", TRUE);
-    switch_to_buffer(bp);
-  } else
-    set_current_window(wp);
+  write_temp_buffer("*Completions*", write_completion, cp, allflag, num);
 
-  bp = create_buffer(cur_bp->name);
-  kill_buffer(cur_bp);
-  cur_bp = cur_wp->bp = bp;
-  cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
-  set_temporary_buffer(cur_bp);
-
-  if (allflag)
-    completion_print(cp->completions, list_length(cp->completions));
-  else
-    completion_print(cp->matches, num);
-  cur_bp->flags |= BFLAG_READONLY;
-  gotobob();
-
-  set_current_window(old_wp);
+  if (!cp->fl_close)
+    cp->old_bp = cur_bp;
 
   term_redisplay();
 }
