@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.24 2004/11/14 23:57:55 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.25 2004/12/20 11:15:38 rrt Exp $     */
 
 #include "config.h"
 
@@ -65,6 +65,10 @@ void minibuf_write(const char *fmt, ...)
 
         term_minibuf_write(buf);
         free(buf);
+
+        /* Redisplay (and leave the cursor in the correct position) */
+        term_redisplay();
+        term_refresh();
 }
 
 /*

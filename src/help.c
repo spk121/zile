@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.22 2004/11/14 21:34:56 rrt Exp $	*/
+/*	$Id: help.c,v 1.23 2004/12/20 11:15:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -242,7 +242,8 @@ Display documentation of the command invoked by a key sequence.
 	astr bufname, doc;
 
 	minibuf_write("Describe key:");
-	if ((name = get_function_by_key_sequence()) == NULL) {
+
+        if ((name = get_function_by_key_sequence()) == NULL) {
 		minibuf_error("Key sequence is undefined");
 		return FALSE;
 	}

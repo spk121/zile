@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.24 2004/11/14 23:57:55 rrt Exp $	*/
+/*	$Id: search.c,v 1.25 2004/12/20 11:15:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -368,9 +368,6 @@ static int isearch(int dir, int regexp)
 		}
 		/* Write in minibuf.  */
 		minibuf_write("%s", astr_cstr(buf));
-		/* Redisplay (and leave the cursor in the correct position) */
-                term_redisplay();
-                term_refresh();
 
 		if (thisflag & FLAG_EXECUTING_MACRO) {
 			c = get_macro_key_data();
@@ -605,8 +602,6 @@ what to do with it.
 				resync_redisplay();
 			for (;;) {
 				minibuf_write("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find, repl);
-                                term_redisplay();
-                                term_refresh();
 				c = term_getkey();
 				switch (c) {
 				case KBD_CANCEL:
