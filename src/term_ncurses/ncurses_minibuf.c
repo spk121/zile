@@ -1,28 +1,24 @@
-/*	$Id: ncurses_minibuf.c,v 1.13 2004/02/14 10:27:35 dacap Exp $	*/
+/* Minibuffer handling
+   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
 
-/*
- * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+   This file is part of Zile.
+
+   Zile is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 2, or (at your option) any later
+   version.
+
+   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Zile; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
+
+/*	$Id: ncurses_minibuf.c,v 1.14 2004/02/17 20:21:18 ssigala Exp $	*/
 
 #include "config.h"
 
@@ -31,30 +27,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if HAVE_NCURSES_H
+#include <ncurses.h>
+#else
 #include <curses.h>
+#endif
 
 #include "zile.h"
 #include "extern.h"
-
 #include "term_ncurses.h"
-
-static size_t astrlen(const char *s)
-{
-	size_t size = 0;
-
-	while (*s != '\0')
-		switch (*s++) {
-		case MINIBUF_SET_COLOR:
-			++s;
-			/* FALLTROUGH */
-		case MINIBUF_UNSET_COLOR:
-			break;
-		default:
-			++size;
-		}
-
-	return size;
-}
 
 void ncurses_minibuf_clear(void)
 {
@@ -127,7 +108,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
 	int c, i, len, prompt_len, thistab, lasttab = -1;
 	char *s, *saved = NULL;
 
-	prompt_len = astrlen(prompt);
+	prompt_len = strlen(prompt);
 
 	len = i = strlen(value);
 	if (*max < i + 10) {

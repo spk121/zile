@@ -1,28 +1,24 @@
-/*	$Id: fontlock.c,v 1.7 2004/02/08 04:39:26 dacap Exp $	*/
+/* Font Lock Mode
+   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
 
-/*
- * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+   This file is part of Zile.
+
+   Zile is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 2, or (at your option) any later
+   version.
+
+   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Zile; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
+
+/*	$Id: fontlock.c,v 1.8 2004/02/17 20:21:18 ssigala Exp $	*/
 
 /*
  * In the future these routines may be rewritten using regex pattern
@@ -47,16 +43,17 @@
  * Parse the line for comments and strings and add anchors if found.
  * C/C++/C#/Java Mode.
  */
-static void cpp_set_anchors(Line *lp, int *lastanchor)
+static void cpp_set_anchors(Line *lp, Anchor *lastanchor)
 {
-	char *sp, *ap;
+	char *sp;
+	Anchor *ap;
 
 	if (lp->size == 0) {
 		lp->anchors = NULL;
 		return;
 	}
 
-	ap = lp->anchors = (char *)zmalloc(lp->size);
+	ap = lp->anchors = (Anchor *)zmalloc(sizeof(Anchor) * lp->size);
 
 	for (sp = lp->text; sp < lp->text + lp->size; ++sp)
 		if (*lastanchor == ANCHOR_BEGIN_COMMENT) {
@@ -136,7 +133,7 @@ static void cpp_set_anchors(Line *lp, int *lastanchor)
 #if ENABLE_SHELL_MODE
 static char *heredoc_string = NULL;
 
-static int make_heredoc_string(Line *lp, char *sp, char *ap)
+static int make_heredoc_string(Line *lp, char *sp, Anchor *ap)
 {
 	char *start, *end;
 
@@ -184,9 +181,10 @@ static int make_heredoc_string(Line *lp, char *sp, char *ap)
  * Parse the line for comments and strings and add anchors if found.
  * Shell Mode.
  */
-static void shell_set_anchors(Line *lp, int *lastanchor)
+static void shell_set_anchors(Line *lp, Anchor *lastanchor)
 {
-	char *sp, *ap;
+	char *sp;
+	Anchor *ap;
 	static int laststrchar;
 
 	if (lp->size == 0) {
@@ -194,7 +192,7 @@ static void shell_set_anchors(Line *lp, int *lastanchor)
 		return;
 	}
 
-	ap = lp->anchors = (char *)zmalloc(lp->size);
+	ap = lp->anchors = (Anchor *)zmalloc(sizeof(Anchor) * lp->size);
 
 	for (sp = lp->text; sp < lp->text + lp->size; sp++) {
 		if (*lastanchor == ANCHOR_BEGIN_STRING) {
@@ -265,7 +263,7 @@ static void shell_set_anchors(Line *lp, int *lastanchor)
 }
 #endif /* ENABLE_SHELL_MODE */
 
-static void line_set_anchors(Buffer *bp, Line *lp, int *lastanchor)
+static void line_set_anchors(Buffer *bp, Line *lp, Anchor *lastanchor)
 {
 	if (lp->anchors) {
 		free(lp->anchors);
@@ -295,8 +293,7 @@ static void line_set_anchors(Buffer *bp, Line *lp, int *lastanchor)
  */
 void font_lock_reset_anchors(Buffer *bp, Line *lp)
 {
-	int lastanchor;
-
+	Anchor lastanchor;
 	lastanchor = find_last_anchor(bp, lp->prev);
 	line_set_anchors(bp, lp, &lastanchor);
 }
@@ -304,20 +301,20 @@ void font_lock_reset_anchors(Buffer *bp, Line *lp)
 /*
  * Find the last set anchor walking backward in the line list.
  */
-int find_last_anchor(Buffer *bp, Line *lp)
+Anchor find_last_anchor(Buffer *bp, Line *lp)
 {
-	char *p;
+	Anchor *ap;
 
 	for (; lp != bp->limitp; lp = lp->prev) {
 		if (lp->anchors == NULL || lp->size == 0)
 			continue;
-		for (p = lp->anchors + lp->size - 1; p >= lp->anchors; --p)
-			if (*p != ANCHOR_NULL) {
+		for (ap = lp->anchors + lp->size - 1; ap >= lp->anchors; --ap)
+			if (*ap != ANCHOR_NULL) {
 #if ENABLE_SHELL_MODE
-				if ((bp->mode == BMODE_SHELL) && (*p == ANCHOR_BEGIN_HEREDOC))
-					make_heredoc_string(lp, lp->text + (p - lp->anchors), NULL);
+				if ((bp->mode == BMODE_SHELL) && (*ap == ANCHOR_BEGIN_HEREDOC))
+					make_heredoc_string(lp, lp->text + (ap - lp->anchors), NULL);
 #endif
-				return *p;
+				return *ap;
 			}
 	}
 
@@ -330,7 +327,7 @@ int find_last_anchor(Buffer *bp, Line *lp)
 static void font_lock_set_anchors(Buffer *bp)
 {
 	Line *lp;
-	int lastanchor = ANCHOR_NULL;
+	Anchor lastanchor = ANCHOR_NULL;
 
 	minibuf_write("Font Lock: setting anchors in `%s'...", bp->name);
 	cur_tp->refresh();

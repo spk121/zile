@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/02/14 22:19:02 $
+		   Last updated: $Date: 2004/02/17 20:21:17 $
 
 ------------------------------------------------------------------------------
 
@@ -8,7 +8,7 @@ INDEX
 
 1. General questions
    1.1. What does `Zile' mean?
-   1.2. Is Zile GNU GPL copylefted?
+   1.2. What is the Zile license?
    1.3. What is the Zile internal macro language?
    1.4. What about a GUI version of Zile?
    1.5. Why another clone of Emacs?  Why not just use Emacs?
@@ -52,37 +52,10 @@ INDEX
     It stands for `Zile Is Lossy Emacs'.  It is just another recursive
     acronym like GNU (GNU's Not Unix).
 
-1.2. Is Zile GNU GPL copylefted?
+1.2. What is the Zile license?
 
-    No, it isn't.  I don't like too much verbose (and complicated)
-    licenses for open-source projects; Zile is released under a simple
-    BSD-style license.
-
-    A verbatim copy of the license follows:
-
-    -------------------------------------------------------------------------
-    Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions
-    are met:
-    1. Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-    2. Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-
-    THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-    IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-    OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
-    IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-    INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-    NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-    DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-    THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-    THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-    -------------------------------------------------------------------------
+    Zile is released under the GNU General Public License.  For
+    more information, see http://www.gnu.org/.
 
 1.3. What is the Zile internal macro language?
 
@@ -113,7 +86,7 @@ INDEX
 1.7. Zile is bogus.
 
     Any bug reports should be sent to the author at the Internet email
-    address <sandro@sigala.it>.  Patches are appreciated.
+    address <zile-devel@lists.sourceforge.net>.  Patches are appreciated.
 
 1.8. I like the xyz function of (X)Emacs but in Zile isn't implemented.
 

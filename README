@@ -40,11 +40,10 @@ to port it under other operating systems, since it is written in ANSI C.
 
 ------------------------------------------------------------------------------
 
-Zile is now hosted on SourceForge at the address:
-http://zile.sourceforge.net/
+Zile is hosted on SourceForge at the address:
 
-Latest version can be also found at my homepage:
-http://www.sigala.it/sandro/
+http://zile.sourceforge.net/		(homepage)
+http://sourceforge.net/projects/zile	(project page)
 
-Any questions, comments, or bug reports should be sent to the author at the
-Internet email address <sandro@sigala.it>.
+Any questions, comments, or bug reports should be sent to the developers
+mailing list <zile-devel@lists.sourceforge.net>.

@@ -16,7 +16,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle Edition 1.7 for Zile version 1.7
-@subtitle Oct 2003
+@subtitle Feb 2004
 @author Sandro Sigala
 
 @dircategory Text editors

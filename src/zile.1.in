@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.5 2004/01/23 01:49:54 dacap Exp $
+.\" $Id: zile.1.in,v 1.6 2004/02/17 20:21:18 ssigala Exp $
 .Dd Nov, 2003
 .Os
 .Dt ZILE 1
@@ -235,3 +235,7 @@ sample Zile initialization file
 .Xr vi 1
 .Sh AUTHORS
 Sandro Sigala <sandro@sigala.it>
+.br
+David A. Capello <dacap@users.sourceforge.net>
+.br
+Reuben Thomas <rrt@sc3d.org>

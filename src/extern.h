@@ -62,7 +62,7 @@ void zile_exit(int exitcode);
 
 /* fontlock.c ------------------------------------------------------------- */
 void font_lock_reset_anchors(Buffer *bp, Line *lp);
-int find_last_anchor(Buffer *bp, Line *lp);
+Anchor find_last_anchor(Buffer *bp, Line *lp);
 
 /* fontlock_c.c ----------------------------------------------------------- */
 char *is_c_keyword(const char *str, int len);

@@ -1,28 +1,24 @@
-/*	$Id: zile.h,v 1.15 2004/02/08 04:39:26 dacap Exp $	*/
+/* Main types and definitions
+   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
 
-/*
- * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+   This file is part of Zile.
+
+   Zile is free software; you can redistribute it and/or modify it under
+   the terms of the GNU General Public License as published by the Free
+   Software Foundation; either version 2, or (at your option) any later
+   version.
+
+   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+   for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Zile; see the file COPYING.  If not, write to the Free
+   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
+   02111-1307, USA.  */
+
+/*	$Id: zile.h,v 1.16 2004/02/17 20:21:18 ssigala Exp $	*/
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -39,10 +35,6 @@
 #define min(a, b)			((a) < (b) ? (a) : (b))
 #undef max
 #define max(a, b)			((a) > (b) ? (a) : (b))
-
-#ifndef PATH_MAX
-#define PATH_MAX			_POSIX_PATH_MAX
-#endif
 
 /*--------------------------------------------------------------------------
  * Main editor structures.
@@ -61,6 +53,9 @@ typedef struct Window Window;
 typedef struct Completion Completion;
 typedef struct History History;
 typedef struct Terminal Terminal;
+/* We could define an enum "Anchor", but sizeof(enum)==2,
+   while sizeof(char)==1. */
+typedef unsigned char Anchor;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
@@ -86,13 +81,13 @@ struct Marker {
 
 /* Font lock anchors. */
 enum {
-  ANCHOR_NULL,
-  ANCHOR_BEGIN_COMMENT,
-  ANCHOR_END_COMMENT,
-  ANCHOR_BEGIN_STRING,
-  ANCHOR_END_STRING,
-  ANCHOR_BEGIN_HEREDOC,
-  ANCHOR_END_HEREDOC
+	ANCHOR_NULL,		/* No anchor. */
+	ANCHOR_BEGIN_COMMENT,	/* Begin a comment. */
+	ANCHOR_END_COMMENT,	/* End of comment. */
+	ANCHOR_BEGIN_STRING,	/* Begin of string. */
+	ANCHOR_END_STRING,	/* End of string. */
+	ANCHOR_BEGIN_HEREDOC,	/* Begin of `<<EOF' like here-document. */
+	ANCHOR_END_HEREDOC	/* End of here-document. */
 };
 
 struct Line {
@@ -104,7 +99,7 @@ struct Line {
 	int maxsize;
 
 	/* Pointer to anchors for font lock. */
-	char *anchors;
+	Anchor *anchors;
 
 	/*
 	 * The text space label; must be the last entry of the structure!
@@ -115,16 +110,19 @@ struct Line {
 	char text[1];
 };
 
-#define UNDO_INSERT_CHAR	1 /* Insert a character. */
-#define UNDO_INSERT_BLOCK	2 /* Insert a block of characters. */
-#define UNDO_REMOVE_CHAR	3 /* Remove a character. */
-#define UNDO_REMOVE_BLOCK	4 /* Remove a block of characters. */
-#define UNDO_REPLACE_CHAR	5 /* Replace a character. */
-#define UNDO_REPLACE_BLOCK	6 /* Replace a block of characters. */
-#define UNDO_START_SEQUENCE	7 /* Start a multi operation sequence. */
-#define UNDO_END_SEQUENCE	8 /* End a multi operation sequence. */
-#define UNDO_INTERCALATE_CHAR	9 /* Insert a char without moving the
-				     current pointer */
+/* Undo delta types. */
+enum {
+	UNDO_INSERT_CHAR,	/* Insert a character. */
+	UNDO_INSERT_BLOCK,	/* Insert a block of characters. */
+	UNDO_REMOVE_CHAR,	/* Remove a character. */
+	UNDO_REMOVE_BLOCK,	/* Remove a block of characters. */
+	UNDO_REPLACE_CHAR,	/* Replace a character. */
+	UNDO_REPLACE_BLOCK,	/* Replace a block of characters. */
+	UNDO_START_SEQUENCE,	/* Start a multi operation sequence. */
+	UNDO_END_SEQUENCE,	/* End a multi operation sequence. */
+	UNDO_INTERCALATE_CHAR	/* Insert a char without moving the
+				   current pointer. */
+};
 
 struct Undo {
 	/* Next undo delta in list. */
@@ -181,14 +179,15 @@ struct Region {
 #define BFLAG_ISEARCH	(0004000) /* The buffer is in Isearch loop. */
 
 /* Mutually exclusive buffer major modes. */
-
-#define BMODE_TEXT	0 /* The buffer is in Text mode. */
-#define BMODE_C		1 /* The buffer is in C mode. */
-#define BMODE_CPP	2 /* The buffer is in C++ mode. */
-#define BMODE_CSHARP	3 /* The buffer is in C# (C sharp) mode. */
-#define BMODE_JAVA	4 /* The buffer is in Java mode */
-#define BMODE_SHELL	5 /* The buffer is in Shell-script mode. */
-#define BMODE_MAIL	6 /* The buffer is in Mail mode */
+enum {
+	BMODE_TEXT,	/* The buffer is in Text mode. */
+	BMODE_C,	/* The buffer is in C mode. */
+	BMODE_CPP,	/* The buffer is in C++ mode. */
+	BMODE_CSHARP,	/* The buffer is in C# (C sharp) mode. */
+	BMODE_JAVA,	/* The buffer is in Java mode */
+	BMODE_SHELL,	/* The buffer is in Shell-script mode. */
+	BMODE_MAIL	/* The buffer is in Mail mode */
+};
 
 struct Buffer {
 	/* The next buffer in buffer list. */
@@ -246,10 +245,10 @@ struct Window {
 };
 
 enum {
-  COMPLETION_NOTMATCHED,
-  COMPLETION_MATCHED,
-  COMPLETION_MATCHEDNONUNIQUE,
-  COMPLETION_NONUNIQUE,
+	COMPLETION_NOTMATCHED,
+	COMPLETION_MATCHED,
+	COMPLETION_MATCHEDNONUNIQUE,
+	COMPLETION_NONUNIQUE,
 };
 
 struct Completion {
@@ -288,12 +287,9 @@ struct History {
 	aentry sel;
 };
 
-#define MINIBUF_SET_COLOR	'\1'
-#define MINIBUF_UNSET_COLOR	'\2'
-
 struct Terminal {
         void *screen; /* Really a SCREEN *, but we don't want
-			 ncurses-specific code or data here */
+			 ncurses-specific code or data here. */
 	int width, height;
 
 	int (*init)(void);
@@ -383,6 +379,7 @@ struct Terminal {
  * Miscellaneous stuff.
  *--------------------------------------------------------------------------*/
 
+/* Avoid thousand warnings about unused `uniarg' parameters. */
 #undef GCC_UNUSED
 #ifdef __GNUC__
 #define GCC_UNUSED __attribute__ ((unused))

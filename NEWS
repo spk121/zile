@@ -1,5 +1,6 @@
 Changes between Zile 1.7 BETA 2 - Zile 1.7 BETA 3
 
+* Changed Zile license from BSD to GNU GPL.
 * You can use the M-p and M-n in minibuffer to navigate through
   history elements.
 * Added `transient-mark-mode' and `highlight-nonselected-windows'

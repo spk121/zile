@@ -38,9 +38,12 @@ dnl ==================================================================
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h limits.h)
-AC_CHECK_HEADER(curses.h,
-         LIBS="$LIBS -lcurses",
-         AC_MSG_FAILURE([cannot find curses.h]))
+dnl Check if ncurses header is available as ncurses.h or curses.h
+AC_CHECK_HEADER(ncurses.h,
+	[AC_DEFINE(HAVE_NCURSES_H, 1, [Define this if you have ncurses.h])],
+	[AC_CHECK_HEADER(curses.h,
+		[AC_DEFINE(HAVE_CURSES_H, 1, [Define this if you have curses.h instead of ncurses.h])],
+		AC_MSG_FAILURE([cannot find neither curses.h or ncurses.h]))])
 
 dnl ==================================================================
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -58,6 +61,10 @@ AC_FUNC_STRFTIME
 AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(getcwd strerror strstr)
+dnl Check if ncurses library is available as libncurses or libcurses
+AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
+		AC_MSG_FAILURE([cannot find neither libncurses.a or libcurses.a]))])
 
 dnl ==================================================================
 dnl Check for GNU Regex library
