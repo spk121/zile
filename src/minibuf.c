@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.27 2004/12/20 13:17:25 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.28 2005/01/09 18:11:13 rrt Exp $     */
 
 #include "config.h"
 
@@ -42,7 +42,6 @@ char *minibuf_format(const char *fmt, va_list ap)
 {
         char *buf;
         vasprintf(&buf, fmt, ap);
-        vsprintf(buf, fmt, ap);
         return buf;
 }
 
@@ -51,40 +50,42 @@ void free_minibuf(void)
         free_history_elements(&files_history);
 }
 
+static void minibuf_vwrite(const char *fmt, va_list ap)
+{
+        char *buf;
+
+        buf = minibuf_format(fmt, ap);
+
+        term_minibuf_write(buf);
+        free(buf);
+
+        /* Redisplay (and leave the cursor in the correct position). */
+        term_redisplay();
+        term_refresh();
+}
+
 /*
  * Write the specified string in the minibuffer.
  */
 void minibuf_write(const char *fmt, ...)
 {
         va_list ap;
-        char *buf;
 
         va_start(ap, fmt);
-        buf = minibuf_format(fmt, ap);
+        minibuf_vwrite(fmt, ap);
         va_end(ap);
-
-        term_minibuf_write(buf);
-        free(buf);
-
-        /* Redisplay (and leave the cursor in the correct position) */
-        term_redisplay();
-        term_refresh();
 }
 
 /*
- * Write the specified error string in the minibuffer.
+ * Write the specified error string in the minibuffer and beep.
  */
 void minibuf_error(const char *fmt, ...)
 {
         va_list ap;
-        char *buf;
 
         va_start(ap, fmt);
-        buf = minibuf_format(fmt, ap);
+        minibuf_vwrite(fmt, ap);
         va_end(ap);
-
-        term_minibuf_write(buf);
-        free(buf);
 
         ding();
 }
@@ -180,19 +181,23 @@ static int minibuf_read_forced(const char *fmt, const char *errmsg,
                         free(buf);
                         return -1;
                 } else {
-                        char *s;
+                        list s;
+                        int i;
                         astr as = astr_new();
+
                         /* Complete partial words if possible. */
                         astr_cpy_cstr(as, p);
                         if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
                                 p = cp->match;
                         astr_delete(as);
-                        for (s = alist_first(cp->completions); s != NULL;
-                             s = alist_next(cp->completions))
-                                if (!strcmp(p, s)) {
+
+                        for (s = list_first(cp->completions), i = 0; s != cp->completions;
+                             s = list_next(s), i++)
+                                if (!strcmp(p, s->item)) {
                                         free(buf);
-                                        return alist_current_idx(cp->completions);
+                                        return i;
                                 }
+
                         minibuf_error(errmsg);
                         waitkey();
                 }
@@ -214,14 +219,14 @@ int minibuf_read_yesno(const char *fmt, ...)
         va_end(ap);
 
         cp = new_completion(FALSE);
-        alist_append(cp->completions, zstrdup("yes"));
-        alist_append(cp->completions, zstrdup("no"));
+        list_append(cp->completions, zstrdup("yes"));
+        list_append(cp->completions, zstrdup("no"));
 
         retvalue = minibuf_read_forced(buf, "Please answer yes or no.", cp);
         if (retvalue != -1) {
                 /* The completions may be sorted by the minibuf completion
                    routines. */
-                if (!strcmp(alist_at(cp->completions, retvalue), "yes"))
+                if (!strcmp(list_at(cp->completions, retvalue), "yes"))
                         retvalue = TRUE;
                 else
                         retvalue = FALSE;
@@ -244,14 +249,14 @@ int minibuf_read_boolean(const char *fmt, ...)
         va_end(ap);
 
         cp = new_completion(FALSE);
-        alist_append(cp->completions, zstrdup("true"));
-        alist_append(cp->completions, zstrdup("false"));
+        list_append(cp->completions, zstrdup("true"));
+        list_append(cp->completions, zstrdup("false"));
 
         retvalue = minibuf_read_forced(buf, "Please answer true or false.", cp);
         if (retvalue != -1) {
                 /* The completions may be sorted by the minibuf completion
                    routines. */
-                if (!strcmp(alist_at(cp->completions, retvalue), "true"))
+                if (!strcmp(list_at(cp->completions, retvalue), "true"))
                         retvalue = TRUE;
                 else
                         retvalue = FALSE;

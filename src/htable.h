@@ -20,14 +20,14 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.h,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: htable.h,v 1.2 2005/01/09 18:11:13 rrt Exp $	*/
 
 #ifndef HTABLE_H
 #define HTABLE_H
 
 #include <stdarg.h>
 
-#include "alist.h"
+#include "list.h"
 
 /*
  * The hash table library provides string-keyed open non-extensible
@@ -85,7 +85,7 @@ htable htable_foreach(htable ht, hiterator f, ...);
  * defined in the hash table. After use, the list should be freed (but
  * not the elements, because they belong to the hash table).
  */
-extern alist  htable_list(htable ht);
+extern list htable_list(htable ht);
 
 
 #endif /* !HTABLE_H */

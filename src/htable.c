@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: htable.c,v 1.2 2004/11/15 12:36:13 rrt Exp $	*/
+/*	$Id: htable.c,v 1.3 2005/01/09 18:11:13 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -187,14 +187,14 @@ htable htable_foreach(htable ht, hiterator f, ...)
 
 static void add_to_list(hpair *pair, va_list ap)
 {
-        alist_append(va_arg(ap, alist), pair);
+        list_append(va_arg(ap, list), pair);
 }
 
-alist htable_list(htable ht)
+list htable_list(htable ht)
 {
-	alist al = alist_new();
-        htable_foreach(ht, add_to_list, al);
-	return al;
+	list l = list_new();
+        htable_foreach(ht, add_to_list, l);
+	return l;
 }
 
 #ifdef TEST

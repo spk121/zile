@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.52 2004/12/26 20:27:09 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.53 2005/01/09 18:11:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -325,7 +325,6 @@ static int quoted_insert_octal(int c1)
 {
 	int c2, c3;
         minibuf_write("C-q %d-", c1 - '0');
-        term_refresh();
         c2 = term_getkey();
 
 	if (!isdigit(c2) || c2 - '0' >= 8) {
@@ -335,7 +334,6 @@ static int quoted_insert_octal(int c1)
 	}
 
         minibuf_write("C-q %d %d-", c1 - '0', c2 - '0');
-        term_refresh();
         c3 = term_getkey();
 
 	if (!isdigit(c3) || c3 - '0' >= 8) {

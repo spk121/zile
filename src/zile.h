@@ -20,12 +20,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.37 2004/12/27 01:10:07 rrt Exp $        */
+/*      $Id: zile.h,v 1.38 2005/01/09 18:11:14 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
 
-#include "alist.h"
+#include "list.h"
 #include "astr.h"
 #include "vector.h"
 
@@ -233,16 +233,16 @@ struct Completion {
         /* This flag is set when the space character is allowed. */
         int fl_space;
 
-        alist completions;      /* The completions list. */
+        list completions;       /* The completions list. */
 
-        alist matches;          /* The matches list. */
+        list matches;           /* The matches list. */
         char *match;            /* The match buffer. */
         int matchsize;          /* The match buffer size. */
 };
 
 struct History {
-        alist elements;         /* Elements (strings).  */
-        aentry sel;
+        list elements;          /* Elements (strings).  */
+        list sel;
 };
 
 struct Terminal {

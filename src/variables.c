@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.20 2004/11/14 23:57:55 rrt Exp $	*/
+/*	$Id: variables.c,v 1.21 2005/01/09 18:11:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -119,7 +119,7 @@ int lookup_bool_variable(char *var)
 static void make_var_compl_iter(hpair *pair, va_list ap)
 {
         Completion *cp = va_arg(ap, Completion *);
-        alist_append(cp->completions, zstrdup(pair->key));
+        list_append(cp->completions, zstrdup(pair->key));
 }
 
 char *minibuf_read_variable_name(char *msg)
@@ -232,19 +232,20 @@ static int sorter(const void *p1, const void *p2)
 static void write_variables_list(va_list ap)
 {
 	Window *old_wp = va_arg(ap, Window *);
-	alist al;
-	hpair *pair;
+	list l, p;
 
 	bprintf("Global variables:\n\n");
 	bprintf("%-30s %s\n", "Variable", "Value");
 	bprintf("%-30s %s\n", "--------", "-----");
 
-	al = htable_list(var_table);
-	alist_sort(al, sorter);
-	for (pair = alist_first(al); pair != NULL; pair = alist_next(al))
+	l = htable_list(var_table);
+	list_sort(l, sorter);
+	for (p = list_first(l); p != l; p = list_next(p)) {
+        	hpair *pair = p->item;
 		if (pair->val != NULL)
 			bprintf("%-30s \"%s\"\n", pair->key, pair->val);
-	alist_delete(al);
+        }
+	list_delete(l);
 
 	bprintf("\nLocal buffer variables:\n\n");
 	bprintf("%-30s %s\n", "Variable", "Value");

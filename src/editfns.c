@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: editfns.c,v 1.5 2004/10/29 22:49:39 rrt Exp $	*/
+/*	$Id: editfns.c,v 1.6 2005/01/09 18:11:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -29,23 +29,23 @@
 #include "extern.h"
 #include "editfns.h"
 
-static alist mark_ring = NULL;	/* Mark-ring.  */
+static list mark_ring = NULL;	/* Mark-ring.  */
 
 /* Push the current mark in the mark-ring.  */
 
 void push_mark(void)
 {
 	if (!mark_ring)
-		mark_ring = alist_new();
+		mark_ring = list_new();
 
 	/* Save the mark.  */
 	if (cur_bp->mark)
-		alist_append(mark_ring, copy_marker(cur_bp->mark));
+		list_append(mark_ring, copy_marker(cur_bp->mark));
 	/* Save an invalid mark.  */
 	else {
 		Marker *m = point_min_marker();
 		m->pt.p = NULL;
-		alist_append(mark_ring, m);
+		list_append(mark_ring, m);
 	}
 }
 
@@ -53,22 +53,16 @@ void push_mark(void)
 
 void pop_mark(void)
 {
-	Marker *m = alist_last(mark_ring);
+	Marker *m = list_last(mark_ring)->item;
 
 	/* Replace the mark.  */
 	if (m->bp->mark)
 		free_marker(m->bp->mark);
 
-	m->bp->mark = (m->pt.p) ? copy_marker(m): NULL;
+	m->bp->mark = (m->pt.p) ? copy_marker(m) : NULL;
 
-	alist_remove(mark_ring);
+	list_betail(mark_ring);
 	free_marker(m);
-
-	/* Empty list?  */
-	if (alist_count(mark_ring) == 0) {
-		alist_delete(mark_ring);
-		mark_ring = NULL;
-	}
 }
 
 /* Set the mark to the point position.  */

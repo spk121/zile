@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.39 2004/12/20 13:17:25 rrt Exp $	*/
+/*	$Id: bind.c,v 1.40 2005/01/09 18:11:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -153,12 +153,10 @@ int do_completion(astr as, int *compl)
 
 	if (!*compl) {
                 minibuf_write("%s", astr_cstr(as));
-                term_refresh();
                 c = term_getkey();
                 *compl = 1;
 	} else {
 		minibuf_write("%s", astr_cstr(as));
-                term_refresh();
 		c = term_getkey();
 	}
 	minibuf_clear();
@@ -387,7 +385,8 @@ char *minibuf_read_function_name(const char *fmt, ...)
 {
 	va_list ap;
 	unsigned int i;
-	char *buf, *p, *ms;
+	char *buf, *ms;
+        list p;
 	fentryp entryp;
 	Completion *cp;
 
@@ -397,7 +396,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
 
 	cp = new_completion(FALSE);
 	for (i = 0; i < fentry_table_size; ++i)
-		alist_append(cp->completions, zstrdup(fentry_table[i].name));
+		list_append(cp->completions, zstrdup(fentry_table[i].name));
 
 	for (;;) {
 		ms = minibuf_read_completion(buf, "", cp, &functions_history);
@@ -419,10 +418,10 @@ char *minibuf_read_function_name(const char *fmt, ...)
 			if (completion_try(cp, as, FALSE) == COMPLETION_MATCHED)
 				ms = cp->match;
                         astr_delete(as);
-			for (p = alist_first(cp->completions); p != NULL;
-			     p = alist_next(cp->completions))
-				if (!strcmp(ms, p)) {
-					ms = p;
+			for (p = list_first(cp->completions); p != cp->completions;
+			     p = list_next(p))
+				if (!strcmp(ms, p->item)) {
+					ms = p->item;
 					break;
 				}
 			if ((entryp = bsearch_function(ms)) == NULL) {
@@ -479,7 +478,6 @@ sequence.
         astr as;
 
         minibuf_write("Set key globally:");
-        term_refresh();
         c = term_getkey();
         p = completion_scan(c, &keys, &numkeys);
 
@@ -549,21 +547,24 @@ List defined functions.
 	return TRUE;
 }
 
-static void write_bindings_tree(leafp tree, alist keys)
+static void write_bindings_tree(leafp tree, list keys)
 {
 	int i;
+        list l;
+        astr as = chordtostr(tree->key);
 
-	alist_append(keys, chordtostr(tree->key));
+	list_append(keys, as);
+        
 	for (i = 0; i < tree->vecnum; ++i) {
 		leafp p = tree->vec[i];
 		if (p->func != NULL) {
                         astr key = astr_new();
                         astr as = chordtostr(p->key);
-			for (alist_first(keys), alist_next(keys);
-                             alist_current_idx(keys) != -1;
-                             alist_next(keys)) {
-				astr_cat(key, alist_current(keys));
-				astr_cat_cstr(key, " ");
+			for (l = list_first(keys);
+                             l != list_last(keys);
+                             l = list_next(l)) {
+				astr_cat(key, l->item);
+				astr_cat_char(key, ' ');
 			}
 			astr_cat(key, as);
                         astr_delete(as);
@@ -573,22 +574,21 @@ static void write_bindings_tree(leafp tree, alist keys)
 		} else
 			write_bindings_tree(p, keys);
 	}
-        alist_last(keys);
-        astr_delete(alist_current(keys));
-        alist_remove(keys);
+        
+        astr_delete(list_betail(keys));
 }
 
 static void write_bindings_list(va_list ap)
 {
-        alist al = alist_new();
+        list l = list_new();
 
         (void)ap;
 
         bprintf("%-15s %s\n", "Binding", "Function");
 	bprintf("%-15s %s\n", "-------", "--------");
 
-	write_bindings_tree(leaf_tree, al);
-        alist_delete(al);
+	write_bindings_tree(leaf_tree, l);
+        list_delete(l);
 }
 
 DEFUN("list-bindings", list_bindings)

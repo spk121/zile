@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.22 2005/01/03 12:29:39 rrt Exp $
+## $Id: Makefile.am,v 1.23 2005/01/09 18:11:12 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -24,8 +24,8 @@ bin_PROGRAMS = zile
 zile_base_SOURCES =				\
 	agetcwd.c				\
 	agetcwd.h				\
-	alist.c					\
-	alist.h					\
+	list.c					\
+	list.h					\
 	astr.c					\
 	astr.h					\
 	htable.c				\

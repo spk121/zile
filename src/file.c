@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.49 2004/12/27 01:10:06 rrt Exp $        */
+/*      $Id: file.c,v 1.50 2005/01/09 18:11:13 rrt Exp $        */
 
 #include "config.h"
 
@@ -376,7 +376,7 @@ Completion *make_buffer_completion(void)
 
         cp = new_completion(FALSE);
         for (bp = head_bp; bp != NULL; bp = bp->next)
-                alist_append(cp->completions, zstrdup(bp->name));
+                list_append(cp->completions, zstrdup(bp->name));
 
         return cp;
 }
@@ -974,7 +974,6 @@ static int save_some_buffers(void)
                         else {
                                 for (;;) {
                                         minibuf_write("Save file %s? (y, n, !, ., q) ", fname);
-                                        term_refresh();
 
                                         c = term_getkey();
                                         switch (c) {
@@ -990,7 +989,6 @@ static int save_some_buffers(void)
                                         }
 
                                         minibuf_error("Please answer y, n, !, . or q.");
-                                        term_refresh();
                                         waitkey();
                                 }
 

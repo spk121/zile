@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: history.c,v 1.5 2005/01/08 22:41:34 rrt Exp $	*/
+/*	$Id: history.c,v 1.6 2005/01/09 18:11:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -31,13 +31,13 @@
 void free_history_elements(History *hp)
 {
 	if (hp->elements) {
-		char *s;
+		list l;
 
-		for (s = alist_first(hp->elements); s != NULL;
-		     s = alist_next(hp->elements))
-			free(s);
+		for (l = list_first(hp->elements); l != hp->elements;
+		     l = list_next(l))
+			free(l->item);
 
-		alist_delete(hp->elements);
+		list_delete(hp->elements);
 		hp->elements = NULL;
 		hp->sel = NULL;
 	}
@@ -48,13 +48,11 @@ void add_history_element(History *hp, const char *string)
 	const char *last;
 
 	if (!hp->elements)
-		hp->elements = alist_new();
+		hp->elements = list_new();
 
-	last = alist_last(hp->elements);
-	if (last && strcmp(last, string) == 0)
-		return;
-
-	alist_append(hp->elements, zstrdup(string));
+	last = list_last(hp->elements)->item;
+	if (!last || strcmp(last, string) != 0)
+                list_append(hp->elements, zstrdup(string));
 }
 
 void prepare_history(History *hp)
@@ -67,19 +65,19 @@ const char *previous_history_element(History *hp)
 	const char *s = NULL;
 
 	if (hp->elements) {
-		/* First time that we use `previous-history-element'.  */
+		/* First time that we use `previous-history-element'. */
 		if (!hp->sel) {
-			/* Select last element.  */
-			if (hp->elements->tail) {
-				hp->sel = hp->elements->tail;
-				s = hp->sel->p;
+			/* Select last element. */
+			if (list_last(hp->elements) != hp->elements) {
+				hp->sel = list_last(hp->elements);
+				s = hp->sel->item;
 			}
 		}
-		/* There are another element? */
-		else if (hp->sel->prev) {
-			/* Select it.  */
-			hp->sel = hp->sel->prev;
-			s = hp->sel->p;
+		/* Is there another element? */
+		else if (list_prev(hp->sel) != hp->elements) {
+			/* Select it. */
+			hp->sel = list_prev(hp->sel);
+			s = hp->sel->item;
 		}
 	}
 
@@ -91,15 +89,14 @@ const char *next_history_element(History *hp)
 	const char *s = NULL;
 
 	if (hp->elements && hp->sel) {
-		/* Next element.  */
-		if (hp->sel->next) {
-			hp->sel = hp->sel->next;
-			s = hp->sel->p;
+		/* Next element. */
+		if (list_next(hp->sel) != hp->elements) {
+			hp->sel = list_next(hp->sel);
+			s = hp->sel->item;
 		}
-		/* No more element (back to original status).  */
-		else {
+		/* No more elements (back to original status). */
+		else
 			hp->sel = NULL;
-		}
 	}
 
 	return s;

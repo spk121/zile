@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: completion.c,v 1.13 2005/01/03 00:44:20 rrt Exp $   */
+/*      $Id: completion.c,v 1.14 2005/01/09 18:11:13 rrt Exp $   */
 
 #include "config.h"
 
@@ -39,9 +39,9 @@
 #include "extern.h"
 #include "agetcwd.h"
 
-/***********************************************************************
-                         Completion functions
- ***********************************************************************/
+/*----------------------------------------------------------------------
+ *                       Completion functions
+ *----------------------------------------------------------------------*/
 
 /*
  * Allocate a new completion structure.
@@ -53,8 +53,8 @@ Completion *new_completion(int fileflag)
         cp = (Completion *)zmalloc(sizeof(Completion));
         memset(cp, 0, sizeof(Completion));
 
-        cp->completions = alist_new();
-        cp->matches = alist_new();
+        cp->completions = list_new();
+        cp->matches = list_new();
 
         if (fileflag) {
                 cp->path = astr_new();
@@ -69,11 +69,12 @@ Completion *new_completion(int fileflag)
  */
 void free_completion(Completion *cp)
 {
-        char *p;
-        for (p = alist_first(cp->completions); p != NULL; p = alist_next(cp->completions))
-                free(p);
-        alist_delete(cp->completions);
-        alist_delete(cp->matches);
+        list p;
+        
+        for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
+                free(p->item);
+        list_delete(cp->completions);
+        list_delete(cp->matches);
         if (cp->fl_dir)
                 astr_delete(cp->path);
         free(cp);
@@ -120,17 +121,14 @@ void completion_scroll_down(Completion *cp)
 /*
  * Calculate the maximum length of the completions.
  */
-static int calculate_max_length(alist al, int size)
+static int calculate_max_length(list l, int size)
 {
-        int i, max = 0;
-        char *p;
+        int len, i, max = 0;
+        list p;
 
-        for (p = alist_first(al); p != NULL; p = alist_next(al)) {
-                if (alist_current_idx(al) >= size)
-                        break;
-                if ((i = strlen(p)) > max)
-                        max = i;
-        }
+        for (p = list_first(l), i = 0; p != l && i < size; p = list_next(p), i++)
+                if ((len = strlen(p->item)) > max)
+                        max = len;
 
         return max;
 }
@@ -138,24 +136,22 @@ static int calculate_max_length(alist al, int size)
 /*
  * Print the list of completions in a set of columns.
  */
-static void completion_print(alist al, int size)
+static void completion_print(list l, int size)
 {
-        int i, col, max, numcols;
-        char *p;
+        int i, j, col, max, numcols;
+        list p;
 
-        max = calculate_max_length(al, size) + 5;
+        max = calculate_max_length(l, size) + 5;
         numcols = (cur_wp->ewidth - 1) / max;
 
         bprintf("Possible completions are:\n");
-        for (p = alist_first(al), col = 0; p != NULL; p = alist_next(al)) {
-                if (alist_current_idx(al) >= size)
-                        break;
+        for (p = list_first(l), i = col = 0; p != l && i < size; p = list_next(p), i++) {
                 if (col >= numcols) {
                         col = 0;
                         insert_newline();
                 }
-                insert_string(p);
-                for (i = max - strlen(p); i > 0; --i)
+                insert_string(p->item);
+                for (j = max - strlen(p->item); j > 0; --j)
                         insert_char(' ');
                 ++col;
         }
@@ -188,7 +184,7 @@ static void popup_completion(Completion *cp, int allflag, int num)
         set_temporary_buffer(cur_bp);
 
         if (allflag)
-                completion_print(cp->completions, alist_count(cp->completions));
+                completion_print(cp->completions, list_length(cp->completions));
         else
                 completion_print(cp->matches, num);
 
@@ -215,13 +211,14 @@ static int completion_reread(Completion *cp, astr as)
         DIR *dir;
         struct dirent *d;
         struct stat st;
-        char *p;
+        list p;
         int i;
 
-        for (p = alist_first(cp->completions); p != NULL; p = alist_next(cp->completions))
-                free(p);
+        for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
+                free(p->item);
+        list_delete(cp->completions);
 
-        alist_clear(cp->completions);
+        cp->completions = list_new();
         cp->fl_sorted = 0;
 
         buf = astr_new();
@@ -231,14 +228,11 @@ static int completion_reread(Completion *cp, astr as)
         for (i = 0; i < astr_len(as); i++){
                 if (*astr_char(as, i) == '/') {
                         if (*astr_char(as, i + 1) == '/') {
-                                /*
-                                 * Got `//'.  Restart from this point.
-                                 */
+                                /* Got `//'; restart from this point. */
                                 while (*astr_char(as, i + 1) == '/')
                                         i++;
                                 astr_truncate(buf, 0);
-                                /* Final '/' remains to be copied
-                                   below */
+                                /* Final '/' remains to be copied below. */
                         }
                 }
                 astr_cat_char(buf, *astr_char(as, i));
@@ -263,7 +257,7 @@ static int completion_reread(Completion *cp, astr as)
                                 astr_cat_cstr(buf, "/");
                 } else
                         astr_cpy_cstr(buf, d->d_name);
-                alist_append(cp->completions, zstrdup(astr_cstr(buf)));
+                list_append(cp->completions, zstrdup(astr_cstr(buf)));
         }
         closedir(dir);
 
@@ -283,53 +277,53 @@ static int completion_reread(Completion *cp, astr as)
 int completion_try(Completion *cp, astr search, int popup_when_complete)
 {
         int i, j, ssize, fullmatches = 0, partmatches = 0;
-        char *p, c;
+        char c;
+        list p;
 
-        alist_clear(cp->matches);
+        list_delete(cp->matches);
+        cp->matches = list_new();
 
         if (cp->fl_dir)
                 if (!completion_reread(cp, search))
                         return COMPLETION_NOTMATCHED;
 
         if (!cp->fl_sorted) {
-                alist_sort(cp->completions, hcompar);
+                list_sort(cp->completions, hcompar);
                 cp->fl_sorted = 1;
         }
 
         ssize = astr_len(search);
 
         if (ssize == 0) {
-                if (alist_count(cp->completions) > 1) {
-                        cp->match = alist_first(cp->completions);
+                cp->match = list_first(cp->completions)->item;
+                if (list_length(cp->completions) > 1) {
                         cp->matchsize = 0;
                         popup_completion(cp, TRUE, 0);
                         return COMPLETION_NONUNIQUE;
                 } else {
-                        cp->match = alist_first(cp->completions);
                         cp->matchsize = strlen(cp->match);
                         return COMPLETION_MATCHED;
                 }
         }
 
-        for (p = alist_first(cp->completions); p != NULL;
-             p = alist_next(cp->completions))
-                if (!strncmp(p, astr_cstr(search), ssize)) {
+        for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
+                if (!strncmp(p->item, astr_cstr(search), ssize)) {
                         ++partmatches;
-                        alist_append(cp->matches, p);
-                        if (!strcmp(p, astr_cstr(search)))
+                        list_append(cp->matches, p->item);
+                        if (!strcmp(p->item, astr_cstr(search)))
                                 ++fullmatches;
                 }
 
         if (partmatches == 0)
                 return COMPLETION_NOTMATCHED;
         else if (partmatches == 1) {
-                cp->match = alist_first(cp->matches);
+                cp->match = list_first(cp->matches)->item;
                 cp->matchsize = strlen(cp->match);
                 return COMPLETION_MATCHED;
         }
 
         if (fullmatches == 1 && partmatches > 1) {
-                cp->match = alist_first(cp->matches);
+                cp->match = list_first(cp->matches)->item;
                 cp->matchsize = strlen(cp->match);
                 if (popup_when_complete)
                         popup_completion(cp, FALSE, partmatches);
@@ -337,12 +331,15 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
         }
 
         for (j = ssize; ; ++j) {
-                char *s = alist_first(cp->matches);
+                list p = list_first(cp->matches);
+                char *s = p->item;
+                
                 c = s[j];
                 for (i = 1; i < partmatches; ++i) {
-                        s = alist_at(cp->matches, i);
+                        p = list_next(p);
+                        s = p->item;
                         if (s[j] != c) {
-                                cp->match = alist_first(cp->matches);
+                                cp->match = list_first(cp->matches)->item;
                                 cp->matchsize = j;
                                 popup_completion(cp, FALSE, partmatches);
                                 return COMPLETION_NONUNIQUE;
