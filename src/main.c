@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.72 2005/01/22 12:32:04 rrt Exp $	*/
+/*	$Id: main.c,v 1.73 2005/01/22 13:13:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -322,8 +322,12 @@ int main(int argc, char **argv)
   if (bflag)
     printf(astr_cstr(as));
   else {
-    if (!qflag)
-      read_rc_file();
+    if (!qflag) {
+      astr as = get_home_dir();
+      astr_cat_cstr(as, "/.zile");
+      lisp_read_file(astr_cstr(as));
+      astr_delete(as);
+    }
 
     term_init();
 

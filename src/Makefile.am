@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.34 2005/01/22 11:30:14 rrt Exp $
+## $Id: Makefile.am,v 1.35 2005/01/22 13:13:14 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -53,7 +53,6 @@ zile_base_SOURCES =				\
 	marker.c				\
 	minibuf.c				\
 	point.c					\
-	rc.c					\
 	redisplay.c				\
 	registers.c				\
 	search.c				\

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.68 2005/01/21 23:25:34 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.69 2005/01/22 13:13:14 rrt Exp $	*/
 
 #include "config.h"
 
@@ -924,14 +924,13 @@ static int forward_sexp(void)
     while (!eolp()) {
       int c = following_char();
 
-      /* Jump quotes that doesn't are sexp separators.  */
+      /* Jump quotes that aren't sexp separators. */
       if (c == '\\'
           && cur_bp->pt.o+1 < astr_len(cur_bp->pt.p->item)
           && ((*astr_char(cur_bp->pt.p->item, cur_bp->pt.o + 1) == '\"')
               || (*astr_char(cur_bp->pt.p->item, cur_bp->pt.o + 1) == '\''))) {
         cur_bp->pt.o++;
-        c = 'a'; /* Convert \' and \" like a
-                    word char */
+        c = 'a'; /* Convert \' and \" into a word char. */
       }
 
       CONTROL_SEXP_LEVEL(ISOPENBRACKETCHAR,
