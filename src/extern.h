@@ -143,7 +143,6 @@ extern int resize_needed;
 /* marker.c --------------------------------------------------------------- */
 Marker *make_marker(void);
 void free_marker(Marker *marker);
-void unchain_marker(Marker *marker);
 void move_marker(Marker *marker, Buffer *bp, Point pt);
 Marker *copy_marker(Marker *marker);
 Marker *point_marker(void);

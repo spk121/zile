@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: marker.c,v 1.6 2005/01/21 23:25:36 rrt Exp $	*/
+/*	$Id: marker.c,v 1.7 2005/01/25 20:45:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,13 +37,7 @@ Marker *make_marker(void)
   return marker;
 }
 
-void free_marker(Marker *marker)
-{
-  unchain_marker(marker);
-  free(marker);
-}
-
-void unchain_marker(Marker *marker)
+static void unchain_marker(Marker *marker)
 {
   Marker *m, *next, *prev = NULL;
 
@@ -63,6 +57,12 @@ void unchain_marker(Marker *marker)
     }
     prev = m;
   }
+}
+
+void free_marker(Marker *marker)
+{
+  unchain_marker(marker);
+  free(marker);
 }
 
 void move_marker(Marker *marker, Buffer *bp, Point pt)
