@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.14 2004/06/30 22:52:41 rrt Exp $
+## $Id: Makefile.am,v 1.15 2004/09/03 02:09:08 dacap Exp $
 
 INCLUDES = -I$(top_srcdir)/lib
 
@@ -38,6 +38,11 @@ zile_base_SOURCES =				\
 	term_redisplay.c			\
 	zile.h
 
+if ALLEGRO
+zile_SOURCES = $(zile_base_SOURCES)		\
+	term_allegro.c				\
+	term_allegro.h
+else
 if CURSES
 zile_SOURCES = $(zile_base_SOURCES)		\
 	term_ncurses.c				\
@@ -46,6 +51,7 @@ else
 zile_SOURCES = $(zile_base_SOURCES)		\
 	term_termcap.c				\
 	term_termcap.h
+endif
 endif
 
 zile_LDADD =					\

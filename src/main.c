@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.31 2004/07/10 23:52:55 rrt Exp $	*/
+/*	$Id: main.c,v 1.32 2004/09/03 02:09:08 dacap Exp $	*/
 
 #include "config.h"
 
@@ -36,6 +36,11 @@
 #include <unistd.h>
 #endif
 #include <signal.h>
+#if ALLEGRO
+#if HAVE_ALLEGRO_H
+#include <allegro.h>
+#endif
+#endif
 
 #include "alist.h"
 
@@ -452,3 +457,7 @@ int main(int argc, char **argv)
 
 	return 0;
 }
+
+#ifdef ALLEGRO
+END_OF_MAIN();
+#endif

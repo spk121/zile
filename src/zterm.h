@@ -19,7 +19,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zterm.h,v 1.2 2004/07/08 23:39:25 rrt Exp $        */
+/*      $Id: zterm.h,v 1.3 2004/09/03 02:09:08 dacap Exp $        */
 
 #ifndef ZTERM_H
 #define ZTERM_H
@@ -29,7 +29,9 @@
 
 #include "config.h"
 
-#ifdef CURSES
+#if defined ALLEGRO
+#include "term_allegro.h"
+#elif defined CURSES
 #include "term_ncurses.h"
 #else
 #include "term_termcap.h"
