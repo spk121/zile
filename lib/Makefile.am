@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.3 2004/02/17 20:21:17 ssigala Exp $
+## $Id: Makefile.am,v 1.4 2004/03/09 12:40:22 rrt Exp $
 
 noinst_MANS = alist.3 astr.3 htable.3
 
@@ -21,6 +21,8 @@ libzile_a_SOURCES =				\
 	astr.h					\
 	htable.c				\
 	htable.h				\
+	vector.c				\
+	vector.h				\
 	memcmp.c				\
 	vasprintf.c				\
 	xmalloc.c				\
