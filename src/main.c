@@ -1,4 +1,4 @@
-/*	$Id: main.c,v 1.13 2004/02/04 02:50:29 dacap Exp $	*/
+/*	$Id: main.c,v 1.14 2004/02/05 10:14:43 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -147,8 +147,8 @@ static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
 %Copyright (C) 1997-2003 Sandro Sigala <sandro@sigala.it>%\n\
-%Copyright (C) 2003-2004 Reuben Thomas <rrt@sc3d.org>%\n\
 %Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>%\n\
+%Copyright (C) 2003-2004 Reuben Thomas <rrt@sc3d.org>%\n\
 \n\
 Type %C-x C-c% to exit Zile.\n\
 Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\

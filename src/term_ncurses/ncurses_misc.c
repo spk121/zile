@@ -1,4 +1,4 @@
-/*	$Id: ncurses_misc.c,v 1.9 2004/01/29 10:36:01 rrt Exp $	*/
+/*	$Id: ncurses_misc.c,v 1.10 2004/02/05 10:14:43 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -88,7 +88,7 @@ void ncurses_resize_windows(void)
 
 static void segv_sig_handler(int signo)
 {
-	fprintf(stderr, "Zile crashed.  Please send a bug report to <sandro@sigala.it>.\r\n");
+	fprintf(stderr, "Zile crashed.  Please send a bug report to <zile-devel@sourceforge.net>.\r\n");
 	zile_exit(2);
 }
 
