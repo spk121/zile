@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/10/16 20:36:50 $
+		   Last updated: $Date: 2004/12/17 11:51:24 $
 
 ------------------------------------------------------------------------------
 
@@ -198,12 +198,13 @@ INDEX
 
 3.1. Zile doesn't compile correctly under the Foobar operating system.
 
-    We have tested Zile under GNU/Linux only. Since it is written in
-    ANSI C, should be fairly easy to port it under other UNIX-like
-    operating systems. If you get Zile running under some other OS,
-    please send a message to the Zile developers telling them that
-    (you might send him the patches you have made to the Zile sources
-    if you want them included in the next release).
+    We have tested Zile under GNU/Linux only (other than the EPOC
+    port). Since it is written in ANSI C, should be fairly easy to
+    port it under other UNIX-like operating systems. If you get Zile
+    running under some other OS, please send a message to the Zile
+    developers telling them that (you might send him the patches you
+    have made to the Zile sources if you want them included in the
+    next release).
 
     Zile is also known to work under the following operating systems:
 
