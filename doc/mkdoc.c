@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.9 2004/11/15 12:36:13 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.1 2004/12/18 22:09:25 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.

@@ -1,4 +1,8 @@
+.deps
 Makefile
 Makefile.in
+mkdoc
+AUTODOC
+HELP
 zile.info
 zilerc.texi
