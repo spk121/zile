@@ -24,21 +24,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* Comment out all this code if we are using the GNU C Library, and are not
-   actually compiling the library itself.  This code is part of the GNU C
-   Library, but also included in many other GNU distributions.  Compiling
-   and linking in this code is a waste when using the GNU C library
-   (especially if it is a shared library).  Rather than having every GNU
-   program understand `configure --with-gnu-libc' and omit the object files,
-   it is simpler to just do this in the source for each such file.  */
-
-#ifdef VMS
-# include <unixlib.h>
-# if HAVE_STRING_H - 0
-#  include <string.h>
-# endif
-#endif
-
 #ifndef _
 /* This is for other GNU distributions with internationalized messages.
    When compiling libc, the _ macro is predefined.  */
@@ -57,9 +42,6 @@
    As `getopt' works, it permutes the elements of ARGV so that,
    when it is done, all the options precede everything else.  Thus
    all application programs are extended to handle flexible argument order.
-
-   Setting the environment variable POSIXLY_CORRECT disables permutation.
-   Then the behavior is completely standard.
 
    GNU application programs can use a third alternative mode in which
    they can distinguish the relative order of options and other arguments.  */
@@ -118,15 +100,13 @@ int optopt = '?';
 /* Describe how to deal with options that follow non-option ARGV-elements.
 
    If the caller did not specify anything,
-   the default is REQUIRE_ORDER if the environment variable
-   POSIXLY_CORRECT is defined, PERMUTE otherwise.
+   the default is PERMUTE.
 
    REQUIRE_ORDER means don't recognize them as options;
    stop option processing when the first non-option is seen.
    This is what Unix does.
-   This mode of operation is selected by either setting the environment
-   variable POSIXLY_CORRECT, or using `+' as the first character
-   of the list of option characters.
+   This mode of operation is selected by using `+' as the first
+   character of the list of option characters.
 
    PERMUTE is the default.  We permute the contents of ARGV as we scan,
    so that eventually all the non-options are at the end.  This allows options
@@ -149,14 +129,7 @@ static enum
   REQUIRE_ORDER, PERMUTE, RETURN_IN_ORDER
 } ordering;
 
-/* Value of POSIXLY_CORRECT environment variable.  */
-static char *posixly_correct;
-
-# if HAVE_STRING_H
-#  include <string.h>
-# else
-#  include <strings.h>
-# endif
+#include <string.h>
 
 static char *
 my_index (str, chr)
@@ -171,7 +144,7 @@ my_index (str, chr)
     }
   return 0;
 }
-
+
 /* Handle permutation of arguments.  */
 
 /* Describe the part of ARGV that contains non-options that have
@@ -181,45 +154,7 @@ my_index (str, chr)
 static int first_nonopt;
 static int last_nonopt;
 
-#ifdef _LIBC
-/* Bash 2.0 gives us an environment variable containing flags
-   indicating ARGV elements that should not be considered arguments.  */
-
-/* Defined in getopt_init.c  */
-extern char *__getopt_nonoption_flags;
-
-static int nonoption_flags_max_len;
-static int nonoption_flags_len;
-
-static int original_argc;
-static char *const *original_argv;
-
-/* Make sure the environment variable bash 2.0 puts in the environment
-   is valid for the getopt call we must make sure that the ARGV passed
-   to getopt is that one passed to the process.  */
-static void
-__attribute__ ((unused))
-store_args_and_env (int argc, char *const *argv)
-{
-  /* XXX This is no good solution.  We should rather copy the args so
-     that we can compare them later.  But we must not use malloc(3).  */
-  original_argc = argc;
-  original_argv = argv;
-}
-# ifdef text_set_element
-text_set_element (__libc_subinit, store_args_and_env);
-# endif /* text_set_element */
-
-# define SWAP_FLAGS(ch1, ch2) \
-  if (nonoption_flags_len > 0)						      \
-    {									      \
-      char __tmp = __getopt_nonoption_flags[ch1];			      \
-      __getopt_nonoption_flags[ch1] = __getopt_nonoption_flags[ch2];	      \
-      __getopt_nonoption_flags[ch2] = __tmp;				      \
-    }
-#else	/* !_LIBC */
-# define SWAP_FLAGS(ch1, ch2)
-#endif	/* _LIBC */
+#define SWAP_FLAGS(ch1, ch2)
 
 /* Exchange two adjacent subsequences of ARGV.
    One subsequence is elements [first_nonopt,last_nonopt)
@@ -245,28 +180,6 @@ exchange (argv)
      That puts the shorter segment into the right place.
      It leaves the longer segment in the right place overall,
      but it consists of two parts that need to be swapped next.  */
-
-#ifdef _LIBC
-  /* First make sure the handling of the `__getopt_nonoption_flags'
-     string can work normally.  Our top argument must be in the range
-     of the string.  */
-  if (nonoption_flags_len > 0 && top >= nonoption_flags_max_len)
-    {
-      /* We must extend the array.  The user plays games with us and
-	 presents new arguments.  */
-      char *new_str = malloc (top + 1);
-      if (new_str == NULL)
-	nonoption_flags_len = nonoption_flags_max_len = 0;
-      else
-	{
-	  memset (__mempcpy (new_str, __getopt_nonoption_flags,
-			     nonoption_flags_max_len),
-		  '\0', top + 1 - nonoption_flags_max_len);
-	  nonoption_flags_max_len = top + 1;
-	  __getopt_nonoption_flags = new_str;
-	}
-    }
-#endif
 
   while (top > middle && middle > bottom)
     {
@@ -330,8 +243,6 @@ _getopt_initialize (argc, argv, optstring)
 
   nextchar = NULL;
 
-  posixly_correct = getenv ("POSIXLY_CORRECT");
-
   /* Determine how to handle the ordering of options and nonoptions.  */
 
   if (optstring[0] == '-')
@@ -344,44 +255,12 @@ _getopt_initialize (argc, argv, optstring)
       ordering = REQUIRE_ORDER;
       ++optstring;
     }
-  else if (posixly_correct != NULL)
-    ordering = REQUIRE_ORDER;
   else
     ordering = PERMUTE;
 
-#ifdef _LIBC
-  if (posixly_correct == NULL
-      && argc == original_argc && argv == original_argv)
-    {
-      if (nonoption_flags_max_len == 0)
-	{
-	  if (__getopt_nonoption_flags == NULL
-	      || __getopt_nonoption_flags[0] == '\0')
-	    nonoption_flags_max_len = -1;
-	  else
-	    {
-	      const char *orig_str = __getopt_nonoption_flags;
-	      int len = nonoption_flags_max_len = strlen (orig_str);
-	      if (nonoption_flags_max_len < argc)
-		nonoption_flags_max_len = argc;
-	      __getopt_nonoption_flags =
-		(char *) malloc (nonoption_flags_max_len);
-	      if (__getopt_nonoption_flags == NULL)
-		nonoption_flags_max_len = -1;
-	      else
-		memset (__mempcpy (__getopt_nonoption_flags, orig_str, len),
-			'\0', nonoption_flags_max_len - len);
-	    }
-	}
-      nonoption_flags_len = nonoption_flags_max_len;
-    }
-  else
-    nonoption_flags_len = 0;
-#endif
-
   return optstring;
 }
-
+
 /* Scan elements of ARGV (whose length is ARGC) for option characters
    given in OPTSTRING.
 
@@ -461,13 +340,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
      Either it does not have option syntax, or there is an environment flag
      from the shell indicating it is not an option.  The later information
      is only used when the used in the GNU libc.  */
-#ifdef _LIBC
-# define NONOPTION_P (argv[optind][0] != '-' || argv[optind][1] == '\0'	      \
-		      || (optind < nonoption_flags_len			      \
-			  && __getopt_nonoption_flags[optind] == '1'))
-#else
-# define NONOPTION_P (argv[optind][0] != '-' || argv[optind][1] == '\0')
-#endif
+#define NONOPTION_P (argv[optind][0] != '-' || argv[optind][1] == '\0')
 
   if (nextchar == NULL || *nextchar == '\0')
     {
@@ -708,15 +581,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
     if (temp == NULL || c == ':')
       {
 	if (opterr)
-	  {
-	    if (posixly_correct)
-	      /* 1003.2 specifies the format of this message.  */
-	      fprintf (stderr, _("%s: illegal option -- %c\n"),
-		       argv[0], c);
-	    else
-	      fprintf (stderr, _("%s: invalid option -- %c\n"),
-		       argv[0], c);
-	  }
+          fprintf (stderr, _("%s: invalid option -- %c\n"),
+                   argv[0], c);
 	optopt = c;
 	return '?';
       }
