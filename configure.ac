@@ -44,18 +44,16 @@ AC_CHECK_FUNCS(getcwd strerror strstr)
 
 AC_MSG_CHECKING([if the debugging code should be included])
 AC_ARG_ENABLE(debug,
-AC_HELP_STRING([--enable-debug], [include debugging code and assertions]),
+AC_HELP_STRING([--enable-debug], [include debugging code]),
 [
 if test $enableval = yes; then
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(DEBUG, 1, [Define this to include debugging code.])
 else
 	AC_MSG_RESULT(no)
-	AC_DEFINE(NDEBUG)
 fi
 ], [
 AC_MSG_RESULT(no)
-AC_DEFINE(NDEBUG, 1, [Define this to remove the debugging assertions.])
 ])
 
 AC_MSG_CHECKING([if all features should be enabled])
@@ -208,15 +206,11 @@ if test $enableval = yes; then
 	enable_lua=true
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(ENABLE_LUA, 1, [Define this to enable Lua scripting (EXPERIMENTAL).])
+        dnl Really want to check if Lua uses dlopen
         AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl")
-        AC_CHECK_LIB(lua, lua_open,
-            AC_DEFINE(HAVE_LUA, 1,
-	      [Define if you have the lua library (-llua).])
-                  LIBS="$LIBS -llua")
-        AC_CHECK_LIB(lualib, luaopen_base,
-            AC_DEFINE(HAVE_LUALIB, 1,
-              [Define if you have the lualib library (-llualib).])
-                  LIBS="$LIBS -llualib")
+        AC_CHECK_HEADERS(lua.h lualib.h,
+            LIBS="$LIBS -llua -llualib",
+            AC_MSG_FAILURE([cannot find one of lua.h or lualib.h.]))
 else
         enable_lua=false
 	AC_MSG_RESULT(no)
