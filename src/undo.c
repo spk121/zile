@@ -1,4 +1,4 @@
-/*	$Id: undo.c,v 1.6 2004/01/21 01:14:14 dacap Exp $	*/
+/*	$Id: undo.c,v 1.7 2004/01/21 01:48:55 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -41,29 +41,6 @@ int undo_nosave = FALSE;
 
 /* This variable is set to TRUE when the undo is in execution. */
 static int doing_undo = FALSE;
-
-/*
- * Jump to the specified line number and offset.
- */
-static void goto_point(int pointn, int pointo)
-{
-	if (cur_wp->pointn > pointn)
-		do 
-			FUNCALL(previous_line);
-		while (cur_wp->pointn > pointn);
-	else if (cur_wp->pointn < pointn)
-		do
-			FUNCALL(next_line);
-		while (cur_wp->pointn < pointn);
-	if (cur_wp->pointo > pointo)
-		do
-			FUNCALL(backward_char);
-		while (cur_wp->pointo > pointo);
-	else if (cur_wp->pointo < pointo)
-		do
-			FUNCALL(forward_char);
-		while (cur_wp->pointo < pointo);
-}
 
 /*
  * Save a reverse delta for doing undo.
