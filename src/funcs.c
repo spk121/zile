@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.84 2005/02/05 01:49:14 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.85 2005/02/06 20:21:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -86,10 +86,8 @@ static char *make_buffer_flags(Buffer *bp, int iscurrent)
 
   buf[0] = iscurrent ? '.' : ' ';
   buf[1] = (bp->flags & BFLAG_MODIFIED) ? '*' : ' ';
-  /*
-   * Display the readonly flag if it is set or the buffer is
-   * the current buffer, i.e. the `*Buffer List*' buffer.
-   */
+  /* Display the readonly flag if it is set or the buffer is
+     the current buffer, i.e. the `*Buffer List*' buffer. */
   buf[2] = (bp->flags & BFLAG_READONLY || bp == cur_bp) ? '%' : ' ';
   buf[3] = '\0';
 
@@ -585,18 +583,18 @@ static int transpose_subr(Function f)
   /* For transpose-chars. */
   if (f == F_forward_char) {
     if (eolp())
-      f(-1);
+      f(TRUE, -1);
   }
   /* For transpose-lines. */
   else if (f == F_forward_line) {
     /* If we are in first line, go to next line. */
     if (list_prev(cur_bp->pt.p) == cur_bp->lines) {
-      f(1);
+      f(FALSE, 1);
     }
   }
 
   /* Backward. */
-  if (!f(-1)) {
+  if (!f(TRUE, -1)) {
     minibuf_error("Beginning of buffer");
     free_marker(p0);
     return FALSE;
@@ -611,7 +609,7 @@ static int transpose_subr(Function f)
 
   /* Check end of buffer (only to check if we could make the
      operation). */
-  if (!f(2)) {
+  if (!f(TRUE, 2)) {
     /* For transpose-lines. */
     if (f == F_forward_line) {
       if (!seq_started) {
@@ -642,7 +640,7 @@ static int transpose_subr(Function f)
   goto_point(p1->pt);
 
   /* Forward. */
-  f(1);
+  f(FALSE, 1);
 
   /* Save and delete 1st marked region. */
   s1 = astr_new();
@@ -656,7 +654,7 @@ static int transpose_subr(Function f)
   FUNCALL(delete_region);
 
   /* Forward. */
-  f(1);
+  f(FALSE, 1);
 
   /* For transpose-lines. */
   if (f == F_forward_line) {
@@ -667,7 +665,7 @@ static int transpose_subr(Function f)
     set_mark();
 
     /* Backward. */
-    f(-1);
+    f(TRUE, -1);
     p2 = point_marker();
 
     /* Save and delete the marked region. */

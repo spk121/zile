@@ -16,7 +16,6 @@ int scroll_up(void);
 
 /* bind.c ----------------------------------------------------------------- */
 size_t do_completion(astr as);
-int execute_function(char *name, int uniarg);
 char *minibuf_read_function_name(const char *fmt, ...);
 char *get_function_by_key_sequence(void);
 void process_key(size_t key);
@@ -268,7 +267,7 @@ int zasprintf(char **ptr, const char *fmt, ...);
  * Declare external Zile functions.
  */
 #define X0(zile_name, c_name)			\
-	extern int F_ ## c_name(int uniarg);
+	extern int F_ ## c_name(int uniused, int uniarg);
 #define X1(zile_name, c_name, k1)		\
 	X0(zile_name, c_name)
 #define X2(zile_name, c_name, k1, k2)		\

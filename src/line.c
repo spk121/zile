@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.60 2005/02/05 13:49:05 rrt Exp $	*/
+/*	$Id: line.c,v 1.61 2005/02/06 20:21:08 rrt Exp $	*/
 
 #include "config.h"
 
@@ -636,6 +636,7 @@ static int indent_relative(void)
 
   /* Find previous non-blank line. */
   do {
+    int uniused = TRUE;
     if (!FUNCALL_ARG(forward_line, -1)) {
       cur_bp->pt = old_point->pt;
       free_marker(old_point);

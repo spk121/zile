@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: eval.c,v 1.19 2005/02/05 13:49:04 rrt Exp $	*/
+/*	$Id: eval.c,v 1.20 2005/02/06 20:21:06 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -42,7 +42,7 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
     leWipe(value_le);
   }
   if (argc < 3)
-    f((argc == 1) ? 1 : uniarg);
+    f(argc == 1, (argc == 1) ? 1 : uniarg);
   return ret ? leT : leNIL;
 }
 
@@ -63,17 +63,17 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
 #undef X3
 
 static evalLookupNode evalTable[] = {
-  { "+"	, eval_cb_add		},
-  { "-"	, eval_cb_subtract	},
-  { "*"	, eval_cb_multiply	},
-  { "/"	, eval_cb_divide	},
-  { "%"	, eval_cb_modulus	},
+  { "+"		, eval_cb_add		},
+  { "-"		, eval_cb_subtract	},
+  { "*"		, eval_cb_multiply	},
+  { "/"		, eval_cb_divide	},
+  { "%"		, eval_cb_modulus	},
 
-  { "<"	, eval_cb_lt		},
+  { "<"		, eval_cb_lt		},
   { "<="	, eval_cb_lt_eq		},
-  { ">"	, eval_cb_gt		},
+  { ">"		, eval_cb_gt		},
   { ">="	, eval_cb_gt_eq		},
-  { "="	, eval_cb_eqsign	},
+  { "="		, eval_cb_eqsign	},
 
   { "and"	, eval_cb_and		},
   { "or"	, eval_cb_or		},

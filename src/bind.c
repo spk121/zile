@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.59 2005/02/06 01:49:13 rrt Exp $	*/
+/*	$Id: bind.c,v 1.60 2005/02/06 20:21:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -215,7 +215,7 @@ void process_key(size_t key)
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     } else {
-      p->func(last_uniarg);
+      p->func(lastflag & FLAG_SET_UNIARG, last_uniarg);
       _last_command = p->func;
     }
 
@@ -366,19 +366,6 @@ static astr bindings_string(fentryp f)
   return as;
 }
 
-int execute_function(char *name, int uniarg)
-{
-  Function func;
-  Macro *mp;
-
-  if ((func = get_function(name)))
-    return func(uniarg);
-  else if ((mp = get_macro(name)))
-    return call_macro(mp);
-  else
-    return FALSE;
-}
-
 /*
  * Read a function name from the minibuffer.
  * The returned buffer must be freed by the caller.
@@ -440,6 +427,19 @@ char *minibuf_read_function_name(const char *fmt, ...)
   free_completion(cp);
 
   return ms;
+}
+
+static int execute_function(char *name, int uniarg)
+{
+  Function func;
+  Macro *mp;
+
+  if ((func = get_function(name)))
+    return func(uniarg ? TRUE : FALSE, uniarg);
+  else if ((mp = get_macro(name)))
+    return call_macro(mp);
+  else
+    return FALSE;
 }
 
 DEFUN("execute-extended-command", execute_extended_command)
