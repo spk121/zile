@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.36 2004/12/17 11:31:10 rrt Exp $	*/
+/*	$Id: line.c,v 1.37 2004/12/31 16:52:42 rrt Exp $	*/
 
 #include "config.h"
 
@@ -635,19 +635,20 @@ static int indent_relative(void)
 		}
 	} while (is_blank_line());
 
-	/* Go to `cur_goalc' in that non-blank line.  */
+	/* Go to `cur_goalc' in that non-blank line. */
 	while (!eolp() && (get_goalc() < cur_goalc))
 		forward_char();
 
-	/* Now find the first blank char.  */
-	while (!eolp() && (!isspace(following_char())))
+	/* Now find the first blank char, unless we go past cur_goalc. */
+	while ((get_goalc() <= cur_goalc) && !eolp() &&
+               (!isspace(following_char())))
 		forward_char();
 
-	/* Find first non-blank char */
+	/* Find first non-blank char. */
 	while (!eolp() && (isspace(following_char())))
 		forward_char();
 
-	/* Target column.  */
+	/* Target column. */
 	if (!eolp())
 		target_goalc = get_goalc();
 	else {
