@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.78 2005/01/29 12:44:49 rrt Exp $	*/
+/*	$Id: main.c,v 1.79 2005/01/30 02:48:18 dacap Exp $	*/
 
 #include "config.h"
 
@@ -74,10 +74,10 @@ static void loop(void)
   for (;;) {
     if (lastflag & FLAG_NEED_RESYNC)
       resync_redisplay();
-    term_redisplay();
-    term_refresh();
 
     minibuf_clear();
+    term_redisplay();
+    term_refresh();
 
     thisflag = 0;
     if (lastflag & FLAG_DEFINING_MACRO)
@@ -349,7 +349,7 @@ int main(int argc, char **argv)
 
     if (argc >= 1)
       while (*argv) {
-        size_t line = 0;
+        size_t line = 1;
         if (**argv == '+')
           line = strtoul(*argv++ + 1, NULL, 10);
         if (*argv)
