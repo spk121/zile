@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.21 2004/10/13 15:50:17 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.22 2004/10/13 15:52:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -237,7 +237,7 @@ static char *get_tcap(void)
         return tcap;
 }
 
-void term_read_screen_size(void)
+static void term_read_screen_size(void)
 {
         char *tcap = get_tcap();
         ZILE_COLS = tgetnum("co");

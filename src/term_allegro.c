@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.5 2004/10/13 15:50:17 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.6 2004/10/13 15:52:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -214,11 +214,6 @@ int term_printw(const char *fmt, ...)
 }
 
 void term_beep(void)
-{
-	/* nothing */
-}
-
-void term_read_screen_size(void)
 {
 	/* nothing */
 }
