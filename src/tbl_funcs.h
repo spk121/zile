@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.26 2005/01/13 07:31:04 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.27 2005/01/16 20:59:27 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -69,7 +69,7 @@ X2("kill-line", kill_line,				"\\C-k", "\\F6")
 X2("kill-region", kill_region,				"\\C-w", "\\F7")
 X1("kill-sexp", kill_sexp,				"\\C-\\M-k")
 X1("kill-word", kill_word,				"\\M-d")
-X1("list-bindings", list_bindings,			"\\C-hlb")
+X1("list-bindings", list_bindings,			"\\C-hb")
 X1("list-buffers", list_buffers,			"\\C-x\\C-b")
 X1("list-functions", list_functions,			"\\C-hlf")
 X1("list-registers", list_registers,			"\\C-hlr")
