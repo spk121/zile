@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.59 2005/01/27 01:33:18 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.60 2005/01/29 00:36:58 rrt Exp $	*/
 
 #include "config.h"
 
@@ -149,9 +149,9 @@ void term_refresh(void)
 
     for (j = 0; j < termp->width; j++) {
       size_t offset = i * termp->width + j;
-      int n = screen.array[offset];
+      size_t n = screen.array[offset];
       char c = n & 0xff;
-      Font f = n & ~0xff;
+      Font f = n & ~0xffU;
 
       if (screen.oarray[offset] != n) {
         if (skipped)
@@ -392,9 +392,9 @@ void term_resume(void)
   winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
 }
 
-static int translate_key(char *s, size_t nbytes)
+static size_t translate_key(char *s, size_t nbytes)
 {
-  int key = KBD_NOKEY, i, used = 0;
+  size_t i, key = KBD_NOKEY, used = 0;
 
   if (nbytes == 1) {
     switch (*s) {
@@ -443,17 +443,17 @@ static int translate_key(char *s, size_t nbytes)
   }
 
   for (i = nbytes - 1; i >= used; i--)
-    term_ungetkey(s[i]);
+    term_ungetkey((size_t)s[i]);
 
   return key;
 }
 
-static int xgetkey(int mode, size_t dsecs)
+static size_t xgetkey(int mode, size_t dsecs)
 {
   size_t nbytes;
   size_t len = astr_len(key_buf);
   char *keys = zmalloc(len + max_key_chars);
-  int key = KBD_NOKEY;
+  size_t key = KBD_NOKEY;
 
   if (mode & GETKEY_DELAYED) {
     nstate.c_cc[VTIME] = dsecs; /* Wait up to dsecs deciseconds... */
@@ -476,24 +476,22 @@ static int xgetkey(int mode, size_t dsecs)
   if (len < max_key_chars) /* Get more chars if we might not already have enough for a keystroke. */
     nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
 
-  if (nbytes >= 0) {
-    if (mode & GETKEY_NONFILTERED) {
-      int i;
-      for (i = nbytes - 2; i >= 0; i--)
-        term_ungetkey(keys[i]);
-      key = keys[nbytes - 1];
-    } else {
-      key = translate_key(keys, nbytes);
-      while (key == KBD_META)
-        key = term_getkey() | KBD_META;
-    }
+  if (mode & GETKEY_NONFILTERED) {
+    int i;
+    for (i = nbytes - 2; i >= 0; i--)
+      term_ungetkey((size_t)keys[i]);
+    key = (size_t)keys[nbytes - 1];
+  } else {
+    key = translate_key(keys, nbytes);
+    while (key == KBD_META)
+      key = term_getkey() | KBD_META;
   }
 
   free(keys);
   return key;
 }
 
-int term_xgetkey(int mode, size_t timeout)
+size_t term_xgetkey(int mode, size_t timeout)
 {
   int key;
   struct sigaction winch_sig;
@@ -514,12 +512,12 @@ int term_xgetkey(int mode, size_t timeout)
   return key;
 }
 
-int term_getkey(void)
+size_t term_getkey(void)
 {
   return term_xgetkey(0, 0);
 }
 
-void term_ungetkey(int key)
+void term_ungetkey(size_t key)
 {
   if (key != KBD_NOKEY) {
     char c = 0;

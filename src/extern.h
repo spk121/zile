@@ -222,9 +222,9 @@ void term_clear(void);
 void term_addch(int c);
 void term_attrset(size_t attrs, ...);
 void term_beep(void);
-int term_getkey(void);
-int term_xgetkey(int mode, size_t timeout);
-void term_ungetkey(int key);
+size_t term_getkey(void);
+size_t term_xgetkey(int mode, size_t timeout);
+void term_ungetkey(size_t key);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

@@ -20,10 +20,12 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.56 2005/01/28 02:38:32 rrt Exp $        */
+/*      $Id: zile.h,v 1.57 2005/01/29 00:36:57 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
+
+#include <limits.h>
 
 #include "list.h"
 #include "astr.h"
@@ -246,7 +248,7 @@ struct History {
 struct Terminal {
   void *screen; /* The real type of this pointer depends on the
                    terminal back-end. */
-  int width, height;
+  size_t width, height;
 };
 
 /* The actual number of lines and columns on the screen, which may
@@ -267,64 +269,64 @@ typedef size_t Font;
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
 
-#define GETKEY_DELAYED                  (0001)
-#define GETKEY_NONFILTERED              (0002)
+#define GETKEY_DELAYED                  0001
+#define GETKEY_NONFILTERED              0002
 
 /* Special value returned in non blocking mode, when no key is pressed. */
-#define KBD_NOKEY                       (-1)
+#define KBD_NOKEY                       UINT_MAX
 
 /* Key modifiers. */
-#define KBD_CTL                         (01000)
-#define KBD_META                        (02000)
+#define KBD_CTL                         01000
+#define KBD_META                        02000
 
 /* Common non-alphanumeric keys. */
 #define KBD_CANCEL                      (KBD_CTL | 'g')
-#define KBD_TAB                         (00402)
-#define KBD_RET                         (00403)
-#define KBD_PGUP                        (00404)
-#define KBD_PGDN                        (00405)
-#define KBD_HOME                        (00406)
-#define KBD_END                         (00407)
-#define KBD_DEL                         (00410)
-#define KBD_BS                          (00411)
-#define KBD_INS                         (00412)
-#define KBD_LEFT                        (00413)
-#define KBD_RIGHT                       (00414)
-#define KBD_UP                          (00415)
-#define KBD_DOWN                        (00416)
-#define KBD_F1                          (00420)
-#define KBD_F2                          (00421)
-#define KBD_F3                          (00422)
-#define KBD_F4                          (00423)
-#define KBD_F5                          (00424)
-#define KBD_F6                          (00425)
-#define KBD_F7                          (00426)
-#define KBD_F8                          (00427)
-#define KBD_F9                          (00430)
-#define KBD_F10                         (00431)
-#define KBD_F11                         (00432)
-#define KBD_F12                         (00433)
+#define KBD_TAB                         00402
+#define KBD_RET                         00403
+#define KBD_PGUP                        00404
+#define KBD_PGDN                        00405
+#define KBD_HOME                        00406
+#define KBD_END                         00407
+#define KBD_DEL                         00410
+#define KBD_BS                          00411
+#define KBD_INS                         00412
+#define KBD_LEFT                        00413
+#define KBD_RIGHT                       00414
+#define KBD_UP                          00415
+#define KBD_DOWN                        00416
+#define KBD_F1                          00420
+#define KBD_F2                          00421
+#define KBD_F3                          00422
+#define KBD_F4                          00423
+#define KBD_F5                          00424
+#define KBD_F6                          00425
+#define KBD_F7                          00426
+#define KBD_F8                          00427
+#define KBD_F9                          00430
+#define KBD_F10                         00431
+#define KBD_F11                         00432
+#define KBD_F12                         00433
 
 /*--------------------------------------------------------------------------
  * Global flags.
  *--------------------------------------------------------------------------*/
 
 /* The last command was a C-p or a C-n. */
-#define FLAG_DONE_CPCN                  (0000001)
+#define FLAG_DONE_CPCN                  0000001
 /* The last command was a kill. */
-#define FLAG_DONE_KILL                  (0000002)
+#define FLAG_DONE_KILL                  0000002
 /* Hint for the redisplay engine: a resync is required. */
-#define FLAG_NEED_RESYNC                (0000004)
+#define FLAG_NEED_RESYNC                0000004
 /* Quit the editor as soon as possible. */
-#define FLAG_QUIT_ZILE                  (0000010)
+#define FLAG_QUIT_ZILE                  0000010
 /* The last command modified the universal argument variable `uniarg'. */
-#define FLAG_SET_UNIARG                 (0000020)
+#define FLAG_SET_UNIARG                 0000020
 /* We are defining a macro. */
-#define FLAG_DEFINING_MACRO             (0000040)
+#define FLAG_DEFINING_MACRO             0000040
 /* We are executing a macro. */
-#define FLAG_EXECUTING_MACRO            (0000100)
+#define FLAG_EXECUTING_MACRO            0000100
 /* Encountered an error. */
-#define FLAG_GOT_ERROR                  (0000200)
+#define FLAG_GOT_ERROR                  0000200
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.
