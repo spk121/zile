@@ -10,7 +10,7 @@
   near future.
 
 * The background colors are not handled very well under X Window
-  terminals (signaled by users, but cannot reproduce).
+  terminals (reported by users, but cannot reproduce).
 
 * The macros do not work for interactive commands.
 
