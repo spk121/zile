@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.9 2004/11/14 21:39:48 rrt Exp $
+.\" $Id: zile.1.in,v 1.10 2004/11/14 21:52:27 rrt Exp $
 .Dd Nov, 2003
 .Os
 .Dt ZILE 1
@@ -92,10 +92,6 @@ show a sample configuration file
 show a tutorial window
 .It Ic C-h v
 describe a variable
-.It Ic C-h C-h, F10
-toggle mini help window
-.It Ic C-h C-r, F9
-rotate mini help contents
 .It Ic C-k, F6
 kill line
 .It Ic C-l

@@ -70,7 +70,7 @@ General look and feel, function names, function behaviors, key bindings.
 @item XEmacs:
 Some minor hints for look and feel.
 @item Jed:
-@i{Mini Help} window, mode line.
+mode line.
 @item ce:
 Internal structure and function names.
 @end itemize
@@ -117,9 +117,6 @@ For the first file the cursor will be positioned on the line specified by
 @item -f function
 Invoke the named internal function with no arguments.
 For example, @samp{-f auto-fill-mode} turns on @i{Auto Fill Mode}.
-@item -h
-Display the @i{Mini Help} window at startup.  This may be useful for
-novice users.
 @item -q
 Do not load the user's initialization file.
 @item -u rcfile
@@ -190,10 +187,6 @@ the @kbd{M-h} key should be used instead of @kbd{C-h}.
 @table @kbd
 @item C-h C-d
 Show informations about getting the latest version.
-@item C-h C-h, @key{F10}
-Toggle the @i{Mini Help} window.
-@item C-h C-r, @key{F9}
-Rotate @i{Mini Help} contents.
 @item C-h F
 Show the Frequently Asked Questions about Zile.
 @item C-h c
@@ -940,8 +933,7 @@ If enabled, highlight region even in nonselected windows.  Default
 value is @samp{false}.
 @item novice-level
 Enable this if you are novice to Emacs in general.
-Disabling this variable the @i{Mini Help}
-window and the message in the scratch buffer will be disabled.
+If this is disabled the message in the scratch buffer will be disabled.
 Default value is @samp{true}.
 @item skip-splash-screen
 If enabled, the splash screen at startup will be avoided.

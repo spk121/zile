@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.43 2004/11/14 21:34:56 rrt Exp $	*/
+/*	$Id: main.c,v 1.44 2004/11/14 21:52:27 rrt Exp $	*/
 
 #include "config.h"
 
@@ -132,7 +132,6 @@ static char about_splash_str[] = "\
 \n\
 Type %C-x C-c% to exit Zile.\n\
 Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\
-Type %C-h C-h% or %F10% to show a mini help window.\n\
 Type %C-h C-d% for information on getting the latest version.\n\
 Type %C-h t% for a tutorial on using Zile.\n\
 Type %C-h s% for a sample configuration file.\n\
@@ -272,10 +271,6 @@ static void setup_main_screen(int argc)
 		FUNCALL(list_buffers);
 	}
 	else {
-		/*
-		 * Show the Mini Help window if the `-h' flag was specified
-		 * on command line or the novice level is enabled.
-		 */
 		if (argc < 1 && lookup_bool_variable("novice-level")) {
 			insert_string("\
 This buffer is for notes you don't want to save.\n\

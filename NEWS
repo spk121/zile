@@ -123,7 +123,7 @@ Changes between Zile 1.4 - Zile 1.5
 
 * Added `switch-to-correlated-buffer' (bound to `F11').
 * Added `skip-splash-screen' variable.
-* Extented Mini Help functionality; now there are three help pages.
+* Extended Mini Help functionality; now there are three help pages.
 * Reorganized partially the `F1'..`F12' keys.
 * Added a reference card (see `etc/refcard.tex' and `etc/refcard.ps').
 * User-invisible changes: introduced three new general-purpose libraries:

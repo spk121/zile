@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.15 2004/10/11 01:21:00 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.16 2004/11/14 21:52:27 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -47,8 +47,8 @@ X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
 X("novice-level",			"b", "true", "\
 Enable this if you are new to Emacs in general.\n\
-Setting this variable to false disables the Mini Help window and\n\
-the message in the scratch buffer.")
+Setting this variable to false disables the message in the scratch\n\
+buffer.")
 X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\
