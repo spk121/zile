@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_minibuf.c,v 1.21 2004/05/09 18:00:33 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.1 2004/05/09 18:31:07 rrt Exp $	*/
 
 #include "config.h"
 
@@ -32,7 +32,7 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "term_ncurses.h"
+#include "term_ncurses/term_ncurses.h"
 
 void ncurses_minibuf_clear(void)
 {
