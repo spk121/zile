@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.19 2005/01/23 18:39:03 rrt Exp $	*/
+/*	$Id: basic.c,v 1.20 2005/01/25 19:22:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -122,12 +122,8 @@ int previous_line(void)
   if (list_prev(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
-    if (!(lastflag & FLAG_DONE_CPCN)) {
-      if (!bolp() && eolp())
-        cur_goalc = INT_MAX;
-      else
-        cur_goalc = get_goalc();
-    }
+    if (!(lastflag & FLAG_DONE_CPCN))
+      cur_goalc = get_goalc();
 
     cur_bp->pt.p = list_prev(cur_bp->pt.p);
     cur_bp->pt.n--;
@@ -172,12 +168,8 @@ int next_line(void)
   if (list_next(cur_bp->pt.p) != cur_bp->lines) {
     thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
-    if (!(lastflag & FLAG_DONE_CPCN)) {
-      if (!bolp() && eolp())
-        cur_goalc = INT_MAX;
-      else
-        cur_goalc = get_goalc();
-    }
+    if (!(lastflag & FLAG_DONE_CPCN))
+      cur_goalc = get_goalc();
 
     cur_bp->pt.p = list_next(cur_bp->pt.p);
     cur_bp->pt.n++;
