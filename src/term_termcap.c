@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.19 2004/10/12 22:39:03 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.20 2004/10/12 23:22:22 rrt Exp $	*/
 
 /* TODO: signal handler resize_windows(); */
 
@@ -271,6 +271,7 @@ void term_init(void)
                 zile_exit(1);
         }
 
+        /* Unbuffered I/O so screen is always up-to-date. */
         setvbuf(stdout, NULL, _IONBF, 0);
 
         /* Extract information we will use. */
@@ -389,9 +390,9 @@ static int translate_key(char *s, int nbytes)
                 return KBD_DOWN;
         else if (nbytes > 1) {
                 int i;
-                for (i = 1; i < strlen(s); i++)
+                for (i = nbytes - 1; i > 0; i--)
                         term_ungetkey(s[i]);
-                return *s;
+                return translate_key(s, 1);
         }
 
         return KBD_NOKEY;
@@ -413,7 +414,7 @@ static int xgetkey(int mode, int arg)
                 nstate.c_cc[VTIME] = arg / 100;  /* Wait up to arg/100 10ths of a second. */
         }                
 
-        nbytes = fread(keys, sizeof(char), MAX_KEY_CHARS, stdin);
+        nbytes = read(STDIN_FILENO, keys, MAX_KEY_CHARS);
         keys[nbytes] = '\0';
         
 	if (ret < 0)
