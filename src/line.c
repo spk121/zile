@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.6 2003/05/19 21:50:25 rrt Exp $	*/
+/*	$Id: line.c,v 1.7 2003/05/19 22:26:19 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2002 Sandro Sigala.  All rights reserved.
@@ -206,8 +206,6 @@ int insert_char(int c)
 
 	if (cur_bp->markp == cur_wp->pointp && cur_bp->marko >= pointo)
 		++cur_bp->marko;
-
-	++cur_wp->pointp->size;
 
 	return TRUE;
 }
