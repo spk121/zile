@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.49 2005/01/21 23:33:25 rrt Exp $	*/
+/*	$Id: line.c,v 1.50 2005/01/26 00:03:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -211,46 +211,63 @@ int insert_newline(void)
   return intercalate_newline() && forward_char();
 }
 
-/* Recase s according to case of template. */
-/* XXX At the moment this is not the same as Emacs (doesn't check that
- * replacement string contains no upper case) but is consistent with
- * search. See feature requests. */
-static void recase(char *s, char *template, int len)
+/*
+ * Check the case of a string.
+ * Returns 2 if it is all upper case, 1 if just the first letter is,
+ * and 0 otherwise.
+ */
+static int check_case(const char *s, unsigned len)
 {
   int i;
 
-  for (i = 0; i < len; i++, s++) {
-    if (isupper(*template++))
-      *s = toupper(*s);
-  }
+  if (!isupper(*s))
+    return 0;
+
+  for (i = 1; i < len; i++)
+    if (!isupper(s[i]))
+      return 1;
+
+  return 2;
 }
 
-/* This routine replaces text in the line "lp" with "newtext".  If
- * "replace_case" is TRUE then the new characters will be the same
- * case as the old. */
-void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext,
-		       int replace_case)
+/*
+ * Recase str according to case of tmpl.
+ */
+static void recase(char *str, unsigned len, const char *tmpl, unsigned tmpl_len)
 {
-  int newsize = strlen(newtext);
+  int i;
+  int tmpl_case = check_case(tmpl, tmpl_len);
 
-  if (orgsize == 0)
+  if (tmpl_case >= 1)
+    *str = toupper(*str);
+
+  if (tmpl_case == 2)
+    for (i = 1; i < len; i++)
+      str[i] = toupper(str[i]);
+}
+
+/*
+ * Replace text in the line "lp" with "newtext". If "replace_case" is
+ * TRUE then the new characters will be the same case as the old.
+ */
+void line_replace_text(Line **lp, int offset, unsigned oldlen,
+                       char *newtext, unsigned newlen, int replace_case)
+{
+  if (oldlen == 0)
     return;
-  assert(orgsize > 0);
 
   if (replace_case) {
     newtext = zstrdup(newtext);
-    recase((char *)newtext, astr_char((*lp)->item, offset), min(orgsize, newsize));
+    recase(newtext, newlen, astr_char((*lp)->item, offset), oldlen);
   }
 
-  if (newsize != orgsize) {
+  if (newlen != oldlen) {
     cur_bp->flags |= BFLAG_MODIFIED;
-    astr_replace_cstr((*lp)->item, offset, orgsize, newtext);
-    adjust_markers(*lp, *lp, offset, 0, newsize - orgsize);
-  } else {
-    if (memcmp(astr_char((*lp)->item, offset), newtext, newsize) != 0) {
-      memcpy(astr_char((*lp)->item, offset), newtext, newsize);
-      cur_bp->flags |= BFLAG_MODIFIED;
-    }
+    astr_replace_cstr((*lp)->item, offset, oldlen, newtext);
+    adjust_markers(*lp, *lp, offset, 0, newlen - oldlen);
+  } else if (memcmp(astr_char((*lp)->item, offset), newtext, newlen) != 0) {
+    memcpy(astr_char((*lp)->item, offset), newtext, newlen);
+    cur_bp->flags |= BFLAG_MODIFIED;
   }
                 
   if (replace_case)

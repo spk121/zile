@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.32 2005/01/25 21:37:36 rrt Exp $	*/
+/*	$Id: search.c,v 1.33 2005/01/26 00:03:47 rrt Exp $	*/
 
 #include "config.h"
 
@@ -108,7 +108,6 @@ static char *re_find_substr(const char *s1, size_t s1size,
   search_regs.end = zmalloc(sizeof(regoff_t));
 
   pattern.translate = NULL;
-  /*	pattern.fastmap = (char *)zmalloc(1 << 8); */
   pattern.fastmap = NULL;
   pattern.buffer = NULL;
   pattern.allocated = 0;
@@ -528,35 +527,45 @@ void free_search_history(void)
   free_history_elements(&regexp_history);
 }
 
+static int no_upper(const char *s, unsigned len)
+{
+  int i;
+
+  for (i = 0; i < len; i++)
+    if (isupper(s[i]))
+      return FALSE;
+
+  return TRUE;
+}
+
 DEFUN("replace-string", replace_string)
   /*+
     Replace occurrences of a string with other text.
     +*/
 {
   char *find, *repl;
-  int count = 0;
+  int count = 0, find_no_upper;
+  unsigned find_len, repl_len;
 
   if ((find = minibuf_read("Replace string: ", "")) == NULL)
     return cancel();
   if (find[0] == '\0')
     return FALSE;
+  find_len = (unsigned)strlen(find);
+  find_no_upper = no_upper(find, find_len);
 
   if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
     return cancel();
-
-  if (!strcmp(find, repl)) {
-    minibuf_error("The two strings cannot match");
-    return FALSE;
-  }
-
+  repl_len = (unsigned)strlen(repl);
+  
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
     ++count;
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
-                         cur_bp->pt.o - strlen(find)),
+                         cur_bp->pt.o - find_len),
               strlen(find), strlen(repl));
-    line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - strlen(find),
-                      strlen(find), repl, TRUE);
+    line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
+                      find_len, repl, repl_len, find_no_upper);
   }
 
   if (thisflag & FLAG_NEED_RESYNC)
@@ -576,21 +585,20 @@ DEFUN("query-replace", query_replace)
     +*/
 {
   char *find, *repl;
-  int count = 0, noask = FALSE, exitloop = FALSE;
+  int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
+  unsigned find_len, repl_len;
 
   if ((find = minibuf_read("Query replace string: ", "")) == NULL)
     return cancel();
-  if (find[0] == '\0')
+  if (*find == '\0')
     return FALSE;
+  find_len = (unsigned)strlen(find);
+  find_no_upper = no_upper(find, find_len);
 
   if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
     return cancel();
-
-  if (!strcmp(find, repl)) {
-    minibuf_error("The two strings cannot match");
-    return FALSE;
-  }
-
+  repl_len = (unsigned)strlen(repl);
+  
   /* Spaghetti code follows... :-( */
   while (search_forward(cur_bp->pt.p, cur_bp->pt.o, find, FALSE)) {
     if (!noask) {
@@ -635,10 +643,10 @@ DEFUN("query-replace", query_replace)
     ++count;
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
-                         cur_bp->pt.o - strlen(find)),
-              strlen(find), strlen(repl));
-    line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - strlen(find),
-                      strlen(find), repl, TRUE);
+                         cur_bp->pt.o - find_len),
+              find_len, repl_len);
+    line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
+                      find_len, repl, repl_len, find_no_upper);
   nextmatch:
     if (exitloop)
       break;

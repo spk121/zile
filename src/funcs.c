@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.71 2005/01/25 18:01:25 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.72 2005/01/26 00:03:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -435,14 +435,13 @@ DEFUN("universal-argument", universal_argument)
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
 
-static void edit_tab_line(Line **lp, int lineno, int offset, int size, int action)
+static void edit_tab_line(Line **lp, int lineno, int offset, unsigned size, int action)
 {
   char *src, *dest;
   int col, i;
 
   if (size == 0)
     return;
-  assert(size >= 1);
 
   src = (char *)zmalloc(size + 1);
   dest = (char *)zmalloc(size * cur_bp->tab_width + 1);
@@ -466,7 +465,7 @@ static void edit_tab_line(Line **lp, int lineno, int offset, int size, int actio
   if (strcmp(src, dest) != 0) {
     undo_save(UNDO_REPLACE_BLOCK, make_point(lineno, offset),
               size, strlen(dest));
-    line_replace_text(lp, offset, size, dest, FALSE);
+    line_replace_text(lp, offset, size, dest, strlen(dest), FALSE);
   }
   free(src);
   free(dest);
@@ -560,17 +559,16 @@ DEFUN("back-to-indentation", back_to_indentation)
 static void astr_append_region(astr s)
 {
   Region r;
-  char *t;
-  int c;
 
   activate_mark();
   calculate_the_region(&r);
 
   if (r.size > 0) {
-    t = copy_text_block(r.start.n, r.start.o, r.size);
+    char *t = copy_text_block(r.start.n, r.start.o, r.size);
     if (t) {
-      for (c = 0; c < r.size; c++)
-        astr_cat_char(s, t[c]);
+      unsigned i;
+      for (i = 0; i < r.size; i++)
+        astr_cat_char(s, t[i]);
       free(t);
     }
   }

@@ -103,7 +103,7 @@ astr keyvectostr(int *keys, int numkeys);
 astr simplify_key(char *key);
 
 /* line.c ----------------------------------------------------------------- */
-void line_replace_text(Line **lp, int offset, int orgsize, const char *newtext, int replace_case);
+void line_replace_text(Line **lp, int offset, unsigned oldlen, char *newtext, unsigned newlen, int replace_case);
 int insert_char(int c);
 int insert_char_in_insert_mode(int c);
 int intercalate_char(int c);
