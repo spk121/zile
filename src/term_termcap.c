@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.48 2005/01/18 12:25:45 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.49 2005/01/18 22:45:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -284,10 +284,10 @@ static char *tgetstr_note_len(const char *cap, char **tcap)
   return s;
 }
 
-static void setattr(int flags)
+static void setattr(int flags, struct termios *state)
 {
-  if (tcsetattr(0, flags, &nstate) < 0) {
-    fprintf(stderr, "Can't set terminal mode\n");
+  if (tcsetattr(0, flags, state) < 0) {
+    fprintf(stderr, "Can't change terminal settings\n");
     zile_exit(1);
   }
 }
@@ -319,7 +319,7 @@ void term_init(void)
   nstate.c_lflag &= ~(ECHO|ECHONL|ICANON|ISIG|IEXTEN);
   nstate.c_cflag &= ~(CSIZE|PARENB);
   nstate.c_cflag |= CS8;
-  setattr(TCSADRAIN);
+  term_resume();
 
   /* Unbuffered I/O so screen is always up-to-date. */
   setvbuf(stdout, NULL, _IONBF, 0);
@@ -356,21 +356,31 @@ void term_close(void)
   astr_delete(norm_string);
   tcdrain(0);
   fflush(stdout);
-  if (tcsetattr(0, TCSADRAIN, &ostate) < 0) {
-    fprintf(stderr, "Can't restore terminal flags\n");
-    zile_exit(1);
-  }
+  term_suspend();
 }
 
 /* Suspend the term ready to go back to the shell */
 void term_suspend(void)
 {
+  setattr(TCSADRAIN, &ostate);
+}
+
+static void winch_sig_handler(int signo)
+{
+  assert(signo == SIGWINCH);
+  read_screen_size();
+  resize_windows();
+  termp->width = ZILE_COLS;
+  termp->height = ZILE_LINES;
+  resync_redisplay();
+  term_refresh();
 }
 
 /* Set up the term again */
 void term_resume(void)
 {
-  /* XXX need to call tcsetattr and winch handler */
+  setattr(TCSADRAIN, &nstate);
+  winch_sig_handler(SIGWINCH); /* Assume Zile is in a consistent state. */
 }
 
 static int translate_key(char *s, int nbytes)
@@ -442,11 +452,11 @@ static int xgetkey(int mode, int dsecs)
   int key = KBD_NOKEY;
 
   if (mode & GETKEY_DELAYED) {
-    nstate.c_cc[VTIME] = dsecs;  /* Wait up to arg deciseconds... */
-    nstate.c_cc[VMIN] = 0;       /* ...but don't require any characters. */
+    nstate.c_cc[VTIME] = dsecs; /* Wait up to dsecs deciseconds... */
+    nstate.c_cc[VMIN] = 0;  /* ...but don't require any characters. */
   } else {
-    nstate.c_cc[VTIME] = 0;	 /* Wait indefinitely... */
-    nstate.c_cc[VMIN] = 1;   /* ...for at least one character. */
+    nstate.c_cc[VTIME] = 0;     /* Wait indefinitely... */
+    nstate.c_cc[VMIN] = 1;      /* ...for at least one character. */
   }
 
   if (keyp < key_buf + MAX_KEY_BUF) {
@@ -456,10 +466,10 @@ static int xgetkey(int mode, int dsecs)
     keyp = key_buf + MAX_KEY_BUF;
   }
 
-  setattr(TCSANOW); /* Set waiting period and number of characters. */
+  setattr(TCSANOW, &nstate); /* Set waiting period and number of characters. */
 
   nbytes = len;
-  if (len < max_key_chars)  /* Don't get more chars if we already have the maximum for a keystroke. */
+  if (len < max_key_chars) /* Get more chars if we might not already have enough for a keystroke. */
     nbytes += read(STDIN_FILENO, keys + len, max_key_chars);
 
   if (nbytes >= 0) {
@@ -479,22 +489,14 @@ static int xgetkey(int mode, int dsecs)
   return key;
 }
 
-static void winch_sig_handler(int signo)
-{
-  assert(signo == SIGWINCH);
-  read_screen_size();
-  resize_windows();
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
-  resync_redisplay();
-  term_refresh();
-}
-
 int term_xgetkey(int mode, int arg)
 {
   int key;
   struct sigaction winch_sig;
 
+/* The SIGWINCH handler is only active in this routine so that we know
+   the data structures are in a consistent state, and here is where Zile
+   spends most of its time. */
   winch_sig.sa_handler = winch_sig_handler;
   sigemptyset(&winch_sig.sa_mask);
   winch_sig.sa_flags = SA_RESTART;
