@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.9 2004/10/11 00:47:19 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.10 2004/10/13 15:47:56 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -47,6 +47,48 @@ void resync_redisplay(void)
 			cur_wp->topdelta = cur_bp->pt.n;
 	}
 	cur_wp->lastpointn = cur_bp->pt.n;
+}
+
+void resize_windows(void)
+{
+	Window *wp;
+	int hdelta = ZILE_LINES - termp->height;
+
+	/* Resize windows horizontally. */
+	for (wp = head_wp; wp != NULL; wp = wp->next)
+		wp->fwidth = wp->ewidth = ZILE_COLS;
+
+	/* Resize windows vertically. */
+	if (hdelta > 0) { /* Increase windows height. */
+		for (wp = head_wp; hdelta > 0; wp = wp->next) {
+			if (wp == NULL)
+				wp = head_wp;
+			++wp->fheight;
+			++wp->eheight;
+			--hdelta;
+		}
+	} else { /* Decrease windows height. */
+		int decreased = TRUE;
+		while (decreased) {
+			decreased = FALSE;
+			for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+				if (wp->fheight > 2) {
+					--wp->fheight;
+					--wp->eheight;
+					++hdelta;
+					decreased = TRUE;
+				}
+		}
+	}
+
+	/*
+	 * Sometimes Zile cannot reduce the windows height to a certain
+	 * value (too small); take care of this case.
+	 */
+	termp->width = ZILE_COLS;
+	termp->height = ZILE_LINES - hdelta;
+
+	FUNCALL(recenter);
 }
 
 void recenter(Window *wp)

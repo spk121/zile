@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.18 2004/10/11 03:03:43 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.19 2004/10/13 15:47:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -329,48 +329,6 @@ void term_full_redisplay(void)
 {
 	term_clear();
 	term_redisplay();
-}
-
-void resize_windows(void)
-{
-	Window *wp;
-	int hdelta = ZILE_LINES - termp->height;
-
-	/* Resize windows horizontally. */
-	for (wp = head_wp; wp != NULL; wp = wp->next)
-		wp->fwidth = wp->ewidth = ZILE_COLS;
-
-	/* Resize windows vertically. */
-	if (hdelta > 0) { /* Increase windows height. */
-		for (wp = head_wp; hdelta > 0; wp = wp->next) {
-			if (wp == NULL)
-				wp = head_wp;
-			++wp->fheight;
-			++wp->eheight;
-			--hdelta;
-		}
-	} else { /* Decrease windows height. */
-		int decreased = TRUE;
-		while (decreased) {
-			decreased = FALSE;
-			for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
-				if (wp->fheight > 2) {
-					--wp->fheight;
-					--wp->eheight;
-					++hdelta;
-					decreased = TRUE;
-				}
-		}
-	}
-
-	/*
-	 * Sometimes Zile cannot reduce the windows height to a certain
-	 * value (too small); take care of this case.
-	 */
-	termp->width = ZILE_COLS;
-	termp->height = ZILE_LINES - hdelta;
-
-	FUNCALL(recenter);
 }
 
 void show_splash_screen(const char *splash)
