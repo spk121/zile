@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.4 2004/11/01 21:33:16 rrt Exp $
+## $Id: Makefile.am,v 1.5 2004/11/14 19:19:48 rrt Exp $
 
 noinst_PROGRAMS = mkdoc
 mkdoc_SOURCES = mkdoc.c
@@ -31,11 +31,6 @@ EXTRA_DIST =					\
 all-local: HELP AUTODOC refcard.ps
 
 HELP: $(top_srcdir)/doc/zile.texi
-	echo "**********************************************************" >$@
-	echo "Please consider reading the Texinfo version of this manual" >>$@
-	echo "(from the command line type \`info zile')." >>$@
-	echo "**********************************************************" >>$@
-	echo "" >>$@
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
