@@ -84,7 +84,7 @@ you use strange formats.
 #include <limits.h>
 
 #define ALLOC_CHUNK 2048
-#define ALLOC_SECURITY_MARGIN 1024   /* big value because some platforms have very big 'G' exponant */
+#define ALLOC_SECURITY_MARGIN 1024   /* big value because some platforms have very big 'G' exponent */
 #if ALLOC_CHUNK < ALLOC_SECURITY_MARGIN
 #    error  !!! ALLOC_CHUNK < ALLOC_SECURITY_MARGIN !!!
 #endif
