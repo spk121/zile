@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.10 2004/04/05 17:18:14 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.11 2004/05/09 18:03:43 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -101,35 +101,12 @@ If disabled, Zile will insert hard tabs (the character `\\t'),\n\
 otherwise it will insert spaces.")
 X("fill-column",			"", "72", "\
 The default fill column (used in Auto Fill Mode).")
-X("font-character",			"c", "green", "\
-The color used in Font Lock Mode for characters.")
-X("font-character-delimiters",		"c", "white", "\
-The color used in Font Lock Mode for character delimiters.")
-X("font-comment",			"c", "red", "\
-The color used in Font Lock Mode for comments.")
-X("font-directive",			"c", "blue", "\
-The color used in Font Lock Mode for preprocessor directives.")
-X("font-here-document",			"c", "green", "\
-The color used in Font Lock/Shell-script modes for here-document\n\
-(e.g.: `<<EOF') blocks.")
-X("font-identifier",			"c", "white", "\
-The color used in Font Lock Mode for identifiers.")
-X("font-keyword",			"c", "magenta", "\
-The color used in Font Lock Mode for keywords.")
-X("font-number",			"c", "cyan", "\
-The color used in Font Lock Mode for numbers.")
-X("font-other",				"c", "white", "\
-The color used in Font Lock Mode for the text.")
-X("font-string",			"c", "green", "\
-The color used in Font Lock Mode for strings.")
-X("font-string-delimiters",		"c", "white", "\
-The color used in Font Lock Mode for string delimiters.")
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
 X("novice-level",			"b", "true", "\
-Enable this if you are novice to Emacs in general.\n\
-Disabling this variable the Mini Help window and the message in\n\
-the scratch buffer will be disabled.")
+Enable this if you are new to Emacs in general.\n\
+Setting this variable to false disables the Mini Help window and\n\
+the message in the scratch buffer.")
 X("show-eob-marker",			"b", "true", "\
 If enabled, a marker will be displayed at the end of the buffer.")
 X("skip-splash-screen",			"b", "false", "\
