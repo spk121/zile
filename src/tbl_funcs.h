@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.30 2005/01/25 12:28:29 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.31 2005/01/25 20:27:04 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -106,7 +106,7 @@ X2("set-mark-command", set_mark_command,		"\\C-@", "\\F5")
 X0("set-variable", set_variable)
 X1("shell-command", shell_command,			"\\M-!")
 X1("shell-command-on-region", shell_command_on_region,	"\\M-|")
-X1("shrink-window", shrink_window,			"\\M-s")
+X0("shrink-window", shrink_window)
 X1("split-window", split_window,			"\\C-x2")
 X1("start-kbd-macro", start_kbd_macro,			"\\C-x(")
 X2("suspend-zile", suspend_zile,			"\\C-x\\C-z", "\\C-z")
