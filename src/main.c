@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.19 2004/03/13 17:27:50 rrt Exp $	*/
+/*	$Id: main.c,v 1.20 2004/03/14 14:36:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -346,11 +346,6 @@ int main(int argc, char **argv)
 	select_terminal();
 	cur_tp->init();
 
-#if ENABLE_LUA
-        /* Initialise Lua */
-        zlua_open();
-#endif
-
 	init_variables();
 	if (!qflag)
 		read_rc_file(uarg);
@@ -389,11 +384,6 @@ int main(int argc, char **argv)
 
 	/* Run the main Zile loop (read key, process key, read key, ...). */
 	loop();
-
-#if ENABLE_LUA
-        /* Finalise Lua */
-        zlua_close();
-#endif
 
 	/* Free all the memory allocated. */
 	alist_delete(fargs);

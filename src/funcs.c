@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.30 2004/03/13 16:31:20 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.31 2004/03/14 14:36:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -105,36 +105,6 @@ static astr make_buffer_mode(Buffer *bp)
 	astr as = astr_new();
 
 	switch (bp->mode) {
-#if ENABLE_C_MODE
-	case BMODE_C:
-		astr_assign_cstr(as, "C");
-		break;
-#endif
-#if ENABLE_CPP_MODE
-	case BMODE_CPP:
-		astr_assign_cstr(as, "C++");
-		break;
-#endif
-#if ENABLE_CSHARP_MODE
-	case BMODE_CSHARP:
-		astr_assign_cstr(as, "C#");
-		break;
-#endif
-#if ENABLE_JAVA_MODE
-	case BMODE_JAVA:
-		astr_assign_cstr(as, "Java");
-		break;
-#endif
-#if ENABLE_SHELL_MODE
-	case BMODE_SHELL:
-		astr_assign_cstr(as, "Shell-script");
-		break;
-#endif
-#if ENABLE_MAIL_MODE
-	case BMODE_MAIL:
-		astr_assign_cstr(as, "Mail");
-		break;
-#endif
 	default:
 		astr_assign_cstr(as, "Text");
 	}
@@ -296,98 +266,6 @@ Turn on the mode for editing text intended for humans to read.
 
 	return TRUE;
 }
-
-#if ENABLE_C_MODE
-DEFUN("c-mode", c_mode)
-/*+
-Turn on the mode for editing K&R and ANSI/ISO C code.
-+*/
-{
-	cur_bp->mode = BMODE_C;
-	if (lookup_bool_variable("auto-font-lock") &&
-	    !(cur_bp->flags & BFLAG_FONTLOCK))
-		FUNCALL(font_lock_mode);
-
-	return TRUE;
-}
-#endif
-
-#if ENABLE_CPP_MODE
-DEFUN("c++-mode", cpp_mode)
-/*+
-Turn on the mode for editing ANSI/ISO C++ code.
-+*/
-{
-	cur_bp->mode = BMODE_CPP;
-	if (lookup_bool_variable("auto-font-lock") &&
-	    !(cur_bp->flags & BFLAG_FONTLOCK))
-		FUNCALL(font_lock_mode);
-
-	return TRUE;
-}
-#endif
-
-#if ENABLE_CSHARP_MODE
-DEFUN("c#-mode", csharp_mode)
-/*+
-Turn on the mode for editing C# (C sharp) code.
-+*/
-{
-	cur_bp->mode = BMODE_CSHARP;
-	if (lookup_bool_variable("auto-font-lock") &&
-	    !(cur_bp->flags & BFLAG_FONTLOCK))
-		FUNCALL(font_lock_mode);
-
-	return TRUE;
-}
-#endif
-
-#if ENABLE_JAVA_MODE
-DEFUN("java-mode", java_mode)
-/*+
-Turn on the mode for editing Java code.
-+*/
-{
-	cur_bp->mode = BMODE_JAVA;
-	if (lookup_bool_variable("auto-font-lock") &&
-	    !(cur_bp->flags & BFLAG_FONTLOCK))
-		FUNCALL(font_lock_mode);
-
-	return TRUE;
-}
-#endif
-
-#if ENABLE_SHELL_MODE
-DEFUN("shell-script-mode", shell_script_mode)
-/*+
-Turn on the mode for editing shell script code.
-+*/
-{
-	cur_bp->mode = BMODE_SHELL;
-	if (lookup_bool_variable("auto-font-lock") &&
-	    !(cur_bp->flags & BFLAG_FONTLOCK))
-		FUNCALL(font_lock_mode);
-
-	return TRUE;
-}
-#endif
-
-#if ENABLE_MAIL_MODE
-DEFUN("mail-mode", mail_mode)
-/*+
-Turn on the mode for editing emails.
-+*/
-{
-	cur_bp->mode = BMODE_MAIL;
-	if (lookup_bool_variable("auto-font-lock") &&
-	    !(cur_bp->flags & BFLAG_FONTLOCK))
-		FUNCALL(font_lock_mode);
-	if (lookup_bool_variable("mail-mode-auto-fill"))
-		cur_bp->flags |= BFLAG_AUTOFILL;
-
-	return TRUE;
-}
-#endif
 
 DEFUN("set-fill-column", set_fill_column)
 /*+
@@ -1413,10 +1291,8 @@ static int setcase_word(int rcase)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK)
 		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-#endif
 
 	return TRUE;
 }

@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: fontlock.c,v 1.10 2004/02/18 09:47:41 rrt Exp $	*/
+/*	$Id: fontlock.c,v 1.11 2004/03/14 14:36:05 rrt Exp $	*/
 
 /*
  * In the future these routines may be rewritten using regex pattern
@@ -39,234 +39,6 @@
 #include "zile.h"
 #include "extern.h"
 
-#if ENABLE_NONTEXT_MODES
-#if ENABLE_CLIKE_MODES
-/*
- * Parse the line for comments and strings and add anchors if found.
- * C/C++/C#/Java Mode.
- */
-static void cpp_set_anchors(Line *lp, Anchor *lastanchor)
-{
-	char *sp;
-	Anchor *ap;
-
-	if (lp->size == 0) {
-		lp->anchors = NULL;
-		return;
-	}
-
-	ap = lp->anchors = (Anchor *)zmalloc(sizeof(Anchor) * lp->size);
-
-	for (sp = lp->text; sp < lp->text + lp->size; ++sp)
-		if (*lastanchor == ANCHOR_BEGIN_COMMENT) {
-			/*
-			 * We are in the middle of a comment, so parse
-			 * for finding the termination sequence.
-			 */
-			if (*sp == '*' && sp < lp->text + lp->size - 1 && *(sp+1) == '/') {
-				/*
-				 * Found a comment termination sequence.
-				 * Put an anchor to signal this.
-				 */
-				++sp;
-				*ap++ = ANCHOR_NULL;
-				*ap++ = ANCHOR_END_COMMENT;
-				*lastanchor = ANCHOR_NULL;
-			} else
-				*ap++ = ANCHOR_NULL;
-		} else if (*lastanchor == ANCHOR_BEGIN_STRING) {
-			/*
-			 * We are in the middle of a string, so parse for
-			 * finding the termination sequence.
-			 */
-			if (*sp == '\\' && sp < lp->text + lp->size - 1) {
-				*ap++ = ANCHOR_NULL;
-				*ap++ = ANCHOR_NULL;
-				++sp;
-			} else if (*sp == '"') {
-				/*
-				 * Found a string termination.  Put an anchor
-				 * to signal this.
-				 */
-				*ap++ = ANCHOR_END_STRING;
-				*lastanchor = ANCHOR_NULL;
-			} else
-				*ap++ = ANCHOR_NULL;
-		} else if (*sp == '/' && sp < lp->text + lp->size - 1 && *(sp+1) == '*') {
-			/*
-			 * Found a comment termination sequence.  Put an
-			 * anchor to signal this.
-			 */
-			++sp;
-			*ap++ = ANCHOR_BEGIN_COMMENT;
-			*ap++ = ANCHOR_NULL;
-			*lastanchor = ANCHOR_BEGIN_COMMENT;
-		} else if (*sp == '/' && sp < lp->text + lp->size - 1 && *(sp+1) == '/') {
-			/* // C++ style comment; ignore to end of line. */
-			for (; sp < lp->text + lp->size; ++sp)
-				*ap++ = ANCHOR_NULL;
-		} else if (*sp == '\'') {
-			/*
-			 * Parse a character constant.  No anchors are
-			 * required for characters since the characters
-			 * cannot be longer than a line.
-			 */
-			*ap++ = ANCHOR_NULL;
-			++sp;
-			while (sp < lp->text + lp->size - 1 && *sp != '\'') {
-				if (*sp == '\\') {
-					*ap++ = ANCHOR_NULL;
-					++sp;
-				}
-				if (sp < lp->text + lp->size - 1) {
-					*ap++ = ANCHOR_NULL;
-					sp++;
-				}
-			}
-		} else if (*sp == '"') {
-			/*
-			 * Found a string beginning sequence.  Put an anchor to
-			 * signal this.
-			 */
-			*ap++ = ANCHOR_BEGIN_STRING;
-			*lastanchor = ANCHOR_BEGIN_STRING;
-		} else
-			*ap++ = ANCHOR_NULL;
-}
-#endif /* ENABLE_CLIKE_MODES */
-
-#if ENABLE_SHELL_MODE
-static char *heredoc_string = NULL;
-
-static int make_heredoc_string(Line *lp, char *sp, Anchor *ap)
-{
-	char *start, *end;
-
-	if (heredoc_string) {
-		free(heredoc_string);
-		heredoc_string = NULL;
-	}
-
-	for (; sp < lp->text + lp->size; ++sp) {
-		if (isspace(*sp)) {
-			if (ap)
-				*ap++ = ANCHOR_NULL;
-			continue;
-		}
-
-		start = end = sp;
-		for (; sp < lp->text + lp->size; ++sp) {
-			if (!isalpha(*sp) && *sp != '_') {
-				if (start == end)
-					return FALSE;
-				break;
-			}
-
-			if (ap) {
-				if (sp == start)
-					*ap++ = ANCHOR_BEGIN_HEREDOC;
-				else
-					*ap++ = ANCHOR_NULL;
-			}
-			end = sp;
-		}
-
-		heredoc_string = zmalloc(end - start + 2);
-		strncpy(heredoc_string, start, end - start + 1);
-		heredoc_string[end - start + 1] = '\0';
-		ZTRACE(("special string = `%s'\n", heredoc_string));
-
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-/*
- * Parse the line for comments and strings and add anchors if found.
- * Shell Mode.
- */
-static void shell_set_anchors(Line *lp, Anchor *lastanchor)
-{
-	char *sp;
-	Anchor *ap;
-	static int laststrchar;
-
-	if (lp->size == 0) {
-		lp->anchors = NULL;
-		return;
-	}
-
-	ap = lp->anchors = (Anchor *)zmalloc(sizeof(Anchor) * lp->size);
-
-	for (sp = lp->text; sp < lp->text + lp->size; sp++) {
-		if (*lastanchor == ANCHOR_BEGIN_STRING) {
-			/*
-			 * We are in the middle of a string, so parse for
-			 * finding the termination sequence.
-			 */
-			if (*sp == '\\' && sp < lp->text + lp->size - 1) {
-				*ap++ = ANCHOR_NULL;
-				*ap++ = ANCHOR_NULL;
-				++sp;
-			} else if (*sp == laststrchar) {
-				/*
-				 * Found a string termination.  Put an anchor
-				 * to signal this.
-				 */
-				*ap++ = ANCHOR_END_STRING;
-				*lastanchor = ANCHOR_NULL;
-			} else {
-				*ap++ = ANCHOR_NULL;
-			}
-		} else if (*lastanchor == ANCHOR_BEGIN_HEREDOC) {
-			/* Special chunks "<< EOF \n ... \n " */
-			if ((sp == lp->text) && heredoc_string &&
-			    (*sp == *heredoc_string) &&
-			    (lp->size == (int)strlen(heredoc_string)) &&
-			    (strncmp(sp, heredoc_string, lp->size) == 0)) {
-				int i, l = strlen(heredoc_string);
-				for (i = 0; i < l - 1; ++i)
-					*ap++ = ANCHOR_NULL;
-				sp += l;
-				*ap++ = ANCHOR_END_HEREDOC;
-				*lastanchor = ANCHOR_NULL;
-			} else {
-				*ap++ = ANCHOR_NULL;
-			}
-		} else if (*sp == '"' || *sp == '`' || *sp == '\'') {
-			/* Found just a string character (\', \" or \`) */
-			if ((sp > lp->text) && (*(sp-1) == '\\')) {
-				laststrchar = *sp;
-				ap--;
-				*ap++ = ANCHOR_BEGIN_STRING;
-				*ap++ = ANCHOR_END_STRING;
-				*lastanchor = ANCHOR_NULL;
-			} else {
-				/*
-				 * Found a string beginning sequence.
-				 * Put an anchor to signal this.
-				 */
-				laststrchar = *sp;
-				*ap++ = ANCHOR_BEGIN_STRING;
-				*lastanchor = ANCHOR_BEGIN_STRING;
-			}
-		} else if ((*sp == '<') && (sp > lp->text) && (*(sp-1) == '<')) {
-			if (make_heredoc_string(lp, sp+1, ap+1)) {
-				*lastanchor = ANCHOR_BEGIN_HEREDOC;
-				break;
-			} else
-				*ap++ = ANCHOR_NULL;
-		}
-		/* Comment; ignore to end of line. */
-		else if ((*sp == '#') && ((sp == lp->text) || (*(sp-1) != '$'))) {
-			for (; sp < lp->text + lp->size; sp++)
-				*ap++ = ANCHOR_NULL;
-		} else
-			*ap++ = ANCHOR_NULL;
-	}
-}
-#endif /* ENABLE_SHELL_MODE */
 
 static void line_set_anchors(Buffer *bp, Line *lp, Anchor *lastanchor)
 {
@@ -276,18 +48,6 @@ static void line_set_anchors(Buffer *bp, Line *lp, Anchor *lastanchor)
 	}
 
 	switch (bp->mode) {
-	case BMODE_C:
-	case BMODE_CPP:
-	case BMODE_CSHARP:
-	case BMODE_JAVA:
-#if ENABLE_CLIKE_MODES
-		cpp_set_anchors(lp, lastanchor);
-#endif
-		break;
-	case BMODE_SHELL:
-#if ENABLE_SHELL_MODE
-		shell_set_anchors(lp, lastanchor);
-#endif
 		break;
 	}
 }
@@ -315,10 +75,6 @@ Anchor find_last_anchor(Buffer *bp, Line *lp)
 			continue;
 		for (ap = lp->anchors + lp->size - 1; ap >= lp->anchors; --ap)
 			if (*ap != ANCHOR_NULL) {
-#if ENABLE_SHELL_MODE
-				if ((bp->mode == BMODE_SHELL) && (*ap == ANCHOR_BEGIN_HEREDOC))
-					make_heredoc_string(lp, lp->text + (ap - lp->anchors), NULL);
-#endif
 				return *ap;
 			}
 	}
@@ -361,7 +117,6 @@ static void font_lock_unset_anchors(Buffer *bp)
 
 	minibuf_clear();
 }
-#endif /* ENABLE_NONTEXT_MODES */
 
 DEFUN("font-lock-mode", font_lock_mode)
 /*+
@@ -371,14 +126,10 @@ When Font Lock mode is enabled, text is fontified as you type it.
 {
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
 		cur_bp->flags &= ~BFLAG_FONTLOCK;
-#if ENABLE_NONTEXT_MODES
 		font_lock_unset_anchors(cur_bp);
-#endif
 	} else {
 		cur_bp->flags |= BFLAG_FONTLOCK;
-#if ENABLE_NONTEXT_MODES
 		font_lock_set_anchors(cur_bp);
-#endif
 	}
 
 	return TRUE;
@@ -390,12 +141,10 @@ Refresh the Font Lock mode internal structures.
 This may be called when the fontification looks weird.
 +*/
 {
-#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
 		font_lock_unset_anchors(cur_bp);
 		font_lock_set_anchors(cur_bp);
 	}
-#endif
 
 	return TRUE;
 }

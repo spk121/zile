@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.6 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: tbl_vars.h,v 1.7 2004/03/14 14:36:05 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -21,14 +21,12 @@ be useful when `C-h' is already bound to Backspace or Delete.\n\
 \n\
 Please note that changing this variable at run-time has no effect; you\n\
 need instead to modify your `~/.zilerc' configuration file and restart Zile.")
-#if ENABLE_NONTEXT_MODES
 X("auto-font-lock",			"b", "true", "\
 Automatically turn on Font Lock Mode when a C/C++ source file or shell\n\
 script is opened.")
 X("auto-font-lock-refresh",		"b", "true", "\
 If enabled, the file will be reparsed by font lock on every C-l press.\n\
 This may be disabled on slow machines.")
-#endif
 X("backup-directory",			"", "~/.backup", "\
 Specify target backup directory.  Directory must be existent.\n\
 This value is used only when the `backup-with-directory' value is true.")
@@ -113,7 +111,6 @@ If disabled, Zile will insert hard tabs (the character `\\t'),\n\
 otherwise it will insert spaces.")
 X("fill-column",			"", "72", "\
 The default fill column (used in Auto Fill Mode).")
-#if ENABLE_NONTEXT_MODES
 X("font-character",			"c", "green", "\
 The color used in Font Lock Mode for characters.")
 X("font-character-delimiters",		"c", "white", "\
@@ -129,18 +126,6 @@ X("font-identifier",			"c", "white", "\
 The color used in Font Lock Mode for identifiers.")
 X("font-keyword",			"c", "magenta", "\
 The color used in Font Lock Mode for keywords.")
-#if ENABLE_MAIL_MODE
-X("font-mail1",				"c", "green", "\
-The color used in Font Lock / Mail Mode for quoting.")
-X("font-mail2",				"c", "red", "\
-The color used in Font Lock / Mail Mode for quoting.")
-X("font-mail3",				"c", "cyan", "\
-The color used in Font Lock / Mail Mode for quoting.")
-X("font-mail4",				"c", "magenta", "\
-The color used in Font Lock / Mail Mode for quoting.")
-X("font-mail5",				"c", "blue", "\
-The color used in Font Lock / Mail Mode for quoting.")
-#endif
 X("font-number",			"c", "cyan", "\
 The color used in Font Lock Mode for numbers.")
 X("font-other",				"c", "white", "\
@@ -149,16 +134,8 @@ X("font-string",			"c", "green", "\
 The color used in Font Lock Mode for strings.")
 X("font-string-delimiters",		"c", "white", "\
 The color used in Font Lock Mode for string delimiters.")
-#endif /* ENABLE_NOTEXT_MODES */
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
-#if ENABLE_MAIL_MODE
-X("mail-mode-auto-fill",		"b", "false", "\
-If enabled, the Auto Fill Mode is automatically enabled in Mail Mode.")
-X("mail-quoting-char",			"", ">", "\
-The character prepended to quoted text in mails.\n\
-Used by Font Lock in Mail Mode.")
-#endif
 X("novice-level",			"b", "true", "\
 Enable this if you are novice to Emacs in general.\n\
 Disabling this variable the Mini Help window and the message in\n\
@@ -177,10 +154,8 @@ X("show-eob-marker",			"b", "true", "\
 If enabled, a marker will be displayed at the end of the buffer.")
 X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
-#if ENABLE_NONTEXT_MODES
 X("standard-indent",			"", "4", "\
 Default number of columns for margin-changing functions to indent.")
-#endif
 X("status-line-color",			"c", "white", "\
 The color of the status line.")
 X("tab-width",				"", "8", "\

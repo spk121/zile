@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: ncurses_redisplay.c,v 1.22 2004/03/13 19:59:50 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.23 2004/03/14 14:36:03 rrt Exp $	*/
 
 /*
  * ncurses redisplay engine.
@@ -60,7 +60,6 @@
 /*
  * The cached variables.
  */
-#if ENABLE_NONTEXT_MODES
 static chtype font_character;
 static chtype font_character_delimiters;
 static chtype font_comment;
@@ -72,11 +71,6 @@ static chtype font_number;
 static chtype font_other;
 static chtype font_string;
 static chtype font_string_delimiters;
-#if ENABLE_MAIL_MODE
-static chtype font_mail[5];
-static int quoting_char;
-#endif
-#endif /* ENABLE_NONTEXT_MODES */
 static chtype status_line_color;
 static int display_time;
 static char *display_time_format;
@@ -233,10 +227,6 @@ static void parse_displayable_chars(const char *s)
 
 void ncurses_refresh_cached_variables(void)
 {
-#if ENABLE_NONTEXT_MODES
-#if ENABLE_MAIL_MODE
-	char *p;
-#endif
 	/*
 	 * Refresh the font cache.
 	 */
@@ -247,25 +237,10 @@ void ncurses_refresh_cached_variables(void)
 	font_here_document = get_font("font-here-document");
 	font_identifier = get_font("font-identifier");
 	font_keyword = get_font("font-keyword");
-#if ENABLE_MAIL_MODE
-	font_mail[0] = get_font("font-mail1");
-	font_mail[1] = get_font("font-mail2");
-	font_mail[2] = get_font("font-mail3");
-	font_mail[3] = get_font("font-mail4");
-	font_mail[4] = get_font("font-mail5");
-#endif
 	font_number = get_font("font-number");
 	font_other = get_font("font-other");
 	font_string = get_font("font-string");
 	font_string_delimiters = get_font("font-string-delimiters");
-#if ENABLE_MAIL_MODE
-	p = get_variable("mail-quoting-char");
-	if (p != NULL && strlen(p) > 0)
-		quoting_char = *p;
-	else
-		quoting_char = '>';
-#endif
-#endif /* ENABLE_NONTEXT_MODES */
 	status_line_color = get_font("status-line-color");
 	display_time = lookup_bool_variable("display-time");
 	display_time_format = get_variable("display-time-format");
@@ -392,7 +367,6 @@ static void draw_line(int line, int startcol, Window *wp, Line *lp,
 	draw_end_of_line(line, wp, lineno, r, highlight, x, j);
 }
 
-#if ENABLE_NONTEXT_MODES
 /*
  * This hack is required for Font Lock because the full line must
  * be parsed always also when is displayed only one truncated fraction.
@@ -407,266 +381,6 @@ do {									    \
 			outch(c, font, &x);				    \
 	}								    \
 } while (0)
-#endif
-
-#if ENABLE_CLIKE_MODES
-/*
- * Draw a line on the screen with font lock color.
- * C/C++/C#/Java Mode.
- */
-static void draw_line_cpp(int line, int startcol, Window *wp, Line *lp,
-			  int lineno, Region *r, int highlight,
-			  int *lastanchor)
-{
-	int i, x, c, nonspace = FALSE;
-
-	move(line, 0);
-	for (x = i = 0; i < lp->size; ++i) {
-		c = lp->text[i];
-
-		/* Comment handling. */
-		if (lp->anchors[i] == ANCHOR_END_COMMENT) {
-			if (*lastanchor == ANCHOR_BEGIN_COMMENT) {
-				OUTCH(c, font_comment);
-				*lastanchor = ANCHOR_NULL;
-			} else
-				OUTCH(c, font_other);
-		} else if (lp->anchors[i] == ANCHOR_BEGIN_COMMENT) {
-			OUTCH(c, font_comment);
-			*lastanchor = ANCHOR_BEGIN_COMMENT;
-		} else if (*lastanchor == ANCHOR_BEGIN_COMMENT)
-			OUTCH(c, font_comment);
-
-		/* String handling. */
-		else if (lp->anchors[i] == ANCHOR_END_STRING) {
-			OUTCH(c, font_string_delimiters);
-			*lastanchor = ANCHOR_NULL;
-		} else if (lp->anchors[i] == ANCHOR_BEGIN_STRING) {
-			OUTCH(c, font_string_delimiters);
-			*lastanchor = ANCHOR_BEGIN_STRING;
-		} else if (*lastanchor == ANCHOR_BEGIN_STRING)
-			OUTCH(c, font_string);
-
-		/* Other tokens handling. */
-		else if (isalpha(c) || c == '_') {
-			int j;
-			chtype attr;
-
-			j = i;
-			while (j < lp->size && (isalnum(lp->text[j]) || lp->text[j] == '_'))
-				++j;
-			if (0) {} /* Hack ;) */
-#if ENABLE_C_MODE
-			else if (wp->bp->mode == BMODE_C &&
-				 is_c_keyword(lp->text + i, j-i) != NULL)
-				attr = font_keyword;
-#endif
-#if ENABLE_CPP_MODE
-			else if (wp->bp->mode == BMODE_CPP &&
-				 is_cpp_keyword(lp->text + i, j-i) != NULL)
-				attr = font_keyword;
-#endif
-#if ENABLE_CSHARP_MODE
-			else if (wp->bp->mode == BMODE_CSHARP &&
-				 is_csharp_keyword(lp->text + i, j-i) != NULL)
-				attr = font_keyword;
-#endif
-#if ENABLE_JAVA_MODE
-			else if (wp->bp->mode == BMODE_JAVA &&
-				 is_java_keyword(lp->text + i, j-i) != NULL)
-				attr = font_keyword;
-#endif
-			else
-				attr = font_identifier;
-			for (; i < j; ++i)
-				OUTCH(lp->text[i], attr);
-			i--;
-		} else if (isdigit(c) || c == '.') { /* Integer or float. */
-			/* XXX Fix this to support floats correctly. */
-			if (c == '.' && (i+1 >= lp->size || !isdigit(lp->text[i+1]))) {
-			        OUTCH(c, font_other);
-				continue;
-			}
-			do {
-				OUTCH(lp->text[i], font_number);
-				++i;
-			} while (i < lp->size && (isxdigit(lp->text[i]) || strchr("xeE.+-lLfFuU", lp->text[i]) != NULL));
-			i--;
-		} else if (c == '#' && !nonspace) { /* Preprocessor directive. */
-			OUTCH(lp->text[i], font_directive);
-			++i;
-			while (i < lp->size && isspace(lp->text[i])) {
-			        OUTCH(lp->text[i], font_directive);
-				++i;
-			}
-			while (i < lp->size && isalpha(lp->text[i])) {
-				OUTCH(lp->text[i], font_directive);
-				++i;
-			}
-			i--;
-		} else if (c == '\'') { /* Character constant. */
-			OUTCH(lp->text[i], font_character_delimiters);
-			while (++i < lp->size && lp->text[i] != '\'')
-				if (lp->text[i] == '\\') {
-					OUTCH('\\', font_character);
-					if (++i < lp->size)
-						OUTCH(lp->text[i], font_character);
-				} else
-					OUTCH(lp->text[i], font_character);
-			if (i < lp->size)
-				OUTCH(lp->text[i], font_character_delimiters);
-		} else if (c == '/' && i+1 < lp->size && lp->text[i+1] == '/') {
-			/* C++ style // comment. */
-			for (; i < lp->size; ++i)
-				OUTCH(lp->text[i], font_comment);
-		} else
-			OUTCH(c, font_other);
-
-		/* We got a non-space character; the next `#' characters will
-		   not begin a directive. */
-		if (!isspace(c))
-			nonspace = TRUE;
-	}
-
-	draw_end_of_line(line, wp, lineno, r, highlight, x, i);
-}
-#endif /* ENABLE_CLIKE_MODES */
-
-#if ENABLE_SHELL_MODE
-static char *my_strnchr(const char *text, int size, int chr)
-{
-	int c;
-	for (c = 0; c < size; ++c, ++text)
-		if (*text == chr)
-			return (char *)text;
-	return NULL;
-}
-
-/*
- * Draw a line on the screen with font lock color.
- * Shell Mode.
- */
-static void draw_line_shell(int line, int startcol, Window *wp, Line *lp,
-			    int lineno, Region *r, int highlight,
-			    int *lastanchor)
-{
-	int i, x, c;
-
-	move(line, 0);
-	for (x = i = 0; i < lp->size; ++i) {
-		c = lp->text[i];
-
-		/* ``Here documents'' "<<EOF" handling. */
-		if (lp->anchors[i] == ANCHOR_END_HEREDOC) {
-			OUTCH(c, font_here_document);
-			*lastanchor = ANCHOR_NULL;
-		} else if (lp->anchors[i] == ANCHOR_BEGIN_HEREDOC) {
-			OUTCH(c, font_here_document);
-			*lastanchor = ANCHOR_BEGIN_HEREDOC;
-		} else if (*lastanchor == ANCHOR_BEGIN_HEREDOC) {
-			OUTCH(c, font_here_document);
-		}
-		/* String handling. */
-		else if (lp->anchors[i] == ANCHOR_END_STRING) {
-			OUTCH(c, font_string_delimiters);
-			*lastanchor = ANCHOR_NULL;
-		} else if (lp->anchors[i] == ANCHOR_BEGIN_STRING) {
-			OUTCH(c, font_string_delimiters);
-			*lastanchor = ANCHOR_BEGIN_STRING;
-		} else if (*lastanchor == ANCHOR_BEGIN_STRING) {
-			OUTCH(c, font_string);
-		} else if (c == '#') {
-			/* Comment. */
-			if ((i == 0) || (lp->text[i-1] != '$')) {
-				for (; i < lp->size; ++i)
-					OUTCH(lp->text[i], font_comment);
-			} else
-				OUTCH(c, font_identifier);
-		} else if ((c == '$') ||
-			 ((x == 0) && (my_strnchr(lp->text, lp->size, '=')))) {
-			/* Identifier name. */
-			int first, gotid = TRUE;
-
-			/* $identifier */
-			if (c == '$') {
-				OUTCH(c, font_other);
-				if (++i < lp->size) {
-					c = lp->text[i];
-					if (c == '$') {
-						/* $$ special variable */
-						OUTCH(c, font_identifier);
-						gotid = FALSE;
-					}
-				}
-			} else {
-				/* Assignment: identifier=... */
-				int j, oldc = c;
-				for (first = TRUE, j = i; j < lp->size; ++j) {
-					c = lp->text[j];
-					if (c == '_' || isalpha(c) ||
-					    (!first && isdigit(c))) {
-						first = FALSE;
-					} else if (c != '=') {
-						OUTCH(oldc, font_other);
-						gotid = FALSE;
-						break;
-					} else
-						break;
-				}
-			}
-
-			if (gotid) {
-				for (first = TRUE; i < lp->size; ++i) {
-					c = lp->text[i];
-					if (c == '_' || isalpha(c) ||
-					    (!first && isdigit(c))) {
-						OUTCH(c, font_identifier);
-						first = FALSE;
-					} else {
-						--i;
-						break;
-					}
-				}
-			}
-		} else {
-			OUTCH(c, font_other);
-		}
-	}
-
-	draw_end_of_line(line, wp, lineno, r, highlight, x, i);
-}
-#endif /* ENABLE_SHELL_MODE */
-
-#if ENABLE_MAIL_MODE
-/*
- * Draw a line on the screen with font lock color.
- * Mail Mode.
- */
-static void draw_line_mail(int line, int startcol, Line *lp,
-			   int lineno, Region *r, int highlight)
-{
-	int i, x, level;
-
-	move(line, 0);
-	for (i = level = 0; i < lp->size; ++i) {
-		int c = lp->text[i];
-		if (c == quoting_char) {
-			++level;
-			if (level > 5)
-				level = 1;
-		} else if (!isspace(c))
-			break;
-	}
-	for (x = i = 0; i < lp->size; ++i) {
-		if (level > 0)
-			OUTCH(lp->text[i], font_mail[level - 1]);
-		else
-			OUTCH(lp->text[i], font_other);
-	}
-	if (x >= COLS)
-		mvaddch(line, COLS-1, '$');
-}
-#endif /* ENABLE_MAIL_MODE */
 
 static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 {
@@ -689,9 +403,7 @@ static void calculate_highlight_region(Window *wp, Region *r, int *highlight)
 static void draw_window(int topline, Window *wp)
 {
 	int i, startcol, lineno;
-#if ENABLE_NONTEXT_MODES
         int lastanchor;
-#endif
 	Line *lp;
 	Region r;
 	int highlight;
@@ -706,10 +418,8 @@ static void draw_window(int topline, Window *wp)
 	     i > 0 && lp->prev != wp->bp->limitp; lp = lp->prev, --i, --lineno)
 		;
 
-#if ENABLE_NONTEXT_MODES
 	if (wp->bp->flags & BFLAG_FONTLOCK)
 		lastanchor = find_last_anchor(wp->bp, lp->prev);
-#endif
 
 	cur_tab_width = wp->bp->tab_width;
 
@@ -731,35 +441,13 @@ static void draw_window(int topline, Window *wp)
 		else
 			startcol = 0;
 #endif
-#if ENABLE_NONTEXT_MODES
 		if (wp->bp->flags & BFLAG_FONTLOCK && lp->anchors != NULL) {
 			switch (wp->bp->mode) {
-			case BMODE_C:
-			case BMODE_CPP:
-			case BMODE_CSHARP:
-			case BMODE_JAVA:
-#if ENABLE_CLIKE_MODES
-				draw_line_cpp(i,  startcol, wp, lp,
-					      lineno, &r, highlight, &lastanchor);
-#endif
-				break;
-			case BMODE_SHELL:
-#if ENABLE_SHELL_MODE
-				draw_line_shell(i, startcol, wp, lp,
-						lineno, &r, highlight, &lastanchor);
-#endif
-				break;
 			default:
 				draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 			}
 		}
-#if ENABLE_MAIL_MODE
-		else if (wp->bp->mode == BMODE_MAIL &&
-                         wp->bp->flags & BFLAG_FONTLOCK)
-                        draw_line_mail(i, startcol, lp, lineno, &r, highlight);
-#endif
 		else
-#endif /* ENABLE_NONTEXT_MODES */
 			draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
 		/*
@@ -892,36 +580,6 @@ static void draw_status_line(int line, Window *wp)
 		addch('-');
 
 	switch (wp->bp->mode) {
-#if ENABLE_C_MODE
-	case BMODE_C:
-		mode = "C";
-		break;
-#endif
-#if ENABLE_CPP_MODE
-	case BMODE_CPP:
-		mode = "C++";
-		break;
-#endif
-#if ENABLE_CSHARP_MODE
-	case BMODE_CSHARP:
-		mode = "C#";
-		break;
-#endif
-#if ENABLE_JAVA_MODE
-	case BMODE_JAVA:
-		mode = "Java";
-		break;
-#endif
-#if ENABLE_SHELL_MODE
-	case BMODE_SHELL:
-		mode = "Shell-script";
-		break;
-#endif
-#if ENABLE_MAIL_MODE
-	case BMODE_MAIL:
-		mode = "Mail";
-		break;
-#endif
 	default:
 		mode = "Text";
 	}

@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2004/02/17 20:21:17 $
+		   Last updated: $Date: 2004/03/14 14:36:06 $
 
 ------------------------------------------------------------------------------
 
@@ -222,7 +222,7 @@ INDEX
 
     The current implementation of Font Lock is difficult to extend and/or
     modify because all the modes are hand written in C (this is faster
-    that regex pattern matching, though) and require a recompilation
+    than regex pattern matching, though) and require a recompilation
     of the code.
 
     If you would like to write a new mode `xyz', you have to modify at least
@@ -241,7 +241,7 @@ INDEX
 
     funcs.c: implement a function like:
 
-	DEFUN("xyz-mode", zyz_mode)
+	DEFUN("xyz-mode", xyz_mode)
 
     (`c-mode' can be used as example).
 
@@ -272,7 +272,7 @@ INDEX
     Zile will automatically turn on Mail Mode at startup.
 
     You might also want to disable backups in mail editing, to avoid
-    pullulating the /tmp directory with useless backup files:
+    polluting the /tmp directory with useless backup files:
 
 	editor = zile -v backup-method=none -f mail-mode
 

@@ -7,11 +7,3 @@
   is not a ``Good Thing''(TM).
 
 * The macros do not work for interactive commands.
-
-* Font Lock in Shell Mode isn't perfect; Shell scripts can be very
-  complicated to parse. Example:
-
-	echo This is a \'$string\'
-
-* Font lock in C/C++ Mode lacks correct support for floats (e.g:
-  1.-e3.4e5 is recognized as a number).

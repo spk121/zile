@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: zile.h,v 1.18 2004/03/08 15:34:11 rrt Exp $	*/
+/*	$Id: zile.h,v 1.19 2004/03/14 14:36:05 rrt Exp $	*/
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -184,12 +184,6 @@ struct Region {
 /* Mutually exclusive buffer major modes. */
 enum {
 	BMODE_TEXT,	/* The buffer is in Text mode. */
-	BMODE_C,	/* The buffer is in C mode. */
-	BMODE_CPP,	/* The buffer is in C++ mode. */
-	BMODE_CSHARP,	/* The buffer is in C# (C sharp) mode. */
-	BMODE_JAVA,	/* The buffer is in Java mode */
-	BMODE_SHELL,	/* The buffer is in Shell-script mode. */
-	BMODE_MAIL	/* The buffer is in Mail mode */
 };
 
 struct Buffer {

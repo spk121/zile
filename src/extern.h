@@ -64,24 +64,6 @@ void zile_exit(int exitcode);
 void font_lock_reset_anchors(Buffer *bp, Line *lp);
 Anchor find_last_anchor(Buffer *bp, Line *lp);
 
-/* fontlock_c.c ----------------------------------------------------------- */
-char *is_c_keyword(const char *str, int len);
-
-/* fontlock_cpp.c --------------------------------------------------------- */
-#if ENABLE_CPP_MODE
-char *is_cpp_keyword(const char *str, int len);
-#endif
-
-/* fontlock_csharp.c --------------------------------------------------------- */
-#if ENABLE_CSHARP_MODE
-char *is_csharp_keyword(const char *str, int len);
-#endif
-
-/* fontlock_java.c --------------------------------------------------------- */
-#if ENABLE_JAVA_MODE
-char *is_java_keyword(const char *str, int len);
-#endif
-
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);
 int set_mark_command(void);

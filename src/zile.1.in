@@ -1,5 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.6 2004/02/17 20:21:18 ssigala Exp $
+.\" $Id: zile.1.in,v 1.7 2004/03/14 14:36:05 rrt Exp $
 .Dd Nov, 2003
 .Os
 .Dt ZILE 1
@@ -16,7 +16,7 @@
 .Op Ar
 .Sh DESCRIPTION
 .Nm Zile
-is another Emacs-clone.
+is another Emacs clone.
 Zile is a customizable, self-documenting real-time
 display editor.
 .Pp

@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.10 2004/02/18 16:21:54 ssigala Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.11 2004/03/14 14:36:05 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -21,15 +21,6 @@ X1("backward-sexp", backward_sexp,			"\\C-\\M-b")
 X1("backward-word", backward_word,			"\\M-b")
 X1("beginning-of-buffer", beginning_of_buffer,		"\\M-<")
 X2("beginning-of-line", beginning_of_line,		"\\C-a", "\\HOME")
-#if ENABLE_CSHARP_MODE
-X0("c#-mode", csharp_mode)
-#endif
-#if ENABLE_CPP_MODE
-X0("c++-mode", cpp_mode)
-#endif
-#if ENABLE_C_MODE
-X0("c-mode", c_mode)
-#endif
 X2("call-last-kbd-macro", call_last_kbd_macro,		"\\C-xe", "\\F12")
 X1("capitalize-word", capitalize_word,			"\\M-c")
 X0("cd", cd)
@@ -80,9 +71,6 @@ X1("isearch-backward", isearch_backward,		"\\C-r")
 X1("isearch-backward-regexp", isearch_backward_regexp,	"\\C-\\M-r")
 X1("isearch-forward", isearch_forward,			"\\C-s")
 X1("isearch-forward-regexp", isearch_forward_regexp,	"\\C-\\M-s")
-#if ENABLE_JAVA_MODE
-X0("java-mode", java_mode)
-#endif
 X1("keyboard-quit", keyboard_quit,			"\\C-g")
 X1("kill-buffer", kill_buffer,				"\\C-xk")
 X2("kill-line", kill_line,				"\\C-k", "\\F6")
@@ -95,12 +83,6 @@ X1("list-buffers", list_buffers,			"\\C-x\\C-b")
 X1("list-functions", list_functions,			"\\C-hlf")
 X1("list-registers", list_registers,			"\\C-hlr")
 X1("list-variables", list_variables,			"\\C-hlv")
-#if ENABLE_LUA
-X0("lua", lua)
-#endif
-#if ENABLE_MAIL_MODE
-X0("mail-mode", mail_mode)
-#endif
 X1("mark-whole-buffer", mark_whole_buffer,		"\\C-xh")
 X1("mark-paragraph", mark_paragraph,			"\\M-h")
 X1("mark-sexp", mark_sexp,				"\\C-\\M-@")
@@ -132,10 +114,6 @@ X2("set-mark-command", set_mark_command,		"\\C-@", "\\F5")
 X0("set-variable", set_variable)
 X1("shell-command", shell_command,			"\\M-!")
 X1("shell-command-on-region", shell_command_on_region,	"\\M-|")
-#if ENABLE_SHELL_MODE
-X0("shell-script-mode", shell_script_mode)
-X0("sh-mode", shell_script_mode)
-#endif
 X1("shrink-window", shrink_window,			"\\M-s")
 X1("split-window", split_window,			"\\C-x2")
 X1("start-kbd-macro", start_kbd_macro,			"\\C-x(")

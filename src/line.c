@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.26 2004/03/10 11:00:51 rrt Exp $	*/
+/*	$Id: line.c,v 1.27 2004/03/14 14:36:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -136,10 +136,8 @@ int intercalate_char(int c)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK)
 		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-#endif
 
 	return TRUE;
 }
@@ -172,10 +170,8 @@ int insert_char(int c)
 
 			cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 			if (cur_bp->flags & BFLAG_FONTLOCK)
 				font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-#endif
 
 			return TRUE;
 		}
@@ -296,12 +292,10 @@ static int common_insert_newline(int move_pt)
 
 	cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 	if (cur_bp->flags & BFLAG_FONTLOCK) {
 		font_lock_reset_anchors(cur_bp, cur_bp->pt.p->prev);
 		font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
 	}
-#endif
 
 	thisflag |= FLAG_NEED_RESYNC;
 
@@ -386,10 +380,8 @@ void line_replace_text(Line **lp, int offset, int orgsize, char *newtext,
 	if (modified) {
 		cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, *lp);
-#endif
 	}
 }
 
@@ -542,10 +534,8 @@ int delete_char(void)
 
 		adjust_markers_for_offset(cur_bp->pt.p, cur_bp->pt.o, -1);
 
-#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-#endif
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -594,10 +584,8 @@ int delete_char(void)
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-#endif
 
 		thisflag |= FLAG_NEED_RESYNC;
 
@@ -665,10 +653,8 @@ int backward_delete_char_overwrite(void)
 
 		cur_bp->flags |= BFLAG_MODIFIED;
 
-#if ENABLE_NONTEXT_MODES
 		if (cur_bp->flags & BFLAG_FONTLOCK)
 			font_lock_reset_anchors(cur_bp, cur_bp->pt.p);
-#endif
 
 		return TRUE;
 	} else {
@@ -804,85 +790,12 @@ static int indent_relative(void)
 	return TRUE;
 }
 
-#if ENABLE_CLIKE_MODES
-int c_indent_command(void)
-{
-#if 0				/* XXX finish it .-dacap */
-	char *indent_string = get_variable("standard-indent");
-	int c, ret, indent = !indent_string ? 4 : atoi(indent_string);
-
-	if (indent < 0)
-		indent = 0;
-
-	if (indent) {
-		save_excursion();
-
-		while (!bolp()) {
-			if (!isspace(preceding_char())) {
-				indent = 0;
-				break;
-			}
-			backward_char();
-		}
-
-		if (indent) {
-			while (!bobp()) {
-				if (!isspace(preceding_char())) {
-					if (preceding_char() != '{')
-						indent = 0;
-					break;
-				}
-				backward_char();
-			}
-		}
-
-		restore_excursion();
-	}
-
-	ret = indent_relative();
-	if (ret) {
-		for (c=0; c<indent; c++)
-			insert_char_in_insert_mode(' ');
-	}
-#else
-	return indent_relative();
-#endif
-}
-#endif
-
 DEFUN("indent-command", indent_command)
 /*+
 Indent line in proper way for current major mode or insert a tab.
 +*/
 {
-	if (cur_bp->mode == BMODE_TEXT
-#if ENABLE_MAIL_MODE
-		|| cur_bp->mode == BMODE_MAIL
-#endif
-		) {
-		return indent_relative();
-	}
-#if ENABLE_CLIKE_MODES
-	else if (0
-#if ENABLE_C_MODE
-		 || cur_bp->mode == BMODE_C
-#endif
-#if ENABLE_CPP_MODE
-		 || cur_bp->mode == BMODE_CPP
-#endif
-#if ENABLE_CSHARP_MODE
-		 || cur_bp->mode == BMODE_CSHARP
-#endif
-#if ENABLE_JAVA_MODE
-		 || cur_bp->mode == BMODE_JAVA
-#endif
-		) {
-		return c_indent_command();
-	}
-#endif
-	else {
-		return insert_tab();
-	}
+        return indent_relative();
 }
 
 DEFUN("newline-and-indent", newline_and_indent)

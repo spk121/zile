@@ -44,28 +44,8 @@ To build zile:
 	src/zile
 
 
-Editing modes and other options
--------------------------------
-
-By default not all functions are enabled. By passing flags to
-`configure', you can enable the omitted features.
-
-The options are the following:
-
-  --enable-c-mode         include C Mode
-  --enable-cpp-mode       include C++ Mode
-  --enable-shell-mode     include Shell Mode
-  --enable-csharp-mode    include C# Mode
-  --enable-java-mode      include Java Mode
-  --enable-mail-mode      include Mail Mode
-  --enable-all-modes      include all editing modes
-  --enable-lua            Lua scripting (EXPERIMENTAL)
-
-Text Mode is always enabled.
-
-Lua scripting requires an installation of Lua 5, including header
-files and libraries. It is currently experimental, and not recommended
-for general use.
+Options
+-------
 
 If you are debugging the editor, you can enable the debugging code:
 

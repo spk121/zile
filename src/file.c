@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: file.c,v 1.24 2004/03/13 19:59:51 rrt Exp $	*/
+/*	$Id: file.c,v 1.25 2004/03/14 14:36:05 rrt Exp $	*/
 
 #include "config.h"
 
@@ -422,81 +422,9 @@ Some examples of correlated files are the following:
 	return FALSE;
 }
 
-#if ENABLE_SHELL_MODE
-/*
- * Try to identify a shell script file.
- *
- * A shell file is identified if the first line is in the format:
- *     <any whitespace> <the # char> <any whitespace> <the ! char>
- */
-static int is_shell_file(const char *filename)
-{
-	FILE *f;
-	char buf[1024], *p;
-	if ((f = fopen(filename, "r")) == NULL)
-		return FALSE;
-	p = fgets(buf, 1024, f);
-	fclose(f);
-	if (p == NULL)
-		return FALSE;
-	while (isspace(*p))
-		++p;
-	if (*p != '#')
-		return FALSE;
-	++p;
-	while (isspace(*p))
-		++p;
-	if (*p != '!')
-		return FALSE;
-	return TRUE;
-}
-#endif
-
 static void find_file_hooks(const char *filename)
 {
-#if ENABLE_C_MODE
-	const char *c_file[] = { ".c", ".h", ".m", NULL };
-#endif
-#if ENABLE_CPP_MODE
-	const char *cpp_file[] = { ".C", ".H", ".cc", ".cpp",
-				   ".cxx", ".hpp", ".hh", NULL };
-#endif
-#if ENABLE_CSHARP_MODE
-	const char *csharp_file[] = { ".cs", ".CS", NULL };
-#endif
-#if ENABLE_JAVA_MODE
-	const char *java_file[] = { ".java", ".JAVA", NULL };
-#endif
-#if ENABLE_SHELL_MODE
-	const char *shell_file[] = { ".sh", ".csh", NULL };
-#endif
-
-        (void)filename; /* Avoid compiler warning if no non-text modes
-                           configured. */
-	if (0) {} /* Hack */
-#if ENABLE_C_MODE
-	else if (have_extension(filename, c_file))
-		FUNCALL(c_mode);
-#endif
-#if ENABLE_CPP_MODE
-	else if (have_extension(filename, cpp_file))
-		FUNCALL(cpp_mode);
-#endif
-#if ENABLE_CSHARP_MODE
-	else if (have_extension(filename, csharp_file))
-		FUNCALL(csharp_mode);
-#endif
-#if ENABLE_JAVA_MODE
-	else if (have_extension(filename, java_file))
-		FUNCALL(java_mode);
-#endif
-#if ENABLE_SHELL_MODE
-	else if (have_extension(filename, shell_file) ||
-		 is_shell_file(filename))
-		FUNCALL(shell_script_mode);
-#endif
-	else
-		FUNCALL(text_mode);
+        FUNCALL(text_mode);
 }
 
 int find_file(const char *filename)
