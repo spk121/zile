@@ -1,4 +1,4 @@
-/*	$Id: funcs.c,v 1.9 2004/01/21 01:46:28 dacap Exp $	*/
+/*	$Id: funcs.c,v 1.10 2004/01/21 01:54:59 dacap Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -731,12 +731,185 @@ Move point to the first non-whitespace character on this line.
 	return TRUE;
 }
 
+/**********************************************************************/
+/* Tranpose functions */
+/**********************************************************************/
+
+static void insert_region (astr s)
+{
+	struct region r;
+	char *t;
+	int c;
+
+	calculate_region (&r);
+	if (r.size > 0) {
+		t = copy_text_block (r.startn, r.starto, r.size);
+		if (t) {
+			for (c=0; c<r.size; c++)
+				astr_append_char (s, t[c]);
+			free (t);
+		}
+	}
+}
+
+static int transpose_subr (funcp f)
+{
+	linep markp;
+	int marko;
+	int n0, o0;
+	int n1, o1;
+	int n2, o2;
+	astr s1 = NULL;
+	astr s2 = NULL;
+	int forward_after_del1 = 1;
+	int seq_started = FALSE;
+
+	markp = cur_bp->markp;
+	marko = cur_bp->marko;
+
+	n0 = cur_wp->pointn;
+	o0 = cur_wp->pointo;
+
+	/* For transpose-chars.  */
+	if (f == F_forward_char) {
+		if (cur_wp->pointo == cur_wp->pointp->size) {
+			if (cur_wp->pointo == 0)
+				forward_after_del1 = 2;
+			f (-1);
+		}
+	}
+	/* For transpose-lines.  */
+	else if (f == F_forward_line) {
+		/* If we are in first line, go to next line.  */
+		if (cur_wp->pointp->prev == cur_bp->limitp) {
+			f (1);
+		}
+	}
+
+	/* Backward.  */
+	if (!f (-1)) {
+		minibuf_error ("Beginning of buffer");
+		return FALSE;
+	}
+
+	/* Mark the beginning of first string.  */
+	set_mark_command ();
+
+	n1 = cur_wp->pointn;
+	o1 = cur_wp->pointo;
+
+	/* Check end of buffer.  */
+	if (!f (2)) {
+		/* For transpose-lines.  */
+		if (f == F_forward_line) {
+			if (!seq_started) {
+				seq_started = TRUE;
+				undo_save (UNDO_START_SEQUENCE, n0, o0, 0, 0);
+			}
+
+			/* When last line has characters. */
+			if (cur_wp->pointp->size > 0)
+				/* We must insert the '\n' in the end
+				   of line (not in the beginning) */
+				FUNCALL (end_of_line);
+
+			/* Insert a newline */
+			FUNCALL (newline);
+		}
+		else {
+			goto_point (n1, o1);
+			minibuf_error ("End of buffer");
+			return FALSE;
+		}
+	}
+
+	goto_point (n1, o1);
+
+	/* Forward.  */
+	f (1);
+
+	/* Save and delete 1st marked region.  */
+	s1 = astr_new ();
+	insert_region (s1);
+
+	if (!seq_started) {
+		seq_started = TRUE;
+		undo_save (UNDO_START_SEQUENCE, n0, o0, 0, 0);
+	}
+
+	FUNCALL (delete_region);
+
+	/* For transpose-lines.  */
+	if (f == F_forward_line) {
+		/* Forward.  */
+		f (forward_after_del1);
+
+		n2 = cur_wp->pointn;
+		o2 = cur_wp->pointo;
+	}
+	else {
+		/* Forward.  */
+		f (forward_after_del1);
+
+		/* Mark the end of second string.  */
+		set_mark_command ();
+
+		/* Backward.  */
+		f (-1);
+
+		n2 = cur_wp->pointn;
+		o2 = cur_wp->pointo;
+
+		/* Save and delete the marked region.  */
+		s2 = astr_new ();
+		insert_region (s2);
+		FUNCALL (delete_region);
+	}
+
+	/* Insert the second string in the first position.  */
+	if (s2) {
+		goto_point (n1, o1);
+		if (astr_size (s2) > 0)
+			insert_string (astr_cstr (s2));
+	}
+
+	/* Insert the first string in the second position.  */
+	if (s1) {
+		goto_point (n2, (n1 != n2) ? o2: o2 + astr_size (s2));
+		if (astr_size (s1) > 0)
+			insert_string (astr_cstr (s1));
+	}
+
+	if (seq_started)
+		undo_save (UNDO_END_SEQUENCE, cur_wp->pointn, cur_wp->pointo, 0, 0);
+
+	/* Delete temporary strings.  */
+	if (s1) astr_delete (s1);
+	if (s2) astr_delete (s2);
+
+	/* Restore mark.  */
+	cur_bp->markp = markp;
+	cur_bp->marko = marko;
+
+	thisflag &= ~(FLAG_HIGHLIGHT_REGION | FLAG_HIGHLIGHT_REGION_STAYS);
+
+	return TRUE;
+}
+
 DEFUN("transpose-chars", transpose_chars)
 /*+
 Interchange characters around point, moving forward one character.
 If at end of line, the previous two chars are exchanged.
 +*/
 {
+	if (warn_if_readonly_buffer ())
+		return FALSE;
+
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr (F_forward_char);
+
+	minibuf_error ("transpose-chars doesn't support uniarg yet");
+	return FALSE;
 }
 
 DEFUN("transpose-words", transpose_words)
@@ -744,6 +917,14 @@ DEFUN("transpose-words", transpose_words)
 Interchange words around point, leaving point at end of them.
 +*/
 {
+	if (warn_if_readonly_buffer ())
+		return FALSE;
+
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr (F_forward_word);
+
+	minibuf_error ("transpose-words doesn't support uniarg yet");
+	return FALSE;
 }
 
 DEFUN("transpose-sexps", transpose_sexps)
@@ -751,6 +932,14 @@ DEFUN("transpose-sexps", transpose_sexps)
 Like M-t but applies to sexps.
 +*/
 {
+	if (warn_if_readonly_buffer ())
+		return FALSE;
+
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr (F_forward_sexp);
+
+	minibuf_error ("transpose-sexps doesn't support uniarg yet");
+	return FALSE;
 }
 
 DEFUN("transpose-lines", transpose_lines)
@@ -760,7 +949,19 @@ With argument ARG, takes previous line and moves it past ARG lines.
 With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
+	if (warn_if_readonly_buffer ())
+		return FALSE;
+
+	if (!(lastflag & FLAG_SET_UNIARG))
+		return transpose_subr (F_forward_line);
+
+	minibuf_error ("transpose-lines doesn't support uniarg yet");
+	return FALSE;
 }
+
+/**********************************************************************/
+/* Move through words */
+/**********************************************************************/
 
 #define ISWORDCHAR(c)	(isalnum(c) || c == '$')
 
@@ -768,7 +969,7 @@ static int forward_word(void)
 {
 	int gotword = FALSE;
 	for (;;) {
-		while (cur_wp->pointo <= cur_wp->pointp->size) {
+		while (cur_wp->pointo < cur_wp->pointp->size) {
 			int c = cur_wp->pointp->text[cur_wp->pointo];
 			if (!ISWORDCHAR(c)) {
 				if (gotword)
@@ -777,9 +978,11 @@ static int forward_word(void)
 				gotword = TRUE;
 			++cur_wp->pointo;
 		}
+		if (gotword)
+			return TRUE;
 		cur_wp->pointo = cur_wp->pointp->size;
 		if (!next_line())
-			return FALSE;
+			break;
 		cur_wp->pointo = 0;
 	}
 	return FALSE;
@@ -811,7 +1014,7 @@ static int backward_word(void)
 	for (;;) {
 		if (cur_wp->pointo == 0) {
 			if (!previous_line())
-				return FALSE;
+				break;
 			cur_wp->pointo = cur_wp->pointp->size;
 		}
 		while (cur_wp->pointo > 0) {
@@ -850,12 +1053,212 @@ With argument, do this that many times.
 	return TRUE;
 }
 
+/**********************************************************************/
+/* Move through balanced expressions (sexp) */
+/**********************************************************************/
+
+#define ISOPENBRACKETCHAR(c)  ((c=='(') || (c=='[') || (c=='{')	||	\
+			       ((c=='\"') && !double_quote) ||		\
+			       ((c=='\'') && !single_quote))
+
+#define ISCLOSEBRACKETCHAR(c) ((c==')') || (c==']') || (c=='}')	||	\
+			       ((c=='\"') && double_quote) ||		\
+			       ((c=='\'') && single_quote))
+
+#define ISSEXPSEPCHAR(c)      (ISOPENBRACKETCHAR (c) ||	\
+			       ISCLOSEBRACKETCHAR (c))
+
+#define CONTROL_SEXP_LEVEL(open, close)					 \
+	if (open (c)) {							 \
+		if (level == 0 && gotsexp)				 \
+			return TRUE;					 \
+									 \
+		level++;						 \
+		gotsexp = TRUE;						 \
+		if (c == '\"') double_quote ^= 1;			 \
+		if (c == '\'') single_quote ^= 1;			 \
+	}								 \
+	else if (close (c)) {						 \
+		if (level == 0 && gotsexp)				 \
+			return TRUE;					 \
+									 \
+		level--;						 \
+		gotsexp = TRUE;						 \
+		if (c == '\"') double_quote ^= 1;			 \
+		if (c == '\'') single_quote ^= 1;			 \
+									 \
+		if (level < 0) {					 \
+			minibuf_error ("Scan error: \"Containing "	 \
+				       "expression ends prematurely\""); \
+			return FALSE;					 \
+		}							 \
+	}
+
+static int forward_sexp (void)
+{
+	int gotsexp = FALSE;
+	int level = 0;
+	int double_quote = 0;
+	int single_quote = 0;
+
+	for (;;) {
+		while (cur_wp->pointo < cur_wp->pointp->size) {
+			int c = cur_wp->pointp->text[cur_wp->pointo];
+
+			/* Jump quotes that doesn't are sexp separators.  */
+			if (c == '\\'
+			    && cur_wp->pointo+1 < cur_wp->pointp->size
+			    && ((cur_wp->pointp->text[cur_wp->pointo+1] == '\"')
+				|| (cur_wp->pointp->text[cur_wp->pointo+1] == '\''))) {
+				cur_wp->pointo++;
+				c = 'a';
+			}
+
+			CONTROL_SEXP_LEVEL (ISOPENBRACKETCHAR,
+					    ISCLOSEBRACKETCHAR);
+
+			cur_wp->pointo++;
+
+			if (!ISWORDCHAR (c)) {
+				if (gotsexp && level == 0) {
+					if (!ISSEXPSEPCHAR (c))
+						cur_wp->pointo--;
+					return TRUE;
+				}
+			}
+			else
+				gotsexp = TRUE;
+		}
+		if (gotsexp && level == 0)
+			return TRUE;
+		cur_wp->pointo = cur_wp->pointp->size;
+		if (!next_line()) {
+			if (level != 0)
+				minibuf_error ("Scan error: \"Unbalanced parentheses\"");
+			break;
+		}
+		cur_wp->pointo = 0;
+	}
+	return FALSE;
+}
+
+DEFUN("forward-sexp", forward_sexp)
+/*+
+Move forward across one balanced expression (sexp).
+With argument, do it that many times.  Negative arg -N means
+move backward across N balanced expressions.
++*/
+{
+	int uni;
+
+	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
+
+	if (uniarg < 0)
+		return FUNCALL_ARG (backward_sexp, -uniarg);
+
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!forward_sexp ())
+			return FALSE;
+
+	return TRUE;
+}
+
+static int backward_sexp(void)
+{
+	int gotsexp = FALSE;
+	int level = 0;
+	int double_quote = 1;
+	int single_quote = 1;
+
+	for (;;) {
+		if (cur_wp->pointo == 0) {
+			if (!previous_line()) {
+				if (level != 0)
+					minibuf_error ("Scan error: \"Unbalanced parentheses\"");
+				break;
+			}
+			cur_wp->pointo = cur_wp->pointp->size;
+		}
+		while (cur_wp->pointo > 0) {
+			int c = cur_wp->pointp->text[cur_wp->pointo - 1];
+
+			/* Jump quotes that doesn't are sexp separators.  */
+			if (((c == '\'') || (c == '\"'))
+			    && cur_wp->pointo-1 > 0
+			    && (cur_wp->pointp->text[cur_wp->pointo-2] == '\\')) {
+				cur_wp->pointo--;
+				c = 'a';
+			}
+
+			CONTROL_SEXP_LEVEL (ISCLOSEBRACKETCHAR,
+					    ISOPENBRACKETCHAR);
+
+			--cur_wp->pointo;
+
+			if (!ISWORDCHAR (c)) {
+				if (gotsexp && level == 0) {
+					if (!ISSEXPSEPCHAR (c))
+						cur_wp->pointo++;
+					return TRUE;
+				}
+			} else
+				gotsexp = TRUE;
+		}
+		if (gotsexp && level == 0)
+			return TRUE;
+	}
+	return FALSE;
+}
+
+DEFUN("backward-sexp", backward_sexp)
+/*+
+Move backward across one balanced expression (sexp).
+With argumenet, do it that many times.  Negative arg -N means
+move forward across N balanced expressions.
++*/
+{
+	int uni;
+
+	thisflag |= FLAG_HIGHLIGHT_REGION_STAYS;
+
+	if (uniarg < 0)
+		return FUNCALL_ARG (forward_sexp, -uniarg);
+
+	for (uni = 0; uni < uniarg; ++uni)
+		if (!backward_sexp ())
+			return FALSE;
+
+	return TRUE;
+}
+
 DEFUN("mark-word", mark_word)
 /*+
 Set mark argument words away from point.
 +*/
 {
-        return FALSE;
+	FUNCALL (set_mark_command);
+	return FUNCALL_ARG (forward_word, uniarg);
+}
+
+DEFUN("mark-sexp", mark_sexp)
+/*+
+Set mark argument sexps from point.
+The place mark goes is the same place C-M-f would
+move to with the same argument.
++*/
+{
+	FUNCALL (set_mark_command);
+	return FUNCALL_ARG (forward_sexp, uniarg);
+}
+
+DEFUN("forward-line", forward_line)
+/*+
+Move N lines forward (backward if N is negative).
+Precisely, if point is on line I, move to the start of line I + N.
++*/
+{
+	FUNCALL (beginning_of_line);
+	return FUNCALL_ARG (next_line, uniarg);
 }
 
 DEFUN("backward-sentence", backward_sentence)
@@ -1252,6 +1655,38 @@ it as the contents of the region.
 		}
 	}
 	astr_delete(out);
+
+	return TRUE;
+}
+
+DEFUN("delete-region", delete_region)
+/*+
+Delete the text between point and mark.
++*/
+{
+	struct region r;
+
+	if (warn_if_no_mark())
+		return FALSE;
+
+	calculate_region(&r);
+
+	if (cur_bp->flags & BFLAG_READONLY) {
+		warn_if_readonly_buffer();
+	} else {
+		int size = r.size;
+
+		if (cur_wp->pointp != r.startp || r.starto != cur_wp->pointo)
+			FUNCALL(exchange_point_and_mark);
+
+		undo_save(UNDO_INSERT_BLOCK, cur_wp->pointn, cur_wp->pointo, size, 0);
+		undo_nosave = TRUE;
+		while (size--)
+			FUNCALL(delete_char);
+		undo_nosave = FALSE;
+	}
+
+	thisflag &= ~(FLAG_HIGHLIGHT_REGION_STAYS);
 
 	return TRUE;
 }
