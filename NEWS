@@ -1,34 +1,32 @@
 Changes between Zile 1.7 BETA 2 - Zile 1.7
 
-* Patches provided by David A. Capello <dacap@users.sourceforge.net>:
-    * Added regexp search functions.
-    * The `prev_bp' was removed.
-    * Now the `exchange-point-and-mark' activates the mark.
-    * Fixed `insert_char' to don't move the mark when insert a
-      character in the same mark position (this fix the
-      `exchange-point-and-mark' after a `yank').
-    * Fixed `insert_nstring' (used by `yank' for example) when is used
-      in overwrite-mode.
-    * Modified `previous-line' and `next-line' to Emacs behavior.
-    * Added `forward-sexp', `backward-sexp', `transpose-sexp', and
-      `mark-sexp'.
-    * Added `forward-line' and `transpose-lines'.
-    * Added `transpose-chars' and `transpose-words' (they don't
-      support uniarg yet).
-    * Fixed `forward-word'.
-    * `C-q' doesn't support overwrite-mode.
-    * Fixed `overwrite-mode' to Emacs behavior.
-    * Fixed `revert_action' to handle nested undo-sequences.
-    * Added `delete-horizontal-space' and `just-one-space'.
-    * Fixed a bug in strtokey0 to handle `M-\' key combination.
-    * Fixed the clock, now is updated correctly.
-    * Added `mark-word'.
-    * Fixed `isearch' to stop recording macros when you press C-g.
-    * Fixed the column indicator in the status line (now 0 is the
-      first column).
-    * Modified `universal_argument' to Emacs behavior.
-    * Fixed overflow for long variable names in configuration file.
-* Various bug-fixes
+* Added regexp search functions.
+* Now the `exchange-point-and-mark' activates the mark.
+* Fixed `insert_char' to don't move the mark when a character is
+  inserted in the same mark position (this fixes the
+  `exchange-point-and-mark' after a `yank').
+* Fixed `insert_nstring' (used by `yank' for example) when it is used
+  in overwrite-mode.
+* Modified `previous-line' and `next-line' to Emacs behavior.
+* Added `forward-sexp', `backward-sexp', `transpose-sexp', and
+  `mark-sexp'.
+* Added `forward-line' and `transpose-lines'.
+* Added `transpose-chars' and `transpose-words' (they don't support
+  uniarg yet).
+* Fixed `forward-word'.
+* `C-q' doesn't support overwrite-mode.
+* Fixed `overwrite-mode' to Emacs behavior.
+* Fixed `revert_action' to handle nested undo-sequences.
+* Added `delete-horizontal-space' and `just-one-space'.
+* Fixed a bug in strtokey0 to handle `M-\' key combination.
+* Fixed the clock, now is updated correctly.
+* Added `mark-word'.
+* Fixed `isearch' to stop recording macros when you press C-g.
+* Fixed the column indicator in the status line (now 0 is the first
+  column).
+* Modified `universal_argument' to Emacs behavior.
+* Fixed overflow for long variable names in configuration file.
+* Various bug-fixes and code cleanups.
 * Search and replace (query-replace and replace-string) respect case.
 
 Changes between Zile 1.6.1 - Zile 1.7 BETA 2
@@ -62,7 +60,7 @@ fixes were applied.
   handling has been removed; now Zile relies only on ncurses KEY_RESIZE.
 * The behavior of the `auto-font-lock' variable is changed in this version.
   Now the variable applies also to buffer mode changes.
-* Fixed two old bugs thanks to Reuben Thomas <rrt@mupsych.org>.
+* Fixed two old bugs thanks to Reuben Thomas <rrt@sc3d.org>.
 * Patches provided by David A. Capello <dacap@users.sourceforge.net>:
     * implemented `kill-word', `backward-kill-word';
     * fixed bug in undo/redo;
