@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.12 2004/01/29 10:36:01 rrt Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.13 2004/01/29 14:03:23 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -959,7 +959,7 @@ static void draw_status_line(int line, windowp wp)
 	}
 
 	move(line, 0);
-	printw("--%2s-Zile: %-18s (%s%s%s%s%s)--L%d--C%d--%s",
+	printw("--%2s- %-18s (%s%s%s%s%s)--L%d--C%d--%s",
 	       make_mode_line_flags(wp),
 	       wp->bp->name, mode,
 	       (wp->bp->flags & BFLAG_AUTOFILL) ? " Fill" : "",
