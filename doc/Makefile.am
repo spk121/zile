@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.3 2004/12/18 22:09:25 rrt Exp $
+## $Id: Makefile.am,v 1.4 2004/12/19 00:43:16 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -44,9 +44,3 @@ all-local: HELP AUTODOC
 
 clean-local:
 	-rm -f mkdoc AUTODOC HELP *.o
-
-install-data-local:
-	$(INSTALL_DATA) zilerc.texi $(DESTDIR)$(infodir)/zilerc.texi
-
-uninstall-local:
-	rm -f $(DESTDIR)$(infodir)/zilerc.texi
