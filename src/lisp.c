@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.2 2005/01/22 12:32:04 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.3 2005/01/22 18:28:59 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -30,7 +30,7 @@
 #include "eval.h"
 
 
-static char *s;
+static const char *s;
 
 astr lisp_read(getcCallback getcp, ungetcCallback ungetcp)
 {
@@ -64,7 +64,7 @@ static void ungetc_string(int c)
   s--;
 }
 
-astr lisp_read_string(char *string)
+astr lisp_read_string(const char *string)
 {
   assert(string);
   s = string;
@@ -84,7 +84,7 @@ static void ungetc_file(int c)
   ungetc(c, fp);
 }
     
-astr lisp_read_file(char *file)
+astr lisp_read_file(const char *file)
 {
   astr as = astr_new();
   fp = fopen(file, "r");

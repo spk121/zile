@@ -128,8 +128,8 @@ void free_kill_ring(void);
 
 /* lisp.c ----------------------------------------------------------------- */
 astr lisp_read(getcCallback getcp, ungetcCallback ungetcp);
-astr lisp_read_string(char *string);
-astr lisp_read_file(char *file);
+astr lisp_read_string(const char *string);
+astr lisp_read_file(const char *file);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro(void);
@@ -191,9 +191,6 @@ Point point_min(void);
 Point point_max(void);
 Point line_beginning_position(int count);
 Point line_end_position(int count);
-
-/* rc.c ------------------------------------------------------------------- */
-void read_rc_file(void);
 
 /* redisplay.c ------------------------------------------------------------ */
 void resync_redisplay(void);
