@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.17 2004/10/11 03:02:05 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.18 2004/10/11 03:03:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -60,7 +60,7 @@ static void outch(int c, Font font, int *x)
 	if (c == '\t')
 		for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZILE_COLS; w--)
 			term_addch(' '), ++(*x);
-	else if (isgraph(c))
+	else if (isprint(c))
 		term_addch(c), ++(*x);
 	else {
 		j = make_char_printable(&buf, c);
@@ -221,7 +221,7 @@ static void calculate_start_column(Window *wp)
 			if (*p == '\t') {
 				col |= t - 1;
 				++col;
-			} else if (isgraph(*p))
+			} else if (isprint(*p))
 				++col;
 			else {
 				col += make_char_printable(&buf, *p);
