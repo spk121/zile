@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.4 2005/01/03 11:39:32 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.5 2005/01/22 01:00:56 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -149,15 +149,6 @@ static void process_file(char *filename)
 }
 
 /*
- * Output the program syntax then exit.
- */
-static void usage(void)
-{
-	fprintf(stderr, "usage: mkdoc [-d] [-o file] [file ...]\n");
-	exit(1);
-}
-
-/*
  * Stub to make zmalloc &c. happy.
  */
 void zile_exit(int exitcode)
@@ -167,29 +158,8 @@ void zile_exit(int exitcode)
 
 int main(int argc, char **argv)
 {
-	int c;
-
 	input_file = stdin;
 	output_file = stdout;
-
-	while ((c = getopt(argc, argv, "o:")) != -1)
-		switch (c) {
-		case 'o':
-			if (output_file != stdout)
-				fclose(output_file);
-			if ((output_file = fopen(optarg, "w")) == NULL) {
-				fprintf(stderr, "mkdoc:%s: %s\n",
-					optarg, strerror(errno));
-				return 1;
-			}
-			break;
-		case '?':
-		default:
-			usage();
-			/* NOTREACHED */
-		}
-	argc -= optind;
-	argv += optind;
 
 	if (argc < 1)
 		process_file(NULL);

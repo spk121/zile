@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.11 2005/01/13 07:34:16 rrt Exp $
+## $Id: Makefile.am,v 1.12 2005/01/22 01:00:55 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -29,10 +29,10 @@ HELP: $(top_srcdir)/doc/zile.texi
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
 
-mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_vars.h
+mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
 	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ mkdoc.o
 
-mkdoc.o: mkdoc.c
+mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_vars.h
 	$(CC_FOR_BUILD) -c -I$(top_srcdir)/doc -I$(top_srcdir) -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
 
 AUTODOC: $(AUTODOCSRCS) mkdoc
