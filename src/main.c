@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.17 2004/02/17 20:21:18 ssigala Exp $	*/
+/*	$Id: main.c,v 1.18 2004/02/23 01:54:47 dacap Exp $	*/
 
 #include "config.h"
 
@@ -254,7 +254,7 @@ static void usage(void)
 	exit(1);
 }
 
-void setup_main_screen(int argc, int hflag)
+static void setup_main_screen(int argc, int hflag)
 {
 	Buffer *bp, *last_bp = NULL;
 	int c = 0;
