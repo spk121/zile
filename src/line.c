@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.48 2005/01/21 23:25:35 rrt Exp $	*/
+/*	$Id: line.c,v 1.49 2005/01/21 23:33:25 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,16 +36,14 @@
 #include "extern.h"
 
 
-static void adjust_markers(Line *lp1, Line *lp2, int pointo, int dir, int offset)
+static void adjust_markers(Line *newlp, Line *oldlp, int pointo, int dir, int offset)
 {
   Marker *pt = point_marker(), *marker;
 
-  for (marker = cur_bp->markers; marker; marker = marker->next)
-    if (marker->pt.p == lp2 &&
-        ((dir == -1) ? TRUE :
-         ((dir == 1) ? marker->pt.o > pointo :
-          marker->pt.o >= pointo + (offset < 0)))) {
-      marker->pt.p = lp1;
+  for (marker = cur_bp->markers; marker != NULL; marker = marker->next)
+    if (marker->pt.p == oldlp &&
+        (dir == -1 || marker->pt.o >= pointo + dir + (offset < 0))) {
+      marker->pt.p = newlp;
       marker->pt.o -= pointo * dir - offset;
       marker->pt.n += dir;
     } else if (marker->pt.n > cur_bp->pt.n)
