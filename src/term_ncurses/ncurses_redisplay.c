@@ -1,4 +1,4 @@
-/*	$Id: ncurses_redisplay.c,v 1.8 2004/01/21 02:12:32 dacap Exp $	*/
+/*	$Id: ncurses_redisplay.c,v 1.9 2004/01/28 09:38:12 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -276,7 +276,7 @@ void ncurses_refresh_cached_variables(void)
 	parse_displayable_chars(displayable_characters);
 	show_eob_marker = lookup_bool_variable("show-eob-marker");
 
-	refresh_clock_timeout ();
+	refresh_clock_timeout();
 }
 
 static int make_char_printable(char *buf, unsigned int c)
@@ -966,10 +966,9 @@ static void draw_status_line(int line, windowp wp)
 	}
 
 	move(line, 0);
-	printw("--%2s-Zile: %-18s (%s%s%s%s%s)--L%d--C%d--%s",
+	printw("--%2s-Zile: %-18s (%s%s%s%s%s%s)--L%d--C%d--%s",
 	       make_mode_line_flags(wp),
 	       wp->bp->name, mode,
-	       /* (wp->bp->flags & BFLAG_FONTLOCK) ? " Font" : "", */
 	       (wp->bp->flags & BFLAG_AUTOFILL) ? " Fill" : "",
 	       (wp->bp->flags & BFLAG_OVERWRITE) ? " Ovwrt" : "",
 	       (thisflag & FLAG_DEFINING_MACRO) ? " Def" : "",
