@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.23 2004/10/13 15:53:53 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.24 2004/10/14 23:32:11 rrt Exp $	*/
 
 #include "config.h"
 
@@ -53,6 +53,8 @@ typedef struct {
                                 array is current, oarray is last
                                 displayed contents. */
 } Screen;
+
+static char *tcap_ptr;
 
 static Screen screen;
 
@@ -258,8 +260,12 @@ static void term_init_screen(void)
 
 void term_init(void)
 {
-        char *tcap = get_tcap();
-        
+        char *tcap;
+
+        tcap_ptr = tcap = get_tcap();
+
+        fprintf(stderr, "tcap %p\n", tcap);
+
         read_screen_size();
         termp->width = ZILE_COLS;
         termp->height = ZILE_LINES;
@@ -324,6 +330,8 @@ void term_close(void)
         free(screen.array);
         free(screen.oarray);
 	termp->screen = NULL;
+        free(tcap_ptr);
+        astr_delete(norm_string);
         tcdrain(0);
         fflush(stdout);
         if (tcsetattr(0, TCSADRAIN, &ostate) < 0) {
