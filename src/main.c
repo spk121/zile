@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.61 2005/01/14 16:56:57 rrt Exp $	*/
+/*	$Id: main.c,v 1.62 2005/01/14 23:43:09 rrt Exp $	*/
 
 #include "config.h"
 
@@ -218,6 +218,11 @@ int main(int argc, char **argv)
 
   setlocale(LC_ALL, "");
 
+  if (earg) {
+    lithp(earg);
+    exit(0);
+  }
+
   term_init();
 
   init_variables();
@@ -241,11 +246,6 @@ int main(int argc, char **argv)
     /* Show the splash screen only if no files and no Lisp expression
        is specified on the command line. */
     about_screen();
-
-  if (earg) {
-    lithp(earg);
-    getchar();
-  }
 
   setup_main_screen(argc);
 
