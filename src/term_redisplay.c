@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.11 2004/10/05 18:51:12 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.12 2004/10/05 19:34:50 rrt Exp $	*/
 
 #define ENABLE_FULL_HSCROLL	/* XXX make it configurable */
 
@@ -35,14 +35,6 @@
 #include "config.h"
 #include "extern.h"
 #include "zterm.h"
-
-#ifdef __FreeBSD__
-/*
- * A redundant refresh() call fixes a refresh bug under FreeBSD with
- * ncurses 1.8.6 (may be also required under others OSs).
- */
-#define NEED_REDUNDANT_REFRESH
-#endif
 
 /*
  * The cached variables.
@@ -525,10 +517,6 @@ void term_redisplay(void)
 
 		draw_window(topline, wp);
 
-#ifdef NEED_REDUNDANT_REFRESH
-		term_refresh();
-#endif
-
 		/*
 		 * Draw the status line only if there is available space
 		 * after the buffer text space.
@@ -540,8 +528,10 @@ void term_redisplay(void)
 	}
 
 #ifndef ENABLE_FULL_HSCROLL
-	if (point_start_column > 0)
-		term_mvaddch(cur_topline + cur_wp->topdelta, 0, '$');
+	if (point_start_column > 0) {
+                term_move(cur_topline + cur_wp->topdelta, 0);
+                term_addch('$');
+        }
 #endif
 	term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
