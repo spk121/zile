@@ -1,4 +1,4 @@
-/*	$Id: line.c,v 1.14 2004/01/29 03:50:50 dacap Exp $	*/
+/*	$Id: line.c,v 1.15 2004/01/29 15:24:11 rrt Exp $	*/
 
 /*
  * Copyright (c) 1997-2003 Sandro Sigala.  All rights reserved.
@@ -133,8 +133,8 @@ int intercalate_char(int c)
 	 * This code assumes that memmove(d, s, 0) does nothing.
 	 */
 	memmove(cur_wp->pointp->text + cur_wp->pointo + 1,
-		cur_wp->pointp->text + cur_wp->pointo,
-		cur_wp->pointp->size - cur_wp->pointo);
+                cur_wp->pointp->text + cur_wp->pointo,
+                cur_wp->pointp->size - cur_wp->pointo);
 
 	undo_save(UNDO_REMOVE_CHAR, cur_wp->pointn, cur_wp->pointo, 0, 0);
 	cur_wp->pointp->text[cur_wp->pointo] = c;
@@ -467,39 +467,29 @@ void insert_nstring(const char *s, size_t size)
  */
 static void auto_fill_break_line()
 {
-	int break_col, last_col;
+	int break_col, last_col, excess = 0;
 	linep lp;
 
-	/* Find break point starting from fill column, or end of line,
-         * whichever is smaller (if there are tabs, the end of line
-         * may be smaller than the fill column). */
-	for (break_col = min(cur_wp->bp->fill_column + 1, cur_wp->pointp->size);
-             break_col > 0; --break_col) {
-		int c = cur_wp->pointp->text[break_col - 1];
-		if (isspace(c))
-			break;
-	}
+        /* Move cursor back to fill_column */
+        while (get_text_goalc(cur_wp) > cur_wp->bp->fill_column + 1) {
+                cur_wp->pointo--;
+                excess++;
+        }
 
-	if (break_col < 2) {
-		/* Find break point starting from current point. */
-		for (break_col = cur_wp->pointo; break_col > 0; --break_col) {
-			int c = cur_wp->pointp->text[break_col - 1];
-			if (isspace(c))
-				break;
-		}
-	}
+        /* Find break point moving left from fill-column. */
+        for (break_col = cur_wp->pointo; break_col > 0; --break_col) {
+                int c = cur_wp->pointp->text[break_col - 1];
+                if (isspace(c))
+                        break;
+        }
 
 	if (break_col > 1) {
 		/* Break line. */
 		last_col = cur_wp->pointo - break_col;
 		cur_wp->pointo = break_col;
+                FUNCALL(delete_horizontal_space);
 		insert_newline();
-		cur_wp->pointo = last_col;
-
-		/* Remove trailing whitespace in broken line. */
-		lp = cur_wp->pointp->prev;
-		while (lp->size > 0 && isspace(lp->text[lp->size - 1]))
-			--lp->size;
+		cur_wp->pointo = last_col + excess;
 	}
 }
 
@@ -567,11 +557,11 @@ int delete_char(void)
 		/*
 		 * Move the text one position backward after the point,
 		 * if required.
-		 * This code assumes that memcpy(d, s, 0) does nothing.
+		 * This code assumes that memmove(d, s, 0) does nothing.
 		 */
-		memcpy(cur_wp->pointp->text + cur_wp->pointo,
-		       cur_wp->pointp->text + cur_wp->pointo + 1,
-		       cur_wp->pointp->size - cur_wp->pointo - 1);
+		memmove(cur_wp->pointp->text + cur_wp->pointo,
+                        cur_wp->pointp->text + cur_wp->pointo + 1,
+                        cur_wp->pointp->size - cur_wp->pointo - 1);
 		--cur_wp->pointp->size;
 
 		/*
@@ -703,17 +693,17 @@ int backward_delete_char(void)
 		if (warn_if_readonly_buffer())
 			return FALSE;
 
-		undo_save(UNDO_INSERT_CHAR, cur_wp->pointn, cur_wp->pointo-1,
+		undo_save(UNDO_INSERT_CHAR, cur_wp->pointn, cur_wp->pointo - 1,
 			  cur_wp->pointp->text[cur_wp->pointo - 1], 0);
 
 		/*
 		 * Move the text one position backward before the point,
 		 * if required.
-		 * This code assumes that memcpy(d, s, 0) does nothing.
+		 * This code assumes that memmove(d, s, 0) does nothing.
 		 */
-		memcpy(cur_wp->pointp->text + cur_wp->pointo - 1,
-		       cur_wp->pointp->text + cur_wp->pointo,
-		       cur_wp->pointp->size - cur_wp->pointo);
+		memmove(cur_wp->pointp->text + cur_wp->pointo - 1,
+                        cur_wp->pointp->text + cur_wp->pointo,
+                        cur_wp->pointp->size - cur_wp->pointo);
 		--cur_wp->pointp->size;
 
 		/*
