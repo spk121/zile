@@ -257,5 +257,6 @@ Point window_pt(Window *wp);
  *--------------------------------------------------------------------------*/
 
 #ifndef HAVE_VASPRINTF
+int asprintf(char **ptr, const char *fmt, ...);
 int vasprintf(char **ptr, const char *fmt, va_list vargs);
 #endif

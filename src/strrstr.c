@@ -20,13 +20,15 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: strrstr.c,v 1.1 2004/11/15 00:47:12 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.2 2004/12/20 18:23:22 rrt Exp $	*/
 
 #include "config.h"
 
 #ifndef HAVE_STRRSTR
 
 #include <string.h>
+
+char *strrstr(const char *s, const char *t);
 
 char *strrstr(const char *s, const char *t) {
         int i, j, slen = strlen(s), tlen = strlen(t);
