@@ -1,4 +1,4 @@
-/* Startup functions
+/* Program invocation, startup and shutdown
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004-2005 Reuben Thomas.
    All rights reserved.
@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.63 2005/01/15 00:34:27 rrt Exp $	*/
+/*	$Id: main.c,v 1.64 2005/01/16 13:04:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -49,6 +49,11 @@
 #include "extern.h"
 
 #define ZILE_VERSION_STRING	"Zile " VERSION
+
+#define ZILE_COPYRIGHT_STRING \
+  "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
+  "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"\
+  "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>"
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -88,22 +93,20 @@ static void loop(void)
 static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
-%Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>%\n\
-%Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>%\n\
-%Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>%\n\
+" ZILE_COPYRIGHT_STRING "\n\
 \n\
-Type %C-x C-c% to exit Zile.\n\
-Type %C-h h% or %F1% for help; %C-x u% to undo changes.\n\
-Type %C-h C-d% for information on getting the latest version.\n\
-Type %C-h t% for a tutorial on using Zile.\n\
-Type %C-h s% for a sample configuration file.\n\
-Type %C-g% at any time to cancel the current operation.\n\
+Type `C-x C-c' to exit Zile.\n\
+Type `C-h h' or `F1' for help; `C-x u; to undo changes.\n\
+Type `C-h C-d' for information on getting the latest version.\n\
+Type `C-h t' for a tutorial on using Zile.\n\
+Type `C-h s' for a sample configuration file.\n\
+Type `C-g' at any time to cancel the current operation.\n\
 \n\
-%C-x% means hold the CTRL key while typing the character %x%.\n\
-%M-x% means hold the META or EDIT or ALT key down while typing %x%.\n\
-If there is no META, EDIT or ALT key, instead press and release\n\
-the ESC key and then type %x%.\n\
-Combinations like %C-h t% mean first do %C-h%, then press %t%.\n\
+`C-x' means hold the CTRL key while typing the character `x'.\n\
+`M-x' means hold the META or ALT key down while typing `x'.\n\
+If there is no META or ALT key, instead press and release\n\
+the ESC key and then type `x'.\n\
+Combinations like `C-h t' mean first do `C-h', then press `t'.\n\
 ";
 
 static char about_minibuf_str[] =
@@ -232,12 +235,9 @@ int main(int argc, char **argv)
       qflag = TRUE;
       break;
     case 'v':
-      /* XXX Common up copyright strings with that above */
       fprintf(stderr,
               ZILE_VERSION_STRING "\n"
-              "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"
-              "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"
-              "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>\n"
+              ZILE_COPYRIGHT_STRING "\n"
               "Zile comes with ABSOLUTELY NO WARRANTY.\n"
               "You may redistribute copies of Zile\n"
               "under the terms of the GNU General Public License.\n"
@@ -285,10 +285,10 @@ int main(int argc, char **argv)
       if (*argv)
         open_file(*argv++, line - 1);
     }
-  else if (earg == NULL)
-    /* Show the splash screen only if no files and no Lisp expression
-       is specified on the command line. */
-    about_screen();
+   else if (earg == NULL && larg == NULL)
+     /* Show the splash screen only if no files and no Lisp expression
+        or load file is specified on the command line. */
+     about_screen();
 
   setup_main_screen(argc);
 
