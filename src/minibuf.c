@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: minibuf.c,v 1.33 2005/01/16 13:07:44 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.34 2005/01/24 14:58:31 rrt Exp $     */
 
 #include "config.h"
 
@@ -101,10 +101,7 @@ char *minibuf_read(const char *fmt, const char *value, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  if (value != NULL)
-    p = term_minibuf_read(buf, value, NULL, NULL);
-  else
-    p = term_minibuf_read(buf, "", NULL, NULL);
+  p = term_minibuf_read(buf, value ? value : "", NULL, NULL);
   free(buf);
 
   return p;
