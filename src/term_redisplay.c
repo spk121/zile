@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.24 2005/01/12 00:16:53 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.25 2005/01/12 00:27:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -160,14 +160,12 @@ static void draw_window(int topline, Window *wp)
   cur_tab_width = wp->bp->tab_width;
 
   /* Draw the window lines. */
-  fprintf(stderr, "!!!%p %p\n", lp, wp->bp->lines);
   for (i = topline; i < wp->eheight + topline; ++i, ++lineno) {
     /* Clear the line. */
     term_move(i, 0);
     term_clrtoeol();
 
     /* If at the end of the buffer, don't write any text. */
-    fprintf(stderr, "%p %p\n", lp, wp->bp->lines);
     if (lp == wp->bp->lines)
       continue;
 
