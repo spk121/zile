@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.27 2005/01/13 07:31:32 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.28 2005/01/16 13:06:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -328,7 +328,7 @@ void term_full_redisplay(void)
 
 void show_splash_screen(const char *splash)
 {
-  int i, bold = 0;
+  int i;
   const char *p;
 
   for (i = 0; i < ZILE_LINES - 2; ++i) {
@@ -338,22 +338,13 @@ void show_splash_screen(const char *splash)
 
   term_move(0, 0);
   for (i = 0, p = splash; *p != '\0'; ++p)
-    switch (*p) {
-    case '%':
-      if (!bold)
-        term_attrset(1, ZILE_BOLD);
-      else
-        term_attrset(1, ZILE_NORMAL);
-      bold ^= 1;
-      break;
-    case  '\n':
+    if (*p == '\n')
       term_move(++i, 0);
-      break;
-    default:
+    else
       term_addch(*p);
-    }
 
   term_refresh();
+  waitkey(20 * 10);
 }
 
 /*
