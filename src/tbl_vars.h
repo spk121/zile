@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.11 2004/05/09 18:03:43 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.12 2004/05/09 18:07:41 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -107,8 +107,6 @@ X("novice-level",			"b", "true", "\
 Enable this if you are new to Emacs in general.\n\
 Setting this variable to false disables the Mini Help window and\n\
 the message in the scratch buffer.")
-X("show-eob-marker",			"b", "true", "\
-If enabled, a marker will be displayed at the end of the buffer.")
 X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\

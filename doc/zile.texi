@@ -1052,9 +1052,6 @@ Enable this if you are novice to Emacs in general.
 Disabling this variable the @i{Mini Help}
 window and the message in the scratch buffer will be disabled.
 Default value is @samp{true}.
-@item show-eob-marker
-If enabled, a marker will be displayed at the end of the buffer.
-Default value is @samp{true}.
 @item skip-splash-screen
 If enabled, the splash screen at startup will be avoided.
 Default value is @samp{false}.

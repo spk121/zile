@@ -34,10 +34,6 @@ display-time = true
 # Display time format (see strftime(3) man page) [default: %I:%M%p]
 display-time-format = "%I:%M%p"
 
-# Enable display of End Of Buffer marker [default: true]
-# If enabled, a marker will be displayed at the end of the buffer.
-show-eob-marker = true
-
 # Specify the file backup method [default: simple]
 #
 # Possible values are: none and simple.
