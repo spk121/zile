@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.46 2005/01/19 00:40:50 rrt Exp $	*/
+/*	$Id: line.c,v 1.47 2005/01/20 16:55:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,7 @@
 #include "extern.h"
 
 static void adjust_markers_for_offset(Line *lp, int pointo, int offset);
-static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type);
+static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len);
 static void adjust_markers_for_delline(Line *lp1, Line *lp2, int lp1len);
 
 /* Insert the character at the current position and move the text at its right
@@ -49,9 +49,7 @@ int intercalate_char(int c)
     return FALSE;
 
   undo_save(UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
-
   astr_insert_char(cur_bp->pt.p->item, cur_bp->pt.o, c);
-
   cur_bp->flags |= BFLAG_MODIFIED;
 
   return TRUE;
@@ -100,25 +98,19 @@ int insert_char(int c)
   return TRUE;
 }
 
-/* Insert a character at the current position in the insert mode
+/*
+ * Insert a character at the current position in insert mode
  * whetever the current insert mode is.
  */
 int insert_char_in_insert_mode(int c)
 {
-  int overwrite_mode_save, ret_value;
+  int old_mode = cur_bp->flags, ret;
 
-  /* save current mode */
-  overwrite_mode_save = cur_bp->flags & BFLAG_OVERWRITE;
-
-  /* force insert mode */
   cur_bp->flags &= ~BFLAG_OVERWRITE;
+  ret = insert_char(c);
+  cur_bp->flags = old_mode;
 
-  ret_value = insert_char(c);
-
-  /* restore previous mode */
-  cur_bp->flags |= overwrite_mode_save;
-
-  return ret_value;
+  return ret;
 }
 
 static void insert_expanded_tab(int (*inschr)(int chr))
@@ -163,7 +155,11 @@ DEFUN("tab-to-tab-stop", tab_to_tab_stop)
   return ret;
 }
 
-static int common_insert_newline(int move_pt)
+/*
+ * Insert a newline at the current position without moving the cursor.
+ * Update all other cursors if they point on the splitted line.
+ */
+int intercalate_newline()
 {
   Line *lp1, *lp2;
   int lp1len, lp2len;
@@ -187,7 +183,7 @@ static int common_insert_newline(int move_pt)
   astr_cpy(lp2->item, astr_substr(lp1->item, lp1len, lp2len));
   astr_truncate(lp1->item, lp1len);
 
-  adjust_markers_for_addline(lp1, lp2, lp1len, move_pt);
+  adjust_markers_for_addline(lp1, lp2, lp1len);
 
   cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -198,15 +194,7 @@ static int common_insert_newline(int move_pt)
 
 int insert_newline(void)
 {
-  return common_insert_newline(TRUE);
-}
-
-/* Insert a newline at the current position without moving the cursor.
- * Update all other cursors if they point on the splitted line.
- */
-int intercalate_newline(void)
-{
-  return common_insert_newline(FALSE);
+  return intercalate_newline() && forward_char();
 }
 
 /* Recase s according to case of template. */
@@ -695,11 +683,11 @@ static void adjust_markers_for_offset(Line *lp, int pointo, int offset)
   free_marker(pt);
 }
 
-static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len, int pt_insertion_type)
+static void adjust_markers_for_addline(Line *lp1, Line *lp2, int lp1len)
 {
   Marker *pt, *marker;
   pt = point_marker();
-  set_marker_insertion_type(pt, pt_insertion_type);
+  set_marker_insertion_type(pt, FALSE);
 
   /* Update the markers.  */
   for (marker = cur_bp->markers; marker; marker = marker->next) {
