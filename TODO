@@ -24,8 +24,6 @@ X1("name-last-kbd-macro", name_last_kbd_macro,          "")
 * Allow search and replace not to follow case (case-fold-search,
   case-replace).
 * Regex pattern matching for replace functions.
-* Add undo compaction, so that functions implemented in terms of other
-  functions can have a single undo action.
 * Add Unicode support.
 
 ------------------------------------------------------------------------------
