@@ -1,4 +1,4 @@
-#	$Id: Makefile.in,v 1.1 2001/01/19 21:59:12 ssigala Exp $
+#	$Id: Makefile.in,v 1.2 2003/04/24 15:11:15 rrt Exp $
 
 subdirs = lib doc etc src
 

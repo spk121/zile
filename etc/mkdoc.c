@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.1 2001/01/19 22:01:43 ssigala Exp $	*/
+/*	$Id: mkdoc.c,v 1.2 2003/04/24 15:11:17 rrt Exp $	*/
 
 #include "config.h"
 

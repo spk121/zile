@@ -1,0 +1,12 @@
+CURSOR                     MISCELLANEOUS              REGION
+C-f, RIGHT  forward char   C-g      abort command     C-SPC    set region
+C-b, LEFT   backward char  C-l      redraw screen     C-x h    mark whole buf.
+C-a, HOME   beg. of line   C-x f    set fill column   C-x C-x  swap point-mark
+C-e, END    end of line    C-x u    undo              C-k      kill line
+C-n, DOWN   next line      C-x C-u  upcase region     C-w      kill region
+C-p, UP     previous line  C-x C-l  downcase region   M-w      copy region
+M-g         goto line      C-x C-q  toggle read-only  C-y      yank
+C-v, PGDN   next page      M-x      execute ext. cmd
+M-v, PGUP   prev. page     C-z      suspend Zile
+M-<         beg. of buf.   C-x C-c  quit Zile         [F9 show next page]
+M->         end of buf.

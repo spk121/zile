@@ -1,0 +1,10 @@
+BUFFER                         WINDOW                     SEARCH
+C-x C-f  find file             C-x 0  delete window       C-s    s. forward
+C-x C-v  find other file       C-x 1  delete other win.   C-r    s. backward
+C-x i    insert file           C-x 2  split window
+C-x C-s  save buffer           C-x ^  enlarge window      MACRO
+C-x s    save mod. buffers     C-x o  go to other win.    C-x (  start rec.
+C-x C-w  write to other file                              C-x )  end rec.
+C-x k    kill buffer           REGISTER                   C-x e  exec. macro
+C-x b    switch buffer         C-x r i  insert register
+C-x C-b  list buffers          C-x r s  save register     [F9 show next page]

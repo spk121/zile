@@ -1,8 +1,18 @@
-* Zile crashes when doing C-w on large regions.
+* The `switch-to-buffer' algorithm is not exactly equal to Emacs (the sequence
+  of buffers is not the same).
+
+* The method of resolving the `C-h' problem by replacing it with `M-h' is not
+  a ``Good Thing''(TM).
+
+* There are many statically allocated buffers that may overflow in the
+  near future.
 
 * The background colors are not handled very well under X Window terminals.
 
 * The macros do not work for interactive commands.
 
-* Font lock lacks correct support for floats (e.g: 1.-e3.4e5 is recognized
-  as a number).
+* Font Lock in Shell Mode isn't perfect; Shell scripts can be very
+  complicated to parse.
+
+* Font lock in C/C++ Mode lacks correct support for floats
+  (e.g: 1.-e3.4e5 is recognized as a number).

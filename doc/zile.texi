@@ -15,13 +15,13 @@
 
 @titlepage
 @title The Zile Manual
-@subtitle Edition 1.4 for Zile version 1.4
-@subtitle January 2001
+@subtitle Edition 1.6 for Zile version 1.6
+@subtitle August 2001
 @author Sandro Sigala
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1997-2001 Sandro Sigala @email{ssigala@@tiscalinet.it}.
+Copyright @copyright{} 1997-2001 Sandro Sigala @email{sandro@@sigala.it}.
 @end titlepage
 
 @c ---------------------------------------------------------------------------
@@ -68,7 +68,7 @@ General look-n-feel, function names, function behaviors, key bindings.
 @item XEmacs:
 Some minor hints for look-n-feel.
 @item Jed:
-Mini help window, mode line.
+@i{Mini Help} window, mode line.
 @item ce:
 Structure names, function names.
 @end itemize
@@ -98,8 +98,8 @@ Zile can complete the user written text.  This is very useful for
 @kbd{M-x} commands and for selecting files.
 @item Colors.
 Zile makes use of the color capatibilities of the terminal if available.
-@item Source highlighting (``C'' and ``C++'' only for now).
-Zile can highlight the ``C'' and ``C++'' source files for better reading.
+@item Source highlighting (``C'', ``C++'', and shell scripts).  Zile can
+highlight ``C'', ``C++'' source files and shell scripts for better reading.
 @item Auto fill (word wrap).
 Zile automatically breaks the lines when they become too wide (if the
 @i{Auto Fill Mode} is enabled).
@@ -139,16 +139,16 @@ Edit file @file{file}.
 @item +number
 For the first file the cursor will be positioned on the line specified by
 @samp{number} (do not insert a space between the @samp{+} sign and the number).
+@item -f function
+Invoke the named internal function with no arguments.
+For example, @samp{-f auto-fill-mode} turns on @i{Auto Fill Mode}.
 @item -h
-Display the minihelp window at startup.  This may be useful for
+Display the @i{Mini Help} window at startup.  This may be useful for
 novice users.
 @item -q
 Do not load the user's initialization file.
 @item -V
 Print version information on standard output then exit.
-@item -f function
-Invoke the named internal function with no arguments.
-For example, @samp{-f auto-fill-mode} turns on @i{Auto Fill Mode}.
 @end table
 
 @c ---------------------------------------------------------------------------
@@ -212,13 +212,15 @@ the @kbd{M-h} key should be used instead of @kbd{C-h}.
 @table @kbd
 @item C-h C-d
 Show informations about getting the latest version.
-@item C-h C-h
-Toggle the command help window.
+@item C-h C-h, @key{F10}
+Toggle the @i{Mini Help} window.
+@item C-h C-r, @key{F9}
+Rotate @i{Mini Help} contents.
 @item C-h F
 Show the Frequently Asked Questions about Zile.
 @item C-h d, C-h f
 Describe a function.
-@item C-h h, F1
+@item C-h h, @key{F1}
 Show this manual.
 @item C-h k
 Describe a key sequence.
@@ -290,12 +292,14 @@ At run-time, you can list the current defined bindings with the
 @item @key{BS}
 Delete the previous character.
 @item @key{INS}
-Toggle overwrite mode.
+Toggle @i{Overwrite Mode}.
 @item @key{RET}
 Insert a new line.
 @item @key{TAB}
 Insert a tab character.
-@item C-@@, C-@key{SPC}
+@item @key{F11}
+Switch to a correlated buffer.
+@item C-@@, C-@key{SPC}, @key{F5}
 Set mark.
 @item C-a, @key{HOME}
 Go to the beginning of line.
@@ -311,13 +315,15 @@ Move cursor to the next char.
 Cancel current command.
 @item C-h C-d
 Show informations about getting the latest version.
-@item C-h C-h
-Toggle mini help window.
+@item C-h C-h, @key{F10}
+Toggle @i{Mini Help} window.
+@item C-h C-r, @key{F9}
+Rotate @i{Mini Help} contents.
 @item C-h F
 Show the FAQ.
 @item C-h d, C-h f
 Describe a function.
-@item C-h h, F1
+@item C-h h, @key{F1}
 Show an help window.
 @item C-h k
 Describe a key sequence.
@@ -335,7 +341,7 @@ Show a sample configuration file.
 Show a tutorial window.
 @item C-h v
 Describe a variable.
-@item C-k
+@item C-k, @key{F6}
 Kill line.
 @item C-l
 Redraw display.
@@ -346,24 +352,24 @@ Move cursor to the previous line.
 @item C-q
 Read next input character and insert it.
 @item C-r
-Search backward.
+Incrementally search backward.
 @item C-s
-Search forward.
+Incrementally search forward.
 @item C-u
 Begin a numeric argument for the following command.
-@item C-w
+@item C-w, @key{F7}
 Kill region.
 @item C-x C-b
 List buffers.
 @item C-x C-c
 Save modified buffers and quit zile.
-@item C-x C-f
+@item C-x C-f, @key{F2}
 Find a file for editing.
 @item C-x C-l
 Convert the region to downcase.
 @item C-x C-q
-Toggle read only mode.
-@item C-x C-s
+Toggle @i{Read Only Mode}.
+@item C-x C-s, @key{F3}
 Save the current buffer.
 @item C-x C-u
 Convert the region to upcase.
@@ -387,7 +393,7 @@ Delete the other open windows.
 Split current window.
 @item C-x b
 Switch to a buffer.
-@item C-x e
+@item C-x e, @key{F12}
 Execute the last recorded keyboard macro.
 @item C-x f
 Set the fill column.
@@ -405,9 +411,9 @@ Copy region to register.
 Save modified buffers.
 @item C-x o
 Select the other window.
-@item C-x u, C-_
+@item C-x u, C-_, @key{F4}
 Undo some previous changes.
-@item C-y
+@item C-y, @key{F8}
 Yank killed text.
 @item C-v, @key{PGDN}
 Scroll up one screen page.
@@ -454,7 +460,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
 @item beginning-of-line
 Move point to beginning of current line.
 @item c-mode
-Turn on the @i{C Mode} mode for editing K&R and ANSI/ISO C code.
+Turn on the @i{C Mode} for editing K&R and ANSI/ISO C code.
 @item c++-mode
 Turn on the @i{C++ Mode} for editing ANSI/ISO C++ code.
 @item call-last-kbd-macro
@@ -533,6 +539,18 @@ Set mark after the inserted text.
 @item insert-register
 Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
+@item isearch-backward
+Do incremental search backward.
+As you type characters, they add to the search string and are found.
+Type return to exit, leaving point at location found.
+Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
+@kbd{C-g} when search is successful aborts and moves point to starting point.
+@item isearch-forward
+Do incremental search forward.
+As you type characters, they add to the search string and are found.
+Type return to exit, leaving point at location found.
+Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
+@kbd{C-g} when search is successful aborts and moves point to starting point.
 @item keyboard-quit
 Cancel current command.
 @item kill-buffer
@@ -593,12 +611,20 @@ Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
 the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
+@item query-replace
+Replace occurrences of a string with other text.
+As each match is found, the user must type a character saying
+what to do with it.
 @item quoted-insert
 Read next input character and insert it.
 This is useful for inserting control characters.
 @item recenter
 Center point in window and redisplay screen.
 The desired position of point is always relative to the current window.
+@item replace-string
+Replace occurrences of a string with other text.
+@item rotate-minihelp-window
+Show the next @i{Mini Help} entry.
 @item save-buffer
 Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
@@ -624,6 +650,33 @@ that value, otherwise with the current column value.
 Set mark at where point is.
 @item set-variable
 Set a variable value to the user specified value.
+@item shell-script-mode
+Turn on the @i{Shell-script Mode} for editing shell scripts.
+@item shell-command
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command.
+
+Standard input from the command comes from the null device.  If the
+shell command produces any output, the output goes to a Zile buffer
+named @samp{*Shell Command Output*}, which is displayed in another window
+but not selected.
+
+If the output is one line, it is displayed in the echo area.
+A numeric argument, as in @kbd{M-1 M-!}, directs this command to insert
+any output into the current buffer.
+@item shell-command-on-region
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command; passes the contents of the region as
+input to the shell command.
+
+If the shell command produces any output, the output goes to a Zile buffer
+named @samp{*Shell Command Output*}, which is displayed in another window
+but not selected.  
+
+If the output is one line, it is displayed in the echo area.
+A numeric argument, as in @kbd{M-1 M-!}, directs output to the current buffer,
+then the old region is deleted first and the output replaces it as the
+contents of the region.
 @item split-window
 Split current window into two windows, one above the other.
 Both windows display the same buffer now current.
@@ -635,6 +688,15 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 Stop Zile and return to superior process.
 @item switch-to-buffer
 Select to the user specified buffer in the current window.
+@item switch-to-correlated-buffer
+Find and open a file correlated with the current buffer.
+Some examples of correlated files are the following:
+@example
+anyfile.c  --> anyfile.h
+anyfile.h  --> anyfile.c
+anyfile.in --> anyfile
+anyfile    --> anyfile.in
+@end example
 @item tabify
 Convert multiple spaces in region to tabs when possible.
 A group of spaces is partially replaced by tabs
@@ -647,7 +709,7 @@ if the @samp{expand-tabs} variable is bound and set to true.
 @item text-mode
 Turn on the @i{Text Mode} for editing text intended for humans to read.
 @item toggle-minihelp-window
-Toggle the mini help window.
+Toggle the @i{Mini Help} window.
 @item toggle-read-only
 Change whether this buffer is visiting its file read-only.
 @item undo
@@ -697,7 +759,8 @@ need instead to modify your @file{~/.zilerc} configuration file and
 restart Zile.
 Default value is @samp{false}.
 @item auto-font-lock
-Automatically turn on @i{Font Lock Mode} when a C or C++ file is opened.
+Automatically turn on @i{Font Lock Mode} when a C/C++ source file
+or shell script is opened.
 Default value is @samp{true}.
 @item auto-font-lock-refresh
 If enabled, the file will be reparsed by @i{Font Lock} on every @kbd{C-l}
@@ -865,12 +928,15 @@ If enabled, highlight the current region with reversed colors.
 Default value is @samp{true}.
 @item novice-level
 Enable this if you are novice to Emacs in general.
-Disabling this variable the key press wait at startup, the @i{Mini Help}
+Disabling this variable the @i{Mini Help}
 window and the message in the scratch buffer will be disabled.
 Default value is @samp{true}.
 @item show-eob-marker
 If enabled, a marker will be displayed at the end of the buffer.
 Default value is @samp{true}.
+@item skip-splash-screen
+If enabled, the splash screen at startup will be avoided.
+Default value is @samp{false}.
 @item status-line-color
 The color of the status line.
 Default value is @samp{cyan}.
@@ -887,7 +953,7 @@ Default value is @samp{false}.
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the
-author at the Internet email address @email{ssigala@@tiscalinet.it}.
+author at the Internet email address @email{sandro@@sigala.it}.
 Please take a look at the @file{KNOWNBUGS} file in the source package
 before posting a bug report.
 

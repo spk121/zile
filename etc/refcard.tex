@@ -1,0 +1,128 @@
+%
+% Zile Reference Card
+%
+\documentclass[10pt]{article}
+\usepackage[a4paper,landscape]{geometry}
+
+\begin{document}
+
+\pagestyle{empty}
+
+\begin{center}
+  \Large
+  Zile Reference Card                                   \\
+  \small\mbox{}                                         \\
+  by Sandro Sigala \verb|<sandro@sigala.it>|            \\
+  Last modified 2001-02-05 for Zile 1.5
+\end{center}
+
+\vfill
+
+\newcommand{\reftable}[2]{
+  \begin{tabular}{|l|l|}
+    \hline
+    \multicolumn{2}{|c|}{\textsc{#1}} \\
+    \hline
+    \hline
+    #2
+    \hline
+  \end{tabular}}
+
+\newcommand{\kbd}[1]{\texttt{#1}}
+\newcommand{\key}[1]{\texttt{<#1>}}
+
+\small
+
+\begin{center}
+\reftable{Help}{
+\kbd{C-h h}, \key{F1}           & Show the Zile manual          \\
+\kbd{C-h C-r}, \key{F9}         & Go to next \textit{Mini Help} page \\
+\kbd{C-h C-h}, \key{F10}        & Toggle \textit{Mini Help} window \\
+\kbd{C-h F}                     & Show the FAQ                  \\
+\kbd{C-h d}, \kbd{C-h f}        & Describe function             \\
+\kbd{C-h k}                     & Describe key                  \\
+\kbd{C-h v}                     & Describe variable             \\
+\kbd{C-h l b}                   & List defined bindings         \\
+\kbd{C-h l f}                   & List defined functions        \\
+\kbd{C-h l r}                   & List defined registers        \\
+\kbd{C-h l v}                   & List defined variables        \\
+\kbd{C-h s}                     & Show configuration sample     \\
+\kbd{C-h t}                     & Show tutorial                 \\
+\kbd{C-h C-d}                   & Show Zile availability info   \\
+}
+\reftable{Cursor Motion}{
+\kbd{C-v}, \key{PGDN}           & Scroll up                     \\
+\kbd{M-v}, \key{PGUP}           & Scroll down                   \\
+\kbd{C-a}, \key{HOME}           & Go to beginning of line       \\
+\kbd{C-e}, \key{END}            & Go to end of line             \\
+\kbd{C-f}, \key{RIGHT}          & Forward character             \\
+\kbd{C-b}, \key{LEFT}           & Backward character            \\
+\kbd{C-p}, \key{UP}             & Go to previous line           \\
+\kbd{C-n}, \key{DOWN}           & Go to next line               \\
+\kbd{M-<}                       & Go to beginning of buffer     \\
+\kbd{M->}                       & Go to end of buffer           \\
+\kbd{M-g}                       & Go to specified line          \\
+}
+\reftable{Buffers}{
+\kbd{C-x C-f}, \key{F2}         & Find file                     \\
+\kbd{C-x C-v}                   & Find alternate file           \\
+\kbd{C-x i}                     & Insert file                   \\
+\kbd{C-x C-s}, \key{F3}         & Save current buffer           \\
+\kbd{C-x C-w}                   & Write to another file         \\
+\kbd{C-x s}                     & Save modified buffers         \\
+\kbd{C-x b}                     & Switch to another buffer      \\
+\kbd{C-x C-b}                   & List buffers                  \\
+\kbd{C-x k}                     & Kill current buffer           \\
+\hline \hline
+\multicolumn{2}{|c|}{\textsc{Windows}} \\
+\hline \hline
+\kbd{C-x 0}                     & Delete window                 \\
+\kbd{C-x 1}                     & Delete other windows          \\
+\kbd{C-x 2}                     & Split window                  \\
+\kbd{C-x \^}                    & Enlarge window                \\
+\kbd{C-x o}                     & Switch to other window        \\
+}
+\mbox{}\\\mbox{}\\\mbox{}\\
+\reftable{Region}{
+\kbd{C-@}, \key{F5}             & Define region                 \\
+\kbd{C-x h}                     & Mark whole buffer             \\
+\kbd{C-x C-x}                   & Exchange point and mark       \\
+\kbd{C-k}, \key{F6}             & Kill line                     \\
+\kbd{C-w}, \key{F7}             & Kill region                   \\
+\kbd{M-w}                       & Copy region as killed         \\
+\kbd{C-y}, \key{F8}             & Yank killed text              \\
+\hline \hline
+\multicolumn{2}{|c|}{\textsc{Registers}} \\
+\hline \hline
+\kbd{C-x r s}                   & Copy region to register       \\
+\kbd{C-x r i}                   & Insert defined register       \\
+\hline \hline
+\multicolumn{2}{|c|}{\textsc{Macros}} \\
+\hline \hline
+\kbd{C-x (}                     & Start defining macro          \\
+\kbd{C-x )}                     & End macro                     \\
+\kbd{C-x e}, \key{F12}          & Call last defined macro       \\
+}
+\reftable{Searching}{
+\kbd{C-s}                       & Search forward                \\
+\kbd{C-r}                       & Search backward               \\
+\hline \hline
+\multicolumn{2}{|c|}{\textsc{Miscellaneous}} \\
+\hline \hline
+\key{INS}                       & Toggle \textit{Overwrite Mode}\\
+\kbd{C-x u}, \kbd{C-\_}, \key{F4}& Undo last command            \\
+\kbd{C-g}                       & Abort current command         \\
+\kbd{C-x C-z}, \kbd{C-z}        & Suspend Zile                  \\
+\kbd{C-q}                       & Insert special character      \\
+\kbd{C-l}                       & Recenter                      \\
+\kbd{C-u}                       & Define function argument      \\
+\kbd{C-x f}                     & Set \textit{Auto Fill} column \\
+\kbd{C-x C-u}                   & Convert region to uppercase   \\
+\kbd{C-x C-l}                   & Convert region to downcase    \\
+\kbd{C-x C-q}                   & Toggle \textit{Read Only Mode}\\
+\kbd{C-x C-c}                   & Save modified buffers and quit Zile \\
+\kbd{M-x}                       & Execute extended command      \\
+}
+\end{center}
+
+\end{document}

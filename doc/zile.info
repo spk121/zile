@@ -1,10 +1,9 @@
-This is Info file zile.info, produced by Makeinfo version 1.68 from the
-input file zile.texi.
+This is zile.info, produced by makeinfo version 4.2 from zile.texi.
 
 
 File: zile.info,  Node: Top,  Next: Overview,  Prev: (dir),  Up: (dir)
 
-   This is the *Zile* manual.
+   This is the _Zile_ manual.
 
    Zile is another Emacs-clone.  Zile is a customizable,
 self-documenting real-time display editor.  Zile was written to be as
@@ -17,7 +16,7 @@ Zile.
 * Features::                    The characteristics of Zile.
 * Differences::                 What makes Zile different from other editors.
 * Invoking Zile::               Command line options that you can give to Zile.
-* Initialization file::         The ".zilerc" initialization file.
+* Initialization file::         The ``.zilerc'' initialization file.
 * Getting help::                How to get help under Zile.
 * Key names::                   How the keys are named.
 * Key bindings::                The functions associated with keys.
@@ -31,11 +30,11 @@ File: zile.info,  Node: Overview,  Next: Features,  Prev: Top,  Up: Top
 Overview
 ********
 
-   The *Zile* editor is written entirely in "C" with the help of the
-*ncurses* library.  Zile can't be compiled with a library different
-than ncurses.  It has been tested under *Linux* only, but it should be
+   The _Zile_ editor is written entirely in "C" with the help of the
+_ncurses_ library.  Zile can't be compiled with a library different
+than ncurses.  It has been tested under _Linux_ only, but it should be
 fairly simple to port it under other operating systems, since it is
-written in *ANSI C*.
+written in _ANSI C_.
 
    Zile should really appear like Emacs, but a lot of good ideas were
 also taken from from other editors:
@@ -44,7 +43,7 @@ also taken from from other editors:
 
    - XEmacs: Some minor hints for look-n-feel.
 
-   - Jed: Mini help window, mode line.
+   - Jed: Mini Help window, mode line.
 
    - ce: Structure names, function names.
 
@@ -60,7 +59,7 @@ Features
 
    - 8-bit clean.  Zile can operate with binary files.
 
-   - Looks like *Emacs*.  Most Zile key sequences and function names
+   - Looks like _Emacs_.  Most Zile key sequences and function names
      are identical to Emacs ones.
 
    - Multi buffer editing w/multi level undo.  Zile can open an
@@ -78,8 +77,9 @@ Features
    - Colors.  Zile makes use of the color capatibilities of the
      terminal if available.
 
-   - Source highlighting ("C" and "C++" only for now).  Zile can
-     highlight the "C" and "C++" source files for better reading.
+   - Source highlighting ("C", "C++", and shell scripts).  Zile can
+     highlight "C", "C++" source files and shell scripts for better
+     reading.
 
    - Auto fill (word wrap).  Zile automatically breaks the lines when
      they become too wide (if the Auto Fill Mode is enabled).
@@ -126,8 +126,12 @@ Invoking Zile
      specified by `number' (do not insert a space between the `+' sign
      and the number).
 
+`-f function'
+     Invoke the named internal function with no arguments.  For
+     example, `-f auto-fill-mode' turns on Auto Fill Mode.
+
 `-h'
-     Display the minihelp window at startup.  This may be useful for
+     Display the Mini Help window at startup.  This may be useful for
      novice users.
 
 `-q'
@@ -135,10 +139,6 @@ Invoking Zile
 
 `-V'
      Print version information on standard output then exit.
-
-`-f function'
-     Invoke the named internal function with no arguments.  For
-     example, `-f auto-fill-mode' turns on Auto Fill Mode.
 
 
 File: zile.info,  Node: Initialization file,  Next: Getting help,  Prev: Invoking Zile,  Up: Top
@@ -192,9 +192,12 @@ A sample file
      # .zilerc sample configuration
      
      # Enable this if you are novice to Emacs in general [default: true]
-     # Disabling this variable the key press wait at startup, the Mini Help
-     # window and the message in the scratch buffer will be disabled.
+     # Disabling this variable the Mini Help window and the message in
+     # the scratch buffer will be disabled.
      novice-level = true
+     
+     # Do not display the splash screen at startup [default: false]
+     skip-splash-screen = false
      
      # Enable alternative key bindings [default: false]
      # Remap the help functions (bound by default to `C-h') to `M-h'.
@@ -268,7 +271,7 @@ A sample file
      # For a list of colors, see below.
      status-line-color = cyan
      
-     # Font lock fonts for C/C++ source files
+     # Font Lock fonts
      # Available colors are:
      #     black, blue, cyan, green, magenta, red, white, yellow,
      #     light-black, light-blue, light-cyan, light-green, light-magenta,
@@ -284,13 +287,12 @@ A sample file
      font-string = green                     # [default: green]
      font-string-delimiters = white          # [default: white]
      
-     # Enable automatic font lock mode for C/C++ files [default: true]
-     # Font lock can also be toggled using the `M-x font-lock-mode' command.
-     # Font lock currently recognizes only the C and C++ languages.
+     # Enable automatic Font Lock Mode for C/C++/sh-scripts [default: true]
+     # Font Lock can also be toggled using the `M-x font-lock-mode' command.
      auto-font-lock = true
      
-     # Enable automatic font lock refresh [default: true]
-     # If enabled, the file will be reparsed by font lock on every C-l press.
+     # Enable automatic Font Lock refresh [default: true]
+     # If enabled, the file will be reparsed by Font Lock on every C-l press.
      # This may be disabled on slow machines.
      auto-font-lock-refresh = true
      
@@ -313,8 +315,11 @@ session to get help.
 `C-h C-d'
      Show informations about getting the latest version.
 
-`C-h C-h'
-     Toggle the command help window.
+`C-h C-h, <F10>'
+     Toggle the Mini Help window.
+
+`C-h C-r, <F9>'
+     Rotate Mini Help contents.
 
 `C-h F'
      Show the Frequently Asked Questions about Zile.
@@ -322,7 +327,7 @@ session to get help.
 `C-h d, C-h f'
      Describe a function.
 
-`C-h h, F1'
+`C-h h, <F1>'
      Show this manual.
 
 `C-h k'
@@ -411,7 +416,7 @@ sequences.
      Delete the previous character.
 
 `<INS>'
-     Toggle overwrite mode.
+     Toggle Overwrite Mode.
 
 `<RET>'
      Insert a new line.
@@ -419,7 +424,10 @@ sequences.
 `<TAB>'
      Insert a tab character.
 
-`C-@, C-<SPC>'
+`<F11>'
+     Switch to a correlated buffer.
+
+`C-@, C-<SPC>, <F5>'
      Set mark.
 
 `C-a, <HOME>'
@@ -443,8 +451,11 @@ sequences.
 `C-h C-d'
      Show informations about getting the latest version.
 
-`C-h C-h'
-     Toggle mini help window.
+`C-h C-h, <F10>'
+     Toggle Mini Help window.
+
+`C-h C-r, <F9>'
+     Rotate Mini Help contents.
 
 `C-h F'
      Show the FAQ.
@@ -452,7 +463,7 @@ sequences.
 `C-h d, C-h f'
      Describe a function.
 
-`C-h h, F1'
+`C-h h, <F1>'
      Show an help window.
 
 `C-h k'
@@ -479,7 +490,7 @@ sequences.
 `C-h v'
      Describe a variable.
 
-`C-k'
+`C-k, <F6>'
      Kill line.
 
 `C-l'
@@ -495,15 +506,15 @@ sequences.
      Read next input character and insert it.
 
 `C-r'
-     Search backward.
+     Incrementally search backward.
 
 `C-s'
-     Search forward.
+     Incrementally search forward.
 
 `C-u'
      Begin a numeric argument for the following command.
 
-`C-w'
+`C-w, <F7>'
      Kill region.
 
 `C-x C-b'
@@ -512,16 +523,16 @@ sequences.
 `C-x C-c'
      Save modified buffers and quit zile.
 
-`C-x C-f'
+`C-x C-f, <F2>'
      Find a file for editing.
 
 `C-x C-l'
      Convert the region to downcase.
 
 `C-x C-q'
-     Toggle read only mode.
+     Toggle Read Only Mode.
 
-`C-x C-s'
+`C-x C-s, <F3>'
      Save the current buffer.
 
 `C-x C-u'
@@ -557,7 +568,7 @@ sequences.
 `C-x b'
      Switch to a buffer.
 
-`C-x e'
+`C-x e, <F12>'
      Execute the last recorded keyboard macro.
 
 `C-x f'
@@ -584,10 +595,10 @@ sequences.
 `C-x o'
      Select the other window.
 
-`C-x u, C-_'
+`C-x u, C-_, <F4>'
      Undo some previous changes.
 
-`C-y'
+`C-y, <F8>'
      Yank killed text.
 
 `C-v, <PGDN>'
@@ -648,7 +659,7 @@ binding, anyway).
      Move point to beginning of current line.
 
 `c-mode'
-     Turn on the C Mode mode for editing K&R and ANSI/ISO C code.
+     Turn on the C Mode for editing K&R and ANSI/ISO C code.
 
 `c++-mode'
      Turn on the C++ Mode for editing ANSI/ISO C++ code.
@@ -762,6 +773,20 @@ binding, anyway).
      Insert contents of the user specified register.  Puts point before
      and mark after the inserted text.
 
+`isearch-backward'
+     Do incremental search backward.  As you type characters, they add
+     to the search string and are found.  Type return to exit, leaving
+     point at location found.  Type `C-r' to search again backward,
+     `C-s' to search again forward.  `C-g' when search is successful
+     aborts and moves point to starting point.
+
+`isearch-forward'
+     Do incremental search forward.  As you type characters, they add
+     to the search string and are found.  Type return to exit, leaving
+     point at location found.  Type `C-s' to search again forward,
+     `C-r' to search again backward.  `C-g' when search is successful
+     aborts and moves point to starting point.
+
 `keyboard-quit'
      Cancel current command.
 
@@ -837,6 +862,10 @@ binding, anyway).
      positioned after the character in that line which spans this
      column, or at the end of the line if it is not long enough.
 
+`query-replace'
+     Replace occurrences of a string with other text.  As each match is
+     found, the user must type a character saying what to do with it.
+
 `quoted-insert'
      Read next input character and insert it.  This is useful for
      inserting control characters.
@@ -844,6 +873,12 @@ binding, anyway).
 `recenter'
      Center point in window and redisplay screen.  The desired position
      of point is always relative to the current window.
+
+`replace-string'
+     Replace occurrences of a string with other text.
+
+`rotate-minihelp-window'
+     Show the next Mini Help entry.
 
 `save-buffer'
      Save current buffer in visited file if modified. By default, makes
@@ -882,6 +917,36 @@ binding, anyway).
 `set-variable'
      Set a variable value to the user specified value.
 
+`shell-script-mode'
+     Turn on the Shell-script Mode for editing shell scripts.
+
+`shell-command'
+     Reads a line of text using the minibuffer and creates an inferior
+     shell to execute the line as a command.
+
+     Standard input from the command comes from the null device.  If the
+     shell command produces any output, the output goes to a Zile buffer
+     named `*Shell Command Output*', which is displayed in another
+     window but not selected.
+
+     If the output is one line, it is displayed in the echo area.  A
+     numeric argument, as in `M-1 M-!', directs this command to insert
+     any output into the current buffer.
+
+`shell-command-on-region'
+     Reads a line of text using the minibuffer and creates an inferior
+     shell to execute the line as a command; passes the contents of the
+     region as input to the shell command.
+
+     If the shell command produces any output, the output goes to a
+     Zile buffer named `*Shell Command Output*', which is displayed in
+     another window but not selected.
+
+     If the output is one line, it is displayed in the echo area.  A
+     numeric argument, as in `M-1 M-!', directs output to the current
+     buffer, then the old region is deleted first and the output
+     replaces it as the contents of the region.
+
 `split-window'
      Split current window into two windows, one above the other.  Both
      windows display the same buffer now current.
@@ -896,6 +961,14 @@ binding, anyway).
 
 `switch-to-buffer'
      Select to the user specified buffer in the current window.
+
+`switch-to-correlated-buffer'
+     Find and open a file correlated with the current buffer.  Some
+     examples of correlated files are the following:
+          anyfile.c  --> anyfile.h
+          anyfile.h  --> anyfile.c
+          anyfile.in --> anyfile
+          anyfile    --> anyfile.in
 
 `tabify'
      Convert multiple spaces in region to tabs when possible.  A group
@@ -912,7 +985,7 @@ binding, anyway).
      Turn on the Text Mode for editing text intended for humans to read.
 
 `toggle-minihelp-window'
-     Toggle the mini help window.
+     Toggle the Mini Help window.
 
 `toggle-read-only'
      Change whether this buffer is visiting its file read-only.
@@ -969,8 +1042,8 @@ in the `.zilerc' initialization file.
      restart Zile.  Default value is `false'.
 
 `auto-font-lock'
-     Automatically turn on Font Lock Mode when a C or C++ file is
-     opened.  Default value is `true'.
+     Automatically turn on Font Lock Mode when a C/C++ source file or
+     shell script is opened.  Default value is `true'.
 
 `auto-font-lock-refresh'
      If enabled, the file will be reparsed by Font Lock on every `C-l'
@@ -1182,13 +1255,16 @@ in the `.zilerc' initialization file.
 
 `novice-level'
      Enable this if you are novice to Emacs in general.  Disabling this
-     variable the key press wait at startup, the Mini Help window and
-     the message in the scratch buffer will be disabled.  Default value
-     is `true'.
+     variable the Mini Help window and the message in the scratch
+     buffer will be disabled.  Default value is `true'.
 
 `show-eob-marker'
      If enabled, a marker will be displayed at the end of the buffer.
      Default value is `true'.
+
+`skip-splash-screen'
+     If enabled, the splash screen at startup will be avoided.  Default
+     value is `false'.
 
 `status-line-color'
      The color of the status line.  Default value is `cyan'.
@@ -1207,27 +1283,27 @@ Bug reports
 ***********
 
    Any questions, comments, or bug reports should be sent to the author
-at the Internet email address <ssigala@tiscalinet.it>.  Please take a
-look at the `KNOWNBUGS' file in the source package before posting a bug
+at the Internet email address <sandro@sigala.it>.  Please take a look
+at the `KNOWNBUGS' file in the source package before posting a bug
 report.
 
 
 
 Tag Table:
-Node: Top95
-Node: Overview1113
-Node: Features1831
-Node: Differences3094
-Node: Differences from Emacs3289
-Node: Invoking Zile3745
-Node: Initialization file4460
-Node: File syntax5009
-Node: Sample file5872
-Node: Getting help10747
-Node: Key names11668
-Node: Key bindings12305
-Node: Functions15606
-Node: Variables25783
-Node: Bug reports33510
+Node: Top69
+Node: Overview1089
+Node: Features1807
+Node: Differences3089
+Node: Differences from Emacs3284
+Node: Invoking Zile3740
+Node: Initialization file4456
+Node: File syntax5005
+Node: Sample file5868
+Node: Getting help10732
+Node: Key names11708
+Node: Key bindings12345
+Node: Functions15826
+Node: Variables28558
+Node: Bug reports36386
 
 End Tag Table

@@ -1,8 +1,14 @@
+/* Define this to support the xterm resizing. */
+#undef SUPPORT_XTERM_RESIZE
+
 /* Define this to remove the debugging assertions.  */
 #undef NDEBUG
 
 /* Define this to include debugging code.  */
 #undef DEBUG
+
+/* Define if you have the ncurses library (-lncurses).  */
+#undef HAVE_LIBNCURSES
 
 /* Define this to use the ncurses screen handling library.  */
 #undef USE_NCURSES
@@ -35,6 +41,6 @@ extern void *xrealloc(void *, size_t);
 extern char *xstrdup(const char *);
 #endif
 
-#ifdef DEBUG
+#ifdef DMALLOC
 #include <dmalloc.h>
 #endif

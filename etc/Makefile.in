@@ -1,8 +1,9 @@
-#	$Id: Makefile.in,v 1.1 2001/01/19 22:01:36 ssigala Exp $
+#	$Id: Makefile.in,v 1.2 2003/04/24 15:11:17 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
 
+DESTDIR =
 prefix = @prefix@
 
 etcdir = $(prefix)/share/zile
@@ -12,15 +13,14 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL = @INSTALL@
 
 CC = @CC@
-CFLAGS = -I.. -I../lib -I../src -W @CFLAGS@
+CFLAGS = -I.. -I../lib -I../src @CFLAGS@
 LDFLAGS = @LDFLAGS@
 ZILELIBS = ../lib/libzile.a
 LIBS = $(ZILELIBS) @LIBS@
 
-FILES = $(srcdir)/zilerc.sample \
-	$(srcdir)/FAQ $(srcdir)/HELP $(srcdir)/HELPWIN $(srcdir)/HELPWINALT \
-	$(srcdir)/LATEST_VERSION $(srcdir)/TUTORIAL \
-	AUTODOC
+FILES = $(srcdir)/zilerc.sample $(srcdir)/FAQ $(srcdir)/HELP \
+	$(srcdir)/MINIHELP1 $(srcdir)/MINIHELP2 $(srcdir)/MINIHELP3 \
+	$(srcdir)/LATEST_VERSION $(srcdir)/TUTORIAL AUTODOC
 
 AUTODOCSRCS = $(srcdir)/../src/*.c
 
@@ -32,7 +32,10 @@ AUTODOCSRCS = $(srcdir)/../src/*.c
 all: $(FILES)
 
 $(srcdir)/HELP: ../doc/zile.texi ../doc/zilerc.texi
-	echo "Please consider reading the Texinfo version of this manual." >$(srcdir)/HELP
+	echo "**********************************************************" >$(srcdir)/HELP
+	echo "Please consider reading the Texinfo version of this manual" >>$(srcdir)/HELP
+	echo "(from the command line type \`info zile')." >>$(srcdir)/HELP
+	echo "**********************************************************" >>$(srcdir)/HELP
 	echo "" >>$(srcdir)/HELP
 	makeinfo --no-header --no-split -I$(srcdir)/../doc $(srcdir)/../doc/zile.texi >>$(srcdir)/HELP
 
@@ -42,17 +45,21 @@ AUTODOC: $(AUTODOCSRCS) mkdoc
 mkdoc: mkdoc.o
 	$(CC) $(LDFLAGS) -o mkdoc mkdoc.o $(ZILELIBS)
 
+refcard.ps: refcard.tex
+	latex refcard
+	dvips -o refcard.ps -ta4 -tlandscape refcard.dvi
+
 .PHONY: install uninstall clean realclean distclean mostlyclean
 
 install: all
-	${srcdir}/../mkinsdir.sh $(etcdir)
+	${srcdir}/../mkinsdir.sh $(DESTDIR)$(etcdir)
 	for f in $(FILES); do \
-		$(INSTALL_DATA) $$f $(etcdir); \
+		$(INSTALL_DATA) $$f $(DESTDIR)$(etcdir); \
 	done
 
 uninstall:
 	for f in $(FILES); do \
-		rm -f $(etcdir)/`basename $$f`; \
+		rm -f $(DESTDIR)$(etcdir)/`basename $$f`; \
 	done
 
 clean: 

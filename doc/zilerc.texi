@@ -3,9 +3,12 @@
 # .zilerc sample configuration
 
 # Enable this if you are novice to Emacs in general [default: true]
-# Disabling this variable the key press wait at startup, the Mini Help
-# window and the message in the scratch buffer will be disabled.
+# Disabling this variable the Mini Help window and the message in
+# the scratch buffer will be disabled.
 novice-level = true
+
+# Do not display the splash screen at startup [default: false]
+skip-splash-screen = false
 
 # Enable alternative key bindings [default: false]
 # Remap the help functions (bound by default to `C-h') to `M-h'.
@@ -79,7 +82,7 @@ colors = true
 # For a list of colors, see below.
 status-line-color = cyan
 
-# Font lock fonts for C/C++ source files
+# Font Lock fonts
 # Available colors are:
 #     black, blue, cyan, green, magenta, red, white, yellow,
 #     light-black, light-blue, light-cyan, light-green, light-magenta,
@@ -95,13 +98,12 @@ font-other = white                      # [default: white]
 font-string = green                     # [default: green]
 font-string-delimiters = white          # [default: white]
 
-# Enable automatic font lock mode for C/C++ files [default: true]
-# Font lock can also be toggled using the `M-x font-lock-mode' command.
-# Font lock currently recognizes only the C and C++ languages.
+# Enable automatic Font Lock Mode for C/C++/sh-scripts [default: true]
+# Font Lock can also be toggled using the `M-x font-lock-mode' command.
 auto-font-lock = true
 
-# Enable automatic font lock refresh [default: true]
-# If enabled, the file will be reparsed by font lock on every C-l press.
+# Enable automatic Font Lock refresh [default: true]
+# If enabled, the file will be reparsed by Font Lock on every C-l press.
 # This may be disabled on slow machines.
 auto-font-lock-refresh = true
 

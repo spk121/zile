@@ -14,29 +14,52 @@ AC_DEFINE(USE_NCURSES)
 dnl Checks for libraries.
 AC_REPLACE_FUNCS(xmalloc xrealloc xstrdup)
 dnl The following check should depend on the `USE_NCURSES' definition.
-AC_CHECK_LIB(ncurses, initscr)
+AC_CHECK_LIB(ncurses, initscr,
+    AC_DEFINE(HAVE_LIBNCURSES) LIBS="$LIBS -lncurses",
+    AC_CHECK_LIB(curses, curses_version,
+	AC_DEFINE(HAVE_LIBNCURSES) LIBS="$LIBS -lcurses"))
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h unistd.h)
-dnl The following check should depend on the `USE_NCURSES' definition.
-AC_CHECK_HEADERS(ncurses.h)
+AC_CHECK_HEADERS(fcntl.h limits.h sys/ioctl.h unistd.h ncurses.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
+AC_FUNC_MEMCMP
+AC_FUNC_STRFTIME
+AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
-AC_CHECK_FUNCS(strerror)
+AC_CHECK_FUNCS(getcwd strerror strstr vasprintf)
+
+AC_MSG_CHECKING(if xterm resizing should be supported)
+AC_ARG_ENABLE(xterm-support,
+[  --enable-xterm-support  include xterm resizing support],
+[
+if test $enableval = yes; then
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(SUPPORT_XTERM_RESIZE)
+else
+	AC_MSG_RESULT(no)
+fi
+], [
+AC_MSG_RESULT(yes)
+AC_DEFINE(SUPPORT_XTERM_RESIZE)
+])
 
 AC_MSG_CHECKING(if the debugging code should be included)
 AC_ARG_ENABLE(debug,
-[  --enable-debug          include debugging code and assertions
-			  (requires the dmalloc debugging package)],
+[  --enable-debug          include debugging code and assertions],
 [
-AC_MSG_RESULT(yes)
-AC_DEFINE(DEBUG)
+if test $enableval = yes; then
+	AC_MSG_RESULT(yes)
+	AC_DEFINE(DEBUG)
+else
+	AC_MSG_RESULT(no)
+	AC_DEFINE(NDEBUG)
+fi
 ], [
 AC_MSG_RESULT(no)
 AC_DEFINE(NDEBUG)
@@ -47,5 +70,5 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"])
 
 rm -f src/paths.h
 
-AC_OUTPUT(doc/Makefile lib/Makefile etc/Makefile  src/Makefile \
+AC_OUTPUT(doc/Makefile lib/Makefile etc/Makefile src/Makefile \
           src/term_ncurses/Makefile Makefile)

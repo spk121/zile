@@ -1,3 +1,53 @@
+Changes from Zile 1.6.1 - Zile 1.6.2
+
+* Fixed a few core dumps.
+
+Changes between Zile 1.6 - Zile 1.6.1
+
+* Added `.m' extension to C Mode (for Objective-C files).
+* Fixed window resize bug under xterm (\377 character was inserted).
+* Typos and minor bug fixes.
+
+Changes between Zile 1.5.3 - Zile 1.6
+
+* Implemented incremental search (`isearch-forward', `isearch-backward').
+* Implemented search & replace (`replace-string', `query-replace').
+* Implemented shell commands (`shell-command', `shell-command-on-region').
+* Implemented better handling of unexpected errors, with automatic file
+  saving on Zile crash.
+
+Changes between Zile 1.5.2 - Zile 1.5.3
+
+* Fixed wrong behavior in novice mode (Font Lock automatically set).
+* Fixed a few core dumps.
+
+Changes between Zile 1.5.1 - Zile 1.5.2
+
+* Implemented Shell-script Mode.
+* Fixed Solaris compatibility bugs.
+* Fixed bugs in C/C++ Font Lock parsing.
+
+Changes between Zile 1.5 - Zile 1.5.1
+
+* Fixed Minibuf filename completion bug.
+
+Changes between Zile 1.4 - Zile 1.5
+
+* Added `switch-to-correlated-buffer' (bound to `F11').
+* Added `skip-splash-screen' variable.
+* Extented Mini Help functionality; now there are three help pages.
+* Reorganized partially the `F1'..`F12' keys.
+* Added a reference card (see `etc/refcard.tex' and `etc/refcard.ps').
+* User-invisible changes: introduced three new general-purpose libraries:
+	- lib/alist.c	Doubly-linked lists
+	- lib/astr.c	Dynamically allocated strings
+	- lib/htable.c	Hash table functions (was hash.c)
+  The new libraries are documented in their man pages (see lib/*.3).
+  Starting from this version, the internal structures will be rewritten
+  using these libraries.  This will make the code easier to maintain,
+  and hopefully fixes some hidden bugs.
+* Many bug fixes.
+
 Changes between Zile 1.3 - Zile 1.4
 
 * Added support for `F1'..`F12' keys.

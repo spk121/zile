@@ -5,15 +5,22 @@
   and suggestions.
 * George Young <gryoung@nortel.ca> for bug reports.
 * Jim Buchanan <c22jrb@dawg.delcoelect.com> for suggestions.
-* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes and the
-  `goto-line' function.
+* Carsten Leonhardt <leo@debian.org> for a lot of bug fixes,
+  the `goto-line' function, Debian package and continuous support.
 * Tim Middelkoop <mtim@arranvale.com> for the backup directory feature.
 * Jeff Sheinberg <jeffsh@erols.com> for bug reports.
-* Christian Weisgerber <naddy@mips.inka.de> for bug reports.
+* Christian Weisgerber <naddy@mips.inka.de> for bug reports and fixes.
 * Pawel A. Gajda <mis@k2.net.pl> for bug reports.
 * Jason Evans <jasone@canonware.com> for bug reports.
 * Mattias R"onnblom <hofors@lysator.liu.se> for bug reports.
 * Rouge Alain <alain.rouge@enac.fr> for suggestions and bug reports.
-* Gerd Bavendiek <bav@esn.sbs.de> for suggestions.
+* Gerd Bavendiek <bav@epost.de> for suggestions and bug reports.
 * Dale DePriest <daled@cadence.com> for suggestions.
 * Florian Nykrin <flo.n@gmx.de> for suggestions and bug reports.
+* Josef 'Jupp' Schugt <jupp@jupp.8m.com> for suggestions.
+* Alexander Glasmacher <alexander.glasmacher@web.de> for bug fixes.
+* Abel Morabito <amorabito@funescoop.com.ar> for suggestions.
+* Jacques A. Vidrine <n@nectar.com> for suggestions.
+* Maxime Soulé <max@IPricot.com> for suggestions.
+* Falk Hueffner <falk@debian.org> for bug reports.
+* Reuben Thomas <rrt@sc3d.org> for bug fixes and maintenance.

@@ -1,8 +1,9 @@
-#	$Id: Makefile.in,v 1.1 2001/01/19 22:00:01 ssigala Exp $
+#	$Id: Makefile.in,v 1.2 2003/04/24 15:11:16 rrt Exp $
 
 srcdir = @srcdir@
 VPATH = $(srcdir)
 
+DESTDIR =
 prefix = @prefix@
 
 infodir = @infodir@
@@ -32,14 +33,14 @@ zile.dvi: zile.texi zilerc.texi
 .PHONY: install uninstall clean realclean distclean mostlyclean
 
 install: all
-	${srcdir}/../mkinsdir.sh $(infodir)
+	${srcdir}/../mkinsdir.sh $(DESTDIR)$(infodir)
 	for f in $(FILES); do \
-		$(INSTALL_DATA) $$f $(infodir); \
+		$(INSTALL_DATA) $$f $(DESTDIR)$(infodir); \
 	done
 
 uninstall:
 	for f in $(FILES); do \
-		rm -f $(infodir)/`basename $$f`; \
+		rm -f $(DESTDIR)$(infodir)/`basename $$f`; \
 	done
 
 clean: 

@@ -1,6 +1,6 @@
 Zile is another Emacs-clone.  Zile is a customizable, self-documenting
-real-time display editor.  Zile was written to be as similar as possible
-to Emacs; every Emacs user should feel at home with Zile.
+real-time, open-source display editor.  Zile was written to be as similar
+as possible to Emacs; every Emacs user should feel at home with Zile.
 
 Zile features:
 
@@ -27,8 +27,8 @@ Zile features:
  - Colors.  Zile makes use of the color capatibilities of the
    terminal if available.
 
- - Source highlighting ("C" and "C++" only for now).  Zile can
-   highlight the "C" and "C++" source files for better reading.
+ - Source highlighting ("C", "C++", and shell scripts).  Zile can
+   highlight "C", "C++" source files and shell scripts for better reading.
 
  - Auto fill (word wrap).  Zile automatically breaks the lines when
    they become too wide (if the Auto Fill Mode is enabled).
@@ -38,8 +38,13 @@ library.  Zile can't be compiled with a library different than ncurses.  It
 has been tested under Linux only, but it should be fairly simple
 to port it under other operating systems, since it is written in ANSI C.
 
-Latest version can be found at the address:
-http://web.tiscalinet.it/ssigala/sandro
+------------------------------------------------------------------------------
+
+Zile is now hosted on SourceForge at the address:
+http://zile.sourceforge.net/
+
+Latest version can be also found at my homepage:
+http://www.sigala.it/sandro/
 
 Any questions, comments, or bug reports should be sent to the author at the
-Internet email address <ssigala@tiscalinet.it>.
+Internet email address <sandro@sigala.it>.

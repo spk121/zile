@@ -1,0 +1,7 @@
+                    HELP COMMANDS 		       |
+F1     show Zile manual     C-h t    show tutorial     | Zile Mini Help
+C-h F  show FAQ             C-h l b  list bindings     |
+C-h d  describe function    C-h l f  list functions    |
+C-h k  describe key         C-h l r  list registers    | [F9 show next page]
+C-h v  describe variable    C-h l v  list variables    | [F10 toggle Mini Help]
+C-h s  show config sample                              |
