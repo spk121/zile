@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(zile, 2.0-a1, zile-devel@lists.sourceforge.net)
+AC_INIT(zile, 2.0-a2, zile-devel@lists.sourceforge.net)
 AC_CONFIG_SRCDIR(src/main.c)
 AM_INIT_AUTOMAKE
 
@@ -22,7 +22,6 @@ AC_C_INLINE
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PATH_PROG(MAKEINFO, makeinfo)
-AC_PATH_PROG(GPERF, gperf)
 
 dnl ==================================================================
 dnl Checks for functions.
@@ -136,10 +135,32 @@ fi
 AM_CONDITIONAL(ALLEGRO, test x$allegro = xtrue)
 
 dnl ==================================================================
+dnl epocemx
+dnl ==================================================================
+
+AC_MSG_CHECKING([use epocemx])
+AC_ARG_ENABLE(epocemx,
+AC_HELP_STRING([--enable-epocemx], [use epocemx interface]),
+[
+if test $enableval = yes; then
+        epocemx=true
+        AC_MSG_RESULT(yes)
+else
+        epocemx=false
+        AC_MSG_RESULT(no)
+fi
+],[
+        epocemx=false
+        AC_MSG_RESULT(no)
+])
+
+AM_CONDITIONAL(EPOCEMX, test x$epocemx = xtrue)
+
+dnl ==================================================================
 dnl Termcap
 dnl ==================================================================
 
-if test x$allegro = xfalse; then
+if test x$allegro = xfalse && test x$epocemx = xfalse; then
         AC_CHECK_HEADERS([termcap.h] [termios.h])
         AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
 		AC_MSG_FAILURE([cannot find libtermcap]))

@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.19 2004/11/15 12:36:13 rrt Exp $
+## $Id: Makefile.am,v 1.20 2004/11/16 00:35:44 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -76,8 +76,13 @@ zile_SOURCES = $(zile_base_SOURCES)		\
 
 zile_LDFLAGS = `allegro-config --libs`
 else
+if EPOCEMX
+zile_SOURCES = $(zile_base_SOURCES)		\
+	term_epocemx.c
+else
 zile_SOURCES = $(zile_base_SOURCES)		\
 	term_termcap.c
+endif
 endif
 
 zile_LDADD =					\
