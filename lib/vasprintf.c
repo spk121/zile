@@ -604,7 +604,24 @@ free_EOF:
      return EOF;
 }
 
-/*############################# _vasprintf ################################*/
+/*############################## asprintf ################################*/
+int
+asprintf( char **      ptr,
+           const char * format_string,
+           ...
+         )
+{
+     va_list        vargs;
+     int            retval;
+
+     va_start( vargs, format_string );
+     retval = vasprintf( ptr, format_string, vargs );
+     va_end( vargs );
+
+     return retval;
+}
+
+/*############################# vasprintf ################################*/
 int
 vasprintf( char **      ptr,
             const char * format_string,
