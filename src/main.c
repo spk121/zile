@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.54 2005/01/10 14:09:47 rrt Exp $	*/
+/*	$Id: main.c,v 1.55 2005/01/11 22:29:19 rrt Exp $	*/
 
 #include "config.h"
 
@@ -228,15 +228,15 @@ int main(int argc, char **argv)
 
   sanity_checks();
 
-  /*
-   * Set up signal handling
-   */
+  /* Set up signal handling */
   signal(SIGFPE, segv_sig_handler);
   signal(SIGSEGV, segv_sig_handler);
   signal(SIGHUP, other_sig_handler);
   signal(SIGINT, other_sig_handler);
   signal(SIGQUIT, other_sig_handler);
   signal(SIGTERM, other_sig_handler);
+
+  setlocale(LC_ALL, "");
 
   term_init();
 
