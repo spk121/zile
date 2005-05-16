@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.72 2005/04/05 17:03:20 rrt Exp $        */
+/*      $Id: file.c,v 1.73 2005/05/16 23:11:16 rrt Exp $        */
 
 #include "config.h"
 
@@ -734,7 +734,7 @@ static astr create_backup_filename(const char *filename,
 
   /* Add the backup directory path to the filename */
   if (withdirectory) {
-    astr dir, fname, buf;
+    astr dir, fname;
     char *backupdir;
 
     backupdir = get_variable("backup-directory");
