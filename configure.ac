@@ -127,7 +127,8 @@ dnl ==================================================================
 if test x$allegro = xfalse && test x$epocemx = xfalse; then
         AC_CHECK_HEADERS([termcap.h] [termios.h])
         AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
-		AC_MSG_FAILURE([cannot find libtermcap]))
+		AC_CHECK_LIB(ncurses, tgetstr, [LIBS="$LIBS -lncurses"],
+                        AC_MSG_FAILURE([cannot find termcap])))
 fi
 
 dnl ==================================================================
