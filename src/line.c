@@ -1,6 +1,6 @@
 /* Line-oriented editing functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.63 2005/02/09 00:23:55 rrt Exp $	*/
+/*	$Id: line.c,v 1.64 2005/05/17 14:37:28 rrt Exp $	*/
 
 #include "config.h"
 
@@ -633,30 +633,34 @@ END_DEFUN
 			 Indentation command
 ***********************************************************************/
 
+/*
+ * Go to cur_goalc() in the previous non-blank line.
+ */
+static void previous_nonblank_goalc(void)
+{
+  size_t cur_goalc = get_goalc();
+  int uniused = TRUE;
+
+  /* Find previous non-blank line. */
+  while (FUNCALL_ARG(forward_line, -1) && is_blank_line());
+
+  /* Go to `cur_goalc' in that non-blank line. */
+  while (!eolp() && get_goalc() < cur_goalc)
+    forward_char();
+}
+
 static int indent_relative(void)
 {
-  size_t target_goalc, cur_goalc = get_goalc();
+  size_t target_goalc = 0, cur_goalc = get_goalc();
   Marker *old_point;
+  int ok = TRUE;
 
   if (warn_if_readonly_buffer())
     return FALSE;
 
   deactivate_mark();
   old_point = point_marker();
-
-  /* Find previous non-blank line. */
-  do {
-    int uniused = TRUE;
-    if (!FUNCALL_ARG(forward_line, -1)) {
-      cur_bp->pt = old_point->pt;
-      free_marker(old_point);
-      return insert_tab();
-    }
-  } while (is_blank_line());
-
-  /* Go to `cur_goalc' in that non-blank line. */
-  while (!eolp() && get_goalc() < cur_goalc)
-    forward_char();
+  previous_nonblank_goalc();
 
   /* Now find the next blank char. */
   if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
@@ -670,35 +674,23 @@ static int indent_relative(void)
   /* Target column. */
   if (!eolp())
     target_goalc = get_goalc();
-  else {
-    cur_bp->pt = old_point->pt;
-    free_marker(old_point);
-
-    return insert_tab();
-  }
 
   cur_bp->pt = old_point->pt;
   free_marker(old_point);
 
   /* Insert spaces.  */
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  while (get_goalc() < target_goalc)
-    insert_char_in_insert_mode(' ');
-
-  /* Tabify.  */
-  push_mark();
-  set_mark();
-  activate_mark();
-  while (!bolp() && isspace(preceding_char()))
-    backward_char();
-  exchange_point_and_mark();
-  FUNCALL(tabify);
-  deactivate_mark();
-  pop_mark();
-
+    if (target_goalc > 0)
+      /* If not at EOL on target line, insert spaces up to
+         target_goalc. */
+      while (get_goalc() < target_goalc)
+        /* If already at EOL on target line, insert a tab. */
+        insert_char(' ');
+    else
+      ok = insert_tab();
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  return TRUE;
+  return ok;
 }
 
 DEFUN_INT("indent-command", indent_command)
@@ -720,12 +712,32 @@ DEFUN_INT("newline-and-indent", newline_and_indent)
 
   if (warn_if_readonly_buffer())
     return FALSE;
+  else {
+    int indent;
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  ret = insert_newline();
-  if (ret)
-    FUNCALL(indent_command);
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return ret;
+    deactivate_mark();
+
+    if ((ret = insert_newline())) {
+      size_t pos;
+      Marker *old_point = point_marker();
+
+      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+
+      /* Check where last non-blank goalc is. */
+      previous_nonblank_goalc();
+      pos = get_goalc();
+      indent = pos > 0 || isspace(following_char());
+      cur_bp->pt = old_point->pt;
+      free_marker(old_point);
+      /* Only indent if we're in column > 0 or we're in column 0 and
+         there is a space character there in the last non-blank line. */
+      if (indent)
+        indent_relative();
+
+      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    }
+
+    return ret;
+  }
 }
 END_DEFUN
