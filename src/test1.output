@@ -1,6 +1,5 @@
 Eval results:
 (!)
-(Hello , world !)
 
 Variables:
 exclamation 	(!)
@@ -11,14 +10,14 @@ transient-mark-mode 	(true)
 tab-width 	(8)
 standard-indent 	(4)
 skip-splash-screen 	(false)
+kill-whole-line 	(false)
 highlight-nonselected-windows 	(false)
 fill-column 	(72)
 expand-tabs 	(false)
+case-replace 	(true)
 beep 	(true)
 backup-with-directory 	(false)
 backup-method 	(simple)
 backup-directory 	(~/.backup)
 auto-fill-mode 	(false)
 alternative-bindings 	(false)
-
-Defuns:

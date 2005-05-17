@@ -21,9 +21,9 @@
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.  */
 #
-#	$Id: tests,v 1.3 2005/01/25 16:45:33 rrt Exp $
+#	$Id: tests,v 1.4 2005/05/17 12:31:29 rrt Exp $
 
-for i in test1 test2 test3; do
+for i in test1; do
   ./zile -q --batch --load=$i.el > $i.stdout
   if ! diff $i.stdout $i.output; then
     exit 1
