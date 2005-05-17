@@ -21,11 +21,13 @@
 # Software Foundation, 59 Temple Place - Suite 330, Boston, MA
 # 02111-1307, USA.  */
 #
-#	$Id: tests,v 1.4 2005/05/17 12:31:29 rrt Exp $
+#	$Id: tests,v 1.5 2005/05/17 12:42:49 rrt Exp $
+
+[ "$srcdir" = "" ] && srcdir="."
 
 for i in test1; do
-  ./zile -q --batch --load=$i.el > $i.stdout
-  if ! diff $i.stdout $i.output; then
+  ./zile -q --batch --load=$srcdir/$i.el > $i.stdout
+  if ! diff $i.stdout $srcdir/$i.output; then
     exit 1
   fi
 done

@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.37 2005/01/26 15:21:14 rrt Exp $
+## $Id: Makefile.am,v 1.38 2005/05/17 12:42:49 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
@@ -76,7 +76,10 @@ endif
 
 zile_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c
+EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c test1.el test1.output
+
+clean-local:
+	rm -f test*.stdout
 
 distclean-local:
 	rm -f paths.h
