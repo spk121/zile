@@ -5,6 +5,8 @@ Changes between Zile 2.0 - Zile 2.2
 * Pseudo-Lisp interpreter added; all it can do is set variables and
   bind keys, but it is a strict subset of Emacs Lisp!
 * Various other bug, design and documentation fixes.
+* Add case-replace and kill-whole-line.
+* Change command-line options to be more like Emacs.
 
 Changes between Zile 1.7 BETA 3 - Zile 2.0
 
