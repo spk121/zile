@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.69 2005/04/04 11:35:52 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.70 2005/05/17 12:14:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -55,7 +55,7 @@ typedef struct {
 } Screen;
 
 static char *tcap_ptr;
-static size_t *key_buf, nkeys;
+static astr key_buf;
 static Screen screen;
 Terminal *termp = &thisterm;
 
@@ -67,7 +67,7 @@ size_t ZILE_LINES;  /* Current number of rows on screen. */
 static char *ks_string, *ke_string, *cm_string, *ce_string;
 static char *mr_string, *me_string;
 
-static int key_code[] = {
+static size_t key_code[] = {
   KBD_LEFT, KBD_RIGHT, KBD_UP, KBD_DOWN,
   KBD_HOME, KBD_END, KBD_PGUP, KBD_PGDN,
   KBD_BS, KBD_DEL, KBD_INS,
@@ -309,6 +309,8 @@ void term_init(void)
   termp->screen = &screen;
   term_clear();
 
+  key_buf = astr_new();
+
   /* Save terminal flags. */
   if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
     fprintf(stderr, "Can't read terminal capabilites\n");
@@ -483,16 +485,9 @@ static size_t getchars(char *keys, size_t nbytes)
 
 static size_t _xgetkey(int mode, size_t dsecs)
 {
-  size_t nbytes = 0;
-  char *keys;
+  size_t nbytes = astr_len(key_buf);
+  char *keys = zmalloc(nbytes + max_key_chars);
   size_t key = KBD_NOKEY;
-
-  if (nkeys > 0) {
-    nkeys--;
-    return key_buf[nkeys];
-  }
-
-  keys = zmalloc(max_key_chars);
 
   if (mode & GETKEY_DELAYED) {
     nstate.c_cc[VTIME] = dsecs; /* Wait up to dsecs deciseconds... */
@@ -500,6 +495,14 @@ static size_t _xgetkey(int mode, size_t dsecs)
   } else {
     nstate.c_cc[VTIME] = 0;     /* Wait indefinitely... */
     nstate.c_cc[VMIN] = 1;      /* ...for at least one character. */
+  }
+
+  /* If we already have characters, move them out of the buffer. */
+  if (nbytes > 0) {
+    memcpy(keys, astr_cstr(key_buf), nbytes);
+    astr_truncate(key_buf, 0);
+    nstate.c_cc[VTIME] = 0; /* If we already have some characters, don't wait for the first. */
+    nstate.c_cc[VMIN] = 0;
   }
 
   setattr(TCSANOW, &nstate);
@@ -556,9 +559,72 @@ size_t term_xgetkey(int mode, size_t timeout)
   return key;
 }
 
-/* XXX Use macro routines for this, suitably pulled out into keys.c */
 void term_ungetkey(size_t key)
 {
-  key_buf = zrealloc(key_buf, sizeof(size_t) * ++nkeys);
-  key_buf[nkeys - 1] = key;
+  if (key != KBD_NOKEY) {
+    if (key & KBD_CTL)
+      switch (key & 0xff) {
+      case '@':
+        astr_insert_char(key_buf, 0, '\0');
+        break;
+      case 'a':  case 'b':  case 'c':  case 'd':  case 'e':
+      case 'f':  case 'g':  case 'h':             case 'j':
+      case 'k':  case 'l':             case 'n':  case 'o':
+      case 'p':  case 'q':  case 'r':  case 's':  case 't':
+      case 'u':  case 'v':  case 'w':  case 'x':  case 'y':
+      case 'z':
+        astr_insert_char(key_buf, 0, (char)((key & 0xff) - 'a' + 1));
+        break;
+      case '_':
+        astr_insert_char(key_buf, 0, '\37');
+        break;
+      }
+    else switch (key & (size_t)~KBD_META) {
+    case KBD_TAB:
+      astr_insert_char(key_buf, 0, '\11');
+      break;
+    case KBD_RET:
+      astr_insert_char(key_buf, 0, '\15');
+      break;
+
+    case KBD_LEFT:
+    case KBD_RIGHT:
+    case KBD_UP:
+    case KBD_DOWN:
+    case KBD_HOME:
+    case KBD_END:
+    case KBD_PGUP:
+    case KBD_PGDN:
+    case KBD_BS:
+    case KBD_DEL:
+    case KBD_INS:
+    case KBD_F1:
+    case KBD_F2:
+    case KBD_F3:
+    case KBD_F4:
+    case KBD_F5:
+    case KBD_F6:
+    case KBD_F7:
+    case KBD_F8:
+    case KBD_F9:
+    case KBD_F10:
+    case KBD_F11:
+    case KBD_F12:
+      {
+        size_t i;
+        for (i = 0; i < KEYS; i++)
+          if (key_code[i] == (key & (size_t)~KBD_META)) {
+            astr_insert_cstr(key_buf, 0, key_cap[i]);
+            break;
+          }
+      }
+      break;
+
+    default:
+      astr_insert_char(key_buf, 0, (char)(key & 0xff));
+    }
+
+    if (key & KBD_META)
+      astr_insert_char(key_buf, 0, '\033');
+  }
 }
