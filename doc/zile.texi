@@ -15,7 +15,7 @@
 
 @titlepage
 @title The Zile Manual
-@subtitle for Zile version 2.1
+@subtitle for Zile version 2.2
 @subtitle January 2005
 @author Sandro Sigala and Reuben Thomas
 
