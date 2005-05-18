@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.70 2005/05/17 12:14:48 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.71 2005/05/18 00:14:40 rrt Exp $	*/
 
 #include "config.h"
 
@@ -470,7 +470,7 @@ static size_t getchars(char *keys, size_t nbytes)
   int nread = 1;
 
   while (nread >= 0 && nbytes < max_key_chars && nread) {
-    nread = read(STDIN_FILENO, keys + nbytes, max_key_chars);
+    nread = read(STDIN_FILENO, keys + nbytes, max_key_chars - nbytes);
     if (nread >= 0)
       nbytes += nread;
 
