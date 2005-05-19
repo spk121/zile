@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.71 2005/05/18 00:14:40 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.72 2005/05/19 23:25:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -43,6 +43,9 @@ static Terminal thisterm = {
 
   /* Uninitialized width and height. */
   0, 0,
+
+  /* Uninitialised */
+  FALSE,
 };
 
 typedef struct {
@@ -240,16 +243,16 @@ static char *get_tcap(void)
   int res;
 
   if (!term) {
-    fprintf(stderr, "No terminal type in TERM.\n");
+    fprintf(stderr, "zile: no terminal type in TERM\n");
     zile_exit(1);
   }
 
   res = tgetent(tcap, term);
   if (res < 0) {
-    fprintf(stderr, "Could not access the termcap data base.\n");
+    perror("zile: can't access the termcap data base");
     zile_exit(1);
   } else if (res == 0) {
-    fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
+    fprintf(stderr, "zile: terminal type `%s' is not defined\n", term);
     zile_exit(1);
   }
 
@@ -291,7 +294,7 @@ static char *tgetstr_note_len(const char *cap, char **tcap)
 static void setattr(int flags, struct termios *state)
 {
   if (tcsetattr(0, flags, state) < 0) {
-    fprintf(stderr, "Can't change terminal settings\n");
+    perror("zile: can't change terminal settings");
     zile_exit(1);
   }
 }
@@ -313,7 +316,7 @@ void term_init(void)
 
   /* Save terminal flags. */
   if ((tcgetattr(0, &ostate) < 0) || (tcgetattr(0, &nstate) < 0)) {
-    fprintf(stderr, "Can't read terminal capabilites\n");
+    perror("zile: can't read terminal capabilites");
     zile_exit(1);
   }
 
@@ -349,6 +352,8 @@ void term_init(void)
   norm_string = astr_new();
   astr_cat_cstr(norm_string, me_string);
   printf("%s", ks_string); /* Activate keypad (including cursor keys). */
+
+  termp->initted = TRUE;
 }
 
 void term_close(void)

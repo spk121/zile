@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: zile.h,v 1.66 2005/02/27 22:50:33 rrt Exp $        */
+/*      $Id: zile.h,v 1.67 2005/05/19 23:25:04 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -257,6 +257,7 @@ struct Terminal {
   void *screen; /* The real type of this pointer depends on the
                    terminal back-end. */
   size_t width, height;
+  int initted; /* Set to TRUE when the terminal has been initialised. */
 };
 
 /* The actual number of lines and columns on the screen, which may

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: window.c,v 1.17 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: window.c,v 1.18 2005/05/19 23:25:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -310,6 +310,7 @@ Point window_pt(Window *wp)
 {
   /* The current window uses the current buffer point; all other
      windows have a saved point.  */
+  assert(wp != NULL);
   if (wp == cur_wp) {
     assert(wp->bp == cur_bp);
     assert(wp->saved_pt == NULL);

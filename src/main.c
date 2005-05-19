@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.85 2005/02/27 22:50:33 rrt Exp $	*/
+/*	$Id: main.c,v 1.86 2005/05/19 23:25:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -198,12 +198,15 @@ static void suspend_sig_handler(int signal)
 {
   assert(signal == SIGTSTP);
 
-  term_tidy();
-  term_suspend();
+  if (termp->initted) {
+    term_tidy();
+    term_suspend();
+  }
 
   /* Trap SIGHUP and SIGTERM so we can properly deal with them while
      suspended */
   act.sa_handler = other_sig_handler;
+  act.sa_flags = SA_RESTART;
   sigaction(SIGHUP, &act, NULL);
   sigaction(SIGTERM, &act, NULL);
 
@@ -220,8 +223,10 @@ static void cont_sig_handler(int signal)
 {
   assert(signal == SIGCONT);
 
-  term_resume();
-  term_full_redisplay();
+  if (termp->initted) {
+    term_resume();
+    term_full_redisplay();
+  }
 
   /* Simplest just to reinitialise everything. */
   signal_init();
@@ -243,6 +248,7 @@ static void signal_init(void)
      pine or mutt freezes the process. */
   sigfillset(&act.sa_mask);
 
+  act.sa_flags = SA_RESTART;
   act.sa_handler = suspend_sig_handler;
   sigaction(SIGTSTP, &act, NULL);
   act.sa_handler = cont_sig_handler;
