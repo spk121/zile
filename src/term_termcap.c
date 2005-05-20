@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_termcap.c,v 1.72 2005/05/19 23:25:04 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.73 2005/05/20 14:26:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -108,13 +108,24 @@ void term_clrtoeol(void)
   screen.curx = x;
 }
 
-static const char *getattr(Font f) {
+static const char *getattr(Font f)
+{
   if (f == ZILE_NORMAL)
     return astr_cstr(norm_string);
   else if (f & ZILE_REVERSE)
     return mr_string;
   assert(0);
   return "";
+}
+
+static char *zgoto(const char *s, int col, int row)
+{
+  char *ret = tgoto(s, col, row);
+  if (ret == NULL) {
+    fprintf(stderr, "zile: can't position cursor\n");
+    zile_exit(1);
+  }
+  return ret;
 }
 
 /*
@@ -135,7 +146,7 @@ void term_refresh(void)
   astr as = astr_new();
 
   /* Start at the top left of the screen with no highlighting. */
-  astr_cat_cstr(as, tgoto(cm_string, 0, 0));
+  astr_cat_cstr(as, zgoto(cm_string, 0, 0));
   astr_cat_cstr(as, getattr(ZILE_NORMAL));
 
   /* Add the rest of the screen. */
@@ -147,7 +158,7 @@ void term_refresh(void)
      * rest of the line to be updated in the array (it should be
      * all zeros).
      */
-    astr_cat_cstr(as, tgoto(cm_string, 0, (int)i));
+    astr_cat_cstr(as, zgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
     for (j = 0; j < termp->width; j++) {
@@ -158,7 +169,7 @@ void term_refresh(void)
 
       if (screen.oarray[offset] != n) {
         if (skipped)
-          astr_cat_cstr(as, tgoto(cm_string, (int)j, (int)i));
+          astr_cat_cstr(as, zgoto(cm_string, (int)j, (int)i));
         skipped = FALSE;
 
         screen.oarray[offset] = n;
@@ -182,7 +193,7 @@ void term_refresh(void)
   }
 
   /* Put the cursor back where it should be. */
-  astr_cat_cstr(as, tgoto(cm_string, (int)screen.curx, (int)screen.cury));
+  astr_cat_cstr(as, zgoto(cm_string, (int)screen.curx, (int)screen.cury));
 
   /* Display the output. */
   write(STDOUT_FILENO, astr_cstr(as), astr_len(as));
