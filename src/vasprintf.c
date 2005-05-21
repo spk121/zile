@@ -172,7 +172,7 @@ static int print_it(xprintf_struct *s, size_t approx_len,
   va_end(varg);
 
   /* Check for overflow */
-  assert((s->buffer_base)[s->buffer_len - 1] != 1);
+  assert((s->buffer_base)[s->buffer_len - 1] == 1);
 
   if (vsprintf_len == EOF) /* must be done *after* overflow-check */
     return EOF;
