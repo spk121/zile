@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_allegro.c,v 1.26 2005/02/05 13:32:41 rrt Exp $	*/
+/*	$Id: term_allegro.c,v 1.27 2005/05/21 10:28:06 rrt Exp $	*/
 
 #include "config.h"
 
@@ -45,6 +45,9 @@ static Terminal thisterm = {
 
   /* Uninitialized width and height. */
   0, 0,
+
+  /* Uninitialised. */
+  FALSE,
 };
 
 Terminal *termp = &thisterm;
@@ -344,11 +347,6 @@ static size_t _getkey(size_t timeout)
   }
 
   return key;
-}
-
-size_t getkey(void)
-{
-  return _getkey(0);
 }
 
 static int _xgetkey(int mode, size_t timeout)
