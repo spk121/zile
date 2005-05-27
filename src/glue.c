@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: glue.c,v 1.29 2005/02/05 01:49:14 rrt Exp $	*/
+/*	$Id: glue.c,v 1.30 2005/05/27 15:41:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -236,24 +236,4 @@ void goto_point(Point pt)
     do
       FUNCALL(forward_char);
     while (cur_bp->pt.o < pt.o);
-}
-
-/*
- * Read an arbitrary length string.
- */
-char *
-getln(FILE *fp)
-{
-  size_t len = 256;
-  int c;
-  char *l = zmalloc(len), *s = l;
-
-  for (c = getc(fp); c != '\n' && c != EOF; c = getc(fp)) {
-    if (s == l + len)
-      zrealloc(l, len *= 2);
-    *s++ = c;
-  }
-  *s = '\0';
-
-  return l;
 }
