@@ -2,6 +2,11 @@
 @setfilename zile.info
 @settitle The Zile Manual
 
+@dircategory Text editors
+@direntry
+* Zile: (zile).                 Zile emacs clone text editor.
+@end direntry
+
 @c If "finalout" is commented out, the printed output will show
 @c black boxes that mark lines that are too long.  Thus, it is
 @c unwise to comment it out when running a master in case there are
@@ -18,11 +23,6 @@
 @subtitle for Zile version 2.2
 @subtitle January 2005
 @author Sandro Sigala and Reuben Thomas
-
-@dircategory Text editors
-@direntry
-* Zile: (zile).                 Zile emacs clone text editor.
-@end direntry
 
 @page
 @vskip 0pt plus 1filll
