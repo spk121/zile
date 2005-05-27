@@ -1,5 +1,5 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.16 2005/05/17 12:42:49 rrt Exp $
+## $Id: Makefile.am,v 1.17 2005/05/27 16:29:41 rrt Exp $
 
 info_TEXINFOS = zile.texi
 
@@ -24,7 +24,7 @@ EXTRA_DIST =					\
 man_MANS = zile.1
 
 HELP: $(top_srcdir)/doc/zile.texi
-	makeinfo --no-header --no-split -I$(top_srcdir)/doc $< >>$@
+	makeinfo --no-header --no-split -I$(top_srcdir)/doc $? >>$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
@@ -46,12 +46,12 @@ dotzile.texi: dotzile.sample
 	@echo "@c Automatically generated file: NO DOT EDIT!" >$@
 	@echo "@setfilename dotzile.info" >>$@
 	@echo "@example" >>$@
-	expand $< >>$@
+	expand $? >>$@
 	@echo "@end example" >>$@
 
 zile.1: zile.1.in
 	rm -f $@
-	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $< > $@
+	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $? > $@
 
 all-local: HELP AUTODOC
 
