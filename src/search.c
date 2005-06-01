@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.45 2005/05/16 23:11:16 rrt Exp $	*/
+/*	$Id: search.c,v 1.46 2005/06/01 16:03:11 rrt Exp $	*/
 
 #include "config.h"
 
@@ -59,7 +59,7 @@ static char *find_substr(int (*f)(int c),
     for (;;) {
       ++sp1, ++sp2;
       if (sp2 > e2)
-        return (char *)s1;
+        return (char *)sp1;
       else if (f(*sp1) != f(*sp2))
         break;
     }
