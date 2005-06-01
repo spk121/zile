@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.13 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.14 2005/06/01 23:15:22 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -79,7 +79,9 @@ void resize_windows(void)
    * value (too small); take care of this case.
    */
   termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES - hdelta;
+  termp->height = ZILE_LINES;
+  if (hdelta > 0)
+    termp->height -= hdelta;
 
   FUNCALL(recenter);
 }
