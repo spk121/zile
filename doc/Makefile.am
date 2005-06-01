@@ -1,5 +1,4 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.17 2005/05/27 16:29:41 rrt Exp $
 
 info_TEXINFOS = zile.texi
 

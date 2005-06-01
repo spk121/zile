@@ -1,5 +1,4 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.16 2005/01/03 11:06:39 rrt Exp $
 
 SUBDIRS = doc src
 

@@ -1,5 +1,4 @@
 ## Process this file with automake to produce Makefile.in
-## $Id: Makefile.am,v 1.38 2005/05/17 12:42:49 rrt Exp $
 
 if HAVE_REGEX_H
 regex =
