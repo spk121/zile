@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: lisp.c,v 1.8 2005/02/27 22:50:33 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.9 2005/06/02 08:19:42 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>
@@ -52,34 +52,6 @@ le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
   list = parseInFile(getcp, ungetcp, list, &lineno);
 
   return list;
-}
-
-
-static const char *s;
-
-static int getc_string(void)
-{
-  int c = *s;
-
-  if (c)
-    s++;
-  else
-    c = EOF;
-
-  return c;
-}
-
-static void ungetc_string(int c)
-{
-  if (c != EOF)
-    s--;
-}
-
-le *lisp_read_string(const char *string)
-{
-  assert(string);
-  s = string;
-  return lisp_read(getc_string, ungetc_string);
 }
 
 

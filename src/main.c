@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: main.c,v 1.87 2005/06/01 16:38:42 rrt Exp $	*/
+/*	$Id: main.c,v 1.88 2005/06/02 08:19:42 rrt Exp $	*/
 
 #include "config.h"
 
@@ -259,9 +259,7 @@ static void signal_init(void)
 /* Options table */
 struct option longopts[] = {
     { "batch",        0, NULL, 'b' },
-    { "eval",         1, NULL, 'e' },
     { "help",         0, NULL, 'h' },
-    { "load",         1, NULL, 'l' },
     { "no-init-file", 0, NULL, 'q' },
     { "version",      0, NULL, 'v' },
     { 0, 0, 0, 0 }
@@ -283,18 +281,6 @@ int main(int argc, char **argv)
     case 'b':
       bflag = TRUE;
       qflag = TRUE;
-      break;
-    case 'e':
-      list = lisp_read_string(optarg);
-      astr_cat_delete(as, lisp_dump(list));
-      leWipe(list);
-      eflag = TRUE;
-      break;
-    case 'l':
-      list = lisp_read_file(optarg);
-      astr_cat_delete(as, lisp_dump(list));
-      leWipe(list);
-      eflag = TRUE; /* Loading a file counts as reading an expression. */
       break;
     case 'q':
       qflag = TRUE;
@@ -326,8 +312,6 @@ int main(int argc, char **argv)
               "\n"
               "FILE                   visit FILE using find-file\n"
               "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
-              "--eval EXPR            evaluate Emacs Lisp expression EXPR\n"
-              "--load, -l FILE        load file of Emacs Lisp code using the load function\n"
               );
       return 0;
     }
