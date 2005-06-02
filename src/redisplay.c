@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.16 2005/06/02 08:02:13 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.17 2005/06/02 09:09:02 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -45,11 +45,17 @@ void resync_redisplay(void)
 void resize_windows(void)
 {
   Window *wp;
-  int hdelta = ZILE_LINES - termp->height;
+  int hdelta;
 
   /* Resize windows horizontally. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
     wp->fwidth = wp->ewidth = ZILE_COLS;
+
+  /* Work out difference in window height; windows may be taller than
+     terminal if the terminal was very short. */
+  for (hdelta = ZILE_LINES, wp = head_wp;
+       wp != NULL;
+       hdelta -= wp->fheight, wp = wp->next);
 
   /* Resize windows vertically. */
   if (hdelta > 0) { /* Increase windows height. */
