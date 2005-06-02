@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.15 2005/06/02 07:32:18 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.16 2005/06/02 08:02:13 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -80,14 +80,8 @@ void resize_windows(void)
     }
   }
 
-  /*
-   * Sometimes Zile cannot reduce the windows height to a certain
-   * value (too small); take care of this case.
-   */
   termp->width = ZILE_COLS;
   termp->height = ZILE_LINES;
-  if (hdelta > 0)
-    termp->height -= hdelta;
 
   FUNCALL(recenter);
 }
