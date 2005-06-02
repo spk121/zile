@@ -282,15 +282,3 @@ int zasprintf(char **ptr, const char *fmt, ...);
 #undef X1
 #undef X2
 #undef X3
-
-/*--------------------------------------------------------------------------
- * Missing functions.
- *
- * The functions here are used in tools, where config.h is not available.
- *--------------------------------------------------------------------------*/
-
-#ifndef HAVE_VASPRINTF
-#include <stdarg.h>
-
-int vasprintf(char **ptr, const char *fmt, va_list vargs);
-#endif
