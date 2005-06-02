@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.39 2005/02/05 13:49:06 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.40 2005/06/02 08:18:50 rrt Exp $	*/
 
 #include "config.h"
 
@@ -324,7 +324,7 @@ void term_redisplay(void)
 
 void term_redraw_cursor(void)
 {
-        term_move(cur_topline + cur_wp->topdelta, point_screen_column);
+  term_move(cur_topline + cur_wp->topdelta, point_screen_column);
 }
 
 void term_full_redisplay(void)
