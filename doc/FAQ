@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2005/02/14 21:57:47 $
+		   Last updated: $Date: 2005/06/02 09:58:35 $
 
 ------------------------------------------------------------------------------
 
@@ -29,7 +29,6 @@ INDEX
    2.8. Zile doesn't handle filenames with non-ASCII characters.
    2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
    2.10. How do I enable Auto Fill Mode at startup?
-   2.11. The Zile screen is not resized when I resize my terminal.
 
 ------------------------------------------------------------------------------
 
@@ -154,17 +153,11 @@ INDEX
 2.7. How do I display non-ASCII characters?
 
     Zile uses the operating system's locale support, so you need to
-    set an appropriate locale. However, Zile only works with 8-bit
-    locales at present; support for Unicode is planned.
+    set an appropriate locale; how you do this depends on your OS.
+    However, Zile only works with 8-bit locales at present; support
+    for Unicode is planned.
 
-    Try to set the LANG environment variable according to your locale,
-    before running Zile. For example, for a French environment, try:
-
-	export LANG=fr_FR	(with a Bourne-like shell)
-
-	setenv LANG fr_FR	(with a C-like shell).
-
-2.8. Zile doesn't handle filenames with non-ASCII characters.
+2.8. Zile doesn't handle filenames containing non-ASCII characters.
 
     See the answer to question 2.7.
 
@@ -176,15 +169,8 @@ INDEX
 
     and use the alternative key sequences (`M-h' instead of `C-h').
 
-2.10. How do I enable Auto Fill Mode at startup?
+2.10. How do I enable auto-fill mode at startup?
 
     Add the following line to your `~/.zile' file:
 
 	(setq auto-fill-mode true)
-
-2.11. The Zile screen is not resized when I resize my terminal.
-
-    Your terminal application does not send the signal `SIGWINCH' to
-    Zile (and other applications). To be sure, you might check if other
-    terminal applications, like `vim' and `joe', also fail to resize
-    their windows.
