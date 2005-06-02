@@ -2,8 +2,6 @@ Changes between Zile 2.0 - Zile 2.2
 
 * More code cleanup.
 * .zilerc replaced by .zile, which is a pseudo-Lisp file.
-* Vestigial Lisp interpreter added; it can do almost nothing, but it
-  is a strict subset of Emacs Lisp!
 * Various other bug, design and documentation fixes.
 * Add case-replace and kill-whole-line.
 * Change command-line options to be more like Emacs.
