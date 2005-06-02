@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.14 2005/06/01 23:15:22 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.15 2005/06/02 07:32:18 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -60,17 +60,23 @@ void resize_windows(void)
       ++wp->eheight;
       --hdelta;
     }
-  } else { /* Decrease windows height. */
+  } else { /* Decrease windows' height, and close windows if necessary. */
     int decreased = TRUE;
     while (decreased) {
       decreased = FALSE;
-      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+      for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next) {
         if (wp->fheight > 2) {
           --wp->fheight;
           --wp->eheight;
           ++hdelta;
           decreased = TRUE;
+        } else if (cur_wp != head_wp || cur_wp->next != NULL) {
+          Window *new_wp = wp->next;
+          delete_window(wp);
+          wp = new_wp;
+          decreased = TRUE;
         }
+      }
     }
   }
 
