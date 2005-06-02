@@ -6,7 +6,7 @@ else
 regex = regex.o
 endif
 
-TESTS = astr tests
+TESTS = astr
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
@@ -75,10 +75,7 @@ endif
 
 zile_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h tests vasprintf.c strrstr.c test1.el test1.output
-
-clean-local:
-	rm -f test*.stdout
+EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c
 
 distclean-local:
 	rm -f paths.h
