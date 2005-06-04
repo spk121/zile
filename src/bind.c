@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.64 2005/02/27 22:50:20 rrt Exp $	*/
+/*	$Id: bind.c,v 1.65 2005/06/04 11:41:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -498,7 +498,7 @@ DEFUN_INT("global-set-key", global_set_key)
     ok = TRUE;
     bind_key_vec(leaf_tree, keys, numkeys, func);
   } else
-    minibuf_error("No such function `%d'", name);
+    minibuf_error("No such function `%s'", name);
 
   free(name);
   if (uniused == 0)
