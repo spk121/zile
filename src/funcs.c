@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: funcs.c,v 1.88 2005/04/04 11:29:40 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.89 2005/06/05 23:45:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,9 +39,9 @@
 
 
 DEFUN_INT("suspend-zile", suspend_zile)
-  /*+
-    Stop Zile and return to superior process.
-    +*/
+/*+
+Stop Zile and return to superior process.
++*/
 {
   raise(SIGTSTP);
   return TRUE;
@@ -56,19 +56,19 @@ int cancel(void)
 }
 
 DEFUN_INT("keyboard-quit", keyboard_quit)
-  /*+
-    Cancel current command.
-    +*/
+/*+
+Cancel current command.
++*/
 {
   return cancel();
 }
 END_DEFUN
 
 DEFUN_INT("transient-mark-mode", transient_mark_mode)
-  /*+
-    Toggle Transient Mark mode.
-    With arg, turn Transient Mark mode on if arg is positive, off otherwise.
-    +*/
+/*+
+Toggle Transient Mark mode.
+With arg, turn Transient Mark mode on if arg is positive, off otherwise.
++*/
 {
   if (!(lastflag & FLAG_SET_UNIARG)) {
     if (transient_mark_mode())
@@ -183,14 +183,14 @@ static void write_buffers_list(va_list ap)
 }
 
 DEFUN_INT("list-buffers", list_buffers)
-  /*+
-    Display a list of names of existing buffers.
-    The list is displayed in a buffer named `*Buffer List*'.
-    Note that buffers with names starting with spaces are omitted.
+/*+
+Display a list of names of existing buffers.
+The list is displayed in a buffer named `*Buffer List*'.
+Note that buffers with names starting with spaces are omitted.
 
-    The M column contains a * for buffers that are modified.
-    The R column contains a % for buffers that are read-only.
-    +*/
+The M column contains a * for buffers that are modified.
+The R column contains a % for buffers that are read-only.
++*/
 {
   write_temp_buffer("*Buffer List*", write_buffers_list, cur_wp);
   return TRUE;
@@ -198,13 +198,13 @@ DEFUN_INT("list-buffers", list_buffers)
 END_DEFUN
 
 DEFUN_INT("overwrite-mode", overwrite_mode)
-  /*+
-    In overwrite mode, printing characters typed in replace existing
-    text on a one-for-one basis, rather than pushing it to the right.
-    At the end of a line, such characters extend the line.
-    C-q still inserts characters in overwrite mode; this is supposed
-    to make it easier to insert characters when necessary.
-    +*/
+/*+
+In overwrite mode, printing characters typed in replace existing
+text on a one-for-one basis, rather than pushing it to the right.
+At the end of a line, such characters extend the line.
+C-q still inserts characters in overwrite mode; this is supposed
+to make it easier to insert characters when necessary.
++*/
 {
   cur_bp->flags ^= BFLAG_OVERWRITE;
   return TRUE;
@@ -212,9 +212,9 @@ DEFUN_INT("overwrite-mode", overwrite_mode)
 END_DEFUN
 
 DEFUN_INT("toggle-read-only", toggle_read_only)
-  /*+
-    Change whether this buffer is visiting its file read-only.
-    +*/
+/*+
+Change whether this buffer is visiting its file read-only.
++*/
 {
   cur_bp->flags ^= BFLAG_READONLY;
   return TRUE;
@@ -222,11 +222,11 @@ DEFUN_INT("toggle-read-only", toggle_read_only)
 END_DEFUN
 
 DEFUN_INT("auto-fill-mode", auto_fill_mode)
-  /*+
-    Toggle Auto Fill mode.
-    In Auto Fill mode, inserting a space at a column beyond `fill-column'
-    automatically breaks the line at a previous space.
-    +*/
+/*+
+Toggle Auto Fill mode.
+In Auto Fill mode, inserting a space at a column beyond `fill-column'
+automatically breaks the line at a previous space.
++*/
 {
   cur_bp->flags ^= BFLAG_AUTOFILL;
   return TRUE;
@@ -234,11 +234,11 @@ DEFUN_INT("auto-fill-mode", auto_fill_mode)
 END_DEFUN
 
 DEFUN_INT("set-fill-column", set_fill_column)
-  /*+
-    Set the fill column.
-    If an argument value is passed, set the `fill-column' variable with
-    that value, otherwise with the current column value.
-    +*/
+/*+
+Set the fill column.
+If an argument value is passed, set the `fill-column' variable with
+that value, otherwise with the current column value.
++*/
 {
   if (lastflag & FLAG_SET_UNIARG)
     variableSetNumber(&cur_bp->vars, "fill-column", uniarg);
@@ -257,9 +257,9 @@ int set_mark_command(void)
 }
 
 DEFUN_INT("set-mark-command", set_mark_command)
-  /*+
-    Set mark at where point is.
-    +*/
+/*+
+Set mark at where point is.
++*/
 {
   int ret = set_mark_command();
   activate_mark();
@@ -282,9 +282,9 @@ int exchange_point_and_mark(void)
 
 
 DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
-  /*+
-    Put the mark where point is now, and point where the mark is now.
-    +*/
+/*+
+Put the mark where point is now, and point where the mark is now.
++*/
 {
   if (!exchange_point_and_mark())
     return FALSE;
@@ -300,9 +300,9 @@ DEFUN_INT("exchange-point-and-mark", exchange_point_and_mark)
 END_DEFUN
 
 DEFUN_INT("mark-whole-buffer", mark_whole_buffer)
-  /*+
-    Put point at beginning and mark at end of buffer.
-    +*/
+/*+
+Put point at beginning and mark at end of buffer.
++*/
 {
   gotoeob();
   FUNCALL(set_mark_command);
@@ -338,11 +338,11 @@ static int quoted_insert_octal(int c1)
 }
 
 DEFUN_INT("quoted-insert", quoted_insert)
-  /*+
-    Read next input character and insert it.
-    This is useful for inserting control characters.
-    You may also type up to 3 octal digits, to insert a character with that code.
-    +*/
+/*+
+Read next input character and insert it.
+This is useful for inserting control characters.
+You may also type up to 3 octal digits, to insert a character with that code.
++*/
 {
   int c;
 
@@ -428,14 +428,14 @@ int universal_argument(int keytype, int xarg)
 }
 
 DEFUN_INT("universal-argument", universal_argument)
-  /*+
-    Begin a numeric argument for the following command.
-    Digits or minus sign following C-u make up the numeric argument.
-    C-u following the digits or minus sign ends the argument.
-    C-u without digits or minus sign provides 4 as argument.
-    Repeating C-u without digits or minus sign multiplies the argument
-    by 4 each time.
-    +*/
+/*+
+Begin a numeric argument for the following command.
+Digits or minus sign following C-u make up the numeric argument.
+C-u following the digits or minus sign ends the argument.
+C-u without digits or minus sign provides 4 as argument.
+Repeating C-u without digits or minus sign multiplies the argument
+by 4 each time.
++*/
 {
   return universal_argument(KBD_CTL | 'u', 0);
 }
@@ -529,31 +529,31 @@ static int edit_tab_region(int action)
 }
 
 DEFUN_INT("tabify", tabify)
-  /*+
-    Convert multiple spaces in region to tabs when possible.
-    A group of spaces is partially replaced by tabs
-    when this can be done without changing the column they end at.
-    The variable `tab-width' controls the spacing of tab stops.
-    +*/
+/*+
+Convert multiple spaces in region to tabs when possible.
+A group of spaces is partially replaced by tabs
+when this can be done without changing the column they end at.
+The variable `tab-width' controls the spacing of tab stops.
++*/
 {
   return edit_tab_region(TAB_TABIFY);
 }
 END_DEFUN
 
 DEFUN_INT("untabify", untabify)
-  /*+
-    Convert all tabs in region to multiple spaces, preserving columns.
-    The variable `tab-width' controls the spacing of tab stops.
-    +*/
+/*+
+Convert all tabs in region to multiple spaces, preserving columns.
+The variable `tab-width' controls the spacing of tab stops.
++*/
 {
   return edit_tab_region(TAB_UNTABIFY);
 }
 END_DEFUN
 
 DEFUN_INT("back-to-indentation", back_to_indentation)
-  /*+
-    Move point to the first non-whitespace character on this line.
-    +*/
+/*+
+Move point to the first non-whitespace character on this line.
++*/
 {
   cur_bp->pt = line_beginning_position(0);
   while (!eolp()) {
@@ -725,12 +725,12 @@ static int transpose_subr(Function f)
 }
 
 DEFUN_INT("transpose-chars", transpose_chars)
-  /*+
-    Interchange characters around point, moving forward one character.
-    With prefix arg ARG, effect is to take character before point
-    and drag it forward past ARG other characters.  If no argument and at
-    end of line, the previous two chars are exchanged.
-    +*/
+/*+
+Interchange characters around point, moving forward one character.
+With prefix arg ARG, effect is to take character before point
+and drag it forward past ARG other characters.  If no argument and at
+end of line, the previous two chars are exchanged.
++*/
 {
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -744,12 +744,12 @@ DEFUN_INT("transpose-chars", transpose_chars)
 END_DEFUN
 
 DEFUN_INT("transpose-words", transpose_words)
-  /*+
-    Interchange words around point, leaving point at end of them.
-    With prefix arg ARG, effect is to take word before or around point
-    and drag it forward past ARG other words. If ARG is zero, the words
-    around or after point and around or after mark are interchanged.
-    +*/
+/*+
+Interchange words around point, leaving point at end of them.
+With prefix arg ARG, effect is to take word before or around point
+and drag it forward past ARG other words. If ARG is zero, the words
+around or after point and around or after mark are interchanged.
++*/
 {
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -763,9 +763,9 @@ DEFUN_INT("transpose-words", transpose_words)
 END_DEFUN
 
 DEFUN_INT("transpose-sexps", transpose_sexps)
-  /*+
-    Like M-t but applies to sexps.
-    +*/
+/*+
+Like M-t but applies to sexps.
++*/
 {
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -779,11 +779,11 @@ DEFUN_INT("transpose-sexps", transpose_sexps)
 END_DEFUN
 
 DEFUN_INT("transpose-lines", transpose_lines)
-  /*+
-    Exchange current line and previous line, leaving point after both.
-    With argument ARG, takes previous line and moves it past ARG lines.
-    With argument 0, interchanges line point is in with line mark is in.
-    +*/
+/*+
+Exchange current line and previous line, leaving point after both.
+With argument ARG, takes previous line and moves it past ARG lines.
+With argument 0, interchanges line point is in with line mark is in.
++*/
 {
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -827,10 +827,10 @@ static int forward_word(void)
 }
 
 DEFUN_INT("forward-word", forward_word)
-  /*+
-    Move point forward one word (backward if the argument is negative).
-    With argument, do this that many times.
-    +*/
+/*+
+Move point forward one word (backward if the argument is negative).
+With argument, do this that many times.
++*/
 {
   int uni;
 
@@ -870,11 +870,11 @@ static int backward_word(void)
 }
 
 DEFUN_INT("backward-word", backward_word)
-  /*+
-    Move backward until encountering the end of a word (forward if the
-    argument is negative).
-    With argument, do this that many times.
-    +*/
+/*+
+Move backward until encountering the end of a word (forward if the
+argument is negative).
+With argument, do this that many times.
++*/
 {
   int uni;
 
@@ -984,11 +984,11 @@ int forward_sexp(void)
 }
 
 DEFUN_INT("forward-sexp", forward_sexp)
-  /*+
-    Move forward across one balanced expression (sexp).
-    With argument, do it that many times.  Negative arg -N means
-    move backward across N balanced expressions.
-    +*/
+/*+
+Move forward across one balanced expression (sexp).
+With argument, do it that many times.  Negative arg -N means
+move backward across N balanced expressions.
++*/
 {
   int uni;
 
@@ -1053,11 +1053,11 @@ int backward_sexp(void)
 }
 
 DEFUN_INT("backward-sexp", backward_sexp)
-  /*+
-    Move backward across one balanced expression (sexp).
-    With argument, do it that many times.  Negative arg -N means
-    move forward across N balanced expressions.
-    +*/
+/*+
+Move backward across one balanced expression (sexp).
+With argument, do it that many times.  Negative arg -N means
+move forward across N balanced expressions.
++*/
 {
   int uni;
 
@@ -1073,9 +1073,9 @@ DEFUN_INT("backward-sexp", backward_sexp)
 END_DEFUN
 
 DEFUN_INT("mark-word", mark_word)
-  /*+
-    Set mark argument words away from point.
-    +*/
+/*+
+Set mark argument words away from point.
++*/
 {
   int ret;
   FUNCALL(set_mark_command);
@@ -1087,11 +1087,11 @@ DEFUN_INT("mark-word", mark_word)
 END_DEFUN
 
 DEFUN_INT("mark-sexp", mark_sexp)
-  /*+
-    Set mark argument sexps from point.
-    The place mark goes is the same place C-M-f would
-    move to with the same argument.
-    +*/
+/*+
+Set mark argument sexps from point.
+The place mark goes is the same place C-M-f would
+move to with the same argument.
++*/
 {
   int ret;
   FUNCALL(set_mark_command);
@@ -1103,10 +1103,10 @@ DEFUN_INT("mark-sexp", mark_sexp)
 END_DEFUN
 
 DEFUN_INT("forward-line", forward_line)
-  /*+
-    Move N lines forward (backward if N is negative).
-    Precisely, if point is on line I, move to the start of line I + N.
-    +*/
+/*+
+Move N lines forward (backward if N is negative).
+Precisely, if point is on line I, move to the start of line I + N.
++*/
 {
   FUNCALL(beginning_of_line);
 
@@ -1128,9 +1128,9 @@ DEFUN_INT("forward-line", forward_line)
 END_DEFUN
 
 DEFUN_INT("backward-paragraph", backward_paragraph)
-  /*+
-    Move backward to start of paragraph.  With argument N, do it N times.
-    +*/
+/*+
+Move backward to start of paragraph.  With argument N, do it N times.
++*/
 {
   if (uniarg < 0)
     return FUNCALL_ARG(forward_paragraph, -uniarg);
@@ -1147,9 +1147,9 @@ DEFUN_INT("backward-paragraph", backward_paragraph)
 END_DEFUN
 
 DEFUN_INT("forward-paragraph", forward_paragraph)
-  /*+
-    Move forward to end of paragraph.  With argument N, do it N times.
-    +*/
+/*+
+Move forward to end of paragraph.  With argument N, do it N times.
++*/
 {
   if (uniarg < 0)
     return FUNCALL_ARG(backward_paragraph, -uniarg);
@@ -1169,10 +1169,10 @@ DEFUN_INT("forward-paragraph", forward_paragraph)
 END_DEFUN
 
 DEFUN_INT("mark-paragraph", mark_paragraph)
-  /*+
-    Put point at beginning of this paragraph, mark at end.
-    The paragraph marked is the one that contains point or follows point.
-    +*/
+/*+
+Put point at beginning of this paragraph, mark at end.
+The paragraph marked is the one that contains point or follows point.
++*/
 {
   if (last_command() == F_mark_paragraph) {
     FUNCALL(exchange_point_and_mark);
@@ -1189,9 +1189,9 @@ DEFUN_INT("mark-paragraph", mark_paragraph)
 END_DEFUN
 
 DEFUN_INT("fill-paragraph", fill_paragraph)
-  /*+
-    Fill paragraph at or after point.
-    +*/
+/*+
+Fill paragraph at or after point.
++*/
 {
   int i, start, end;
   Marker *m = point_marker();
@@ -1289,9 +1289,9 @@ static int setcase_word(int rcase)
 }
 
 DEFUN_INT("downcase-word", downcase_word)
-  /*+
-    Convert following word (or argument N words) to lower case, moving over.
-    +*/
+/*+
+Convert following word (or argument N words) to lower case, moving over.
++*/
 {
   int uni, ret = TRUE;
 
@@ -1308,9 +1308,9 @@ DEFUN_INT("downcase-word", downcase_word)
 END_DEFUN
 
 DEFUN_INT("upcase-word", upcase_word)
-  /*+
-    Convert following word (or argument N words) to upper case, moving over.
-    +*/
+/*+
+Convert following word (or argument N words) to upper case, moving over.
++*/
 {
   int uni, ret = TRUE;
 
@@ -1327,11 +1327,11 @@ DEFUN_INT("upcase-word", upcase_word)
 END_DEFUN
 
 DEFUN_INT("capitalize-word", capitalize_word)
-  /*+
-    Capitalize the following word (or argument N words), moving over.
-    This gives the word(s) a first character in upper case and the rest
-    lower case.
-    +*/
+/*+
+Capitalize the following word (or argument N words), moving over.
+This gives the word(s) a first character in upper case and the rest
+lower case.
++*/
 {
   int uni, ret = TRUE;
 
@@ -1387,18 +1387,18 @@ static int setcase_region(int rcase)
 }
 
 DEFUN_INT("upcase-region", upcase_region)
-  /*+
-    Convert the region to upper case.
-    +*/
+/*+
+Convert the region to upper case.
++*/
 {
   return setcase_region(UPPERCASE);
 }
 END_DEFUN
 
 DEFUN_INT("downcase-region", downcase_region)
-  /*+
-    Convert the region to lower case.
-    +*/
+/*+
+Convert the region to lower case.
++*/
 {
   return setcase_region(LOWERCASE);
 }
@@ -1412,17 +1412,17 @@ static void write_shell_output(va_list ap)
 }
 
 DEFUN_INT("shell-command", shell_command)
-  /*+
-    Reads a line of text using the minibuffer and creates an inferior shell
-    to execute the line as a command.
-    Standard input from the command comes from the null device.  If the
-    shell command produces any output, the output goes to a Zile buffer
-    named `*Shell Command Output*', which is displayed in another window
-    but not selected.
-    If the output is one line, it is displayed in the echo area.
-    A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
-    command to insert any output into the current buffer.
-    +*/
+/*+
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command.
+Standard input from the command comes from the null device.  If the
+shell command produces any output, the output goes to a Zile buffer
+named `*Shell Command Output*', which is displayed in another window
+but not selected.
+If the output is one line, it is displayed in the echo area.
+A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
+command to insert any output into the current buffer.
++*/
 {
   char *ms;
   FILE *pipe;
@@ -1472,18 +1472,18 @@ DEFUN_INT("shell-command", shell_command)
 END_DEFUN
 
 DEFUN_INT("shell-command-on-region", shell_command_on_region)
-  /*+
-    Reads a line of text using the minibuffer and creates an inferior shell
-    to execute the line as a command; passes the contents of the region as
-    input to the shell command.
-    If the shell command produces any output, the output goes to a Zile buffer
-    named `*Shell Command Output*', which is displayed in another window
-    but not selected.
-    If the output is one line, it is displayed in the echo area.
-    A numeric argument, as in `M-1 M-|' or `C-u M-|', directs output to the
-    current buffer, then the old region is deleted first and the output replaces
-    it as the contents of the region.
-    +*/
+/*+
+Reads a line of text using the minibuffer and creates an inferior shell
+to execute the line as a command; passes the contents of the region as
+input to the shell command.
+If the shell command produces any output, the output goes to a Zile buffer
+named `*Shell Command Output*', which is displayed in another window
+but not selected.
+If the output is one line, it is displayed in the echo area.
+A numeric argument, as in `M-1 M-|' or `C-u M-|', directs output to the
+current buffer, then the old region is deleted first and the output replaces
+it as the contents of the region.
++*/
 {
   char *ms;
   FILE *pipe;
@@ -1574,9 +1574,9 @@ DEFUN_INT("shell-command-on-region", shell_command_on_region)
 END_DEFUN
 
 DEFUN_INT("delete-region", delete_region)
-  /*+
-    Delete the text between point and mark.
-    +*/
+/*+
+Delete the text between point and mark.
++*/
 {
   Region r;
 
@@ -1606,11 +1606,11 @@ DEFUN_INT("delete-region", delete_region)
 END_DEFUN
 
 DEFUN_INT("delete-blank-lines", delete_blank_lines)
-  /*+
-    On blank line, delete all surrounding blank lines, leaving just one.
-    On isolated blank line, delete that one.
-    On nonblank line, delete any immediately following blank lines.
-    +*/
+/*+
+On blank line, delete all surrounding blank lines, leaving just one.
+On isolated blank line, delete that one.
+On nonblank line, delete any immediately following blank lines.
++*/
 {
   Marker *old_marker = point_marker();
   int seq_started = FALSE;

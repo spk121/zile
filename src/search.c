@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.47 2005/06/05 18:59:35 rrt Exp $	*/
+/*	$Id: search.c,v 1.48 2005/06/05 23:45:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -242,9 +242,9 @@ static int search_backward(Line *startp, size_t starto, const char *s, int regex
 static char *last_search = NULL;
 
 DEFUN_INT("search-forward", search_forward)
-  /*+
-    Search forward from point for the user specified text.
-    +*/
+/*+
+Search forward from point for the user specified text.
++*/
 {
   char *ms;
 
@@ -267,9 +267,9 @@ DEFUN_INT("search-forward", search_forward)
 END_DEFUN
 
 DEFUN_INT("search-backward", search_backward)
-  /*+
-    Search backward from point for the user specified text.
-    +*/
+/*+
+Search backward from point for the user specified text.
++*/
 {
   char *ms;
 
@@ -292,9 +292,9 @@ DEFUN_INT("search-backward", search_backward)
 END_DEFUN
 
 DEFUN_INT("search-forward-regexp", search_forward_regexp)
-  /*+
-    Search forward from point for regular expression REGEXP.
-    +*/
+/*+
+Search forward from point for regular expression REGEXP.
++*/
 {
   char *ms;
 
@@ -317,9 +317,9 @@ DEFUN_INT("search-forward-regexp", search_forward_regexp)
 END_DEFUN
 
 DEFUN_INT("search-backward-regexp", search_backward_regexp)
-  /*+
-    Search backward from point for match for regular expression REGEXP.
-    +*/
+/*+
+Search backward from point for match for regular expression REGEXP.
++*/
 {
   char *ms;
 
@@ -484,52 +484,52 @@ static int isearch(int dir, int regexp)
 }
 
 DEFUN_INT("isearch-forward", isearch_forward)
-  /*+
-    Do incremental search forward.
-    With a prefix argument, do an incremental regular expression search instead.
-    As you type characters, they add to the search string and are found.
-    Type return to exit, leaving point at location found.
-    Type C-s to search again forward, C-r to search again backward.
-    C-g when search is successful aborts and moves point to starting point.
-    +*/
+/*+
+Do incremental search forward.
+With a prefix argument, do an incremental regular expression search instead.
+As you type characters, they add to the search string and are found.
+Type return to exit, leaving point at location found.
+Type C-s to search again forward, C-r to search again backward.
+C-g when search is successful aborts and moves point to starting point.
++*/
 {
   return isearch(ISEARCH_FORWARD, (lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
 DEFUN_INT("isearch-backward", isearch_backward)
-  /*+
-    Do incremental search backward.
-    With a prefix argument, do a regular expression search instead.
-    As you type characters, they add to the search string and are found.
-    Type return to exit, leaving point at location found.
-    Type C-r to search again backward, C-s to search again forward.
-    C-g when search is successful aborts and moves point to starting point.
-    +*/
+/*+
+Do incremental search backward.
+With a prefix argument, do a regular expression search instead.
+As you type characters, they add to the search string and are found.
+Type return to exit, leaving point at location found.
+Type C-r to search again backward, C-s to search again forward.
+C-g when search is successful aborts and moves point to starting point.
++*/
 {
   return isearch(ISEARCH_BACKWARD, (lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
 DEFUN_INT("isearch-forward-regexp", isearch_forward_regexp)
-  /*+
-    Do incremental search forward for regular expression.
-    With a prefix argument, do a regular string search instead.
-    Like ordinary incremental search except that your input
-    is treated as a regexp.  See C-s for more info.
-    +*/
+/*+
+Do incremental search forward for regular expression.
+With a prefix argument, do a regular string search instead.
+Like ordinary incremental search except that your input
+is treated as a regexp.  See C-s for more info.
++*/
 {
   return isearch(ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
 DEFUN_INT("isearch-backward-regexp", isearch_backward_regexp)
-  /*+
-    Do incremental search forward for regular expression.
-    With a prefix argument, do a regular string search instead.
-    Like ordinary incremental search except that your input
-    is treated as a regexp.  See C-s for more info.
-    +*/
+/*+
+Do incremental search forward for regular expression.
+With a prefix argument, do a regular string search instead.
+Like ordinary incremental search except that your input
+is treated as a regexp.  See C-s for more info.
++*/
 {
   return isearch(ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
 }
@@ -553,9 +553,9 @@ static int no_upper(const char *s, size_t len)
 }
 
 DEFUN_INT("replace-string", replace_string)
-  /*+
-    Replace occurrences of a string with other text.
-    +*/
+/*+
+Replace occurrences of a string with other text.
++*/
 {
   char *find, *repl;
   int count = 0, find_no_upper;
@@ -593,11 +593,11 @@ DEFUN_INT("replace-string", replace_string)
 END_DEFUN
 
 DEFUN_INT("query-replace", query_replace)
-  /*+
-    Replace occurrences of a string with other text.
-    As each match is found, the user must type a character saying
-    what to do with it.
-    +*/
+/*+
+Replace occurrences of a string with other text.
+As each match is found, the user must type a character saying
+what to do with it.
++*/
 {
   char *find, *repl;
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;

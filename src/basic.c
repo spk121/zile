@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: basic.c,v 1.26 2005/02/07 01:36:43 rrt Exp $	*/
+/*	$Id: basic.c,v 1.27 2005/06/05 23:45:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,9 +38,9 @@
 static int cur_goalc;
 
 DEFUN_INT("beginning-of-line", beginning_of_line)
-  /*+
-    Move point to beginning of current line.
-    +*/
+/*+
+Move point to beginning of current line.
++*/
 {
   cur_bp->pt = line_beginning_position(uniarg);
 
@@ -54,9 +54,9 @@ DEFUN_INT("beginning-of-line", beginning_of_line)
 END_DEFUN
 
 DEFUN_INT("end-of-line", end_of_line)
-  /*+
-    Move point to end of current line.
-    +*/
+/*+
+Move point to end of current line.
++*/
 {
   cur_bp->pt = line_end_position(uniarg);
 
@@ -140,12 +140,12 @@ int previous_line(void)
 }
 
 DEFUN_INT("previous-line", previous_line)
-  /*+
-    Move cursor vertically up one line.
-    If there is no character in the target line exactly over the current column,
-    the cursor is positioned after the character in that line which spans this
-    column, or at the end of the line if it is not long enough.
-    +*/
+/*+
+Move cursor vertically up one line.
+If there is no character in the target line exactly over the current column,
+the cursor is positioned after the character in that line which spans this
+column, or at the end of the line if it is not long enough.
++*/
 {
   int i;
 
@@ -187,12 +187,12 @@ int next_line(void)
 }
 
 DEFUN_INT("next-line", next_line)
-  /*+
-    Move cursor vertically down one line.
-    If there is no character in the target line exactly under the current column,
-    the cursor is positioned after the character in that line which spans this
-    column, or at the end of the line if it is not long enough.
-    +*/
+/*+
+Move cursor vertically down one line.
+If there is no character in the target line exactly under the current column,
+the cursor is positioned after the character in that line which spans this
+column, or at the end of the line if it is not long enough.
++*/
 {
   int i;
 
@@ -229,10 +229,10 @@ void goto_line(size_t to_line)
 }
 
 DEFUN_INT("goto-char", goto_char)
-  /*+
-    Read a number N and move the cursor to character number N.
-    Position 1 is the beginning of the buffer.
-    +*/
+/*+
+Read a number N and move the cursor to character number N.
+Position 1 is the beginning of the buffer.
++*/
 {
   char *ms;
   int to_char, count;
@@ -254,10 +254,10 @@ DEFUN_INT("goto-char", goto_char)
 END_DEFUN
 
 DEFUN_INT("goto-line", goto_line)
-  /*+
-    Move cursor to the beginning of the specified line.
-    Line 1 is the beginning of the buffer.
-    +*/
+/*+
+Move cursor to the beginning of the specified line.
+Line 1 is the beginning of the buffer.
++*/
 {
   char *ms;
   size_t to_line;
@@ -286,9 +286,9 @@ void gotobob(void)
 }
 
 DEFUN_INT("beginning-of-buffer", beginning_of_buffer)
-  /*+
-    Move point to the beginning of the buffer; leave mark at previous position.
-    +*/
+/*+
+Move point to the beginning of the buffer; leave mark at previous position.
++*/
 {
   set_mark_command();
   gotobob();
@@ -306,9 +306,9 @@ void gotoeob(void)
 }
 
 DEFUN_INT("end-of-buffer", end_of_buffer)
-  /*+
-    Move point to the end of the buffer; leave mark at previous position.
-    +*/
+/*+
+Move point to the end of the buffer; leave mark at previous position.
++*/
 {
   set_mark_command();
   gotoeob();
@@ -333,10 +333,10 @@ int backward_char(void)
 }
 
 DEFUN_INT("backward-char", backward_char)
-  /*+
-    Move point left N characters (right if N is negative).
-    On attempt to pass beginning or end of buffer, stop and signal error.
-    +*/
+/*+
+Move point left N characters (right if N is negative).
+On attempt to pass beginning or end of buffer, stop and signal error.
++*/
 {
   int i;
 
@@ -370,10 +370,10 @@ int forward_char(void)
 }
 
 DEFUN_INT("forward-char", forward_char)
-  /*+
-    Move point right N characters (left if N is negative).
-    On reaching end of buffer, stop and signal error.
-    +*/
+/*+
+Move point right N characters (left if N is negative).
+On reaching end of buffer, stop and signal error.
++*/
 {
   int i;
 
@@ -423,9 +423,9 @@ int scroll_down(void)
 }
 
 DEFUN_INT("scroll-down", scroll_down)
-  /*+
-    Scroll text of current window downward near full screen.
-    +*/
+/*+
+Scroll text of current window downward near full screen.
++*/
 {
   int i;
 
@@ -451,9 +451,9 @@ int scroll_up(void)
 }
 
 DEFUN_INT("scroll-up", scroll_up)
-  /*+
-    Scroll text of current window upward near full screen.
-    +*/
+/*+
+Scroll text of current window upward near full screen.
++*/
 {
   int i;
 

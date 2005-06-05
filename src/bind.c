@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.65 2005/06/04 11:41:48 rrt Exp $	*/
+/*	$Id: bind.c,v 1.66 2005/06/05 23:45:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -443,9 +443,9 @@ static int execute_function(char *name, int uniarg)
 }
 
 DEFUN_INT("execute-extended-command", execute_extended_command)
-  /*+
-    Read function name, then read its arguments and call it.
-    +*/
+/*+
+Read function name, then read its arguments and call it.
++*/
 {
   int res;
   char *name;
@@ -469,11 +469,11 @@ DEFUN_INT("execute-extended-command", execute_extended_command)
 END_DEFUN
 
 DEFUN_INT("global-set-key", global_set_key)
-  /*+
-    Bind a command to a key sequence.
-    Read key sequence and function name, and bind the function to the key
-    sequence.
-    +*/
+/*+
+Bind a command to a key sequence.
+Read key sequence and function name, and bind the function to the key
+sequence.
++*/
 {
   int ok = FALSE;
   size_t key, *keys = NULL, numkeys;
@@ -509,11 +509,11 @@ DEFUN_INT("global-set-key", global_set_key)
 END_DEFUN
 
 DEFUN_INT("where-is", where_is)
-  /*+
-    Print message listing key sequences that invoke the command DEFINITION.
-    Argument is a command definition, usually a symbol with a function definition.
-    If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
-    +*/
+/*+
+Print message listing key sequences that invoke the command DEFINITION.
+Argument is a command definition, usually a symbol with a function definition.
+If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
++*/
 {
   char *name;
   fentryp f;
@@ -606,9 +606,9 @@ static void write_bindings_list(va_list ap)
 }
 
 DEFUN_INT("list-bindings", list_bindings)
-  /*+
-    List defined bindings.
-    +*/
+/*+
+List defined bindings.
++*/
 {
   write_temp_buffer("*Bindings List*", write_bindings_list);
   return TRUE;

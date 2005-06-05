@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.73 2005/05/16 23:11:16 rrt Exp $        */
+/*      $Id: file.c,v 1.74 2005/06/05 23:45:48 rrt Exp $        */
 
 #include "config.h"
 
@@ -387,10 +387,10 @@ Completion *make_buffer_completion(void)
 }
 
 DEFUN_INT("find-file", find_file)
-  /*+
-    Edit a file specified by the user.  Switch to a buffer visiting the file,
-    creating one if none already exists.
-    +*/
+/*+
+Edit a file specified by the user.  Switch to a buffer visiting the file,
+creating one if none already exists.
++*/
 {
   char *ms;
   astr buf;
@@ -414,11 +414,11 @@ DEFUN_INT("find-file", find_file)
 END_DEFUN
 
 DEFUN_INT("find-alternate-file", find_alternate_file)
-  /*+
-    Find the file specified by the user, select its buffer, kill previous buffer.
-    If the current buffer now contains an empty file that you just visited
-    (presumably by mistake), use this command to visit the file you really want.
-    +*/
+/*+
+Find the file specified by the user, select its buffer, kill previous buffer.
+If the current buffer now contains an empty file that you just visited
+(presumably by mistake), use this command to visit the file you really want.
++*/
 {
   char *ms;
   astr buf;
@@ -445,9 +445,9 @@ DEFUN_INT("find-alternate-file", find_alternate_file)
 END_DEFUN
 
 DEFUN_INT("switch-to-buffer", switch_to_buffer)
-  /*+
-    Select to the user specified buffer in the current window.
-    +*/
+/*+
+Select to the user specified buffer in the current window.
++*/
 {
   char *ms;
   Buffer *swbuf;
@@ -565,9 +565,9 @@ void kill_buffer(Buffer *kill_bp)
 }
 
 DEFUN_INT("kill-buffer", kill_buffer)
-  /*+
-    Kill the current buffer or the user specified one.
-    +*/
+/*+
+Kill the current buffer or the user specified one.
++*/
 {
   Buffer *bp;
   char *ms;
@@ -612,10 +612,10 @@ static void insert_buffer(Buffer *bp)
 }
 
 DEFUN_INT("insert-buffer", insert_buffer)
-  /*+
-    Insert after point the contents of the user specified buffer.
-    Puts mark after the inserted text.
-    +*/
+/*+
+Insert after point the contents of the user specified buffer.
+Puts mark after the inserted text.
++*/
 {
   Buffer *bp, *swbuf;
   char *ms;
@@ -688,10 +688,10 @@ static int insert_file(char *filename)
 }
 
 DEFUN_INT("insert-file", insert_file)
-  /*+
-    Insert contents of the user specified file into buffer after point.
-    Set mark after the inserted text.
-    +*/
+/*+
+Insert contents of the user specified file into buffer after point.
+Set mark after the inserted text.
++*/
 {
   char *ms;
   astr buf;
@@ -956,20 +956,20 @@ static int save_buffer(Buffer *bp)
 }
 
 DEFUN_INT("save-buffer", save_buffer)
-  /*+
-    Save current buffer in visited file if modified. By default, makes the
-    previous version into a backup file if this is the first save.
-    +*/
+/*+
+Save current buffer in visited file if modified. By default, makes the
+previous version into a backup file if this is the first save.
++*/
 {
   return save_buffer(cur_bp);
 }
 END_DEFUN
 
 DEFUN_INT("write-file", write_file)
-  /*+
-    Write current buffer into the user specified file.
-    Makes buffer visit that file, and marks it not modified.
-    +*/
+/*+
+Write current buffer into the user specified file.
+Makes buffer visit that file, and marks it not modified.
++*/
 {
   char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
   char *ms;
@@ -1067,18 +1067,18 @@ static int save_some_buffers(void)
 
 
 DEFUN_INT("save-some-buffers", save_some_buffers)
-  /*+
-    Save some modified file-visiting buffers.  Asks user about each one.
-    +*/
+/*+
+Save some modified file-visiting buffers.  Asks user about each one.
++*/
 {
   return save_some_buffers();
 }
 END_DEFUN
 
 DEFUN_INT("save-buffers-kill-zile", save_buffers_kill_zile)
-  /*+
-    Offer to save each buffer, then kill this Zile process.
-    +*/
+/*+
+Offer to save each buffer, then kill this Zile process.
++*/
 {
   Buffer *bp;
   int ans, i = 0;
@@ -1133,10 +1133,10 @@ void zile_exit(int exitcode)
 }
 
 DEFUN_INT("cd", cd)
-  /*+
-    Make the user specified directory become the current buffer's default
-    directory.
-    +*/
+/*+
+Make the user specified directory become the current buffer's default
+directory.
++*/
 {
   char *ms;
   astr buf;

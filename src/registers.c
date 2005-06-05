@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: registers.c,v 1.18 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: registers.c,v 1.19 2005/06/05 23:45:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,9 +38,9 @@ static struct {
 } regs[NUM_REGISTERS];
 
 DEFUN_INT("copy-to-register", copy_to_register)
-  /*+
-    Copy region into the user specified register.
-    +*/
+/*+
+Copy region into the user specified register.
++*/
 {
   Region r;
   char *p;
@@ -77,10 +77,10 @@ static void insert_register(int reg)
 }
 
 DEFUN_INT("insert-register", insert_register)
-  /*+
-    Insert contents of the user specified register.
-    Puts point before and mark after the inserted text.
-    +*/
+/*+
+Insert contents of the user specified register.
+Puts point before and mark after the inserted text.
++*/
 {
   int reg, uni;
 
@@ -136,9 +136,9 @@ static void write_registers_list(va_list ap)
 }
 
 DEFUN_INT("list-registers", list_registers)
-  /*+
-    List defined registers.
-    +*/
+/*+
+List defined registers.
++*/
 {
   write_temp_buffer("*Registers List*", write_registers_list);
   return TRUE;

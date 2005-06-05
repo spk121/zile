@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: help.c,v 1.31 2005/02/14 21:57:47 rrt Exp $	*/
+/*	$Id: help.c,v 1.32 2005/06/05 23:45:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,9 +37,9 @@
 #include "paths.h"
 
 DEFUN_INT("zile-version", zile_version)
-  /*+
-    Show the zile version.
-    +*/
+/*+
+Show the zile version.
++*/
 {
   minibuf_write("Zile " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 
@@ -62,36 +62,36 @@ static int show_file(char *filename)
 }
 
 DEFUN_INT("help", help)
-  /*+
-    Show a help window.
-    +*/
+/*+
+Show a help window.
++*/
 {
   return show_file(PATH_DATA "/HELP");
 }
 END_DEFUN
 
 DEFUN_INT("help-config-sample", help_config_sample)
-  /*+
-    Show a configuration file sample.
-    +*/
+/*+
+Show a configuration file sample.
++*/
 {
   return show_file(PATH_DATA "/dotzile.sample");
 }
 END_DEFUN
 
 DEFUN_INT("view-zile-FAQ", view_zile_FAQ)
-  /*+
-    Show the Zile Frequently Asked Questions (FAQ).
-    +*/
+/*+
+Show the Zile Frequently Asked Questions (FAQ).
++*/
 {
   return show_file(PATH_DATA "/FAQ");
 }
 END_DEFUN
 
 DEFUN_INT("help-with-tutorial", help_with_tutorial)
-  /*+
-    Show a tutorial window.
-    +*/
+/*+
+Show a tutorial window.
++*/
 {
   if (show_file(PATH_DATA "/TUTORIAL")) {
     astr buf;
@@ -170,9 +170,9 @@ static void write_function_description(va_list ap)
 }
 
 DEFUN_INT("describe-function", describe_function)
-  /*+
-    Display the full documentation of a function.
-    +*/
+/*+
+Display the full documentation of a function.
++*/
 {
   char *name;
   astr bufname, doc;
@@ -210,9 +210,9 @@ static void write_variable_description(va_list ap)
 }
 
 DEFUN_INT("describe-variable", describe_variable)
-  /*+
-    Display the full documentation of a variable.
-    +*/
+/*+
+Display the full documentation of a variable.
++*/
 {
   char *name;
   astr bufname, defval, doc;
@@ -240,9 +240,9 @@ DEFUN_INT("describe-variable", describe_variable)
 END_DEFUN
 
 DEFUN_INT("describe-key", describe_key)
-  /*+
-    Display documentation of the command invoked by a key sequence.
-    +*/
+/*+
+Display documentation of the command invoked by a key sequence.
++*/
 {
   char *name;
   astr bufname, doc;

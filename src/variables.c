@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: variables.c,v 1.30 2005/02/07 01:36:44 rrt Exp $	*/
+/*	$Id: variables.c,v 1.31 2005/06/05 23:45:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -158,9 +158,9 @@ static char *get_variable_format(char *var)
 }
 
 DEFUN_INT("set-variable", set_variable)
-  /*+
-    Set a variable value to the user-specified value.
-    +*/
+/*+
+Set a variable value to the user-specified value.
++*/
 {
   char *var, *val, *fmt;
 

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: redisplay.c,v 1.17 2005/06/02 09:09:02 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.18 2005/06/05 23:45:49 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -103,10 +103,10 @@ void recenter(Window *wp)
 }
 
 DEFUN_INT("recenter", recenter)
-  /*+
-    Center point in window and redisplay screen.
-    The desired position of point is always relative to the current window.
-    +*/
+/*+
+Center point in window and redisplay screen.
+The desired position of point is always relative to the current window.
++*/
 {
   recenter(cur_wp);
   term_full_redisplay();

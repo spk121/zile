@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.19 2005/02/05 01:49:15 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.20 2005/06/05 23:45:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -68,7 +68,7 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 
   term_addnstr(value + n, min(ZILE_COLS - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
-        
+
   if (strlen(value + n) >= ZILE_COLS - prompt_len - margin) {
     term_move(ZILE_LINES - 1, ZILE_COLS - 1);
     term_addch('$');

@@ -18,7 +18,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: undo.c,v 1.21 2005/02/07 01:36:44 rrt Exp $        */
+/*      $Id: undo.c,v 1.22 2005/06/05 23:45:49 rrt Exp $        */
 
 #include "config.h"
 
@@ -175,10 +175,10 @@ static Undo *revert_action(Undo *up)
 }
 
 DEFUN_INT("undo", undo)
-  /*+
-    Undo some previous changes.
-    Repeat this command to undo more changes.
-    +*/
+/*+
+Undo some previous changes.
+Repeat this command to undo more changes.
++*/
 {
   if (cur_bp->flags & BFLAG_NOUNDO) {
     minibuf_error("Undo disabled in this buffer");
