@@ -21,7 +21,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: line.c,v 1.64 2005/05/17 14:37:28 rrt Exp $	*/
+/*	$Id: line.c,v 1.65 2005/06/05 23:27:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -152,11 +152,11 @@ int insert_tab(void)
 }
 
 DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
-  /*+
-    Insert a tabulation at the current point position into
-    the current buffer.  Convert the tabulation into spaces
-    if the `expand-tabs' variable is bound and set to true.
-    +*/
+/*+
+Insert a tabulation at the current point position into
+the current buffer.  Convert the tabulation into spaces
+if the `expand-tabs' variable is bound and set to true.
++*/
 {
   int uni, ret = TRUE;
 
@@ -338,10 +338,10 @@ void fill_break_line(void)
 }
 
 DEFUN_INT("newline", newline)
-  /*+
-    Insert a newline at the current point position into
-    the current buffer.
-    +*/
+/*+
+Insert a newline at the current point position into
+the current buffer.
++*/
 {
   int uni, ret = TRUE;
 
@@ -362,9 +362,9 @@ DEFUN_INT("newline", newline)
 END_DEFUN
 
 DEFUN_INT("open-line", open_line)
-  /*+
-    Insert a newline and leave point before it.
-    +*/
+/*+
+Insert a newline and leave point before it.
++*/
 {
   int uni, ret = TRUE;
 
@@ -421,9 +421,9 @@ int self_insert_command(int c)
 }
 
 DEFUN_INT("self-insert-command", self_insert_command)
-  /*+
-    Insert the character you type.
-    +*/
+/*+
+Insert the character you type.
++*/
 {
   int uni, c, ret = TRUE;
 
@@ -510,10 +510,10 @@ int delete_char(void)
 }
 
 DEFUN_INT("delete-char", delete_char)
-  /*+
-    Delete the following character.
-    Join lines if the character is a newline.
-    +*/
+/*+
+Delete the following character.
+Join lines if the character is a newline.
++*/
 {
   int uni, ret = TRUE;
 
@@ -572,10 +572,10 @@ static int backward_delete_char_overwrite(void)
 }
 
 DEFUN_INT("backward-delete-char", backward_delete_char)
-  /*+
-    Delete the previous character.
-    Join lines if the character is a newline.
-    +*/
+/*+
+Delete the previous character.
+Join lines if the character is a newline.
++*/
 {
   /* In overwrite-mode and isn't called by delete_char().  */
   int (*f)(void) = ((cur_bp->flags & BFLAG_OVERWRITE) &&
@@ -599,9 +599,9 @@ DEFUN_INT("backward-delete-char", backward_delete_char)
 END_DEFUN
 
 DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
-  /*+
-    Delete all spaces and tabs around point.
-    +*/
+/*+
+Delete all spaces and tabs around point.
++*/
 {
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
@@ -617,9 +617,9 @@ DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
 END_DEFUN
 
 DEFUN_INT("just-one-space", just_one_space)
-  /*+
-    Delete all spaces and tabs around point, leaving one space.
-    +*/
+/*+
+Delete all spaces and tabs around point, leaving one space.
++*/
 {
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   FUNCALL(delete_horizontal_space);
@@ -694,19 +694,19 @@ static int indent_relative(void)
 }
 
 DEFUN_INT("indent-command", indent_command)
-  /*+
-    Indent line or insert a tab.
-    +*/
+/*+
+Indent line or insert a tab.
++*/
 {
   return indent_relative();
 }
 END_DEFUN
 
 DEFUN_INT("newline-and-indent", newline_and_indent)
-  /*+
-    Insert a newline, then indent.
-    Indentation is done using the `indent-command' function.
-    +*/
+/*+
+Insert a newline, then indent.
+Indentation is done using the `indent-command' function.
++*/
 {
   int ret;
 
@@ -726,7 +726,7 @@ DEFUN_INT("newline-and-indent", newline_and_indent)
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc();
       pos = get_goalc();
-      indent = pos > 0 || isspace(following_char());
+      indent = pos > 0 || (!eolp() && isspace(following_char()));
       cur_bp->pt = old_point->pt;
       free_marker(old_point);
       /* Only indent if we're in column > 0 or we're in column 0 and
