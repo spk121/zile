@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: search.c,v 1.46 2005/06/01 16:03:11 rrt Exp $	*/
+/*	$Id: search.c,v 1.47 2005/06/05 18:59:35 rrt Exp $	*/
 
 #include "config.h"
 
@@ -577,7 +577,7 @@ DEFUN_INT("replace-string", replace_string)
     undo_save(UNDO_REPLACE_BLOCK,
               make_point(cur_bp->pt.n,
                          cur_bp->pt.o - find_len),
-              strlen(find), strlen(repl));
+              find_len, repl_len);
     line_replace_text(&cur_bp->pt.p, cur_bp->pt.o - find_len,
                       find_len, repl, repl_len, find_no_upper);
   }
