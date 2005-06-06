@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*	$Id: bind.c,v 1.67 2005/06/06 11:16:52 rrt Exp $	*/
+/*	$Id: bind.c,v 1.68 2005/06/06 11:38:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -395,6 +395,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
       break;
     } else if (ms[0] == '\0') {
       minibuf_error("No function name given");
+      astr_delete(ms);
       ms = NULL;
       break;
     } else {
