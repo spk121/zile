@@ -20,7 +20,7 @@
    Software Foundation, 59 Temple Place - Suite 330, Boston, MA
    02111-1307, USA.  */
 
-/*      $Id: file.c,v 1.74 2005/06/05 23:45:48 rrt Exp $        */
+/*      $Id: file.c,v 1.75 2005/06/06 10:46:04 rrt Exp $        */
 
 #include "config.h"
 
@@ -527,7 +527,8 @@ void kill_buffer(Buffer *kill_bp)
         wp->saved_pt = NULL;    /* It was freed. */
       }
 
-    cur_bp = new_bp;
+    head_bp = cur_bp = new_bp;
+    head_bp->next = NULL;
     cur_bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
     if (strcmp(cur_bp->name, "*scratch*") != 0) {
       set_buffer_name(cur_bp, "*scratch*");
