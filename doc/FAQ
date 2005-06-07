@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2005/06/07 00:00:13 $
+		   Last updated: $Date: 2005/06/07 00:08:09 $
 
 ------------------------------------------------------------------------------
 
@@ -21,13 +21,12 @@ INDEX
 2. Functionality
    2.1. How do I quit Zile?
    2.2. How do I return to the shell without leaving Zile?
-   2.3. Zile is hung.
-   2.4. How do I undo the previous command?
-   2.5. What does `C-something' or `M-something' mean?
-   2.6. What settings can I change?
-   2.7. How do I handle non-ASCII characters?
-   2.8. The META/ALT key doesn't work.
-   2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   2.3. How do I undo the previous command?
+   2.4. What does `C-something' or `M-something' mean?
+   2.5. What settings can I change?
+   2.6. How do I handle non-ASCII characters?
+   2.7. The META/ALT key doesn't work.
+   2.8. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
 ------------------------------------------------------------------------------
 
@@ -119,20 +118,11 @@ INDEX
 
     Type `C-x C-z' or simply `C-z'.
 
-2.3. Zile is hung.
-
-    From the tutorial (`C-h t'):
-
-    If Zile gets into an infinite (or simply very long) computation
-    which you don't want to finish, you can stop it safely by typing
-    `C-g'. You can also use `C-g' to discard a numeric argument or the
-    beginning of a command that you don't want to finish.
-
-2.4. How do I undo the previous command?
+2.3. How do I undo the previous command?
 
     Type `C-x u'.
 
-2.5. What does `C-something' or `M-something' mean?
+2.4. What does `C-something' or `M-something' mean?
 
     From the tutorial (`C-h t'):
 
@@ -144,19 +134,19 @@ INDEX
 	     press and release the ESC key and then type <chr>. We
 	     write <ESC> for the ESC key.
 
-2.6. What settings can I change?
+2.5. What settings can I change?
 
     Check out the `dotzile.sample' file (type `C-h s') for a full list
     of variables.
 
-2.7. How do I handle non-ASCII characters?
+2.6. How do I handle non-ASCII characters?
 
     Zile uses the operating system's locale support, so you need to
     set an appropriate locale; how you do this depends on your OS.
     However, Zile only works with 8-bit locales at present; support
     for Unicode is planned.
 
-2.8 The META/ALT key doesn't work in xterm.
+2.7 The META/ALT key doesn't work in xterm.
 
     This is probably because you are using "8-bit input".  Using the
     following X resources should make things work:
@@ -167,7 +157,7 @@ INDEX
     Typically you'll want to put these lines in your ~/.Xresources
     file.
 
-2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+2.8. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
     Add the following line to your `~/.zile' file:
 
