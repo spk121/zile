@@ -1,11 +1,6 @@
                Zile build and installation instructions
                ----------------------------------------
 
-Special note for Cygwin users: If you are trying compiling Zile with
-cygwin, please read question 3.3 of the FAQ (found in the `etc'
-subdirectory).
-
-
 To build zile:
 
 1) Run configure:
