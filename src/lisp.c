@@ -17,10 +17,10 @@
 
    You should have received a copy of the GNU General Public License
    along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
-/*	$Id: lisp.c,v 1.9 2005/06/02 08:19:42 rrt Exp $	*/
+/*	$Id: lisp.c,v 1.10 2005/07/11 06:10:25 rrt Exp $	*/
 
 #include <stdio.h>
 #include <assert.h>

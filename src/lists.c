@@ -17,10 +17,10 @@
 
    You should have received a copy of the GNU General Public License
    along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
-/*	$Id: lists.c,v 1.17 2005/02/08 19:27:57 rrt Exp $	*/
+/*	$Id: lists.c,v 1.18 2005/07/11 06:10:25 rrt Exp $	*/
 
 #include <stdlib.h>
 #include <string.h>

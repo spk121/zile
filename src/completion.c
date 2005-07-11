@@ -15,10 +15,10 @@
 
    You should have received a copy of the GNU General Public License
    along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
-/*      $Id: completion.c,v 1.24 2005/01/29 13:10:25 rrt Exp $   */
+/*      $Id: completion.c,v 1.25 2005/07/11 06:10:25 rrt Exp $   */
 
 #include "config.h"
 

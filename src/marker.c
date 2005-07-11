@@ -15,10 +15,10 @@
 
    You should have received a copy of the GNU General Public License
    along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, 59 Temple Place - Suite 330, Boston, MA
-   02111-1307, USA.  */
+   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
+   02111-1301, USA.  */
 
-/*	$Id: marker.c,v 1.7 2005/01/25 20:45:15 rrt Exp $	*/
+/*	$Id: marker.c,v 1.8 2005/07/11 06:10:26 rrt Exp $	*/
 
 #include "config.h"
 
@@ -101,12 +101,5 @@ Marker *point_min_marker(void)
 {
   Marker *marker = make_marker();
   move_marker(marker, cur_bp, point_min());
-  return marker;
-}
-
-Marker *point_max_marker(void)
-{
-  Marker *marker = make_marker();
-  move_marker(marker, cur_bp, point_max());
   return marker;
 }
