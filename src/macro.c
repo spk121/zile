@@ -1,5 +1,7 @@
 /* Macro facility functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2005 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -18,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: macro.c,v 1.16 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: macro.c,v 1.17 2005/07/11 19:52:55 rrt Exp $	*/
 
 #include "config.h"
 
@@ -51,6 +53,7 @@ static void add_macro_key(Macro *mp, size_t key)
 void add_cmd_to_macro(void)
 {
   size_t i;
+  assert(cmd_mp);
   for (i = 0; i < cmd_mp->nkeys; i++)
     add_macro_key(cur_mp, cmd_mp->keys[i]);
   macro_delete(cmd_mp);

@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: glue.c,v 1.31 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: glue.c,v 1.32 2005/07/11 19:52:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -64,7 +64,7 @@ size_t xgetkey(int mode, size_t timeout)
  */
 size_t getkey(void)
 {
-  return term_xgetkey(0, 0);
+  return xgetkey(0, 0);
 }
 
 /*
