@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.91 2005/07/11 22:48:38 rrt Exp $	*/
+/*	$Id: main.c,v 1.92 2005/07/11 22:53:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -280,7 +280,7 @@ struct option longopts[] = {
 
 int main(int argc, char **argv)
 {
-  int c, bflag = FALSE, qflag = FALSE, eflag = FALSE;
+  int c, bflag = FALSE, qflag = FALSE;
   astr as = astr_new();
   list fargs = list_new();
 
@@ -368,7 +368,7 @@ int main(int argc, char **argv)
         if (*argv)
           open_file(*argv++, line - 1);
       }
-    else if (eflag == FALSE && list_length(fargs) == 0)
+    else if (list_length(fargs) == 0)
       /* Show the splash screen only if no files and no Lisp expression
          or load file is specified on the command line. */
       about_screen();
