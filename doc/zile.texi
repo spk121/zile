@@ -566,6 +566,10 @@ move backward across N balanced expressions.
 @item forward-word
 Move point forward one word (backward if the argument is negative).
 With argument, do this that many times.
+@item global-set-key
+Bind a command to a key sequence.
+Read key sequence and function name, and bind the function to the key
+sequence.
 @item goto-char
 Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
@@ -576,8 +580,6 @@ Line 1 is the beginning of the buffer.
 Show a help window.
 @item help-config-sample
 Show a configuration file sample.
-@item view-zile-FAQ
-Show the Zile @i{Frequently Asked Questions} list (FAQ).
 @item help-latest-version
 Show informations about getting the latest version.
 @item help-tutorial
@@ -818,6 +820,8 @@ The variable @samp{tab-width} controls the spacing of tab stops.
 Convert the region to upper case.
 @item upcase-word
 Convert following word (or argument N words) to upper case, moving over.
+@item view-zile-FAQ
+Show the Zile @i{Frequently Asked Questions} list (FAQ).
 @item where-is
 Show the key or keys to which the given command is bound.
 @item write-file
