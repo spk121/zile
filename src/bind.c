@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.70 2005/07/11 06:12:29 rrt Exp $	*/
+/*	$Id: bind.c,v 1.71 2005/07/11 22:48:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -428,7 +428,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
   return ms;
 }
 
-static int execute_function(char *name, int uniarg)
+int execute_function(char *name, int uniarg)
 {
   Function func;
   Macro *mp;

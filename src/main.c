@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.90 2005/07/11 06:12:40 rrt Exp $	*/
+/*	$Id: main.c,v 1.91 2005/07/11 22:48:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -131,6 +131,18 @@ static void about_screen(void)
     show_splash_screen(about_splash_str);
     term_refresh();
     waitkey(20 * 10);
+  }
+}
+
+static void execute_functions(list funcs)
+{
+  list l;
+  for (l = list_first(funcs); l != funcs; l = list_next(l)) {
+    char *func = (char *)l->item;
+    term_redisplay();
+    if (!execute_function(func, 1))
+      minibuf_error("Function `%s' not defined", func);
+    lastflag |= FLAG_NEED_RESYNC;
   }
 }
 
@@ -260,6 +272,7 @@ static void signal_init(void)
 struct option longopts[] = {
     { "batch",        0, NULL, 'b' },
     { "help",         0, NULL, 'h' },
+    { "funcall",      0, NULL, 'f' },
     { "no-init-file", 0, NULL, 'q' },
     { "version",      0, NULL, 'v' },
     { 0, 0, 0, 0 }
@@ -269,17 +282,21 @@ int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE, eflag = FALSE;
   astr as = astr_new();
+  list fargs = list_new();
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
   lisp_init();
   init_variables();
 
-  while ((c = getopt_long_only(argc, argv, "l:q", longopts, NULL)) != -1)
+  while ((c = getopt_long_only(argc, argv, "bhf:q", longopts, NULL)) != -1)
     switch (c) {
     case 'b':
       bflag = TRUE;
       qflag = TRUE;
+      break;
+    case 'f':
+      list_append(fargs, optarg);
       break;
     case 'q':
       qflag = TRUE;
@@ -304,6 +321,7 @@ int main(int argc, char **argv)
               "\n"
               "--batch                do not do interactive display; implies -q\n"
               "--help                 display this help message and exit\n"
+              "--funcall, -f FUNC     call Zile function FUNC with no arguments\n"
               "--no-init-file, -q     do not load ~/.zile\n"
               "--version              display version information and exit\n"
               "\n"
@@ -350,12 +368,14 @@ int main(int argc, char **argv)
         if (*argv)
           open_file(*argv++, line - 1);
       }
-    else if (eflag == FALSE)
+    else if (eflag == FALSE && list_length(fargs) == 0)
       /* Show the splash screen only if no files and no Lisp expression
          or load file is specified on the command line. */
       about_screen();
 
     setup_main_screen(argc, as);
+
+    execute_functions(fargs);
 
     /* Run the main Zile loop. */
     loop();
