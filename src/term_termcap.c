@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_termcap.c,v 1.74 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: term_termcap.c,v 1.75 2005/07/19 14:10:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -284,8 +284,8 @@ static void init_screen(void)
 
   read_screen_size();
   size = ZILE_COLS * ZILE_LINES;
-  screen.array = zrealloc(screen.array, size * sizeof(int));
-  screen.oarray = zrealloc(screen.oarray, size * sizeof(int));
+  screen.array = zrealloc(screen.array, size * sizeof(size_t));
+  screen.oarray = zrealloc(screen.oarray, size * sizeof(size_t));
   screen.curx = screen.cury = 0;
 }
 

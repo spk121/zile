@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_epocemx.c,v 1.15 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: term_epocemx.c,v 1.16 2005/07/19 14:10:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -244,8 +244,8 @@ static void term_init_screen(void)
 {
   int size = termp->width * termp->height;
 
-  screen.array = zmalloc(size * sizeof(int));
-  screen.oarray = zmalloc(size * sizeof(int));
+  screen.array = zmalloc(size * sizeof(size_t));
+  screen.oarray = zmalloc(size * sizeof(size_t));
   screen.curx = screen.cury = 0;
 
   term_clear(); /* Ensure the first call to term_refresh will update the screen. */
