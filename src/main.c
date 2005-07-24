@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.93 2005/07/24 17:48:29 rrt Exp $	*/
+/*	$Id: main.c,v 1.94 2005/07/24 18:15:43 rrt Exp $	*/
 
 #include "config.h"
 
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
   lisp_init();
   init_variables();
 
-  while ((c = getopt_long_only(argc, argv, "bhf:q", longopts, NULL)) != -1)
+  while ((c = getopt_long_only(argc, argv, "bhf:qv", longopts, NULL)) != -1)
     switch (c) {
     case 'b':
       bflag = TRUE;
