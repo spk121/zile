@@ -120,12 +120,10 @@ For the first file the cursor will be positioned on the line specified by
 @samp{NUMBER} (do not insert a space between the @samp{+} sign and the number).
 @item --batch
 Run in batch mode.
-@item --eval EXPR
-Evaluate Lisp expression @samp{EXPR}.
+@item -f, --funcall FUNC
+Call Lisp function @samp{FUNC}.
 @item --help
 Print the command line syntax and exit.
-@item --load FILE
-Load Lisp file @file{FILE}.
 @item -q, --no-init-file
 Do not load ~/.zile.
 @item --version
