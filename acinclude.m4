@@ -31,7 +31,6 @@ else
      rm -f conftest*
      test x"${bfd_cv_build_exeext}" = x && bfd_cv_build_exeext=no])
   EXEEXT_FOR_BUILD=""
-  test x"${bfd_cv_build_exeext}" != xno && EXEEXT_FOR_BUILD=${bfd_cv_build_exeex
-t}
+  test x"${bfd_cv_build_exeext}" != xno && EXEEXT_FOR_BUILD=${bfd_cv_build_exeext}
 fi
 AC_SUBST(EXEEXT_FOR_BUILD)])dnl
