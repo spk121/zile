@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.68 2005/07/11 06:10:26 rrt Exp $        */
+/*      $Id: zile.h,v 1.69 2005/07/27 01:12:25 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -173,7 +173,7 @@ struct Buffer {
 
   /* Buffer flags. */
   int flags;
-  size_t mark_active : 1;
+  int mark_active;
 
   /* Buffer-local variables. */
   le *vars;
