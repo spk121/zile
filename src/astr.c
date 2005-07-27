@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: astr.c,v 1.14 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: astr.c,v 1.15 2005/07/27 01:09:15 rrt Exp $	*/
 
 #include "config.h"
 
@@ -208,30 +208,30 @@ astr astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s)
 
 astr astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c)
 {
-  return astr_replace_x(as, pos, size, (const char *)&c, 1);
+  return astr_replace_x(as, pos, size, (const char *)&c, (size_t)1);
 }
 
 astr astr_insert(astr as, ptrdiff_t pos, const astr src)
 {
   assert(src != NULL);
-  return astr_replace_x(as, pos, 0, src->text, src->len);
+  return astr_replace_x(as, pos, (size_t)0, src->text, src->len);
 }
 
 astr astr_insert_cstr(astr as, ptrdiff_t pos, const char *s)
 {
   assert(s != NULL);
-  return astr_replace_x(as, pos, 0, s, strlen(s));
+  return astr_replace_x(as, pos, (size_t)0, s, strlen(s));
 }
 
 astr astr_insert_char(astr as, ptrdiff_t pos, int c)
 {
   char ch = (char)c;
-  return astr_replace_x(as, pos, 0, &ch, 1);
+  return astr_replace_x(as, pos, (size_t)0, &ch, (size_t)1);
 }
 
 astr astr_remove(astr as, ptrdiff_t pos, size_t size)
 {
-  return astr_replace_x(as, pos, size, "", 0);
+  return astr_replace_x(as, pos, size, "", (size_t)0);
 }
 
 /* Don't define in terms of astr_remove, to avoid endless recursion */

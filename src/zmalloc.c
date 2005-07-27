@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: zmalloc.c,v 1.4 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: zmalloc.c,v 1.5 2005/07/27 01:09:15 rrt Exp $	*/
 
 
 #include "config.h"
@@ -41,7 +41,7 @@ void *zmalloc(size_t size)
 
   assert(size > 0);
 
-  if ((ptr = calloc(size, 1)) == NULL) {
+  if ((ptr = calloc(size, (size_t)1)) == NULL) {
     fprintf(stderr, "zile: cannot allocate memory\n");
     zile_exit(1);
   }

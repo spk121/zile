@@ -202,7 +202,7 @@ static int type_s(xprintf_struct *s, int width, int prec,
   size_t string_len;
 
   if (arg_string == NULL)
-    return print_it(s, 6, "(null)", 0);
+    return print_it(s, (size_t)6, "(null)", 0);
 
   /* hand-made strlen() whitch stops when 'prec' is reached. */
   /* if 'prec' is -1 then it is never reached. */
@@ -277,7 +277,7 @@ static int dispatch(xprintf_struct *s)
 
   /* '%%' escape sequence */
   if (*SRCTXT == '%') {
-    if (realloc_buff(s,1) == EOF) /* because we can have "%%%%%%%%..." */
+    if (realloc_buff(s, (size_t)1) == EOF) /* because we can have "%%%%%%%%..." */
       return EOF;
     *DESTTXT = '%';
     DESTTXT++;
@@ -509,7 +509,7 @@ static int core(xprintf_struct *s)
   s->buffer_len = 0;
   s->real_len = 0;
   s->pseudo_len = 0;
-  if (realloc_buff(s,0) == EOF)
+  if (realloc_buff(s, (size_t)0) == EOF)
     return EOF;
   s->dest_string = s->buffer_base;
 
