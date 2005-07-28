@@ -22,7 +22,7 @@
 #include <assert.h>
 
 /* AIX requires this to be the first thing in the file. */
-#if defined (_AIX) && !defined (REGEX_MALLOC)
+#if defined (_AIX)
   #pragma alloca
 #endif
 
@@ -135,23 +135,6 @@ init_syntax_once ()
 #define SIGN_EXTEND_CHAR(c) ((((unsigned char) (c)) ^ 128) - 128)
 #endif
 
-/* Should we use malloc or alloca?  If REGEX_MALLOC is not defined, we
-   use `alloca' instead of `malloc'.  This is because using malloc in
-   re_search* or re_match* could cause memory leaks when C-g is used in
-   Emacs; also, malloc is slower and causes storage fragmentation.  On
-   the other hand, malloc is more portable, and easier to debug.
-
-   Because we sometimes use alloca, some routines have to be macros,
-   not functions -- `alloca'-allocated space disappears at the end of the
-   function it is called in.  */
-
-#ifdef REGEX_MALLOC
-
-#define REGEX_ALLOCATE malloc
-#define REGEX_REALLOCATE(source, osize, nsize) realloc (source, nsize)
-
-#else /* not REGEX_MALLOC  */
-
 /* Emacs already defines alloca, sometimes.  */
 #ifndef alloca
 
@@ -177,8 +160,6 @@ char *alloca ();
   (destination = (char *) alloca (nsize),				\
    memcpy (destination, source, osize),					\
    destination)
-
-#endif /* not REGEX_MALLOC */
 
 
 /* True if `size1' is non-NULL and PTR is pointing anywhere inside
@@ -1936,8 +1917,7 @@ typedef struct
      REGSTART, REGEND -- arrays of string positions.
      REG_INFO -- array of information about each subexpression.
 
-   Also assumes the variables `fail_stack' and (if debugging), `bufp',
-   `pend', `string1', `size1', `string2', and `size2'.  */
+   Also assumes the variables `fail_stack'.  */
 
 #define POP_FAILURE_POINT(str, pat, low_reg, high_reg, regstart, regend, reg_info)\
 {									\
@@ -1990,9 +1970,7 @@ re_compile_fastmap (bufp)
 {
   int j, k;
   fail_stack_type fail_stack;
-#ifndef REGEX_MALLOC
   char *destination;
-#endif
   /* We don't push any register information onto the failure stack.  */
   unsigned num_regs = 0;
 
@@ -2515,25 +2493,8 @@ typedef union
 
 
 /* Free everything we malloc.  */
-#ifdef REGEX_MALLOC
-#define FREE_VAR(var) if (var) free (var); var = NULL
-#define FREE_VARIABLES()						\
-  do {									\
-    FREE_VAR (fail_stack.stack);					\
-    FREE_VAR (regstart);						\
-    FREE_VAR (regend);							\
-    FREE_VAR (old_regstart);						\
-    FREE_VAR (old_regend);						\
-    FREE_VAR (best_regstart);						\
-    FREE_VAR (best_regend);						\
-    FREE_VAR (reg_info);						\
-    FREE_VAR (reg_dummy);						\
-    FREE_VAR (reg_info_dummy);						\
-  } while (0)
-#else /* not REGEX_MALLOC */
 /* Some MIPS systems (at least) want this to free alloca'd storage.  */
 #define FREE_VARIABLES() alloca (0)
-#endif /* not REGEX_MALLOC */
 
 
 /* These values must meet several constraints.  They must not be valid
@@ -2682,16 +2643,6 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
           return -2;
         }
     }
-#ifdef REGEX_MALLOC
-  else
-    {
-      /* We must initialize all our variables to NULL, so that
-         `FREE_VARIABLES' doesn't try to free them.  */
-      regstart = regend = old_regstart = old_regend = best_regstart
-        = best_regend = reg_dummy = NULL;
-      reg_info = reg_info_dummy = (register_info_type *) NULL;
-    }
-#endif /* REGEX_MALLOC */
 
   /* The starting position is bogus.  */
   if (pos < 0 || pos > size1 + size2)
@@ -3112,7 +3063,7 @@ re_match_2 (bufp, string1, size1, string2, size2, pos, regs, stop)
                           regstart[r] = old_regstart[r];
 
                           /* xx why this test?  */
-                          if ((int) old_regend[r] >= (int) regstart[r])
+                          if (old_regend[r] - regstart[r] >= 0)
                             regend[r] = old_regend[r];
                         }
                     }
