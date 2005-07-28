@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.71 2005/07/11 22:48:38 rrt Exp $	*/
+/*	$Id: bind.c,v 1.72 2005/07/28 21:08:56 rrt Exp $	*/
 
 #include "config.h"
 
@@ -177,7 +177,7 @@ static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)
   leafp p;
   vector *v = vec_new(sizeof(key));
 
-  vec_item(v, 0, size_t) = key;
+  vec_item(v, (size_t)0, size_t) = key;
   *numkeys = 1;
 
   do {
@@ -203,17 +203,17 @@ void process_key(size_t key)
   if (key == KBD_NOKEY)
     return;
 
-  if (key & KBD_META && isdigit(key & 255))
+  if (key & KBD_META && isdigit((int)(key & 255)))
     /* Got an ESC x sequence where `x' is a digit. */
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else {
     if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
       /* There are no bindings for the pressed key. */
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, (size_t)0, (size_t)0);
       for (uni = 0;
            uni < last_uniarg && self_insert_command((ptrdiff_t)key);
            ++uni);
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, (size_t)0, (size_t)0);
     } else {
       p->func((lastflag & FLAG_SET_UNIARG) != 0, last_uniarg);
       _last_command = p->func;
@@ -285,7 +285,7 @@ void init_bindings(void)
         if (fentry_table[i].key[j] != NULL) {
           if (strcmp(fentry_table[i].key[j], "\\M-h") == 0)
             fentry_table[i].key[j] = "\\M-h\\M-h";
-          else if (strncmp(fentry_table[i].key[j], "\\C-h", 4) == 0) {
+          else if (strncmp(fentry_table[i].key[j], "\\C-h", (size_t)4) == 0) {
             fentry_table[i].key[j] = zstrdup(fentry_table[i].key[j]);
             fentry_table[i].key[j][1] = 'M';
           }
@@ -417,7 +417,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
         break;                  /* We're finished. */
       } else {
         minibuf_error("Undefined function name `%s'", ms);
-        waitkey(WAITKEY_DEFAULT);
+        waitkey((size_t)WAITKEY_DEFAULT);
       }
     }
   }
@@ -547,7 +547,7 @@ char *get_function_by_key_sequence(void)
   size_t c = getkey();
   size_t *keys, numkeys;
 
-  if (c & KBD_META && isdigit(c & 255))
+  if (c & KBD_META && isdigit((int)(c & 255)))
     return "universal-argument";
 
   p = completion_scan(c, &keys, &numkeys);

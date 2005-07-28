@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: parser.c,v 1.10 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: parser.c,v 1.11 2005/07/28 21:08:56 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdlib.h>
@@ -75,10 +75,10 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
   while (1) {
     astr_cat_char(tok, (char)c);
 
-    if (!doublequotes) { 
+    if (!doublequotes) {
       if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n' || c == '\r' || c == EOF) {
         ungetachar(c);
-        astr_truncate(tok, -1);
+        astr_truncate(tok, (ptrdiff_t)-1);
 
         if (!astr_cmp_cstr(tok, "quote")) {
           *tokenid = T_QUOTE;
@@ -96,10 +96,10 @@ static astr snagAToken(getcCallback getachar, ungetcCallback ungetachar, enum to
         /* Fall through */
 
       case '\"':
-        astr_truncate(tok, -1);
+        astr_truncate(tok, (ptrdiff_t)-1);
         *tokenid = T_WORD;
         return tok;
-    
+
       }
     }
 
@@ -141,7 +141,7 @@ struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar, struct 
       list = leAddDataElement(list, astr_cstr(tok), isquoted);
       isquoted = 0;
       break;
-	    
+
     case T_CLOSEPAREN:
     case T_EOF:
       isquoted = 0;
