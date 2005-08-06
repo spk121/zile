@@ -26,7 +26,7 @@ dnl Checks for functions.
 dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
-AC_CHECK_FUNCS(getcwd fchmod fchown sigaction)
+AC_CHECK_FUNCS(getcwd fchmod fchown)
 
 dnl ==================================================================
 dnl Checks for header files.
