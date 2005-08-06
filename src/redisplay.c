@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: redisplay.c,v 1.19 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.20 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -49,11 +49,11 @@ void resize_windows(void)
 
   /* Resize windows horizontally. */
   for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = ZILE_COLS;
+    wp->fwidth = wp->ewidth = term_width();
 
   /* Work out difference in window height; windows may be taller than
      terminal if the terminal was very short. */
-  for (hdelta = ZILE_LINES, wp = head_wp;
+  for (hdelta = term_height(), wp = head_wp;
        wp != NULL;
        hdelta -= wp->fheight, wp = wp->next);
 
@@ -85,9 +85,6 @@ void resize_windows(void)
       }
     }
   }
-
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
 
   FUNCALL(recenter);
 }

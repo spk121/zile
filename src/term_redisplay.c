@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.41 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.42 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -33,10 +33,38 @@
 #include "config.h"
 #include "extern.h"
 
+static int initted = FALSE;
+static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
 static size_t point_start_column;
 static size_t point_screen_column;
+
+int term_initted(void)
+{
+  return initted;
+}
+
+void term_set_initted(void)
+{
+  initted = TRUE;
+}
+
+size_t term_width(void)
+{
+  return width;
+}
+
+size_t term_height(void)
+{
+  return height;
+}
+
+void term_set_size(size_t cols, size_t rows)
+{
+  width = cols;
+  height = rows;
+}
 
 static int make_char_printable(char **buf, size_t c)
 {
@@ -53,24 +81,24 @@ static void outch(int c, Font font, size_t *x)
   int j, w;
   char *buf;
 
-  if (*x >= ZILE_COLS)
+  if (*x >= term_width())
     return;
 
   term_attrset(1, font);
 
   if (c == '\t')
-    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < ZILE_COLS; w--)
+    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < term_width(); w--)
       term_addch(' '), ++(*x);
   else if (isprint(c))
     term_addch(c), ++(*x);
   else {
     j = make_char_printable(&buf, (size_t)c);
-    for (w = 0; w < j && *x < ZILE_COLS; ++w)
+    for (w = 0; w < j && *x < term_width(); ++w)
       term_addch(buf[w]), ++(*x);
     free(buf);
   }
 
-  term_attrset(1, ZILE_NORMAL);
+  term_attrset(1, FONT_NORMAL);
 }
 
 static int in_region(size_t lineno, size_t x, Region *r)
@@ -96,13 +124,13 @@ static int in_region(size_t lineno, size_t x, Region *r)
 static void draw_end_of_line(size_t line, Window *wp, size_t lineno, Region *r,
                              int highlight, size_t x, size_t i)
 {
-  if (x >= ZILE_COLS) {
-    term_move(line, ZILE_COLS - 1);
+  if (x >= term_width()) {
+    term_move(line, term_width() - 1);
     term_addch('$');
   } else if (highlight) {
     for (; x < wp->ewidth; ++i) {
       if (in_region(lineno, i, r))
-        outch(' ', ZILE_REVERSE, &x);
+        outch(' ', FONT_REVERSE, &x);
       else
         x++;
     }
@@ -117,9 +145,9 @@ static void draw_line(size_t line, size_t startcol, Window *wp, Line *lp,
   term_move(line, 0);
   for (x = 0, i = startcol; i < astr_len(lp->item) && x < wp->ewidth; i++) {
     if (highlight && in_region(lineno, i, r))
-      outch(*astr_char(lp->item, (ptrdiff_t)i), ZILE_REVERSE, &x);
+      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_REVERSE, &x);
     else
-      outch(*astr_char(lp->item, (ptrdiff_t)i), ZILE_NORMAL, &x);
+      outch(*astr_char(lp->item, (ptrdiff_t)i), FONT_NORMAL, &x);
   }
 
   draw_end_of_line(line, wp, lineno, r, highlight, x, i);
@@ -264,7 +292,7 @@ static void draw_status_line(size_t line, Window *wp)
   char *buf;
   Point pt = window_pt(wp);
 
-  term_attrset(1, ZILE_REVERSE);
+  term_attrset(1, FONT_REVERSE);
 
   term_move(line, 0);
   for (i = 0; i < wp->ewidth; ++i)
@@ -293,7 +321,7 @@ static void draw_status_line(size_t line, Window *wp)
               make_screen_pos(wp, &buf));
   free(buf);
 
-  term_attrset(1, ZILE_NORMAL);
+  term_attrset(1, FONT_NORMAL);
 }
 
 void term_redisplay(void)
@@ -338,13 +366,13 @@ void show_splash_screen(const char *splash)
   size_t i;
   const char *p;
 
-  for (i = 0; i < ZILE_LINES - 2; ++i) {
+  for (i = 0; i < term_height() - 2; ++i) {
     term_move(i, 0);
     term_clrtoeol();
   }
 
   term_move(0, 0);
-  for (i = 0, p = splash; *p != '\0' && i < termp->height - 2; ++p)
+  for (i = 0, p = splash; *p != '\0' && i < term_height() - 2; ++p)
     if (*p == '\n')
       term_move(++i, 0);
     else
@@ -356,9 +384,9 @@ void show_splash_screen(const char *splash)
  */
 void term_tidy(void)
 {
-  term_move(ZILE_LINES - 1, 0);
+  term_move(term_height() - 1, 0);
   term_clrtoeol();
-  term_attrset(1, ZILE_NORMAL);
+  term_attrset(1, FONT_NORMAL);
   term_refresh();
 }
 

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_minibuf.c,v 1.21 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: term_minibuf.c,v 1.22 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -38,7 +38,7 @@ static void xminibuf_write(const char *s)
 {
   size_t x;
 
-  for (x = 0; *s != '\0' && x < ZILE_COLS; s++) {
+  for (x = 0; *s != '\0' && x < term_width(); s++) {
     term_addch(*(unsigned char *)s);
     ++x;
   }
@@ -46,7 +46,7 @@ static void xminibuf_write(const char *s)
 
 void term_minibuf_write(const char *s)
 {
-  term_move(ZILE_LINES - 1, 0);
+  term_move(term_height() - 1, 0);
   xminibuf_write(s);
   term_clrtoeol();
 }
@@ -56,25 +56,25 @@ static void draw_minibuf_read(const char *prompt, const char *value,
 {
   int margin = 1, n = 0;
 
-  term_move(ZILE_LINES - 1, 0);
+  term_move(term_height() - 1, 0);
   term_clrtoeol();
   xminibuf_write(prompt);
 
-  if (prompt_len + pointo + 1 >= ZILE_COLS) {
+  if (prompt_len + pointo + 1 >= term_width()) {
     margin++;
     term_addch('$');
-    n = pointo - pointo % (ZILE_COLS - prompt_len - 2);
+    n = pointo - pointo % (term_width() - prompt_len - 2);
   }
 
-  term_addnstr(value + n, min(ZILE_COLS - prompt_len - margin, strlen(value) - n));
+  term_addnstr(value + n, min(term_width() - prompt_len - margin, strlen(value) - n));
   term_addnstr(match, strlen(match));
 
-  if (strlen(value + n) >= ZILE_COLS - prompt_len - margin) {
-    term_move(ZILE_LINES - 1, ZILE_COLS - 1);
+  if (strlen(value + n) >= term_width() - prompt_len - margin) {
+    term_move(term_height() - 1, term_width() - 1);
     term_addch('$');
   }
 
-  term_move(ZILE_LINES - 1, prompt_len + margin - 1 + pointo % (ZILE_COLS - prompt_len - margin));
+  term_move(term_height() - 1, prompt_len + margin - 1 + pointo % (term_width() - prompt_len - margin));
 
   term_refresh();
 }
@@ -120,44 +120,44 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
     switch (c = getkey()) {
     case KBD_NOKEY:
       break;
-    case KBD_CTL | 'z':
+    case KBD_CTRL | 'z':
       FUNCALL(suspend_zile);
       break;
     case KBD_RET:
-      term_move(ZILE_LINES - 1, 0);
+      term_move(term_height() - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);
       return *p;
     case KBD_CANCEL:
-      term_move(ZILE_LINES - 1, 0);
+      term_move(term_height() - 1, 0);
       term_clrtoeol();
       if (saved)
         free(saved);
       return NULL;
-    case KBD_CTL | 'a':
+    case KBD_CTRL | 'a':
     case KBD_HOME:
       i = 0;
       break;
-    case KBD_CTL | 'e':
+    case KBD_CTRL | 'e':
     case KBD_END:
       i = len;
       break;
-    case KBD_CTL | 'b':
+    case KBD_CTRL | 'b':
     case KBD_LEFT:
       if (i > 0)
         --i;
       else
         ding();
       break;
-    case KBD_CTL | 'f':
+    case KBD_CTRL | 'f':
     case KBD_RIGHT:
       if (i < len)
         ++i;
       else
         ding();
       break;
-    case KBD_CTL | 'k':
+    case KBD_CTRL | 'k':
       /* XXX no kill-register save is done yet. */
       if (i < len) {
         len -= len - i;
@@ -194,7 +194,7 @@ static char *rot_vminibuf_read(const char *prompt, const char *value,
         thistab = lasttab;
       }
       break;
-    case KBD_CTL | 'v':
+    case KBD_CTRL | 'v':
     case KBD_PGDN:
       if (cp == NULL) {
         ding();

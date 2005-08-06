@@ -1,26 +1,24 @@
 /* Exported terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zile.
+   This file is part of Zee.
 
-   Zile is free software; you can redistribute it and/or modify it under
+   Zee is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
+   along with Zee; see the file COPYING.  If not, write to the Free
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
-
-/*	$Id: term_epocemx.c,v 1.16 2005/07/19 14:10:49 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,22 +35,11 @@
 #include "zile.h"
 #include "extern.h"
 
-static Terminal thisterm = {
-  /* Unitialised screen pointer. */
-  NULL,
-
-  /* Uninitialized width and height. */
-  0, 0,
-
-  /* Uninitialised. */
-  FALSE,
-};
-
 typedef struct {
   size_t curx, cury;  /* cursor x and y. */
   Font font;       /* current font. */
   size_t *array, *oarray; /* contents of screen (8 low bits is
-                             character, rest is Zile font code).
+                             character, rest is font code).
                              array is current, oarray is last
                              displayed contents. */
 } Screen;
@@ -60,11 +47,6 @@ typedef struct {
 static char *tcap_ptr;
 
 static Screen screen;
-
-Terminal *termp = &thisterm;
-
-size_t ZILE_COLS;   /* Current number of columns on screen. */
-size_t ZILE_LINES;  /* Current number of rows on screen. */
 
 static char *cm_string, *ce_string;
 static char *so_string, *se_string, *mr_string, *me_string;
@@ -80,15 +62,15 @@ void term_move(size_t y, size_t x)
 void term_clrtoeol(void)
 {
   size_t i, x = screen.curx;
-  for (i = screen.curx; i < termp->width; i++)
+  for (i = screen.curx; i < term_width(); i++)
     term_addch(0);
   screen.curx = x;
 }
 
 static const char *getattr(Font f) {
-  if (f == ZILE_NORMAL)
+  if (f == FONT_NORMAL)
     return astr_cstr(norm_string);
-  else if (f & ZILE_REVERSE)
+  else if (f & FONT_REVERSE)
     return mr_string;
   assert(0);
   return "";
@@ -108,15 +90,15 @@ void term_refresh(void)
 {
   int skipped, eol;
   size_t i, j;
-  Font of = ZILE_NORMAL;
+  Font of = FONT_NORMAL;
   astr as = astr_new();
 
   /* Start at the top left of the screen with no highlighting. */
   astr_cat_cstr(as, tgoto(cm_string, 0, 0));
-  astr_cat_cstr(as, getattr(ZILE_NORMAL));
+  astr_cat_cstr(as, getattr(FONT_NORMAL));
 
   /* Add the rest of the screen. */
-  for (i = 0; i < termp->height; i++) {
+  for (i = 0; i < term_height(); i++) {
     eol = FALSE;
     /*
      * The eol flag may seem unnecessary; it is used (rather than
@@ -127,8 +109,8 @@ void term_refresh(void)
     astr_cat_cstr(as, tgoto(cm_string, 0, (int)i));
     skipped = FALSE;
 
-    for (j = 0; j < termp->width; j++) {
-      size_t offset = i * termp->width + j;
+    for (j = 0; j < term_width(); j++) {
+      size_t offset = i * term_width() + j;
       size_t n = screen.array[offset];
       char c = n & 0xff;
       Font f = n & ~0xffU;
@@ -170,7 +152,7 @@ void term_clear(void)
 {
   size_t i;
   term_move(0, 0);
-  for (i = 0; i < termp->width * termp->height; i++) {
+  for (i = 0; i < term_width() * term_height(); i++) {
     screen.array[i] = 0;
     screen.oarray[i] = 1;
   }
@@ -178,10 +160,10 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-  screen.array[screen.cury * termp->width + screen.curx] = c | screen.font;
+  screen.array[screen.cury * term_width() + screen.curx] = c | screen.font;
   screen.curx++;
-  if (screen.curx == termp->width) {
-    if (screen.cury < termp->height - 1) {
+  if (screen.curx == term_width()) {
+    if (screen.cury < term_height() - 1) {
       screen.curx = 0;
       screen.cury++;
     } else
@@ -197,10 +179,10 @@ void term_attrset(size_t attrs, ...)
   for (i = 0; i < attrs; i++) {
     Font f = va_arg(valist, Font);
     switch (f) {
-    case ZILE_NORMAL:
-      screen.font = ZILE_NORMAL;
+    case FONT_NORMAL:
+      screen.font = FONT_NORMAL;
       break;
-    case ZILE_REVERSE:
+    case FONT_REVERSE:
       screen.font |= f;
       break;
     }
@@ -223,26 +205,18 @@ static char *get_tcap(void)
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    zile_exit(1);
+    die(1);
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    zile_exit(1);
+    die(1);
   }
 
   return tcap;
 }
 
-static void read_screen_size(void)
-{
-  char *tcap = get_tcap();
-  ZILE_COLS = tgetnum("co");
-  ZILE_LINES = tgetnum("li");
-  free(tcap);
-}
-
 static void term_init_screen(void)
 {
-  int size = termp->width * termp->height;
+  int size = term_width() * term_height();
 
   screen.array = zmalloc(size * sizeof(size_t));
   screen.oarray = zmalloc(size * sizeof(size_t));
@@ -263,12 +237,9 @@ void term_init(void)
 
   tcap_ptr = tcap = get_tcap();
 
-  read_screen_size();
-  termp->width = ZILE_COLS;
-  termp->height = ZILE_LINES;
+  term_set_size((size_t)tgetnum("co"), (size_t)tgetnum("li"));
 
   term_init_screen();
-  termp->screen = &screen;
 
   /* Unbuffered I/O so screen is always up-to-date. */
   setvbuf(stdout, NULL, _IONBF, 0);
@@ -291,20 +262,9 @@ void term_close(void)
   /* Free memory and finish with termcap. */
   free(screen.array);
   free(screen.oarray);
-  termp->screen = NULL;
   free(tcap_ptr);
   astr_delete(norm_string);
   fflush(stdout);
-}
-
-/* Suspend the term ready to go back to the shell */
-void term_suspend(void)
-{
-}
-
-/* Set up the term again */
-void term_resume(void)
-{
 }
 
 /* cursor keys */
@@ -318,18 +278,18 @@ void term_resume(void)
 #define KPGDN       4101
 #define KMENU       4150
 
-static int translate_key(size_t code)
+static int translate_key(int code)
 {
   switch (code) {
   case '\0':		/* C-@ */
-    return KBD_CTL | '@';
+    return KBD_CTRL | '@';
   case '\1':  case '\2':  case '\3':  case '\4':  case '\5':
-  case '\6':  case '\7':                         case '\12':
+  case '\6':  case '\7':                          case '\12':
   case '\13': case '\14':             case '\16': case '\17':
   case '\20': case '\21': case '\22': case '\23': case '\24':
   case '\25': case '\26': case '\27': case '\30': case '\31':
   case '\32':		/* C-a ... C-z */
-    return KBD_CTL | ('a' + code - 1);
+    return KBD_CTRL | ('a' + code - 1);
   case '\11':
     return KBD_TAB;
   case '\15':
@@ -337,7 +297,7 @@ static int translate_key(size_t code)
   case '\33':		/* META */
     return KBD_META;
   case '\37':
-    return KBD_CTL | '_';
+    return KBD_CTRL | '_';
   case '\10':		/* BS */
     return KBD_BS;
   case KUP:
@@ -363,32 +323,17 @@ static int translate_key(size_t code)
   }
 }
 
-#define MAX_KEY_BUF	16
-
-static int key_buf[MAX_KEY_BUF];
-static int *keyp = key_buf;
-
-size_t term_xgetkey(int mode, size_t timeout GCC_UNUSED)
+size_t term_xgetkey(int mode, size_t timeout)
 {
-  size_t code;
+  int code = _read_key(0);
 
-  if (keyp > key_buf)
-    return *--keyp;
-
-  code= _read_key(0);
-
-  if (mode & GETKEY_UNFILTERED) {
+  (void)timeout;
+  if (mode & GETKEY_UNFILTERED)
     return code & 0xff;
-  } else {
+  else {
     int key = translate_key(code);
     while (key == KBD_META)
       key = getkey() | KBD_META;
     return key;
   }
-}
-
-void term_ungetkey(size_t key)
-{
-  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
-    *keyp++ = key;
 }

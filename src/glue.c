@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: glue.c,v 1.32 2005/07/11 19:52:53 rrt Exp $	*/
+/*	$Id: glue.c,v 1.33 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -46,21 +46,32 @@ void ding(void)
   thisflag |= FLAG_GOT_ERROR;
 }
 
+#define MAX_KEY_BUF	16
+
+static int key_buf[MAX_KEY_BUF];
+static int *keyp = key_buf;
+
 /*
  * Get a keystroke, waiting for up to timeout 10ths of a second if
- * mode contains GETKEY_DELAYED, and translating it into a Zile
+ * mode contains GETKEY_DELAYED, and translating it into a
  * keycode unless mode contains GETKEY_UNFILTERED.
  */
 size_t xgetkey(int mode, size_t timeout)
 {
-  size_t key = term_xgetkey(mode, timeout);
+  size_t key;
+
+  if (keyp > key_buf)
+    return *--keyp;
+
+  key = term_xgetkey(mode, timeout);
   if (thisflag & FLAG_DEFINING_MACRO)
     add_key_to_cmd(key);
   return key;
 }
 
 /*
- * Wait for a keystroke and return the Zile key code.
+ * Wait for a keystroke indefinitely, and return the
+ * corresponding keycode.
  */
 size_t getkey(void)
 {
@@ -68,12 +79,18 @@ size_t getkey(void)
 }
 
 /*
- * Wait for two seconds or until a key is pressed.
- * The key is then available with getkey().
+ * Wait for timeout 10ths if a second or until a key is pressed.
+ * The key is then available with [x]getkey().
  */
-void waitkey(size_t delay)
+void waitkey(size_t timeout)
 {
-  term_ungetkey(term_xgetkey(GETKEY_DELAYED, delay));
+  ungetkey(xgetkey(GETKEY_DELAYED, timeout));
+}
+
+void ungetkey(size_t key)
+{
+  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
+    *keyp++ = key;
 }
 
 /*

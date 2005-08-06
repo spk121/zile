@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: macro.c,v 1.17 2005/07/11 19:52:55 rrt Exp $	*/
+/*	$Id: macro.c,v 1.18 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -168,7 +168,7 @@ int call_macro(Macro *mp)
   size_t i;
 
   for (i = mp->nkeys - 1; i < mp->nkeys ; i--)
-    term_ungetkey(mp->keys[i]);
+    ungetkey(mp->keys[i]);
 
   if (lastflag & FLAG_GOT_ERROR)
     ret = FALSE;

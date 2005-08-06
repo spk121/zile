@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.90 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.91 2005/08/06 16:23:29 rrt Exp $	*/
 
 #include "config.h"
 
@@ -368,7 +368,7 @@ int universal_argument(int keytype, int xarg)
 
   if (keytype == KBD_META) {
     astr_cpy_cstr(as, "ESC");
-    term_ungetkey((size_t)(xarg + '0'));
+    ungetkey((size_t)(xarg + '0'));
   } else
     astr_cpy_cstr(as, "C-u");
 
@@ -395,7 +395,7 @@ int universal_argument(int keytype, int xarg)
         arg = arg * 10 + digit;
 
       i++;
-    } else if (key == (KBD_CTL | 'u')) {
+    } else if (key == (KBD_CTRL | 'u')) {
       astr_cat_cstr(as, " C-u");
       if (i == 0)
         arg *= 4;
@@ -410,11 +410,11 @@ int universal_argument(int keytype, int xarg)
         /* If i == 0 do nothing (the Emacs behavior is a little
            strange in this case, it waits for one more key that is
            eaten, and then goes back to the normal state). */
-        term_ungetkey(key);
+        ungetkey(key);
         break;
       }
     } else {
-      term_ungetkey(key);
+      ungetkey(key);
       break;
     }
   }
@@ -437,7 +437,7 @@ Repeating C-u without digits or minus sign multiplies the argument
 by 4 each time.
 +*/
 {
-  return universal_argument(KBD_CTL | 'u', 0);
+  return universal_argument(KBD_CTRL | 'u', 0);
 }
 END_DEFUN
 

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.69 2005/07/27 01:12:25 rrt Exp $        */
+/*      $Id: zile.h,v 1.70 2005/08/06 16:23:30 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -253,43 +253,30 @@ typedef struct Macro {
   struct Macro *next;           /* Next macro in the list. */
 } Macro;
 
-struct Terminal {
-  void *screen; /* The real type of this pointer depends on the
-                   terminal back-end. */
-  size_t width, height;
-  int initted; /* Set to TRUE when the terminal has been initialised. */
-};
-
-/* The actual number of lines and columns on the screen, which may
-   differ from the Terminal's settings after a SIGWINCH. */
-extern size_t ZILE_LINES, ZILE_COLS;
-
-extern Terminal *termp; /* The global Terminal. */
-
 /* Type of font attributes */
 typedef size_t Font;
 
 /* Zile font codes
  * Designed to fit in an int, leaving room for a char underneath. */
-#define ZILE_NORMAL		0x000
-#define ZILE_REVERSE		0x100
+#define FONT_NORMAL		0x000
+#define FONT_REVERSE		0x100
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
 
 #define GETKEY_DELAYED                  0001
-#define GETKEY_UNFILTERED              0002
+#define GETKEY_UNFILTERED               0002
 
 /* Special value returned in non blocking mode, when no key is pressed. */
 #define KBD_NOKEY                       UINT_MAX
 
 /* Key modifiers. */
-#define KBD_CTL                         01000
+#define KBD_CTRL                        01000
 #define KBD_META                        02000
 
 /* Common non-alphanumeric keys. */
-#define KBD_CANCEL                      (KBD_CTL | 'g')
+#define KBD_CANCEL                      (KBD_CTRL | 'g')
 #define KBD_TAB                         00402
 #define KBD_RET                         00403
 #define KBD_PGUP                        00404

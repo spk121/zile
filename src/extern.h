@@ -97,6 +97,7 @@ int backward_sexp(void);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
+void ungetkey(size_t key);
 size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
 void waitkey(size_t delay);
@@ -207,6 +208,11 @@ char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, H
 void free_rotation_buffers(void);
 
 /* term_redisplay.c ------------------------------------------------------- */
+int term_initted(void);
+void term_set_initted(void);
+size_t term_width(void);
+size_t term_height(void);
+void term_set_size(size_t cols, size_t rows);
 void term_redisplay(void);
 void term_full_redisplay(void);
 void show_splash_screen(const char *splash);
@@ -228,7 +234,6 @@ void term_addch(int c);
 void term_attrset(size_t attrs, ...);
 void term_beep(void);
 size_t term_xgetkey(int mode, size_t timeout);
-void term_ungetkey(size_t key);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

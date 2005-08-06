@@ -69,7 +69,7 @@ else
 if EPOCEMX
 zile_SOURCES = $(zile_base_SOURCES) term_epocemx.c
 else
-zile_SOURCES = $(zile_base_SOURCES) term_termcap.c
+zile_SOURCES = $(zile_base_SOURCES) term_ncurses.c
 endif
 endif
 

@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: window.c,v 1.20 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: window.c,v 1.21 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -247,9 +247,9 @@ Make the selected window fill the screen.
       free_window(wp);
   }
 
-  cur_wp->fwidth = cur_wp->ewidth = termp->width;
+  cur_wp->fwidth = cur_wp->ewidth = term_width();
   /* Save space for minibuffer. */
-  cur_wp->fheight = termp->height - 1;
+  cur_wp->fheight = term_height() - 1;
   /* Save space for status line. */
   cur_wp->eheight = cur_wp->fheight - 1;
   cur_wp->next = NULL;
@@ -287,9 +287,9 @@ void create_first_window(void)
 
   wp = window_new();
   cur_wp = head_wp = wp;
-  wp->fwidth = wp->ewidth = termp->width;
+  wp->fwidth = wp->ewidth = term_width();
   /* Save space for minibuffer. */
-  wp->fheight = termp->height - 1;
+  wp->fheight = term_height() - 1;
   /* Save space for status line. */
   wp->eheight = wp->fheight - 1;
   wp->bp = bp;

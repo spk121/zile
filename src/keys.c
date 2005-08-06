@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: keys.c,v 1.20 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: keys.c,v 1.21 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,11 +39,11 @@ astr chordtostr(size_t key)
 {
   astr as = astr_new();
 
-  if (key & KBD_CTL)
+  if (key & KBD_CTRL)
     astr_cat_cstr(as, "C-");
   if (key & KBD_META)
     astr_cat_cstr(as, "M-");
-  key &= ~(KBD_CTL | KBD_META);
+  key &= ~(KBD_CTRL | KBD_META);
 
   switch (key) {
   case KBD_PGUP:
@@ -173,7 +173,7 @@ static const char *keyname[] = {
  */
 static int keycode[] = {
   KBD_BS,
-  KBD_CTL,
+  KBD_CTRL,
   KBD_DEL,
   KBD_DOWN,
   KBD_END,
@@ -249,7 +249,7 @@ size_t strtochord(char *buf, size_t *len)
 
   *len = l;
 
-  if (key == KBD_CTL || key == KBD_META) {
+  if (key == KBD_CTRL || key == KBD_META) {
     size_t k = strtochord(buf + l, &l);
     if (k == KBD_NOKEY) {
       *len = 0;

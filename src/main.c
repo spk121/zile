@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.94 2005/07/24 18:15:43 rrt Exp $	*/
+/*	$Id: main.c,v 1.95 2005/08/06 16:23:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -210,10 +210,8 @@ static void suspend_sig_handler(int signal)
 {
   assert(signal == SIGTSTP);
 
-  if (termp->initted) {
+  if (term_initted())
     term_tidy();
-    term_suspend();
-  }
 
   /* Trap SIGHUP and SIGTERM so we can properly deal with them while
      suspended */
@@ -235,10 +233,8 @@ static void cont_sig_handler(int signal)
 {
   assert(signal == SIGCONT);
 
-  if (termp->initted) {
-    term_resume();
+  if (term_initted())
     term_full_redisplay();
-  }
 
   /* Simplest just to reinitialise everything. */
   signal_init();
