@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.7 2005/02/05 13:48:15 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.8 2005/08/06 16:26:31 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -69,12 +69,12 @@ static void fdecl(const char *name)
 
   while ((buf = astr_fgets(input_file)) != NULL) {
     if (s == 1) {
-      if (!strncmp(astr_cstr(buf), "+*/", 3))
+      if (!strncmp(astr_cstr(buf), "+*/", (size_t)3))
         break;
       astr_cat(doc, buf);
       astr_cat_char(doc, '\n');
     }
-    if (!strncmp(astr_cstr(buf), "/*+", 3))
+    if (!strncmp(astr_cstr(buf), "/*+", (size_t)3))
       s = 1;
     else if (astr_cstr(buf)[0] == '{')
       break;
@@ -91,7 +91,7 @@ static void parse(void)
   astr buf;
 
   while ((buf = astr_fgets(input_file)) != NULL) {
-    if (!strncmp(astr_cstr(buf), "DEFUN(", 6)) {
+    if (!strncmp(astr_cstr(buf), "DEFUN(", (size_t)6)) {
       int i, j;
       astr sub;
       i = astr_find_cstr(buf, "\"");
