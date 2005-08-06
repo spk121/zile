@@ -121,15 +121,29 @@ fi
 AM_CONDITIONAL(EPOCEMX, test x$epocemx = xtrue)
 
 dnl ==================================================================
-dnl Termcap
+dnl Curses
 dnl ==================================================================
 
+AC_DEFUN([CHECK_CURSES],
+[
+        AC_MSG_CHECKING([use curses])
+        AC_MSG_RESULT(yes)
+        AC_DEFINE(CURSES, 1, [Define this to use curses.])
+        AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
+[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
+        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
+        dnl Check if ncurses library is available as libncurses or libcurses
+        AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
+AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
+])
+
 if test x$allegro = xfalse && test x$epocemx = xfalse; then
-        AC_CHECK_HEADERS([termcap.h] [termios.h])
-        AC_CHECK_LIB(termcap, tgetstr, [LIBS="$LIBS -ltermcap"],
-		AC_CHECK_LIB(ncurses, tgetstr, [LIBS="$LIBS -lncurses"],
-                        AC_MSG_FAILURE([cannot find termcap])))
+        curses=true
+        CHECK_CURSES
 fi
+
+AM_CONDITIONAL(CURSES, test x$curses = xtrue)
 
 dnl ==================================================================
 dnl Extra definitions for config.h
