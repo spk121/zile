@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(zile, 2.2.3, zile-devel@lists.sourceforge.net)
+AC_INIT(zile, 2.2.4, zile-devel@lists.sourceforge.net)
 AM_INIT_AUTOMAKE
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
