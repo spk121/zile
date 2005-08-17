@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.70 2005/08/06 16:23:30 rrt Exp $        */
+/*      $Id: zile.h,v 1.71 2005/08/17 14:15:28 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -87,7 +87,6 @@ struct Marker {
 
 /* Undo delta types. */
 enum {
-  UNDO_INSERT_CHAR,       /* Insert a character. */
   UNDO_INSERT_BLOCK,      /* Insert a block of characters. */
   UNDO_REMOVE_CHAR,       /* Remove a character. */
   UNDO_REMOVE_BLOCK,      /* Remove a block of characters. */

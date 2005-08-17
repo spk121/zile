@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: undo.c,v 1.23 2005/07/11 06:10:26 rrt Exp $        */
+/*      $Id: undo.c,v 1.24 2005/08/17 14:15:28 rrt Exp $        */
 
 #include "config.h"
 
@@ -58,7 +58,6 @@ void undo_save(int type, Point pt, size_t arg1, size_t arg2)
     up->unchanged = TRUE;
 
   switch (type) {
-  case UNDO_INSERT_CHAR:
   case UNDO_REPLACE_CHAR:
   case UNDO_INTERCALATE_CHAR:
     up->delta.c = (char)arg1;
@@ -110,12 +109,6 @@ static Undo *revert_action(Undo *up)
   goto_point(up->pt);
 
   switch (up->type) {
-  case UNDO_INSERT_CHAR:
-    if (up->delta.c == '\n')
-      insert_newline();
-    else
-      insert_char_in_insert_mode(up->delta.c);
-    break;
   case UNDO_INTERCALATE_CHAR:
     if (up->delta.c == '\n')
       intercalate_newline();
