@@ -18,10 +18,11 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: vector.c,v 1.4 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: vector.c,v 1.5 2005/08/23 00:41:09 rrt Exp $	*/
 
 #include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "config.h"
 #include "vector.h"
@@ -55,7 +56,8 @@ static vector *resize(vector *v, size_t items)
 }
 
 /* Convert a vector to an array */
-void *vec_toarray(vector *v) {
+void *vec_toarray(vector *v)
+{
   void *a;
   resize(v, vec_items(v));
   a = v->array;
