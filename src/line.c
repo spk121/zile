@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: line.c,v 1.66 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: line.c,v 1.67 2005/09/02 23:47:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -116,15 +116,15 @@ int insert_char(int c)
 
 /*
  * Insert a character at the current position in insert mode
- * whetever the current insert mode is.
+ * whatever the current insert mode is.
  */
 int insert_char_in_insert_mode(int c)
 {
-  int old_mode = cur_bp->flags, ret;
+  int old_overwrite = cur_bp->flags & BFLAG_OVERWRITE, ret;
 
   cur_bp->flags &= ~BFLAG_OVERWRITE;
   ret = insert_char(c);
-  cur_bp->flags = old_mode;
+  cur_bp->flags |= old_overwrite;
 
   return ret;
 }
