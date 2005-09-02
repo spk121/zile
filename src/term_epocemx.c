@@ -205,10 +205,10 @@ static char *get_tcap(void)
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    die(1);
+    exit(1);
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    die(1);
+    exit(1);
   }
 
   return tcap;
