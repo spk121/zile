@@ -2,7 +2,7 @@
 ; (c) Reuben Thomas 2005
 
 &EN
-#{"Zile"},(0x101F9331),2,20,0
+#{"Zile"},(0x101F9331),2,26,0
 
 "doc/BANNER.EPOC"-"",FT,TA
 "src/zile"-"!:\zile.exe"
