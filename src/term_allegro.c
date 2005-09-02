@@ -184,7 +184,7 @@ void term_init(void)
   set_color_depth(8);
   if (set_gfx_mode(GFX_SAFE, 640, 480, 0, 0) < 0) {
     fprintf(stderr, "Could not set VGA screen mode.");
-    die(1);
+    exit(1);
   }
 
   LOCK_VARIABLE(blink_state);
@@ -298,9 +298,9 @@ size_t term_xgetkey(int mode, size_t timeout)
   if (mode & GETKEY_UNFILTERED)
     return hooked_readkey(mode, timeout) & 0xff;
   else {
-    size_t key = translate_key(mode, hooked_readkey(mode, timeout));
+    size_t key = translate_key(hooked_readkey(mode, timeout));
     while (key == KBD_META) {
-      key = translate_key(0, hooked_readkey(0));
+      key = translate_key(hooked_readkey(mode, 0));
       key |= KBD_META;
     }
     return key;
