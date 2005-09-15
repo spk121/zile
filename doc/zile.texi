@@ -489,7 +489,7 @@ This gives the word(s) a first character in upper case and the rest
 lower case.
 @item call-last-kbd-macro
 Call the last keyboard macro that you defined with @kbd{C-x (}.
-A prefix argument serves as a repeat count.  Zero means repeat until error.
+A prefix argument serves as a repeat count.
 @item capitalize-word
 Capitalize the following word (or argument N words), moving over.
 This gives the word(s) a first character in upper case and the rest
