@@ -153,7 +153,7 @@ astr lisp_dump(le *list);
 void cancel_kbd_macro(void);
 void add_cmd_to_macro(void);
 void add_key_to_cmd(size_t key);
-int call_macro(Macro *mp);
+void call_macro(Macro *mp);
 void free_macros(void);
 Macro *get_macro(char *name);
 

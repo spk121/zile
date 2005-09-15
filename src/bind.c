@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.72 2005/07/28 21:08:56 rrt Exp $	*/
+/*	$Id: bind.c,v 1.73 2005/09/15 21:47:12 rrt Exp $	*/
 
 #include "config.h"
 
@@ -435,9 +435,10 @@ int execute_function(char *name, int uniarg)
 
   if ((func = get_function(name)))
     return func(uniarg ? 1 : 0, uniarg);
-  else if ((mp = get_macro(name)))
-    return call_macro(mp);
-  else
+  else if ((mp = get_macro(name))) {
+    call_macro(mp);
+    return TRUE;
+  } else
     return FALSE;
 }
 

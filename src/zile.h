@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.71 2005/08/17 14:15:28 rrt Exp $        */
+/*      $Id: zile.h,v 1.72 2005/09/15 21:47:13 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -318,8 +318,6 @@ typedef size_t Font;
 #define FLAG_SET_UNIARG                 0000020
 /* We are defining a macro. */
 #define FLAG_DEFINING_MACRO             0000040
-/* Encountered an error. */
-#define FLAG_GOT_ERROR                  0000100
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

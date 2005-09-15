@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: glue.c,v 1.33 2005/08/06 16:23:30 rrt Exp $	*/
+/*	$Id: glue.c,v 1.34 2005/09/15 21:47:13 rrt Exp $	*/
 
 #include "config.h"
 
@@ -42,8 +42,6 @@ void ding(void)
 
   if (lookup_bool_variable("beep"))
     term_beep();
-
-  thisflag |= FLAG_GOT_ERROR;
 }
 
 #define MAX_KEY_BUF	16
