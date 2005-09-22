@@ -61,7 +61,7 @@ void term_clear(void)
 
 void term_addch(int c)
 {
-  addch((chtype)c);
+  addch((chtype)(c & ~A_ATTRIBUTES));
 }
 
 void term_attrset(size_t attrs, ...)
