@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: point.c,v 1.11 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: point.c,v 1.12 2005/09/22 21:21:33 rrt Exp $	*/
 
 #include "config.h"
 
@@ -131,4 +131,3 @@ Point line_end_position(int count)
   pt.o = astr_len(pt.p->item);
   return pt;
 }
-
