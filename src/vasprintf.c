@@ -570,6 +570,15 @@ int vasprintf(char **ptr, const char *format_string, va_list vargs)
   int retval;
 
   s.src_string = format_string;
+#ifdef va_copy
+  va_copy (s.vargs, vargs);
+#else
+#ifdef __va_copy
+  __va_copy (s.vargs, vargs);
+#else
+  memcpy (&s.vargs, vargs, sizeof (va_list));
+#endif /* __va_copy */
+#endif /* va_copy */
   va_copy(s.vargs, vargs);
   s.maxlen = (size_t)INT_MAX;
 
