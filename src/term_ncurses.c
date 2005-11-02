@@ -120,8 +120,12 @@ void term_close(void)
   /* Free memory and finish with ncurses. */
   endwin();
   delscreen(screen);
-  if (xterm)
-    printf("\033[?1036;l");       /* Reset Meta key */
+  if (xterm) {
+    printf("\033[?1036;l");     /* Reset Meta key */
+    printf("\r         \r");    /* Overwrite string in previous line
+                                   for terminal emulators that don't
+                                   understand it */
+  }
   screen = NULL;
 }
 
