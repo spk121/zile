@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.76 2005/07/11 06:10:25 rrt Exp $        */
+/*      $Id: file.c,v 1.77 2006/01/09 15:22:26 rrt Exp $        */
 
 #include "config.h"
 
@@ -293,7 +293,8 @@ void read_from_disk(const char *filename)
 {
   Line *lp;
   FILE *fp;
-  int i, size, eol = FALSE;
+  int i, size;
+  size_t eol_len = 0;
   char buf[BUFSIZ + 1];
 
   buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
@@ -310,26 +311,28 @@ void read_from_disk(const char *filename)
 
   while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
     for (i = 0; i < size; i++)
-      if (buf[i] != '\n' && buf[i] != '\r')
+      if ((eol_len > 0 && (strncmp(cur_bp->eol, buf + i, eol_len) != 0)) ||
+          (eol_len == 0 && (buf[i] != '\n' && buf[i] != '\r')))
         astr_cat_char(lp->item, buf[i]);
       else {
         lp = list_prepend(lp, astr_new());
         ++cur_bp->num_lines;
 
-        if (i < size - 1 &&
-            buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
-                                     buf[i + 1] == '\r')) {
-          if (!eol) {
+        if (eol_len == 0) {
+          if (i < size - 1 &&
+              buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
+                                       buf[i + 1] == '\r')) {
             cur_bp->eol[0] = buf[i];
             cur_bp->eol[1] = buf[i + 1];
-            eol = TRUE;
+            eol_len = 2;
+          } else {
+            cur_bp->eol[0] = buf[i];
+            cur_bp->eol[1] = '\0';
+            eol_len = 1;
           }
-          i++;
-        } else if (!eol) {
-          cur_bp->eol[0] = buf[i];
-          cur_bp->eol[1] = '\0';
-          eol = TRUE;
         }
+
+        i += eol_len - 1;
       }
 
   list_next(lp) = cur_bp->lines;
