@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.92 2006/01/24 02:04:59 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.93 2006/01/24 02:33:45 rrt Exp $	*/
 
 #include "config.h"
 
@@ -1136,8 +1136,10 @@ Move backward to start of paragraph.  With argument N, do it N times.
     return FUNCALL_ARG(forward_paragraph, -uniarg);
 
   do {
-    while (previous_line() && is_empty_line());
-    while (previous_line() && !is_empty_line());
+    while (is_empty_line() && previous_line())
+      ;
+    while (!is_empty_line() && previous_line())
+      ;
   } while (--uniarg > 0);
 
   FUNCALL(beginning_of_line);
@@ -1155,8 +1157,10 @@ Move forward to end of paragraph.  With argument N, do it N times.
     return FUNCALL_ARG(backward_paragraph, -uniarg);
 
   do {
-    while (next_line() && is_empty_line());
-    while (next_line() && !is_empty_line());
+    while (is_empty_line() && next_line())
+      ;
+    while (!is_empty_line() && next_line())
+      ;
   } while (--uniarg > 0);
 
   if (is_empty_line())
