@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.93 2006/01/24 02:33:45 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.94 2006/01/24 13:36:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -399,6 +399,8 @@ int universal_argument(int keytype, int xarg)
       astr_cat_cstr(as, " C-u");
       if (i == 0)
         arg *= 4;
+      else
+        break;
     } else if (key == '-') {
       /* After any number && if sign doesn't change. */
       if (i == 0 && sgn > 0) {
