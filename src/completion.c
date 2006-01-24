@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: completion.c,v 1.25 2005/07/11 06:10:25 rrt Exp $   */
+/*      $Id: completion.c,v 1.26 2006/01/24 02:00:21 rrt Exp $   */
 
 #include "config.h"
 
@@ -69,7 +69,7 @@ Completion *completion_new(int fileflag)
 void free_completion(Completion *cp)
 {
   list p;
-        
+
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
     free(p->item);
   list_delete(cp->completions);
@@ -158,7 +158,7 @@ static void write_completion(va_list ap)
 {
   Completion *cp = va_arg(ap, Completion *);
   int allflag = va_arg(ap, int);
-  size_t num = va_arg(ap, size_t); 
+  size_t num = va_arg(ap, size_t);
   if (allflag)
     completion_print(cp->completions, list_length(cp->completions));
   else
@@ -320,7 +320,7 @@ int completion_try(Completion *cp, astr search, int popup_when_complete)
   for (j = ssize; ; ++j) {
     list p = list_first(cp->matches);
     char *s = p->item;
-                
+
     c = s[j];
     for (i = 1; i < partmatches; ++i) {
       p = list_next(p);
