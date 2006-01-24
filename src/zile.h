@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.72 2005/09/15 21:47:13 rrt Exp $        */
+/*      $Id: zile.h,v 1.73 2006/01/24 02:04:59 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -65,7 +65,7 @@ typedef struct Terminal Terminal;
  * The type of a Zile exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*Function)(int argc, int uniarg);
+typedef int (*Function)(int uniarg);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -343,18 +343,18 @@ typedef size_t Font;
 
 /* Define an interactive function. */
 #define DEFUN_INT(zile_func, c_func) \
-        int F_ ## c_func(int uniused GCC_UNUSED, int uniarg GCC_UNUSED) \
+        int F_ ## c_func(int uniarg GCC_UNUSED) \
         {
 #define END_DEFUN \
         }
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-        F_ ## c_func(FALSE, 1)
+        F_ ## c_func(1)
 
-/* Call an interactive function with an universal argument. */
+/* Call an interactive function with a universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
-        F_ ## c_func(uniused, uniarg)
+        F_ ## c_func(uniarg)
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20

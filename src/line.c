@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: line.c,v 1.67 2005/09/02 23:47:30 rrt Exp $	*/
+/*	$Id: line.c,v 1.68 2006/01/24 02:04:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -639,7 +639,6 @@ END_DEFUN
 static void previous_nonblank_goalc(void)
 {
   size_t cur_goalc = get_goalc();
-  int uniused = TRUE;
 
   /* Find previous non-blank line. */
   while (FUNCALL_ARG(forward_line, -1) && is_blank_line());

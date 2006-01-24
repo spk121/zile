@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.73 2005/09/15 21:47:12 rrt Exp $	*/
+/*	$Id: bind.c,v 1.74 2006/01/24 02:04:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -215,7 +215,7 @@ void process_key(size_t key)
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, (size_t)0, (size_t)0);
     } else {
-      p->func((lastflag & FLAG_SET_UNIARG) != 0, last_uniarg);
+      p->func(last_uniarg);
       _last_command = p->func;
     }
 
@@ -434,7 +434,7 @@ int execute_function(char *name, int uniarg)
   Macro *mp;
 
   if ((func = get_function(name)))
-    return func(uniarg ? 1 : 0, uniarg);
+    return func(uniarg);
   else if ((mp = get_macro(name))) {
     call_macro(mp);
     return TRUE;
@@ -451,7 +451,7 @@ Read function name, then read its arguments and call it.
   char *name;
   astr msg = astr_new();
 
-  if (uniused && uniarg != 0)
+  if (uniarg != 1)
     astr_afmt(msg, "%d M-x ", uniarg);
   else
     astr_cat_cstr(msg, "M-x ");
@@ -501,8 +501,7 @@ sequence.
     minibuf_error("No such function `%s'", name);
 
   free(name);
-  if (uniused == 0)
-    free(keys);
+  free(keys);
 
   return ok;
 }
@@ -528,7 +527,7 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
     astr as = astr_new();
 
     astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
-    if (uniused)
+    if (uniarg != 1)
       bprintf("%s", astr_cstr(as));
     else
       minibuf_write("%s", astr_cstr(as));
