@@ -1,6 +1,6 @@
 /* Miscellaneous Emacs functions reimplementation
    Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
-   Copyright (c) 2003-2004 Reuben Thomas.  All rights reserved.
+   Copyright (c) 2003-2006 Reuben Thomas.  All rights reserved.
    Copyright (c) 2004 David A. Capello.  All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.94 2006/01/24 13:36:44 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.95 2006/01/26 13:42:11 rrt Exp $	*/
 
 #include "config.h"
 
