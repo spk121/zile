@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.98 2006/01/30 14:25:01 rrt Exp $	*/
+/*	$Id: main.c,v 1.99 2006/01/30 14:26:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -57,7 +57,7 @@
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
   "Copyright (C) 2003-2004 David A. Capello <dacap@users.sourceforge.net>\n"\
-  "Copyright (C) 2003-2005 Reuben Thomas <rrt@sc3d.org>"
+  "Copyright (C) 2003-2006 Reuben Thomas <rrt@sc3d.org>"
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
