@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.97 2006/01/24 02:15:11 rrt Exp $	*/
+/*	$Id: main.c,v 1.98 2006/01/30 14:25:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -340,7 +340,6 @@ int main(int argc, char **argv)
   astr_delete(as);
   free_kill_ring();
   free_registers();
-  free_search_history();
   free_macros();
   free_windows();
   free_buffers();

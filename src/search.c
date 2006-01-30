@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.50 2005/08/06 16:23:30 rrt Exp $	*/
+/*	$Id: search.c,v 1.51 2006/01/30 14:25:01 rrt Exp $	*/
 
 #include "config.h"
 
@@ -41,9 +41,6 @@
 #else
 #include "regex.h"
 #endif
-
-static History search_history;
-static History regexp_history;
 
 static char *find_substr(int (*f)(int c),
                          const char *s1, size_t s1size,
@@ -534,12 +531,6 @@ is treated as a regexp.  See C-s for more info.
   return isearch(ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
-
-void free_search_history(void)
-{
-  free_history_elements(&search_history);
-  free_history_elements(&regexp_history);
-}
 
 static int no_upper(const char *s, size_t len)
 {
