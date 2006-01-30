@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.95 2006/01/26 13:42:11 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.96 2006/01/30 15:23:00 rrt Exp $	*/
 
 #include "config.h"
 
@@ -557,7 +557,7 @@ DEFUN_INT("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  cur_bp->pt = line_beginning_position(0);
+  cur_bp->pt = line_beginning_position(1);
   while (!eolp()) {
     if (!isspace(following_char()))
       break;
