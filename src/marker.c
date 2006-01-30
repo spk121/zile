@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: marker.c,v 1.8 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: marker.c,v 1.9 2006/01/30 15:33:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -44,7 +44,7 @@ static void unchain_marker(Marker *marker)
   if (!marker->bp)
     return;
 
-  for (m=marker->bp->markers; m; m=next) {
+  for (m = marker->bp->markers; m; m = next) {
     next = m->next;
     if (m == marker) {
       if (prev)
