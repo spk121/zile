@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: window.c,v 1.21 2005/08/06 16:23:30 rrt Exp $	*/
+/*	$Id: window.c,v 1.22 2006/02/01 04:38:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -309,14 +309,18 @@ Window *find_window(const char *name)
 Point window_pt(Window *wp)
 {
   /* The current window uses the current buffer point; all other
-     windows have a saved point.  */
+     windows have a saved point, except that if a window has just been
+     killed, it needs to use its new buffer's current point. */
   assert(wp != NULL);
   if (wp == cur_wp) {
     assert(wp->bp == cur_bp);
     assert(wp->saved_pt == NULL);
+    assert(cur_bp);
     return cur_bp->pt;
   } else {
-    assert(wp->saved_pt != NULL);
-    return wp->saved_pt->pt;
+    if (wp->saved_pt != NULL)
+      return wp->saved_pt->pt;
+    else
+      return wp->bp->pt;
   }
 }
