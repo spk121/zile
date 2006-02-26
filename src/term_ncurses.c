@@ -96,7 +96,7 @@ void term_init(void)
 
   if (term && strcmp(term, "xterm") == 0) {
     xterm = TRUE;
-    printf("\033[?1036;h");       /* Make Meta send ESC */
+    printf("\033[?1036h");      /* Make Meta send ESC */
   }
   screen = newterm(NULL, stdout, stdin);
   set_term(screen);
@@ -120,12 +120,8 @@ void term_close(void)
   /* Free memory and finish with ncurses. */
   endwin();
   delscreen(screen);
-  if (xterm) {
-    printf("\033[?1036;l");     /* Reset Meta key */
-    printf("\r         \r");    /* Overwrite string in previous line
-                                   for terminal emulators that don't
-                                   understand it */
-  }
+  if (xterm)
+    printf("\033[?1036l");      /* Reset Meta key */
   screen = NULL;
 }
 
