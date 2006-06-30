@@ -35,8 +35,6 @@
 #include "zile.h"
 #include "extern.h"
 
-typedef SCREEN Screen;
-Screen *screen;
 int xterm;
 
 void term_move(size_t y, size_t x)
@@ -98,8 +96,7 @@ void term_init(void)
     xterm = TRUE;
     printf("\033[?1036h");      /* Make Meta send ESC */
   }
-  screen = newterm(NULL, stdout, stdin);
-  set_term(screen);
+  initscr();
 
   term_set_size((size_t)COLS, (size_t)LINES);
 
@@ -119,10 +116,8 @@ void term_close(void)
 
   /* Free memory and finish with ncurses. */
   endwin();
-  delscreen(screen);
   if (xterm)
     printf("\033[?1036l");      /* Reset Meta key */
-  screen = NULL;
 }
 
 static size_t translate_key(int c)
