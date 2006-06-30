@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.99 2006/01/30 14:26:18 rrt Exp $	*/
+/*	$Id: main.c,v 1.100 2006/06/30 23:22:30 rrt Exp $	*/
 
 #include "config.h"
 
@@ -91,6 +91,9 @@ static void loop(void)
       break;
     if (!(thisflag & FLAG_SET_UNIARG))
       last_uniarg = 1;
+
+    if (last_command() != F_undo)
+      cur_bp->next_undop = cur_bp->last_undop;
 
     lastflag = thisflag;
   }
