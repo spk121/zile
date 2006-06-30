@@ -11,6 +11,19 @@
 ; The default tabulation width [default: 8]
 (setq tab-width 8)
 
+; Always indent [default: true]
+; Controls the operation of the TAB key.
+; If enabled, hitting TAB always just indents the current line.
+; Otherwise, hitting TAB indents the current line if point is at the
+; left margin or in the line's indentation, otherwise it moves to the
+; next tab stop.
+(setq tab-always-indent true)
+
+; Insert real tabs [default: false]
+; If enabled, insert-tab inserts `real' tabs; otherwise, it always
+; inserts spaces.
+(setq indent-tabs-mode false)
+
 ; The default fill column (in Auto Fill Mode) [default: 72]
 (setq fill-column 72)
 
@@ -19,11 +32,6 @@
 
 ; Kill whole line regardless of cursor position [default: false]
 (setq kill-whole-line false)
-
-; Expand tabs [default: false]
-; If disabled, Zile will insert hard tabs (the character \t),
-; otherwise it will insert spaces.
-(setq expand-tabs false)
 
 ; Enable beep [default: true]
 ; If enabled, a sound will be emitted on any error.

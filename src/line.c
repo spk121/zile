@@ -1,6 +1,6 @@
 /* Line-oriented editing functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: line.c,v 1.68 2006/01/24 02:04:59 rrt Exp $	*/
+/*	$Id: line.c,v 1.69 2006/06/30 13:38:44 rrt Exp $	*/
 
 #include "config.h"
 
@@ -143,8 +143,8 @@ int insert_tab(void)
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  if (!lookup_bool_variable("expand-tabs"))
-    insert_char_in_insert_mode('\t');
+  if (lookup_bool_variable("indent-tabs-mode"))
+    insert_char('\t');
   else
     insert_expanded_tab(insert_char_in_insert_mode);
 
@@ -153,9 +153,8 @@ int insert_tab(void)
 
 DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
 /*+
-Insert a tabulation at the current point position into
-the current buffer.  Convert the tabulation into spaces
-if the `expand-tabs' variable is bound and set to true.
+Insert a tabulation at the current point position into the current
+buffer.
 +*/
 {
   int uni, ret = TRUE;
@@ -658,32 +657,39 @@ static int indent_relative(void)
     return FALSE;
 
   deactivate_mark();
-  old_point = point_marker();
-  previous_nonblank_goalc();
 
-  /* Now find the next blank char. */
-  if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
-    while (!eolp() && (!isspace(following_char())))
+  /* If we're on first line, set target to 0. */
+  if (list_prev(cur_bp->pt.p) == cur_bp->lines)
+    target_goalc = 0;
+  else { /* Find goalc in previous non-blank line. */
+    old_point = point_marker();
+
+    previous_nonblank_goalc();
+
+    /* Now find the next blank char. */
+    if (!(preceding_char() == '\t' && get_goalc() > cur_goalc))
+      while (!eolp() && (!isspace(following_char())))
+        forward_char();
+
+    /* Find next non-blank char. */
+    while (!eolp() && (isspace(following_char())))
       forward_char();
 
-  /* Find next non-blank char. */
-  while (!eolp() && (isspace(following_char())))
-    forward_char();
+    /* Target column. */
+    if (!eolp())
+      target_goalc = get_goalc();
 
-  /* Target column. */
-  if (!eolp())
-    target_goalc = get_goalc();
-
-  cur_bp->pt = old_point->pt;
-  free_marker(old_point);
+    cur_bp->pt = old_point->pt;
+    free_marker(old_point);
+  }
 
   /* Insert spaces.  */
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
     if (target_goalc > 0)
       /* If not at EOL on target line, insert spaces up to
-         target_goalc. */
+         target_goalc; if already at EOL on target line, insert a tab.
+       */
       while (get_goalc() < target_goalc)
-        /* If already at EOL on target line, insert a tab. */
         insert_char(' ');
     else
       ok = insert_tab();
@@ -692,19 +698,41 @@ static int indent_relative(void)
   return ok;
 }
 
-DEFUN_INT("indent-command", indent_command)
+static size_t current_indent(void)
+{
+  size_t cur_indent;
+  Marker *save_point = point_marker();
+
+  /* Find first non-blank char. */
+  FUNCALL(beginning_of_line);
+  while (!eolp() && (isspace(following_char())))
+    forward_char();
+
+  cur_indent = get_goalc();
+
+  /* Restore point. */
+  cur_bp->pt = save_point->pt;
+  free_marker(save_point);
+
+  return cur_indent;
+}
+
+DEFUN_INT("indent-for-tab-command", indent_for_tab_command)
 /*+
 Indent line or insert a tab.
 +*/
 {
-  return indent_relative();
+  if (!lookup_bool_variable("tab-always-indent") && get_goalc() > current_indent())
+    return insert_tab();
+  else
+    return indent_relative();
 }
 END_DEFUN
 
 DEFUN_INT("newline-and-indent", newline_and_indent)
 /*+
 Insert a newline, then indent.
-Indentation is done using the `indent-command' function.
+Indentation is done using the `indent-for-tab-command' function.
 +*/
 {
   int ret;
@@ -731,7 +759,7 @@ Indentation is done using the `indent-command' function.
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)
-        indent_relative();
+        FUNCALL(indent_for_tab_command);
 
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
     }

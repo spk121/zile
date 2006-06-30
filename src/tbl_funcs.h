@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.35 2005/05/16 23:11:17 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.36 2006/06/30 13:38:44 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function.
@@ -55,9 +55,9 @@ X1("goto-line", goto_line,				"\\M-g")
 X2("help", help,					"\\C-hh", "\\F1")
 X1("help-config-sample", help_config_sample,		"\\C-hs")
 X1("help-with-tutorial", help_with_tutorial,		"\\C-ht")
-X1("indent-command", indent_command,			"\\TAB")
 X0("insert-buffer", insert_buffer)
 X1("insert-file", insert_file,				"\\C-xi")
+X1("indent-for-tab-command", indent_for_tab_command,	"\\TAB")
 X1("insert-register", insert_register,			"\\C-xri")
 X1("isearch-backward", isearch_backward,		"\\C-r")
 X1("isearch-backward-regexp", isearch_backward_regexp,	"\\C-\\M-r")

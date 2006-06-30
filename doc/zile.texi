@@ -21,13 +21,13 @@
 @titlepage
 @title The Zile Manual
 @subtitle for Zile version 2.2
-@subtitle January 2005
+@subtitle June 2006
 @author Sandro Sigala and Reuben Thomas
 
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1997-2004 Sandro Sigala
-Copyright @copyright{} 2003-2005 Reuben Thomas
+Copyright @copyright{} 2003-2006 Reuben Thomas
 Copyright @copyright{} 2004 David A. Capello
 @end titlepage
 
@@ -248,7 +248,7 @@ For full documentation, see @ref{Functions}.
 @c LINT KEY
 @table @kbd
 @item @key{TAB}
-Insert indentation.  Bound to @code{indent-command}.
+Insert indentation.  Bound to @code{indent-for-tab-command}.
 @item @key{RET}
 Insert a new line.  Bound to @code{newline}.
 @item @key{BS}
@@ -582,7 +582,7 @@ Show a configuration file sample.
 Show informations about getting the latest version.
 @item help-tutorial
 Show a tutorial window.
-@item indent-command
+@item indent-for-tab-command
 Indent line in proper way for current major mode or insert a tab.
 @item insert-buffer
 Insert after point the contents of the user specified buffer.
@@ -672,7 +672,7 @@ Insert a newline at the current point position into
 the current buffer.
 @item newline-and-indent
 Insert a newline, then indent according to major mode.
-Indentation is done using the @i{indent-command} function.
+Indentation is done using the @i{indent-for-tab-command} function.
 @item next-line
 Move cursor vertically down one line.
 If there is no character in the target line exactly in the current column,
@@ -783,8 +783,7 @@ when this can be done without changing the column they end at.
 The variable @samp{tab-width} controls the spacing of tab stops.
 @item tab-to-tab-stop
 Insert a tabulation at the current point position into
-the current buffer.  Convert the tabulation into spaces
-if the @samp{expand-tabs} variable is bound and set to true.
+the current buffer.
 @item toggle-read-only
 Change whether this buffer is visiting its file read-only.
 @item transient-mark-mode
@@ -881,13 +880,12 @@ Default value is @samp{false}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{true}.
-@item expand-tabs
-If disabled, Zile will insert hard tabs (the character @samp{\t}),
-otherwise it will insert spaces.
-Default value is @samp{false}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
+@item indent-tabs-mode
+If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts spaces.
+Default value is @samp{false}.
 @item kill-whole-line
 If enabled, `kill-line' with no arg at the beginning of a line kills the whole line.
 Default value is @samp{false}.
@@ -900,6 +898,12 @@ Default value is @samp{false}.
 @item standard-indent
 Default number of columns for margin-changing functions to
 indent. Default values is @samp{4}.
+@item tab-always-indent
+Controls the operation of the TAB key.
+If enabled, hitting TAB always just indents the current line.
+Otherwise, hitting TAB indents the current line if point is at the left margin
+or in the line's indentation, otherwise it insert a `real' tab character.
+Default value is @samp{true}.
 @item tab-width
 The default tabulation width.
 Default value is @samp{8}.

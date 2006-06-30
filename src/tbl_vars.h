@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.22 2005/02/14 21:57:48 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.23 2006/06/30 13:38:44 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -42,12 +42,12 @@ X("beep",				"b", "true", "\
 If enabled, a sound will be emitted on any error.")
 X("case-replace",			"b", "true", "\
 Non-nil means `query-replace' should preserve case in replacements.")
-X("expand-tabs",			"b", "false", "\
-If disabled, Zile will insert hard tabs (the character `\\t'),\n\
-otherwise it will insert spaces.")
 X("fill-column",			"", "72", "\
 Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")
+X("indent-tabs-mode",			"b", "false", "\
+If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts\n\
+spaces.")
 X("highlight-nonselected-windows",	"b", "false", "\
 If enabled, highlight region even in nonselected windows.")
 X("kill-whole-line",			"b", "false", "\
@@ -56,6 +56,9 @@ X("skip-splash-screen",			"b", "false", "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", "\
 Default number of columns for margin-changing functions to indent.")
+X("tab-always-indent",			"b", "true", "\
+If enabled, the TAB key always indents, otherwise it inserts a `real'\n\
+tab when point is in the left margin or the line's indentation.")
 X("tab-width",				"", "8", "\
 Distance between tab stops (for display of tab characters), in columns.\n\
 Automatically becomes buffer-local when set in any fashion.")
