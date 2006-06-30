@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: variables.c,v 1.32 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: variables.c,v 1.33 2006/06/30 13:57:51 rrt Exp $	*/
 
 #include "config.h"
 
@@ -179,9 +179,9 @@ Set a variable value to the user-specified value.
       return cancel();
   }
 
-  /* `tab-width' and `fill-column' automatically become
+  /* `tab-width', `fill-column' and `indent-tabs-mode' automatically become
      buffer-local when set in any fashion. */
-  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column"))
+  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column") || !strcmp(var, "indent-tabs-mode"))
     variableSetString(&cur_bp->vars, var, val);
   else
     set_variable(var, val);
