@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: minibuf.c,v 1.38 2005/07/11 06:10:26 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.39 2006/07/15 01:44:57 rrt Exp $     */
 
 #include "config.h"
 
@@ -243,14 +243,14 @@ int minibuf_read_boolean(const char *fmt, ...)
   va_end(ap);
 
   cp = completion_new(FALSE);
-  list_append(cp->completions, zstrdup("true"));
-  list_append(cp->completions, zstrdup("false"));
+  list_append(cp->completions, zstrdup("t"));
+  list_append(cp->completions, zstrdup("nil"));
 
-  retvalue = minibuf_read_forced(buf, "Please answer true or false.", cp);
+  retvalue = minibuf_read_forced(buf, "Please answer `t' or `nil'.", cp);
   if (retvalue != -1) {
     /* The completions may be sorted by the minibuf completion
        routines. */
-    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "true"))
+    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "t"))
       retvalue = TRUE;
     else
       retvalue = FALSE;

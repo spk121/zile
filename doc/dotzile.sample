@@ -1,41 +1,41 @@
 ; .zile sample configuration
 
-; Do not display the splash screen at startup [default: false]
-(setq skip-splash-screen false)
+; Do not display the splash screen at startup [default: nil]
+(setq skip-splash-screen nil)
 
-; Enable alternative key bindings [default: false]
+; Enable alternative key bindings [default: nil]
 ; Remap the help functions (bound by default to `C-h') to `M-h'.
 ; This may be useful when `C-h' is already bound to Backspace or Delete.
-(setq alternative-bindings false)
+(setq alternative-bindings nil)
 
 ; The default tabulation width [default: 8]
 (setq tab-width 8)
 
-; Always indent [default: true]
+; Always indent [default: t]
 ; Controls the operation of the TAB key.
 ; If enabled, hitting TAB always just indents the current line.
 ; Otherwise, hitting TAB indents the current line if point is at the
 ; left margin or in the line's indentation, otherwise it moves to the
 ; next tab stop.
-(setq tab-always-indent true)
+(setq tab-always-indent t)
 
-; Insert real tabs [default: false]
+; Insert real tabs [default: nil]
 ; If enabled, insert-tab inserts `real' tabs; otherwise, it always
 ; inserts spaces.
-(setq indent-tabs-mode false)
+(setq indent-tabs-mode nil)
 
 ; The default fill column (in Auto Fill Mode) [default: 72]
 (setq fill-column 72)
 
-; Enable the Auto Fill Mode [default: false]
-(setq auto-fill-mode false)
+; Enable the Auto Fill Mode [default: nil]
+(setq auto-fill-mode nil)
 
-; Kill whole line regardless of cursor position [default: false]
-(setq kill-whole-line false)
+; Kill whole line regardless of cursor position [default: nil]
+(setq kill-whole-line nil)
 
-; Enable beep [default: true]
+; Enable beep [default: t]
 ; If enabled, a sound will be emitted on any error.
-(setq beep true)
+(setq beep t)
 
 ; Standard indentation level [default: 4]
 ; Default number of columns for margin-changing functions to indent.
@@ -44,12 +44,12 @@
 ; If enabled, deactivates the mark when the buffer contents change.
 ; Also enables highlighting of the region whenever the mark is active.
 ; The variable `highlight-nonselected-windows' controls whether to
-; highlight all windows or just the selected window. [default: true]
-(setq transient-mark-mode true)
+; highlight all windows or just the selected window. [default: t]
+(setq transient-mark-mode t)
 
 ; If enabled, highlight region even in nonselected windows.
-; [default: false]
-(setq highlight-nonselected-windows false)
+; [default: nil]
+(setq highlight-nonselected-windows nil)
 
 ; Specify the file backup method [default: simple]
 ;
@@ -61,11 +61,11 @@
 ;   create the backup `foo.c~').
 (setq backup-method simple)
 
-; Enable backup directory for backup files [default: false]
+; Enable backup directory for backup files [default: nil]
 ; If enabled Zile will backup files to a user specified directory;
 ; the directory must exist and must be specified in the
 ; variable `backup-directory' (see below).
-(setq backup-with-directory false)
+(setq backup-with-directory nil)
 
 ; Specify target backup directory [default: "~/.backup"]
 ; Directory must exist.

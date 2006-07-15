@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: variables.c,v 1.33 2006/06/30 13:57:51 rrt Exp $	*/
+/*	$Id: variables.c,v 1.34 2006/07/15 01:44:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -173,7 +173,7 @@ Set a variable value to the user-specified value.
     int i;
     if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
       return cancel();
-    val = (i == TRUE) ? "true" : "false";
+    val = (i == TRUE) ? "t" : "nil";
   } else { /* Non-boolean variable. */
     if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
       return cancel();

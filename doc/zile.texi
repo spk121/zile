@@ -21,7 +21,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle for Zile version 2.2
-@subtitle June 2006
+@subtitle July 2006
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -167,7 +167,7 @@ This is the initialization file that comes with the Zile sources.
 This table contains the commands that can be used during an editing
 session to get help.
 
-If you have set the @samp{alternative-bindings} variable to @samp{true},
+If you have set the @samp{alternative-bindings} variable to @samp{t},
 the @kbd{M-h} key should be used instead of @kbd{C-h}.
 
 @table @kbd
@@ -236,7 +236,7 @@ typing @kbd{x}.
 This table contains the full list of commands associated with key
 sequences.
 
-If you have set the @samp{alternative-bindings} variable to @samp{true},
+If you have set the @samp{alternative-bindings} variable to @samp{t},
 the @kbd{M-h} key should be used instead of @kbd{C-h}.
 
 At run-time, you can list the current defined bindings with the
@@ -853,10 +853,10 @@ or @key{DEL}.
 Please note that changing this variable at run-time has no effect; you
 need instead to modify your @file{~/.zile} configuration file and
 restart Zile.
-Default value is @samp{false}.
+Default value is @samp{nil}.
 @item backup-directory
-Specify target backup directory.  Directory must exist.
-This value is used only when the @samp{backup-with-directory} value is true.
+Specify target backup directory, which must exist.
+This value is used only when @samp{backup-with-directory} is true.
 Default value is @samp{~/.backup}.
 @item backup-method
 Specify the file backup method.
@@ -876,25 +876,25 @@ Default value is @samp{simple}.
 If enabled Zile will backup files to a user specified directory;
 the directory must exist and must be specified in the
 variable @samp{backup-directory}.
-Default value is @samp{false}.
+Default value is @samp{nil}.
 @item beep
 If enabled, a sound will be emitted on any error.
-Default value is @samp{true}.
+Default value is @samp{t}.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.
 @item indent-tabs-mode
 If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts spaces.
-Default value is @samp{false}.
+Default value is @samp{nil}.
 @item kill-whole-line
 If enabled, `kill-line' with no arg at the beginning of a line kills the whole line.
-Default value is @samp{false}.
+Default value is @samp{nil}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
-value is @samp{false}.
+value is @samp{nil}.
 @item skip-splash-screen
 If enabled, the splash screen at startup will be avoided.
-Default value is @samp{false}.
+Default value is @samp{nil}.
 @item standard-indent
 Default number of columns for margin-changing functions to
 indent. Default values is @samp{4}.
@@ -903,19 +903,19 @@ Controls the operation of the TAB key.
 If enabled, hitting TAB always just indents the current line.
 Otherwise, hitting TAB indents the current line if point is at the left margin
 or in the line's indentation, otherwise it insert a `real' tab character.
-Default value is @samp{true}.
+Default value is @samp{t}.
 @item tab-width
 The default tabulation width.
 Default value is @samp{8}.
 @item auto-fill-mode
 If enabled, the @i{Auto Fill Mode} is automatically enabled.  Default
-value is @samp{false}.
+value is @samp{nil}.
 @item transient-mark-mode
 If enabled, deactivates the mark when the buffer contents change.
 Also enables highlighting of the region whenever the mark is active.
 The variable `highlight-nonselected-windows' controls whether to
 highlight all windows or just the selected window.  Default value is
-@samp{true}.
+@samp{t}.
 @end table
 @c LINT END VAR
 

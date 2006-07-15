@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.96 2006/01/30 15:23:00 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.97 2006/07/15 01:44:57 rrt Exp $	*/
 
 #include "config.h"
 
@@ -72,11 +72,11 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
 {
   if (!(lastflag & FLAG_SET_UNIARG)) {
     if (transient_mark_mode())
-      set_variable("transient-mark-mode", "false");
+      set_variable("transient-mark-mode", "nil");
     else
-      set_variable("transient-mark-mode", "true");
+      set_variable("transient-mark-mode", "t");
   } else
-    set_variable("transient-mark-mode", uniarg > 0 ? "true" : "false");
+    set_variable("transient-mark-mode", uniarg > 0 ? "t" : "nil");
 
   activate_mark();
   return TRUE;
