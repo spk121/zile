@@ -880,6 +880,10 @@ Default value is @samp{nil}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{t}.
+@item case-fold-search
+Non-nil means searches ignore case.
+@item case-replace
+Non-nil means `query-replace' should preserve case in replacements.
 @item fill-column
 The default fill column (used in @i{Auto Fill Mode}).
 Default value is @samp{72}.

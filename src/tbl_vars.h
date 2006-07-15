@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.24 2006/07/15 01:44:57 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.25 2006/07/15 02:12:59 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -11,21 +11,22 @@
  *   - "b" for boolean ("t" or "nil");
  *   - "" (empty string) for non-fixed format.
  * The third column specifies the default value.
- * The forth column specifies the variable documentation.
+ * The third column specifies whether the variable becomes local when set.
+ * The fifth column specifies the variable documentation.
  */
 
-X("alternative-bindings",		"b", "nil", "\
+X("alternative-bindings",		"b", "nil", FALSE, "\
 Remap the help functions (bound by default to `C-h') to `M-h'.  This may\n\
 be useful when `C-h' is already bound to Backspace or Delete.\n\
 \n\
 Please note that changing this variable at run-time has no effect; you\n\
 need instead to modify your `~/.zile' configuration file and restart Zile.")
-X("auto-fill-mode",			"b", "nil", "\
+X("auto-fill-mode",			"b", "nil", FALSE, "\
 If enabled, the Auto Fill Mode is automatically enabled.")
-X("backup-directory",			"", "~/.backup", "\
+X("backup-directory",			"", "~/.backup", FALSE, "\
 Specify target backup directory.  Directory must be existent.\n\
 This value is used only when the `backup-with-directory' value is true.")
-X("backup-method",			"", "simple", "\
+X("backup-method",			"", "simple", FALSE, "\
 Specify the file backup method.\n\
 \n\
 Possible values are: none and simple.\n\
@@ -34,35 +35,37 @@ Possible values are: none and simple.\n\
  - If `simple' is specified, Zile will create a backup file with a\n\
    tilde `~' appended to the name (e.g.: on saving `foo.c' it will\n\
    create the backup `foo.c~').")
-X("backup-with-directory",		"b", "nil", "\
+X("backup-with-directory",		"b", "nil", FALSE, "\
 If enabled Zile will backup files to a user specified directory;\n\
 the directory must exist and must be specified in the\n\
 variable `backup-directory'.")
-X("beep",				"b", "t", "\
+X("beep",				"b", "t", FALSE, "\
 If enabled, a sound will be emitted on any error.")
-X("case-replace",			"b", "t", "\
+X("case-fold-search",			"b", "t", TRUE, "\
+Non-nil means searches ignore case.")
+X("case-replace",			"b", "t", FALSE, "\
 Non-nil means `query-replace' should preserve case in replacements.")
-X("fill-column",			"", "72", "\
+X("fill-column",			"", "72", TRUE, "\
 Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")
-X("indent-tabs-mode",			"b", "nil", "\
+X("indent-tabs-mode",			"b", "nil", TRUE, "\
 If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts\n\
 spaces.")
-X("highlight-nonselected-windows",	"b", "nil", "\
+X("highlight-nonselected-windows",	"b", "nil", FALSE, "\
 If enabled, highlight region even in nonselected windows.")
-X("kill-whole-line",			"b", "nil", "\
+X("kill-whole-line",			"b", "nil", FALSE, "\
 If enabled, `kill-line' with no arg at beg of line kills the whole line.")
-X("skip-splash-screen",			"b", "nil", "\
+X("skip-splash-screen",			"b", "nil", FALSE, "\
 If enabled, the splash screen at startup will be avoided.")
-X("standard-indent",			"", "4", "\
+X("standard-indent",			"", "4", FALSE, "\
 Default number of columns for margin-changing functions to indent.")
-X("tab-always-indent",			"b", "t", "\
+X("tab-always-indent",			"b", "t", FALSE, "\
 If enabled, the TAB key always indents, otherwise it inserts a `real'\n\
 tab when point is in the left margin or the line's indentation.")
-X("tab-width",				"", "8", "\
+X("tab-width",				"", "8", TRUE, "\
 Distance between tab stops (for display of tab characters), in columns.\n\
 Automatically becomes buffer-local when set in any fashion.")
-X("transient-mark-mode",		"b", "t", "\
+X("transient-mark-mode",		"b", "t", FALSE, "\
 If enabled, deactivates the mark when the buffer contents change.\n\
 Also enables highlighting of the region whenever the mark is active.\n\
 The variable `highlight-nonselected-windows' controls whether to\n\

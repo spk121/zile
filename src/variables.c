@@ -1,6 +1,6 @@
 /* Variables handling functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: variables.c,v 1.34 2006/07/15 01:44:57 rrt Exp $	*/
+/*	$Id: variables.c,v 1.35 2006/07/15 02:12:59 rrt Exp $	*/
 
 #include "config.h"
 
@@ -39,11 +39,12 @@
  * Default variables values table.
  */
 static struct var_entry {
-  char *var;	/* Variable name. */
-  char *fmt;	/* Variable format (boolean, etc.). */
-  char *val;	/* Default value. */
+  char *var;                    /* Variable name. */
+  char *fmt;                    /* Variable format (boolean, etc.). */
+  char *val;                    /* Default value. */
+  int local;                    /* If true, becomes local when set. */
 } def_vars[] = {
-#define X(zile_var, fmt, val, doc) { zile_var, fmt, val },
+#define X(zile_var, fmt, val, local, doc) { zile_var, fmt, val, local },
 #include "tbl_vars.h"
 #undef X
 };
@@ -106,7 +107,7 @@ int lookup_bool_variable(char *var)
   char *p;
 
   if ((p = get_variable(var)) != NULL)
-    return !strcmp(p, "true");
+    return strcmp(p, "nil") != 0;
 
   return FALSE;
 }
@@ -147,14 +148,14 @@ char *minibuf_read_variable_name(char *msg)
   return ms;
 }
 
-static char *get_variable_format(char *var)
+static struct var_entry *get_variable_entry(char *var)
 {
   struct var_entry *p;
   for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
     if (!strcmp(p->var, var))
-      return p->fmt;
+      return p;
 
-  return "";
+  return NULL;
 }
 
 DEFUN_INT("set-variable", set_variable)
@@ -162,14 +163,15 @@ DEFUN_INT("set-variable", set_variable)
 Set a variable value to the user-specified value.
 +*/
 {
-  char *var, *val, *fmt;
+  char *var, *val;
+  struct var_entry *ent;
 
   var = minibuf_read_variable_name("Set variable: ");
   if (var == NULL)
     return FALSE;
 
-  fmt = get_variable_format(var);
-  if (!strcmp(fmt, "b")) {
+  ent = get_variable_entry(var);
+  if (ent && !strcmp(ent->fmt, "b")) {
     int i;
     if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
       return cancel();
@@ -179,9 +181,9 @@ Set a variable value to the user-specified value.
       return cancel();
   }
 
-  /* `tab-width', `fill-column' and `indent-tabs-mode' automatically become
-     buffer-local when set in any fashion. */
-  if (!strcmp(var, "tab-width") || !strcmp(var, "fill-column") || !strcmp(var, "indent-tabs-mode"))
+  /* Some variables automatically become buffer-local when set in
+     any fashion. */
+  if (ent->local)
     variableSetString(&cur_bp->vars, var, val);
   else
     set_variable(var, val);

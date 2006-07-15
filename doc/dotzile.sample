@@ -33,6 +33,12 @@
 ; Kill whole line regardless of cursor position [default: nil]
 (setq kill-whole-line nil)
 
+; Ignore case when searching [default: t]
+(setq case-fold-search t)
+
+; Match case when replacing [default: t]
+(setq case-replace t)
+
 ; Enable beep [default: t]
 ; If enabled, a sound will be emitted on any error.
 (setq beep t)

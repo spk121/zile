@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.9 2005/08/07 23:05:07 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.10 2006/07/15 02:12:59 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -48,10 +48,11 @@ struct ventry {
   char	*name;
   char	*fmt;
   char	*defvalue;
+  int   local;
   char	*doc;
 } ventry_table[] = {
-#define X(name, fmt, defvalue, doc) \
-	{ name, fmt, defvalue, doc },
+#define X(name, fmt, defvalue, local, doc) \
+	{ name, fmt, defvalue, local, doc },
 #include "tbl_vars.h"
 #undef X
 };
