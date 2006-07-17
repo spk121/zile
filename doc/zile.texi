@@ -167,9 +167,6 @@ This is the initialization file that comes with the Zile sources.
 This table contains the commands that can be used during an editing
 session to get help.
 
-If you have set the @samp{alternative-bindings} variable to @samp{t},
-the @kbd{M-h} key should be used instead of @kbd{C-h}.
-
 @table @kbd
 @item C-h C-d
 Show informations about getting the latest version.
@@ -235,9 +232,6 @@ typing @kbd{x}.
 
 This table contains the full list of commands associated with key
 sequences.
-
-If you have set the @samp{alternative-bindings} variable to @samp{t},
-the @kbd{M-h} key should be used instead of @kbd{C-h}.
 
 At run-time, you can list the current defined bindings with the
 @samp{list-bindings} command.
@@ -846,14 +840,6 @@ on the compilation options given to @samp{configure}.
 
 @c LINT VAR
 @table @code
-@item alternative-bindings
-Remap the help functions (bound by default to @kbd{C-h}) to @kbd{M-h}.
-This may be useful when @kbd{C-h} is already bound to @key{BS}
-or @key{DEL}.
-Please note that changing this variable at run-time has no effect; you
-need instead to modify your @file{~/.zile} configuration file and
-restart Zile.
-Default value is @samp{nil}.
 @item backup-directory
 Specify target backup directory, which must exist.
 This value is used only when @samp{backup-with-directory} is true.

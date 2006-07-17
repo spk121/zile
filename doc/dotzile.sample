@@ -76,3 +76,21 @@
 ; Specify target backup directory [default: "~/.backup"]
 ; Directory must exist.
 (setq backup-directory "~/.backup")
+
+; Rebind keys
+; (global-set-key "key" 'func)
+
+; Better bindings for when backspace generates C-h
+;(global-set-key "\BS"    'backward-delete-char)
+;(global-set-key "\C-h"   'backward-delete-char)
+;(global-set-key "\M-:"   'mark-paragraph)
+;(global-set-key "\M-hb"  'list-bindings)
+;(global-set-key "\M-hd"  'describe-function)
+;(global-set-key "\M-hf"  'describe-function)
+;(global-set-key "\M-hF"  'view-zile-FAQ)
+;(global-set-key "\M-hk"  'describe-key)
+;(global-set-key "\M-hlr" 'list-registers)
+;(global-set-key "\M-hs"  'help-config-sample)
+;(global-set-key "\M-ht"  'help-with-tutorial)
+;(global-set-key "\M-hw"  'where-is)
+;(global-set-key "\M-hv"  'describe-variable)

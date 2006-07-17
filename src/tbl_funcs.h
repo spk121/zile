@@ -1,8 +1,9 @@
-/*	$Id: tbl_funcs.h,v 1.36 2006/06/30 13:38:44 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.37 2006/07/17 01:21:34 rrt Exp $	*/
 
 /*
- * Add an entry to this list for declaring a new function.
- * X0 means no key binding, X1 means one key binding, etc.
+ * Add an entry to this list for declaring a new function, in
+ * alphabetic order. X0 means no key binding, X1 means one key
+ * binding, etc.
  *
  * Please remember to keep in sync with the Texinfo documentation
  * `../doc/zile.texi'.

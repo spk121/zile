@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.25 2006/07/15 02:12:59 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.26 2006/07/17 01:21:34 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -15,12 +15,6 @@
  * The fifth column specifies the variable documentation.
  */
 
-X("alternative-bindings",		"b", "nil", FALSE, "\
-Remap the help functions (bound by default to `C-h') to `M-h'.  This may\n\
-be useful when `C-h' is already bound to Backspace or Delete.\n\
-\n\
-Please note that changing this variable at run-time has no effect; you\n\
-need instead to modify your `~/.zile' configuration file and restart Zile.")
 X("auto-fill-mode",			"b", "nil", FALSE, "\
 If enabled, the Auto Fill Mode is automatically enabled.")
 X("backup-directory",			"", "~/.backup", FALSE, "\

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.74 2006/01/24 02:04:59 rrt Exp $	*/
+/*	$Id: bind.c,v 1.75 2006/07/17 01:21:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -278,21 +278,6 @@ void init_bindings(void)
   size_t i, j;
 
   leaf_tree = leaf_new(10);
-
-  if (lookup_bool_variable("alternative-bindings"))
-    for (i = 0; i < fentry_table_size; ++i)
-      for (j = 0; j < 3; ++j)
-        if (fentry_table[i].key[j] != NULL) {
-          if (strcmp(fentry_table[i].key[j], "\\M-h") == 0)
-            fentry_table[i].key[j] = "\\M-h\\M-h";
-          else if (strncmp(fentry_table[i].key[j], "\\C-h", (size_t)4) == 0) {
-            fentry_table[i].key[j] = zstrdup(fentry_table[i].key[j]);
-            fentry_table[i].key[j][1] = 'M';
-          }
-        }
-
-  /* Sort the array for better searching later. */
-  qsort(fentry_table, fentry_table_size, sizeof(fentry_table[0]), bind_compar);
 
   /* Bind all the default functions. */
   for (i = 0; i < fentry_table_size; i++)

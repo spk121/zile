@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.100 2006/06/30 23:22:30 rrt Exp $	*/
+/*	$Id: main.c,v 1.101 2006/07/17 01:21:34 rrt Exp $	*/
 
 #include "config.h"
 
@@ -123,12 +123,6 @@ static char about_minibuf_str[] =
 
 static void about_screen(void)
 {
-  /* I don't like this hack, but I don't know another way... */
-  if (lookup_bool_variable("alternative-bindings")) {
-    replace_string(about_splash_str, "C-h", "M-h");
-    replace_string(about_minibuf_str, "C-h", "M-h");
-  }
-
   minibuf_write(about_minibuf_str);
   if (!lookup_bool_variable("skip-splash-screen")) {
     show_splash_screen(about_splash_str);
@@ -286,6 +280,8 @@ int main(int argc, char **argv)
 
   setlocale(LC_ALL, "");
 
+  init_bindings();
+
   if (bflag)
     printf(astr_cstr(as));
   else {
@@ -305,7 +301,6 @@ int main(int argc, char **argv)
     /* Create the `*scratch*' buffer and initialize key bindings. */
     create_first_window();
     term_redisplay();
-    init_bindings();
 
     if (argc >= 1)
       while (*argv) {
