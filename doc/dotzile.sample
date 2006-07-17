@@ -3,11 +3,6 @@
 ; Do not display the splash screen at startup [default: nil]
 (setq skip-splash-screen nil)
 
-; Enable alternative key bindings [default: nil]
-; Remap the help functions (bound by default to `C-h') to `M-h'.
-; This may be useful when `C-h' is already bound to Backspace or Delete.
-(setq alternative-bindings nil)
-
 ; The default tabulation width [default: 8]
 (setq tab-width 8)
 
