@@ -703,8 +703,7 @@ The desired position of point is always relative to the current window.
 @item replace-string
 Replace occurrences of a string with other text.
 @item save-buffer
-Save current buffer in visited file if modified. By default, makes the
-previous version into a backup file if this is the first save.
+Save current buffer in visited file if modified.
 @item save-buffers-kill-zile
 Offer to save each buffer, then kill this Zile process.
 @item save-some-buffers
@@ -841,28 +840,14 @@ on the compilation options given to @samp{configure}.
 @c LINT VAR
 @table @code
 @item backup-directory
-Specify target backup directory, which must exist.
-This value is used only when @samp{backup-with-directory} is true.
-Default value is @samp{~/.backup}.
-@item backup-method
-Specify the file backup method.
-Possible values are: @samp{none} and @samp{simple}.
-@c LINT IGNORE
-@table @samp
-@item none
-If @samp{none} is specified, Zile will not create backup files.
-@item simple
-If @samp{simple} is specified, Zile will create a backup file with a
-tilde @samp{~} appended to the name (e.g.: on saving @file{foo.c} it will
-create the backup @file{foo.c~}).
-@end table
-@c LINT END IGNORE
-Default value is @samp{simple}.
-@item backup-with-directory
-If enabled Zile will backup files to a user specified directory;
-the directory must exist and must be specified in the
-variable @samp{backup-directory}.
+Specify target backup directory, which must exist, or @samp{nil}.
 Default value is @samp{nil}.
+@item make-backup-files
+Specify whether a backup is made the first time a file is saved.
+If enabled, Zile will create a backup file with a tilde @samp{~}
+appended to the name (e.g. on saving @file{foo.c} it will create the
+backup @file{foo.c~}).
+Default value is @samp{t}.
 @item beep
 If enabled, a sound will be emitted on any error.
 Default value is @samp{t}.

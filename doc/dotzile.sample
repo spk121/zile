@@ -52,25 +52,16 @@
 ; [default: nil]
 (setq highlight-nonselected-windows nil)
 
-; Specify the file backup method [default: simple]
-;
-; Possible values are: none and simple.
-;
-; * If `none' is specified, Zile will not create backup files.
-; * If `simple' is specified, Zile will create a backup file with a
-;   tilde `~' appended to the name (e.g.: on saving `foo.c' it will
-;   create the backup `foo.c~').
-(setq backup-method simple)
+; Specify whether backups are made [default: t]
+; If enabled, Zile will create a backup file with a tilde `~' appended
+; to the name (e.g.: on saving `foo.c' it will create the backup
+; `foo.c~').
+(setq make-backup-files t)
 
-; Enable backup directory for backup files [default: nil]
-; If enabled Zile will backup files to a user specified directory;
-; the directory must exist and must be specified in the
-; variable `backup-directory' (see below).
-(setq backup-with-directory nil)
-
-; Specify target backup directory [default: "~/.backup"]
-; Directory must exist.
-(setq backup-directory "~/.backup")
+; Specify target backup directory [default: nil]
+; If set to a directory name (which must exist), backups are created
+; in that directory.
+(setq backup-directory nil)
 
 ; Rebind keys
 ; (global-set-key "key" 'func)

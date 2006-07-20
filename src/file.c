@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.77 2006/01/09 15:22:26 rrt Exp $        */
+/*      $Id: file.c,v 1.78 2006/07/20 00:12:59 rrt Exp $        */
 
 #include "config.h"
 
@@ -37,15 +37,12 @@
 #endif
 #include <limits.h>
 #include <pwd.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#include <utime.h>
-#include <ctype.h>
 
 #include "zile.h"
 #include "extern.h"
@@ -732,16 +729,13 @@ END_DEFUN
  * Create a backup filename according to user specified variables.
  */
 static astr create_backup_filename(const char *filename,
-                                   int withdirectory)
+                                   const char *backupdir)
 {
   astr res, buf = astr_new();
 
   /* Add the backup directory path to the filename */
-  if (withdirectory) {
+  if (backupdir) {
     astr dir, fname;
-    char *backupdir;
-
-    backupdir = get_variable("backup-directory");
 
     astr_cat_cstr(buf, backupdir);
     if (*astr_char(buf, -1) != '/')
@@ -775,88 +769,6 @@ static astr create_backup_filename(const char *filename,
   return res;
 }
 
-/*
- * Copy a file.
- */
-static int copy_file(const char *source, const char *dest)
-{
-  char buf[BUFSIZ];
-  int ifd, ofd, stat_valid, serrno;
-  size_t len;
-  struct stat st;
-  char *tname;
-
-  ifd = open(source, O_RDONLY, 0);
-  if (ifd < 0) {
-    minibuf_error("%s: unable to backup", source);
-    return FALSE;
-  }
-
-  if (zasprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
-    minibuf_error("Cannot allocate temporary file name `%s'",
-                  strerror(errno));
-    return FALSE;
-  }
-
-  ofd = mkstemp(tname);
-  if (ofd == -1) {
-    serrno = errno;
-    close(ifd);
-    minibuf_error("%s: unable to create backup", dest);
-    free(tname);
-    errno = serrno;
-    return FALSE;
-  }
-
-  while ((len = read(ifd, buf, sizeof buf)) > 0)
-    if (write(ofd, buf, len) < 0) {
-      minibuf_error("Unable to write to backup file `%s'", dest);
-      close(ifd);
-      close(ofd);
-      return FALSE;
-    }
-
-  serrno = errno;
-  stat_valid = fstat(ifd, &st) != -1;
-
-#if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
-  /* Recover file permissions and ownership. */
-  if (stat_valid) {
-#ifdef HAVE_FCHMOD
-    fchmod(ofd, st.st_mode);
-#endif
-#ifdef HAVE_FCHOWN
-    fchown(ofd, st.st_uid, st.st_gid);
-#endif
-  }
-#endif
-
-  close(ifd);
-  close(ofd);
-
-  if (stat_valid) {
-    if (rename(tname, dest) == -1) {
-      minibuf_error("Cannot rename temporary file `%s'", strerror(errno));
-      (void)unlink(tname);
-      stat_valid = FALSE;
-    }
-  } else if (unlink(tname) == -1)
-    minibuf_error("Cannot remove temporary file `%s'", strerror(errno));
-
-  free(tname);
-  errno = serrno;
-
-  /* Recover file modification time. */
-  if (stat_valid) {
-    struct utimbuf t;
-    t.actime = st.st_atime;
-    t.modtime = st.st_mtime;
-    utime(dest, &t);
-  }
-
-  return stat_valid;
-}
-
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
   int fd;
@@ -885,23 +797,25 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
  */
 static int write_to_disk(Buffer *bp, char *filename)
 {
-  int fd, backupsimple, backupwithdir;
-
-  backupsimple = is_variable_equal("backup-method", "simple");
-  backupwithdir = lookup_bool_variable("backup-with-directory");
+  int fd, backup = lookup_bool_variable("make-backup-files");
+  char *backupdir = lookup_bool_variable("backup-directory") ?
+    get_variable("backup-directory") : NULL;
 
   /*
    * Make backup of original file.
    */
-  if (!(bp->flags & BFLAG_BACKUP) && backupsimple
+  if (!(bp->flags & BFLAG_BACKUP) && backup
       && (fd = open(filename, O_RDWR, 0)) != -1) {
     astr bfilename;
     close(fd);
-    bfilename = create_backup_filename(filename, backupwithdir);
-    if (!copy_file(filename, astr_cstr(bfilename)))
+    bfilename = create_backup_filename(filename, backupdir);
+    if (rename(filename, astr_cstr(bfilename)) == 0)
+      bp->flags |= BFLAG_BACKUP;
+    else {
+      minibuf_error("Cannot make backup file: %s", strerror(errno));
       waitkey(WAITKEY_DEFAULT);
+    }
     astr_delete(bfilename);
-    bp->flags |= BFLAG_BACKUP;
   }
 
   if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
