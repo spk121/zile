@@ -4,6 +4,7 @@ Changes after Zile 2.2
 * Add --funcall back.
 * termcap terminal replaced with ncurses again.
 * Various bug fixes.
+* Design fixes to mimic Emacs better.
 
 Changes between Zile 2.0 - Zile 2.2
 
