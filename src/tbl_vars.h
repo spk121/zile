@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.26 2006/07/17 01:21:34 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.27 2006/07/25 12:27:02 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -42,11 +42,11 @@ Non-nil means `query-replace' should preserve case in replacements.")
 X("fill-column",			"", "72", TRUE, "\
 Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")
+X("highlight-nonselected-windows",	"b", "nil", FALSE, "\
+If enabled, highlight region even in nonselected windows.")
 X("indent-tabs-mode",			"b", "nil", TRUE, "\
 If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts\n\
 spaces.")
-X("highlight-nonselected-windows",	"b", "nil", FALSE, "\
-If enabled, highlight region even in nonselected windows.")
 X("kill-whole-line",			"b", "nil", FALSE, "\
 If enabled, `kill-line' with no arg at beg of line kills the whole line.")
 X("skip-splash-screen",			"b", "nil", FALSE, "\
