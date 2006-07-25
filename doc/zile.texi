@@ -703,7 +703,8 @@ The desired position of point is always relative to the current window.
 @item replace-string
 Replace occurrences of a string with other text.
 @item save-buffer
-Save current buffer in visited file if modified.
+src/Save current buffer in visited file if modified. By default, makes the
+previous version into a backup file if this is the first save.
 @item save-buffers-kill-zile
 Offer to save each buffer, then kill this Zile process.
 @item save-some-buffers
