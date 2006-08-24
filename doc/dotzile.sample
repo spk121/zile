@@ -60,7 +60,8 @@
 
 ; Specify target backup directory [default: nil]
 ; If set to a directory name (which must exist), backups are created
-; in that directory.
+; in that directory. Otherwise backups are created alongside the
+; backuped file.
 (setq backup-directory nil)
 
 ; Rebind keys

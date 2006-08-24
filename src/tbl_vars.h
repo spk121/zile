@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.27 2006/07/25 12:27:02 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.28 2006/08/24 23:50:27 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -11,28 +11,15 @@
  *   - "b" for boolean ("t" or "nil");
  *   - "" (empty string) for non-fixed format.
  * The third column specifies the default value.
- * The third column specifies whether the variable becomes local when set.
+ * The fourth column specifies whether the variable becomes local when set.
  * The fifth column specifies the variable documentation.
  */
 
 X("auto-fill-mode",			"b", "nil", FALSE, "\
 If enabled, the Auto Fill Mode is automatically enabled.")
-X("backup-directory",			"", "~/.backup", FALSE, "\
+X("backup-directory",			"", "nil", FALSE, "\
 Specify target backup directory.  Directory must be existent.\n\
-This value is used only when the `backup-with-directory' value is true.")
-X("backup-method",			"", "simple", FALSE, "\
-Specify the file backup method.\n\
-\n\
-Possible values are: none and simple.\n\
-\n\
- - If `none' is specified, Zile will not create backup files.\n\
- - If `simple' is specified, Zile will create a backup file with a\n\
-   tilde `~' appended to the name (e.g.: on saving `foo.c' it will\n\
-   create the backup `foo.c~').")
-X("backup-with-directory",		"b", "nil", FALSE, "\
-If enabled Zile will backup files to a user specified directory;\n\
-the directory must exist and must be specified in the\n\
-variable `backup-directory'.")
+This value is used only when the `make-backup-files' value is true.")
 X("beep",				"b", "t", FALSE, "\
 If enabled, a sound will be emitted on any error.")
 X("case-fold-search",			"b", "t", TRUE, "\
@@ -49,6 +36,9 @@ If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts\n\
 spaces.")
 X("kill-whole-line",			"b", "nil", FALSE, "\
 If enabled, `kill-line' with no arg at beg of line kills the whole line.")
+X("make-backup-files",			"b", "t", FALSE, "\
+If enabled, Zile will create a backup file with a tilde `~' appended\n\
+to the file name")
 X("skip-splash-screen",			"b", "nil", FALSE, "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", FALSE, "\
