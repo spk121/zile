@@ -53,15 +53,15 @@
 (setq highlight-nonselected-windows nil)
 
 ; Specify whether backups are made [default: t]
-; If enabled, Zile will create a backup file with a tilde `~' appended
-; to the name (e.g.: on saving `foo.c' it will create the backup
-; `foo.c~').
+; Non-nil means make a backup of a file the first time it is saved.
+; This is done by appending `~' to the file name.
 (setq make-backup-files t)
 
 ; Specify target backup directory [default: nil]
-; If set to a directory name (which must exist), backups are created
-; in that directory. Otherwise backups are created alongside the
-; backuped file.
+; The directory for backup files, which must exist.
+; If this variable is nil, the backup is made in the original file's
+; directory.
+; This value is used only when `make-backup-files' is `t'.
 (setq backup-directory nil)
 
 ; Rebind keys

@@ -1,4 +1,4 @@
-/*	$Id: tbl_vars.h,v 1.28 2006/08/24 23:50:27 rrt Exp $	*/
+/*	$Id: tbl_vars.h,v 1.29 2006/09/06 17:30:42 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new global variable.
@@ -18,8 +18,10 @@
 X("auto-fill-mode",			"b", "nil", FALSE, "\
 If enabled, the Auto Fill Mode is automatically enabled.")
 X("backup-directory",			"", "nil", FALSE, "\
-Specify target backup directory.  Directory must be existent.\n\
-This value is used only when the `make-backup-files' value is true.")
+The directory for backup files, which must exist.\n\
+If this variable is nil, the backup is made in the original file's\n\
+directory.\n\
+This value is used only when `make-backup-files' is `t'.")
 X("beep",				"b", "t", FALSE, "\
 If enabled, a sound will be emitted on any error.")
 X("case-fold-search",			"b", "t", TRUE, "\
@@ -37,8 +39,8 @@ spaces.")
 X("kill-whole-line",			"b", "nil", FALSE, "\
 If enabled, `kill-line' with no arg at beg of line kills the whole line.")
 X("make-backup-files",			"b", "t", FALSE, "\
-If enabled, Zile will create a backup file with a tilde `~' appended\n\
-to the file name")
+Non-nil means make a backup of a file the first time it is saved.\n\
+This is done by appending `~' to the file name. ")
 X("skip-splash-screen",			"b", "nil", FALSE, "\
 If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"", "4", FALSE, "\

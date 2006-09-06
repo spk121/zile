@@ -1,6 +1,6 @@
 /* Disk file handling
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.78 2006/07/20 00:12:59 rrt Exp $        */
+/*      $Id: file.c,v 1.79 2006/09/06 17:30:42 rrt Exp $        */
 
 #include "config.h"
 
@@ -95,10 +95,10 @@ astr agetcwd(void)
 /*
  * This functions does some corrections and expansions to
  * the passed path:
- * - Splits the path into the directory and the filename;
- * - Expands the `~/' and `~name/' expressions;
- * - replaces the `//' with `/' (restarting from the root directory);
- * - removes the `..' and `.' entries.
+ * - splits the path into directory (with trailing slash) and filename;
+ * - expands `~/' and `~name/' expressions;
+ * - replaces `//' with `/' (restarting from the root directory);
+ * - removes `..' and `.' entries.
  */
 int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
 {
@@ -726,49 +726,8 @@ Set mark after the inserted text.
 END_DEFUN
 
 /*
- * Create a backup filename according to user specified variables.
+ * Write buffer to given file name with given umask.
  */
-static astr create_backup_filename(const char *filename,
-                                   const char *backupdir)
-{
-  astr res, buf = astr_new();
-
-  /* Add the backup directory path to the filename */
-  if (backupdir) {
-    astr dir, fname;
-
-    astr_cat_cstr(buf, backupdir);
-    if (*astr_char(buf, -1) != '/')
-      astr_cat_cstr(buf, "/");
-    while (*filename != '\0') {
-      if (*filename == '/')
-        astr_cat_char(buf, '!');
-      else
-        astr_cat_char(buf, *filename);
-      ++filename;
-    }
-
-    dir = astr_new();
-    fname = astr_new();
-    if (!expand_path(astr_cstr(buf), "", dir, fname)) {
-      fprintf(stderr, "zile: %s: invalid backup directory\n", astr_cstr(dir));
-      zile_exit(1);
-    }
-    astr_cpy_cstr(buf, astr_cstr(dir));
-    astr_cat_cstr(buf, astr_cstr(fname));
-    astr_delete(dir);
-    astr_delete(fname);
-    filename = astr_cstr(buf);
-  }
-
-  res = astr_new();
-  astr_cat_cstr(res, filename);
-  astr_cat_char(res, '~');
-  astr_delete(buf);
-
-  return res;
-}
-
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 {
   int fd;
@@ -792,6 +751,47 @@ static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
 }
 
 /*
+ * Create a backup filename according to user specified variables.
+ */
+static astr create_backup_filename(const char *filename,
+                                   const char *backupdir)
+{
+  astr res;
+
+  /* Prepend the backup directory path to the filename */
+  if (backupdir) {
+    astr dir = astr_new(), fname = astr_new(), buf = astr_new();
+
+    astr_cpy_cstr(buf, backupdir);
+    if (*astr_char(buf, -1) != '/')
+      astr_cat_char(buf, '/');
+    while (*filename) {
+      if (*filename == '/')
+        astr_cat_char(buf, '!');
+      else
+        astr_cat_char(buf, *filename);
+      ++filename;
+    }
+
+    if (!expand_path(astr_cstr(buf), "", dir, fname)) {
+      astr_delete(buf);
+      astr_delete(dir);
+      astr_delete(fname);
+      return NULL;
+    }
+    astr_cat_delete(dir, fname);
+    res = dir;
+  } else {
+    res = astr_new();
+    astr_cat_cstr(res, filename);
+  }
+
+  astr_cat_char(res, '~');
+
+  return res;
+}
+
+/*
  * Write the buffer contents to a file.  Create a backup file if specified
  * by the user variables.
  */
@@ -809,7 +809,7 @@ static int write_to_disk(Buffer *bp, char *filename)
     astr bfilename;
     close(fd);
     bfilename = create_backup_filename(filename, backupdir);
-    if (rename(filename, astr_cstr(bfilename)) == 0)
+    if (bfilename && rename(filename, astr_cstr(bfilename)) == 0)
       bp->flags |= BFLAG_BACKUP;
     else {
       minibuf_error("Cannot make backup file: %s", strerror(errno));
