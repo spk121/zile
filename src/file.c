@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.79 2006/09/06 17:30:42 rrt Exp $        */
+/*      $Id: file.c,v 1.80 2006/09/10 23:53:09 rrt Exp $        */
 
 #include "config.h"
 
@@ -43,6 +43,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <utime.h>
 
 #include "zile.h"
 #include "extern.h"
@@ -726,6 +727,88 @@ Set mark after the inserted text.
 END_DEFUN
 
 /*
+ * Copy a file.
+ */
+static int copy_file(const char *source, const char *dest)
+{
+  char buf[BUFSIZ];
+  int ifd, ofd, stat_valid, serrno;
+  size_t len;
+  struct stat st;
+  char *tname;
+
+  ifd = open(source, O_RDONLY, 0);
+  if (ifd < 0) {
+    minibuf_error("%s: unable to backup", source);
+    return FALSE;
+  }
+
+  if (zasprintf(&tname, "%s_XXXXXXXXXX", dest) == -1) {
+    minibuf_error("Cannot allocate temporary file name `%s'",
+                  strerror(errno));
+    return FALSE;
+  }
+
+  ofd = mkstemp(tname);
+  if (ofd == -1) {
+    serrno = errno;
+    close(ifd);
+    minibuf_error("%s: unable to create backup", dest);
+    free(tname);
+    errno = serrno;
+    return FALSE;
+  }
+
+  while ((len = read(ifd, buf, sizeof buf)) > 0)
+    if (write(ofd, buf, len) < 0) {
+      minibuf_error("Unable to write to backup file `%s'", dest);
+      close(ifd);
+      close(ofd);
+      return FALSE;
+    }
+
+  serrno = errno;
+  stat_valid = fstat(ifd, &st) != -1;
+
+#if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
+  /* Recover file permissions and ownership. */
+  if (stat_valid) {
+#ifdef HAVE_FCHMOD
+    fchmod(ofd, st.st_mode);
+#endif
+#ifdef HAVE_FCHOWN
+    fchown(ofd, st.st_uid, st.st_gid);
+#endif
+  }
+#endif
+
+  close(ifd);
+  close(ofd);
+
+  if (stat_valid) {
+    if (rename(tname, dest) == -1) {
+      minibuf_error("Cannot rename temporary file `%s'", strerror(errno));
+      (void)unlink(tname);
+      stat_valid = FALSE;
+    }
+  } else if (unlink(tname) == -1)
+    minibuf_error("Cannot remove temporary file `%s'", strerror(errno));
+
+  free(tname);
+  errno = serrno;
+
+  /* Recover file modification time. */
+  if (stat_valid) {
+    struct utimbuf t;
+    t.actime = st.st_atime;
+    t.modtime = st.st_mtime;
+    utime(dest, &t);
+  }
+
+  return stat_valid;
+}
+
+/*
  * Write buffer to given file name with given umask.
  */
 static int raw_write_to_disk(Buffer *bp, const char *filename, int umask)
@@ -809,7 +892,7 @@ static int write_to_disk(Buffer *bp, char *filename)
     astr bfilename;
     close(fd);
     bfilename = create_backup_filename(filename, backupdir);
-    if (bfilename && rename(filename, astr_cstr(bfilename)) == 0)
+    if (bfilename && copy_file(filename, astr_cstr(bfilename)))
       bp->flags |= BFLAG_BACKUP;
     else {
       minibuf_error("Cannot make backup file: %s", strerror(errno));
