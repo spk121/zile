@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.75 2006/07/17 01:21:34 rrt Exp $	*/
+/*	$Id: bind.c,v 1.76 2006/09/13 19:58:53 rrt Exp $	*/
 
 #include "config.h"
 
@@ -402,7 +402,7 @@ char *minibuf_read_function_name(const char *fmt, ...)
         break;                  /* We're finished. */
       } else {
         minibuf_error("Undefined function name `%s'", ms);
-        waitkey((size_t)WAITKEY_DEFAULT);
+        waitkey(WAITKEY_DEFAULT);
       }
     }
   }
