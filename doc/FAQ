@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2005/06/07 00:08:09 $
+		   Last updated: $Date: 2006/09/17 14:08:44 $
 
 ------------------------------------------------------------------------------
 
@@ -24,9 +24,10 @@ INDEX
    2.3. How do I undo the previous command?
    2.4. What does `C-something' or `M-something' mean?
    2.5. What settings can I change?
-   2.6. How do I handle non-ASCII characters?
-   2.7. The META/ALT key doesn't work.
-   2.8. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   2.6. Why are my settings being ignored?
+   2.7. How do I handle non-ASCII characters?
+   2.8. The META/ALT key doesn't work.
+   2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
 ------------------------------------------------------------------------------
 
@@ -139,14 +140,20 @@ INDEX
     Check out the `dotzile.sample' file (type `C-h s') for a full list
     of variables.
 
-2.6. How do I handle non-ASCII characters?
+2.6 Why are my settings being ignored?
+
+    Note that since Zile 2.2.16, booleans are, as in Emacs, `t' and
+    `nil' rather than `true' and `false'. If you haven't yet updated
+    your .zile, you should do so.
+
+2.7. How do I handle non-ASCII characters?
 
     Zile uses the operating system's locale support, so you need to
     set an appropriate locale; how you do this depends on your OS.
     However, Zile only works with 8-bit locales at present; support
     for Unicode is planned.
 
-2.7 The META/ALT key doesn't work in xterm.
+2.8 The META/ALT key doesn't work in xterm.
 
     This is probably because you are using "8-bit input".  Using the
     following X resources should make things work:
@@ -157,7 +164,7 @@ INDEX
     Typically you'll want to put these lines in your ~/.Xresources
     file.
 
-2.8. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
     Add the following line to your `~/.zile' file:
 

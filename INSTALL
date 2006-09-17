@@ -49,11 +49,3 @@ If you are debugging the editor, you can enable the debugging code:
 For other configure options, run
 
 	 ./configure --help
-
-
-Changing key bindings
----------------------
-
-If you would like to change some key bindings of Zile, you need to
-edit the `src/tbl_funcs.h' file. Maybe in the future a feature for
-rebinding a function at run-time will be available.

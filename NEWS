@@ -5,6 +5,7 @@ Changes after Zile 2.2
 * termcap terminal replaced with ncurses again.
 * Various bug fixes.
 * Design fixes to mimic Emacs better.
+* "true" and "false" changed to "t" and "nil".
 
 Changes between Zile 2.0 - Zile 2.2
 
