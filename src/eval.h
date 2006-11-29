@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.h,v 1.13 2006/11/29 21:19:31 rrt Exp $	*/
+/*	$Id: eval.h,v 1.14 2006/11/29 22:34:46 rrt Exp $	*/
 
 #ifndef EVAL_H
 #define EVAL_H
@@ -44,7 +44,6 @@ enum setfcn {
   S_SETQ
 };
 
-le *eval_cb_set_helper(enum setfcn function, le *branch);
 le *eval_cb_set(int argc, le *branch);
 le *eval_cb_setq(int argc, le *branch);
 

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.74 2006/11/29 20:57:02 rrt Exp $        */
+/*      $Id: zile.h,v 1.75 2006/11/29 22:34:46 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -344,7 +344,9 @@ typedef size_t Font;
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
         int F_ ## c_func(int uniarg GCC_UNUSED, le *list GCC_UNUSED) \
-        {
+        { \
+          if (list && list->data) \
+            uniarg = atoi(list->data);
 #define END_DEFUN \
         }
 

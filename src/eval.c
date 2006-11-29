@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.c,v 1.26 2006/11/29 21:19:31 rrt Exp $	*/
+/*	$Id: eval.c,v 1.27 2006/11/29 22:34:46 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -149,7 +149,7 @@ int countNodes(le *branch)
 }
 
 
-le *eval_cb_set_helper(enum setfcn function, le *branch)
+static le *eval_cb_set_helper(enum setfcn function, le *branch)
 {
   int argc = countNodes(branch);
   le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
