@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.102 2006/07/20 19:58:15 rrt Exp $	*/
+/*	$Id: main.c,v 1.103 2006/11/29 21:19:31 rrt Exp $	*/
 
 #include "config.h"
 
@@ -285,17 +285,6 @@ int main(int argc, char **argv)
   if (bflag)
     printf(astr_cstr(as));
   else {
-    if (!qflag) {
-      le *list;
-
-      astr as = get_home_dir();
-      astr_cat_cstr(as, "/.zile");
-      list = lisp_read_file(astr_cstr(as));
-      astr_delete(lisp_dump(list));
-      astr_delete(as);
-      leWipe(list);
-    }
-
     term_init();
 
     /* Create the `*scratch*' buffer and initialize key bindings. */
@@ -316,6 +305,17 @@ int main(int argc, char **argv)
       about_screen();
 
     setup_main_screen(argc, as);
+
+    if (!qflag) {
+      le *list;
+
+      astr as = get_home_dir();
+      astr_cat_cstr(as, "/.zile");
+      list = lisp_read_file(astr_cstr(as));
+      astr_delete(lisp_dump(list));
+      astr_delete(as);
+      leWipe(list);
+    }
 
     execute_functions(fargs);
     list_delete(fargs);

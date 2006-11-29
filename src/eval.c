@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.c,v 1.25 2006/11/29 20:57:02 rrt Exp $	*/
+/*	$Id: eval.c,v 1.26 2006/11/29 21:19:31 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -108,7 +108,7 @@ le *evaluateBranch(le *trybranch)
   prim = lookupFunction(keyword->data);
   leWipe(keyword);
   if (prim)
-    return prim(countNodes(trybranch), trybranch);
+    return prim(1, trybranch);
 
   return NULL;
 }
@@ -149,8 +149,9 @@ int countNodes(le *branch)
 }
 
 
-le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
+le *eval_cb_set_helper(enum setfcn function, le *branch)
 {
+  int argc = countNodes(branch);
   le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
 
   if (branch != NULL && argc >= 3) {
@@ -175,12 +176,12 @@ le *eval_cb_set_helper(enum setfcn function, int argc, le *branch)
   return newvalue;
 }
 
-le* eval_cb_set(int argc, le *branch)
+le *eval_cb_set(int argc GCC_UNUSED, le *branch)
 {
-  return eval_cb_set_helper(S_SET, argc, branch);
+  return eval_cb_set_helper(S_SET, branch);
 }
 
-le *eval_cb_setq(int argc, le *branch)
+le *eval_cb_setq(int argc GCC_UNUSED, le *branch)
 {
-  return eval_cb_set_helper(S_SETQ, argc, branch);
+  return eval_cb_set_helper(S_SETQ, branch);
 }
