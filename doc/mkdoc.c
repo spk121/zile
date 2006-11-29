@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.11 2006/07/17 22:56:06 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.12 2006/11/29 21:00:36 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -92,7 +92,7 @@ static void parse(void)
   astr buf;
 
   while ((buf = astr_fgets(input_file)) != NULL) {
-    if (!strncmp(astr_cstr(buf), "DEFUN_INT(", (size_t)6)) {
+    if (!strncmp(astr_cstr(buf), "DEFUN(", (size_t)6)) {
       int i, j;
       astr sub;
       i = astr_find_cstr(buf, "\"");
