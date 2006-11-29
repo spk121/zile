@@ -1,3 +1,5 @@
+#include "eval.h"
+
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp(Buffer *bp, Point pt);
 size_t get_goalc_wp(Window *wp);
@@ -272,7 +274,7 @@ int zasprintf(char **ptr, const char *fmt, ...);
  * Declare external Zile functions.
  */
 #define X0(zile_name, c_name)			\
-	extern int F_ ## c_name(int uniarg);
+	extern int F_ ## c_name(int uniarg, le *l);
 #define X1(zile_name, c_name, k1)		\
 	X0(zile_name, c_name)
 #define X2(zile_name, c_name, k1, k2)		\

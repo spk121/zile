@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: window.c,v 1.22 2006/02/01 04:38:38 rrt Exp $	*/
+/*	$Id: window.c,v 1.23 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -90,7 +90,7 @@ void set_current_window(Window *wp)
   }
 }
 
-DEFUN_INT("split-window", split_window)
+DEFUN("split-window", split_window)
 /*+
 Split current window into two windows, one above the other.
 Both windows display the same buffer now current.
@@ -142,7 +142,7 @@ void delete_window(Window *del_wp)
   free_window(del_wp);
 }
 
-DEFUN_INT("delete-window", delete_window)
+DEFUN("delete-window", delete_window)
 /*+
 Remove the current window from the screen.
 +*/
@@ -158,7 +158,7 @@ Remove the current window from the screen.
 }
 END_DEFUN
 
-DEFUN_INT("enlarge-window", enlarge_window)
+DEFUN("enlarge-window", enlarge_window)
 /*+
 Make current window one line bigger.
 +*/
@@ -190,7 +190,7 @@ Make current window one line bigger.
 }
 END_DEFUN
 
-DEFUN_INT("shrink-window", shrink_window)
+DEFUN("shrink-window", shrink_window)
 /*+
 Make current window one line smaller.
 +*/
@@ -234,7 +234,7 @@ Window *popup_window(void)
   return head_wp;
 }
 
-DEFUN_INT("delete-other-windows", delete_other_windows)
+DEFUN("delete-other-windows", delete_other_windows)
 /*+
 Make the selected window fill the screen.
 +*/
@@ -259,7 +259,7 @@ Make the selected window fill the screen.
 }
 END_DEFUN
 
-DEFUN_INT("other-window", other_window)
+DEFUN("other-window", other_window)
 /*+
 Select the first different window on the screen.
 All windows are arranged in a cyclic order.

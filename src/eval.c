@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.c,v 1.24 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: eval.c,v 1.25 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -33,10 +33,46 @@
 #include "vars.h"
 
 
+static le *eval_cb_command_helper(Function f, int argc, le *branch)
+{
+  int ret = f(argc, branch);
+  return ret ? leT : leNIL;
+}
+
+#define X(zile_name, c_name) \
+  static le *eval_cb_ ## c_name(int argc, le *branch) \
+  { \
+    return eval_cb_command_helper(F_ ## c_name, argc, branch); \
+  }
+#define X0(zile_name, c_name)                    X(zile_name, c_name)
+#define X1(zile_name, c_name, key1)              X(zile_name, c_name)
+#define X2(zile_name, c_name, key1, key2)        X(zile_name, c_name)
+#define X3(zile_name, c_name, key1, key2, key3)  X(zile_name, c_name)
+#include "tbl_funcs.h"
+#undef X
+#undef X0
+#undef X1
+#undef X2
+#undef X3
+
+
 static evalLookupNode evalTable[] = {
   { "set"	, eval_cb_set		},
   { "setq"	, eval_cb_setq		},
-  { NULL	, NULL			}
+#define X0(zile_name, c_name) \
+  { zile_name   , eval_cb_ ## c_name },
+#define X1(zile_name, c_name, key1) \
+  { zile_name   , eval_cb_ ## c_name },
+#define X2(zile_name, c_name, key1, key2) \
+  { zile_name   , eval_cb_ ## c_name },
+#define X3(zile_name, c_name, key1, key2, key3) \
+  { zile_name   , eval_cb_ ## c_name },
+#include "tbl_funcs.h"
+#undef X0
+#undef X1
+#undef X2
+#undef X3
+  { NULL	, NULL			},
 };
 
 
@@ -77,6 +113,7 @@ le *evaluateBranch(le *trybranch)
   return NULL;
 }
 
+
 le *evaluateNode(le *node)
 {
   le *value;
@@ -91,10 +128,10 @@ le *evaluateNode(le *node)
       value = evaluateBranch(node->branch);
 
   } else {
-    le *temp = variableGet(mainVarList, node->data);
+    value = variableGet(mainVarList, node->data);
 
-    if (temp != NULL)
-      value = leDup(temp);
+    if (value != NULL)
+      value = leDup(value);
     else
       value = leNew(node->data);
   }

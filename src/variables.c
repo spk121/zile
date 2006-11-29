@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: variables.c,v 1.35 2006/07/15 02:12:59 rrt Exp $	*/
+/*	$Id: variables.c,v 1.36 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -158,7 +158,7 @@ static struct var_entry *get_variable_entry(char *var)
   return NULL;
 }
 
-DEFUN_INT("set-variable", set_variable)
+DEFUN("set-variable", set_variable)
 /*+
 Set a variable value to the user-specified value.
 +*/

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: killring.c,v 1.24 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: killring.c,v 1.25 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -111,7 +111,7 @@ static int kill_line(int literally)
   return FALSE;
 }
 
-DEFUN_INT("kill-line", kill_line)
+DEFUN("kill-line", kill_line)
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
 With prefix argument, kill that many lines from point.
@@ -139,7 +139,7 @@ With prefix argument, kill that many lines from point.
 }
 END_DEFUN
 
-DEFUN_INT("kill-region", kill_region)
+DEFUN("kill-region", kill_region)
 /*+
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
@@ -198,7 +198,7 @@ to make one entry in the kill ring.
 }
 END_DEFUN
 
-DEFUN_INT("copy-region-as-kill", copy_region_as_kill)
+DEFUN("copy-region-as-kill", copy_region_as_kill)
 /*+
 Save the region as if killed, but don't kill it.
 +*/
@@ -225,7 +225,7 @@ Save the region as if killed, but don't kill it.
 }
 END_DEFUN
 
-DEFUN_INT("kill-word", kill_word)
+DEFUN("kill-word", kill_word)
 /*+
 Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
@@ -252,7 +252,7 @@ With argument, do this that many times.
 }
 END_DEFUN
 
-DEFUN_INT("backward-kill-word", backward_kill_word)
+DEFUN("backward-kill-word", backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
@@ -262,7 +262,7 @@ With argument, do this that many times.
 }
 END_DEFUN
 
-DEFUN_INT("kill-sexp", kill_sexp)
+DEFUN("kill-sexp", kill_sexp)
 /*+
 Kill the sexp (balanced expression) following the cursor.
 With ARG, kill that many sexps after the cursor.
@@ -290,7 +290,7 @@ Negative arg -N means kill N sexps before the cursor.
 }
 END_DEFUN
 
-DEFUN_INT("yank", yank)
+DEFUN("yank", yank)
 /*+
 Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently

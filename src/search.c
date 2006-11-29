@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.51 2006/01/30 14:25:01 rrt Exp $	*/
+/*	$Id: search.c,v 1.52 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -238,7 +238,7 @@ static int search_backward(Line *startp, size_t starto, const char *s, int regex
 
 static char *last_search = NULL;
 
-DEFUN_INT("search-forward", search_forward)
+DEFUN("search-forward", search_forward)
 /*+
 Search forward from point for the user specified text.
 +*/
@@ -263,7 +263,7 @@ Search forward from point for the user specified text.
 }
 END_DEFUN
 
-DEFUN_INT("search-backward", search_backward)
+DEFUN("search-backward", search_backward)
 /*+
 Search backward from point for the user specified text.
 +*/
@@ -288,7 +288,7 @@ Search backward from point for the user specified text.
 }
 END_DEFUN
 
-DEFUN_INT("search-forward-regexp", search_forward_regexp)
+DEFUN("search-forward-regexp", search_forward_regexp)
 /*+
 Search forward from point for regular expression REGEXP.
 +*/
@@ -313,7 +313,7 @@ Search forward from point for regular expression REGEXP.
 }
 END_DEFUN
 
-DEFUN_INT("search-backward-regexp", search_backward_regexp)
+DEFUN("search-backward-regexp", search_backward_regexp)
 /*+
 Search backward from point for match for regular expression REGEXP.
 +*/
@@ -480,7 +480,7 @@ static int isearch(int dir, int regexp)
   return TRUE;
 }
 
-DEFUN_INT("isearch-forward", isearch_forward)
+DEFUN("isearch-forward", isearch_forward)
 /*+
 Do incremental search forward.
 With a prefix argument, do an incremental regular expression search instead.
@@ -494,7 +494,7 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-DEFUN_INT("isearch-backward", isearch_backward)
+DEFUN("isearch-backward", isearch_backward)
 /*+
 Do incremental search backward.
 With a prefix argument, do a regular expression search instead.
@@ -508,7 +508,7 @@ C-g when search is successful aborts and moves point to starting point.
 }
 END_DEFUN
 
-DEFUN_INT("isearch-forward-regexp", isearch_forward_regexp)
+DEFUN("isearch-forward-regexp", isearch_forward_regexp)
 /*+
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
@@ -520,7 +520,7 @@ is treated as a regexp.  See C-s for more info.
 }
 END_DEFUN
 
-DEFUN_INT("isearch-backward-regexp", isearch_backward_regexp)
+DEFUN("isearch-backward-regexp", isearch_backward_regexp)
 /*+
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
@@ -543,7 +543,7 @@ static int no_upper(const char *s, size_t len)
   return TRUE;
 }
 
-DEFUN_INT("replace-string", replace_string)
+DEFUN("replace-string", replace_string)
 /*+
 Replace occurrences of a string with other text.
 +*/
@@ -583,7 +583,7 @@ Replace occurrences of a string with other text.
 }
 END_DEFUN
 
-DEFUN_INT("query-replace", query_replace)
+DEFUN("query-replace", query_replace)
 /*+
 Replace occurrences of a string with other text.
 As each match is found, the user must type a character saying

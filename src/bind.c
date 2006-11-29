@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.76 2006/09/13 19:58:53 rrt Exp $	*/
+/*	$Id: bind.c,v 1.77 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -215,7 +215,7 @@ void process_key(size_t key)
            ++uni);
       undo_save(UNDO_END_SEQUENCE, cur_bp->pt, (size_t)0, (size_t)0);
     } else {
-      p->func(last_uniarg);
+      p->func(last_uniarg, NULL);
       _last_command = p->func;
     }
 
@@ -419,7 +419,7 @@ int execute_function(char *name, int uniarg)
   Macro *mp;
 
   if ((func = get_function(name)))
-    return func(uniarg);
+    return func(uniarg, NULL);
   else if ((mp = get_macro(name))) {
     call_macro(mp);
     return TRUE;
@@ -427,7 +427,7 @@ int execute_function(char *name, int uniarg)
     return FALSE;
 }
 
-DEFUN_INT("execute-extended-command", execute_extended_command)
+DEFUN("execute-extended-command", execute_extended_command)
 /*+
 Read function name, then read its arguments and call it.
 +*/
@@ -453,7 +453,7 @@ Read function name, then read its arguments and call it.
 }
 END_DEFUN
 
-DEFUN_INT("global-set-key", global_set_key)
+DEFUN("global-set-key", global_set_key)
 /*+
 Bind a command to a key sequence.
 Read key sequence and function name, and bind the function to the key
@@ -462,18 +462,23 @@ sequence.
 {
   int ok = FALSE;
   size_t key, *keys = NULL, numkeys;
-  leafp p;
   Function func;
   char *name;
-  astr as;
 
-  minibuf_write("Set key globally: ");
-  key = getkey();
-  p = completion_scan(key, &keys, &numkeys);
+  if (list) {
+    numkeys = keystrtovec(list->list_next->data, &keys);
+    name = list->list_next->list_next->data;
+  } else {
+    astr as;
 
-  as = keyvectostr(keys, numkeys);
-  name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
-  astr_delete(as);
+    minibuf_write("Set key globally: ");
+    key = getkey();
+    completion_scan(key, &keys, &numkeys);
+
+    as = keyvectostr(keys, numkeys);
+    name = minibuf_read_function_name("Set key %s to command: ", astr_cstr(as));
+    astr_delete(as);
+  }
 
   if (name == NULL)
     return FALSE;
@@ -485,14 +490,15 @@ sequence.
   } else
     minibuf_error("No such function `%s'", name);
 
-  free(name);
+  if (!list)
+    free(name);
   free(keys);
 
   return ok;
 }
 END_DEFUN
 
-DEFUN_INT("where-is", where_is)
+DEFUN("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
 Argument is a command definition, usually a symbol with a function definition.
@@ -589,7 +595,7 @@ static void write_bindings_list(va_list ap)
   list_delete(l);
 }
 
-DEFUN_INT("list-bindings", list_bindings)
+DEFUN("list-bindings", list_bindings)
 /*+
 List defined bindings.
 +*/

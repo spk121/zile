@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: line.c,v 1.69 2006/06/30 13:38:44 rrt Exp $	*/
+/*	$Id: line.c,v 1.70 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -151,7 +151,7 @@ int insert_tab(void)
   return TRUE;
 }
 
-DEFUN_INT("tab-to-tab-stop", tab_to_tab_stop)
+DEFUN("tab-to-tab-stop", tab_to_tab_stop)
 /*+
 Insert a tabulation at the current point position into the current
 buffer.
@@ -336,7 +336,7 @@ void fill_break_line(void)
     cur_bp->pt.o = old_col;
 }
 
-DEFUN_INT("newline", newline)
+DEFUN("newline", newline)
 /*+
 Insert a newline at the current point position into
 the current buffer.
@@ -360,7 +360,7 @@ the current buffer.
 }
 END_DEFUN
 
-DEFUN_INT("open-line", open_line)
+DEFUN("open-line", open_line)
 /*+
 Insert a newline and leave point before it.
 +*/
@@ -419,7 +419,7 @@ int self_insert_command(int c)
   }
 }
 
-DEFUN_INT("self-insert-command", self_insert_command)
+DEFUN("self-insert-command", self_insert_command)
 /*+
 Insert the character you type.
 +*/
@@ -508,7 +508,7 @@ int delete_char(void)
   return FALSE;
 }
 
-DEFUN_INT("delete-char", delete_char)
+DEFUN("delete-char", delete_char)
 /*+
 Delete the following character.
 Join lines if the character is a newline.
@@ -570,7 +570,7 @@ static int backward_delete_char_overwrite(void)
     return backward_delete_char();
 }
 
-DEFUN_INT("backward-delete-char", backward_delete_char)
+DEFUN("backward-delete-char", backward_delete_char)
 /*+
 Delete the previous character.
 Join lines if the character is a newline.
@@ -597,7 +597,7 @@ Join lines if the character is a newline.
 }
 END_DEFUN
 
-DEFUN_INT("delete-horizontal-space", delete_horizontal_space)
+DEFUN("delete-horizontal-space", delete_horizontal_space)
 /*+
 Delete all spaces and tabs around point.
 +*/
@@ -615,7 +615,7 @@ Delete all spaces and tabs around point.
 }
 END_DEFUN
 
-DEFUN_INT("just-one-space", just_one_space)
+DEFUN("just-one-space", just_one_space)
 /*+
 Delete all spaces and tabs around point, leaving one space.
 +*/
@@ -717,7 +717,7 @@ static size_t current_indent(void)
   return cur_indent;
 }
 
-DEFUN_INT("indent-for-tab-command", indent_for_tab_command)
+DEFUN("indent-for-tab-command", indent_for_tab_command)
 /*+
 Indent line or insert a tab.
 +*/
@@ -729,7 +729,7 @@ Indent line or insert a tab.
 }
 END_DEFUN
 
-DEFUN_INT("newline-and-indent", newline_and_indent)
+DEFUN("newline-and-indent", newline_and_indent)
 /*+
 Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.

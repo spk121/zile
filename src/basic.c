@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: basic.c,v 1.28 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: basic.c,v 1.29 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,7 @@
 /* Goal-column to arrive when `prev/next-line' functions are used.  */
 static int cur_goalc;
 
-DEFUN_INT("beginning-of-line", beginning_of_line)
+DEFUN("beginning-of-line", beginning_of_line)
 /*+
 Move point to beginning of current line.
 +*/
@@ -53,7 +53,7 @@ Move point to beginning of current line.
 }
 END_DEFUN
 
-DEFUN_INT("end-of-line", end_of_line)
+DEFUN("end-of-line", end_of_line)
 /*+
 Move point to end of current line.
 +*/
@@ -139,7 +139,7 @@ int previous_line(void)
   return FALSE;
 }
 
-DEFUN_INT("previous-line", previous_line)
+DEFUN("previous-line", previous_line)
 /*+
 Move cursor vertically up one line.
 If there is no character in the target line exactly over the current column,
@@ -186,7 +186,7 @@ int next_line(void)
   return FALSE;
 }
 
-DEFUN_INT("next-line", next_line)
+DEFUN("next-line", next_line)
 /*+
 Move cursor vertically down one line.
 If there is no character in the target line exactly under the current column,
@@ -228,7 +228,7 @@ void goto_line(size_t to_line)
     ngotodown(to_line - cur_bp->pt.n);
 }
 
-DEFUN_INT("goto-char", goto_char)
+DEFUN("goto-char", goto_char)
 /*+
 Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
@@ -253,7 +253,7 @@ Position 1 is the beginning of the buffer.
 }
 END_DEFUN
 
-DEFUN_INT("goto-line", goto_line)
+DEFUN("goto-line", goto_line)
 /*+
 Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
@@ -285,7 +285,7 @@ void gotobob(void)
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
-DEFUN_INT("beginning-of-buffer", beginning_of_buffer)
+DEFUN("beginning-of-buffer", beginning_of_buffer)
 /*+
 Move point to the beginning of the buffer; leave mark at previous position.
 +*/
@@ -305,7 +305,7 @@ void gotoeob(void)
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
-DEFUN_INT("end-of-buffer", end_of_buffer)
+DEFUN("end-of-buffer", end_of_buffer)
 /*+
 Move point to the end of the buffer; leave mark at previous position.
 +*/
@@ -332,7 +332,7 @@ int backward_char(void)
   return FALSE;
 }
 
-DEFUN_INT("backward-char", backward_char)
+DEFUN("backward-char", backward_char)
 /*+
 Move point left N characters (right if N is negative).
 On attempt to pass beginning or end of buffer, stop and signal error.
@@ -369,7 +369,7 @@ int forward_char(void)
   return FALSE;
 }
 
-DEFUN_INT("forward-char", forward_char)
+DEFUN("forward-char", forward_char)
 /*+
 Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
@@ -422,7 +422,7 @@ int scroll_down(void)
   }
 }
 
-DEFUN_INT("scroll-down", scroll_down)
+DEFUN("scroll-down", scroll_down)
 /*+
 Scroll text of current window downward near full screen.
 +*/
@@ -450,7 +450,7 @@ int scroll_up(void)
   }
 }
 
-DEFUN_INT("scroll-up", scroll_up)
+DEFUN("scroll-up", scroll_up)
 /*+
 Scroll text of current window upward near full screen.
 +*/

@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: undo.c,v 1.24 2005/08/17 14:15:28 rrt Exp $        */
+/*      $Id: undo.c,v 1.25 2006/11/29 20:57:02 rrt Exp $        */
 
 #include "config.h"
 
@@ -167,7 +167,7 @@ static Undo *revert_action(Undo *up)
   return up->next;
 }
 
-DEFUN_INT("undo", undo)
+DEFUN("undo", undo)
 /*+
 Undo some previous changes.
 Repeat this command to undo more changes.

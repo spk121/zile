@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.80 2006/09/10 23:53:09 rrt Exp $        */
+/*      $Id: file.c,v 1.81 2006/11/29 20:57:02 rrt Exp $        */
 
 #include "config.h"
 
@@ -387,7 +387,7 @@ Completion *make_buffer_completion(void)
   return cp;
 }
 
-DEFUN_INT("find-file", find_file)
+DEFUN("find-file", find_file)
 /*+
 Edit a file specified by the user.  Switch to a buffer visiting the file,
 creating one if none already exists.
@@ -414,7 +414,7 @@ creating one if none already exists.
 }
 END_DEFUN
 
-DEFUN_INT("find-alternate-file", find_alternate_file)
+DEFUN("find-alternate-file", find_alternate_file)
 /*+
 Find the file specified by the user, select its buffer, kill previous buffer.
 If the current buffer now contains an empty file that you just visited
@@ -445,7 +445,7 @@ If the current buffer now contains an empty file that you just visited
 }
 END_DEFUN
 
-DEFUN_INT("switch-to-buffer", switch_to_buffer)
+DEFUN("switch-to-buffer", switch_to_buffer)
 /*+
 Select to the user specified buffer in the current window.
 +*/
@@ -566,7 +566,7 @@ void kill_buffer(Buffer *kill_bp)
   }
 }
 
-DEFUN_INT("kill-buffer", kill_buffer)
+DEFUN("kill-buffer", kill_buffer)
 /*+
 Kill the current buffer or the user specified one.
 +*/
@@ -613,7 +613,7 @@ static void insert_buffer(Buffer *bp)
   undo_nosave = FALSE;
 }
 
-DEFUN_INT("insert-buffer", insert_buffer)
+DEFUN("insert-buffer", insert_buffer)
 /*+
 Insert after point the contents of the user specified buffer.
 Puts mark after the inserted text.
@@ -689,7 +689,7 @@ static int insert_file(char *filename)
   return TRUE;
 }
 
-DEFUN_INT("insert-file", insert_file)
+DEFUN("insert-file", insert_file)
 /*+
 Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
@@ -956,7 +956,7 @@ static int save_buffer(Buffer *bp)
   return TRUE;
 }
 
-DEFUN_INT("save-buffer", save_buffer)
+DEFUN("save-buffer", save_buffer)
 /*+
 Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
@@ -966,7 +966,7 @@ previous version into a backup file if this is the first save.
 }
 END_DEFUN
 
-DEFUN_INT("write-file", write_file)
+DEFUN("write-file", write_file)
 /*+
 Write current buffer into the user specified file.
 Makes buffer visit that file, and marks it not modified.
@@ -1067,7 +1067,7 @@ static int save_some_buffers(void)
 }
 
 
-DEFUN_INT("save-some-buffers", save_some_buffers)
+DEFUN("save-some-buffers", save_some_buffers)
 /*+
 Save some modified file-visiting buffers.  Asks user about each one.
 +*/
@@ -1076,7 +1076,7 @@ Save some modified file-visiting buffers.  Asks user about each one.
 }
 END_DEFUN
 
-DEFUN_INT("save-buffers-kill-zile", save_buffers_kill_zile)
+DEFUN("save-buffers-kill-zile", save_buffers_kill_zile)
 /*+
 Offer to save each buffer, then kill this Zile process.
 +*/
@@ -1133,7 +1133,7 @@ void zile_exit(int exitcode)
   exit(exitcode);
 }
 
-DEFUN_INT("cd", cd)
+DEFUN("cd", cd)
 /*+
 Make the user specified directory become the current buffer's default
 directory.

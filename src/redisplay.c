@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: redisplay.c,v 1.21 2005/08/23 15:31:21 rrt Exp $	*/
+/*	$Id: redisplay.c,v 1.22 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include <stdarg.h>
 
@@ -99,7 +99,7 @@ void recenter(Window *wp)
     wp->topdelta = pt.n;
 }
 
-DEFUN_INT("recenter", recenter)
+DEFUN("recenter", recenter)
 /*+
 Center point in window and redisplay screen.
 The desired position of point is always relative to the current window.

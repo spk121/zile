@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: help.c,v 1.33 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: help.c,v 1.34 2006/11/29 20:57:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -36,7 +36,7 @@
 #include "extern.h"
 #include "paths.h"
 
-DEFUN_INT("zile-version", zile_version)
+DEFUN("zile-version", zile_version)
 /*+
 Show the zile version.
 +*/
@@ -61,7 +61,7 @@ static int show_file(char *filename)
   return TRUE;
 }
 
-DEFUN_INT("help", help)
+DEFUN("help", help)
 /*+
 Show a help window.
 +*/
@@ -70,7 +70,7 @@ Show a help window.
 }
 END_DEFUN
 
-DEFUN_INT("help-config-sample", help_config_sample)
+DEFUN("help-config-sample", help_config_sample)
 /*+
 Show a configuration file sample.
 +*/
@@ -79,7 +79,7 @@ Show a configuration file sample.
 }
 END_DEFUN
 
-DEFUN_INT("view-zile-FAQ", view_zile_FAQ)
+DEFUN("view-zile-FAQ", view_zile_FAQ)
 /*+
 Show the Zile Frequently Asked Questions (FAQ).
 +*/
@@ -88,7 +88,7 @@ Show the Zile Frequently Asked Questions (FAQ).
 }
 END_DEFUN
 
-DEFUN_INT("help-with-tutorial", help_with_tutorial)
+DEFUN("help-with-tutorial", help_with_tutorial)
 /*+
 Show a tutorial window.
 +*/
@@ -169,7 +169,7 @@ static void write_function_description(va_list ap)
           name, astr_cstr(doc));
 }
 
-DEFUN_INT("describe-function", describe_function)
+DEFUN("describe-function", describe_function)
 /*+
 Display the full documentation of a function.
 +*/
@@ -209,7 +209,7 @@ static void write_variable_description(va_list ap)
           name, astr_cstr(defval), curval, astr_cstr(doc));
 }
 
-DEFUN_INT("describe-variable", describe_variable)
+DEFUN("describe-variable", describe_variable)
 /*+
 Display the full documentation of a variable.
 +*/
@@ -239,7 +239,7 @@ Display the full documentation of a variable.
 }
 END_DEFUN
 
-DEFUN_INT("describe-key", describe_key)
+DEFUN("describe-key", describe_key)
 /*+
 Display documentation of the command invoked by a key sequence.
 +*/
