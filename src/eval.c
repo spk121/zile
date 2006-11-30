@@ -1,6 +1,6 @@
 /* Lisp eval
    Copyright (c) 2001 Scott "Jerry" Lawrence.
-   Copyright (c) 2005 Reuben Thomas.
+   Copyright (c) 2005-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.c,v 1.27 2006/11/29 22:34:46 rrt Exp $	*/
+/*	$Id: eval.c,v 1.28 2006/11/30 14:58:31 rrt Exp $	*/
 
 #include <assert.h>
 #include <stdio.h>
@@ -108,7 +108,7 @@ le *evaluateBranch(le *trybranch)
   prim = lookupFunction(keyword->data);
   leWipe(keyword);
   if (prim)
-    return prim(1, trybranch);
+    return prim(0, trybranch);
 
   return NULL;
 }

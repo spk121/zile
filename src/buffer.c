@@ -1,6 +1,6 @@
 /* Buffer-oriented functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: buffer.c,v 1.32 2005/07/11 06:10:25 rrt Exp $	*/
+/*	$Id: buffer.c,v 1.33 2006/11/30 14:58:31 rrt Exp $	*/
 
 #include "config.h"
 
@@ -110,6 +110,15 @@ void free_buffers(void)
 }
 
 /*
+ * Initialise a buffer
+ */
+void init_buffer(Buffer *bp)
+{
+  if (lookup_bool_variable("auto-fill-mode"))
+    bp->flags ^= BFLAG_AUTOFILL;
+}
+
+/*
  * Allocate a new buffer and insert it into the buffer list.
  */
 Buffer *create_buffer(const char *name)
@@ -122,9 +131,8 @@ Buffer *create_buffer(const char *name)
   bp->next = head_bp;
   head_bp = bp;
 
-  if (lookup_bool_variable("auto-fill-mode"))
-    bp->flags ^= BFLAG_AUTOFILL;
-
+  init_buffer(bp);
+  
   return bp;
 }
 

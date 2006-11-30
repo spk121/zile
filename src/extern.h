@@ -31,6 +31,7 @@ char *get_function_name(Function p);
 /* buffer.c --------------------------------------------------------------- */
 void calculate_region(Region *rp, Point from, Point to);
 int calculate_the_region(Region *rp);
+void init_buffer(Buffer *bp);
 Buffer *create_buffer(const char *name);
 void free_buffer(Buffer *bp);
 void free_buffers(void);

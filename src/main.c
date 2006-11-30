@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2005 Reuben Thomas.
+   Copyright (c) 2004-2006 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.103 2006/11/29 21:19:31 rrt Exp $	*/
+/*	$Id: main.c,v 1.104 2006/11/30 14:58:31 rrt Exp $	*/
 
 #include "config.h"
 
@@ -287,9 +287,25 @@ int main(int argc, char **argv)
   else {
     term_init();
 
-    /* Create the `*scratch*' buffer and initialize key bindings. */
+    /* Create the `*scratch*' buffer. */
     create_first_window();
     term_redisplay();
+
+    /* Read settings after creating *scratch* buffer so that any
+       buffer commands won't cause a crash. */
+    if (!qflag) {
+      le *list;
+
+      astr as = get_home_dir();
+      astr_cat_cstr(as, "/.zile");
+      list = lisp_read_file(astr_cstr(as));
+      astr_delete(lisp_dump(list));
+      astr_delete(as);
+      leWipe(list);
+    }
+
+    /* Reinitialise the *scratch* buffer to catch settings */
+    init_buffer(cur_bp);
 
     if (argc >= 1)
       while (*argv) {
@@ -305,17 +321,6 @@ int main(int argc, char **argv)
       about_screen();
 
     setup_main_screen(argc, as);
-
-    if (!qflag) {
-      le *list;
-
-      astr as = get_home_dir();
-      astr_cat_cstr(as, "/.zile");
-      list = lisp_read_file(astr_cstr(as));
-      astr_delete(lisp_dump(list));
-      astr_delete(as);
-      leWipe(list);
-    }
 
     execute_functions(fargs);
     list_delete(fargs);
