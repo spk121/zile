@@ -1,6 +1,6 @@
 /* Exported terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2006 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
