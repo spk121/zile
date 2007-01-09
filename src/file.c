@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.81 2006/11/29 20:57:02 rrt Exp $        */
+/*      $Id: file.c,v 1.82 2007/01/09 00:08:57 rrt Exp $        */
 
 #include "config.h"
 
@@ -901,7 +901,7 @@ static int write_to_disk(Buffer *bp, char *filename)
     astr_delete(bfilename);
   }
 
-  if (raw_write_to_disk(bp, filename, 0644) == FALSE) {
+  if (raw_write_to_disk(bp, filename, 0666) == FALSE) {
     minibuf_error("%s: %s", filename, strerror(errno));
     return FALSE;
   }
