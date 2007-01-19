@@ -62,7 +62,7 @@ The @emph{Zile} editor is written entirely in @emph{@w{ANSI C}}.
 It should run on any POSIX system. It has also been ported to @emph{EPOC}.
 
 Zile should really appear like Emacs, but a lot of good ideas were
-also taken from from other editors; in particular, ce for the internal
+also taken from other editors; in particular, ce for the internal
 structure.
 
 @c ---------------------------------------------------------------------------
@@ -351,7 +351,7 @@ Save modified buffers and quit zile.  Bound to @code{save-buffers-kill-zile}.
 @item C-x C-f, @key{F2}
 Find a file for editing.  Bound to @code{find-file}.
 @item C-x C-r
-Edit a file read-only.  Boudn to @code{find-file-read-only}.
+Edit a file read-only.  Bound to @code{find-file-read-only}.
 @item C-x C-l
 Convert the region to lower case.  Bound to @code{downcase-region}.
 @item C-x C-q
