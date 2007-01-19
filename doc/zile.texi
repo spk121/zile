@@ -392,12 +392,16 @@ Kill word.  Bound to @code{kill-word}.
 Move point forward one word.  Bound to @code{forward-word}.
 @item M-g
 Read line number and go there.  Bound to @code{goto-line}.
+@item M-h
+Put point at beginning of this paragraph, mark at end.  Bound to @code{mark-paragraph}.
 @item M-i
 Insert a tab character.  Bound to @code{tab-to-tab-stop}.
 @item M-l
 Convert following word to lower case.  Bound to @code{downcase-word}.
 @item M-m
 Move point to the first non-whitespace character on this line.  Bound to @code{back-to-indentation}.
+@item M-q
+Fill paragraph at or after point.  Bound to @code{fill-paragraph}.
 @item M-s
 Shrink current window.  Bound to @code{shrink-window}.
 @item M-t
@@ -410,6 +414,10 @@ Scroll down one screen page.  Bound to @code{scroll-down}.
 Save the region as if killed, but don't kill it.  Bound to @code{copy-region-as-kill}.
 @item M-x
 Execute extended command.  Bound to @code{execute-extended-command}.
+@item M-{
+Move backward one paragraph.  Bound to @code{backward-paragraph}.
+@item M-}
+Move forward one paragraph.  Bound to @code{forward-paragraph}.
 @item C-M-@@
 Put mark after following expression.  Bound to @code{mark-sexp}.
 @item C-M-b
@@ -435,9 +443,6 @@ This table contains the full list of available functions, that can be
 called with the @kbd{M-x} key (please note that most functions have a
 key binding, anyway).
 
-At run-time, you can list the current defined functions with the
-@samp{list-functions} command.
-
 Please note that some functions may be not available depending
 on the compilation options given to @samp{configure}.
 
@@ -458,6 +463,8 @@ Join lines if the character is a newline.
 @item backward-kill-word
 Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
+@item backward-paragraph
+Move backward to start of paragraph.  With argument N, do it N times.
 @item backward-sexp
 Move backward across one balanced expression (sexp).
 With argument, do it that many times.  Negative arg -N means
@@ -470,10 +477,6 @@ With argument, do this that many times.
 Move point to the beginning of the buffer; leave mark at previous position.
 @item beginning-of-line
 Move point to beginning of current line.
-@item capitalize-word
-Capitalize the following word (or argument N words), moving over.
-This gives the word(s) a first character in upper case and the rest
-lower case.
 @item call-last-kbd-macro
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.
@@ -509,8 +512,6 @@ Remove the current window from the screen.
 Display the full documentation of a function.
 @item describe-key
 Display documentation of the function invoked by a key sequence.
-@item describe-key-briefly
-Display the name of the function invoked by a key sequence.
 @item describe-variable
 Display the full documentation of a variable.
 @item downcase-region
@@ -531,6 +532,8 @@ Make current window one line bigger.
 Put the mark where point is now, and point where the mark is now.
 @item execute-extended-command
 Read function name, then read its arguments and call it.
+@item fill-paragraph
+Fill paragraph at or after point.
 @item find-alternate-file
 Find the file specified by the user, select its buffer, kill previous buffer.
 If the current buffer now contains an empty file that you just visited
@@ -549,6 +552,8 @@ On reaching end of buffer, stop and signal error.
 @item forward-line
 Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
+@item forward-paragraph
+Move forward to end of paragraph.  With argument N, do it N times.
 @item forward-sexp
 Move forward across one balanced expression (sexp).
 With argument, do it that many times.  Negative arg -N means
@@ -570,9 +575,7 @@ Line 1 is the beginning of the buffer.
 Show a help window.
 @item help-config-sample
 Show a configuration file sample.
-@item help-latest-version
-Show informations about getting the latest version.
-@item help-tutorial
+@item help-with-tutorial
 Show a tutorial window.
 @item indent-for-tab-command
 Indent line in proper way for current major mode or insert a tab.
@@ -647,10 +650,11 @@ Note that buffers with names starting with spaces are omitted.
 @item The @samp{R} column contains a @samp{%} for buffers that are read-only.
 @end itemize
 @c LINT END IGNORE
-@item list-functions
-List defined functions.
 @item list-registers
 List defined registers.
+@item mark-paragraph
+Put point at beginning of this paragraph, mark at end.
+The paragraph marked is the one that contains point or follows point.
 @item mark-whole-buffer
 Put point at beginning and mark at end of buffer.
 @item mark-sexp
@@ -659,6 +663,11 @@ The place mark goes is the same place @kbd{C-M-f} would
 move to with the same argument.
 @item mark-word
 Set mark argument words away from point.
+@item name-last-kbd-macro
+Assign a name to the last keyboard macro defined.
+Argument SYMBOL is the name to define.
+The symbol's function definition becomes the keyboard macro string.
+Such a "function" cannot be called from Lisp, but it is a valid editor command.
 @item newline
 Insert a newline at the current point position into
 the current buffer.

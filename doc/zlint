@@ -7,7 +7,7 @@
 #
 
 if [ ! -f ../src/tbl_funcs.h ]; then
-	echo "Please run this script in the sources directory \`etc/'";
+	echo "Please run this script in the sources directory \`doc/'";
 	exit 1
 fi
 
@@ -31,7 +31,7 @@ cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
 
 cat >$TMPFILE1 <<EOF
-#define X(v, t, d, c)	v
+#define X(v, t, d, l, c)	v
 EOF
 
 cat $TMPFILE1 ../src/tbl_vars.h | cpp | tr -d " \t\"" \
