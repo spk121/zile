@@ -57,3 +57,6 @@ all-local: HELP AUTODOC
 clean-local:
 	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
 	rm -f zile.1
+
+check-local:
+	zlint
