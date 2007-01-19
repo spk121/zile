@@ -59,4 +59,4 @@ clean-local:
 	rm -f zile.1
 
 check-local:
-	zlint
+	cd $(top_srcdir)/doc && $(top_srcdir)/doc/zlint

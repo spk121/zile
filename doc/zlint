@@ -13,11 +13,13 @@ fi
 
 echo "Extracting info..."
 
-TMPFILE1=`mktemp /tmp/$0.XXXXXX` || exit 1
-TMPFUNCS=`mktemp /tmp/$0.XXXXXX` || exit 1
-TMPVARS=`mktemp /tmp/$0.XXXXXX` || exit 1
-TMPFUNCST=`mktemp /tmp/$0.XXXXXX` || exit 1
-TMPVARST=`mktemp /tmp/$0.XXXXXX` || exit 1
+name=`basename $0`
+
+TMPFILE1=`mktemp /tmp/$name.XXXXXX` || exit 1
+TMPFUNCS=`mktemp /tmp/$name.XXXXXX` || exit 1
+TMPVARS=`mktemp /tmp/$name.XXXXXX` || exit 1
+TMPFUNCST=`mktemp /tmp/$name.XXXXXX` || exit 1
+TMPVARST=`mktemp /tmp/$name.XXXXXX` || exit 1
 
 cat >$TMPFILE1 <<EOF
 #define X0(z, c)			z
