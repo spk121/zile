@@ -1,4 +1,4 @@
-/*	$Id: tbl_funcs.h,v 1.37 2006/07/17 01:21:34 rrt Exp $	*/
+/*	$Id: tbl_funcs.h,v 1.38 2007/01/19 14:24:49 rrt Exp $	*/
 
 /*
  * Add an entry to this list for declaring a new function, in
@@ -45,6 +45,7 @@ X1("execute-extended-command", execute_extended_command,"\\M-x")
 X1("fill-paragraph", fill_paragraph,			"\\M-q")
 X1("find-alternate-file", find_alternate_file,		"\\C-x\\C-v")
 X2("find-file", find_file,				"\\C-x\\C-f", "\\F2")
+X1("find-file-read-only", find_file_read_only,		"\\C-x\\C-r")
 X2("forward-char", forward_char,			"\\C-f", "\\RIGHT")
 X0("forward-line", forward_line)
 X1("forward-paragraph", forward_paragraph,		"\\M-}")

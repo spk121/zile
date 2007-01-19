@@ -21,13 +21,13 @@
 @titlepage
 @title The Zile Manual
 @subtitle for Zile version 2.2
-@subtitle July 2006
+@subtitle January 2007
 @author Sandro Sigala and Reuben Thomas
 
 @page
 @vskip 0pt plus 1filll
 Copyright @copyright{} 1997-2004 Sandro Sigala
-Copyright @copyright{} 2003-2006 Reuben Thomas
+Copyright @copyright{} 2003-2007 Reuben Thomas
 Copyright @copyright{} 2004 David A. Capello
 @end titlepage
 
@@ -359,6 +359,8 @@ List buffers.  Bound to @code{list-buffers}.
 Save modified buffers and quit zile.  Bound to @code{save-buffers-kill-zile}.
 @item C-x C-f, @key{F2}
 Find a file for editing.  Bound to @code{find-file}.
+@item C-x C-r
+Edit a file read-only.  Boudn to @code{find-file-read-only}.
 @item C-x C-l
 Convert the region to lower case.  Bound to @code{downcase-region}.
 @item C-x C-q
@@ -543,8 +545,13 @@ Find the file specified by the user, select its buffer, kill previous buffer.
 If the current buffer now contains an empty file that you just visited
 (presumably by mistake), use this command to visit the file you really want.
 @item find-file
-Edit a file specified by the user.  Switch to a buffer visiting the file,
+Edit the specified file.
+Switch to a buffer visiting the file,
 creating one if none already exists.
+@item find-file-read-only
+Edit the specified file but don't allow changes.
+Like `find-file' but marks buffer as read-only.
+Use M-x toggle-read-only to permit editing.
 @item forward-char
 Move point right one character.
 On reaching end of buffer, stop and signal error.

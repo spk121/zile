@@ -1,6 +1,6 @@
 /* Disk file handling
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.82 2007/01/09 00:08:57 rrt Exp $        */
+/*      $Id: file.c,v 1.83 2007/01/19 14:24:49 rrt Exp $        */
 
 #include "config.h"
 
@@ -389,7 +389,8 @@ Completion *make_buffer_completion(void)
 
 DEFUN("find-file", find_file)
 /*+
-Edit a file specified by the user.  Switch to a buffer visiting the file,
+Edit the specified file.
+Switch to a buffer visiting the file,
 creating one if none already exists.
 +*/
 {
@@ -411,6 +412,20 @@ creating one if none already exists.
 
   free(ms);
   return FALSE;
+}
+END_DEFUN
+
+DEFUN("find-file-read-only", find_file_read_only)
+/*+
+Edit the specified file but don't allow changes.
+Like `find-file' but marks buffer as read-only.
+Use M-x toggle-read-only to permit editing.
++*/
+{
+  int ret_value;
+  if ((ret_value = FUNCALL(find_file)))
+    cur_bp->flags |= BFLAG_READONLY;
+  return ret_value;
 }
 END_DEFUN
 
