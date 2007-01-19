@@ -61,18 +61,9 @@ user should feel at home with Zile.
 The @emph{Zile} editor is written entirely in @emph{@w{ANSI C}}.
 It should run on any POSIX system. It has also been ported to @emph{EPOC}.
 
-Zile should really appear like
-Emacs, but a lot of good ideas were also taken from from other editors:
-@itemize -
-@item Emacs:
-General look and feel, function names, function behaviors, key bindings.
-@item XEmacs:
-Some minor hints for look and feel.
-@item Jed:
-mode line.
-@item ce:
-Internal structure and function names.
-@end itemize
+Zile should really appear like Emacs, but a lot of good ideas were
+also taken from from other editors; in particular, ce for the internal
+structure.
 
 @c ---------------------------------------------------------------------------
 @node Features, Invoking Zile, Overview, Top
