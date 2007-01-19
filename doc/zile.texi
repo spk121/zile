@@ -159,8 +159,6 @@ This table contains the commands that can be used during an editing
 session to get help.
 
 @table @kbd
-@item C-h C-d
-Show informations about getting the latest version.
 @item C-h F
 Show the Frequently Asked Questions about Zile.
 @item C-h c
@@ -276,8 +274,6 @@ Show a sample configuration file.  Bound to @code{help-config-sample}.
 Show a tutorial window.  Bound to @code{help-with-tutorial}.
 @item C-h v
 Describe a variable.  Bound to @code{describe-variable}.
-@item C-h C-d
-Show informations about getting the latest version.  Bound to @code{describe-function}.
 @item C-j
 Equivalent to <RET> followed by <TAB>.  Bound to @code{newline-and-indent}.
 @item C-k, @key{F6}
@@ -494,7 +490,7 @@ Copy region into the user specified register.
 @item delete-blank-lines
 On blank line, delete all surrounding blank lines, leaving just one.
 On isolated blank line, delete that one.
-On nonblank line, delete any immediately following blank lines.
+On non-blank line, delete any immediately following blank lines.
 @item delete-char
 Delete the following character.
 Join lines if the character is a newline.
@@ -617,7 +613,7 @@ Cancel current command.
 @item kill-buffer
 Kill the current buffer or the user specified one.
 @item kill-line
-Kill the rest of the current line; if no nonblanks there, kill thru newline.
+Kill the rest of the current line; if no non-blanks there, kill thru newline.
 @item kill-region
 Kill between point and mark.
 The text is deleted but saved in the kill ring.
@@ -710,7 +706,7 @@ The desired position of point is always relative to the current window.
 @item replace-string
 Replace occurrences of a string with other text.
 @item save-buffer
-src/Save current buffer in visited file if modified. By default, makes the
+Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
 @item save-buffers-kill-zile
 Offer to save each buffer, then kill this Zile process.
@@ -917,3 +913,5 @@ filed in the relevant tracker at @uref{http://sourceforge.net/projects/zile/}.
 Local Variables:
 compile-command: "texi2dvi zile.texi"
 End:
+
+@c  LocalWords:  Zile Sigala Capello
