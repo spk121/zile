@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.83 2007/01/19 14:24:49 rrt Exp $        */
+/*      $Id: file.c,v 1.84 2007/01/19 15:32:50 rrt Exp $        */
 
 #include "config.h"
 
@@ -283,6 +283,20 @@ void open_file(char *path, size_t lineno)
   resync_redisplay();
 }
 
+#if HAVE_UNISTD_H
+/* Return nonzero if file exists and can be written. */
+static int check_writable(const char *filename)
+{
+#ifdef HAVE_EUIDACCESS
+  return euidaccess(filename, W_OK) >= 0;
+#else
+  /* Access isn't quite right because it uses the real uid
+     and we really want to test with the effective uid. */
+  return access(filename, W_OK) >= 0;
+#endif
+}
+#endif
+
 /*
  * Read the file contents into a buffer.
  * Return quietly if the file doesn't exist.
@@ -305,6 +319,11 @@ void read_from_disk(const char *filename)
     return;
   }
 
+#if HAVE_UNISTD_H
+  if (!check_writable(filename))
+    cur_bp->flags |= BFLAG_READONLY;
+#endif
+  
   lp = cur_bp->pt.p;
 
   while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
