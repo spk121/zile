@@ -3,6 +3,9 @@ autom4te.cache
 aclocal.m4
 config.log
 config.status
+depcomp
+install-sh
+missing
 Makefile
 Makefile.in
 config.h
