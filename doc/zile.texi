@@ -256,8 +256,6 @@ Move cursor to the next char.  Bound to @code{forward-char}.
 Cancel current command.  Bound to @code{keyboard-quit}.
 @item C-h F
 Show the FAQ.  Bound to @code{view-zile-FAQ}.
-@item C-h c
-Describe briefly a key sequence.  Bound to @code{describe-key-briefly}.
 @item C-h d, C-h f
 Describe a function.  Bound to @code{describe-function}.
 @item C-h h, @key{F1}
