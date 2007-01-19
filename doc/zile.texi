@@ -414,9 +414,9 @@ Scroll down one screen page.  Bound to @code{scroll-down}.
 Save the region as if killed, but don't kill it.  Bound to @code{copy-region-as-kill}.
 @item M-x
 Execute extended command.  Bound to @code{execute-extended-command}.
-@item M-{
+@item M-@{
 Move backward one paragraph.  Bound to @code{backward-paragraph}.
-@item M-}
+@item M-@}
 Move forward one paragraph.  Bound to @code{forward-paragraph}.
 @item C-M-@@
 Put mark after following expression.  Bound to @code{mark-sexp}.
