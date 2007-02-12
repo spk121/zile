@@ -1,6 +1,6 @@
 /* Main types and definitions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,11 +20,12 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.75 2006/11/29 22:34:46 rrt Exp $        */
+/*      $Id: zile.h,v 1.76 2007/02/12 14:05:45 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
 
+#include <stdlib.h>
 #include <limits.h>
 
 #include "list.h"
