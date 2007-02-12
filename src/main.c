@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.105 2007/01/09 00:14:58 rrt Exp $	*/
+/*	$Id: main.c,v 1.106 2007/02/12 14:01:48 rrt Exp $	*/
 
 #include "config.h"
 
@@ -227,6 +227,7 @@ int main(int argc, char **argv)
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
+  init_search();
   lisp_init();
   init_variables();
 

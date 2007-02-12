@@ -1,6 +1,7 @@
 /* Incremental search and replace functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2004-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,11 +21,12 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.52 2006/11/29 20:57:02 rrt Exp $	*/
+/*	$Id: search.c,v 1.53 2007/02/12 14:01:48 rrt Exp $	*/
 
 #include "config.h"
 
 #include <assert.h>
+#include <limits.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -42,22 +44,61 @@
 #include "regex.h"
 #endif
 
-static char *find_substr(int (*f)(int c),
-                         const char *s1, size_t s1size,
-			 const char *s2, size_t s2size)
+/* Downcasing table for case-folding search */
+static char id[UCHAR_MAX + 1];
+static char downcase[UCHAR_MAX + 1];
+
+void init_search(void)
+{
+  int i;
+
+  for (i = 0; i <= UCHAR_MAX; i++) {
+    id[i] = i;
+    downcase[i] = tolower(i);
+  }
+}
+
+/* Return true if there are no upper-case letters in the given string.
+   If `regex' is true, ignore escaped letters. */
+static int no_upper(const char *s, size_t len, int regex)
+{
+  int quote_flag = 0;
+  size_t i;
+
+  for (i = 0; i < len; i++) {
+    if (regex && s[i] == '\\')
+      quote_flag = !quote_flag;
+    else if (!quote_flag && isupper(s[i]))
+      return FALSE;
+  }
+
+  return TRUE;
+}
+
+static const char *fold_table(const char *s, int regex)
+{
+    if (lookup_bool_variable("case-fold-search") && no_upper(s, strlen(s), regex))
+      return downcase;
+    else
+      return id;
+}
+
+static char *find_substr(const char *s1, size_t s1size,
+			 const char *s2, size_t s2size,
+                         const char translate[UCHAR_MAX])
 {
   const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
   const char *sp1, *sp2;
 
   for (; s1 <= e1 - s2size + 1; ++s1) {
-    if (f(*s1) != f(*s2))
+    if (translate[(unsigned)*s1] != translate[(unsigned)*s2])
       continue;
     sp1 = s1; sp2 = s2;
     for (;;) {
       ++sp1, ++sp2;
       if (sp2 > e2)
         return (char *)sp1;
-      else if (f(*sp1) != f(*sp2))
+      else if (translate[(unsigned)*sp1] != translate[(unsigned)*sp2])
         break;
     }
   }
@@ -65,22 +106,22 @@ static char *find_substr(int (*f)(int c),
   return NULL;
 }
 
-static char *rfind_substr(int (*f)(int c),
-                          const char *s1, size_t s1size,
-			  const char *s2, size_t s2size)
+static char *rfind_substr(const char *s1, size_t s1size,
+			  const char *s2, size_t s2size,
+                          const char translate[UCHAR_MAX])
 {
   const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
   const char *sp1, *sp2;
 
   for (; e1 >= s1 + s2size - 1; --e1) {
-    if (f(*e1) != f(*e2))
+    if (translate[(unsigned)*e1] != translate[(unsigned)*e2])
       continue;
     sp1 = e1; sp2 = e2;
     for (;;) {
       --sp1, --sp2;
       if (sp2 < s2)
         return (char *)(sp1 + 1);
-      else if (f(*sp1) != f(*sp2))
+      else if (translate[(unsigned)*sp1] != translate[(unsigned)*sp2])
         break;
     }
   }
@@ -92,7 +133,8 @@ static const char *re_find_err = NULL;
 
 static char *re_find_substr(const char *s1, size_t s1size,
 			    const char *s2, size_t s2size,
-			    int bol, int eol, int backward)
+			    int bol, int eol, int backward,
+                            const char translate[UCHAR_MAX])
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
@@ -106,7 +148,8 @@ static char *re_find_substr(const char *s1, size_t s1size,
   search_regs.start = zmalloc(sizeof(regoff_t));
   search_regs.end = zmalloc(sizeof(regoff_t));
 
-  pattern.translate = NULL;
+  /* translate table is never written to, so this cast is safe */
+  pattern.translate = (char *)translate;
   pattern.fastmap = NULL;
   pattern.buffer = NULL;
   pattern.allocated = 0;
@@ -154,18 +197,10 @@ static void goto_linep(Line *lp)
     next_line();
 }
 
-/* Avoid macros */
-#undef tolower
-
-static int id(int c)
-{
-  return c;
-}
-
 static int search_forward(Line *startp, size_t starto, const char *s, int regexp)
 {
   Line *lp;
-  const char *sp, *sp2;
+  const char *sp, *sp2, *translate = fold_table(s, regexp);
   size_t s1size, s2size = strlen(s);
 
   if (s2size < 1)
@@ -184,11 +219,10 @@ static int search_forward(Line *startp, size_t starto, const char *s, int regexp
 
     if (regexp)
       sp2 = re_find_substr(sp, s1size, s, s2size,
-                           sp == astr_cstr(lp->item), TRUE, FALSE);
-    else if (lookup_bool_variable("case-fold-search"))
-      sp2 = find_substr(tolower, sp, s1size, s, s2size);
+                           sp == astr_cstr(lp->item), TRUE, FALSE,
+                           translate);
     else
-      sp2 = find_substr(id, sp, s1size, s, s2size);
+      sp2 = find_substr(sp, s1size, s, s2size, translate);
 
     if (sp2 != NULL) {
       goto_linep(lp);
@@ -203,7 +237,7 @@ static int search_forward(Line *startp, size_t starto, const char *s, int regexp
 static int search_backward(Line *startp, size_t starto, const char *s, int regexp)
 {
   Line *lp;
-  const char *sp, *sp2;
+  const char *sp, *sp2, *translate = fold_table(s, regexp);
   size_t s1size, ssize = strlen(s);
 
   if (ssize < 1)
@@ -220,11 +254,10 @@ static int search_backward(Line *startp, size_t starto, const char *s, int regex
 
     if (regexp)
       sp2 = re_find_substr(sp, s1size, s, ssize,
-                           TRUE, s1size == astr_len(lp->item), TRUE);
-    else if (lookup_bool_variable("case-fold-search"))
-      sp2 = rfind_substr(tolower, sp, s1size, s, ssize);
+                           TRUE, s1size == astr_len(lp->item), TRUE,
+                           translate);
     else
-      sp2 = rfind_substr(id, sp, s1size, s, ssize);
+      sp2 = rfind_substr(sp, s1size, s, ssize, translate);
 
     if (sp2 != NULL) {
       goto_linep(lp);
@@ -403,9 +436,11 @@ static int isearch(int dir, int regexp)
         cur_bp->mark = old_mark;
       break;
     } else if (c == KBD_BS) {
+      /* FIXME: Currently goes back to start; should unwind one match at a
+         time */
       if (astr_len(pattern) > 0) {
         astr_truncate(pattern, -1);
-        cur_bp->pt = start;
+        cur = cur_bp->pt = start;
         thisflag |= FLAG_NEED_RESYNC;
       } else
         ding();
@@ -432,26 +467,28 @@ static int isearch(int dir, int regexp)
             FUNCALL(search_forward_regexp);
           else
             FUNCALL(search_forward);
-        }
-        else {
+        } else {
           if (regexp)
             FUNCALL(search_backward_regexp);
           else
             FUNCALL(search_backward);
         }
-      } else if (astr_len(pattern) > 0) {
-        /* Save mark. */
-        set_mark();
-        cur_bp->mark->pt = start;
-
-        /* Save search string. */
-        if (last_search != NULL)
-          free(last_search);
-        last_search = zstrdup(astr_cstr(pattern));
-
-        minibuf_write("Mark saved when search started");
-      } else
-        minibuf_clear();
+      } else {
+        if (astr_len(pattern) > 0) {
+          /* Save mark. */
+          set_mark();
+          cur_bp->mark->pt = start;
+          
+          /* Save search string. */
+          if (last_search != NULL)
+            free(last_search);
+          last_search = zstrdup(astr_cstr(pattern));
+          
+          minibuf_write("Mark saved when search started");
+        } else
+          minibuf_clear();
+        ungetkey(c);
+      }
       break;
     } else
       astr_cat_char(pattern, c);
@@ -513,7 +550,7 @@ DEFUN("isearch-forward-regexp", isearch_forward_regexp)
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
 Like ordinary incremental search except that your input
-is treated as a regexp.  See C-s for more info.
+is treated as a regexp.  See M-x isearch-forward for more info.
 +*/
 {
   return isearch(ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
@@ -525,23 +562,12 @@ DEFUN("isearch-backward-regexp", isearch_backward_regexp)
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
 Like ordinary incremental search except that your input
-is treated as a regexp.  See C-s for more info.
+is treated as a regexp.  See M-x isearch-forward for more info.
 +*/
 {
   return isearch(ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
-
-static int no_upper(const char *s, size_t len)
-{
-  size_t i;
-
-  for (i = 0; i < len; i++)
-    if (isupper(s[i]))
-      return FALSE;
-
-  return TRUE;
-}
 
 DEFUN("replace-string", replace_string)
 /*+
@@ -557,7 +583,7 @@ Replace occurrences of a string with other text.
   if (find[0] == '\0')
     return FALSE;
   find_len = strlen(find);
-  find_no_upper = no_upper(find, find_len);
+  find_no_upper = no_upper(find, find_len, FALSE);
 
   if ((repl = minibuf_read("Replace `%s' with: ", "", find)) == NULL)
     return cancel();
@@ -599,7 +625,7 @@ what to do with it.
   if (*find == '\0')
     return FALSE;
   find_len = strlen(find);
-  find_no_upper = no_upper(find, find_len);
+  find_no_upper = no_upper(find, find_len, FALSE);
 
   if ((repl = minibuf_read("Query replace `%s' with: ", "", find)) == NULL)
     return cancel();

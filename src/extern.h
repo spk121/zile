@@ -202,6 +202,9 @@ void resync_redisplay(void);
 void resize_windows(void);
 void recenter(Window *wp);
 
+/* search.c --------------------------------------------------------------- */
+void init_search(void);
+
 /* term_minibuf.c --------------------------------------------------------- */
 void term_minibuf_write(const char *fmt);
 char *term_minibuf_read(const char *prompt, const char *value, Completion *cp, History *hp);
