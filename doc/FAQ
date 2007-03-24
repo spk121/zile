@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2006/09/17 14:08:44 $
+		   Last updated: $Date: 2007/03/24 22:53:37 $
 
 ------------------------------------------------------------------------------
 
@@ -171,3 +171,11 @@ INDEX
 	(setq alternative-bindings true)
 
     and use the alternative key sequences (`M-h' instead of `C-h').
+
+    This might also be an operating system bug; for example, versions
+    of Mac OS X up to and including 10.4 (at least) have conflicting
+    settings for the terminal and terminfo. A good solution is to use
+    a terminfo file that matches the default terminal settings, as
+    explained at:
+
+        http://community.livejournal.com/evan_tech/64392.html
