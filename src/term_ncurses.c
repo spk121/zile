@@ -211,11 +211,13 @@ size_t term_xgetkey(int mode, size_t timeout)
     if (mode & GETKEY_DELAYED)
       wtimeout(stdscr, -1);
 
+#ifdef KEY_RESIZE
     if (c == KEY_RESIZE) {
       term_set_size((size_t)COLS, (size_t)LINES);
       resize_windows();
       continue;
     }
+#endif
 
     if (mode & GETKEY_UNFILTERED)
       key = (size_t)c;

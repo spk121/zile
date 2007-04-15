@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: zmalloc.c,v 1.5 2005/07/27 01:09:15 rrt Exp $	*/
+/*	$Id: zmalloc.c,v 1.6 2007/04/15 12:16:15 rrt Exp $	*/
 
 
 #include "config.h"
@@ -77,6 +77,9 @@ char *zstrdup(const char *s)
 /*
  * Wrapper for vasprintf.
  */
+#ifndef HAVE_VASPRINTF
+int vasprintf(char **ptr, const char *format_string, va_list vargs);
+#endif
 int zvasprintf(char **ptr, const char *fmt, va_list vargs)
 {
   int retval = vasprintf(ptr, fmt, vargs);

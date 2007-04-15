@@ -75,7 +75,7 @@ endif
 
 zile_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c
+EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c getopt.h
 
 distclean-local:
 	rm -f paths.h
