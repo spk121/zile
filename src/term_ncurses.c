@@ -1,16 +1,16 @@
 /* Exported terminal
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zee.
+   This file is part of Zile.
 
-   Zee is free software; you can redistribute it and/or modify it under
+   Zile is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
