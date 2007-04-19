@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2007/03/24 22:53:37 $
+		   Last updated: $Date: 2007/04/19 22:54:50 $
 
 ------------------------------------------------------------------------------
 
@@ -51,11 +51,11 @@ INDEX
 	footprint installations (e.g. on floppy disk) or quick editing
 	sessions.''
 
-    That's why sometimes Emacs isn't the best editor to use :-)  I
-    use XEmacs myself when I do coding, but I use Zile when I have,
-    let's say, to quick edit the dot files in the home directory; I
-    don't want to wait 5 seconds to load XEmacs for doing a 2-second
-    edit...
+    That's why sometimes Emacs isn't the best editor to use :-) I use
+    Emacs myself for coding, but I use Zile when I have, let's say, to
+    quickly edit the dot files in the home directory of a remote
+    machine; I don't want to wait 5 seconds to load Emacs for doing a
+    2-second edit...
 
 1.4. Where can I get the latest version?
 
@@ -89,8 +89,8 @@ INDEX
 
 1.8. How small does Zile get?
 
-    On Debian 3.1 i386, Zile 2.0beta8 built with gcc 3.3.5 -O2 weighs
-    in at 101,496 bytes when stripped. This is a fairly typical build.
+    On Debian 4.0 i386, Zile 2.2.31 built with gcc 4.1.2 -O2 weighs
+    in at 110,504 bytes when stripped. This is a fairly typical build.
 
 1.9. Does Zile support Unicode/UTF-8?
 
