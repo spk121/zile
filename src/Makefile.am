@@ -12,6 +12,8 @@ check_PROGRAMS = astr
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
 
+AM_CPPFLAGS = -DPATH_DATA="\"$(pkgdatadir)\""
+
 bin_PROGRAMS = zile
 
 zile_base_SOURCES =				\
@@ -76,18 +78,3 @@ endif
 zile_LDADD = $(regex) @LIBOBJS@
 
 EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c getopt.h
-
-distclean-local:
-	rm -f paths.h
-
-help.o: paths.h
-
-paths.h:
-	@echo "/* Automatically generated file.  NO NOT EDIT! */" >paths.h.tmp
-	@echo "" >>paths.h.tmp
-	@echo '#define PATH_PREFIX "$(prefix)"' >>paths.h.tmp
-	@echo '#define PATH_DATA "$(pkgdatadir)"' >>paths.h.tmp
-	if test ! -f paths.h -o				\
-	        ! "cmp paths.h paths.h.tmp -s" ; then	\
-		mv paths.h.tmp paths.h ;		\
-	fi

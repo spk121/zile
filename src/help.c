@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: help.c,v 1.34 2006/11/29 20:57:02 rrt Exp $	*/
+/*	$Id: help.c,v 1.35 2007/04/19 22:49:41 rrt Exp $	*/
 
 #include "config.h"
 
@@ -34,7 +34,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "paths.h"
 
 DEFUN("zile-version", zile_version)
 /*+
