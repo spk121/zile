@@ -20,18 +20,20 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: strrstr.c,v 1.6 2007/05/03 15:33:48 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.7 2007/05/03 15:43:21 rrt Exp $	*/
 
 #include "config.h"
 
 #ifndef HAVE_STRRSTR
 
+#include <stddef.h>
 #include <string.h>
 
 char *strrstr(const char *s, const char *t);
 
-char *strrstr(const char *s, const char *t) {
-  int i, j, slen = strlen(s), tlen = strlen(t);
+char *strrstr(const char *s, const char *t)
+{
+  size_t i, j, slen = strlen(s), tlen = strlen(t);
 
   if (slen < tlen)
     return NULL;
