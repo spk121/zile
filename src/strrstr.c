@@ -1,4 +1,4 @@
-/* Dynamically allocated strings
+/* strrstr implementation
    Copyright (c) Kent Irwin (kent.irwin@nist.gov).
    Copyright (c) 2004 Reuben Thomas.
    All rights reserved.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: strrstr.c,v 1.5 2005/07/11 06:10:26 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.6 2007/05/03 15:33:48 rrt Exp $	*/
 
 #include "config.h"
 
