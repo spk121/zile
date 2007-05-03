@@ -1,6 +1,6 @@
 /* strrstr implementation
    Copyright (c) Kent Irwin (kent.irwin@nist.gov).
-   Copyright (c) 2004 Reuben Thomas.
+   Copyright (c) 2004, 2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: strrstr.c,v 1.7 2007/05/03 15:43:21 rrt Exp $	*/
+/*	$Id: strrstr.c,v 1.8 2007/05/03 15:44:29 rrt Exp $	*/
 
 #include "config.h"
 
