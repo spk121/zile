@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.53 2007/02/12 14:01:48 rrt Exp $	*/
+/*	$Id: search.c,v 1.54 2007/05/24 20:33:02 rrt Exp $	*/
 
 #include "config.h"
 
@@ -487,7 +487,8 @@ static int isearch(int dir, int regexp)
           minibuf_write("Mark saved when search started");
         } else
           minibuf_clear();
-        ungetkey(c);
+        if (c != KBD_RET)
+          ungetkey(c);
       }
       break;
     } else
