@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.76 2007/02/12 14:05:45 rrt Exp $        */
+/*      $Id: zile.h,v 1.77 2007/06/01 21:35:21 rrt Exp $        */
 
 #ifndef ZILE_H
 #define ZILE_H
@@ -199,6 +199,9 @@ struct Window {
   /* The top line delta and last point line number. */
   size_t topdelta;
   int lastpointn;
+
+  /* The start column of the window (>0 if scrolled sideways) */
+  size_t start_column;
 
   /* The point line pointer, line number and offset (used to
      hold the point in non-current windows). */

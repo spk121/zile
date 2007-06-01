@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.42 2005/08/06 16:23:30 rrt Exp $	*/
+/*	$Id: term_redisplay.c,v 1.43 2007/06/01 21:35:21 rrt Exp $	*/
 
 #include "config.h"
 
@@ -37,7 +37,6 @@ static int initted = FALSE;
 static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
-static size_t point_start_column;
 static size_t point_screen_column;
 
 int term_initted(void)
@@ -198,11 +197,11 @@ static void draw_window(size_t topline, Window *wp)
     if (lp == wp->bp->lines)
       continue;
 
-    startcol = point_start_column;
+    startcol = wp->start_column;
 
     draw_line(i, startcol, wp, lp, lineno, &r, highlight);
 
-    if (point_start_column > 0) {
+    if (wp->start_column > 0) {
       term_move(i, 0);
       term_addch('$');
     }
@@ -257,7 +256,7 @@ static void calculate_start_column(Window *wp)
     lpfact = (lp - astr_cstr(pt.p->item)) / (wp->ewidth / 3);
 
     if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2)) {
-      point_start_column = lp + 1 - astr_cstr(pt.p->item);
+      wp->start_column = lp + 1 - astr_cstr(pt.p->item);
       point_screen_column = lastcol;
       return;
     }
@@ -265,7 +264,7 @@ static void calculate_start_column(Window *wp)
     lastcol = col;
   }
 
-  point_start_column = 0;
+  wp->start_column = 0;
   point_screen_column = col;
 }
 
