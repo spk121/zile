@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: zmalloc.c,v 1.6 2007/04/15 12:16:15 rrt Exp $	*/
+/*	$Id: zmalloc.c,v 1.7 2007/06/05 13:59:09 rrt Exp $	*/
 
 
 #include "config.h"
@@ -43,7 +43,7 @@ void *zmalloc(size_t size)
 
   if ((ptr = calloc(size, (size_t)1)) == NULL) {
     fprintf(stderr, "zile: cannot allocate memory\n");
-    zile_exit(1);
+    zile_exit(2);
   }
 
   return ptr;
@@ -60,7 +60,7 @@ void *zrealloc(void *ptr, size_t size)
 
   if ((newptr = realloc(ptr, size)) == NULL) {
     fprintf(stderr, "zile: cannot reallocate memory\n");
-    zile_exit(1);
+    zile_exit(2);
   }
 
   return newptr;
@@ -86,7 +86,7 @@ int zvasprintf(char **ptr, const char *fmt, va_list vargs)
 
   if (retval == -1) {
     fprintf(stderr, "zile: cannot allocate memory for asprintf\n");
-    zile_exit(1);
+    zile_exit(2);
   }
 
   return retval;
