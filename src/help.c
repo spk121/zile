@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: help.c,v 1.35 2007/04/19 22:49:41 rrt Exp $	*/
+/*	$Id: help.c,v 1.36 2007/06/05 22:30:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -53,7 +53,7 @@ static int show_file(char *filename)
     return FALSE;
   }
 
-  open_file(filename, 0);
+  find_file(filename);
   cur_bp->flags = BFLAG_READONLY | BFLAG_NOSAVE | BFLAG_NEEDNAME
     | BFLAG_NOUNDO;
 
@@ -93,13 +93,13 @@ Show a tutorial window.
 +*/
 {
   if (show_file(PATH_DATA "/TUTORIAL")) {
-    astr buf;
+    astr buf = get_home_dir();
+
     cur_bp->flags = 0;
-    buf = get_home_dir();
     astr_cat_cstr(buf, "/TUTORIAL");
     set_buffer_filename(cur_bp, astr_cstr(buf));
-
     astr_delete(buf);
+
     return TRUE;
   }
 

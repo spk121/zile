@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.85 2007/06/05 14:05:20 rrt Exp $        */
+/*      $Id: file.c,v 1.86 2007/06/05 22:30:22 rrt Exp $        */
 
 #include "config.h"
 
@@ -81,6 +81,7 @@ astr agetcwd(void)
   char *buf = (char *)zmalloc(len);
   char *res;
   astr as;
+
   while ((res = getcwd(buf, len)) == NULL && errno == ERANGE) {
     len *= 2;
     buf = zrealloc(buf, len);
@@ -90,6 +91,7 @@ astr agetcwd(void)
     *buf = '\0';
   as = astr_cpy_cstr(astr_new(), buf);
   free(buf);
+
   return as;
 }
 
@@ -101,13 +103,13 @@ astr agetcwd(void)
  * - replaces `//' with `/' (restarting from the root directory);
  * - removes `..' and `.' entries.
  */
-int expand_path(const char *path, const char *cwdir, astr dir, astr fname)
+int expand_path(const char *path, astr dir, astr fname)
 {
   struct passwd *pw;
   const char *sp = path;
 
   if (*sp != '/') {
-    astr_cat_cstr(dir, cwdir);
+    astr_cat_delete(dir, agetcwd());
     if (astr_len(dir) == 0 || *astr_char(dir, -1) != '/')
       astr_cat_cstr(dir, "/");
   }
@@ -220,26 +222,23 @@ astr compact_path(const char *path)
 /*
  * Return the current directory.
  */
-astr get_current_dir(int interactive)
+static astr get_current_dir(void)
 {
   astr buf;
 
-  if (interactive && cur_bp->filename != NULL) {
+  if (cur_bp->filename != NULL) {
     /* If the current buffer has a filename, get the current directory
        name from it. */
     int p;
 
     buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
-    p = astr_rfind_cstr(buf, "/");
-    if (p != -1)
+    if ((p = astr_rfind_cstr(buf, "/")) != -1)
       astr_truncate(buf, (ptrdiff_t)(p ? p : 1));
-    if (*astr_char(buf, -1) != '/')
-      astr_cat_cstr(buf, "/");
-  } else {
-    /* Get the current directory name from the system. */
+  } else /* Get the current directory name from the system. */
     buf = agetcwd();
+
+  if (*astr_char(buf, -1) != '/')
     astr_cat_cstr(buf, "/");
-  }
 
   return buf;
 }
@@ -256,33 +255,6 @@ astr get_home_dir(void)
   else
     as = agetcwd();
   return as;
-}
-
-void open_file(char *path, size_t lineno)
-{
-  astr buf, dir, fname;
-
-  dir = astr_new();
-  fname = astr_new();
-  buf = get_current_dir(FALSE);
-
-  if (!expand_path(path, astr_cstr(buf), dir, fname)) {
-    /* This can only happen if a malformed filename is passed on the
-       command line. */
-    fprintf(stderr, "zile: %s: invalid filename or path\n", path);
-    zile_exit(1);
-  }
-
-  astr_cpy_cstr(buf, astr_cstr(dir));
-  astr_cat_cstr(buf, astr_cstr(fname));
-  astr_delete(dir);
-  astr_delete(fname);
-
-  find_file(astr_cstr(buf));
-  astr_delete(buf);
-  if (lineno > 0)
-    ngotodown(lineno);
-  lastflag |= FLAG_NEED_RESYNC;
 }
 
 #if HAVE_UNISTD_H
@@ -315,7 +287,7 @@ void read_from_disk(const char *filename)
 
   if ((fp = fopen(filename, "r")) == NULL) {
     if (errno != ENOENT) {
-      minibuf_write("%s: %s foo", filename, strerror(errno));
+      minibuf_write("%s: %s", filename, strerror(errno));
       cur_bp->flags |= BFLAG_READONLY;
     }
     return;
@@ -418,7 +390,7 @@ creating one if none already exists.
   char *ms;
   astr buf;
 
-  buf = get_current_dir(TRUE);
+  buf = get_current_dir();
   if ((ms = minibuf_read_dir("Find file: ", astr_cstr(buf))) == NULL) {
     astr_delete(buf);
     return cancel();
@@ -460,7 +432,7 @@ If the current buffer now contains an empty file that you just visited
   char *ms;
   astr buf;
 
-  buf = get_current_dir(TRUE);
+  buf = get_current_dir();
   if ((ms = minibuf_read_dir("Find alternate: ", astr_cstr(buf)))
       == NULL) {
     astr_delete(buf);
@@ -737,7 +709,7 @@ Set mark after the inserted text.
   if (warn_if_readonly_buffer())
     return FALSE;
 
-  buf = get_current_dir(TRUE);
+  buf = get_current_dir();
   if ((ms = minibuf_read_dir("Insert file: ", astr_cstr(buf)))
       == NULL) {
     astr_delete(buf);
@@ -892,7 +864,7 @@ static astr create_backup_filename(const char *filename,
       ++filename;
     }
 
-    if (!expand_path(astr_cstr(buf), "", dir, fname)) {
+    if (!expand_path(astr_cstr(buf), dir, fname)) {
       astr_delete(buf);
       astr_delete(dir);
       astr_delete(fname);
@@ -905,9 +877,7 @@ static astr create_backup_filename(const char *filename,
     astr_cat_cstr(res, filename);
   }
 
-  astr_cat_char(res, '~');
-
-  return res;
+  return astr_cat_char(res, '~');
 }
 
 /*
@@ -1146,7 +1116,7 @@ END_DEFUN
  * Function called on unexpected error or Zile crash (SIGSEGV).
  * Attempts to save modified buffers.
  */
-void zile_exit(int exitcode)
+void zile_exit(void)
 {
   Buffer *bp;
 
@@ -1166,7 +1136,8 @@ void zile_exit(int exitcode)
       raw_write_to_disk(bp, astr_cstr(buf), 0600);
       astr_delete(buf);
     }
-  exit(exitcode);
+
+  exit(2);
 }
 
 DEFUN("cd", cd)
@@ -1179,7 +1150,7 @@ directory.
   astr buf;
   struct stat st;
 
-  buf = get_current_dir(TRUE);
+  buf = get_current_dir();
   if ((ms = minibuf_read_dir("Change default directory: ",
                              astr_cstr(buf))) == NULL) {
     astr_delete(buf);

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.107 2007/06/05 14:05:20 rrt Exp $	*/
+/*	$Id: main.c,v 1.108 2007/06/05 22:30:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -185,14 +185,14 @@ static void segv_sig_handler(int signo)
 {
   (void)signo;
   fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
-  zile_exit(2);
+  zile_exit();
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
   fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
-  zile_exit(2);
+  zile_exit();
 }
 
 static void signal_init(void)
@@ -216,6 +216,28 @@ struct option longopts[] = {
     { "version",      optional_argument, NULL, 'v' },
     { 0, 0, 0, 0 }
 };
+
+static astr expand_file(char *path)
+{
+  int ret;
+  astr dir = astr_new();
+  astr fname = astr_new();
+  astr buf = astr_new();
+
+  if ((ret = expand_path(path, dir, fname))) {
+    astr_cpy_cstr(buf, astr_cstr(dir));
+    astr_cat_cstr(buf, astr_cstr(fname));
+  }
+
+  astr_delete(dir);
+  astr_delete(fname);
+
+  if (!ret) {
+    astr_delete(buf);
+    return NULL;
+  }
+  return buf;
+}
 
 int main(int argc, char **argv)
 {
@@ -322,7 +344,7 @@ int main(int argc, char **argv)
       leWipe(list);
     }
 
-    /* Reinitialise the *scratch* buffer to catch settings */
+    /* Reinitialise the scratch buffer to catch settings */
     init_buffer(cur_bp);
 
     if (argc >= 1)
@@ -330,8 +352,22 @@ int main(int argc, char **argv)
         size_t line = 1;
         if (**argv == '+')
           line = strtoul(*argv++ + 1, NULL, 10);
-        if (*argv)
-          open_file(*argv++, line - 1);
+        if (*argv) {
+          astr as = expand_file(*argv);
+
+          if (as) {
+            find_file(astr_cstr(as));
+            argv++;
+          } else {
+            fprintf(stderr, "zile: %s: invalid filename or path\n", astr_cstr(*argv));
+            exit(1);
+          }
+          astr_delete(as);
+
+          if (line > 1)
+            ngotodown(line - 1);
+          lastflag |= FLAG_NEED_RESYNC;
+        }
       }
     else if (list_length(fargs) == 0)
       /* Show the splash screen only if no files and no Lisp expression

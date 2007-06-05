@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: minibuf.c,v 1.39 2006/07/15 01:44:57 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.40 2007/06/05 22:30:23 rrt Exp $     */
 
 #include "config.h"
 
@@ -122,11 +122,9 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  rbuf = agetcwd();
   dir = astr_new();
   fname = astr_new();
-  expand_path(value, astr_cstr(rbuf), dir, fname);
-  astr_delete(rbuf);
+  expand_path(value, dir, fname); /* Guaranteed to work */
   astr_cat_cstr(dir, astr_cstr(fname));
   rbuf = compact_path(astr_cstr(dir));
   astr_delete(dir);
@@ -142,18 +140,15 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
     /* Add history element. */
     add_history_element(&files_history, p);
 
-    rbuf = agetcwd();
     dir = astr_new();
     fname = astr_new();
 
-    expand_path(p, astr_cstr(rbuf), dir, fname);
-    astr_cpy(rbuf, dir);
-    astr_cat(rbuf, fname);
+    expand_path(p, dir, fname); /* Guaranteed to work */
+    astr_cat(dir, fname);
 
-    astr_delete(dir);
     astr_delete(fname);
-    p = zstrdup(astr_cstr(rbuf));
-    astr_delete(rbuf);
+    p = zstrdup(astr_cstr(dir));
+    astr_delete(dir);
   }
 
   return p;
