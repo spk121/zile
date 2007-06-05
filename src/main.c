@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2006 Reuben Thomas.
+   Copyright (c) 2004-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.106 2007/02/12 14:01:48 rrt Exp $	*/
+/*	$Id: main.c,v 1.107 2007/06/05 14:05:20 rrt Exp $	*/
 
 #include "config.h"
 
@@ -143,7 +143,7 @@ static void execute_functions(list funcs)
   }
 }
 
-static void setup_main_screen(int argc, astr as)
+static void setup_main_screen(int argc)
 {
   Buffer *bp, *last_bp = NULL;
   int c = 0;
@@ -162,17 +162,13 @@ static void setup_main_screen(int argc, astr as)
     FUNCALL(other_window);
   }
   /* More than two files.  */
-  else if (c > 3) {
+  else if (c > 3)
     FUNCALL(list_buffers);
-  }
   else {
     if (argc < 1) {
       undo_nosave = TRUE;
 
-      if (astr_len(as) > 0)
-        insert_string(astr_cstr(as));
-      else
-        insert_string("\
+      insert_string("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
@@ -180,7 +176,7 @@ then enter the text in that file's own buffer.\n\
 
       undo_nosave = FALSE;
       cur_bp->flags &= ~BFLAG_MODIFIED;
-      resync_redisplay();
+      lastflag |= FLAG_NEED_RESYNC;
     }
   }
 }
@@ -210,19 +206,21 @@ static void signal_init(void)
 }
 
 /* Options table */
+/* Options which take no argument have optional_argument, so that no
+   arguments are signalled as extraneous, to mimic Emacs */
 struct option longopts[] = {
-    { "batch",        0, NULL, 'b' },
-    { "help",         0, NULL, 'h' },
-    { "funcall",      1, NULL, 'f' },
-    { "no-init-file", 0, NULL, 'q' },
-    { "version",      0, NULL, 'v' },
+    { "batch",        optional_argument, NULL, 'b' },
+    { "help",         optional_argument, NULL, 'h' },
+    { "funcall",      required_argument, NULL, 'f' },
+    { "no-init-file", optional_argument, NULL, 'q' },
+    { "version",      optional_argument, NULL, 'v' },
     { 0, 0, 0, 0 }
 };
 
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE;
-  astr as = astr_new();
+  astr ms = NULL;
   list fargs = list_new();
 
   /* Set up Lisp environment now so it's available to files and
@@ -231,7 +229,16 @@ int main(int argc, char **argv)
   lisp_init();
   init_variables();
 
-  while ((c = getopt_long_only(argc, argv, "bhf:qv", longopts, NULL)) != -1)
+  opterr = 0;           /* Don't display errors for unknown options */
+  while (TRUE) {
+    int this_optind = optind ? optind : 1;
+
+    /* Leading : so as to return ':' for a missing arg, not '?' */
+    c = getopt_long_only(argc, argv, ":bhf:qv", longopts, NULL);
+
+    if (c == -1)
+      break;
+
     switch (c) {
     case 'b':
       bflag = TRUE;
@@ -273,7 +280,16 @@ int main(int argc, char **argv)
               "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
               );
       return 0;
+    case '?':                   /* Unknown option*/
+      if (ms == NULL)
+        ms = astr_afmt(astr_new(), "Unknown option `%s'", argv[this_optind]);
+      break;
+    case ':':                   /* Missing argument */
+      fprintf(stderr, "zile: Option `%s' requires an argument\n\n", argv[this_optind]);
+      exit(1);
     }
+  }
+
   argc -= optind;
   argv += optind;
 
@@ -283,9 +299,10 @@ int main(int argc, char **argv)
 
   init_bindings();
 
-  if (bflag)
-    printf(astr_cstr(as));
-  else {
+  if (bflag) {
+    if (ms)
+      printf("%s\n", astr_cstr(ms));
+  } else {
     term_init();
 
     /* Create the `*scratch*' buffer. */
@@ -321,8 +338,10 @@ int main(int argc, char **argv)
          or load file is specified on the command line. */
       about_screen();
 
-    setup_main_screen(argc, as);
+    setup_main_screen(argc);
 
+    if (ms)
+      minibuf_error(astr_cstr(ms));
     execute_functions(fargs);
     list_delete(fargs);
 
@@ -341,7 +360,8 @@ int main(int argc, char **argv)
   lisp_finalise();
 
   /* Free all the memory allocated. */
-  astr_delete(as);
+  if (ms)
+    astr_delete(ms);
   free_kill_ring();
   free_registers();
   free_macros();

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.84 2007/01/19 15:32:50 rrt Exp $        */
+/*      $Id: file.c,v 1.85 2007/06/05 14:05:20 rrt Exp $        */
 
 #include "config.h"
 
@@ -267,6 +267,8 @@ void open_file(char *path, size_t lineno)
   buf = get_current_dir(FALSE);
 
   if (!expand_path(path, astr_cstr(buf), dir, fname)) {
+    /* This can only happen if a malformed filename is passed on the
+       command line. */
     fprintf(stderr, "zile: %s: invalid filename or path\n", path);
     zile_exit(1);
   }
@@ -280,7 +282,7 @@ void open_file(char *path, size_t lineno)
   astr_delete(buf);
   if (lineno > 0)
     ngotodown(lineno);
-  resync_redisplay();
+  lastflag |= FLAG_NEED_RESYNC;
 }
 
 #if HAVE_UNISTD_H
