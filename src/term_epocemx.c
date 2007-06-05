@@ -3,22 +3,24 @@
    Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
-   This file is part of Zee.
+   This file is part of Zile.
 
-   Zee is free software; you can redistribute it and/or modify it under
+   Zile is free software; you can redistribute it and/or modify it under
    the terms of the GNU General Public License as published by the Free
    Software Foundation; either version 2, or (at your option) any later
    version.
 
-   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
+   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
    WARRANTY; without even the implied warranty of MERCHANTABILITY or
    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zee; see the file COPYING.  If not, write to the Free
+   along with Zile; see the file COPYING.  If not, write to the Free
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
+
+/*	$Id: term_epocemx.c,v 1.19 2007/06/05 14:03:18 rrt Exp $	*/
 
 #include "config.h"
 
@@ -205,10 +207,10 @@ static char *get_tcap(void)
   res = tgetent(tcap, term);
   if (res < 0) {
     fprintf(stderr, "Could not access the termcap data base.\n");
-    exit(1);
+    return NULL;
   } else if (res == 0) {
     fprintf(stderr, "Terminal type `%s' is not defined.\n", term);
-    exit(1);
+    return NULL;
   }
 
   return tcap;
@@ -236,6 +238,8 @@ void term_init(void)
   char *tcap;
 
   tcap_ptr = tcap = get_tcap();
+  if (tcap_ptr == NULL)
+    exit(1);  
 
   term_set_size((size_t)tgetnum("co"), (size_t)tgetnum("li"));
 
