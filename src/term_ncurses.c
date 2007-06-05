@@ -16,9 +16,11 @@
    for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zee; see the file COPYING.  If not, write to the Free
+   along with Zile; see the file COPYING.  If not, write to the Free
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
+
+/*	$Id: term_ncurses.c,v 1.22 2007/06/05 13:43:54 rrt Exp $	*/
 
 #include "config.h"
 
