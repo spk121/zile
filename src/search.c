@@ -1,4 +1,4 @@
-/* Incremental search and replace functions
+/* Search and replace functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004 David A. Capello.
    Copyright (c) 2004-2007 Reuben Thomas.
@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.54 2007/05/24 20:33:02 rrt Exp $	*/
+/*	$Id: search.c,v 1.55 2007/06/06 22:48:38 rrt Exp $	*/
 
 #include "config.h"
 
@@ -83,47 +83,35 @@ static const char *fold_table(const char *s, int regex)
       return id;
 }
 
-static char *find_substr(const char *s1, size_t s1size,
+static const char *find_substr(const char *s1, size_t s1size,
 			 const char *s2, size_t s2size,
-                         const char translate[UCHAR_MAX])
+                         const char translate[UCHAR_MAX + 1])
 {
-  const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
-  const char *sp1, *sp2;
+  const char *e1 = s1 + s1size, *e2 = s2 + s2size;
 
-  for (; s1 <= e1 - s2size + 1; ++s1) {
-    if (translate[(unsigned)*s1] != translate[(unsigned)*s2])
-      continue;
-    sp1 = s1; sp2 = s2;
-    for (;;) {
-      ++sp1, ++sp2;
-      if (sp2 > e2)
-        return (char *)sp1;
-      else if (translate[(unsigned)*sp1] != translate[(unsigned)*sp2])
-        break;
-    }
+  for (; s1 <= e1 - s2size; s1++) {
+    const char *sp1 = s1, *sp2 = s2;
+
+    while (translate[(unsigned)*sp1++] == translate[(unsigned)*sp2++])
+      if (sp2 == e2)
+        return sp1;
   }
 
   return NULL;
 }
 
-static char *rfind_substr(const char *s1, size_t s1size,
+static const char *rfind_substr(const char *s1, size_t s1size,
 			  const char *s2, size_t s2size,
-                          const char translate[UCHAR_MAX])
+                          const char translate[UCHAR_MAX + 1])
 {
-  const char *e1 = s1 + s1size - 1, *e2 = s2 + s2size - 1;
-  const char *sp1, *sp2;
+  const char *e1 = s1 + s1size, *e2 = s2 + s2size;
 
-  for (; e1 >= s1 + s2size - 1; --e1) {
-    if (translate[(unsigned)*e1] != translate[(unsigned)*e2])
-      continue;
-    sp1 = e1; sp2 = e2;
-    for (;;) {
-      --sp1, --sp2;
-      if (sp2 < s2)
-        return (char *)(sp1 + 1);
-      else if (translate[(unsigned)*sp1] != translate[(unsigned)*sp2])
-        break;
-    }
+  for (; e1 >= s1 + s2size; e1--) {
+    const char *sp1 = e1, *sp2 = e2;
+
+    while (translate[(unsigned)*--sp1] == translate[(unsigned)*--sp2])
+      if (sp2 == s2)
+        return sp1;
   }
 
   return NULL;
@@ -134,7 +122,7 @@ static const char *re_find_err = NULL;
 static char *re_find_substr(const char *s1, size_t s1size,
 			    const char *s2, size_t s2size,
 			    int bol, int eol, int backward,
-                            const char translate[UCHAR_MAX])
+                            const char translate[UCHAR_MAX + 1])
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
