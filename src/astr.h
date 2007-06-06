@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: astr.h,v 1.8 2005/07/11 06:10:25 rrt Exp $        */
+/*      $Id: astr.h,v 1.9 2007/06/06 22:11:15 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -52,12 +52,12 @@ typedef struct astr_s *astr;
 /*
  * Allocate a new string with zero length.
  */
-extern astr   astr_new(void);
+extern astr astr_new(void);
 
 /*
  * Deallocate the previously allocated string as.
  */
-extern void   astr_delete(astr as);
+extern void astr_delete(astr as);
 
 /*
  * Convert as into a C null-terminated string.
@@ -75,13 +75,13 @@ extern void   astr_delete(astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-extern char * astr_char(const astr as, ptrdiff_t pos);
+extern char *astr_char(const astr as, ptrdiff_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-extern astr   astr_substr(const astr as, ptrdiff_t pos, size_t size);
+extern astr astr_substr(const astr as, ptrdiff_t pos, size_t size);
 
 /*
  * Do strcmp on the contents of s1 and s2
@@ -92,73 +92,73 @@ extern astr   astr_substr(const astr as, ptrdiff_t pos, size_t size);
 /*
  * Assign the contents of the argument string to the string as.
  */
-extern astr   astr_cpy(astr as, const astr src);
-extern astr   astr_cpy_cstr(astr as, const char *s);
+extern astr astr_cpy(astr as, const astr src);
+extern astr astr_cpy_cstr(astr as, const char *s);
 
 /*
  * Append the contents of the argument string or character to as.
  */
-extern astr   astr_cat(astr as, const astr src);
-extern astr   astr_cat_cstr(astr as, const char *s);
-extern astr   astr_ncat_cstr(astr as, const char *s, size_t len);
-extern astr   astr_cat_char(astr as, int c);
+extern astr astr_cat(astr as, const astr src);
+extern astr astr_cat_cstr(astr as, const char *s);
+extern astr astr_ncat_cstr(astr as, const char *s, size_t len);
+extern astr astr_cat_char(astr as, int c);
 
 /*
  * Append the contents of src to as and free src.
  */
-extern astr   astr_cat_delete(astr as, const astr src);
+extern astr astr_cat_delete(astr as, const astr src);
 
 /*
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */
-extern astr   astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src);
-extern astr   astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s);
-extern astr   astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c);
+extern astr astr_replace(astr as, ptrdiff_t pos, size_t size, const astr src);
+extern astr astr_replace_cstr(astr as, ptrdiff_t pos, size_t size, const char *s);
+extern astr astr_replace_char(astr as, ptrdiff_t pos, size_t size, int c);
 
 /*
  * Insert the contents of the argument string or character in as.
  */
-extern astr   astr_insert(astr as, ptrdiff_t pos, const astr src);
-extern astr   astr_insert_cstr(astr as, ptrdiff_t pos, const char *s);
-extern astr   astr_insert_char(astr as, ptrdiff_t pos, int c);
+extern astr astr_insert(astr as, ptrdiff_t pos, const astr src);
+extern astr astr_insert_cstr(astr as, ptrdiff_t pos, const char *s);
+extern astr astr_insert_char(astr as, ptrdiff_t pos, int c);
 
 /*
  * Remove size chars from as at position pos.
  */
-extern astr   astr_remove(astr as, ptrdiff_t pos, size_t size);
+extern astr astr_remove(astr as, ptrdiff_t pos, size_t size);
 
 /*
  * Truncate as to given position.
  */
-extern astr   astr_truncate(astr as, ptrdiff_t pos);
+extern astr astr_truncate(astr as, ptrdiff_t pos);
 
 /*
  * Find the first occurrence of the argument string in as, returning
  * the position starting from the beginning of the string.
  */
-extern int    astr_find(const astr as, const astr src);
-extern int    astr_find_cstr(const astr as, const char *s);
+extern int astr_find(const astr as, const astr src);
+extern int astr_find_cstr(const astr as, const char *s);
 
 /*
  * Find the last occurrence of the argument string in as, returning
  * the position starting from the end of the string.
  */
-extern int    astr_rfind(const astr as, const astr src);
-extern int    astr_rfind_cstr(const astr as, const char *s);
+extern int astr_rfind(const astr as, const astr src);
+extern int astr_rfind_cstr(const astr as, const char *s);
 
 /*
  * Read a string from the stream f and return it. The trailing newline
  * is removed from the string. If the stream is at eof when astr_fgets
  * is called, it returns NULL.
  */
-extern astr   astr_fgets(FILE *f);
+extern astr astr_fgets(FILE *f);
 
 /*
  * Append formatted text to the argument string
  */
-extern astr   astr_vafmt(astr as, const char *fmt, va_list ap);
-extern astr   astr_afmt(astr as, const char *fmt, ...);
+extern astr astr_vafmt(astr as, const char *fmt, va_list ap);
+extern astr astr_afmt(astr as, const char *fmt, ...);
 
 
 /*
