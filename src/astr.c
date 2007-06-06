@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: astr.c,v 1.15 2005/07/27 01:09:15 rrt Exp $	*/
+/*	$Id: astr.c,v 1.16 2007/06/06 22:46:39 rrt Exp $	*/
 
 #include "config.h"
 
@@ -290,9 +290,9 @@ static void assert_eq(astr as, const char *s)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zile_exit(int exitcode)
+void zile_exit(void)
 {
-  exit(exitcode);
+  exit(2);
 }
 
 int main(void)

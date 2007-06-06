@@ -1,4 +1,4 @@
-/*	$Id: mkdoc.c,v 1.12 2006/11/29 21:00:36 rrt Exp $	*/
+/*	$Id: mkdoc.c,v 1.13 2007/06/06 22:46:39 rrt Exp $	*/
 
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
@@ -145,9 +145,9 @@ static void process_file(char *filename)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zile_exit(int exitcode)
+void zile_exit(void)
 {
-  exit(exitcode);
+  exit(2);
 }
 
 int main(int argc, char **argv)
