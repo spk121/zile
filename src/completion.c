@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: completion.c,v 1.27 2007/06/05 22:30:22 rrt Exp $   */
+/*      $Id: completion.c,v 1.28 2007/06/07 08:47:43 rrt Exp $   */
 
 #include "config.h"
 
@@ -233,6 +233,7 @@ static int completion_reread(Completion *cp, astr as)
 
   astr_cpy(as, fname);
 
+  buf = astr_new();
   while ((d = readdir(dir)) != NULL) {
     astr_cpy(buf, pdir);
     astr_cat_cstr(buf, d->d_name);
