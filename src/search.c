@@ -21,7 +21,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.55 2007/06/06 22:48:38 rrt Exp $	*/
+/*	$Id: search.c,v 1.56 2007/06/10 22:11:04 rrt Exp $	*/
 
 #include "config.h"
 
@@ -92,7 +92,7 @@ static const char *find_substr(const char *s1, size_t s1size,
   for (; s1 <= e1 - s2size; s1++) {
     const char *sp1 = s1, *sp2 = s2;
 
-    while (translate[(unsigned)*sp1++] == translate[(unsigned)*sp2++])
+    while (translate[(unsigned char)*sp1++] == translate[(unsigned char)*sp2++])
       if (sp2 == e2)
         return sp1;
   }
@@ -109,7 +109,7 @@ static const char *rfind_substr(const char *s1, size_t s1size,
   for (; e1 >= s1 + s2size; e1--) {
     const char *sp1 = e1, *sp2 = e2;
 
-    while (translate[(unsigned)*--sp1] == translate[(unsigned)*--sp2])
+    while (translate[(unsigned char)*--sp1] == translate[(unsigned char)*--sp2])
       if (sp2 == s2)
         return sp1;
   }
