@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: main.c,v 1.108 2007/06/05 22:30:22 rrt Exp $	*/
+/*	$Id: main.c,v 1.109 2007/06/14 11:55:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -217,28 +217,6 @@ struct option longopts[] = {
     { 0, 0, 0, 0 }
 };
 
-static astr expand_file(char *path)
-{
-  int ret;
-  astr dir = astr_new();
-  astr fname = astr_new();
-  astr buf = astr_new();
-
-  if ((ret = expand_path(path, dir, fname))) {
-    astr_cpy_cstr(buf, astr_cstr(dir));
-    astr_cat_cstr(buf, astr_cstr(fname));
-  }
-
-  astr_delete(dir);
-  astr_delete(fname);
-
-  if (!ret) {
-    astr_delete(buf);
-    return NULL;
-  }
-  return buf;
-}
-
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE;
@@ -353,16 +331,18 @@ int main(int argc, char **argv)
         if (**argv == '+')
           line = strtoul(*argv++ + 1, NULL, 10);
         if (*argv) {
-          astr as = expand_file(*argv);
+          astr as = astr_new();
 
-          if (as) {
+          astr_cpy_cstr(as, *argv);
+
+          if (expand_path(as)) {
             find_file(astr_cstr(as));
             argv++;
+            astr_delete(as);
           } else {
             fprintf(stderr, "zile: %s: invalid filename or path\n", astr_cstr(*argv));
             exit(1);
           }
-          astr_delete(as);
 
           if (line > 1)
             ngotodown(line - 1);

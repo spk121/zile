@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: help.c,v 1.36 2007/06/05 22:30:22 rrt Exp $	*/
+/*	$Id: help.c,v 1.37 2007/06/14 11:55:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -138,7 +138,7 @@ static astr get_funcvar_doc(char *name, astr defval, int isfunc)
       }
       if (isfunc || astr_len(defval) > 0) {
         astr_cat(doc, buf);
-        astr_cat_cstr(doc, "\n");
+        astr_cat_char(doc, '\n');
       } else
         astr_cpy(defval, buf);
     } else if (!astr_cmp(buf, match))

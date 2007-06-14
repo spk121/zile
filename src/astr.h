@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
    Copyright (c) 2001-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: astr.h,v 1.9 2007/06/06 22:11:15 rrt Exp $        */
+/*      $Id: astr.h,v 1.10 2007/06/14 11:55:22 rrt Exp $        */
 
 #ifndef ASTR_H
 #define ASTR_H
@@ -53,6 +53,11 @@ typedef struct astr_s *astr;
  * Allocate a new string with zero length.
  */
 extern astr astr_new(void);
+
+/*
+ * Make a new string from a C null-terminated string
+ */
+#define astr_new_cstr(s)        (astr_cpy_cstr(astr_new(), (s)))
 
 /*
  * Deallocate the previously allocated string as.

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: bind.c,v 1.77 2006/11/29 20:57:02 rrt Exp $	*/
+/*	$Id: bind.c,v 1.78 2007/06/14 11:55:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -161,7 +161,7 @@ static astr make_completion(size_t *keys, size_t numkeys)
 
   for (i = 0; i < numkeys; i++) {
     if (i > 0) {
-      astr_cat_cstr(as, " ");
+      astr_cat_char(as, ' ');
       len++;
     }
     key = chordtostr(keys[i]);
@@ -169,7 +169,7 @@ static astr make_completion(size_t *keys, size_t numkeys)
     astr_delete(key);
   }
 
-  return astr_cat_cstr(as, "-");
+  return astr_cat_char(as, '-');
 }
 
 static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)

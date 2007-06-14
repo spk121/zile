@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: completion.c,v 1.28 2007/06/07 08:47:43 rrt Exp $   */
+/*      $Id: completion.c,v 1.29 2007/06/14 11:55:22 rrt Exp $   */
 
 #include "config.h"
 
@@ -34,6 +34,7 @@
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#include <libgen.h>
 
 #include "zile.h"
 #include "extern.h"
@@ -192,12 +193,14 @@ static int hcompar(const void *p1, const void *p2)
  */
 static int completion_reread(Completion *cp, astr as)
 {
-  astr buf, pdir, fname;
+  astr buf;
   DIR *dir;
+  char *s1, *s2;
+  const char *pdir, *base;
   struct dirent *d;
   struct stat st;
   list p;
-  size_t i;
+  astr bs = astr_new();
 
   for (p = list_first(cp->completions); p != cp->completions; p = list_next(p))
     free(p->item);
@@ -206,41 +209,38 @@ static int completion_reread(Completion *cp, astr as)
   cp->completions = list_new();
   cp->fl_sorted = 0;
 
-  buf = astr_new();
-  pdir = astr_new();
-  fname = astr_new();
+  if (expand_path(as) == NULL)
+    return FALSE;
 
-  for (i = 0; i < astr_len(as); i++){
-    if (*astr_char(as, (ptrdiff_t)i) == '/') {
-      if (*astr_char(as, (ptrdiff_t)(i + 1)) == '/') {
-        /* Got `//'; restart from this point. */
-        while (*astr_char(as, (ptrdiff_t)(i + 1)) == '/')
-          i++;
-        astr_truncate(buf, 0);
-        /* Final '/' remains to be copied below. */
-      }
-    }
-    astr_cat_char(buf, *astr_char(as, (ptrdiff_t)i));
+  /* Split up path with dirname and basename, unless it ends in `/',
+     in which case it's considered to be entirely dirname */
+  s1 = zstrdup(astr_cstr(as));
+  s2 = zstrdup(astr_cstr(as));
+  if (*astr_char(as, -1) != '/') {
+    pdir = dirname(s1);
+    /* Append `/' to pdir */
+    astr_cat_cstr(bs, pdir);
+    astr_cat_char(bs, '/');
+    pdir = astr_cstr(bs);
+    base = basename(s2);
+  } else {
+    pdir = s1;
+    base = "";
   }
-  astr_cpy(as, buf);
-  astr_delete(buf);
 
-  if (!expand_path(astr_cstr(as), pdir, fname))
+  astr_cpy_cstr(as, base);
+
+  if ((dir = opendir(pdir)) == NULL)
     return FALSE;
-
-  if ((dir = opendir(astr_cstr(pdir))) == NULL)
-    return FALSE;
-
-  astr_cpy(as, fname);
 
   buf = astr_new();
   while ((d = readdir(dir)) != NULL) {
-    astr_cpy(buf, pdir);
+    astr_cpy_cstr(buf, pdir);
     astr_cat_cstr(buf, d->d_name);
     if (stat(astr_cstr(buf), &st) != -1) {
       astr_cpy_cstr(buf, d->d_name);
       if (S_ISDIR(st.st_mode))
-        astr_cat_cstr(buf, "/");
+        astr_cat_char(buf, '/');
     } else
       astr_cpy_cstr(buf, d->d_name);
     list_append(cp->completions, zstrdup(astr_cstr(buf)));
@@ -248,11 +248,12 @@ static int completion_reread(Completion *cp, astr as)
   closedir(dir);
 
   astr_delete(cp->path);
-  cp->path = compact_path(astr_cstr(pdir));
+  cp->path = compact_path(astr_new_cstr(pdir));
 
   astr_delete(buf);
-  astr_delete(pdir);
-  astr_delete(fname);
+  astr_delete(bs);
+  free(s1);
+  free(s2);
 
   return TRUE;
 }

@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: keys.c,v 1.21 2005/08/06 16:23:30 rrt Exp $	*/
+/*	$Id: keys.c,v 1.22 2007/06/14 11:55:23 rrt Exp $	*/
 
 #include "config.h"
 
@@ -317,7 +317,7 @@ astr simplify_key(char *key)
   for (j = 0; j < i; j++) {
     astr as;
     if (j > 0)
-      astr_cat_cstr(dest, " ");
+      astr_cat_char(dest, ' ');
     as = chordtostr(keys[j]);
     astr_cat(dest, as);
     astr_delete(as);

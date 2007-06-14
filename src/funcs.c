@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.98 2006/11/29 20:57:02 rrt Exp $	*/
+/*	$Id: funcs.c,v 1.99 2007/06/14 11:55:22 rrt Exp $	*/
 
 #include "config.h"
 
@@ -373,7 +373,7 @@ int universal_argument(int keytype, int xarg)
     astr_cpy_cstr(as, "C-u");
 
   for (;;) {
-    astr_cat_cstr(as, "-"); /* Add the '-' character. */
+    astr_cat_char(as, '-'); /* Add the '-' character. */
     key = do_completion(as);
     astr_truncate(as, -1); /* Remove the '-' character. */
 
@@ -1453,7 +1453,7 @@ command to insert any output into the current buffer.
   while ((s = astr_fgets(pipe)) != NULL) {
     ++lines;
     astr_cat(out, s);
-    astr_cat_cstr(out, "\n");
+    astr_cat_char(out, '\n');
     astr_delete(s);
   }
   pclose(pipe);
@@ -1539,7 +1539,7 @@ it as the contents of the region.
   while (astr_len(s = astr_fgets(pipe)) > 0) {
     ++lines;
     astr_cat(out, s);
-    astr_cat_cstr(out, "\n");
+    astr_cat_char(out, '\n');
     astr_delete(s);
   }
   astr_delete(s);

@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.86 2007/06/05 22:30:22 rrt Exp $        */
+/*      $Id: file.c,v 1.87 2007/06/14 11:55:22 rrt Exp $        */
 
 #include "config.h"
 
@@ -98,20 +98,23 @@ astr agetcwd(void)
 /*
  * This functions does some corrections and expansions to
  * the passed path:
- * - splits the path into directory (with trailing slash) and filename;
  * - expands `~/' and `~name/' expressions;
  * - replaces `//' with `/' (restarting from the root directory);
  * - removes `..' and `.' entries.
+ *
+ * If something goes wrong, the string is deleted and NULL returned
  */
-int expand_path(const char *path, astr dir, astr fname)
+astr expand_path(astr path)
 {
+  int ret = TRUE;
   struct passwd *pw;
-  const char *sp = path;
+  const char *sp = astr_cstr(path);
+  astr epath = astr_new();
 
   if (*sp != '/') {
-    astr_cat_delete(dir, agetcwd());
-    if (astr_len(dir) == 0 || *astr_char(dir, -1) != '/')
-      astr_cat_cstr(dir, "/");
+    astr_cat_delete(epath, agetcwd());
+    if (astr_len(epath) == 0 || *astr_char(epath, -1) != '/')
+      astr_cat_char(epath, '/');
   }
 
   while (*sp != '\0') {
@@ -120,32 +123,36 @@ int expand_path(const char *path, astr dir, astr fname)
         /* Got `//'.  Restart from this point. */
         while (*sp == '/')
           sp++;
-        astr_truncate(dir, 0);
+        astr_truncate(epath, 0);
       }
-      astr_cat_char(dir, '/');
+      astr_cat_char(epath, '/');
     } else if (*sp == '~') {
       if (*(sp + 1) == '/') {
         /* Got `~/'. Restart from this point and insert the user's
            home directory. */
-        astr_truncate(dir, 0);
-        if ((pw = getpwuid(getuid())) == NULL)
-          return FALSE;
+        astr_truncate(epath, 0);
+        if ((pw = getpwuid(getuid())) == NULL) {
+          ret = FALSE;
+          break;
+        }
         if (strcmp(pw->pw_dir, "/") != 0)
-          astr_cat_cstr(dir, pw->pw_dir);
+          astr_cat_cstr(epath, pw->pw_dir);
         ++sp;
       } else {
         /* Got `~something'.  Restart from this point and insert that
            user's home directory. */
         astr as = astr_new();
-        astr_truncate(dir, 0);
+        astr_truncate(epath, 0);
         ++sp;
         while (*sp != '\0' && *sp != '/')
           astr_cat_char(as, *sp++);
         pw = getpwnam(astr_cstr(as));
         astr_delete(as);
-        if (pw == NULL)
-          return FALSE;
-        astr_cat_cstr(dir, pw->pw_dir);
+        if (pw == NULL) {
+          ret = FALSE;
+          break;
+        }
+        astr_cat_cstr(epath, pw->pw_dir);
       }
     } else if (*sp == '.') {
       if (*(sp + 1) == '/' || *(sp + 1) == '\0') {
@@ -154,38 +161,40 @@ int expand_path(const char *path, astr dir, astr fname)
           ++sp;
       } else if (*(sp + 1) == '.' &&
                  (*(sp + 2) == '/' || *(sp + 2) == '\0')) {
-        if (astr_len(dir) >= 1 && *astr_char(dir, -1) == '/')
-          astr_truncate(dir, -1);
-        while (*astr_char(dir, -1) != '/' &&
-               astr_len(dir) >= 1)
-          astr_truncate(dir, -1);
+        if (astr_len(epath) >= 1 && *astr_char(epath, -1) == '/')
+          astr_truncate(epath, -1);
+        while (*astr_char(epath, -1) != '/' &&
+               astr_len(epath) >= 1)
+          astr_truncate(epath, -1);
         sp += 2;
         if (*sp == '/' && *(sp + 1) != '/')
           ++sp;
       } else
-        goto gotfname;
+        goto got_component;
     } else {
       const char *p;
-    gotfname:
+    got_component:
       p = sp;
       while (*p != '\0' && *p != '/')
         p++;
-      if (*p == '\0') {
-        /* Final filename. */
-        astr_cat_cstr(fname, sp);
+      if (*p == '\0') { /* Final filename */
+        astr_cat_cstr(epath, sp);
         break;
-      } else {
-        /* Non-final directory. */
+      } else { /* Non-final directory */
         while (*sp != '/')
-          astr_cat_char(dir, *sp++);
+          astr_cat_char(epath, *sp++);
       }
     }
   }
 
-  if (astr_len(dir) == 0)
-    astr_cat_cstr(dir, "/");
+  astr_cpy(path, epath);
+  astr_delete(epath);
 
-  return TRUE;
+  if (!ret) {
+    astr_delete(path);
+    return NULL;
+  }
+  return path;
 }
 
 /*
@@ -193,7 +202,7 @@ int expand_path(const char *path, astr dir, astr fname)
  * and restart from / if // found,
  * else the unmodified path.
  */
-astr compact_path(const char *path)
+astr compact_path(const astr path)
 {
   astr buf = astr_new();
   struct passwd *pw;
@@ -201,20 +210,20 @@ astr compact_path(const char *path)
 
   if ((pw = getpwuid(getuid())) == NULL) {
     /* User not found in password file. */
-    astr_cpy_cstr(buf, path);
+    astr_cpy(buf, path);
     return buf;
   }
 
   /* Replace `/userhome/' (if existent) with `~/'. */
   i = strlen(pw->pw_dir);
-  if (!strncmp(pw->pw_dir, path, i)) {
+  if (!strncmp(pw->pw_dir, astr_cstr(path), i)) {
     astr_cpy_cstr(buf, "~/");
     if (!strcmp(pw->pw_dir, "/"))
-      astr_cat_cstr(buf, path + 1);
+      astr_cat_cstr(buf, astr_char(path, 1));
     else
-      astr_cat_cstr(buf, path + i + 1);
+      astr_cat_cstr(buf, astr_char(path, i + 1));
   } else
-    astr_cpy_cstr(buf, path);
+    astr_cpy(buf, path);
 
   return buf;
 }
@@ -238,7 +247,7 @@ static astr get_current_dir(void)
     buf = agetcwd();
 
   if (*astr_char(buf, -1) != '/')
-    astr_cat_cstr(buf, "/");
+    astr_cat_char(buf, '/');
 
   return buf;
 }
@@ -851,7 +860,7 @@ static astr create_backup_filename(const char *filename,
 
   /* Prepend the backup directory path to the filename */
   if (backupdir) {
-    astr dir = astr_new(), fname = astr_new(), buf = astr_new();
+    astr buf = astr_new();
 
     astr_cpy_cstr(buf, backupdir);
     if (*astr_char(buf, -1) != '/')
@@ -864,18 +873,11 @@ static astr create_backup_filename(const char *filename,
       ++filename;
     }
 
-    if (!expand_path(astr_cstr(buf), dir, fname)) {
-      astr_delete(buf);
-      astr_delete(dir);
-      astr_delete(fname);
+    if (expand_path(buf) == NULL)
       return NULL;
-    }
-    astr_cat_delete(dir, fname);
-    res = dir;
-  } else {
-    res = astr_new();
-    astr_cat_cstr(res, filename);
-  }
+    res = buf;
+  } else
+    res = astr_cat_cstr(astr_new(), filename);
 
   return astr_cat_char(res, '~');
 }

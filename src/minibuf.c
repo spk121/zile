@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: minibuf.c,v 1.40 2007/06/05 22:30:23 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.41 2007/06/14 11:55:23 rrt Exp $     */
 
 #include "config.h"
 
@@ -116,19 +116,15 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
   va_list ap;
   char *buf, *p;
   Completion *cp;
-  astr dir, fname, rbuf;
+  astr as, rbuf;
 
   va_start(ap, value);
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  dir = astr_new();
-  fname = astr_new();
-  expand_path(value, dir, fname); /* Guaranteed to work */
-  astr_cat_cstr(dir, astr_cstr(fname));
-  rbuf = compact_path(astr_cstr(dir));
-  astr_delete(dir);
-  astr_delete(fname);
+  as = expand_path(astr_cat_cstr(astr_new(), value)); /* Guaranteed to work */
+  rbuf = compact_path(as);
+  astr_delete(as);
 
   cp = completion_new(TRUE);
   p = term_minibuf_read(buf, astr_cstr(rbuf), cp, &files_history);
@@ -140,15 +136,9 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
     /* Add history element. */
     add_history_element(&files_history, p);
 
-    dir = astr_new();
-    fname = astr_new();
-
-    expand_path(p, dir, fname); /* Guaranteed to work */
-    astr_cat(dir, fname);
-
-    astr_delete(fname);
-    p = zstrdup(astr_cstr(dir));
-    astr_delete(dir);
+    rbuf = expand_path(astr_cat_cstr(astr_new(), p)); /* Guaranteed to work */
+    p = zstrdup(astr_cstr(rbuf));
+    astr_delete(rbuf);
   }
 
   return p;
