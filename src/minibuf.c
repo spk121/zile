@@ -18,7 +18,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: minibuf.c,v 1.41 2007/06/14 11:55:23 rrt Exp $     */
+/*      $Id: minibuf.c,v 1.42 2007/06/14 11:59:15 rrt Exp $     */
 
 #include "config.h"
 
@@ -122,7 +122,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
   buf = minibuf_format(fmt, ap);
   va_end(ap);
 
-  as = expand_path(astr_cat_cstr(astr_new(), value)); /* Guaranteed to work */
+  as = expand_path(astr_new_cstr(value)); /* Guaranteed to work */
   rbuf = compact_path(as);
   astr_delete(as);
 
@@ -136,7 +136,7 @@ char *minibuf_read_dir(const char *fmt, const char *value, ...)
     /* Add history element. */
     add_history_element(&files_history, p);
 
-    rbuf = expand_path(astr_cat_cstr(astr_new(), p)); /* Guaranteed to work */
+    rbuf = expand_path(astr_new_cstr(p)); /* Guaranteed to work */
     p = zstrdup(astr_cstr(rbuf));
     astr_delete(rbuf);
   }

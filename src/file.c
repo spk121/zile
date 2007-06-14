@@ -20,7 +20,7 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: file.c,v 1.87 2007/06/14 11:55:22 rrt Exp $        */
+/*      $Id: file.c,v 1.88 2007/06/14 11:59:15 rrt Exp $        */
 
 #include "config.h"
 
@@ -89,7 +89,7 @@ astr agetcwd(void)
   /* If there was an error, return the empty string */
   if (res == NULL)
     *buf = '\0';
-  as = astr_cpy_cstr(astr_new(), buf);
+  as = astr_new_cstr(buf);
   free(buf);
 
   return as;
@@ -240,7 +240,7 @@ static astr get_current_dir(void)
        name from it. */
     int p;
 
-    buf = astr_cpy_cstr(astr_new(), cur_bp->filename);
+    buf = astr_new_cstr(cur_bp->filename);
     if ((p = astr_rfind_cstr(buf, "/")) != -1)
       astr_truncate(buf, (ptrdiff_t)(p ? p : 1));
   } else /* Get the current directory name from the system. */
@@ -260,7 +260,7 @@ astr get_home_dir(void)
   char *s = getenv("HOME");
   astr as;
   if (s != NULL && strlen(s) < PATH_MAX)
-    as = astr_cat_cstr(astr_new(), s);
+    as = astr_new_cstr(s);
   else
     as = agetcwd();
   return as;
@@ -877,7 +877,7 @@ static astr create_backup_filename(const char *filename,
       return NULL;
     res = buf;
   } else
-    res = astr_cat_cstr(astr_new(), filename);
+    res = astr_new_cstr(filename);
 
   return astr_cat_char(res, '~');
 }
