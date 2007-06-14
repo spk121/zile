@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: astr.c,v 1.16 2007/06/06 22:46:39 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>

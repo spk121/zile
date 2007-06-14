@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: parser.h,v 1.6 2005/07/11 06:10:26 rrt Exp $	*/
-
 #ifndef PARSER_H
 #define PARSER_H
 

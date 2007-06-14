@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: point.c,v 1.12 2005/09/22 21:21:33 rrt Exp $	*/
-
 #include "config.h"
 
 #include "zile.h"

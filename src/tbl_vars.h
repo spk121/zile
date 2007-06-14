@@ -1,5 +1,3 @@
-/*	$Id: tbl_vars.h,v 1.29 2006/09/06 17:30:42 rrt Exp $	*/
-
 /*
  * Add an entry to this list for declaring a new global variable.
  *

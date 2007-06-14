@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.h,v 1.14 2006/11/29 22:34:46 rrt Exp $	*/
-
 #ifndef EVAL_H
 #define EVAL_H
 

@@ -19,8 +19,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: list.c,v 1.8 2005/07/11 06:10:25 rrt Exp $	*/
-
 #include <stdlib.h>
 #include <assert.h>
 

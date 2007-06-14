@@ -1,5 +1,3 @@
-/*	$Id: mkdoc.c,v 1.13 2007/06/06 22:46:39 rrt Exp $	*/
-
 /*
  * A Quick & Dirty tool to produce the AUTODOC file.
  */

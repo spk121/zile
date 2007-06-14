@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: strrstr.c,v 1.8 2007/05/03 15:44:29 rrt Exp $	*/
-
 #include "config.h"
 
 #ifndef HAVE_STRRSTR

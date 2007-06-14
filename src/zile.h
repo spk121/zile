@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: zile.h,v 1.77 2007/06/01 21:35:21 rrt Exp $        */
-
 #ifndef ZILE_H
 #define ZILE_H
 

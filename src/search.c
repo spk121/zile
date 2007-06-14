@@ -21,8 +21,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: search.c,v 1.56 2007/06/10 22:11:04 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>

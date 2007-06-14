@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: keys.c,v 1.22 2007/06/14 11:55:23 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>

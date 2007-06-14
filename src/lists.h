@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: lists.h,v 1.8 2005/07/11 06:10:25 rrt Exp $	*/
-
 #ifndef LISTS_H
 #define LISTS_H
 

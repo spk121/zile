@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: funcs.c,v 1.99 2007/06/14 11:55:22 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>

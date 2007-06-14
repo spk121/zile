@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: astr.h,v 1.10 2007/06/14 11:55:22 rrt Exp $        */
-
 #ifndef ASTR_H
 #define ASTR_H
 

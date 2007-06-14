@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: completion.c,v 1.29 2007/06/14 11:55:22 rrt Exp $   */
-
 #include "config.h"
 
 #if HAVE_SYS_STAT_H

@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_ncurses.c,v 1.22 2007/06/05 13:43:54 rrt Exp $	*/
-
 #include "config.h"
 
 #include <stddef.h>

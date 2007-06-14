@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: editfns.c,v 1.13 2005/07/11 06:10:25 rrt Exp $	*/
-
 #include "config.h"
 
 #include <stdlib.h>

@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: term_redisplay.c,v 1.43 2007/06/01 21:35:21 rrt Exp $	*/
-
 #include "config.h"
 
 #include <ctype.h>

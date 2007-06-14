@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: vector.h,v 1.3 2005/07/11 06:10:26 rrt Exp $	*/
-
 #ifndef VECTOR_H
 #define VECTOR_H
 

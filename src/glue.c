@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: glue.c,v 1.34 2005/09/15 21:47:13 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>

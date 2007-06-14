@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*      $Id: minibuf.c,v 1.42 2007/06/14 11:59:15 rrt Exp $     */
-
 #include "config.h"
 
 #include <assert.h>

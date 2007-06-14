@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: redisplay.c,v 1.22 2006/11/29 20:57:02 rrt Exp $	*/
-
 #include <stdarg.h>
 
 #include "config.h"

@@ -1,5 +1,3 @@
-/*	$Id: tbl_funcs.h,v 1.38 2007/01/19 14:24:49 rrt Exp $	*/
-
 /*
  * Add an entry to this list for declaring a new function, in
  * alphabetic order. X0 means no key binding, X1 means one key

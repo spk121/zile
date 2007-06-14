@@ -1,6 +1,5 @@
 .\" -*- nroff -*-
-.\" $Id: zile.1.in,v 1.3 2007/06/06 22:15:20 rrt Exp $
-.Dd Jan, 2005
+.Dd Jun, 2007
 .Os
 .Dt ZILE 1
 .Sh NAME

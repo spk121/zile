@@ -18,8 +18,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: marker.c,v 1.9 2006/01/30 15:33:21 rrt Exp $	*/
-
 #include "config.h"
 
 #include <stdlib.h>

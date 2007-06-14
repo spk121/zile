@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: parser.c,v 1.11 2005/07/28 21:08:56 rrt Exp $	*/
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

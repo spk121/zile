@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: eval.c,v 1.28 2006/11/30 14:58:31 rrt Exp $	*/
-
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

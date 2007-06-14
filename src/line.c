@@ -21,8 +21,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: line.c,v 1.70 2006/11/29 20:57:02 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>

@@ -20,8 +20,6 @@
    Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
    02111-1301, USA.  */
 
-/*	$Id: macro.c,v 1.20 2006/11/29 20:57:02 rrt Exp $	*/
-
 #include "config.h"
 
 #include <assert.h>
