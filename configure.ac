@@ -82,7 +82,7 @@ AC_DEFUN([zile_CHECK_ALLEGRO],
 
 AC_MSG_CHECKING([use allegro library])
 AC_ARG_ENABLE(allegro,
-AC_HELP_STRING([--enable-allegro], [use allegro interface]),
+AC_HELP_STRING([--enable-allegro], [use Allegro interface]),
 [
 if test $enableval = yes; then
         allegro=true

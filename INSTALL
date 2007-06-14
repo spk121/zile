@@ -1,7 +1,7 @@
                Zile build and installation instructions
                ----------------------------------------
 
-To build zile:
+To build and install Zile:
 
 1) Run configure:
 
@@ -11,32 +11,17 @@ To build zile:
 
 	make
 
-3a) To install zile, run
+3) To install zile, run
 
 	make install
 
    By default, zile is installed under /usr/local; this can be changed
-   by using the --prefix argument to configure.
+   by using the --prefix argument to configure, e.g.
 
-3b) If you just want to try zile, edit the `src/paths.h' file: replace
-   the line
+	./configure --prefix=$HOME/zile
 
-	#define PATH_DATA "/usr/local/share/zile"
-
-   by
-
-	#define PATH_DATA "/zile_src_dir/etc/zile"
-
-   where `zile_src_dir' is the absolute directory where you unpacked the
-   Zile sources.
-
-4b) Recompile the sources:
-
-	make
-
-5b) To try zile, run it: 
-
-	src/zile
+   You can also run it in place (src/zile), but if you do that the
+   built-in documentation won't be available.
 
 
 Options
@@ -45,6 +30,11 @@ Options
 If you are debugging the editor, you can enable the debugging code:
 
   --enable-debug          include debugging code and assertions
+
+To build with the Allegro or EPOC front-end, use one of:
+
+  --enable-allegro        use Allegro interface
+  --enable-epocemx        use epocemx interface
 
 For other configure options, run
 
