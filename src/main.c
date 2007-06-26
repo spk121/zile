@@ -329,13 +329,7 @@ int main(int argc, char **argv)
         if (**argv == '+')
           line = strtoul(*argv++ + 1, NULL, 10);
         if (*argv) {
-          astr as = astr_new();
-
-          astr_cpy_cstr(as, *argv);
-
-          find_file(astr_cstr(as));
-          argv++;
-          astr_delete(as);
+          find_file(*argv++);
 
           if (line > 1)
             ngotodown(line - 1);
