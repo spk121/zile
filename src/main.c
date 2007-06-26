@@ -333,14 +333,9 @@ int main(int argc, char **argv)
 
           astr_cpy_cstr(as, *argv);
 
-          if (expand_path(as)) {
-            find_file(astr_cstr(as));
-            argv++;
-            astr_delete(as);
-          } else {
-            fprintf(stderr, "zile: %s: invalid filename or path\n", astr_cstr(*argv));
-            exit(1);
-          }
+          find_file(astr_cstr(as));
+          argv++;
+          astr_delete(as);
 
           if (line > 1)
             ngotodown(line - 1);
