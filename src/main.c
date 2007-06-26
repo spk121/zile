@@ -323,7 +323,7 @@ int main(int argc, char **argv)
     /* Reinitialise the scratch buffer to catch settings */
     init_buffer(cur_bp);
 
-    if (argc >= 1)
+    if (argc >= 1) {
       while (*argv) {
         size_t line = 1;
         if (**argv == '+')
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
           lastflag |= FLAG_NEED_RESYNC;
         }
       }
-    else if (list_length(fargs) == 0)
+    } else if (list_length(fargs) == 0)
       /* Show the splash screen only if no files and no Lisp expression
          or load file is specified on the command line. */
       about_screen();
