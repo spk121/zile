@@ -50,7 +50,7 @@
 #include "eval.h"
 #include "vars.h"
 
-#define ZILE_VERSION_STRING	"Zile " VERSION
+#define ZILE_VERSION_STRING	PACKAGE_NAME " " VERSION
 
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
@@ -102,10 +102,10 @@ static char about_splash_str[] = "\
 \n\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
-Type `C-x C-c' to exit Zile.\n\
+Type `C-x C-c' to exit " PACKAGE_NAME ".\n\
 Type `C-h h' for help; `C-x u; to undo changes.\n\
 Type `C-h C-d' for information on getting the latest version.\n\
-Type `C-h t' for a tutorial on using Zile.\n\
+Type `C-h t' for a tutorial on using " PACKAGE_NAME ".\n\
 Type `C-h s' for a sample configuration file.\n\
 Type `C-g' at any time to cancel the current operation.\n\
 \n\
@@ -117,7 +117,7 @@ Combinations like `C-h h' mean first press `C-h', then `h'.\n\
 ";
 
 static char about_minibuf_str[] =
-"Welcome to Zile!  For help type `C-h h'";
+"Welcome to " PACKAGE_NAME "!  For help type `C-h h'";
 
 static void about_screen(void)
 {
@@ -182,14 +182,14 @@ then enter the text in that file's own buffer.\n\
 static void segv_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, "Zile crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
+  fprintf(stderr, PACKAGE_NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
   zile_exit();
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
-  fprintf(stderr, "Zile terminated with signal %d.\r\n", signo);
+  fprintf(stderr, PACKAGE_NAME " terminated with signal %d.\r\n", signo);
   zile_exit();
 }
 
@@ -253,24 +253,24 @@ int main(int argc, char **argv)
       fprintf(stderr,
               ZILE_VERSION_STRING "\n"
               ZILE_COPYRIGHT_STRING "\n"
-              "Zile comes with ABSOLUTELY NO WARRANTY.\n"
-              "You may redistribute copies of Zile\n"
+              PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+              "You may redistribute copies of " PACKAGE_NAME "\n"
               "under the terms of the GNU General Public License.\n"
               "For more information about these matters, see the file named COPYING.\n"
               );
       return 0;
     case 'h':
       fprintf(stderr,
-              "Usage: zile [OPTION-OR-FILENAME]...\n"
+              "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
               "\n"
-              "Run Zile, the lightweight Emacs clone.\n"
+              "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
               "\n"
               "Initialization options:\n"
               "\n"
               "--batch                do not do interactive display; implies -q\n"
               "--help                 display this help message and exit\n"
-              "--funcall, -f FUNC     call Zile function FUNC with no arguments\n"
-              "--no-init-file, -q     do not load ~/.zile\n"
+              "--funcall, -f FUNC     call " PACKAGE_NAME " function FUNC with no arguments\n"
+              "--no-init-file, -q     do not load ~/." PACKAGE "\n"
               "--version              display version information and exit\n"
               "\n"
               "Action options:\n"
@@ -284,7 +284,7 @@ int main(int argc, char **argv)
         ms = astr_afmt(astr_new(), "Unknown option `%s'", argv[this_optind]);
       break;
     case ':':                   /* Missing argument */
-      fprintf(stderr, "zile: Option `%s' requires an argument\n\n", argv[this_optind]);
+      fprintf(stderr, PACKAGE ": Option `%s' requires an argument\n\n", argv[this_optind]);
       exit(1);
     }
   }
@@ -314,7 +314,7 @@ int main(int argc, char **argv)
       le *list;
 
       astr as = get_home_dir();
-      astr_cat_cstr(as, "/.zile");
+      astr_cat_cstr(as, "/." PACKAGE);
       list = lisp_read_file(astr_cstr(as));
       astr_delete(lisp_dump(list));
       astr_delete(as);
@@ -348,7 +348,7 @@ int main(int argc, char **argv)
     execute_functions(fargs);
     list_delete(fargs);
 
-    /* Run the main Zile loop. */
+    /* Run the main loop. */
     loop();
 
     /* Tidy and close the terminal. */
