@@ -220,6 +220,7 @@ int main(int argc, char **argv)
   int c, bflag = FALSE, qflag = FALSE;
   astr ms = NULL;
   list fargs = list_new();
+  size_t line;
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
@@ -323,20 +324,19 @@ int main(int argc, char **argv)
     /* Reinitialise the scratch buffer to catch settings */
     init_buffer(cur_bp);
 
-    if (argc >= 1) {
-      while (*argv) {
-        size_t line = 1;
-        if (**argv == '+')
-          line = strtoul(*argv++ + 1, NULL, 10);
-        if (*argv) {
-          find_file(*argv++);
-
-          if (line > 1)
-            ngotodown(line - 1);
-          lastflag |= FLAG_NEED_RESYNC;
-        }
+    /* Open files given on the command line */
+    for (line = 1; *argv; argv++) {
+      if (**argv == '+')
+        line = strtoul(*argv + 1, NULL, 10);
+      else {
+        find_file(*argv);
+        ngotodown(line - 1);
+        line = 1;
+        lastflag |= FLAG_NEED_RESYNC;
       }
-    } else if (list_length(fargs) == 0)
+    }
+
+    if (argc == 0 && list_length(fargs) == 0)
       /* Show the splash screen only if no files and no Lisp expression
          or load file is specified on the command line. */
       about_screen();
