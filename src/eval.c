@@ -1,6 +1,6 @@
 /* Lisp eval
    Copyright (c) 2001 Scott "Jerry" Lawrence.
-   Copyright (c) 2005-2006 Reuben Thomas.
+   Copyright (c) 2005-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -55,8 +55,7 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
 
 
 static evalLookupNode evalTable[] = {
-  { "set"	, eval_cb_set		},
-  { "setq"	, eval_cb_setq		},
+  { "setq"	, eval_cb_setq },
 #define X0(zile_name, c_name) \
   { zile_name   , eval_cb_ ## c_name },
 #define X1(zile_name, c_name, key1) \
@@ -70,7 +69,7 @@ static evalLookupNode evalTable[] = {
 #undef X1
 #undef X2
 #undef X3
-  { NULL	, NULL			},
+  { NULL	, NULL },
 };
 
 
@@ -146,11 +145,10 @@ int countNodes(le *branch)
   return count;
 }
 
-
-static le *eval_cb_set_helper(enum setfcn function, le *branch)
+le *eval_cb_setq(int argc, le *branch)
 {
-  int argc = countNodes(branch);
-  le *newkey = NULL /* XXX unnecessary */, *newvalue = leNIL, *current;
+  le *newvalue = leNIL, *current;
+  argc = countNodes(branch);
 
   if (branch != NULL && argc >= 3) {
     for (current = branch->list_next; current; current = current->list_next->list_next) {
@@ -159,12 +157,7 @@ static le *eval_cb_set_helper(enum setfcn function, le *branch)
 
       newvalue = evaluateNode(current->list_next);
 
-      variableSet(&mainVarList,
-                  function == S_SET ? (newkey = evaluateNode(current))->data : current->data,
-                  newvalue);
-
-      if (function == S_SET)
-        leWipe(newkey);
+      variableSet(&mainVarList, current->data, newvalue);
 
       if (current->list_next == NULL)
         break;
@@ -172,14 +165,4 @@ static le *eval_cb_set_helper(enum setfcn function, le *branch)
   }
 
   return newvalue;
-}
-
-le *eval_cb_set(int argc GCC_UNUSED, le *branch)
-{
-  return eval_cb_set_helper(S_SET, branch);
-}
-
-le *eval_cb_setq(int argc GCC_UNUSED, le *branch)
-{
-  return eval_cb_set_helper(S_SETQ, branch);
 }
