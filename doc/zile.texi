@@ -107,18 +107,17 @@ The options are as follows:
 @item FILE
 Edit file @file{FILE}.
 @item +NUMBER
-For the first file the cursor will be positioned on the line specified by
-@samp{NUMBER} (do not insert a space between the @samp{+} sign and the number).
+Go to line @samp{NUMBER} in the next file opened.
 @item --batch
-Run in batch mode.
-@item -f, --funcall FUNC
-Call Lisp function @samp{FUNC}.
+Do not do interactive display; implies @samp{-q}.
 @item --help
-Print the command line syntax and exit.
-@item -q, --no-init-file
-Do not load ~/.zile.
+Display a help message and exit.
+@item -f, --funcall FUNC
+Call Zile function @samp{FUNC} with no arguments.
+@item --no-init-file, -q
+Do not load an init file.
 @item --version
-Print version information and exit.
+Display version information and exit.
 @end table
 
 Zile returns 0 on successful termination, 1 if it cannot start up, for
@@ -143,9 +142,9 @@ line switch @samp{-q} to tell Zile not to load the initialization file.
 @node File syntax, Sample file, Initialization file, Initialization file
 @section File syntax
 
-The initialization file is an ordinary Lisp file. See the Lisp manual
-for more details. The file is most commonly used to initialize
-variables; see the next subsection for an example.
+The initialization file is written in Zile Lisp. Zile Lisp is a tiny
+subset of Emacs Lisp that consists of the Zile commands plus
+@code{setq}. See the next subsection for a sample initialization file.
 
 @c ---------------------------------------------------------------------------
 @node Sample file,  , File syntax, Initialization file

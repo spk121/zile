@@ -7,46 +7,42 @@
 .Nd Zile Is Lossy Emacs
 .Sh SYNOPSIS
 .Nm zile
-.Op Fl hqV
-.Op Fl u Ar rcfile
-.Op Ar +number
-.Op Ar
+.Op OPTION...
+.Op FILE...
 .Sh DESCRIPTION
 .Nm Zile
-is a lightweight Emacs clone.
-.Pp
-This document contains only a brief description of the Zile editor.  For a
-more complete documentation, please read the Info file or the
-Texinfo manual.
-.Pp
-The options are as follows:
+is a lightweight Emacs clone that provides a subset of Emacs's
+functionality suitable for basic editing. It should run on any POSIX
+system with ncurses. For more complete documentation, see the Info
+manual (`info zile').
+.Sh OPTIONS
 .Bl -tag -width indent
-.It Ar +number
-For the first file the cursor will be positioned on the line specified by
-.Ar number
-(do not insert a space between the "+" sign and the number).
-.It Fl q
-Do not load the user's initialization file.
-.It Fl u Ar rcfile
-Specify an alternate initialization file.
-.It Fl V
-Print version information on standard output then exit.
+.It Ar +NUMBER
+Go to line \fINUMBER\fR in the next file opened.
+.It Fl -batch
+Do not do interactive display; implies -q.
+.It Fl -help
+Display a help message and exit.
+.It Fl -funcall, f Ar FUNC
+call Zile function \fIFUNC\fR with no arguments.
+.It Fl -no-init-file, q
+Do not load an init file.
+.It Fl -version
+Display version information and exit.
 .El
+.Sh DIAGNOSTICS
+Zile returns 0 on successful termination, 1 if it cannot start up, for
+example because of an invalid command-line argument, and 2 if it
+crashes or runs out of memory.
 .Sh FILES
 .Bl -tag -width Fl
 .It Pa ~/.zile
-user customized Zile initialization file
-.It Pa @pkgdatadir@/AUTODOC
-self-documentation
-.It Pa @pkgdatadir@/FAQ
-Zile FAQ
-.It Pa @pkgdatadir@/HELP
-Zile manual
-.It Pa @pkgdatadir@/TUTORIAL
-Zile tutorial
+user's Zile init file
 .It Pa @pkgdatadir@/dotzile.sample
-sample Zile initialization file
+sample Zile init file
 .El
+.Sh BUGS
+Please report bugs to \fBzile-devel@lists.sourceforge.net\fR.
 .Sh SEE ALSO
 .Xr emacs 1 ,
 .Xr xemacs 1 ,
@@ -54,6 +50,6 @@ sample Zile initialization file
 .Sh AUTHORS
 Sandro Sigala <sandro@sigala.it>
 .br
-David A. Capello <dacap@users.sourceforge.net>
-.br
 Reuben Thomas <rrt@sc3d.org>
+.br
+David A. Capello <dacap@users.sourceforge.net>
