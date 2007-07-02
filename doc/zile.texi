@@ -36,7 +36,7 @@ Copyright @copyright{} 2004 David A. Capello
 
 This is the @emph{Zile} manual.
 
-Zile is another Emacs-clone.
+Zile is small Emacs clone.
 Zile is a customizable, self-documenting real-time display editor.
 Zile was written to be as similar as possible to Emacs; every Emacs
 user should feel at home with Zile.
