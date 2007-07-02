@@ -31,10 +31,6 @@ If you are debugging the editor, you can enable the debugging code:
 
   --enable-debug          include debugging code and assertions
 
-To build with the EPOC front-end, use:
-
-  --enable-epocemx        use epocemx interface
-
 For other configure options, run
 
 	./configure --help

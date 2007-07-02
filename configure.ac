@@ -69,51 +69,16 @@ if test "$GCC" = "yes"; then
 fi
 
 dnl ==================================================================
-dnl epocemx
-dnl ==================================================================
-
-AC_MSG_CHECKING([use epocemx])
-AC_ARG_ENABLE(epocemx,
-AC_HELP_STRING([--enable-epocemx], [use epocemx interface]),
-[
-if test $enableval = yes; then
-        epocemx=true
-        AC_MSG_RESULT(yes)
-else
-        epocemx=false
-        AC_MSG_RESULT(no)
-fi
-],[
-        epocemx=false
-        AC_MSG_RESULT(no)
-])
-
-AM_CONDITIONAL(EPOCEMX, test x$epocemx = xtrue)
-
-dnl ==================================================================
 dnl Curses
 dnl ==================================================================
 
-AC_DEFUN([CHECK_CURSES],
-[
-        AC_MSG_CHECKING([use curses])
-        AC_MSG_RESULT(yes)
-        AC_DEFINE(CURSES, 1, [Define this to use curses.])
-        AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
-[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
+AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
+	[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
         AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
         dnl Check if ncurses library is available as libncurses or libcurses
         AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
         [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
-])
-
-if test x$epocemx = xfalse; then
-        curses=true
-        CHECK_CURSES
-fi
-
-AM_CONDITIONAL(CURSES, test x$curses = xtrue)
+	AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 
 dnl ==================================================================
 dnl Extra definitions for config.h
