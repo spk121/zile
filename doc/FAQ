@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2007/07/02 15:59:17 $
+		   Last updated: $Date: 2007/07/02 23:46:42 $
 
 ------------------------------------------------------------------------------
 
@@ -98,12 +98,12 @@ INDEX
 
 1.10. Zile doesn't compile.
 
-    We have tested Zile under GNU/Linux only (other than the EPOC
-    port), although it should work on any POSIX-compliant OS that
-    supports ncurses. If you get Zile running under an OS not listed
-    here, please send a message to the Zile developers telling them
-    that (you might also send any patches you have made to the Zile
-    sources if you want them included in the next release).
+    We have tested Zile under GNU/Linux only, although it should work
+    on any POSIX-compliant OS that supports ncurses. If you get Zile
+    running under an OS not listed here, please send a message to the
+    Zile developers telling them that (you might also send any patches
+    you have made to the Zile sources if you want them included in the
+    next release).
 
 ------------------------------------------------------------------------------
 

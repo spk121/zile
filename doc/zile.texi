@@ -59,7 +59,7 @@ user should feel at home with Zile.
 @chapter Overview
 
 The @emph{Zile} editor is written entirely in @emph{@w{ANSI C}}.
-It should run on any POSIX system. It has also been ported to @emph{EPOC}.
+It should run on any POSIX system.
 
 Zile should really appear like Emacs, but a lot of good ideas were
 also taken from other editors; in particular, ce for the internal
