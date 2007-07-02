@@ -69,37 +69,6 @@ if test "$GCC" = "yes"; then
 fi
 
 dnl ==================================================================
-dnl Allegro
-dnl ==================================================================
-
-AC_DEFUN([zile_CHECK_ALLEGRO],
-[
-        AC_CHECK_HEADER(allegro.h,
-			AC_DEFINE(HAVE_ALLEGRO_H, 1, [We have the allegro.h header.]),
-			AC_MSG_FAILURE([cannot find allegro.h]))
-        AC_DEFINE(ALLEGRO, 1, [Define this to use Allegro library.])
-])
-
-AC_MSG_CHECKING([use allegro library])
-AC_ARG_ENABLE(allegro,
-AC_HELP_STRING([--enable-allegro], [use Allegro interface]),
-[
-if test $enableval = yes; then
-        allegro=true
-        AC_MSG_RESULT(yes)
-	zile_CHECK_ALLEGRO
-else
-        allegro=false
-        AC_MSG_RESULT(no)
-fi
-],[
-        allegro=false
-        AC_MSG_RESULT(no)
-])
-
-AM_CONDITIONAL(ALLEGRO, test x$allegro = xtrue)
-
-dnl ==================================================================
 dnl epocemx
 dnl ==================================================================
 
@@ -139,7 +108,7 @@ AC_DEFUN([CHECK_CURSES],
 AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 ])
 
-if test x$allegro = xfalse && test x$epocemx = xfalse; then
+if test x$epocemx = xfalse; then
         curses=true
         CHECK_CURSES
 fi

@@ -64,15 +64,10 @@ zile_base_SOURCES =				\
 	term_redisplay.c			\
 	zile.h
 
-if ALLEGRO
-zile_SOURCES = $(zile_base_SOURCES) term_allegro.c
-zile_LDFLAGS = `allegro-config --libs`
-else
 if EPOCEMX
 zile_SOURCES = $(zile_base_SOURCES) term_epocemx.c
 else
 zile_SOURCES = $(zile_base_SOURCES) term_ncurses.c
-endif
 endif
 
 zile_LDADD = $(regex) @LIBOBJS@

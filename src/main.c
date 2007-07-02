@@ -39,11 +39,6 @@
 #include "getopt.h"
 #endif
 #include <signal.h>
-#if ALLEGRO
-#if HAVE_ALLEGRO_H
-#include <allegro.h>
-#endif
-#endif
 
 #include "zile.h"
 #include "extern.h"
