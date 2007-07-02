@@ -440,9 +440,6 @@ This table contains the full list of available functions, that can be
 called with the @kbd{M-x} key (please note that most functions have a
 key binding, anyway).
 
-Please note that some functions may be not available depending
-on the compilation options given to @samp{configure}.
-
 @c LINT FUNC
 @table @code
 @item auto-fill-mode
@@ -838,9 +835,6 @@ Show the zile version.
 This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
 in the @file{.zile} initialization file.
-
-Please note that some variables may be not available depending
-on the compilation options given to @samp{configure}.
 
 @c LINT VAR
 @table @code
