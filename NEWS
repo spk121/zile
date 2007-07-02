@@ -3,6 +3,7 @@ Changes since Zile 2.2
 * Fix macro creation.
 * Add --funcall back.
 * termcap terminal replaced with ncurses again.
+* Removed Allegro and EPOC support.
 * Incremental search improved.
 * "true" and "false" changed to "t" and "nil".
 * Allow key-binding in .zile.
