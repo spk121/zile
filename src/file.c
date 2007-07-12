@@ -232,20 +232,22 @@ astr compact_path(const astr path)
 static astr get_current_dir(void)
 {
   astr buf;
+  int p;
 
-  if (cur_bp->filename != NULL) {
+  if (cur_bp->filename != NULL)
     /* If the current buffer has a filename, get the current directory
        name from it. */
-    int p;
-
     buf = astr_new_cstr(cur_bp->filename);
-    if ((p = astr_rfind_cstr(buf, "/")) != -1)
-      astr_truncate(buf, (ptrdiff_t)(p ? p : 1));
-  } else /* Get the current directory name from the system. */
+  else { /* Get the current directory name from the system. */
     buf = agetcwd();
+    if (astr_len(buf) != 0 && *astr_char(buf, -1) != '/')
+      astr_cat_char(buf, '/');
+  }
 
-  if (*astr_char(buf, -1) != '/')
-    astr_cat_char(buf, '/');
+  if ((p = astr_rfind_cstr(buf, "/")) != -1)
+    astr_truncate(buf, (ptrdiff_t)(p ? p : 1));
+  else /* if just a file name, clear it */
+    astr_truncate(buf, 0);
 
   return buf;
 }
