@@ -8,3 +8,4 @@
 
 extern int asprintf(char **strp, const char *fmt, ...);
 extern int vasprintf(char **strp, const char *fmt, va_list ap);
+extern char *strrstr(const char *, const char *);

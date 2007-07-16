@@ -218,7 +218,8 @@ static int completion_reread(Completion *cp, astr as)
     pdir = dirname(s1);
     /* Append `/' to pdir */
     astr_cat_cstr(bs, pdir);
-    astr_cat_char(bs, '/');
+    if (*astr_char(bs, -1) != '/')
+      astr_cat_char(bs, '/');
     pdir = astr_cstr(bs);
     base = basename(s2);
   } else {

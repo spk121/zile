@@ -36,11 +36,13 @@ char *strrstr(const char *s, const char *t)
   if (slen < tlen)
     return NULL;
 
-  for (i = slen - tlen; i > 0; i--) {
+  for (i = slen - tlen;; i--) {
     for (j = 0; j < tlen && s[i + j] == t[j]; j++)
       ;
     if (j == tlen)
       return (char *)(s + i);
+    if (i == 0)
+      break;
   }
   return NULL;
 }
