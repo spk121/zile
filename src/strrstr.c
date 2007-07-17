@@ -31,19 +31,19 @@ char *strrstr(const char *s, const char *t);
 
 char *strrstr(const char *s, const char *t)
 {
-  size_t i, j, slen = strlen(s), tlen = strlen(t);
+  size_t slen = strlen(s), tlen = strlen(t);
 
-  if (slen < tlen)
-    return NULL;
+  if (slen >= tlen) {
+    size_t i = slen - tlen, j;
 
-  for (i = slen - tlen;; i--) {
-    for (j = 0; j < tlen && s[i + j] == t[j]; j++)
-      ;
-    if (j == tlen)
-      return (char *)(s + i);
-    if (i == 0)
-      break;
+    do {
+      for (j = 0; j < tlen && s[i + j] == t[j]; j++)
+        ;
+      if (j == tlen)
+        return (char *)(s + i);
+    } while (i-- != 0);
   }
+
   return NULL;
 }
 
