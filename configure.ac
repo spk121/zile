@@ -19,7 +19,6 @@ dnl ==================================================================
 AC_PROG_CC
 BFD_CC_FOR_BUILD
 AC_PROG_INSTALL
-AC_PATH_PROG(MAKEINFO, makeinfo)
 AM_PROG_CC_C_O
 
 dnl ==================================================================
