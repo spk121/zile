@@ -21,7 +21,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle for Zile version 2.2
-@subtitle June 2007
+@subtitle July 2007
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -572,7 +572,7 @@ Show a configuration file sample.
 @item help-with-tutorial
 Show a tutorial window.
 @item indent-for-tab-command
-Indent line in proper way for current major mode or insert a tab.
+Indent line or insert a tab.
 @item insert-buffer
 Insert after point the contents of the user specified buffer.
 Puts mark after the inserted text.
@@ -666,7 +666,7 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
 Insert a newline at the current point position into
 the current buffer.
 @item newline-and-indent
-Insert a newline, then indent according to major mode.
+Insert a newline, then indent.
 Indentation is done using the @i{indent-for-tab-command} function.
 @item next-line
 Move cursor vertically down one line.
@@ -866,8 +866,9 @@ Default value is @samp{nil}.
 @item highlight-nonselected-windows
 If enabled, highlight region even in nonselected windows.  Default
 value is @samp{nil}.
-@item skip-splash-screen
-If enabled, the splash screen at startup will be avoided.
+@item inhibit-splash-screen
+Non-nil inhibits the startup screen.
+It also inhibits display of the initial message in the `*scratch*' buffer.
 Default value is @samp{nil}.
 @item standard-indent
 Default number of columns for margin-changing functions to

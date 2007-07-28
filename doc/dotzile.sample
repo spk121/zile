@@ -1,7 +1,7 @@
 ; .zile sample configuration
 
 ; Do not display the splash screen at startup [default: nil]
-(setq skip-splash-screen nil)
+(setq inhibit-splash-screen nil)
 
 ; The default tabulation width [default: 8]
 (setq tab-width 8)

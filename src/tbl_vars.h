@@ -31,13 +31,14 @@ If enabled, highlight region even in nonselected windows.")
 X("indent-tabs-mode",			"nil", TRUE, "\
 If enabled, insert-tab inserts `real' tabs; otherwise, it always inserts\n\
 spaces.")
+X("inhibit-splash-screen",		"nil", FALSE, "\
+Non-nil inhibits the startup screen.\n\
+It also inhibits display of the initial message in the `*scratch*' buffer.")
 X("kill-whole-line",			"nil", FALSE, "\
 If enabled, `kill-line' with no arg at beg of line kills the whole line.")
 X("make-backup-files",			"t", FALSE, "\
 Non-nil means make a backup of a file the first time it is saved.\n\
 This is done by appending `~' to the file name. ")
-X("skip-splash-screen",			"nil", FALSE, "\
-If enabled, the splash screen at startup will be avoided.")
 X("standard-indent",			"4", FALSE, "\
 Default number of columns for margin-changing functions to indent.")
 X("tab-always-indent",			"t", FALSE, "\
