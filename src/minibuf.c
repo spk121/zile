@@ -214,36 +214,6 @@ int minibuf_read_yesno(const char *fmt, ...)
   return retvalue;
 }
 
-int minibuf_read_boolean(const char *fmt, ...)
-{
-  va_list ap;
-  char *buf;
-  Completion *cp;
-  int retvalue;
-
-  va_start(ap, fmt);
-  buf = minibuf_format(fmt, ap);
-  va_end(ap);
-
-  cp = completion_new(FALSE);
-  list_append(cp->completions, zstrdup("t"));
-  list_append(cp->completions, zstrdup("nil"));
-
-  retvalue = minibuf_read_forced(buf, "Please answer `t' or `nil'.", cp);
-  if (retvalue != -1) {
-    /* The completions may be sorted by the minibuf completion
-       routines. */
-    if (!strcmp(list_at(cp->completions, (size_t)retvalue), "t"))
-      retvalue = TRUE;
-    else
-      retvalue = FALSE;
-  }
-  free_completion(cp);
-  free(buf);
-
-  return retvalue;
-}
-
 /*
  * Read a string from the minibuffer using a completion.
  */

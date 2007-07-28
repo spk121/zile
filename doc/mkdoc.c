@@ -44,13 +44,12 @@ struct fentry {
 
 struct ventry {
   char	*name;
-  char	*fmt;
   char	*defvalue;
   int	local;
   char	*doc;
 } ventry_table[] = {
-#define X(name, fmt, defvalue, local, doc) \
-	{ name, fmt, defvalue, local, doc },
+#define X(name, defvalue, local, doc) \
+	{ name, defvalue, local, doc },
 #include "tbl_vars.h"
 #undef X
 };

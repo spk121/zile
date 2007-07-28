@@ -179,7 +179,6 @@ void minibuf_error(const char *fmt, ...);
 void minibuf_write(const char *fmt, ...);
 char *minibuf_read(const char *fmt, const char *value, ...);
 int minibuf_read_yesno(const char *fmt, ...);
-int minibuf_read_boolean(const char *fmt, ...);
 char *minibuf_read_dir(const char *fmt, const char *value, ...);
 char *minibuf_read_completion(const char *fmt, char *value, Completion *cp, History *hp, ...);
 void minibuf_clear(void);

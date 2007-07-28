@@ -38,11 +38,10 @@
  */
 static struct var_entry {
   char *var;                    /* Variable name. */
-  char *fmt;                    /* Variable format (boolean, etc.). */
   char *val;                    /* Default value. */
   int local;                    /* If true, becomes local when set. */
 } def_vars[] = {
-#define X(zile_var, fmt, val, local, doc) { zile_var, fmt, val, local },
+#define X(var, val, local, doc) { var, val, local },
 #include "tbl_vars.h"
 #undef X
 };
@@ -169,15 +168,8 @@ Set a variable value to the user-specified value.
     return FALSE;
 
   ent = get_variable_entry(var);
-  if (ent && !strcmp(ent->fmt, "b")) {
-    int i;
-    if ((i = minibuf_read_boolean("Set %s to value: ", var)) == -1)
-      return cancel();
-    val = (i == TRUE) ? "t" : "nil";
-  } else { /* Non-boolean variable. */
-    if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
-      return cancel();
-  }
+  if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
+    return cancel();
 
   /* Some variables automatically become buffer-local when set in
      any fashion. */
