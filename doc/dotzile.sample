@@ -8,21 +8,21 @@
 
 ; Always indent [default: t]
 ; Controls the operation of the TAB key.
-; If enabled, hitting TAB always just indents the current line.
-; Otherwise, hitting TAB indents the current line if point is at the
-; left margin or in the line's indentation, otherwise it moves to the
-; next tab stop.
+; If t, hitting TAB always just indents the current line.
+; If nil, hitting TAB indents the current line if point is at the
+; left margin or in the line's indentation, otherwise it inserts a
+; "real" TAB character.
 (setq tab-always-indent t)
 
 ; Insert real tabs [default: nil]
-; If enabled, insert-tab inserts `real' tabs; otherwise, it always
+; If non-nil, insert-tab inserts `real' tabs; otherwise, it always
 ; inserts spaces.
 (setq indent-tabs-mode nil)
 
 ; The default fill column (in Auto Fill Mode) [default: 72]
 (setq fill-column 72)
 
-; Enable the Auto Fill Mode [default: nil]
+; Enable Auto Fill Mode [default: nil]
 (setq auto-fill-mode nil)
 
 ; Kill whole line regardless of cursor position [default: nil]
@@ -34,21 +34,21 @@
 ; Match case when replacing [default: t]
 (setq case-replace t)
 
-; Enable beep [default: t]
-; If enabled, a sound will be emitted on any error.
-(setq beep t)
+; Enable bell [default: t]
+; Non-nil means ring the terminal bell on any error.
+(setq ring-bell t)
 
 ; Standard indentation level [default: 4]
 ; Default number of columns for margin-changing functions to indent.
 (setq standard-indent 4)
 
-; If enabled, deactivates the mark when the buffer contents change.
+; If non-nil, deactivates the mark when the buffer contents change.
 ; Also enables highlighting of the region whenever the mark is active.
 ; The variable `highlight-nonselected-windows' controls whether to
 ; highlight all windows or just the selected window. [default: t]
 (setq transient-mark-mode t)
 
-; If enabled, highlight region even in nonselected windows.
+; If non-nil, highlight region even in nonselected windows.
 ; [default: nil]
 (setq highlight-nonselected-windows nil)
 
