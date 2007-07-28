@@ -9,5 +9,3 @@ EXTRA_DIST =					\
 	NEWS					\
 	README					\
 	THANKS
-
-CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/src
