@@ -285,7 +285,6 @@ static char *make_screen_pos(Window *wp, char **buf)
 static void draw_status_line(size_t line, Window *wp)
 {
   size_t i;
-  int someflag = 0;
   char *buf;
   Point pt = window_pt(wp);
 
@@ -296,27 +295,22 @@ static void draw_status_line(size_t line, Window *wp)
     term_addch('-');
 
   term_move(line, 0);
-  term_printw("--%2s- %-18s (", make_mode_line_flags(wp), wp->bp->name);
-
-  if (wp->bp->flags & BFLAG_AUTOFILL) {
-    term_printw("Fill");
-    someflag = 1;
-  }
-  if (wp->bp->flags & BFLAG_OVERWRITE) {
-    term_printw("%sOvwrt", someflag ? " " : "");
-    someflag = 1;
-  }
-  if (thisflag & FLAG_DEFINING_MACRO) {
-    term_printw("%sDef", someflag ? " " : "");
-    someflag = 1;
-  }
-  if (wp->bp->flags & BFLAG_ISEARCH)
-    term_printw("%sIsearch", someflag ? " " : "");
-
-  term_printw(")--L%d--C%d--%s",
-              pt.n+1, get_goalc_wp(wp),
-              make_screen_pos(wp, &buf));
+  term_printw("--:%2s  %-15s   %s (%d,%d)      (Text",
+              make_mode_line_flags(wp), wp->bp->name,
+              make_screen_pos(wp, &buf),
+              pt.n+1, get_goalc_wp(wp));
   free(buf);
+
+  if (wp->bp->flags & BFLAG_AUTOFILL)
+    term_printw(" Fill");
+  if (wp->bp->flags & BFLAG_OVERWRITE)
+    term_printw(" Ovwrt");
+  if (thisflag & FLAG_DEFINING_MACRO)
+    term_printw(" Def");
+  if (wp->bp->flags & BFLAG_ISEARCH)
+    term_printw(" Isearch");
+
+  term_addch(')');
 
   term_attrset(1, FONT_NORMAL);
 }
