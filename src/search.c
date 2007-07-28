@@ -408,8 +408,7 @@ static int isearch(int dir, int regexp)
       cur_bp->pt = start;
       thisflag |= FLAG_NEED_RESYNC;
 
-      /* "Quit" (also it calls ding() and stops
-         recording macros). */
+      /* Quit. */
       cancel();
 
       /* Restore old mark position. */
@@ -422,8 +421,6 @@ static int isearch(int dir, int regexp)
         cur_bp->mark = old_mark;
       break;
     } else if (c == KBD_BS) {
-      /* FIXME: Currently goes back to start; should unwind one match at a
-         time */
       if (astr_len(pattern) > 0) {
         astr_truncate(pattern, -1);
         cur = cur_bp->pt = start;
