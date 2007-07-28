@@ -287,6 +287,7 @@ static void draw_status_line(size_t line, Window *wp)
   size_t i;
   char *buf;
   Point pt = window_pt(wp);
+  astr as;
 
   term_attrset(1, FONT_REVERSE);
 
@@ -295,11 +296,12 @@ static void draw_status_line(size_t line, Window *wp)
     term_addch('-');
 
   term_move(line, 0);
-  term_printw("--:%2s  %-15s   %s (%d,%d)      (Text",
+  as = astr_afmt(astr_new(), "(%d,%d)", pt.n+1, get_goalc_wp(wp));
+  term_printw("--:%2s  %-15s   %s %-9s (Text",
               make_mode_line_flags(wp), wp->bp->name,
-              make_screen_pos(wp, &buf),
-              pt.n+1, get_goalc_wp(wp));
+              make_screen_pos(wp, &buf), astr_cstr(as));
   free(buf);
+  astr_delete(as);
 
   if (wp->bp->flags & BFLAG_AUTOFILL)
     term_printw(" Fill");
