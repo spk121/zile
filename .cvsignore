@@ -1,8 +1,8 @@
-configure
+configure configure.lineno
 autom4te.cache
 aclocal.m4
 config.log
-config.status
+config.status config.status.lineno
 depcomp
 install-sh
 missing
