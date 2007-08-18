@@ -287,7 +287,7 @@ static void draw_status_line(size_t line, Window *wp)
   size_t i;
   char *buf;
   Point pt = window_pt(wp);
-  astr as;
+  astr as, bs;
 
   term_attrset(1, FONT_REVERSE);
 
@@ -296,23 +296,25 @@ static void draw_status_line(size_t line, Window *wp)
     term_addch('-');
 
   term_move(line, 0);
-  as = astr_afmt(astr_new(), "(%d,%d)", pt.n+1, get_goalc_wp(wp));
-  term_printw("--:%2s  %-15s   %s %-9s (Text",
+  bs = astr_afmt(astr_new(), "(%d,%d)", pt.n+1, get_goalc_wp(wp));
+  as = astr_afmt(astr_new(), "--:%2s  %-15s   %s %-9s (Text",
               make_mode_line_flags(wp), wp->bp->name,
-              make_screen_pos(wp, &buf), astr_cstr(as));
+              make_screen_pos(wp, &buf), astr_cstr(bs));
   free(buf);
-  astr_delete(as);
+  astr_delete(bs);
 
   if (wp->bp->flags & BFLAG_AUTOFILL)
-    term_printw(" Fill");
+    astr_cat_cstr(as, " Fill");
   if (wp->bp->flags & BFLAG_OVERWRITE)
-    term_printw(" Ovwrt");
+    astr_cat_cstr(as, " Ovwrt");
   if (thisflag & FLAG_DEFINING_MACRO)
-    term_printw(" Def");
+    astr_cat_cstr(as, " Def");
   if (wp->bp->flags & BFLAG_ISEARCH)
-    term_printw(" Isearch");
+    astr_cat_cstr(as, " Isearch");
 
-  term_addch(')');
+  astr_cat_char(as, ')');
+  term_addnstr(astr_cstr(as), min(term_width(), astr_len(as)));
+  astr_delete(as);
 
   term_attrset(1, FONT_NORMAL);
 }
@@ -391,20 +393,4 @@ void term_addnstr(const char *s, size_t len)
   size_t i;
   for (i = 0; i < len; i++)
     term_addch(*s++);
-}
-
-/*
- * printf on the terminal
- */
-int term_printw(const char *fmt, ...)
-{
-  char *buf;
-  int res = 0;
-  va_list ap;
-  va_start(ap, fmt);
-  res = zvasprintf(&buf, fmt, ap);
-  va_end(ap);
-  term_addnstr(buf, strlen(buf));
-  free(buf);
-  return res;
 }
