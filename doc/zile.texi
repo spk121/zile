@@ -129,8 +129,8 @@ crashes or runs out of memory.
 @chapter Initialization file
 
 When Zile is started, it normally loads the @file{.zile} file in your
-home directory. We call this file your ``initialization file'' because
-it specifies how to initialize Zile for you. You can use the command
+home directory.  We call this file your ``initialization file'' because
+it specifies how to initialize Zile for you.  You can use the command
 line switch @samp{-q} to tell Zile not to load the initialization file.
 
 @menu
@@ -142,9 +142,9 @@ line switch @samp{-q} to tell Zile not to load the initialization file.
 @node File syntax, Sample file, Initialization file, Initialization file
 @section File syntax
 
-The initialization file is written in Zile Lisp. Zile Lisp is a tiny
+The initialization file is written in Zile Lisp.  Zile Lisp is a tiny
 subset of Emacs Lisp that consists of the Zile commands plus
-@code{setq}. See the next subsection for a sample initialization file.
+@code{setq}.  See the next subsection for a sample initialization file.
 
 @c ---------------------------------------------------------------------------
 @node Sample file,  , File syntax, Initialization file
@@ -704,7 +704,7 @@ The desired position of point is always relative to the current window.
 @item replace-string
 Replace occurrences of a string with other text.
 @item save-buffer
-Save current buffer in visited file if modified. By default, makes the
+Save current buffer in visited file if modified.  By default, makes the
 previous version into a backup file if this is the first save.
 @item save-buffers-kill-zile
 Offer to save each buffer, then kill this Zile process.
