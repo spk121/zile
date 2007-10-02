@@ -149,6 +149,13 @@ struct Region {
 #define BFLAG_AUTOFILL  (0000400) /* The buffer is in Auto Fill mode. */
 #define BFLAG_ISEARCH   (0001000) /* The buffer is in Isearch loop. */
 
+/* Formats of end-of-line. */
+extern char coding_eol_lf[3];
+extern char coding_eol_crlf[3];
+extern char coding_eol_cr[3];
+/* This value is used to signal that the type is not yet decided. */
+extern char coding_eol_undecided[3];
+
 struct Buffer {
   /* The next buffer in buffer list. */
   Buffer *next;
@@ -184,7 +191,7 @@ struct Buffer {
   char *filename;
 
   /* EOL string (up to 2 chars) for this buffer. */
-  char eol[3];
+  char *eol;
 };
 
 struct Window {

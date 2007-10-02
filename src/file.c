@@ -278,19 +278,30 @@ static int check_writable(const char *filename)
 }
 #endif
 
+/* Formats of end-of-line. */
+char coding_eol_lf[3] = "\n";
+char coding_eol_crlf[3] = "\r\n";
+char coding_eol_cr[3] = "\r";
+/* This value is used to signal that the type is not yet decided. */
+char coding_eol_undecided[3] = "";
+
+/* Maximum number of EOLs to check before deciding type. */
+#define MAX_EOL_CHECK_COUNT 3
+
 /*
  * Read the file contents into a buffer.
- * Return quietly if the file doesn't exist.
+ * Return quietly if the file doesn't exist, or other error.
  */
 void read_from_disk(const char *filename)
 {
   Line *lp;
   FILE *fp;
   int i, size;
-  size_t eol_len = 0;
-  char buf[BUFSIZ + 1];
+  char *this_eol_type;
+  size_t eol_len = 0, total_eols = 0;
+  char buf[BUFSIZ];
 
-  buf[BUFSIZ] = '\0';     /* Sentinel for end of line checks. */
+  cur_bp->eol = coding_eol_undecided;
 
   if ((fp = fopen(filename, "r")) == NULL) {
     if (errno != ENOENT) {
@@ -307,31 +318,51 @@ void read_from_disk(const char *filename)
   
   lp = cur_bp->pt.p;
 
-  while ((size = fread(buf, 1, BUFSIZ, fp)) > 0)
-    for (i = 0; i < size; i++)
-      if ((eol_len > 0 && (strncmp(cur_bp->eol, buf + i, eol_len) != 0)) ||
-          (eol_len == 0 && (buf[i] != '\n' && buf[i] != '\r')))
-        astr_cat_char(lp->item, buf[i]);
-      else {
-        lp = list_prepend(lp, astr_new());
-        ++cur_bp->num_lines;
-
-        if (eol_len == 0) {
-          if (i < size - 1 &&
-              buf[i + 1] != buf[i] && (buf[i + 1] == '\n' ||
-                                       buf[i + 1] == '\r')) {
-            cur_bp->eol[0] = buf[i];
-            cur_bp->eol[1] = buf[i + 1];
-            eol_len = 2;
-          } else {
-            cur_bp->eol[0] = buf[i];
-            cur_bp->eol[1] = '\0';
-            eol_len = 1;
-          }
+  /* Read first chunk and determine EOL type. */
+  if ((size = fread(buf, 1, BUFSIZ, fp)) > 0) {
+    for (i = 0; i < size && total_eols < MAX_EOL_CHECK_COUNT; i++) {
+      if (buf[i] == '\n' || buf[i] == '\r') {
+        total_eols++;
+        if (buf[i] == '\n')
+          this_eol_type = coding_eol_lf;
+        else if (i >= size || buf[i + 1] != '\n')
+          this_eol_type = coding_eol_cr;
+        else {
+          this_eol_type = coding_eol_crlf;
+          i++;
         }
-
-        i += eol_len - 1;
+        
+        if (cur_bp->eol == coding_eol_undecided)
+          /* This is the first end-of-line. */
+          cur_bp->eol = this_eol_type;
+        else if (cur_bp->eol != this_eol_type) {
+          /* This EOL is different from the last; arbitrarily choose
+             LF. */
+          cur_bp->eol = coding_eol_lf;
+          break;
+        }
       }
+    }
+    
+    /* If no EOLs found, arbitrarily choose LF. */
+    if (cur_bp->eol == coding_eol_undecided)
+      cur_bp->eol = coding_eol_lf;
+    
+    eol_len = strlen(cur_bp->eol);
+    
+    /* Process this and subsequent chunks into lines. */
+    do {
+      for (i = 0; i < size; i++) {
+        if (strncmp(cur_bp->eol, buf + i, eol_len) != 0)
+          astr_cat_char(lp->item, buf[i]);
+        else {
+          lp = list_prepend(lp, astr_new());
+          ++cur_bp->num_lines;
+          i += eol_len - 1;
+        }
+      }
+    } while ((size = fread(buf, 1, BUFSIZ, fp)) > 0);
+  }
 
   list_next(lp) = cur_bp->lines;
   list_prev(cur_bp->lines) = lp;

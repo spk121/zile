@@ -21,7 +21,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle for Zile version 2.2
-@subtitle July 2007
+@subtitle October 2007
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -91,10 +91,10 @@ This works for @kbd{M-x} commands and for file names.
 Zile automatically breaks the lines when they become too wide (if
 @i{Auto Fill Mode} is enabled).
 @item Auto line ending detection.
-When a file is loaded, its line ending is detected automatically
-according to the first end of line, either LF, CR, CRLF or LFCR.  Files with
-mixed line endings will not be corrupted, but the line breaks will not be correctly
-displayed.
+When a file is loaded, its line ending is detected automatically as
+either LF, CR or CRLF. Files with mixed line endings will be displayed
+as if they had LF line endings. If a CR line ending is detected,
+``(Mac)'' is shown in the modeline, and for CRLF, ``(DOS)''.
 @end itemize
 
 @c ---------------------------------------------------------------------------

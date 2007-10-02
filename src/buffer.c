@@ -54,7 +54,7 @@ static Buffer *buffer_new(void)
   list_prev(bp->pt.p) = list_next(bp->pt.p) = bp->lines;
 
   /* Set default EOL string. */
-  bp->eol[0] = '\n';
+  bp->eol = coding_eol_lf;
 
   return bp;
 }

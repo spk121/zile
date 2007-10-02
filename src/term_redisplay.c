@@ -1,6 +1,6 @@
 /* Redisplay engine
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -285,7 +285,7 @@ static char *make_screen_pos(Window *wp, char **buf)
 static void draw_status_line(size_t line, Window *wp)
 {
   size_t i;
-  char *buf;
+  char *buf, *eol_type;
   Point pt = window_pt(wp);
   astr as, bs;
 
@@ -295,11 +295,18 @@ static void draw_status_line(size_t line, Window *wp)
   for (i = 0; i < wp->ewidth; ++i)
     term_addch('-');
 
+  if (cur_bp->eol == coding_eol_cr)
+    eol_type = "(Mac)";
+  else if (cur_bp->eol == coding_eol_crlf)
+    eol_type = "(DOS)";
+  else
+    eol_type = ":";
+    
   term_move(line, 0);
   bs = astr_afmt(astr_new(), "(%d,%d)", pt.n+1, get_goalc_wp(wp));
-  as = astr_afmt(astr_new(), "--:%2s  %-15s   %s %-9s (Text",
-              make_mode_line_flags(wp), wp->bp->name,
-              make_screen_pos(wp, &buf), astr_cstr(bs));
+  as = astr_afmt(astr_new(), "--%s%2s  %-15s   %s %-9s (Text",
+                 eol_type, make_mode_line_flags(wp), wp->bp->name,
+                 make_screen_pos(wp, &buf), astr_cstr(bs));
   free(buf);
   astr_delete(bs);
 
