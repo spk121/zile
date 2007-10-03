@@ -35,8 +35,6 @@
 #include "zile.h"
 #include "extern.h"
 
-int xterm;
-
 void term_move(size_t y, size_t x)
 {
   move((int)y, (int)x);
@@ -90,19 +88,12 @@ void term_beep(void)
 
 void term_init(void)
 {
-  char *term = getenv("TERM");
-
-  if (term && strcmp(term, "xterm") == 0) {
-    xterm = TRUE;
-    printf("\033[?1036h");      /* Make Meta send ESC */
-  }
   initscr();
-
   term_set_size((size_t)COLS, (size_t)LINES);
-
   noecho();
   nonl();
   raw();
+  meta(stdscr, TRUE);
   intrflush(stdscr, FALSE);
   keypad(stdscr, TRUE);
 }
@@ -116,8 +107,6 @@ void term_close(void)
 
   /* Free memory and finish with ncurses. */
   endwin();
-  if (xterm)
-    printf("\033[?1036l");      /* Reset Meta key */
 }
 
 static size_t translate_key(int c)
