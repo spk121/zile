@@ -306,7 +306,8 @@ astr keyvectostr(size_t *keys, size_t numkeys)
  */
 astr simplify_key(char *key)
 {
-  size_t i, j, *keys;
+  int i, j;
+  size_t *keys;
   astr dest = astr_new();
 
   if (key == NULL)

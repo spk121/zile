@@ -119,7 +119,8 @@ static void bind_key_vec(leafp tree, size_t *keys, size_t n, Function func)
 
 static void bind_key_string(char *key, Function func)
 {
-  size_t numkeys, *keys;
+  int numkeys;
+  size_t *keys;
 
   if ((numkeys = keystrtovec(key, &keys)) > 0) {
     bind_key_vec(leaf_tree, keys, numkeys, func);
@@ -170,7 +171,7 @@ static astr make_completion(size_t *keys, size_t numkeys)
   return astr_cat_char(as, '-');
 }
 
-static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)
+static leafp completion_scan(size_t key, size_t **keys, int *numkeys)
 {
   leafp p;
   vector *v = vec_new(sizeof(key));
@@ -194,8 +195,8 @@ static leafp completion_scan(size_t key, size_t **keys, size_t *numkeys)
 
 void process_key(size_t key)
 {
-  int uni;
-  size_t *keys = NULL, numkeys;
+  int uni, numkeys;
+  size_t *keys = NULL;
   leafp p;
 
   if (key == KBD_NOKEY)
@@ -458,8 +459,8 @@ Read key sequence and function name, and bind the function to the key
 sequence.
 +*/
 {
-  int ok = FALSE;
-  size_t key, *keys = NULL, numkeys;
+  int ok = FALSE, numkeys;
+  size_t key, *keys = NULL;
   Function func;
   char *name;
 
@@ -533,8 +534,8 @@ END_DEFUN
 char *get_function_by_key_sequence(void)
 {
   leafp p;
-  size_t c = getkey();
-  size_t *keys, numkeys;
+  size_t c = getkey(), *keys;
+  int numkeys;
 
   if (c & KBD_META && isdigit((int)(c & 255)))
     return "universal-argument";
@@ -586,19 +587,20 @@ static void write_bindings_list(va_list ap)
 
   (void)ap;
 
-  bprintf("%-15s %s\n", "Binding", "Function");
-  bprintf("%-15s %s\n", "-------", "--------");
+  bprintf("Global Bindings:");
+  bprintf("%-15s %s\n", "key", "binding");
+  bprintf("%-15s %s\n", "---", "-------");
 
   write_bindings_tree(leaf_tree, l);
   list_delete(l);
 }
 
-DEFUN("list-bindings", list_bindings)
+DEFUN("describe-bindings", describe_bindings)
 /*+
-List defined bindings.
+Show a list of all defined keys, and their definitions.
 +*/
 {
-  write_temp_buffer("*Bindings List*", write_bindings_list);
+  write_temp_buffer("*Help*", write_bindings_list);
   return TRUE;
 }
 END_DEFUN
