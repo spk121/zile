@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2007/07/02 23:46:42 $
+		   Last updated: $Date: 2007/10/12 15:58:43 $
 
 ------------------------------------------------------------------------------
 
@@ -20,14 +20,15 @@ INDEX
 
 2. Functionality
    2.1. How do I quit Zile?
-   2.2. How do I return to the shell without leaving Zile?
-   2.3. How do I undo the previous command?
-   2.4. What does `C-something' or `M-something' mean?
-   2.5. What settings can I change?
-   2.6. Why are my settings being ignored?
-   2.7. How do I handle non-ASCII characters?
-   2.8. The META/ALT key doesn't work.
-   2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   2.2. How do I make Zile insert a tab character?
+   2.3. How do I return to the shell without leaving Zile?
+   2.4. How do I undo the previous command?
+   2.5. What does `C-something' or `M-something' mean?
+   2.6. What settings can I change?
+   2.7. Why are my settings being ignored?
+   2.8. How do I handle non-ASCII characters?
+   2.9. The META/ALT key doesn't work.
+   2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
 ------------------------------------------------------------------------------
 
@@ -94,7 +95,7 @@ INDEX
 
 1.9. Does Zile support Unicode/UTF-8?
 
-    No. Support for Unicode is planned in the future.
+    No.
 
 1.10. Zile doesn't compile.
 
@@ -114,15 +115,25 @@ INDEX
     Type `C-x C-c' (that means holding CONTROL while typing X,
     releasing them, then holding CONTROL while typing C)
 
-2.2. How do I return to the shell without leaving Zile?
+2.2. How do I make Zile insert a tab character?
+
+    You can insert a tab by typing `C-q TAB', to "quote" a tab
+    character. If you want TAB always to insert tab characters rather
+    than indenting, rebind it to insert-tab, by putting
+
+      (global-set-key "\TAB" 'insert-tab)
+
+    into your ~/.zile file.
+
+2.3. How do I return to the shell without leaving Zile?
 
     Type `C-x C-z' or simply `C-z'.
 
-2.3. How do I undo the previous command?
+2.4. How do I undo the previous command?
 
     Type `C-x u'.
 
-2.4. What does `C-something' or `M-something' mean?
+2.5. What does `C-something' or `M-something' mean?
 
     From the tutorial (`C-h t'):
 
@@ -134,25 +145,24 @@ INDEX
 	     press and release the ESC key and then type <chr>. We
 	     write <ESC> for the ESC key.
 
-2.5. What settings can I change?
+2.6. What settings can I change?
 
     Check out the `dotzile.sample' file (type `C-h s') for a full list
     of variables.
 
-2.6 Why are my settings being ignored?
+2.7. Why are my settings being ignored?
 
-    Note that since Zile 2.2.16, booleans are, as in Emacs, `t' and
-    `nil' rather than `true' and `false'. If you haven't yet updated
-    your .zile, you should do so.
+    Since Zile 2.2.16, booleans are, as in Emacs, `t' and `nil' rather
+    than `true' and `false'. If you haven't yet updated your .zile,
+    you should do so.
 
-2.7. How do I handle non-ASCII characters?
+2.8. How do I handle non-ASCII characters?
 
     Zile uses the operating system's locale support, so you need to
     set an appropriate locale; how you do this depends on your OS.
-    However, Zile only works with 8-bit locales at present; support
-    for Unicode is planned.
+    However, Zile only works with 8-bit locales.
 
-2.8 The META/ALT key doesn't work in xterm.
+2.9. The META/ALT key doesn't work in xterm.
 
     This is probably because you are using "8-bit input".  Using the
     following X resources should make things work:
@@ -163,7 +173,7 @@ INDEX
     Typically you'll want to put these lines in your ~/.Xresources
     file.
 
-2.9. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+2.10. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
     Add the following line to your `~/.zile' file:
 

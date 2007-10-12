@@ -387,7 +387,7 @@ Capitalize the following word.  Bound to @code{capitalize-word}.
 Kill word.  Bound to @code{kill-word}.
 @item M-f
 Move point forward one word.  Bound to @code{forward-word}.
-@item M-g
+@item M-g g
 Read line number and go there.  Bound to @code{goto-line}.
 @item M-h
 Put point at beginning of this paragraph, mark at end.  Bound to @code{mark-paragraph}.
