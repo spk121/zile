@@ -222,8 +222,7 @@ typing @kbd{x}.
 @chapter Functions
 
 This table contains the full list of available functions, that can be
-called with the @kbd{M-x} key (please note that most functions have a
-key binding, anyway).
+called with the @kbd{M-x} key (most functions also have a key binding).
 
 @c LINT FUNC
 @table @code
