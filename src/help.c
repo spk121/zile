@@ -242,16 +242,23 @@ Display documentation of the command invoked by a key sequence.
 +*/
 {
   char *name;
-  astr bufname, doc;
+  astr bufname, doc, binding;
+  size_t *keys;
+  int numkeys;
 
   minibuf_write("Describe key:");
+  name = get_function_by_key_sequence(&keys, &numkeys);
+  binding = keyvectostr(keys, numkeys);
+  free(keys);
 
-  if ((name = get_function_by_key_sequence()) == NULL) {
-    minibuf_error("Key sequence is undefined");
+  if (name == NULL) {
+    minibuf_error("%s is undefined", astr_cstr(binding));
+    astr_delete(binding);
     return FALSE;
   }
 
-  minibuf_write("Key sequence runs the command `%s'", name);
+  minibuf_write("%s runs the command `%s'", astr_cstr(binding), name);
+  astr_delete(binding);
 
   if ((doc = get_funcvar_doc(name, NULL, TRUE)) == NULL)
     return FALSE;

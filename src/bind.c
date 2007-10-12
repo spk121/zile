@@ -531,17 +531,19 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
 }
 END_DEFUN
 
-char *get_function_by_key_sequence(void)
+char *get_function_by_key_sequence(size_t **keys, int *numkeys)
 {
   leafp p;
-  size_t c = getkey(), *keys;
-  int numkeys;
+  size_t c = getkey();
 
-  if (c & KBD_META && isdigit((int)(c & 255)))
+  if (c & KBD_META && isdigit((int)(c & 255))) {
+    *numkeys = 1;
+    *keys = malloc(sizeof(**keys));
+    *keys[1] = c;
     return "universal-argument";
+  }
 
-  p = completion_scan(c, &keys, &numkeys);
-  free(keys);
+  p = completion_scan(c, keys, numkeys);
   if (p == NULL) {
     if (c == KBD_RET || c == KBD_TAB || c <= 255)
       return "self-insert-command";

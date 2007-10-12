@@ -302,7 +302,7 @@ astr keyvectostr(size_t *keys, size_t numkeys)
     astr key = chordtostr(keys[i]);
     astr_cat(as, key);
     astr_delete(key);
-    if (i > 0)
+    if (i < numkeys - 1)
       astr_cat_char(as, ' ');
   }
 
