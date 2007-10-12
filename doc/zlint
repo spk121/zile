@@ -33,7 +33,7 @@ cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
 
 cat >$TMPFILE1 <<EOF
-#define X(v, t, d, l, c)	v
+#define X(v, d, l, c)	v
 EOF
 
 cat $TMPFILE1 ../src/tbl_vars.h | cpp | tr -d " \t\"" \
