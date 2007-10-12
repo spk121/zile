@@ -1,5 +1,7 @@
 /* Key sequences functions
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2007 Reuben Thomas.
+   All rights reserved.
 
    This file is part of Zile.
 
@@ -45,79 +47,79 @@ astr chordtostr(size_t key)
 
   switch (key) {
   case KBD_PGUP:
-    astr_cat_cstr(as, "PGUP");
+    astr_cat_cstr(as, "<prior>");
     break;
   case KBD_PGDN:
-    astr_cat_cstr(as, "PGDN");
+    astr_cat_cstr(as, "<next>");
     break;
   case KBD_HOME:
-    astr_cat_cstr(as, "HOME");
+    astr_cat_cstr(as, "<home>");
     break;
   case KBD_END:
-    astr_cat_cstr(as, "END");
+    astr_cat_cstr(as, "<end>");
     break;
   case KBD_DEL:
-    astr_cat_cstr(as, "DEL");
+    astr_cat_cstr(as, "<delete>");
     break;
   case KBD_BS:
-    astr_cat_cstr(as, "BS");
+    astr_cat_cstr(as, "<backspace>");
     break;
   case KBD_INS:
-    astr_cat_cstr(as, "INS");
+    astr_cat_cstr(as, "<insert>");
     break;
   case KBD_LEFT:
-    astr_cat_cstr(as, "LEFT");
+    astr_cat_cstr(as, "<left>");
     break;
   case KBD_RIGHT:
-    astr_cat_cstr(as, "RIGHT");
+    astr_cat_cstr(as, "<right>");
     break;
   case KBD_UP:
-    astr_cat_cstr(as, "UP");
+    astr_cat_cstr(as, "<up>");
     break;
   case KBD_DOWN:
-    astr_cat_cstr(as, "DOWN");
+    astr_cat_cstr(as, "<down>");
     break;
   case KBD_RET:
-    astr_cat_cstr(as, "RET");
+    astr_cat_cstr(as, "<RET>");
     break;
   case KBD_TAB:
-    astr_cat_cstr(as, "TAB");
+    astr_cat_cstr(as, "<TAB>");
     break;
   case KBD_F1:
-    astr_cat_cstr(as, "F1");
+    astr_cat_cstr(as, "<f1>");
     break;
   case KBD_F2:
-    astr_cat_cstr(as, "F2");
+    astr_cat_cstr(as, "<f2>");
     break;
   case KBD_F3:
-    astr_cat_cstr(as, "F3");
+    astr_cat_cstr(as, "<f3>");
     break;
   case KBD_F4:
-    astr_cat_cstr(as, "F4");
+    astr_cat_cstr(as, "<f4>");
     break;
   case KBD_F5:
-    astr_cat_cstr(as, "F5");
+    astr_cat_cstr(as, "<f5>");
     break;
   case KBD_F6:
-    astr_cat_cstr(as, "F6");
+    astr_cat_cstr(as, "<f6>");
     break;
   case KBD_F7:
-    astr_cat_cstr(as, "F7");
+    astr_cat_cstr(as, "<f7>");
     break;
   case KBD_F8:
-    astr_cat_cstr(as, "F8");
+    astr_cat_cstr(as, "<f8>");
     break;
   case KBD_F9:
-    astr_cat_cstr(as, "F9");
+    astr_cat_cstr(as, "<f9>");
     break;
   case KBD_F10:
-    astr_cat_cstr(as, "F10");
+    astr_cat_cstr(as, "<f10>");
     break;
   case KBD_F11:
-    astr_cat_cstr(as, "F11");
+    astr_cat_cstr(as, "<f11>");
     break;
   case KBD_F12:
-    astr_cat_cstr(as, "F12");
+    astr_cat_cstr(as, "<f12>");
     break;
   case ' ':
     astr_cat_cstr(as, "SPC");
@@ -136,7 +138,7 @@ astr chordtostr(size_t key)
  * Array of key names in lexical order
  */
 static const char *keyname[] = {
-  "\\BS",
+  "\\BACKSPACE",
   "\\C-",
   "\\DEL",
   "\\DOWN",
@@ -154,13 +156,16 @@ static const char *keyname[] = {
   "\\F8",
   "\\F9",
   "\\HOME",
-  "\\INS",
+  "\\INSERT",
   "\\LEFT",
   "\\M-",
-  "\\PGDN",
-  "\\PGUP",
+  "\\NEXT",
+  "\\PAGEDOWN",
+  "\\PAGEUP",
+  "\\PRIOR",
   "\\RET",
   "\\RIGHT",
+  "\\SPC",
   "\\TAB",
   "\\UP",
   "\\\\",
@@ -192,9 +197,12 @@ static int keycode[] = {
   KBD_LEFT,
   KBD_META,
   KBD_PGDN,
+  KBD_PGDN,
+  KBD_PGUP,
   KBD_PGUP,
   KBD_RET,
   KBD_RIGHT,
+  ' ',
   KBD_TAB,
   KBD_UP,
   '\\',

@@ -196,20 +196,22 @@ This table contains the names of the keys that are used in Zile.
 Space
 @item RET
 Return
-@item LFD
-Linefeed
 @item TAB
 Tab
-@item BS
+@item BACKSPACE
 Backspace
 @item ESC
 Escape
-@item DEL
+@item DELETE
 Delete
 @item CTRL
 Control
 @item META
 Meta (also known as @key{EDIT} or @key{ALT} on some keyboards).
+@item PRIOR
+PgUp (page up) (also called @key{PAGEUP}).
+@item NEXT
+PgDn (page down) (also called @key{PAGEDOWN}).
 @end table
 
 In key combinations, like @kbd{M-g}, the @kbd{M-} prefix means hold the
