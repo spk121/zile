@@ -23,7 +23,7 @@ EXTRA_DIST =					\
 man_MANS = zile.1
 
 HELP: $(top_srcdir)/doc/zile.texi
-	makeinfo --no-header --no-split -I$(top_srcdir)/doc $? >>$@
+	makeinfo --no-header --no-split -I$(top_srcdir)/doc $? >$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 AM_CFLAGS = -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src
