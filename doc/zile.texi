@@ -70,8 +70,8 @@ structure.
 
 @itemize -
 @item Small but fast and powerful.
-It is very useful for small footprint installations (e.g. on floppy disk)
-or quick editing sessions.
+It is useful for small footprint installations (e.g. on floppy disk) and
+small computers.
 @item 8-bit clean.
 Zile can operate with binary files.
 @item Looks like @emph{Emacs}.
