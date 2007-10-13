@@ -348,10 +348,8 @@ Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
 @item help
 Show a help window.
-@item help-config-sample
-Show a configuration file sample.
 @item help-with-tutorial
-Show a tutorial window.
+Show a tutorial.
 @item indent-for-tab-command
 Indent line or insert a tab.
 @item insert-buffer
