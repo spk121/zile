@@ -6,6 +6,8 @@
 # This script is a big hack, like all shell scripts.
 #
 
+ret=0
+
 if [ ! -f ../src/tbl_funcs.h ]; then
 	echo "Please run this script in the sources directory \`doc/'";
 	exit 1
@@ -60,18 +62,22 @@ BEGIN { v=0;i=0 }
 echo "Checking functions..."
 for f in `comm -13 $TMPFUNCS $TMPFUNCST`; do
 	echo "function $f defined in zile.texi but not in tbl_funcs.h."
+        ret=1
 done
 for f in `comm -23 $TMPFUNCS $TMPFUNCST`; do
 	echo "function $f defined in tbl_funcs.h but not in Texinfo."
+        ret=1
 done
 
 echo "Checking variables..."
 for f in `comm -13 $TMPVARS $TMPVARST`; do
 	echo "variable $f defined in zile.texi but not in tbl_vars.h."
+        ret=1
 done
 for f in `comm -23 $TMPVARS $TMPVARST`; do
 	echo "variable $f defined in tbl_vars.h but not in Texinfo."
+        ret=1
 done
 
 rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
-exit 0
+exit $ret
