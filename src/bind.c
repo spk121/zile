@@ -530,8 +530,8 @@ END_DEFUN
 DEFUN("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
-Argument is a command definition, usually a symbol with a function definition.
-If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
+Argument is a command name.  If the prefix arg is non-nil, insert the
+message in the buffer.
 +*/
 {
   char *name;
