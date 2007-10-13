@@ -204,7 +204,6 @@ Insert the character you type.
   for (uni = 0; uni < uniarg; ++uni) {
     /* Mask out ~KBD_CTRL to allow control sequences to be themselves. */
     int key = lastkey() & ~KBD_CTRL;
-    fprintf(stderr, "%d\n", key);
     deactivate_mark();
     if (key <= 0xff) {
       if (isspace(key) && cur_bp->flags & BFLAG_AUTOFILL &&
@@ -308,6 +307,7 @@ void init_bindings(void)
     *keys = i;
     bind_key_vec(leaf_tree, keys, 1, F_self_insert_command);
   }
+  free(keys);
   
   /* Bind all the default functions. */
   for (i = 0; i < fentry_table_size; i++)
@@ -570,33 +570,31 @@ Argument is a command name.  If the prefix arg is non-nil, insert the
 message in the buffer.
 +*/
 {
-  char *name;
+  char *name = minibuf_read_function_name("Where is command: ");
+  int ret = FALSE;
   gather_bindings_state g;
 
-  name = minibuf_read_function_name("Where is command: ");
+  if (name && (g.f = get_function(name))) {
+    g.bindings = astr_new();
+    walk_bindings(leaf_tree, gather_bindings, &g);
 
-  if (name == NULL || (g.f = get_function(name)) == NULL)
-    return FALSE;
-
-  g.bindings = astr_new();
-  walk_bindings(leaf_tree, gather_bindings, &g);
-
-  if (astr_len(g.bindings) == 0)
-    minibuf_write("%s is not on any key", name);
-  else {
-    astr as = astr_new();
-
-    astr_afmt(as, "%s is on %s", name, astr_cstr(g.bindings));
-    if (lastflag & FLAG_SET_UNIARG)
-      bprintf("%s", astr_cstr(as));
-    else
-      minibuf_write("%s", astr_cstr(as));
-
-    astr_delete(as);
+    if (astr_len(g.bindings) == 0)
+      minibuf_write("%s is not on any key", name);
+    else {
+      astr as = astr_new();
+      astr_afmt(as, "%s is on %s", name, astr_cstr(g.bindings));
+      if (lastflag & FLAG_SET_UNIARG)
+        bprintf("%s", astr_cstr(as));
+      else
+        minibuf_write("%s", astr_cstr(as));
+      astr_delete(as);
+    }
+    astr_delete(g.bindings);
+    ret = TRUE;
   }
-  astr_delete(g.bindings);
 
-  return TRUE;
+  free(name);
+  return ret;
 }
 END_DEFUN
 
