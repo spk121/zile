@@ -244,7 +244,7 @@ void process_key(size_t key)
   }
   free(keys);
 
-  /* Only add keystrokes if we're already in macro defining mode
+  /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro();
