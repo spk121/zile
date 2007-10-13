@@ -352,10 +352,10 @@ typedef size_t Font;
 
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
-        int F_ ## c_func(int uniarg GCC_UNUSED, le *list GCC_UNUSED) \
+        int F_ ## c_func(int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
         { \
-          if (list && list->data) \
-            uniarg = atoi(list->data);
+          if (arglist && arglist->data) \
+            uniarg = atoi(arglist->data);
 #define END_DEFUN \
         }
 

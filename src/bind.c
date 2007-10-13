@@ -363,23 +363,6 @@ char *get_function_name(Function p)
   return NULL;
 }
 
-static astr bindings_string(fentryp f)
-{
-  size_t i;
-  astr as = astr_new();
-
-  for (i = 0; i < 3; ++i) {
-    astr key = simplify_key(f->key[i]);
-    if (astr_len(key) > 0) {
-        astr_cat_cstr(as, (i == 0) ? "" : ", ");
-        astr_cat(as, key);
-    }
-    astr_delete(key);
-  }
-
-  return as;
-}
-
 /*
  * Read a function name from the minibuffer.
  * The returned buffer must be freed by the caller.
@@ -494,9 +477,9 @@ sequence.
   Function func;
   char *name;
 
-  if (list) {
-    numkeys = keystrtovec(list->list_next->data, &keys);
-    name = list->list_next->list_next->data;
+  if (arglist) {
+    numkeys = keystrtovec(arglist->list_next->data, &keys);
+    name = arglist->list_next->list_next->data;
   } else {
     astr as;
 
@@ -519,13 +502,65 @@ sequence.
   } else
     minibuf_error("No such function `%s'", name);
 
-  if (!list)
+  if (!arglist)
     free(name);
   free(keys);
 
   return ok;
 }
 END_DEFUN
+
+static void walk_bindings_tree(leafp tree, list keys, void (*process)(astr key, leafp p, void *st), void *st)
+{
+  size_t i;
+  list l;
+  astr as = chordtostr(tree->key);
+
+  list_append(keys, as);
+
+  for (i = 0; i < tree->vecnum; ++i) {
+    leafp p = tree->vec[i];
+    if (p->func != NULL) {
+      astr key = astr_new();
+      astr as = chordtostr(p->key);
+      for (l = list_next(list_first(keys));
+           l != keys;
+           l = list_next(l)) {
+        astr_cat(key, l->item);
+        astr_cat_char(key, ' ');
+      }
+      astr_cat_delete(key, as);
+      process(key, p, st);
+      astr_delete(key);
+    } else
+      walk_bindings_tree(p, keys, process, st);
+  }
+
+  astr_delete(list_betail(keys));
+}
+
+static void walk_bindings(leafp tree, void (*process)(astr key, leafp p, void *st), void *st)
+{
+  list l = list_new();
+  walk_bindings_tree(tree, l, process, st);
+  list_delete(l);
+}
+
+typedef struct {
+  Function f;
+  astr bindings;
+} gather_bindings_state;
+
+static void gather_bindings(astr key, leafp p, void *st)
+{
+  gather_bindings_state *g = (gather_bindings_state *)st;
+
+  if (p->func == g->f) {
+    if (astr_len(g->bindings) > 0)
+      astr_cat_cstr(g->bindings, ", ");
+    astr_cat(g->bindings, key);
+  }
+}
 
 DEFUN("where-is", where_is)
 /*+
@@ -535,28 +570,30 @@ message in the buffer.
 +*/
 {
   char *name;
-  fentryp f;
+  gather_bindings_state g;
 
   name = minibuf_read_function_name("Where is command: ");
 
-  if (name == NULL || (f = get_fentry(name)) == NULL)
+  if (name == NULL || (g.f = get_function(name)) == NULL)
     return FALSE;
 
-  if (!f->key[0])
+  g.bindings = astr_new();
+  walk_bindings(leaf_tree, gather_bindings, &g);
+
+  if (astr_len(g.bindings) == 0)
     minibuf_write("%s is not on any key", name);
   else {
-    astr bindings = bindings_string(f);
     astr as = astr_new();
 
-    astr_afmt(as, "%s is on %s", name, astr_cstr(bindings));
+    astr_afmt(as, "%s is on %s", name, astr_cstr(g.bindings));
     if (uniarg != 1)
       bprintf("%s", astr_cstr(as));
     else
       minibuf_write("%s", astr_cstr(as));
 
     astr_delete(as);
-    astr_delete(bindings);
   }
+  astr_delete(g.bindings);
 
   return TRUE;
 }
@@ -581,48 +618,20 @@ char *get_function_by_key_sequence(size_t **keys, int *numkeys)
     return get_function_name(p->func);
 }
 
-static void write_bindings_tree(leafp tree, list keys)
+static void print_binding(astr key, leafp p, void *st GCC_UNUSED)
 {
-  size_t i;
-  list l;
-  astr as = chordtostr(tree->key);
-
-  list_append(keys, as);
-
-  for (i = 0; i < tree->vecnum; ++i) {
-    leafp p = tree->vec[i];
-    if (p->func != NULL) {
-      astr key = astr_new();
-      astr as = chordtostr(p->key);
-      for (l = list_next(list_first(keys));
-           l != keys;
-           l = list_next(l)) {
-        astr_cat(key, l->item);
-        astr_cat_char(key, ' ');
-      }
-      astr_cat(key, as);
-      astr_delete(as);
-      bprintf("%-15s %s\n", astr_cstr(key), get_function_name(p->func));
-      astr_delete(key);
-    } else
-      write_bindings_tree(p, keys);
-  }
-
-  astr_delete(list_betail(keys));
+  bprintf("%-15s %s\n", astr_cstr(key), get_function_name(p->func));
 }
 
 static void write_bindings_list(va_list ap)
 {
-  list l = list_new();
-
   (void)ap;
 
   bprintf("Global Bindings:");
   bprintf("%-15s %s\n", "key", "binding");
   bprintf("%-15s %s\n", "---", "-------");
 
-  write_bindings_tree(leaf_tree, l);
-  list_delete(l);
+  walk_bindings(leaf_tree, print_binding, NULL);
 }
 
 DEFUN("describe-bindings", describe_bindings)
