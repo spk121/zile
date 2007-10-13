@@ -449,7 +449,7 @@ Read function name, then read its arguments and call it.
   char *name;
   astr msg = astr_new();
 
-  if (uniarg != 1)
+  if (lastflag & FLAG_SET_UNIARG)
     astr_afmt(msg, "%d M-x ", uniarg);
   else
     astr_cat_cstr(msg, "M-x ");
@@ -587,7 +587,7 @@ message in the buffer.
     astr as = astr_new();
 
     astr_afmt(as, "%s is on %s", name, astr_cstr(g.bindings));
-    if (uniarg != 1)
+    if (lastflag & FLAG_SET_UNIARG)
       bprintf("%s", astr_cstr(as));
     else
       minibuf_write("%s", astr_cstr(as));

@@ -120,7 +120,7 @@ With prefix argument, kill that many lines from point.
   if (!(lastflag & FLAG_DONE_KILL))
     flush_kill_ring();
 
-  if (uniarg == 1)
+  if (!(lastflag & FLAG_SET_UNIARG))
     kill_line(lookup_bool_variable("kill-whole-line"));
   else {
     undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
