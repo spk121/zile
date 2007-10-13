@@ -302,11 +302,10 @@ void init_bindings(void)
   keys = zmalloc(sizeof(*keys));
   leaf_tree = leaf_new(10);
 
-  /* Bind all keys to self_insert_command */
-  for (i = 0; i <= 0xff; i++) {
-    *keys = i;
-    bind_key_vec(leaf_tree, keys, 1, F_self_insert_command);
-  }
+  /* Bind all printing keys to self_insert_command */
+  for (i = 0; i <= 0xff; i++)
+    if (isprint(*keys = i))
+      bind_key_vec(leaf_tree, keys, 1, F_self_insert_command);
   free(keys);
   
   /* Bind all the default functions. */
