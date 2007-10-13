@@ -33,6 +33,7 @@
 #include "extern.h"
 
 static History functions_history;
+static size_t _last_key; 
 static Function _last_command;
 
 /*--------------------------------------------------------------------------
@@ -193,9 +194,44 @@ static leafp completion_scan(size_t key, size_t **keys, int *numkeys)
   return p;
 }
 
+int self_insert_command(int c)
+{
+  deactivate_mark();
+
+  if (c <= 255) {
+    if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
+        get_goalc() > (size_t)get_variable_number("fill-column"))
+      fill_break_line();
+    insert_char(c);
+    return TRUE;
+  } else {
+    ding();
+    return FALSE;
+  }
+}
+
+DEFUN("self-insert-command", self_insert_command)
+/*+
+Insert the character you type.
++*/
+{
+  int uni, ret = TRUE;
+
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  for (uni = 0; uni < uniarg; ++uni)
+    if (!self_insert_command(_last_key)) {
+      ret = FALSE;
+      break;
+    }
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+
+  return ret;
+}
+END_DEFUN
+
 void process_key(size_t key)
 {
-  int uni, numkeys;
+  int numkeys;
   size_t *keys = NULL;
   leafp p;
 
@@ -205,21 +241,16 @@ void process_key(size_t key)
   if (key & KBD_META && isdigit((int)(key & 255)))
     /* Got an ESC x sequence where `x' is a digit. */
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
-  else {
-    if ((p = completion_scan(key, &keys, &numkeys)) == NULL) {
-      /* There are no bindings for the pressed key. */
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, (size_t)0, (size_t)0);
-      for (uni = 0;
-           uni < last_uniarg && self_insert_command((ptrdiff_t)key);
-           ++uni);
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, (size_t)0, (size_t)0);
-    } else {
-      p->func(last_uniarg, NULL);
-      _last_command = p->func;
-    }
-
-    free(keys);
+  else if ((p = completion_scan(key, &keys, &numkeys)) != NULL) {
+    _last_key = key;
+    p->func(last_uniarg, NULL);
+    _last_command = p->func;
+  } else {
+    astr as = keyvectostr(keys, numkeys);
+    minibuf_error("%s is undefined", astr_cstr(as));
+    astr_delete(as);
   }
+  free(keys);
 
   /* Only add keystrokes if we're already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
@@ -274,10 +305,17 @@ static int bind_compar(const void *p1, const void *p2)
 
 void init_bindings(void)
 {
-  size_t i, j;
+  size_t i, j, *keys;
 
+  keys = zmalloc(sizeof(*keys));
   leaf_tree = leaf_new(10);
 
+  /* Bind all keys to self_insert_command */
+  for (i = 0; i <= 255; i++) {
+    *keys = i;
+    bind_key_vec(leaf_tree, keys, 1, F_self_insert_command);
+  }
+  
   /* Bind all the default functions. */
   for (i = 0; i < fentry_table_size; i++)
     for (j = 0; j < 3; ++j)
@@ -512,7 +550,9 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
   if (name == NULL || (f = get_fentry(name)) == NULL)
     return FALSE;
 
-  if (f->key[0]) {
+  if (!f->key[0])
+    minibuf_write("%s is not on any key", name);
+  else {
     astr bindings = bindings_string(f);
     astr as = astr_new();
 
@@ -524,8 +564,7 @@ If INSERT (the prefix arg) is non-nil, insert the message in the buffer.
 
     astr_delete(as);
     astr_delete(bindings);
-  } else
-    minibuf_write("%s is not on any key", name);
+  }
 
   return TRUE;
 }
@@ -544,12 +583,9 @@ char *get_function_by_key_sequence(size_t **keys, int *numkeys)
   }
 
   p = completion_scan(c, keys, numkeys);
-  if (p == NULL) {
-    if (c == KBD_RET || c == KBD_TAB || c <= 255)
-      return "self-insert-command";
-    else
-      return NULL;
-  } else
+  if (p == NULL)
+    return NULL;
+  else
     return get_function_name(p->func);
 }
 
