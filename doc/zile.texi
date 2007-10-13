@@ -75,17 +75,17 @@ or quick editing sessions.
 @item 8-bit clean.
 Zile can operate with binary files.
 @item Looks like @emph{Emacs}.
-Most Zile key sequences and function names are identical to Emacs ones.
+Key sequences and function names are identical to Emacs.
 @item Multi buffer editing with multi level undo.
-Zile can open an infinite number of files and can record an infinite
-sequence of undo operations (limited only by the amount of free memory).
+Zile can open as many files and restore as many undo operations as
+memory allows.
 @item Multi window.
 Zile can display multiple windows on the screen.
 @item Killing, yanking and registers.
 The killing, yanking and register features of Emacs are available
 in Zile.
 @item Minibuffer completion.
-This works for @kbd{M-x} commands and for file names.
+This works for @kbd{M-x} commands, file, buffer and variable names.
 @item Auto fill (word wrap).
 Zile automatically breaks the lines when they become too wide (if
 @i{Auto Fill Mode} is enabled).
