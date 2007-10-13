@@ -12,9 +12,9 @@ EXTRA_DIST =					\
 
 # FIXME: Do cvs tag rel-$VERSION (need to s/\./-/)
 release: distcheck
-	@read -p "SourceForge login: " USER && \
-	read -p "Password: " PASSWORD && \
-	read -p "Release focus:\n\
+	@read -e -p "SourceForge login: " USER && \
+	read -r -s -p "Password: " PASSWORD && \
+	echo -e "Release focus:\n\
   Initial FreshMeat announcement  1\n\
   Documentation                   2\n\
   Code cleanup                    3\n\
@@ -23,7 +23,8 @@ release: distcheck
   Minor bug fixes                 6\n\
   Major bug fixes                 7\n\
   Minor security fixes            8\n\
-  Major security fixes            9" FOCUS && \
-	$VISUAL release.notes && \
-	copher -u $USER -P $PASSWORD -p $PACKAGE -k $PACKAGE -r $VERSION -N release.notes $PACKAGE-$VERSION.tar.gz && \
-	fm-submit --no-stdin -p $PACKAGE -v $VERSION -c "`cat release-notes`" -r $FOCUS
+  Major security fixes            9" && \
+	read -e -p "Choice: " FOCUS && \
+	$$VISUAL release.notes && \
+	copher -u $$USER -P $$PASSWORD -p $(PACKAGE) -k $(PACKAGE) -r $(VERSION) -N release-notes $(PACKAGE)-$(VERSION).tar.gz && \
+	fm-submit --no-stdin -p $(PACKAGE) -v $(VERSION) -c "`cat release-notes`" -r $$FOCUS
