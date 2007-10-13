@@ -59,7 +59,7 @@ BEGIN { v=0;i=0 }
 
 echo "Checking functions..."
 for f in `comm -13 $TMPFUNCS $TMPFUNCST`; do
-	echo "function $f defined in Texinfo but not in tbl_funcs.h."
+	echo "function $f defined in zile.texi but not in tbl_funcs.h."
 done
 for f in `comm -23 $TMPFUNCS $TMPFUNCST`; do
 	echo "function $f defined in tbl_funcs.h but not in Texinfo."
@@ -67,7 +67,7 @@ done
 
 echo "Checking variables..."
 for f in `comm -13 $TMPVARS $TMPVARST`; do
-	echo "variable $f defined in Texinfo but not in tbl_vars.h."
+	echo "variable $f defined in zile.texi but not in tbl_vars.h."
 done
 for f in `comm -23 $TMPVARS $TMPVARST`; do
 	echo "variable $f defined in tbl_vars.h but not in Texinfo."
