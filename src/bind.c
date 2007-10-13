@@ -539,7 +539,7 @@ char *get_function_by_key_sequence(size_t **keys, int *numkeys)
   if (c & KBD_META && isdigit((int)(c & 255))) {
     *numkeys = 1;
     *keys = malloc(sizeof(**keys));
-    *keys[1] = c;
+    *keys[0] = c;
     return "universal-argument";
   }
 
