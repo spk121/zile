@@ -12,10 +12,10 @@ EXTRA_DIST =					\
 
 # FIXME: Do cvs tag rel-$VERSION (need to s/\./-/)
 release: distcheck
-	@read -p "User: " USER && \
+	@read -p "SourceForge login: " USER && \
 	read -p "Password: " PASSWORD && \
-	read "Release focus:\n\
-  Initial freshmeat announcement  1\n\
+	read -p "Release focus:\n\
+  Initial FreshMeat announcement  1\n\
   Documentation                   2\n\
   Code cleanup                    3\n\
   Minor feature enhancements      4\n\
