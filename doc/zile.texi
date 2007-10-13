@@ -149,7 +149,8 @@ subset of Emacs Lisp that consists of the Zile commands plus
 @node Sample file,  , File syntax, Initialization file
 @section A sample file
 
-This is the initialization file that comes with the Zile sources.
+This is an initialization file that shows the default variable settings.
+You can use it as a model for your own init file.
 
 @include dotzile.texi
 
