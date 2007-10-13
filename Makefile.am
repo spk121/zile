@@ -10,7 +10,6 @@ EXTRA_DIST =					\
 	README					\
 	THANKS
 
-# FIXME: Do 
 release: distcheck
 	cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
 	read -e -p "SourceForge login: " USER && \
