@@ -33,7 +33,6 @@
 #include "extern.h"
 
 static History functions_history;
-static size_t _last_key; 
 static Function _last_command;
 
 /*--------------------------------------------------------------------------
@@ -203,12 +202,15 @@ Insert the character you type.
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni) {
+    /* Mask out ~KBD_CTRL to allow control sequences to be themselves. */
+    int key = lastkey() & ~KBD_CTRL;
+    fprintf(stderr, "%d\n", key);
     deactivate_mark();
-    if (_last_key <= 255) {
-      if (isspace(_last_key) && cur_bp->flags & BFLAG_AUTOFILL &&
+    if (key <= 0xff) {
+      if (isspace(key) && cur_bp->flags & BFLAG_AUTOFILL &&
           get_goalc() > (size_t)get_variable_number("fill-column"))
         fill_break_line();
-      insert_char(_last_key);
+      insert_char(key);
     } else {
       ding(); 
       ret = FALSE;
@@ -230,11 +232,10 @@ void process_key(size_t key)
   if (key == KBD_NOKEY)
     return;
 
-  if (key & KBD_META && isdigit((int)(key & 255)))
+  if (key & KBD_META && isdigit((int)(key & 0xff)))
     /* Got an ESC x sequence where `x' is a digit. */
     universal_argument(KBD_META, (int)((key & 0xff) - '0'));
   else if ((p = completion_scan(key, &keys, &numkeys)) != NULL) {
-    _last_key = key;
     p->func(last_uniarg, NULL);
     _last_command = p->func;
   } else {
@@ -303,7 +304,7 @@ void init_bindings(void)
   leaf_tree = leaf_new(10);
 
   /* Bind all keys to self_insert_command */
-  for (i = 0; i <= 255; i++) {
+  for (i = 0; i <= 0xff; i++) {
     *keys = i;
     bind_key_vec(leaf_tree, keys, 1, F_self_insert_command);
   }
@@ -604,7 +605,7 @@ char *get_function_by_key_sequence(size_t **keys, int *numkeys)
   leafp p;
   size_t c = getkey();
 
-  if (c & KBD_META && isdigit((int)(c & 255))) {
+  if (c & KBD_META && isdigit((int)(c & 0xff))) {
     *numkeys = 1;
     *keys = malloc(sizeof(**keys));
     *keys[0] = c;

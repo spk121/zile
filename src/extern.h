@@ -99,6 +99,7 @@ int backward_sexp(void);
 /* glue.c ----------------------------------------------------------------- */
 void ding(void);
 void ungetkey(size_t key);
+size_t lastkey(void);
 size_t xgetkey(int mode, size_t timeout);
 size_t getkey(void);
 void waitkey(size_t delay);

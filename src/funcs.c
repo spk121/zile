@@ -345,7 +345,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
   int c;
 
   minibuf_write("C-q-");
-  c = term_xgetkey(GETKEY_UNFILTERED, 0);
+  c = xgetkey(GETKEY_UNFILTERED, 0);
 
   if (isdigit(c) && c - '0' < 8)
     quoted_insert_octal(c);

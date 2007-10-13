@@ -46,6 +46,13 @@ void ding(void)
 
 static int key_buf[MAX_KEY_BUF];
 static int *keyp = key_buf;
+static size_t _last_key;
+
+/* Return last key pressed */
+size_t lastkey(void)
+{
+  return _last_key;
+}
 
 /*
  * Get a keystroke, waiting for up to timeout 10ths of a second if
@@ -54,15 +61,15 @@ static int *keyp = key_buf;
  */
 size_t xgetkey(int mode, size_t timeout)
 {
-  size_t key;
-
   if (keyp > key_buf)
-    return *--keyp;
+    _last_key = *--keyp;
+  else
+    _last_key = term_xgetkey(mode, timeout);
 
-  key = term_xgetkey(mode, timeout);
   if (thisflag & FLAG_DEFINING_MACRO)
-    add_key_to_cmd(key);
-  return key;
+    add_key_to_cmd(_last_key);
+
+  return _last_key;
 }
 
 /*

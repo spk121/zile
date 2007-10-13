@@ -181,7 +181,7 @@ static size_t translate_key(int c)
   case KEY_F(12):
     return KBD_F12;
   default:
-    if (c > 255 || c < 0)
+    if (c > 0xff || c < 0)
       return KBD_NOKEY;	/* Undefined behaviour. */
     return c;
   }
