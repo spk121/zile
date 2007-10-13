@@ -67,15 +67,6 @@ Show a help window.
 }
 END_DEFUN
 
-DEFUN("help-config-sample", help_config_sample)
-/*+
-Show a configuration file sample.
-+*/
-{
-  return show_file(PATH_DATA "/dotzile.sample");
-}
-END_DEFUN
-
 DEFUN("view-zile-FAQ", view_zile_FAQ)
 /*+
 Show the Zile Frequently Asked Questions (FAQ).
