@@ -423,16 +423,8 @@ int delete_char(void)
     undo_save(UNDO_INTERCALATE_CHAR, cur_bp->pt,
               (size_t)(*astr_char(cur_bp->pt.p->item,
                                     (ptrdiff_t)cur_bp->pt.o)), 0);
-
-    /*
-     * Move the text one position backward after the point,
-     * if required.
-     * This code assumes that memmove(d, s, 0) does nothing.
-     */
     astr_remove(cur_bp->pt.p->item, (ptrdiff_t)cur_bp->pt.o, 1);
-
     adjust_markers(cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
-
     cur_bp->flags |= BFLAG_MODIFIED;
 
     return TRUE;
@@ -537,9 +529,7 @@ Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-  /* In overwrite-mode and isn't called by delete_char().  */
-  int (*f)(void) = ((cur_bp->flags & BFLAG_OVERWRITE) &&
-                    (last_uniarg > 0)) ?
+  int (*f)(void) = cur_bp->flags & BFLAG_OVERWRITE ?
     backward_delete_char_overwrite : backward_delete_char;
   int uni, ret = TRUE;
 
