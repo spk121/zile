@@ -161,27 +161,21 @@ This table contains the commands that can be used during an editing
 session to get help.
 
 @table @kbd
-@item C-h F
+@item C-h C-f, @key{f1} C-f
 Show the Frequently Asked Questions about Zile.
-@item C-h c
-Describe briefly a key sequence.
-@item C-h d, C-h f
+@item C-h f, @key{f1} f
 Describe a function.
-@item C-h h, @key{F1}
+@item C-h h, @key{f1} h, @key{f1} @key{f1}
 Show this manual.
-@item C-h k
+@item C-h k, @key{f1} k
 Describe a key sequence.
-@item C-h b
+@item C-h b, @key{f1} b
 Show the defined bindings.
-@item C-h l r
-Show the defined registers.
-@item C-h s
-Show a sample configuration file.
-@item C-h t
+@item C-h t, @key{f1} t
 Show a tutorial window.
-@item C-h v
+@item C-h v, @key{f1} v
 Describe a variable.
-@item C-h w
+@item C-h w, @key{f1} w
 Show the key or keys to which a command is bound.
 @end table
 
