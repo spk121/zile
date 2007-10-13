@@ -21,7 +21,6 @@ size_t do_completion(astr as);
 char *minibuf_read_function_name(const char *fmt, ...);
 int execute_function(char *name, int uniarg);
 char *get_function_by_key_sequence(size_t **keys, int *numkeys);
-int self_insert_command(int c);
 void process_key(size_t key);
 void init_bindings(void);
 Function last_command(void);

@@ -194,22 +194,6 @@ static leafp completion_scan(size_t key, size_t **keys, int *numkeys)
   return p;
 }
 
-int self_insert_command(int c)
-{
-  deactivate_mark();
-
-  if (c <= 255) {
-    if (isspace(c) && cur_bp->flags & BFLAG_AUTOFILL &&
-        get_goalc() > (size_t)get_variable_number("fill-column"))
-      fill_break_line();
-    insert_char(c);
-    return TRUE;
-  } else {
-    ding();
-    return FALSE;
-  }
-}
-
 DEFUN("self-insert-command", self_insert_command)
 /*+
 Insert the character you type.
@@ -218,11 +202,19 @@ Insert the character you type.
   int uni, ret = TRUE;
 
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!self_insert_command(_last_key)) {
+  for (uni = 0; uni < uniarg; ++uni) {
+    deactivate_mark();
+    if (_last_key <= 255) {
+      if (isspace(_last_key) && cur_bp->flags & BFLAG_AUTOFILL &&
+          get_goalc() > (size_t)get_variable_number("fill-column"))
+        fill_break_line();
+      insert_char(_last_key);
+    } else {
+      ding(); 
       ret = FALSE;
       break;
     }
+  }
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   return ret;
