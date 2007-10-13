@@ -288,6 +288,8 @@ Delete all spaces and tabs around point, leaving one space.
 Delete the text between point and mark.
 @item delete-window
 Remove the current window from the screen.
+@item describe-bindings
+Show a list of all defined keys, and their definitions.
 @item describe-function
 Display the full documentation of a function.
 @item describe-key
@@ -417,8 +419,6 @@ Negative arg -N means kill N sexps before the cursor.
 @item kill-word
 Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
-@item list-bindings
-List defined bindings.
 @item list-buffers
 Display a list of names of existing buffers.
 The list is displayed in a buffer named @samp{*Buffer List*}.
