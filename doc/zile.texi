@@ -282,8 +282,6 @@ Join lines if the character is a newline.
 Delete all spaces and tabs around point.
 @item delete-other-windows
 Make the selected window fill the screen.
-@item just-one-space
-Delete all spaces and tabs around point, leaving one space.
 @item delete-region
 Delete the text between point and mark.
 @item delete-window
@@ -394,6 +392,8 @@ Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
 Like ordinary incremental search except that your input
 is treated as a regexp.  See @kbd{C-s} for more info.
+@item just-one-space
+Delete all spaces and tabs around point, leaving one space.
 @item keyboard-quit
 Cancel current command.
 @item kill-buffer
@@ -435,12 +435,12 @@ List defined registers.
 @item mark-paragraph
 Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
-@item mark-whole-buffer
-Put point at beginning and mark at end of buffer.
 @item mark-sexp
 Set mark argument sexps from point.
 The place mark goes is the same place @kbd{C-M-f} would
 move to with the same argument.
+@item mark-whole-buffer
+Put point at beginning and mark at end of buffer.
 @item mark-word
 Set mark argument words away from point.
 @item name-last-kbd-macro

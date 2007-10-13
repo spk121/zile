@@ -30,7 +30,7 @@ cat >$TMPFILE1 <<EOF
 EOF
 
 cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
-	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
+	| sed -e "/^#/d" -e "/^$/d" >$TMPFUNCS
 
 cat >$TMPFILE1 <<EOF
 #define X(v, d, l, c)	v
@@ -46,7 +46,7 @@ BEGIN { v=0;i=0 }
 /^@c LINT IGNORE/ { i=1 }
 /^@c LINT END IGNORE/ { i=0 }
 { if (v && !i) print }
-' | grep "@item" | sed "s/@item //" | sort >$TMPFUNCST
+' | grep "@item" | sed "s/@item //" >$TMPFUNCST
 
 cat ../doc/zile.texi | awk '
 BEGIN { v=0;i=0 }
