@@ -34,3 +34,6 @@ If you are debugging the editor, you can enable the debugging code:
 For other configure options, run
 
 	./configure --help
+
+To make a release automatically, you need copher, from
+http://meatsmith.sourceforge.net/
