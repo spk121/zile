@@ -557,14 +557,14 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 Stop Zile and return to superior process.
 @item switch-to-buffer
 Select to the user specified buffer in the current window.
+@item tab-to-tab-stop
+Insert a tabulation at the current point position into
+the current buffer.
 @item tabify
 Convert multiple spaces in region to tabs when possible.
 A group of spaces is partially replaced by tabs
 when this can be done without changing the column they end at.
 The variable @samp{tab-width} controls the spacing of tab stops.
-@item tab-to-tab-stop
-Insert a tabulation at the current point position into
-the current buffer.
 @item toggle-read-only
 Change whether this buffer is visiting its file read-only.
 @item transient-mark-mode
