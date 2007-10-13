@@ -10,6 +10,8 @@ EXTRA_DIST =					\
 	README					\
 	THANKS
 
+NOTES = release-notes
+
 release: distcheck
 	cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
 	read -e -p "SourceForge login: " USER && \
@@ -25,6 +27,6 @@ release: distcheck
   Minor security fixes            8\n\
   Major security fixes            9" && \
 	read -e -p "Choice: " FOCUS && \
-	$$VISUAL release.notes && \
-	copher -u $$USER -P $$PASSWORD -p $(PACKAGE) -k $(PACKAGE) -r $(VERSION) -N release-notes $(PACKAGE)-$(VERSION).tar.gz && \
-	fm-submit --no-stdin -p $(PACKAGE) -v $(VERSION) -c "`cat release-notes`" -r $$FOCUS
+	$$VISUAL $(NOTES) && \
+	copher -u $$USER -P $$PASSWORD -p $(PACKAGE) -k $(PACKAGE) -r $(VERSION) -N $(NOTES) $(PACKAGE)-$(VERSION).tar.gz && \
+	fm-submit --no-stdin -p $(PACKAGE) -v $(VERSION) -c "`cat $(NOTES)`" -r $$FOCUS
