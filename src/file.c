@@ -282,8 +282,6 @@ static int check_writable(const char *filename)
 char coding_eol_lf[3] = "\n";
 char coding_eol_crlf[3] = "\r\n";
 char coding_eol_cr[3] = "\r";
-/* This value is used to signal that the type is not yet decided. */
-char coding_eol_undecided[3] = "";
 
 /* Maximum number of EOLs to check before deciding type. */
 #define MAX_EOL_CHECK_COUNT 3
@@ -296,12 +294,10 @@ void read_from_disk(const char *filename)
 {
   Line *lp;
   FILE *fp;
-  int i, size;
+  int i, size, first_eol = TRUE;
   char *this_eol_type;
   size_t eol_len = 0, total_eols = 0;
   char buf[BUFSIZ];
-
-  cur_bp->eol = coding_eol_undecided;
 
   if ((fp = fopen(filename, "r")) == NULL) {
     if (errno != ENOENT) {
@@ -332,10 +328,11 @@ void read_from_disk(const char *filename)
           i++;
         }
         
-        if (cur_bp->eol == coding_eol_undecided)
+        if (first_eol) {
           /* This is the first end-of-line. */
           cur_bp->eol = this_eol_type;
-        else if (cur_bp->eol != this_eol_type) {
+          first_eol = FALSE;
+        } else if (cur_bp->eol != this_eol_type) {
           /* This EOL is different from the last; arbitrarily choose
              LF. */
           cur_bp->eol = coding_eol_lf;
@@ -344,13 +341,8 @@ void read_from_disk(const char *filename)
       }
     }
     
-    /* If no EOLs found, arbitrarily choose LF. */
-    if (cur_bp->eol == coding_eol_undecided)
-      cur_bp->eol = coding_eol_lf;
-    
-    eol_len = strlen(cur_bp->eol);
-    
     /* Process this and subsequent chunks into lines. */
+    eol_len = strlen(cur_bp->eol);
     do {
       for (i = 0; i < size; i++) {
         if (strncmp(cur_bp->eol, buf + i, eol_len) != 0)
