@@ -132,8 +132,12 @@ static void insert_expanded_tab(int (*inschr)(int chr))
   int c = get_goalc();
   int t = tab_width(cur_bp);
 
+  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+
   for (c = t - c % t; c > 0; --c)
     (*inschr)(' ');
+
+  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 }
 
 int insert_tab(void)
@@ -505,15 +509,10 @@ static int backward_delete_char_overwrite(void)
       return FALSE;
 
     backward_char();
-    if (following_char() == '\t') {
-      /* In overwrite-mode.  */
-      undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+    if (following_char() == '\t')
       insert_expanded_tab(insert_char);
-      undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-    }
-    else {
-      insert_char(' '); /* In overwrite-mode.  */
-    }
+    else
+      insert_char(' ');
     backward_char();
 
     cur_bp->flags |= BFLAG_MODIFIED;
@@ -673,7 +672,7 @@ DEFUN("indent-for-tab-command", indent_for_tab_command)
 Indent line or insert a tab.
 +*/
 {
-  if (!lookup_bool_variable("tab-always-indent") && get_goalc() > current_indent())
+  if (!lookup_bool_variable("tab-always-indent") && get_goalc() >= current_indent())
     return insert_tab();
   else
     return indent_relative();
