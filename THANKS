@@ -41,5 +41,6 @@ The Zile team would like to thank:
 * Thomas Dickey for help with ncurses
 * Robert Millan for bug reports and fixes
 * Aaron Swartz for clarifying problems on Mac OS X
+* Julien Chaffraix for indenting fixes
 
 and everyone else who has reported bugs and made suggestions.
