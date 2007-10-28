@@ -654,6 +654,7 @@ static size_t current_indent(void)
   Marker *save_point = point_marker();
 
   /* Find first non-blank char. */
+  FUNCALL(previous_line);
   FUNCALL(beginning_of_line);
   while (!eolp() && (isspace(following_char())))
     forward_char();
