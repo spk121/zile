@@ -17,15 +17,15 @@ release: distcheck
 	read -e -p "SourceForge login: " USER && \
 	read -r -s -p "Password: " PASSWORD && \
 	echo -e "Release focus:\n\
-  Initial FreshMeat announcement  1\n\
-  Documentation                   2\n\
-  Code cleanup                    3\n\
-  Minor feature enhancements      4\n\
-  Major feature enhancements      5\n\
-  Minor bug fixes                 6\n\
-  Major bug fixes                 7\n\
-  Minor security fixes            8\n\
-  Major security fixes            9" && \
+  1 Initial FreshMeat announcement\n\
+  2 Documentation\n\
+  3 Code cleanup\n\
+  4 Minor feature enhancements\n\
+  5 Major feature enhancements\n\
+  6 Minor bug fixes\n\
+  7 Major bug fixes\n\
+  8 Minor security fixes\n\
+  9 Major security fixes" && \
 	read -e -p "Choice: " FOCUS && \
 	$$VISUAL $(NOTES) && \
 	copher -u $$USER -P $$PASSWORD -p $(PACKAGE) -k $(PACKAGE) -r $(VERSION) -N $(NOTES) $(PACKAGE)-$(VERSION).tar.gz && \
