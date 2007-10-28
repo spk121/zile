@@ -648,14 +648,15 @@ static int indent_relative(void)
   return ok;
 }
 
-static size_t current_indent(void)
+static size_t previous_line_indent(void)
 {
   size_t cur_indent;
   Marker *save_point = point_marker();
 
-  /* Find first non-blank char. */
   FUNCALL(previous_line);
   FUNCALL(beginning_of_line);
+
+  /* Find first non-blank char. */
   while (!eolp() && (isspace(following_char())))
     forward_char();
 
@@ -673,7 +674,11 @@ DEFUN("indent-for-tab-command", indent_for_tab_command)
 Indent line or insert a tab.
 +*/
 {
-  if (!lookup_bool_variable("tab-always-indent") && get_goalc() >= current_indent())
+ /*
+  * If `tab-always-indent' is nil, compare point's column with the
+  * previous line's indentation. If it is strictly smaller, indent
+  * relative to the previous line; otherwise, indent absolutely. */
+  if (!lookup_bool_variable("tab-always-indent") && get_goalc() >= previous_line_indent())
     return insert_tab();
   else
     return indent_relative();
