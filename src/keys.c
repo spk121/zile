@@ -140,7 +140,7 @@ astr chordtostr(size_t key)
 static const char *keyname[] = {
   "\\BACKSPACE",
   "\\C-",
-  "\\DEL",
+  "\\DELETE",
   "\\DOWN",
   "\\END",
   "\\F1",

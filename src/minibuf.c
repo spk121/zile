@@ -30,6 +30,7 @@
 #include "extern.h"
 
 static History files_history;
+int minibuf_written = FALSE;
 
 /*--------------------------------------------------------------------------
  * Minibuffer wrapper functions.
@@ -49,16 +50,19 @@ void free_minibuf(void)
 
 static void minibuf_vwrite(const char *fmt, va_list ap)
 {
-  char *buf;
+  char *buf = minibuf_format(fmt, ap);
 
-  buf = minibuf_format(fmt, ap);
+  if (cur_wp) {
+    term_minibuf_write(buf);
 
-  term_minibuf_write(buf);
+    /* Redisplay (and leave the cursor in the correct position). */
+    term_redisplay();
+    term_refresh();
+  } else
+    fputs(buf, stderr);
+
   free(buf);
-
-  /* Redisplay (and leave the cursor in the correct position). */
-  term_redisplay();
-  term_refresh();
+  minibuf_written = TRUE;
 }
 
 /*

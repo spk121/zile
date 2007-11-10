@@ -214,7 +214,6 @@ struct option longopts[] = {
 int main(int argc, char **argv)
 {
   int c, bflag = FALSE, qflag = FALSE;
-  astr ms = NULL;
   list fargs = list_new();
   size_t line;
 
@@ -276,8 +275,7 @@ int main(int argc, char **argv)
               );
       return 0;
     case '?':                   /* Unknown option*/
-      if (ms == NULL)
-        ms = astr_afmt(astr_new(), "Unknown option `%s'", argv[this_optind]);
+      minibuf_error("Unknown option `%s'", argv[this_optind]);
       break;
     case ':':                   /* Missing argument */
       fprintf(stderr, PACKAGE ": Option `%s' requires an argument\n\n", argv[this_optind]);
@@ -294,10 +292,7 @@ int main(int argc, char **argv)
 
   init_bindings();
 
-  if (bflag) {
-    if (ms)
-      printf("%s\n", astr_cstr(ms));
-  } else {
+  if (!bflag) {
     term_init();
 
     /* Create the `*scratch*' buffer. */
@@ -332,15 +327,12 @@ int main(int argc, char **argv)
       }
     }
 
-    if (argc == 0 && list_length(fargs) == 0)
+    if (!minibuf_written && argc == 0 && list_length(fargs) == 0)
       /* Show the splash screen only if no files and no Lisp expression
          or load file is specified on the command line. */
       about_screen();
 
     setup_main_screen(argc);
-
-    if (ms)
-      minibuf_error(astr_cstr(ms));
     execute_functions(fargs);
     list_delete(fargs);
 
@@ -359,8 +351,6 @@ int main(int argc, char **argv)
   lisp_finalise();
 
   /* Free all the memory allocated. */
-  if (ms)
-    astr_delete(ms);
   free_kill_ring();
   free_registers();
   free_macros();

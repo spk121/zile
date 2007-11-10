@@ -479,6 +479,10 @@ sequence.
 
   if (arglist) {
     numkeys = keystrtovec(arglist->list_next->data, &keys);
+    if (numkeys == -1) {
+      minibuf_error("No such key sequence `%s'", arglist->list_next->data);
+      return FALSE;
+    }
     name = arglist->list_next->list_next->data;
   } else {
     astr as;

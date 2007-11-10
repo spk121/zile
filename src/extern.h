@@ -173,6 +173,7 @@ Marker *point_marker(void);
 Marker *point_min_marker(void);
 
 /* minibuf.c -------------------------------------------------------------- */
+extern int minibuf_written;
 char *minibuf_format(const char *fmt, va_list ap);
 void free_minibuf(void);
 void minibuf_error(const char *fmt, ...);
