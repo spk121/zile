@@ -196,6 +196,7 @@ static leafp completion_scan(size_t key, size_t **keys, int *numkeys)
 DEFUN("self-insert-command", self_insert_command)
 /*+
 Insert the character you type.
+Whichever character you type to run this command is inserted.
 +*/
 {
   int uni, ret = TRUE;
