@@ -135,7 +135,7 @@ astr chordtostr(size_t key)
 }
 
 /*
- * Array of key names in lexical order
+ * Array of key names
  */
 static const char *keyname[] = {
   "\\BACKSPACE",
@@ -209,24 +209,16 @@ static int keycode[] = {
 };
 
 /*
- * String prefix comparison.
- */
-static int bstrcmp_prefix(const void *s, const void *t)
-{
-  return strncmp(*(const char **)s, *(const char **)t,
-                 strlen(*(const char **)t));
-}
-
-/*
  * Convert a key string to its key code.
  */
 static size_t strtokey(char *buf, size_t *len)
 {
   if (*buf == '\\') {
-    char **p = bsearch(&buf, keyname,
-                       sizeof(keyname) / sizeof(keyname[0]),
-                       sizeof(char *),
-                       bstrcmp_prefix);
+    size_t i;
+    char **p = NULL;
+    for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++)
+      if (strncmp(keyname[i], buf, min(strlen(keyname[i]), strlen(buf))) == 0)
+        p = (char **)&keyname[i];
     if (p == NULL) {
       *len = 0;
       return KBD_NOKEY;
