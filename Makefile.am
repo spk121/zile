@@ -13,7 +13,7 @@ EXTRA_DIST =					\
 NOTES = release-notes
 
 release: distcheck
-	cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
+	@cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
 	read -e -p "SourceForge login: " USER && \
 	read -r -s -p "Password: " PASSWORD && \
 	echo -e "Release focus:\n\
