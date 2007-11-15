@@ -117,7 +117,7 @@ static void bind_key_vec(leafp tree, size_t *keys, size_t n, Function func)
     s->func = func;
 }
 
-static void bind_key_string(char *key, Function func)
+static int bind_key_string(char *key, Function func)
 {
   int numkeys;
   size_t *keys;
@@ -125,7 +125,9 @@ static void bind_key_string(char *key, Function func)
   if ((numkeys = keystrtovec(key, &keys)) > 0) {
     bind_key_vec(leaf_tree, keys, numkeys, func);
     free(keys);
-  }
+    return TRUE;
+  } else
+    return FALSE;
 }
 
 static leafp search_key(leafp tree, size_t *keys, size_t n)
@@ -313,7 +315,10 @@ void init_bindings(void)
   for (i = 0; i < fentry_table_size; i++)
     for (j = 0; j < 3; ++j)
       if (fentry_table[i].key[j] != NULL)
-        bind_key_string(fentry_table[i].key[j], fentry_table[i].func);
+        if (!bind_key_string(fentry_table[i].key[j], fentry_table[i].func)) {
+          fprintf(stderr, PACKAGE ": Key sequence %s is invalid in default bindings\n\n", fentry_table[i].key[j]);
+          exit(1);
+        }
 }
 
 static void recursive_free_bindings(leafp p)
