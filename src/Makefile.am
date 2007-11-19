@@ -6,7 +6,7 @@ else
 regex = regex.o
 endif
 
-TESTS = astr
+TESTS = astr zile-startup-test
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
