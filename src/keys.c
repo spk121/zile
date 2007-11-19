@@ -217,7 +217,7 @@ static size_t strtokey(char *buf, size_t *len)
     size_t i;
     char **p = NULL;
     for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++)
-      if (strncmp(keyname[i], buf, min(strlen(keyname[i]), strlen(buf))) == 0)
+      if (strncmp(keyname[i], buf, strlen(keyname[i])) == 0)
         p = (char **)&keyname[i];
     if (p == NULL) {
       *len = 0;
