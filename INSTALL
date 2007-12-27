@@ -39,6 +39,5 @@ For other configure options, run
 Automated releases
 ------------------
 
-To make a release automatically, you need copher, from
-http://meatsmith.sourceforge.net/, and fm-submit, from
-http://www.ivarch.com/programs/fm-submit.shtml
+To make a release automatically, you need woger, from
+http://rrt.sc3d.org/Software/woger
