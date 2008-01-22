@@ -1,5 +1,5 @@
 /* strrstr implementation
-   Copyright (c) 2004, 2007 Reuben Thomas.  All rights reserved.
+   Copyright (c) 2004, 2007, 2008 Reuben Thomas.  All rights reserved.
 
    This file is part of Zile.
 
