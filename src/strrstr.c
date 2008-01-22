@@ -1,7 +1,5 @@
 /* strrstr implementation
-   Copyright (c) Kent Irwin (kent.irwin@nist.gov).
-   Copyright (c) 2004, 2007 Reuben Thomas.
-   All rights reserved.
+   Copyright (c) 2004, 2007 Reuben Thomas.  All rights reserved.
 
    This file is part of Zile.
 
@@ -31,17 +29,13 @@ char *strrstr(const char *s, const char *t);
 
 char *strrstr(const char *s, const char *t)
 {
-  size_t slen = strlen(s), tlen = strlen(t);
+  size_t i, j, tlen = strlen(t);
 
-  if (slen >= tlen) {
-    size_t i = slen - tlen, j;
-
-    do {
-      for (j = 0; j < tlen && s[i + j] == t[j]; j++)
-        ;
-      if (j == tlen)
-        return (char *)(s + i);
-    } while (i-- != 0);
+  for (i = strlen(s); i >= tlen; i--) {
+    for (j = 0; j < tlen && s[i - tlen + j] == t[j]; j++)
+      ;
+    if (j == tlen)
+      return (char *)(s + i);
   }
 
   return NULL;

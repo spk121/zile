@@ -6,8 +6,8 @@ The Zile team would like to thank:
   package, and fixing and reporting several bugs
 * Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
   `goto-line' function, Debian package and continuous support
-* Scott "Jerry" Lawrence <jsl@absynth.com> for lithp, on version 0.6
-  of which the now-defunct Lisp interpreter was based.
+* Scott "Jerry" Lawrence <yorgle@gmail.com> for lithp, on version 0.6
+  of which the minimal Lisp interpreter is based
 * Daniel Sobral <Daniel_Sobral@voga.com.br> for suggestions
 * Mikael Karpberg <karpen@ocean.campus.luth.se> for bug reports, fixes
   and suggestions
