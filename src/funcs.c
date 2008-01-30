@@ -1,7 +1,8 @@
 /* Miscellaneous Emacs functions reimplementation
-   Copyright (c) 1997-2004 Sandro Sigala.  All rights reserved.
-   Copyright (c) 2003-2006 Reuben Thomas.  All rights reserved.
-   Copyright (c) 2004 David A. Capello.  All rights reserved.
+   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2004 David A. Capello.
+   All rights reserved.
 
    This file is part of Zile.
 
