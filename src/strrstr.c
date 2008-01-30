@@ -35,7 +35,7 @@ char *strrstr(const char *s, const char *t)
     for (j = 0; j < tlen && s[i - tlen + j] == t[j]; j++)
       ;
     if (j == tlen)
-      return (char *)(s + i);
+      return (char *)(s + i - 1);
   }
 
   return NULL;
