@@ -167,6 +167,8 @@ static char *re_find_substr(const char *s1, size_t s1size,
   }
 
   re_set_syntax(old_syntax);
+  pattern.translate = NULL; /* Work around a glibc bug, where regfree
+                               tries to free(pattern.translate) */
   regfree(&pattern);
 
   free(search_regs.start);
