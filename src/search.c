@@ -1,7 +1,7 @@
 /* Search and replace functions
    Copyright (c) 1997-2004 Sandro Sigala.
    Copyright (c) 2004 David A. Capello.
-   Copyright (c) 2004-2007 Reuben Thomas.
+   Copyright (c) 2004-2008 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -167,8 +167,8 @@ static char *re_find_substr(const char *s1, size_t s1size,
   }
 
   re_set_syntax(old_syntax);
-  pattern.translate = NULL; /* Work around a glibc bug, where regfree
-                               tries to free(pattern.translate) */
+  pattern.translate = NULL; /* regfree requires translate to be NULL
+                               or malloced */
   regfree(&pattern);
 
   free(search_regs.start);
