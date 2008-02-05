@@ -13,4 +13,4 @@ EXTRA_DIST =					\
 release: distcheck
 	cvs diff && \
 	cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
-	woger $(PACKAGE) $(VERSION) release-notes.$(VERSION)
+	woger $(PACKAGE) $(VERSION) release-notes-$(VERSION)
