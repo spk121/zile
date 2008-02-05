@@ -3,6 +3,13 @@
 
 To build and install Zile:
 
+[Only if you're compiling the CVS sources, first make sure you have
+the GNU autotools installed (automake >= 1.9, autoconf >= 2.59) and
+run
+
+        autoreconf -i
+]
+
 1) Run configure:
 
 	./configure
@@ -11,11 +18,11 @@ To build and install Zile:
 
 	make
 
-3) To install zile, run
+3) To install Zile, run
 
 	make install
 
-   By default, zile is installed under /usr/local; this can be changed
+   By default, Zile is installed under /usr/local; this can be changed
    by using the --prefix argument to configure, e.g.
 
 	./configure --prefix=$HOME/zile
