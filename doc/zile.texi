@@ -21,7 +21,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle for Zile version 2.2
-@subtitle October 2007
+@subtitle February 2008
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -354,6 +354,16 @@ Show a help window.
 Show a tutorial.
 @item indent-for-tab-command
 Indent line or insert a tab.
+Depending on @i{tab-always-indent}, either insert a tab or indent.
+If initial point was within line's indentation, position after
+the indentation.  Else stay at same point in text.
+@item indent-relative
+Space out to under next indent point in previous nonblank line.
+An indent point is a non-whitespace character following whitespace.
+If the previous nonblank line has no indent points beyond the
+column point starts at, @i{tab-to-tab-stop} is done instead, unless
+this command is invoked with a numeric argument, in which case it
+does nothing.
 @item insert-buffer
 Insert after point the contents of the user specified buffer.
 Puts mark after the inserted text.
