@@ -1,6 +1,6 @@
 /* Line-oriented editing functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2006 Reuben Thomas.
+   Copyright (c) 2003-2008 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
    All rights reserved.
 
@@ -597,11 +597,22 @@ static void previous_nonblank_goalc(void)
     forward_char();
 }
 
-static int indent_relative(void)
+DEFUN("indent-relative", indent_relative)
+/*+
+Space out to under next indent point in previous nonblank line.
+An indent point is a non-whitespace character following whitespace.
+The following line shows the indentation points in this line.
+    ^         ^    ^     ^   ^           ^      ^  ^    ^
+If the previous nonblank line has no indent points beyond the
+column point starts at, `tab-to-tab-stop' is done instead, unless
+this command is invoked with a numeric argument, in which case it
+does nothing.
++*/
 {
   size_t target_goalc = 0, cur_goalc = get_goalc();
   Marker *old_point;
   int ok = TRUE;
+  size_t t = tab_width(cur_bp);
 
   if (warn_if_readonly_buffer())
     return FALSE;
@@ -633,20 +644,28 @@ static int indent_relative(void)
     free_marker(old_point);
   }
 
-  /* Insert spaces.  */
+  /* Insert indentation.  */
   undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-    if (target_goalc > 0)
-      /* If not at EOL on target line, insert spaces up to
-         target_goalc; if already at EOL on target line, insert a tab.
-       */
-      while (get_goalc() < target_goalc)
-        insert_char(' ');
-    else
+  if (target_goalc > 0) {
+    /* If not at EOL on target line, insert spaces & tabs up to
+       target_goalc; if already at EOL on target line, insert a tab.
+    */
+    if ((cur_goalc = get_goalc()) < target_goalc) {
+      do {
+        if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
+          ok = insert_tab();
+        else
+          ok = insert_char(' ');
+      } while (ok && (cur_goalc = get_goalc()) < target_goalc);
+    } else
       ok = insert_tab();
+  } else
+    ok = insert_tab();
   undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
   return ok;
 }
+END_DEFUN
 
 static size_t previous_line_indent(void)
 {
@@ -672,16 +691,16 @@ static size_t previous_line_indent(void)
 DEFUN("indent-for-tab-command", indent_for_tab_command)
 /*+
 Indent line or insert a tab.
+Depending on `tab-always-indent', either insert a tab or indent.
+If initial point was within line's indentation, position after
+the indentation.  Else stay at same point in text.
 +*/
 {
- /*
-  * If `tab-always-indent' is nil, compare point's column with the
-  * previous line's indentation. If it is strictly smaller, indent
-  * relative to the previous line; otherwise, indent absolutely. */
-  if (!lookup_bool_variable("tab-always-indent") && get_goalc() >= previous_line_indent())
+  if (lookup_bool_variable("tab-always-indent"))
     return insert_tab();
-  else
-    return indent_relative();
+  else if (get_goalc() < previous_line_indent())
+    return FUNCALL(indent_relative);
+  return TRUE;
 }
 END_DEFUN
 
