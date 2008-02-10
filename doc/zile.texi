@@ -59,7 +59,7 @@ user should feel at home with Zile.
 @node Overview, Features, Top, Top
 @chapter Overview
 
-The @emph{Zile} editor is written entirely in @emph{@w{ANSI C}}.
+The Zile editor is written entirely in @emph{@w{ANSI C}}.
 It should run on any POSIX system.
 
 Zile should really appear like Emacs, but a lot of good ideas were
@@ -615,7 +615,7 @@ Reinsert the last stretch of killed text.
 More precisely, reinsert the stretch of killed text most recently
 killed @i{or} yanked.  Put point at end, and set mark at beginning.
 @item zile-version
-Show the zile version.
+Show the version of Zile.
 @end table
 @c LINT END FUNC
 
