@@ -85,7 +85,7 @@ int find_file(const char *filename);
 Completion *make_buffer_completion(void);
 int check_modified_buffer(Buffer *bp);
 void kill_buffer(Buffer *kill_bp);
-void zile_exit(void);
+void zile_exit(int doabort);
 
 /* funcs.c ---------------------------------------------------------------- */
 int cancel(void);

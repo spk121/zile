@@ -1,6 +1,6 @@
 /* Disk file handling
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2007 Reuben Thomas.
+   Copyright (c) 2003-2008 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -1138,8 +1138,10 @@ END_DEFUN
 /*
  * Function called on unexpected error or Zile crash (SIGSEGV).
  * Attempts to save modified buffers.
+ * If doabort is true, aborts to allow core dump generation;
+ * otherwise, exit.
  */
-void zile_exit(void)
+void zile_exit(int doabort)
 {
   Buffer *bp;
 
@@ -1160,7 +1162,10 @@ void zile_exit(void)
       astr_delete(buf);
     }
 
-  exit(2);
+  if (doabort)
+    abort();
+  else
+    exit(2);
 }
 
 DEFUN("cd", cd)

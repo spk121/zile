@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2007 Reuben Thomas.
+   Copyright (c) 2004-2008 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -179,14 +179,14 @@ static void segv_sig_handler(int signo)
 {
   (void)signo;
   fprintf(stderr, PACKAGE_NAME " crashed.  Please send a bug report to <" PACKAGE_BUGREPORT ">.\r\n");
-  zile_exit();
+  zile_exit(TRUE);
 }
 
 static void other_sig_handler(int signo)
 {
   (void)signo;
   fprintf(stderr, PACKAGE_NAME " terminated with signal %d.\r\n", signo);
-  zile_exit();
+  zile_exit(FALSE);
 }
 
 static void signal_init(void)

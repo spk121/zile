@@ -1,6 +1,6 @@
 /* Memory allocation functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004 Reuben Thomas.
+   Copyright (c) 2004-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -40,7 +40,7 @@ void *zmalloc(size_t size)
 
   if ((ptr = calloc(size, (size_t)1)) == NULL) {
     fprintf(stderr, PACKAGE ": cannot allocate memory\n");
-    zile_exit();
+    zile_exit(FALSE);
   }
 
   return ptr;
@@ -57,7 +57,7 @@ void *zrealloc(void *ptr, size_t size)
 
   if ((newptr = realloc(ptr, size)) == NULL) {
     fprintf(stderr, PACKAGE ": cannot reallocate memory\n");
-    zile_exit();
+    zile_exit(FALSE);
   }
 
   return newptr;
@@ -83,7 +83,7 @@ int zvasprintf(char **ptr, const char *fmt, va_list vargs)
 
   if (retval == -1) {
     fprintf(stderr, PACKAGE ": cannot allocate memory for asprintf\n");
-    zile_exit();
+    zile_exit(FALSE);
   }
 
   return retval;
