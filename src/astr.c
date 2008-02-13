@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
    Copyright (c) 2001-2004 Sandro Sigala.
-   Copyright (c) 2003-2004 Reuben Thomas.
+   Copyright (c) 2003-2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -288,7 +288,7 @@ static void assert_eq(astr as, const char *s)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zile_exit(void)
+void zile_exit(int doabort)
 {
   exit(2);
 }
