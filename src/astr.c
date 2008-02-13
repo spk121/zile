@@ -290,6 +290,7 @@ static void assert_eq(astr as, const char *s)
  */
 void zile_exit(int doabort)
 {
+  (void)doabort;
   exit(2);
 }
 
