@@ -193,6 +193,7 @@ static void signal_init(void)
 {
   /* Set up signal handling */
   signal(SIGSEGV, segv_sig_handler);
+  signal(SIGBUS, segv_sig_handler);
   signal(SIGHUP, other_sig_handler);
   signal(SIGINT, other_sig_handler);
   signal(SIGQUIT, other_sig_handler);
