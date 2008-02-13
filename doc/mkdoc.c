@@ -142,8 +142,9 @@ static void process_file(char *filename)
 /*
  * Stub to make zmalloc &c. happy.
  */
-void zile_exit(void)
+void zile_exit(int doabort)
 {
+  (void)doabort;
   exit(2);
 }
 
