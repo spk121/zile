@@ -433,8 +433,8 @@ static int dispatch(xprintf_struct *s)
     /* char */
   case 'c':
     if (modifier != -1)
-      return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
-    INCOHERENT();
+      INCOHERENT();
+    return print_it(s, (size_t)approx_width, format_string, va_arg(s->vargs, int));
     /* 'int' instead of 'char' because default promotion is 'int' */
 
     /* math */
