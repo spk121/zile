@@ -2,7 +2,7 @@
   #                                                                           #
   #                                vasprintf                                  #
   #                                                                           #
-  #               Copyright (c) 2002-2003 David TAILLANDIER                   #
+  #               Copyright (c) 2002-2005 David TAILLANDIER                   #
   #                                                                           #
   ###########################################################################*/
 
@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 ====================
 
-Hacked from xnprintf version of 29th December 2002 to provide only
+Hacked from xnprintf version of 26th February 2005 to provide only
 vasprintf by Reuben Thomas <rrt@sc3d.org> for Zile.
 
 ====================
