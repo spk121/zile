@@ -1,6 +1,6 @@
 /* Key bindings and extended commands
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2003-2007 Reuben Thomas.
+   Copyright (c) 2003-2008 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -109,7 +109,7 @@ static void bind_key_vec(leafp tree, size_t *keys, size_t n, Function func)
     add_leaf(tree, p);
     if (n == 1)
       p->func = func;
-    else
+    else if (n > 0)
       bind_key_vec(p, &keys[1], n - 1, func);
   } else if (n > 1)
     bind_key_vec(s, &keys[1], n - 1, func);
