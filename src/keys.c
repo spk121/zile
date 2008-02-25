@@ -228,7 +228,7 @@ static size_t strtokey(char *buf, size_t *len)
     }
   } else {
     *len = 1;
-    return (size_t)*buf;
+    return (size_t)*(unsigned char *)buf;
   }
 }
 
