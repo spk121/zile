@@ -1,6 +1,6 @@
 /* Memory allocation functions
    Copyright (c) 1997-2004 Sandro Sigala.
-   Copyright (c) 2004-2005 Reuben Thomas.
+   Copyright (c) 2004-2008 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
@@ -52,8 +52,6 @@ void *zmalloc(size_t size)
 void *zrealloc(void *ptr, size_t size)
 {
   void *newptr;
-
-  assert(size > 0);
 
   if ((newptr = realloc(ptr, size)) == NULL) {
     fprintf(stderr, PACKAGE ": cannot reallocate memory\n");
