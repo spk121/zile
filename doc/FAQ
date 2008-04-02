@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2007/10/12 15:58:43 $
+		   Last updated: $Date: 2008/04/02 21:50:37 $
 
 ------------------------------------------------------------------------------
 
@@ -13,7 +13,7 @@ INDEX
    1.4. Where can I get the latest version?
    1.5. Why did you choose such difficult key sequences?
    1.6. Zile has a bug!
-   1.7. I like the xyz function of (X)Emacs but it's not in Zile!
+   1.7. I like the xyz function of Emacs but it's not in Zile!
    1.8. How small does Zile get?
    1.9. Does Zile support Unicode/UTF-8?
    1.10. Zile doesn't compile.
@@ -75,14 +75,14 @@ INDEX
     Bugzilla at http://sourceforge.net/projects/zile. Patches are
     appreciated.
 
-1.7. I like the xyz function of (X)Emacs but it's not in Zile!
+1.7. I like the xyz function of Emacs but it's not in Zile!
 
     Zile was written to be small but fast and powerful enough.
 
-    In general, if you need something more powerful, use Emacs or
-    XEmacs. You could also try Jed, which emulates Emacs, is not much
-    bigger than Zile, and has syntax highlighting, a macro language
-    and more (http://www.jedsoft.org/jed/).
+    In general, if you need something more powerful, use Emacs. You
+    could also try Jed, which emulates Emacs, is not much bigger than
+    Zile, and has syntax highlighting, a macro language and more
+    (http://www.jedsoft.org/jed/).
 
     If you still think that a certain function should be implemented
     in Zile, please send a message to the developers (see question
