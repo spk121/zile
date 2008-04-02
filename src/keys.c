@@ -35,101 +35,103 @@
 /*
  * Convert a key chord into its ASCII representation
  */
-astr chordtostr(size_t key)
+astr
+chordtostr (size_t key)
 {
-  astr as = astr_new();
+  astr as = astr_new ();
 
   if (key & KBD_CTRL)
-    astr_cat_cstr(as, "C-");
+    astr_cat_cstr (as, "C-");
   if (key & KBD_META)
-    astr_cat_cstr(as, "M-");
+    astr_cat_cstr (as, "M-");
   key &= ~(KBD_CTRL | KBD_META);
 
-  switch (key) {
-  case KBD_PGUP:
-    astr_cat_cstr(as, "<prior>");
-    break;
-  case KBD_PGDN:
-    astr_cat_cstr(as, "<next>");
-    break;
-  case KBD_HOME:
-    astr_cat_cstr(as, "<home>");
-    break;
-  case KBD_END:
-    astr_cat_cstr(as, "<end>");
-    break;
-  case KBD_DEL:
-    astr_cat_cstr(as, "<delete>");
-    break;
-  case KBD_BS:
-    astr_cat_cstr(as, "<backspace>");
-    break;
-  case KBD_INS:
-    astr_cat_cstr(as, "<insert>");
-    break;
-  case KBD_LEFT:
-    astr_cat_cstr(as, "<left>");
-    break;
-  case KBD_RIGHT:
-    astr_cat_cstr(as, "<right>");
-    break;
-  case KBD_UP:
-    astr_cat_cstr(as, "<up>");
-    break;
-  case KBD_DOWN:
-    astr_cat_cstr(as, "<down>");
-    break;
-  case KBD_RET:
-    astr_cat_cstr(as, "<RET>");
-    break;
-  case KBD_TAB:
-    astr_cat_cstr(as, "<TAB>");
-    break;
-  case KBD_F1:
-    astr_cat_cstr(as, "<f1>");
-    break;
-  case KBD_F2:
-    astr_cat_cstr(as, "<f2>");
-    break;
-  case KBD_F3:
-    astr_cat_cstr(as, "<f3>");
-    break;
-  case KBD_F4:
-    astr_cat_cstr(as, "<f4>");
-    break;
-  case KBD_F5:
-    astr_cat_cstr(as, "<f5>");
-    break;
-  case KBD_F6:
-    astr_cat_cstr(as, "<f6>");
-    break;
-  case KBD_F7:
-    astr_cat_cstr(as, "<f7>");
-    break;
-  case KBD_F8:
-    astr_cat_cstr(as, "<f8>");
-    break;
-  case KBD_F9:
-    astr_cat_cstr(as, "<f9>");
-    break;
-  case KBD_F10:
-    astr_cat_cstr(as, "<f10>");
-    break;
-  case KBD_F11:
-    astr_cat_cstr(as, "<f11>");
-    break;
-  case KBD_F12:
-    astr_cat_cstr(as, "<f12>");
-    break;
-  case ' ':
-    astr_cat_cstr(as, "SPC");
-    break;
-  default:
-    if (isgraph(key))
-      astr_cat_char(as, (int)(key & 0xff));
-    else
-      astr_afmt(as, "<%x>", key);
-  }
+  switch (key)
+    {
+    case KBD_PGUP:
+      astr_cat_cstr (as, "<prior>");
+      break;
+    case KBD_PGDN:
+      astr_cat_cstr (as, "<next>");
+      break;
+    case KBD_HOME:
+      astr_cat_cstr (as, "<home>");
+      break;
+    case KBD_END:
+      astr_cat_cstr (as, "<end>");
+      break;
+    case KBD_DEL:
+      astr_cat_cstr (as, "<delete>");
+      break;
+    case KBD_BS:
+      astr_cat_cstr (as, "<backspace>");
+      break;
+    case KBD_INS:
+      astr_cat_cstr (as, "<insert>");
+      break;
+    case KBD_LEFT:
+      astr_cat_cstr (as, "<left>");
+      break;
+    case KBD_RIGHT:
+      astr_cat_cstr (as, "<right>");
+      break;
+    case KBD_UP:
+      astr_cat_cstr (as, "<up>");
+      break;
+    case KBD_DOWN:
+      astr_cat_cstr (as, "<down>");
+      break;
+    case KBD_RET:
+      astr_cat_cstr (as, "<RET>");
+      break;
+    case KBD_TAB:
+      astr_cat_cstr (as, "<TAB>");
+      break;
+    case KBD_F1:
+      astr_cat_cstr (as, "<f1>");
+      break;
+    case KBD_F2:
+      astr_cat_cstr (as, "<f2>");
+      break;
+    case KBD_F3:
+      astr_cat_cstr (as, "<f3>");
+      break;
+    case KBD_F4:
+      astr_cat_cstr (as, "<f4>");
+      break;
+    case KBD_F5:
+      astr_cat_cstr (as, "<f5>");
+      break;
+    case KBD_F6:
+      astr_cat_cstr (as, "<f6>");
+      break;
+    case KBD_F7:
+      astr_cat_cstr (as, "<f7>");
+      break;
+    case KBD_F8:
+      astr_cat_cstr (as, "<f8>");
+      break;
+    case KBD_F9:
+      astr_cat_cstr (as, "<f9>");
+      break;
+    case KBD_F10:
+      astr_cat_cstr (as, "<f10>");
+      break;
+    case KBD_F11:
+      astr_cat_cstr (as, "<f11>");
+      break;
+    case KBD_F12:
+      astr_cat_cstr (as, "<f12>");
+      break;
+    case ' ':
+      astr_cat_cstr (as, "SPC");
+      break;
+    default:
+      if (isgraph (key))
+	astr_cat_char (as, (int) (key & 0xff));
+      else
+	astr_afmt (as, "<%x>", key);
+    }
 
   return as;
 }
@@ -211,51 +213,62 @@ static int keycode[] = {
 /*
  * Convert a key string to its key code.
  */
-static size_t strtokey(char *buf, size_t *len)
+static size_t
+strtokey (char *buf, size_t * len)
 {
-  if (*buf == '\\') {
-    size_t i;
-    char **p = NULL;
-    for (i = 0; i < sizeof(keyname) / sizeof(keyname[0]); i++)
-      if (strncmp(keyname[i], buf, strlen(keyname[i])) == 0)
-        p = (char **)&keyname[i];
-    if (p == NULL) {
-      *len = 0;
-      return KBD_NOKEY;
-    } else {
-      *len = strlen(*p);
-      return keycode[p - (char **)keyname];
+  if (*buf == '\\')
+    {
+      size_t i;
+      char **p = NULL;
+      for (i = 0; i < sizeof (keyname) / sizeof (keyname[0]); i++)
+	if (strncmp (keyname[i], buf, strlen (keyname[i])) == 0)
+	  p = (char **) &keyname[i];
+      if (p == NULL)
+	{
+	  *len = 0;
+	  return KBD_NOKEY;
+	}
+      else
+	{
+	  *len = strlen (*p);
+	  return keycode[p - (char **) keyname];
+	}
     }
-  } else {
-    *len = 1;
-    return (size_t)*(unsigned char *)buf;
-  }
+  else
+    {
+      *len = 1;
+      return (size_t) * (unsigned char *) buf;
+    }
 }
 
 /*
  * Convert a key chord string to its key code.
  */
-size_t strtochord(char *buf, size_t *len)
+size_t
+strtochord (char *buf, size_t * len)
 {
   size_t key, l;
 
-  key = strtokey(buf, &l);
-  if (key == KBD_NOKEY) {
-    *len = 0;
-    return KBD_NOKEY;
-  }
-
-  *len = l;
-
-  if (key == KBD_CTRL || key == KBD_META) {
-    size_t k = strtochord(buf + l, &l);
-    if (k == KBD_NOKEY) {
+  key = strtokey (buf, &l);
+  if (key == KBD_NOKEY)
+    {
       *len = 0;
       return KBD_NOKEY;
     }
-    *len += l;
-    key |= k;
-  }
+
+  *len = l;
+
+  if (key == KBD_CTRL || key == KBD_META)
+    {
+      size_t k = strtochord (buf + l, &l);
+      if (k == KBD_NOKEY)
+	{
+	  *len = 0;
+	  return KBD_NOKEY;
+	}
+      *len += l;
+      key |= k;
+    }
 
   return key;
 }
@@ -263,40 +276,45 @@ size_t strtochord(char *buf, size_t *len)
 /*
  * Convert a key sequence string into a key code sequence.
  */
-int keystrtovec(char *key, size_t **keys)
+int
+keystrtovec (char *key, size_t ** keys)
 {
-  vector *v = vec_new(sizeof(size_t));
+  vector *v = vec_new (sizeof (size_t));
   size_t size;
 
-  for (size = 0; *key != '\0'; size++) {
-    size_t len, code = strtochord(key, &len);
-    vec_item(v, size, size_t) = code;
-    if ((vec_item(v, size, size_t) = code) == KBD_NOKEY) {
-      vec_delete(v);
-      return -1;
+  for (size = 0; *key != '\0'; size++)
+    {
+      size_t len, code = strtochord (key, &len);
+      vec_item (v, size, size_t) = code;
+      if ((vec_item (v, size, size_t) = code) == KBD_NOKEY)
+	{
+	  vec_delete (v);
+	  return -1;
+	}
+      key += len;
     }
-    key += len;
-  }
 
-  *keys = vec_toarray(v);
+  *keys = vec_toarray (v);
   return size;
 }
 
 /*
  * Convert a key code sequence into a key code sequence string.
  */
-astr keyvectostr(size_t *keys, size_t numkeys)
+astr
+keyvectostr (size_t * keys, size_t numkeys)
 {
   size_t i;
-  astr as = astr_new();
+  astr as = astr_new ();
 
-  for (i = 0; i < numkeys; i++) {
-    astr key = chordtostr(keys[i]);
-    astr_cat(as, key);
-    astr_delete(key);
-    if (i < numkeys - 1)
-      astr_cat_char(as, ' ');
-  }
+  for (i = 0; i < numkeys; i++)
+    {
+      astr key = chordtostr (keys[i]);
+      astr_cat (as, key);
+      astr_delete (key);
+      if (i < numkeys - 1)
+	astr_cat_char (as, ' ');
+    }
 
   return as;
 }
@@ -304,25 +322,27 @@ astr keyvectostr(size_t *keys, size_t numkeys)
 /*
  * Convert a key like "\\C-xrs" to "C-x r s"
  */
-astr simplify_key(char *key)
+astr
+simplify_key (char *key)
 {
   int i, j;
   size_t *keys;
-  astr dest = astr_new();
+  astr dest = astr_new ();
 
   if (key == NULL)
     return dest;
-  i = keystrtovec(key, &keys);
-  for (j = 0; j < i; j++) {
-    astr as;
-    if (j > 0)
-      astr_cat_char(dest, ' ');
-    as = chordtostr(keys[j]);
-    astr_cat(dest, as);
-    astr_delete(as);
-  }
+  i = keystrtovec (key, &keys);
+  for (j = 0; j < i; j++)
+    {
+      astr as;
+      if (j > 0)
+	astr_cat_char (dest, ' ');
+      as = chordtostr (keys[j]);
+      astr_cat (dest, as);
+      astr_delete (as);
+    }
   if (i > 0)
-    free(keys);
+    free (keys);
 
   return dest;
 }

@@ -25,18 +25,20 @@
 #include <stddef.h>
 #include <string.h>
 
-char *strrstr(const char *s, const char *t);
+char *strrstr (const char *s, const char *t);
 
-char *strrstr(const char *s, const char *t)
+char *
+strrstr (const char *s, const char *t)
 {
-  size_t i, j, tlen = strlen(t);
+  size_t i, j, tlen = strlen (t);
 
-  for (i = strlen(s); i >= tlen; i--) {
-    for (j = 0; j < tlen && s[i - tlen + j] == t[j]; j++)
-      ;
-    if (j == tlen)
-      return (char *)(s + i - tlen);
-  }
+  for (i = strlen (s); i >= tlen; i--)
+    {
+      for (j = 0; j < tlen && s[i - tlen + j] == t[j]; j++)
+	;
+      if (j == tlen)
+	return (char *) (s + i - tlen);
+    }
 
   return NULL;
 }

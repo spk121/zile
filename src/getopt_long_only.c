@@ -331,7 +331,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
   if (optind == 0 || !__getopt_initialized)
     {
       if (optind == 0)
-	optind = 1;	/* Don't scan ARGV[0], the program name.  */
+	optind = 1;		/* Don't scan ARGV[0], the program name.  */
       optstring = _getopt_initialize (argc, argv, optstring);
       __getopt_initialized = 1;
     }
@@ -347,7 +347,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
       /* Advance to the next ARGV-element.  */
 
       /* Give FIRST_NONOPT & LAST_NONOPT rational values if OPTIND has been
-	 moved back by the user (who may also have changed the arguments).  */
+         moved back by the user (who may also have changed the arguments).  */
       if (last_nonopt > optind)
 	last_nonopt = optind;
       if (first_nonopt > optind)
@@ -372,9 +372,9 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* The special ARGV-element `--' means premature end of options.
-	 Skip it like a null option,
-	 then exchange with previous non-options as if it were an option,
-	 then skip everything else like a non-option.  */
+         Skip it like a null option,
+         then exchange with previous non-options as if it were an option,
+         then skip everything else like a non-option.  */
 
       if (optind != argc && !strcmp (argv[optind], "--"))
 	{
@@ -390,7 +390,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* If we have done all the ARGV-elements, stop the scan
-	 and back over any non-options that we skipped and permuted.  */
+         and back over any non-options that we skipped and permuted.  */
 
       if (optind == argc)
 	{
@@ -402,7 +402,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* If we have come to a non-option and did not permute it,
-	 either stop the scan or describe it to the caller and pass it by.  */
+         either stop the scan or describe it to the caller and pass it by.  */
 
       if (NONOPTION_P)
 	{
@@ -413,7 +413,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* We have found another option-ARGV-element.
-	 Skip the initial punctuation.  */
+         Skip the initial punctuation.  */
 
       nextchar = (argv[optind] + 1
 		  + (longopts != NULL && argv[optind][1] == '-'));
@@ -436,7 +436,9 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 
   if (longopts != NULL
       && (argv[optind][1] == '-'
-	  || (long_only && (argv[optind][2] || !my_index (optstring, argv[optind][1])))))
+	  || (long_only
+	      && (argv[optind][2]
+		  || !my_index (optstring, argv[optind][1])))))
     {
       char *nameend;
       const struct option *p;
@@ -450,12 +452,11 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	/* Do nothing.  */ ;
 
       /* Test all long options for either exact match
-	 or abbreviated matches.  */
+         or abbreviated matches.  */
       for (p = longopts, option_index = 0; p->name; p++, option_index++)
 	if (!strncmp (p->name, nextchar, nameend - nextchar))
 	  {
-	    if ((size_t) (nameend - nextchar)
-		== (size_t) strlen (p->name))
+	    if ((size_t) (nameend - nextchar) == (size_t) strlen (p->name))
 	      {
 		/* Exact match found.  */
 		pfound = p;
@@ -492,7 +493,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	  if (*nameend)
 	    {
 	      /* Don't test has_arg with >, because some C compilers don't
-		 allow it to be used on enums.  */
+	         allow it to be used on enums.  */
 	      if (pfound->has_arg)
 		optarg = nameend + 1;
 	      else
@@ -502,12 +503,14 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		      if (argv[optind - 1][1] == '-')
 			/* --option */
 			fprintf (stderr,
-				 _("%s: option `--%s' doesn't allow an argument\n"),
+				 _
+				 ("%s: option `--%s' doesn't allow an argument\n"),
 				 argv[0], pfound->name);
 		      else
 			/* +option or -option */
 			fprintf (stderr,
-				 _("%s: option `%c%s' doesn't allow an argument\n"),
+				 _
+				 ("%s: option `%c%s' doesn't allow an argument\n"),
 				 argv[0], argv[optind - 1][0], pfound->name);
 		    }
 
@@ -525,8 +528,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		{
 		  if (opterr)
 		    fprintf (stderr,
-			   _("%s: option `%s' requires an argument\n"),
-			   argv[0], argv[optind - 1]);
+			     _("%s: option `%s' requires an argument\n"),
+			     argv[0], argv[optind - 1]);
 		  nextchar += strlen (nextchar);
 		  optopt = pfound->val;
 		  return optstring[0] == ':' ? ':' : '?';
@@ -544,9 +547,9 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* Can't find it as a long option.  If this is not getopt_long_only,
-	 or the option starts with '--' or is not a valid short
-	 option, then it's an error.
-	 Otherwise interpret it as a short option.  */
+         or the option starts with '--' or is not a valid short
+         option, then it's an error.
+         Otherwise interpret it as a short option.  */
       if (!long_only || argv[optind][1] == '-'
 	  || my_index (optstring, *nextchar) == NULL)
 	{
@@ -581,8 +584,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
     if (temp == NULL || c == ':')
       {
 	if (opterr)
-          fprintf (stderr, _("%s: invalid option -- %c\n"),
-                   argv[0], c);
+	  fprintf (stderr, _("%s: invalid option -- %c\n"), argv[0], c);
 	optopt = c;
 	return '?';
       }
@@ -628,7 +630,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	/* optarg is now the argument, see if it's in the
 	   table of longopts.  */
 
-	for (nextchar = nameend = optarg; *nameend && *nameend != '='; nameend++)
+	for (nextchar = nameend = optarg; *nameend && *nameend != '=';
+	     nameend++)
 	  /* Do nothing.  */ ;
 
 	/* Test all long options for either exact match
@@ -676,8 +679,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		  {
 		    if (opterr)
 		      fprintf (stderr, _("\
-%s: option `-W %s' doesn't allow an argument\n"),
-			       argv[0], pfound->name);
+%s: option `-W %s' doesn't allow an argument\n"), argv[0], pfound->name);
 
 		    nextchar += strlen (nextchar);
 		    return '?';
@@ -707,8 +709,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	      }
 	    return pfound->val;
 	  }
-	  nextchar = NULL;
-	  return 'W';	/* Let the application handle it.   */
+	nextchar = NULL;
+	return 'W';		/* Let the application handle it.   */
       }
     if (temp[1] == ':')
       {
@@ -740,8 +742,8 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 		  {
 		    /* 1003.2 specifies the format of this message.  */
 		    fprintf (stderr,
-			   _("%s: option requires an argument -- %c\n"),
-			   argv[0], c);
+			     _("%s: option requires an argument -- %c\n"),
+			     argv[0], c);
 		  }
 		optopt = c;
 		if (optstring[0] == ':')
@@ -751,7 +753,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	      }
 	    else
 	      /* We already incremented `optind' once;
-		 increment it again when taking next ARGV-elt as argument.  */
+	         increment it again when taking next ARGV-elt as argument.  */
 	      optarg = argv[optind++];
 	    nextchar = NULL;
 	  }

@@ -31,9 +31,10 @@
 #include "vars.h"
 
 
-static le *eval_cb_command_helper(Function f, int argc, le *branch)
+static le *
+eval_cb_command_helper (Function f, int argc, le * branch)
 {
-  int ret = f(argc, branch);
+  int ret = f (argc, branch);
   return ret ? leT : leNIL;
 }
 
@@ -55,7 +56,7 @@ static le *eval_cb_command_helper(Function f, int argc, le *branch)
 
 
 static evalLookupNode evalTable[] = {
-  { "setq"	, eval_cb_setq },
+  {"setq", eval_cb_setq},
 #define X0(zile_name, c_name) \
   { zile_name   , eval_cb_ ## c_name },
 #define X1(zile_name, c_name, key1) \
@@ -69,22 +70,24 @@ static evalLookupNode evalTable[] = {
 #undef X1
 #undef X2
 #undef X3
-  { NULL	, NULL },
+  {NULL, NULL},
 };
 
 
-eval_cb lookupFunction(char *name)
+eval_cb
+lookupFunction (char *name)
 {
   int i;
   for (i = 0; evalTable[i].word; i++)
-    if (!strcmp(evalTable[i].word, name))
+    if (!strcmp (evalTable[i].word, name))
       return evalTable[i].callback;
 
   return NULL;
 }
 
 
-le *evaluateBranch(le *trybranch)
+le *
+evaluateBranch (le * trybranch)
 {
   le *keyword;
   eval_cb prim;
@@ -93,51 +96,57 @@ le *evaluateBranch(le *trybranch)
     return NULL;
 
   if (trybranch->branch)
-    keyword = evaluateBranch(trybranch->branch);
+    keyword = evaluateBranch (trybranch->branch);
   else
-    keyword = leNew(trybranch->data);
+    keyword = leNew (trybranch->data);
 
-  if (keyword->data == NULL) {
-    leWipe(keyword);
-    return leNIL;
-  }
+  if (keyword->data == NULL)
+    {
+      leWipe (keyword);
+      return leNIL;
+    }
 
-  prim = lookupFunction(keyword->data);
-  leWipe(keyword);
+  prim = lookupFunction (keyword->data);
+  leWipe (keyword);
   if (prim)
-    return prim(0, trybranch);
+    return prim (0, trybranch);
 
   return NULL;
 }
 
 
-le *evaluateNode(le *node)
+le *
+evaluateNode (le * node)
 {
   le *value;
 
   if (node == NULL)
     return leNIL;
 
-  if (node->branch != NULL) {
-    if (node->quoted)
-      value = leDup(node->branch);
-    else
-      value = evaluateBranch(node->branch);
+  if (node->branch != NULL)
+    {
+      if (node->quoted)
+	value = leDup (node->branch);
+      else
+	value = evaluateBranch (node->branch);
 
-  } else {
-    value = variableGet(mainVarList, node->data);
+    }
+  else
+    {
+      value = variableGet (mainVarList, node->data);
 
-    if (value != NULL)
-      value = leDup(value);
-    else
-      value = leNew(node->data);
-  }
+      if (value != NULL)
+	value = leDup (value);
+      else
+	value = leNew (node->data);
+    }
 
   return value;
 }
 
 
-int countNodes(le *branch)
+int
+countNodes (le * branch)
 {
   int count;
 
@@ -145,24 +154,28 @@ int countNodes(le *branch)
   return count;
 }
 
-le *eval_cb_setq(int argc, le *branch)
+le *
+eval_cb_setq (int argc, le * branch)
 {
   le *newvalue = leNIL, *current;
-  argc = countNodes(branch);
+  argc = countNodes (branch);
 
-  if (branch != NULL && argc >= 3) {
-    for (current = branch->list_next; current; current = current->list_next->list_next) {
-      if (newvalue != leNIL)
-        leWipe(newvalue);
+  if (branch != NULL && argc >= 3)
+    {
+      for (current = branch->list_next; current;
+	   current = current->list_next->list_next)
+	{
+	  if (newvalue != leNIL)
+	    leWipe (newvalue);
 
-      newvalue = evaluateNode(current->list_next);
+	  newvalue = evaluateNode (current->list_next);
 
-      variableSet(&mainVarList, current->data, newvalue);
+	  variableSet (&mainVarList, current->data, newvalue);
 
-      if (current->list_next == NULL)
-        break;
+	  if (current->list_next == NULL)
+	    break;
+	}
     }
-  }
 
   return newvalue;
 }

@@ -26,9 +26,10 @@
 #include "extern.h"
 
 /* Create an empty list, returning a pointer to the list */
-list list_new(void)
+list
+list_new (void)
 {
-  list l = zmalloc(sizeof(struct list_s));
+  list l = zmalloc (sizeof (struct list_s));
 
   l->next = l->prev = l;
   l->item = NULL;
@@ -37,19 +38,23 @@ list list_new(void)
 }
 
 /* Delete a list, freeing its nodes */
-void list_delete(list l)
+void
+list_delete (list l)
 {
   list p = l, q;
 
-  do {
-    q = p;
-    p = p->next;
-    free(q);
-  } while (p != l);
+  do
+    {
+      q = p;
+      p = p->next;
+      free (q);
+    }
+  while (p != l);
 }
 
 /* Return the length of a list */
-size_t list_length(list l)
+size_t
+list_length (list l)
 {
   list p;
   size_t length = 0;
@@ -61,9 +66,10 @@ size_t list_length(list l)
 }
 
 /* Add an item to the head of a list, returning the new list head */
-list list_prepend(list l, void *i)
+list
+list_prepend (list l, void *i)
 {
-  list n = zmalloc(sizeof(struct list_s));
+  list n = zmalloc (sizeof (struct list_s));
 
   n->next = l->next;
   n->prev = l;
@@ -74,9 +80,10 @@ list list_prepend(list l, void *i)
 }
 
 /* Add an item to the tail of a list, returning the new list tail */
-list list_append(list l, void *i)
+list
+list_append (list l, void *i)
 {
-  list n = zmalloc(sizeof(struct list_s));
+  list n = zmalloc (sizeof (struct list_s));
 
   n->next = l;
   n->prev = l->prev;
@@ -87,7 +94,8 @@ list list_append(list l, void *i)
 }
 
 /* Return the first item of a list, or NULL if the list is empty */
-void *list_head(list l)
+void *
+list_head (list l)
 {
   list p = l->next;
 
@@ -99,7 +107,8 @@ void *list_head(list l)
 
 /* Remove the first item of a list, returning the item, or NULL if the
    list is empty */
-void *list_behead(list l)
+void *
+list_behead (list l)
 {
   void *i;
   list p = l->next;
@@ -109,14 +118,15 @@ void *list_behead(list l)
   i = p->item;
   l->next = l->next->next;
   l->next->prev = l;
-  free(p);
+  free (p);
 
   return i;
 }
 
 /* Remove the last item of a list, returning the item, or NULL if the
    list is empty */
-void *list_betail(list l)
+void *
+list_betail (list l)
 {
   void *i;
   list p = l->prev;
@@ -126,44 +136,46 @@ void *list_betail(list l)
   i = p->item;
   l->prev = l->prev->prev;
   l->prev->next = l;
-  free(p);
+  free (p);
 
   return i;
 }
 
 /* Return the nth item of l, or l->item (usually NULL) if that is out
    of range */
-void *list_at(list l, size_t n)
+void *
+list_at (list l, size_t n)
 {
   size_t i;
   list p;
-        
-  assert(l != NULL);
 
-  for (p = list_first(l), i = 0; p != l && i < n; p = list_next(p), i++)
+  assert (l != NULL);
+
+  for (p = list_first (l), i = 0; p != l && i < n; p = list_next (p), i++)
     ;
-  
+
   return p->item;
 }
 
 /* Sort list l with qsort using comparison function cmp */
-void list_sort(list l, int (*cmp)(const void *p1, const void *p2))
+void
+list_sort (list l, int (*cmp) (const void *p1, const void *p2))
 {
   list p;
   void **vec;
-  size_t i, len = list_length(l);
+  size_t i, len = list_length (l);
 
-  assert(l != NULL && cmp != NULL);
+  assert (l != NULL && cmp != NULL);
 
-  vec = (void **)zmalloc(sizeof(void *) * len);
+  vec = (void **) zmalloc (sizeof (void *) * len);
 
-  for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
-    vec[i] = (void *)p->item;
+  for (p = list_first (l), i = 0; i < len; p = list_next (p), ++i)
+    vec[i] = (void *) p->item;
 
-  qsort(vec, len, sizeof(void *), cmp);
+  qsort (vec, len, sizeof (void *), cmp);
 
-  for (p = list_first(l), i = 0; i < len; p = list_next(p), ++i)
+  for (p = list_first (l), i = 0; i < len; p = list_next (p), ++i)
     p->item = vec[i];
 
-  free(vec);
+  free (vec);
 }

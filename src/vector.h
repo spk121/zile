@@ -24,17 +24,18 @@
 #include <stddef.h>
 
 /* Unitialised vector elements are zeroed */
-typedef struct {
-  size_t itemsize;        /* size of each item in bytes */
-  size_t items;           /* number of items used */
-  size_t size;            /* number of items available */
-  void *array;            /* the array of contents */
+typedef struct
+{
+  size_t itemsize;		/* size of each item in bytes */
+  size_t items;			/* number of items used */
+  size_t size;			/* number of items available */
+  void *array;			/* the array of contents */
 } vector;
 
-vector *vec_new(size_t itemsize);
-void vec_delete(vector *v);
-void *vec_toarray(vector *v);
-void *vec_index(vector *v, size_t idx);
+vector *vec_new (size_t itemsize);
+void vec_delete (vector * v);
+void *vec_toarray (vector * v);
+void *vec_index (vector * v, size_t idx);
 
 #define vec_item(v, idx, ty)         (*(ty *)vec_index((v), (idx)))
 #define vec_itemsize(v) (v)->itemsize

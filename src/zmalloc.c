@@ -32,16 +32,18 @@
 /*
  * Return a zeroed allocated memory area.
  */
-void *zmalloc(size_t size)
+void *
+zmalloc (size_t size)
 {
   void *ptr;
 
-  assert(size > 0);
+  assert (size > 0);
 
-  if ((ptr = calloc(size, (size_t)1)) == NULL) {
-    fprintf(stderr, PACKAGE ": cannot allocate memory\n");
-    zile_exit(FALSE);
-  }
+  if ((ptr = calloc (size, (size_t) 1)) == NULL)
+    {
+      fprintf (stderr, PACKAGE ": cannot allocate memory\n");
+      zile_exit (FALSE);
+    }
 
   return ptr;
 }
@@ -49,14 +51,16 @@ void *zmalloc(size_t size)
 /*
  * Resize an allocated memory area.
  */
-void *zrealloc(void *ptr, size_t size)
+void *
+zrealloc (void *ptr, size_t size)
 {
   void *newptr;
 
-  if ((newptr = realloc(ptr, size)) == NULL) {
-    fprintf(stderr, PACKAGE ": cannot reallocate memory\n");
-    zile_exit(FALSE);
-  }
+  if ((newptr = realloc (ptr, size)) == NULL)
+    {
+      fprintf (stderr, PACKAGE ": cannot reallocate memory\n");
+      zile_exit (FALSE);
+    }
 
   return newptr;
 }
@@ -64,25 +68,28 @@ void *zrealloc(void *ptr, size_t size)
 /*
  * Duplicate a string.
  */
-char *zstrdup(const char *s)
+char *
+zstrdup (const char *s)
 {
-  return strcpy(zmalloc(strlen(s) + 1), s);
+  return strcpy (zmalloc (strlen (s) + 1), s);
 }
 
 /*
  * Wrapper for vasprintf.
  */
 #ifndef HAVE_VASPRINTF
-int vasprintf(char **ptr, const char *format_string, va_list vargs);
+int vasprintf (char **ptr, const char *format_string, va_list vargs);
 #endif
-int zvasprintf(char **ptr, const char *fmt, va_list vargs)
+int
+zvasprintf (char **ptr, const char *fmt, va_list vargs)
 {
-  int retval = vasprintf(ptr, fmt, vargs);
+  int retval = vasprintf (ptr, fmt, vargs);
 
-  if (retval == -1) {
-    fprintf(stderr, PACKAGE ": cannot allocate memory for asprintf\n");
-    zile_exit(FALSE);
-  }
+  if (retval == -1)
+    {
+      fprintf (stderr, PACKAGE ": cannot allocate memory for asprintf\n");
+      zile_exit (FALSE);
+    }
 
   return retval;
 }
@@ -90,14 +97,15 @@ int zvasprintf(char **ptr, const char *fmt, va_list vargs)
 /*
  * Wrapper for asprintf.
  */
-int zasprintf(char **ptr, const char *fmt, ...)
+int
+zasprintf (char **ptr, const char *fmt, ...)
 {
   va_list vargs;
   int retval;
 
-  va_start(vargs, fmt);
-  retval = zvasprintf(ptr, fmt, vargs);
-  va_end(vargs);
+  va_start (vargs, fmt);
+  retval = zvasprintf (ptr, fmt, vargs);
+  va_end (vargs);
 
   return retval;
 }

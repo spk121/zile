@@ -91,7 +91,7 @@ struct option
 # define no_argument		0
 # define required_argument	1
 # define optional_argument	2
-#endif	/* need getopt */
+#endif /* need getopt */
 
 
 /* Get definitions and prototypes for functions to process the
@@ -121,12 +121,12 @@ struct option
 # ifndef __need_getopt
 extern int getopt_long_only (int __argc, char *const *__argv,
 			     const char *__shortopts,
-		             const struct option *__longopts, int *__longind);
+			     const struct option *__longopts, int *__longind);
 
 /* Internal only.  Users should not call this directly.  */
 extern int _getopt_internal (int __argc, char *const *__argv,
 			     const char *__shortopts,
-		             const struct option *__longopts, int *__longind,
+			     const struct option *__longopts, int *__longind,
 			     int __long_only);
 # endif
 

@@ -29,118 +29,131 @@
 static list mark_ring = NULL;	/* Mark ring. */
 
 /* Push the current mark in the mark-ring. */
-void push_mark(void)
+void
+push_mark (void)
 {
   if (!mark_ring)
-    mark_ring = list_new();
+    mark_ring = list_new ();
 
   /* Save the mark.  */
   if (cur_bp->mark)
-    list_append(mark_ring, copy_marker(cur_bp->mark));
+    list_append (mark_ring, copy_marker (cur_bp->mark));
   /* Save an invalid mark.  */
-  else {
-    Marker *m = point_min_marker();
-    m->pt.p = NULL;
-    list_append(mark_ring, m);
-  }
+  else
+    {
+      Marker *m = point_min_marker ();
+      m->pt.p = NULL;
+      list_append (mark_ring, m);
+    }
 }
 
 /* Pop a mark from the mark-ring a put it as current mark. */
-void pop_mark(void)
+void
+pop_mark (void)
 {
-  Marker *m = list_last(mark_ring)->item;
+  Marker *m = list_last (mark_ring)->item;
 
   /* Replace the mark. */
   if (m->bp->mark)
-    free_marker(m->bp->mark);
+    free_marker (m->bp->mark);
 
-  m->bp->mark = (m->pt.p) ? copy_marker(m) : NULL;
+  m->bp->mark = (m->pt.p) ? copy_marker (m) : NULL;
 
-  list_betail(mark_ring);
-  free_marker(m);
+  list_betail (mark_ring);
+  free_marker (m);
 }
 
 /* Set the mark to the point position. */
-void set_mark(void)
+void
+set_mark (void)
 {
   if (!cur_bp->mark)
-    cur_bp->mark = point_marker();
+    cur_bp->mark = point_marker ();
   else
-    move_marker(cur_bp->mark, cur_bp, cur_bp->pt);
+    move_marker (cur_bp->mark, cur_bp, cur_bp->pt);
 }
 
-int is_empty_line(void)
+int
+is_empty_line (void)
 {
-  return astr_len(cur_bp->pt.p->item) == 0;
+  return astr_len (cur_bp->pt.p->item) == 0;
 }
 
-int is_blank_line(void)
+int
+is_blank_line (void)
 {
   size_t c;
-  for (c = 0; c < astr_len(cur_bp->pt.p->item); c++)
-    if (!isspace(*astr_char(cur_bp->pt.p->item, (ptrdiff_t)c)))
+  for (c = 0; c < astr_len (cur_bp->pt.p->item); c++)
+    if (!isspace (*astr_char (cur_bp->pt.p->item, (ptrdiff_t) c)))
       return FALSE;
   return TRUE;
 }
 
-int char_after(Point *pt)
+int
+char_after (Point * pt)
 {
-  if (eobp())
+  if (eobp ())
     return 0;
-  else if (eolp())
+  else if (eolp ())
     return '\n';
   else
-    return *astr_char(pt->p->item, (ptrdiff_t)pt->o);
+    return *astr_char (pt->p->item, (ptrdiff_t) pt->o);
 }
 
-int char_before(Point *pt)
+int
+char_before (Point * pt)
 {
-  if (bobp())
+  if (bobp ())
     return 0;
-  else if (bolp())
+  else if (bolp ())
     return '\n';
   else
-    return *astr_char(pt->p->item, (ptrdiff_t)(pt->o - 1));
+    return *astr_char (pt->p->item, (ptrdiff_t) (pt->o - 1));
 }
 
 /* This function returns the character following point in the current
    buffer. */
-int following_char(void)
+int
+following_char (void)
 {
-  return char_after(&cur_bp->pt);
+  return char_after (&cur_bp->pt);
 }
 
 /* This function returns the character preceding point in the current
    buffer. */
-int preceding_char(void)
+int
+preceding_char (void)
 {
-  return char_before(&cur_bp->pt);
+  return char_before (&cur_bp->pt);
 }
 
 /* This function returns TRUE if point is at the beginning of the
    buffer. */
-int bobp(void)
+int
+bobp (void)
 {
-  return (list_prev(cur_bp->pt.p) == cur_bp->lines &&
-          cur_bp->pt.o == 0);
+  return (list_prev (cur_bp->pt.p) == cur_bp->lines && cur_bp->pt.o == 0);
 }
 
 /* This function returns TRUE if point is at the end of the
    buffer. */
-int eobp(void)
+int
+eobp (void)
 {
-  return (list_next(cur_bp->pt.p) == cur_bp->lines &&
-          cur_bp->pt.o == astr_len(cur_bp->pt.p->item));
+  return (list_next (cur_bp->pt.p) == cur_bp->lines &&
+	  cur_bp->pt.o == astr_len (cur_bp->pt.p->item));
 }
 
 /* Returns TRUE if point is at the beginning of a line. */
-int bolp(void)
+int
+bolp (void)
 {
   return cur_bp->pt.o == 0;
 }
 
 /* Returns TRUE if point is at the end of a line. */
-int eolp(void)
+int
+eolp (void)
 {
-  return cur_bp->pt.o == astr_len(cur_bp->pt.p->item);
+  return cur_bp->pt.o == astr_len (cur_bp->pt.p->item);
 }

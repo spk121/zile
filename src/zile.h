@@ -51,7 +51,7 @@
  */
 typedef struct Point Point;
 typedef struct Marker Marker;
-typedef struct list_s Line;   /* This is evil! */
+typedef struct list_s Line;	/* This is evil! */
 typedef struct Undo Undo;
 typedef struct Region Region;
 typedef struct Buffer Buffer;
@@ -64,7 +64,7 @@ typedef struct Terminal Terminal;
  * The type of a Zile exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*Function)(int uniarg, le *list);
+typedef int (*Function) (int uniarg, le * list);
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -72,32 +72,36 @@ typedef int (*Function)(int uniarg, le *list);
  */
 
 /* Point and Marker. */
-struct Point {
-  Line *p;                      /* Line pointer. */
-  size_t n;                     /* Line number. */
-  size_t o;                     /* Offset. */
+struct Point
+{
+  Line *p;			/* Line pointer. */
+  size_t n;			/* Line number. */
+  size_t o;			/* Offset. */
 };
 
-struct Marker {
-  Buffer *bp;             /* Buffer that points into. */
-  Point pt;               /* Point position. */
-  Marker *next;           /* Used to chain all markers in the buffer. */
+struct Marker
+{
+  Buffer *bp;			/* Buffer that points into. */
+  Point pt;			/* Point position. */
+  Marker *next;			/* Used to chain all markers in the buffer. */
 };
 
 /* Undo delta types. */
-enum {
-  UNDO_INSERT_BLOCK,      /* Insert a block of characters. */
-  UNDO_REMOVE_CHAR,       /* Remove a character. */
-  UNDO_REMOVE_BLOCK,      /* Remove a block of characters. */
-  UNDO_REPLACE_CHAR,      /* Replace a character. */
-  UNDO_REPLACE_BLOCK,     /* Replace a block of characters. */
-  UNDO_START_SEQUENCE,    /* Start a multi operation sequence. */
-  UNDO_END_SEQUENCE,      /* End a multi operation sequence. */
-  UNDO_INTERCALATE_CHAR   /* Insert a char without moving the
-                             current pointer. */
+enum
+{
+  UNDO_INSERT_BLOCK,		/* Insert a block of characters. */
+  UNDO_REMOVE_CHAR,		/* Remove a character. */
+  UNDO_REMOVE_BLOCK,		/* Remove a block of characters. */
+  UNDO_REPLACE_CHAR,		/* Replace a character. */
+  UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
+  UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
+  UNDO_END_SEQUENCE,		/* End a multi operation sequence. */
+  UNDO_INTERCALATE_CHAR		/* Insert a char without moving the
+				   current pointer. */
 };
 
-struct Undo {
+struct Undo
+{
   /* Next undo delta in list. */
   Undo *next;
 
@@ -113,23 +117,26 @@ struct Undo {
   int unchanged;
 
   /* The undo delta. */
-  union {
+  union
+  {
     /* The character to insert or replace. */
     int c;
 
     /* The block to insert. */
-    struct {
+    struct
+    {
       char *text;
-      size_t osize;      /* Original size; only for replace. */
-      size_t size;       /* New block size. */
+      size_t osize;		/* Original size; only for replace. */
+      size_t size;		/* New block size. */
     } block;
   } delta;
 };
 
-struct Region {
-  Point start;            /* The region start. */
-  Point end;              /* The region end. */
-  size_t size;                /* The region size. */
+struct Region
+{
+  Point start;			/* The region start. */
+  Point end;			/* The region end. */
+  size_t size;			/* The region size. */
 
   /* The total number of lines ('\n' newlines) in region. */
   int num_lines;
@@ -137,17 +144,17 @@ struct Region {
 
 /* Buffer flags or minor modes. */
 
-#define BFLAG_MODIFIED  (0000001) /* The buffer has been modified. */
-#define BFLAG_NOSAVE    (0000002) /* The buffer need not to be saved. */
-#define BFLAG_NEEDNAME  (0000004) /* On save, ask for a file name. */
-#define BFLAG_TEMPORARY (0000010) /* The buffer is a temporary buffer. */
-#define BFLAG_READONLY  (0000020) /* The buffer cannot be modified. */
-#define BFLAG_OVERWRITE (0000040) /* The buffer is in overwrite mode. */
-#define BFLAG_BACKUP    (0000100) /* The old file has already been
-                                     backed up. */
-#define BFLAG_NOUNDO    (0000200) /* Do not record undo informations. */
-#define BFLAG_AUTOFILL  (0000400) /* The buffer is in Auto Fill mode. */
-#define BFLAG_ISEARCH   (0001000) /* The buffer is in Isearch loop. */
+#define BFLAG_MODIFIED  (0000001)	/* The buffer has been modified. */
+#define BFLAG_NOSAVE    (0000002)	/* The buffer need not to be saved. */
+#define BFLAG_NEEDNAME  (0000004)	/* On save, ask for a file name. */
+#define BFLAG_TEMPORARY (0000010)	/* The buffer is a temporary buffer. */
+#define BFLAG_READONLY  (0000020)	/* The buffer cannot be modified. */
+#define BFLAG_OVERWRITE (0000040)	/* The buffer is in overwrite mode. */
+#define BFLAG_BACKUP    (0000100)	/* The old file has already been
+					   backed up. */
+#define BFLAG_NOUNDO    (0000200)	/* Do not record undo informations. */
+#define BFLAG_AUTOFILL  (0000400)	/* The buffer is in Auto Fill mode. */
+#define BFLAG_ISEARCH   (0001000)	/* The buffer is in Isearch loop. */
 
 /* Formats of end-of-line. */
 extern char coding_eol_lf[3];
@@ -156,7 +163,8 @@ extern char coding_eol_cr[3];
 /* This value is used to signal that the type is not yet decided. */
 extern char coding_eol_undecided[3];
 
-struct Buffer {
+struct Buffer
+{
   /* The next buffer in buffer list. */
   Buffer *next;
 
@@ -194,7 +202,8 @@ struct Buffer {
   char *eol;
 };
 
-struct Window {
+struct Window
+{
   /* The next window in window list. */
   Window *next;
 
@@ -217,14 +226,16 @@ struct Window {
   size_t ewidth, eheight;
 };
 
-enum {
+enum
+{
   COMPLETION_NOTMATCHED,
   COMPLETION_MATCHED,
   COMPLETION_MATCHEDNONUNIQUE,
   COMPLETION_NONUNIQUE
 };
 
-struct Completion {
+struct Completion
+{
   /* This flag is set when the vector is sorted. */
   int fl_sorted;
   /* This flag is set when a completion window has been popped up. */
@@ -242,23 +253,25 @@ struct Completion {
   /* This flag is set when the space character is allowed. */
   int fl_space;
 
-  list completions;             /* The completions list. */
+  list completions;		/* The completions list. */
 
-  list matches;                 /* The matches list. */
-  char *match;                  /* The match buffer. */
-  size_t matchsize;             /* The match buffer size. */
+  list matches;			/* The matches list. */
+  char *match;			/* The match buffer. */
+  size_t matchsize;		/* The match buffer size. */
 };
 
-struct History {
-  list elements;                /* Elements (strings).  */
+struct History
+{
+  list elements;		/* Elements (strings).  */
   list sel;
 };
 
-typedef struct Macro {
-  size_t nkeys;                 /* The number of keystrokes. */
-  size_t *keys;                 /* Vector of keystrokes. */
-  char *name;                   /* Name of the macro. */
-  struct Macro *next;           /* Next macro in the list. */
+typedef struct Macro
+{
+  size_t nkeys;			/* The number of keystrokes. */
+  size_t *keys;			/* Vector of keystrokes. */
+  char *name;			/* Name of the macro. */
+  struct Macro *next;		/* Next macro in the list. */
 } Macro;
 
 /* Type of font attributes */

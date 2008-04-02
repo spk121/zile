@@ -27,77 +27,87 @@
 #include "zile.h"
 #include "extern.h"
 
-Marker *make_marker(void)
+Marker *
+make_marker (void)
 {
   Marker *marker;
-  marker = (Marker *)zmalloc(sizeof(Marker));
-  memset(marker, 0, sizeof(Marker));
+  marker = (Marker *) zmalloc (sizeof (Marker));
+  memset (marker, 0, sizeof (Marker));
   return marker;
 }
 
-static void unchain_marker(Marker *marker)
+static void
+unchain_marker (Marker * marker)
 {
   Marker *m, *next, *prev = NULL;
 
   if (!marker->bp)
     return;
 
-  for (m = marker->bp->markers; m; m = next) {
-    next = m->next;
-    if (m == marker) {
-      if (prev)
-        prev->next = next;
-      else
-        m->bp->markers = next;
+  for (m = marker->bp->markers; m; m = next)
+    {
+      next = m->next;
+      if (m == marker)
+	{
+	  if (prev)
+	    prev->next = next;
+	  else
+	    m->bp->markers = next;
 
-      m->bp = NULL;
-      break;
+	  m->bp = NULL;
+	  break;
+	}
+      prev = m;
     }
-    prev = m;
-  }
 }
 
-void free_marker(Marker *marker)
+void
+free_marker (Marker * marker)
 {
-  unchain_marker(marker);
-  free(marker);
+  unchain_marker (marker);
+  free (marker);
 }
 
-void move_marker(Marker *marker, Buffer *bp, Point pt)
+void
+move_marker (Marker * marker, Buffer * bp, Point pt)
 {
-  if (bp != marker->bp) {
-    /* Unchain with the previous pointed buffer.  */
-    unchain_marker(marker);
+  if (bp != marker->bp)
+    {
+      /* Unchain with the previous pointed buffer.  */
+      unchain_marker (marker);
 
-    /* Change the buffer.  */
-    marker->bp = bp;
+      /* Change the buffer.  */
+      marker->bp = bp;
 
-    /* Chain with the new buffer.  */
-    marker->next = bp->markers;
-    bp->markers = marker;
-  }
+      /* Chain with the new buffer.  */
+      marker->next = bp->markers;
+      bp->markers = marker;
+    }
 
   /* Change the point.  */
   marker->pt = pt;
 }
 
-Marker *copy_marker(Marker *m)
+Marker *
+copy_marker (Marker * m)
 {
-  Marker *marker = make_marker();
-  move_marker(marker, m->bp, m->pt);
+  Marker *marker = make_marker ();
+  move_marker (marker, m->bp, m->pt);
   return marker;
 }
 
-Marker *point_marker(void)
+Marker *
+point_marker (void)
 {
-  Marker *marker = make_marker();
-  move_marker(marker, cur_bp, cur_bp->pt);
+  Marker *marker = make_marker ();
+  move_marker (marker, cur_bp, cur_bp->pt);
   return marker;
 }
 
-Marker *point_min_marker(void)
+Marker *
+point_min_marker (void)
 {
-  Marker *marker = make_marker();
-  move_marker(marker, cur_bp, point_min());
+  Marker *marker = make_marker ();
+  move_marker (marker, cur_bp, point_min ());
   return marker;
 }

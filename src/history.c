@@ -26,76 +26,88 @@
 #include "zile.h"
 #include "extern.h"
 
-void free_history_elements(History *hp)
+void
+free_history_elements (History * hp)
 {
-  if (hp->elements) {
-    list l;
+  if (hp->elements)
+    {
+      list l;
 
-    for (l = list_first(hp->elements); l != hp->elements;
-         l = list_next(l))
-      free(l->item);
+      for (l = list_first (hp->elements); l != hp->elements;
+	   l = list_next (l))
+	free (l->item);
 
-    list_delete(hp->elements);
-    hp->elements = NULL;
-    hp->sel = NULL;
-  }
+      list_delete (hp->elements);
+      hp->elements = NULL;
+      hp->sel = NULL;
+    }
 }
 
-void add_history_element(History *hp, const char *string)
+void
+add_history_element (History * hp, const char *string)
 {
   const char *last;
 
   if (!hp->elements)
-    hp->elements = list_new();
+    hp->elements = list_new ();
 
-  last = list_last(hp->elements)->item;
-  if (!last || strcmp(last, string) != 0)
-    list_append(hp->elements, zstrdup(string));
+  last = list_last (hp->elements)->item;
+  if (!last || strcmp (last, string) != 0)
+    list_append (hp->elements, zstrdup (string));
 }
 
-void prepare_history(History *hp)
+void
+prepare_history (History * hp)
 {
   hp->sel = NULL;
 }
 
-const char *previous_history_element(History *hp)
+const char *
+previous_history_element (History * hp)
 {
   const char *s = NULL;
 
-  if (hp->elements) {
-    /* First time that we use `previous-history-element'. */
-    if (!hp->sel) {
-      /* Select last element. */
-      if (list_last(hp->elements) != hp->elements) {
-        hp->sel = list_last(hp->elements);
-        s = hp->sel->item;
-      }
+  if (hp->elements)
+    {
+      /* First time that we use `previous-history-element'. */
+      if (!hp->sel)
+	{
+	  /* Select last element. */
+	  if (list_last (hp->elements) != hp->elements)
+	    {
+	      hp->sel = list_last (hp->elements);
+	      s = hp->sel->item;
+	    }
+	}
+      /* Is there another element? */
+      else if (list_prev (hp->sel) != hp->elements)
+	{
+	  /* Select it. */
+	  hp->sel = list_prev (hp->sel);
+	  s = hp->sel->item;
+	}
     }
-    /* Is there another element? */
-    else if (list_prev(hp->sel) != hp->elements) {
-      /* Select it. */
-      hp->sel = list_prev(hp->sel);
-      s = hp->sel->item;
-    }
-  }
 
   return s;
 }
 
-const char *next_history_element(History *hp)
+const char *
+next_history_element (History * hp)
 {
   const char *s = NULL;
 
-  if (hp->elements && hp->sel) {
-    /* Next element. */
-    if (list_next(hp->sel) != hp->elements) {
-      hp->sel = list_next(hp->sel);
-      s = hp->sel->item;
+  if (hp->elements && hp->sel)
+    {
+      /* Next element. */
+      if (list_next (hp->sel) != hp->elements)
+	{
+	  hp->sel = list_next (hp->sel);
+	  s = hp->sel->item;
+	}
+      /* No more elements (back to original status). */
+      else
+	hp->sel = NULL;
     }
-    /* No more elements (back to original status). */
-    else
-      hp->sel = NULL;
-  }
 
   return s;
 }

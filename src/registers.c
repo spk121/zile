@@ -30,12 +30,13 @@
 
 #define NUM_REGISTERS	256
 
-static struct {
-  char	*text;
-  size_t	size;
+static struct
+{
+  char *text;
+  size_t size;
 } regs[NUM_REGISTERS];
 
-DEFUN("copy-to-register", copy_to_register)
+DEFUN ("copy-to-register", copy_to_register)
 /*+
 Copy region into the user specified register.
 +*/
@@ -44,37 +45,36 @@ Copy region into the user specified register.
   char *p;
   int reg;
 
-  minibuf_write("Copy to register: ");
-  term_refresh();
-  if ((reg = getkey()) == KBD_CANCEL)
-    return cancel();
-  minibuf_clear();
+  minibuf_write ("Copy to register: ");
+  term_refresh ();
+  if ((reg = getkey ()) == KBD_CANCEL)
+    return cancel ();
+  minibuf_clear ();
   reg %= NUM_REGISTERS;
 
-  if (warn_if_no_mark())
+  if (warn_if_no_mark ())
     return FALSE;
 
-  calculate_the_region(&r);
+  calculate_the_region (&r);
 
-  p = copy_text_block(r.start.n, r.start.o, r.size);
+  p = copy_text_block (r.start.n, r.start.o, r.size);
   if (regs[reg].text != NULL)
-    free(regs[reg].text);
+    free (regs[reg].text);
   regs[reg].text = p;
   regs[reg].size = r.size;
 
   return TRUE;
 }
-END_DEFUN
-
-static void insert_register(int reg)
+END_DEFUN static void
+insert_register (int reg)
 {
-  undo_save(UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
+  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
   undo_nosave = TRUE;
-  insert_nstring(regs[reg].text, regs[reg].size);
+  insert_nstring (regs[reg].text, regs[reg].size);
   undo_nosave = FALSE;
 }
 
-DEFUN("insert-register", insert_register)
+DEFUN ("insert-register", insert_register)
 /*+
 Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
@@ -82,71 +82,71 @@ Puts point before and mark after the inserted text.
 {
   int reg, uni;
 
-  if (warn_if_readonly_buffer())
+  if (warn_if_readonly_buffer ())
     return FALSE;
 
-  minibuf_write("Insert register: ");
-  term_refresh();
-  if ((reg = getkey()) == KBD_CANCEL)
-    return cancel();
-  minibuf_clear();
+  minibuf_write ("Insert register: ");
+  term_refresh ();
+  if ((reg = getkey ()) == KBD_CANCEL)
+    return cancel ();
+  minibuf_clear ();
   reg %= NUM_REGISTERS;
 
-  if (regs[reg].text == NULL) {
-    minibuf_error("Register does not contain text");
-    return FALSE;
-  }
+  if (regs[reg].text == NULL)
+    {
+      minibuf_error ("Register does not contain text");
+      return FALSE;
+    }
 
-  set_mark_command();
+  set_mark_command ();
 
-  undo_save(UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < last_uniarg; ++uni)
-    insert_register(reg);
-  undo_save(UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    insert_register (reg);
+  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  exchange_point_and_mark();
-  deactivate_mark();
+  exchange_point_and_mark ();
+  deactivate_mark ();
 
   return TRUE;
 }
-END_DEFUN
-
-static void write_registers_list(va_list ap)
+END_DEFUN static void
+write_registers_list (va_list ap)
 {
   size_t i, count;
 
-  (void)ap;
-  bprintf("%-8s %8s\n", "Register", "Size");
-  bprintf("%-8s %8s\n", "--------", "----");
+  (void) ap;
+  bprintf ("%-8s %8s\n", "Register", "Size");
+  bprintf ("%-8s %8s\n", "--------", "----");
   for (i = count = 0; i < NUM_REGISTERS; ++i)
-    if (regs[i].text != NULL) {
-      astr as = astr_new();
-      ++count;
-      if (isprint(i))
-        astr_afmt(as, "`%c'", i);
-      else
-        astr_afmt(as, "`\\%o'", i);
-      bprintf("%-8s %8d\n", astr_cstr(as), regs[i].size);
-      astr_delete(as);
-    }
+    if (regs[i].text != NULL)
+      {
+	astr as = astr_new ();
+	++count;
+	if (isprint (i))
+	  astr_afmt (as, "`%c'", i);
+	else
+	  astr_afmt (as, "`\\%o'", i);
+	bprintf ("%-8s %8d\n", astr_cstr (as), regs[i].size);
+	astr_delete (as);
+      }
   if (!count)
-    bprintf("No registers defined\n");
+    bprintf ("No registers defined\n");
 }
 
-DEFUN("list-registers", list_registers)
+DEFUN ("list-registers", list_registers)
 /*+
 List defined registers.
 +*/
 {
-  write_temp_buffer("*Registers List*", write_registers_list);
+  write_temp_buffer ("*Registers List*", write_registers_list);
   return TRUE;
 }
-END_DEFUN
-
-void free_registers(void)
+END_DEFUN void
+free_registers (void)
 {
   int i;
   for (i = 0; i < NUM_REGISTERS; ++i)
     if (regs[i].text != NULL)
-      free(regs[i].text);
+      free (regs[i].text);
 }

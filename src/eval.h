@@ -25,28 +25,30 @@
 
 #include "lists.h"
 
-typedef le *(*eval_cb)(int argc, le *branch);
-typedef struct evalLookupNode {
+typedef le *(*eval_cb) (int argc, le * branch);
+typedef struct evalLookupNode
+{
   char *word;
   eval_cb callback;
 } evalLookupNode;
 
-eval_cb lookupFunction(char *name);
-le *evaluateBranch(le *trybranch);
-le *evaluateNode(le *node);
+eval_cb lookupFunction (char *name);
+le *evaluateBranch (le * trybranch);
+le *evaluateNode (le * node);
 
-int countNodes(le *branch);
+int countNodes (le * branch);
 
-enum setfcn {
+enum setfcn
+{
   S_SET,
   S_SETQ
 };
 
-le *eval_cb_set(int argc, le *branch);
-le *eval_cb_setq(int argc, le *branch);
+le *eval_cb_set (int argc, le * branch);
+le *eval_cb_setq (int argc, le * branch);
 
 le *leNIL, *leT;
-void eval_init(void);
-void eval_finalise(void);
+void eval_init (void);
+void eval_finalise (void);
 
 #endif

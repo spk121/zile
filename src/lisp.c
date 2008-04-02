@@ -28,26 +28,29 @@
 #include "eval.h"
 
 
-void lisp_init(void)
+void
+lisp_init (void)
 {
-  leNIL = leNew("NIL");
-  leT = leNew("T");
+  leNIL = leNew ("NIL");
+  leT = leNew ("T");
 }
 
 
-void lisp_finalise(void)
+void
+lisp_finalise (void)
 {
-  leReallyWipe(leNIL);
-  leReallyWipe(leT);
+  leReallyWipe (leNIL);
+  leReallyWipe (leT);
 }
 
 
-le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
+le *
+lisp_read (getcCallback getcp, ungetcCallback ungetcp)
 {
   int lineno = 0;
   struct le *list = NULL;
 
-  list = parseInFile(getcp, ungetcp, list, &lineno);
+  list = parseInFile (getcp, ungetcp, list, &lineno);
 
   return list;
 }
@@ -55,39 +58,43 @@ le *lisp_read(getcCallback getcp, ungetcCallback ungetcp)
 
 static FILE *fp = NULL;
 
-static int getc_file(void)
+static int
+getc_file (void)
 {
-  return getc(fp);
+  return getc (fp);
 }
 
-static void ungetc_file(int c)
+static void
+ungetc_file (int c)
 {
-  ungetc(c, fp);
+  ungetc (c, fp);
 }
 
-le *lisp_read_file(const char *file)
+le *
+lisp_read_file (const char *file)
 {
   le *list;
-  fp = fopen(file, "r");
+  fp = fopen (file, "r");
 
   if (fp == NULL)
     return NULL;
 
-  list = lisp_read(getc_file, ungetc_file);
-  fclose(fp);
+  list = lisp_read (getc_file, ungetc_file);
+  fclose (fp);
 
   return list;
 }
 
 
-astr lisp_dump(le *list)
+astr
+lisp_dump (le * list)
 {
-  astr as = astr_new();
+  astr as = astr_new ();
 
-  astr_cat_cstr(as, "Eval results:\n");
-  astr_cat_delete(as, leDumpEval(list, 0));
-  astr_cat_cstr(as, "\n\nVariables:\n");
-  astr_cat_delete(as, variableDump(mainVarList));
+  astr_cat_cstr (as, "Eval results:\n");
+  astr_cat_delete (as, leDumpEval (list, 0));
+  astr_cat_cstr (as, "\n\nVariables:\n");
+  astr_cat_delete (as, variableDump (mainVarList));
 
   return as;
 }

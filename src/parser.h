@@ -26,7 +26,8 @@
 #include <stdio.h>
 #include "lists.h"
 
-enum tokenname {
+enum tokenname
+{
   T_EOF,
   T_CLOSEPAREN,
   T_OPENPAREN,
@@ -35,10 +36,10 @@ enum tokenname {
   T_WORD
 };
 
-typedef int (*getcCallback)(void);
-typedef void (*ungetcCallback)(int c);
+typedef int (*getcCallback) (void);
+typedef void (*ungetcCallback) (int c);
 
-struct le *parseInFile(getcCallback getachar, ungetcCallback ungetachar,
-            struct le * list, int *line);
+struct le *parseInFile (getcCallback getachar, ungetcCallback ungetachar,
+			struct le *list, int *line);
 
 #endif

@@ -36,126 +36,147 @@
 /*
  * Default variables values table.
  */
-static struct var_entry {
-  char *var;                    /* Variable name. */
-  char *val;                    /* Default value. */
-  int local;                    /* If true, becomes local when set. */
-} def_vars[] = {
+static struct var_entry
+{
+  char *var;			/* Variable name. */
+  char *val;			/* Default value. */
+  int local;			/* If true, becomes local when set. */
+} def_vars[] =
+{
 #define X(var, val, local, doc) { var, val, local },
 #include "tbl_vars.h"
 #undef X
 };
 
-void init_variables(void)
+void
+init_variables (void)
 {
   struct var_entry *p;
 
-  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    set_variable(p->var, p->val);
+  for (p = &def_vars[0];
+       p < &def_vars[sizeof (def_vars) / sizeof (def_vars[0])]; p++)
+    set_variable (p->var, p->val);
 }
 
-void set_variable(char *var, char *val)
+void
+set_variable (char *var, char *val)
 {
-  variableSetString(&mainVarList, var, val);
+  variableSetString (&mainVarList, var, val);
 }
 
-char *get_variable_bp(Buffer *bp, char *var)
+char *
+get_variable_bp (Buffer * bp, char *var)
 {
   char *s = NULL;
 
   if (bp)
-    s = variableGetString(bp->vars, var);
+    s = variableGetString (bp->vars, var);
 
   if (s == NULL)
-    s = variableGetString(mainVarList, var);
+    s = variableGetString (mainVarList, var);
 
   return s;
 }
 
-char *get_variable(char *var)
+char *
+get_variable (char *var)
 {
-  return get_variable_bp(cur_bp, var);
+  return get_variable_bp (cur_bp, var);
 }
 
-int get_variable_number_bp(Buffer *bp, char *var)
+int
+get_variable_number_bp (Buffer * bp, char *var)
 {
   int t = 0;
-  char *s = get_variable_bp(bp, var);
+  char *s = get_variable_bp (bp, var);
 
   if (s)
-    t = atoi(s);
+    t = atoi (s);
 
   return t;
 }
 
-int get_variable_number(char *var)
+int
+get_variable_number (char *var)
 {
-  return get_variable_number_bp(cur_bp, var);
+  return get_variable_number_bp (cur_bp, var);
 }
 
-int is_variable_equal(char *var, char *val)
+int
+is_variable_equal (char *var, char *val)
 {
-  char *v = get_variable(var);
-  return v != NULL && !strcmp(v, val);
+  char *v = get_variable (var);
+  return v != NULL && !strcmp (v, val);
 }
 
-int lookup_bool_variable(char *var)
+int
+lookup_bool_variable (char *var)
 {
   char *p;
 
-  if ((p = get_variable(var)) != NULL)
-    return strcmp(p, "nil") != 0;
+  if ((p = get_variable (var)) != NULL)
+    return strcmp (p, "nil") != 0;
 
   return FALSE;
 }
 
-char *minibuf_read_variable_name(char *msg)
+char *
+minibuf_read_variable_name (char *msg)
 {
   char *ms;
-  Completion *cp = completion_new(FALSE);
+  Completion *cp = completion_new (FALSE);
   le *lp;
 
   for (lp = mainVarList; lp != NULL; lp = lp->list_next)
-    list_append(cp->completions, zstrdup(lp->data));
+    list_append (cp->completions, zstrdup (lp->data));
 
-  for (;;) {
-    ms = minibuf_read_completion(msg, "", cp, NULL);
+  for (;;)
+    {
+      ms = minibuf_read_completion (msg, "", cp, NULL);
 
-    if (ms == NULL) {
-      free_completion(cp);
-      cancel();
-      return NULL;
+      if (ms == NULL)
+	{
+	  free_completion (cp);
+	  cancel ();
+	  return NULL;
+	}
+
+      if (ms[0] == '\0')
+	{
+	  free_completion (cp);
+	  minibuf_error ("No variable name given");
+	  return NULL;
+	}
+      else if (get_variable (ms) == NULL)
+	{
+	  minibuf_error ("Undefined variable name `%s'", ms);
+	  waitkey (WAITKEY_DEFAULT);
+	}
+      else
+	{
+	  minibuf_clear ();
+	  break;
+	}
     }
 
-    if (ms[0] == '\0') {
-      free_completion(cp);
-      minibuf_error("No variable name given");
-      return NULL;
-    } else if (get_variable(ms) == NULL) {
-      minibuf_error("Undefined variable name `%s'", ms);
-      waitkey(WAITKEY_DEFAULT);
-    } else {
-      minibuf_clear();
-      break;
-    }
-  }
-
-  free_completion(cp);
+  free_completion (cp);
 
   return ms;
 }
 
-static struct var_entry *get_variable_entry(char *var)
+static struct var_entry *
+get_variable_entry (char *var)
 {
   struct var_entry *p;
-  for (p = &def_vars[0]; p < &def_vars[sizeof(def_vars) / sizeof(def_vars[0])]; p++)
-    if (!strcmp(p->var, var))
+  for (p = &def_vars[0];
+       p < &def_vars[sizeof (def_vars) / sizeof (def_vars[0])]; p++)
+    if (!strcmp (p->var, var))
       return p;
 
   return NULL;
 }
 
-DEFUN("set-variable", set_variable)
+DEFUN ("set-variable", set_variable)
 /*+
 Set a variable value to the user-specified value.
 +*/
@@ -163,21 +184,22 @@ Set a variable value to the user-specified value.
   char *var, *val;
   struct var_entry *ent;
 
-  var = minibuf_read_variable_name("Set variable: ");
+  var = minibuf_read_variable_name ("Set variable: ");
   if (var == NULL)
     return FALSE;
 
-  ent = get_variable_entry(var);
-  if ((val = minibuf_read("Set %s to value: ", "", var)) == NULL)
-    return cancel();
+  ent = get_variable_entry (var);
+  if ((val = minibuf_read ("Set %s to value: ", "", var)) == NULL)
+    return cancel ();
 
   /* Some variables automatically become buffer-local when set in
      any fashion. */
   if (ent->local)
-    variableSetString(&cur_bp->vars, var, val);
+    variableSetString (&cur_bp->vars, var, val);
   else
-    set_variable(var, val);
+    set_variable (var, val);
 
   return TRUE;
 }
+
 END_DEFUN
