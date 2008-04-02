@@ -5,5 +5,20 @@ The authors of Zile:
 * Reuben Thomas <rrt@sc3d.org> joined the project at version 1.6.1,
   and has been responsible for maintenance and releases since then,
   fixing bugs and adding a few features along the way
-* David A. Capello <dacap@users.sourceforge.net> joined the Zile team
-  for version 1.7, adding many new features such as regex search
+* David A. Capello <dacap@users.sourceforge.net> contributed to Zile
+  from version 1.7 to 2.0, adding many new features such as regex
+  search
+* Scott Lawrence <yorgle@gmail.com> wrote the "lithp" interpreter
+  which was used as the basis for the tiny Lisp interpreter.
+
+For each source file, the original author is listed first and other
+contributors are listed afterwards.
+
+The following separate programs are included with Zile:
+
+* regex.c and regex.h are the GNU regex implementation.
+
+* getopt_long_only.c and getopt.h are from the GNU getopt package.
+
+* vasprintf.c is a slimmed-down version of David Taillandier's
+  xnprintf.
