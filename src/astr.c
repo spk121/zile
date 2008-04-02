@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
-   Copyright (c) 2001-2004 Sandro Sigala.
-   Copyright (c) 2003-2005 Reuben Thomas.
+   Copyright (c) 2001, 2002, 2003, 2004 Sandro Sigala.
+   Copyright (c) 2003, 2004, 2005 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.

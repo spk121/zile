@@ -1,5 +1,5 @@
 /* Key sequences functions
-   Copyright (c) 1997-2004 Sandro Sigala.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2007 Reuben Thomas.
    All rights reserved.
 

@@ -1,5 +1,5 @@
 /* Circular doubly-linked lists/queues
-   Copyright (c) 1997-2005 Reuben Thomas.  All rights reserved.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005 Reuben Thomas.  All rights reserved.
 
    This file is part of Zile.
 

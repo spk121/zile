@@ -1,6 +1,6 @@
 /* Lisp eval
    Copyright (c) 2001 Scott "Jerry" Lawrence.
-   Copyright (c) 2005-2007 Reuben Thomas.
+   Copyright (c) 2005, 2006, 2007 Reuben Thomas.
    All rights reserved.
 
    This file is part of Zile.
