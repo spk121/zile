@@ -61,6 +61,7 @@ user should feel at home with Zile.
 * Functions::                   The list of functions.
 * Variables::                   The list of variables.
 * Bug reports::                 How to report a bug.
+* GNU Free Documentation License::  The GNU Free Documentation License.
 @end menu
 
 @c ---------------------------------------------------------------------------
@@ -696,7 +697,7 @@ Default value is @samp{t}.
 @c LINT END VAR
 
 @c ---------------------------------------------------------------------------
-@node Bug reports,  The GNU Free Documentation License, Variables, Top
+@node Bug reports, GNU Free Documentation License, Variables, Top
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the
@@ -704,7 +705,7 @@ developers at @email{zile-devel@@lists.sourceforge.net}, or even better,
 filed in the relevant tracker at @uref{http://sourceforge.net/projects/zile/}.
 
 @c ---------------------------------------------------------------------------
-@node The GNU Free Documentation License,  , Bug reports, Top
+@node GNU Free Documentation License,  , Bug reports, Top
 @chapter The GNU Free Documentation License
 
 @center Version 1.2, November 2002
