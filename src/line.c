@@ -115,7 +115,7 @@ insert_char (int c)
        */
     }
 
-  (void) intercalate_char (c);
+  intercalate_char (c);
   adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
 
   return TRUE;

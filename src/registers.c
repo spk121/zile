@@ -112,12 +112,13 @@ Puts point before and mark after the inserted text.
 
   return TRUE;
 }
-END_DEFUN static void
-write_registers_list (va_list ap)
+END_DEFUN
+
+static void
+write_registers_list (va_list ap GCC_UNUSED)
 {
   size_t i, count;
 
-  (void) ap;
   bprintf ("%-8s %8s\n", "Register", "Size");
   bprintf ("%-8s %8s\n", "--------", "----");
   for (i = count = 0; i < NUM_REGISTERS; ++i)
@@ -144,7 +145,9 @@ List defined registers.
   write_temp_buffer ("*Registers List*", write_registers_list);
   return TRUE;
 }
-END_DEFUN void
+END_DEFUN
+
+void
 free_registers (void)
 {
   int i;

@@ -251,12 +251,11 @@ leDumpEvalTree (le * list, int indent)
 }
 
 astr
-leDumpEval (le * list, int indent)
+leDumpEval (le * list, int indent GCC_UNUSED)
 {
   le *start = list;
   astr as = astr_new ();
 
-  (void) indent;
   for (; list; list = list->list_next)
     {
       if (list->branch)

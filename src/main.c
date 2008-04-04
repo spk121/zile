@@ -187,9 +187,8 @@ then enter the text in that file's own buffer.\n\
 }
 
 static void
-segv_sig_handler (int signo)
+segv_sig_handler (int signo GCC_UNUSED)
 {
-  (void) signo;
   fprintf (stderr,
 	   PACKAGE_NAME " crashed.  Please send a bug report to <"
 	   PACKAGE_BUGREPORT ">.\r\n");
@@ -197,9 +196,8 @@ segv_sig_handler (int signo)
 }
 
 static void
-other_sig_handler (int signo)
+other_sig_handler (int signo GCC_UNUSED)
 {
-  (void) signo;
   fprintf (stderr, PACKAGE_NAME " terminated with signal %d.\r\n", signo);
   zile_exit (FALSE);
 }

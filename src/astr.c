@@ -325,9 +325,8 @@ assert_eq (astr as, const char *s)
  * Stub to make zmalloc &c. happy.
  */
 void
-zile_exit (int doabort)
+zile_exit (int doabort GCC_UNUSED)
 {
-  (void) doabort;
   exit (2);
 }
 

@@ -928,7 +928,7 @@ copy_file (const char *source, const char *dest)
 	{
 	  minibuf_error ("Cannot rename temporary file `%s'",
 			 strerror (errno));
-	  (void) unlink (tname);
+	  unlink (tname);
 	  stat_valid = FALSE;
 	}
     }

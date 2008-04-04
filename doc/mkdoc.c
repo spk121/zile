@@ -178,9 +178,8 @@ process_file (char *filename)
  * Stub to make zmalloc &c. happy.
  */
 void
-zile_exit (int doabort)
+zile_exit (int doabort GCC_UNUSED)
 {
-  (void) doabort;
   exit (2);
 }
 
