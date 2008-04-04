@@ -266,13 +266,14 @@ struct History
   list sel;
 };
 
-typedef struct Macro
+struct Macro
 {
   size_t nkeys;			/* The number of keystrokes. */
   size_t *keys;			/* Vector of keystrokes. */
   char *name;			/* Name of the macro. */
   struct Macro *next;		/* Next macro in the list. */
-} Macro;
+};
+typedef struct Macro Macro;
 
 /* Type of font attributes */
 typedef size_t Font;

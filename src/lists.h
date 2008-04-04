@@ -25,7 +25,7 @@
 
 #include "astr.h"
 
-typedef struct le
+struct le
 {
   /* either data or a branch */
   struct le *branch;
@@ -36,7 +36,8 @@ typedef struct le
   /* for the next in the list in the current parenlevel */
   struct le *list_prev;
   struct le *list_next;
-} le;
+};
+typedef struct le le;
 
 le *leNew (const char *text);
 void leReallyWipe (le * list);

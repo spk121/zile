@@ -26,7 +26,7 @@
 #include "lists.h"
 
 typedef le *(*eval_cb) (int argc, le * branch);
-typedef struct evalLookupNode
+typedef struct
 {
   char *word;
   eval_cb callback;
