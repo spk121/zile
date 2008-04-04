@@ -66,7 +66,9 @@ Copy region into the user specified register.
 
   return TRUE;
 }
-END_DEFUN static void
+END_DEFUN
+
+static void
 insert_register (int reg)
 {
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);

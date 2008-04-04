@@ -45,7 +45,9 @@ Stop Zile and return to superior process.
   raise (SIGTSTP);
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 cancel (void)
 {
   deactivate_mark ();
@@ -60,8 +62,8 @@ Cancel current command.
 {
   return cancel ();
 }
-
 END_DEFUN
+
 DEFUN ("transient-mark-mode", transient_mark_mode)
 /*+
 Toggle Transient Mark mode.
@@ -81,7 +83,9 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
   activate_mark ();
   return TRUE;
 }
-END_DEFUN static char *
+END_DEFUN
+
+static char *
 make_buffer_flags (Buffer * bp, int iscurrent)
 {
   static char buf[4];
@@ -202,8 +206,8 @@ The R column contains a % for buffers that are read-only.
   write_temp_buffer ("*Buffer List*", write_buffers_list, cur_wp);
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("overwrite-mode", overwrite_mode)
 /*+
 In overwrite mode, printing characters typed in replace existing
@@ -216,8 +220,8 @@ to make it easier to insert characters when necessary.
   cur_bp->flags ^= BFLAG_OVERWRITE;
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("toggle-read-only", toggle_read_only)
 /*+
 Change whether this buffer is visiting its file read-only.
@@ -226,8 +230,8 @@ Change whether this buffer is visiting its file read-only.
   cur_bp->flags ^= BFLAG_READONLY;
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("auto-fill-mode", auto_fill_mode)
 /*+
 Toggle Auto Fill mode.
@@ -238,8 +242,8 @@ automatically breaks the line at a previous space.
   cur_bp->flags ^= BFLAG_AUTOFILL;
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("set-fill-column", set_fill_column)
 /*+
 Set the fill column.
@@ -255,7 +259,9 @@ that value, otherwise with the current column value.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 set_mark_command (void)
 {
   set_mark ();
@@ -272,7 +278,9 @@ Set mark at where point is.
   activate_mark ();
   return ret;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 exchange_point_and_mark (void)
 {
   /* No mark? */
@@ -304,8 +312,8 @@ Put the mark where point is now, and point where the mark is now.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("mark-whole-buffer", mark_whole_buffer)
 /*+
 Put point at beginning and mark at end of buffer.
@@ -316,7 +324,9 @@ Put point at beginning and mark at end of buffer.
   gotobob ();
   return TRUE;
 }
-END_DEFUN static int
+END_DEFUN
+
+static int
 quoted_insert_octal (int c1)
 {
   int c2, c3;
@@ -366,7 +376,9 @@ You may also type up to 3 octal digits, to insert a character with that code.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 universal_argument (int keytype, int xarg)
 {
   int i = 0, arg = 4, sgn = 1, digit;
@@ -461,8 +473,8 @@ by 4 each time.
 {
   return universal_argument (KBD_CTRL | 'u', 0);
 }
-
 END_DEFUN
+
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
   static void
@@ -565,8 +577,8 @@ The variable `tab-width' controls the spacing of tab stops.
 {
   return edit_tab_region (TAB_TABIFY);
 }
-
 END_DEFUN
+
 DEFUN ("untabify", untabify)
 /*+
 Convert all tabs in region to multiple spaces, preserving columns.
@@ -575,8 +587,8 @@ The variable `tab-width' controls the spacing of tab stops.
 {
   return edit_tab_region (TAB_UNTABIFY);
 }
-
 END_DEFUN
+
 DEFUN ("back-to-indentation", back_to_indentation)
 /*+
 Move point to the first non-whitespace character on this line.
@@ -591,8 +603,8 @@ Move point to the first non-whitespace character on this line.
     }
   return TRUE;
 }
-
 END_DEFUN
+
 /***********************************************************************
 			  Transpose functions
 ***********************************************************************/
@@ -786,8 +798,8 @@ end of line, the previous two chars are exchanged.
   minibuf_error ("transpose-chars doesn't support uniarg yet");
   return FALSE;
 }
-
 END_DEFUN
+
 DEFUN ("transpose-words", transpose_words)
 /*+
 Interchange words around point, leaving point at end of them.
@@ -805,8 +817,8 @@ around or after point and around or after mark are interchanged.
   minibuf_error ("transpose-words doesn't support uniarg yet");
   return FALSE;
 }
-
 END_DEFUN
+
 DEFUN ("transpose-sexps", transpose_sexps)
 /*+
 Like M-t but applies to sexps.
@@ -821,8 +833,8 @@ Like M-t but applies to sexps.
   minibuf_error ("transpose-sexps doesn't support uniarg yet");
   return FALSE;
 }
-
 END_DEFUN
+
 DEFUN ("transpose-lines", transpose_lines)
 /*+
 Exchange current line and previous line, leaving point after both.
@@ -839,8 +851,8 @@ With argument 0, interchanges line point is in with line mark is in.
   minibuf_error ("transpose-lines doesn't support uniarg yet");
   return FALSE;
 }
-
 END_DEFUN
+
 /***********************************************************************
 			  Move through words
 ***********************************************************************/
@@ -890,7 +902,9 @@ With argument, do this that many times.
 
   return TRUE;
 }
-END_DEFUN static int
+END_DEFUN
+
+static int
 backward_word (void)
 {
   int gotword = FALSE;
@@ -938,8 +952,8 @@ With argument, do this that many times.
 
   return TRUE;
 }
-
 END_DEFUN
+
 /***********************************************************************
 	       Move through balanced expressions (sexp)
 ***********************************************************************/
@@ -1054,7 +1068,9 @@ move backward across N balanced expressions.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 backward_sexp (void)
 {
   int gotsexp = FALSE;
@@ -1130,8 +1146,8 @@ move forward across N balanced expressions.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("mark-word", mark_word)
 /*+
 Set mark argument words away from point.
@@ -1144,8 +1160,8 @@ Set mark argument words away from point.
     FUNCALL (exchange_point_and_mark);
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("mark-sexp", mark_sexp)
 /*+
 Set mark argument sexps from point.
@@ -1160,8 +1176,8 @@ move to with the same argument.
     FUNCALL (exchange_point_and_mark);
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("forward-line", forward_line)
 /*+
 Move N lines forward (backward if N is negative).
@@ -1188,8 +1204,8 @@ Precisely, if point is on line I, move to the start of line I + N.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("backward-paragraph", backward_paragraph)
 /*+
 Move backward to start of paragraph.  With argument N, do it N times.
@@ -1211,8 +1227,8 @@ Move backward to start of paragraph.  With argument N, do it N times.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("forward-paragraph", forward_paragraph)
 /*+
 Move forward to end of paragraph.  With argument N, do it N times.
@@ -1237,8 +1253,8 @@ Move forward to end of paragraph.  With argument N, do it N times.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("mark-paragraph", mark_paragraph)
 /*+
 Put point at beginning of this paragraph, mark at end.
@@ -1260,8 +1276,8 @@ The paragraph marked is the one that contains point or follows point.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("fill-paragraph", fill_paragraph)
 /*+
 Fill paragraph at or after point.
@@ -1306,8 +1322,8 @@ Fill paragraph at or after point.
 
   return TRUE;
 }
-
 END_DEFUN
+
 #define UPPERCASE		1
 #define LOWERCASE		2
 #define CAPITALIZE		3
@@ -1388,8 +1404,8 @@ Convert following word (or argument N words) to lower case, moving over.
 
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("upcase-word", upcase_word)
 /*+
 Convert following word (or argument N words) to upper case, moving over.
@@ -1408,8 +1424,8 @@ Convert following word (or argument N words) to upper case, moving over.
 
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("capitalize-word", capitalize_word)
 /*+
 Capitalize the following word (or argument N words), moving over.
@@ -1430,8 +1446,8 @@ lower case.
 
   return ret;
 }
-
 END_DEFUN
+
 /*
  * Set the region case.
  */
@@ -1483,8 +1499,8 @@ Convert the region to upper case.
 {
   return setcase_region (UPPERCASE);
 }
-
 END_DEFUN
+
 DEFUN ("downcase-region", downcase_region)
 /*+
 Convert the region to lower case.
@@ -1492,7 +1508,9 @@ Convert the region to lower case.
 {
   return setcase_region (LOWERCASE);
 }
-END_DEFUN static void
+END_DEFUN
+
+static void
 write_shell_output (va_list ap)
 {
   astr out = va_arg (ap, astr);
@@ -1563,8 +1581,8 @@ command to insert any output into the current buffer.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("shell-command-on-region", shell_command_on_region)
 /*+
 Reads a line of text using the minibuffer and creates an inferior shell
@@ -1672,8 +1690,8 @@ it as the contents of the region.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("delete-region", delete_region)
 /*+
 Delete the text between point and mark.
@@ -1707,8 +1725,8 @@ Delete the text between point and mark.
   deactivate_mark ();
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("delete-blank-lines", delete_blank_lines)
 /*+
 On blank line, delete all surrounding blank lines, leaving just one.
@@ -1799,5 +1817,4 @@ On nonblank line, delete any immediately following blank lines.
 
   return TRUE;
 }
-
 END_DEFUN

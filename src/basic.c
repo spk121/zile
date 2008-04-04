@@ -49,8 +49,8 @@ Move point to beginning of current line.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("end-of-line", end_of_line)
 /*+
 Move point to end of current line.
@@ -65,8 +65,8 @@ Move point to end of current line.
 
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Get the goal column.  Take care of expanding tabulations.
  */
@@ -174,7 +174,9 @@ column, or at the end of the line if it is not long enough.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 next_line (void)
 {
   if (list_next (cur_bp->pt.p) != cur_bp->lines)
@@ -225,8 +227,8 @@ column, or at the end of the line if it is not long enough.
 
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Go to the line `to_line', counting from 0.  Point will end up in
  * "random" column.
@@ -267,8 +269,8 @@ Position 1 is the beginning of the buffer.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("goto-line", goto_line)
 /*+
 Move cursor to the beginning of the specified line.
@@ -294,8 +296,8 @@ Line 1 is the beginning of the buffer.
 
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Move point to the beginning of the buffer; do not touch the mark.
  */
@@ -315,8 +317,8 @@ Move point to the beginning of the buffer; leave mark at previous position.
   gotobob ();
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Move point to the end of the buffer; do not touch the mark.
  */
@@ -336,7 +338,9 @@ Move point to the end of the buffer; leave mark at previous position.
   gotoeob ();
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 backward_char (void)
 {
   if (!bolp ())
@@ -376,7 +380,9 @@ On attempt to pass beginning or end of buffer, stop and signal error.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 forward_char (void)
 {
   if (!eolp ())
@@ -416,7 +422,9 @@ On reaching end of buffer, stop and signal error.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 ngotoup (size_t n)
 {
   for (; n > 0; n--)
@@ -468,7 +476,9 @@ Scroll text of current window downward near full screen.
 
   return TRUE;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 scroll_up (void)
 {
   if (cur_bp->pt.n < cur_bp->num_lines)
@@ -496,5 +506,4 @@ Scroll text of current window upward near full screen.
 
   return TRUE;
 }
-
 END_DEFUN

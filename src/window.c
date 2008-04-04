@@ -126,7 +126,9 @@ Both windows display the same buffer now current.
 
   return TRUE;
 }
-END_DEFUN void
+END_DEFUN
+
+void
 delete_window (Window * del_wp)
 {
   Window *wp;
@@ -163,8 +165,8 @@ Remove the current window from the screen.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("enlarge-window", enlarge_window)
 /*+
 Make current window one line bigger.
@@ -197,8 +199,8 @@ Make current window one line bigger.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("shrink-window", shrink_window)
 /*+
 Make current window one line smaller.
@@ -228,8 +230,9 @@ Make current window one line smaller.
 
   return TRUE;
 }
+END_DEFUN
 
-END_DEFUN Window *
+Window *
 popup_window (void)
 {
   if (head_wp->next == NULL)
@@ -271,8 +274,8 @@ Make the selected window fill the screen.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("other-window", other_window)
 /*+
 Select the first different window on the screen.
@@ -283,8 +286,8 @@ This command selects the window one step away in that order.
   set_current_window ((cur_wp->next != NULL) ? cur_wp->next : head_wp);
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * This function is called once in main(), for creating
  * the scratch buffer.

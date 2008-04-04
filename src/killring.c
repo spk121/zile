@@ -151,8 +151,8 @@ With prefix argument, kill that many lines from point.
   deactivate_mark ();
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("kill-region", kill_region)
 /*+
 Kill between point and mark.
@@ -214,8 +214,8 @@ to make one entry in the kill ring.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("copy-region-as-kill", copy_region_as_kill)
 /*+
 Save the region as if killed, but don't kill it.
@@ -241,8 +241,8 @@ Save the region as if killed, but don't kill it.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("kill-word", kill_word)
 /*+
 Kill characters forward until encountering the end of a word.
@@ -268,8 +268,8 @@ With argument, do this that many times.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("backward-kill-word", backward_kill_word)
 /*+
 Kill characters backward until encountering the end of a word.
@@ -278,8 +278,8 @@ With argument, do this that many times.
 {
   return FUNCALL_ARG (kill_word, !uniarg ? -1 : -uniarg);
 }
-
 END_DEFUN
+
 DEFUN ("kill-sexp", kill_sexp)
 /*+
 Kill the sexp (balanced expression) following the cursor.
@@ -306,8 +306,8 @@ Negative arg -N means kill N sexps before the cursor.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("yank", yank)
 /*+
 Reinsert the last stretch of killed text.
@@ -335,7 +335,9 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
   return TRUE;
 }
-END_DEFUN void
+END_DEFUN
+
+void
 free_kill_ring (void)
 {
   free (kill_ring_text);

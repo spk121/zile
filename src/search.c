@@ -311,8 +311,8 @@ Search forward from point for the user specified text.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("search-backward", search_backward)
 /*+
 Search backward from point for the user specified text.
@@ -337,8 +337,8 @@ Search backward from point for the user specified text.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("search-forward-regexp", search_forward_regexp)
 /*+
 Search forward from point for regular expression REGEXP.
@@ -363,8 +363,8 @@ Search forward from point for regular expression REGEXP.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("search-backward-regexp", search_backward_regexp)
 /*+
 Search backward from point for match for regular expression REGEXP.
@@ -389,8 +389,8 @@ Search backward from point for match for regular expression REGEXP.
 
   return TRUE;
 }
-
 END_DEFUN
+
 #define ISEARCH_FORWARD		1
 #define ISEARCH_BACKWARD	2
 /*
@@ -571,8 +571,8 @@ C-g when search is successful aborts and moves point to starting point.
 {
   return isearch (ISEARCH_FORWARD, (lastflag & FLAG_SET_UNIARG));
 }
-
 END_DEFUN
+
 DEFUN ("isearch-backward", isearch_backward)
 /*+
 Do incremental search backward.
@@ -585,8 +585,8 @@ C-g when search is successful aborts and moves point to starting point.
 {
   return isearch (ISEARCH_BACKWARD, (lastflag & FLAG_SET_UNIARG));
 }
-
 END_DEFUN
+
 DEFUN ("isearch-forward-regexp", isearch_forward_regexp)
 /*+
 Do incremental search forward for regular expression.
@@ -597,8 +597,8 @@ is treated as a regexp.  See M-x isearch-forward for more info.
 {
   return isearch (ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
 }
-
 END_DEFUN
+
 DEFUN ("isearch-backward-regexp", isearch_backward_regexp)
 /*+
 Do incremental search forward for regular expression.
@@ -609,8 +609,8 @@ is treated as a regexp.  See M-x isearch-forward for more info.
 {
   return isearch (ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
 }
-
 END_DEFUN
+
 DEFUN ("replace-string", replace_string)
 /*+
 Replace occurrences of a string with other text.
@@ -651,8 +651,8 @@ Replace occurrences of a string with other text.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("query-replace", query_replace)
 /*+
 Replace occurrences of a string with other text.
@@ -744,5 +744,4 @@ endoffunc:
 
   return TRUE;
 }
-
 END_DEFUN

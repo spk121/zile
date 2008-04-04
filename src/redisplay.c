@@ -119,5 +119,4 @@ The desired position of point is always relative to the current window.
   term_full_redisplay ();
   return TRUE;
 }
-
 END_DEFUN

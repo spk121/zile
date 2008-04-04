@@ -184,8 +184,8 @@ buffer.
 
   return ret;
 }
-
 END_DEFUN
+
 /*
  * Insert a newline at the current position without moving the cursor.
  * Update all other cursors if they point on the splitted line.
@@ -393,8 +393,8 @@ the current buffer.
 
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("open-line", open_line)
 /*+
 Insert a newline and leave point before it.
@@ -413,7 +413,9 @@ Insert a newline and leave point before it.
 
   return ret;
 }
-END_DEFUN void
+END_DEFUN
+
+void
 insert_string (const char *s)
 {
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, strlen (s), 0);
@@ -526,7 +528,9 @@ Join lines if the character is a newline.
 
   return ret;
 }
-END_DEFUN int
+END_DEFUN
+
+int
 backward_delete_char (void)
 {
   deactivate_mark ();
@@ -590,8 +594,8 @@ Join lines if the character is a newline.
 
   return ret;
 }
-
 END_DEFUN
+
 DEFUN ("delete-horizontal-space", delete_horizontal_space)
 /*+
 Delete all spaces and tabs around point.
@@ -608,8 +612,8 @@ Delete all spaces and tabs around point.
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("just-one-space", just_one_space)
 /*+
 Delete all spaces and tabs around point, leaving one space.
@@ -621,8 +625,8 @@ Delete all spaces and tabs around point, leaving one space.
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
   return TRUE;
 }
-
 END_DEFUN
+
 /***********************************************************************
 			 Indentation command
 ***********************************************************************/
@@ -718,7 +722,9 @@ does nothing.
 
   return ok;
 }
-END_DEFUN static size_t
+END_DEFUN
+
+static size_t
 previous_line_indent (void)
 {
   size_t cur_indent;
@@ -754,8 +760,8 @@ the indentation.  Else stay at same point in text.
     return FUNCALL (indent_relative);
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("newline-and-indent", newline_and_indent)
 /*+
 Insert a newline, then indent.
@@ -797,5 +803,4 @@ Indentation is done using the `indent-for-tab-command' function.
       return ret;
     }
 }
-
 END_DEFUN

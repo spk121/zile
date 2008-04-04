@@ -201,5 +201,4 @@ Set a variable value to the user-specified value.
 
   return TRUE;
 }
-
 END_DEFUN

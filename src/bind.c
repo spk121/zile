@@ -251,7 +251,9 @@ Whichever character you type to run this command is inserted.
 
   return ret;
 }
-END_DEFUN void
+END_DEFUN
+
+void
 process_key (size_t key)
 {
   int numkeys;
@@ -542,8 +544,8 @@ Read function name, then read its arguments and call it.
 
   return res;
 }
-
 END_DEFUN
+
 DEFUN ("global-set-key", global_set_key)
 /*+
 Bind a command to a key sequence.
@@ -600,7 +602,9 @@ sequence.
 
   return ok;
 }
-END_DEFUN static void
+END_DEFUN
+
+static void
 walk_bindings_tree (leafp tree, list keys,
 		    void (*process) (astr key, leafp p, void *st), void *st)
 {
@@ -701,7 +705,9 @@ message in the buffer.
   free (name);
   return ret;
 }
-END_DEFUN char *
+END_DEFUN
+
+char *
 get_function_by_key_sequence (size_t ** keys, int *numkeys)
 {
   leafp p;
@@ -746,5 +752,4 @@ Show a list of all defined keys, and their definitions.
   write_temp_buffer ("*Help*", write_bindings_list);
   return TRUE;
 }
-
 END_DEFUN

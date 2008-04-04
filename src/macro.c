@@ -103,8 +103,8 @@ Use M-x name-last-kbd-macro to give it a permanent name.
   cur_mp = zmalloc (sizeof (Macro));
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("end-kbd-macro", end_kbd_macro)
 /*+
 Finish defining a keyboard macro.
@@ -121,8 +121,8 @@ The macro is now available for use via C-x e.
   thisflag &= ~FLAG_DEFINING_MACRO;
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("name-last-kbd-macro", name_last_kbd_macro)
 /*+
 Assign a name to the last keyboard macro defined.
@@ -170,7 +170,9 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
 
   return TRUE;
 }
-END_DEFUN void
+END_DEFUN
+
+void
 call_macro (Macro * mp)
 {
   size_t i;
@@ -205,8 +207,8 @@ defining others, use M-x name-last-kbd-macro.
 
   return ret;
 }
-
 END_DEFUN
+
 /*
  * Free all the macros (used at Zile exit).
  */

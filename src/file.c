@@ -494,8 +494,8 @@ creating one if none already exists.
   free (ms);
   return FALSE;
 }
-
 END_DEFUN
+
 DEFUN ("find-file-read-only", find_file_read_only)
 /*+
 Edit the specified file but don't allow changes.
@@ -508,8 +508,8 @@ Use M-x toggle-read-only to permit editing.
     cur_bp->flags |= BFLAG_READONLY;
   return ret_value;
 }
-
 END_DEFUN
+
 DEFUN ("find-alternate-file", find_alternate_file)
 /*+
 Find the file specified by the user, select its buffer, kill previous buffer.
@@ -539,8 +539,8 @@ If the current buffer now contains an empty file that you just visited
   free (ms);
   return FALSE;
 }
-
 END_DEFUN
+
 DEFUN ("switch-to-buffer", switch_to_buffer)
 /*+
 Select to the user specified buffer in the current window.
@@ -573,8 +573,8 @@ Select to the user specified buffer in the current window.
 
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Check if the buffer has been modified.  If so, asks the user if
  * he/she wants to save the changes.  If the response is positive, return
@@ -714,7 +714,9 @@ Kill the current buffer or the user specified one.
 
   return FALSE;
 }
-END_DEFUN static void
+END_DEFUN
+
+static void
 insert_buffer (Buffer * bp)
 {
   Line *lp;
@@ -775,7 +777,9 @@ Puts mark after the inserted text.
 
   return TRUE;
 }
-END_DEFUN static int
+END_DEFUN
+
+static int
 insert_file (char *filename)
 {
   int fd;
@@ -855,8 +859,8 @@ Set mark after the inserted text.
   free (ms);
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Copy a file.
  */
@@ -1113,8 +1117,8 @@ previous version into a backup file if this is the first save.
 {
   return save_buffer (cur_bp);
 }
-
 END_DEFUN
+
 DEFUN ("write-file", write_file)
 /*+
 Write current buffer into the user specified file.
@@ -1145,7 +1149,9 @@ Makes buffer visit that file, and marks it not modified.
   free (ms);
   return TRUE;
 }
-END_DEFUN static int
+END_DEFUN
+
+static int
 save_some_buffers (void)
 {
   Buffer *bp;
@@ -1228,8 +1234,8 @@ Save some modified file-visiting buffers.  Asks user about each one.
 {
   return save_some_buffers ();
 }
-
 END_DEFUN
+
 DEFUN ("save-buffers-kill-zile", save_buffers_kill_zile)
 /*+
 Offer to save each buffer, then kill this Zile process.
@@ -1261,8 +1267,8 @@ Offer to save each buffer, then kill this Zile process.
 
   return TRUE;
 }
-
 END_DEFUN
+
 /*
  * Function called on unexpected error or Zile crash (SIGSEGV).
  * Attempts to save modified buffers.
@@ -1335,5 +1341,4 @@ directory.
   free (ms);
   return FALSE;
 }
-
 END_DEFUN

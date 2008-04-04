@@ -116,7 +116,7 @@ parse (void)
 
   while ((buf = astr_fgets (input_file)) != NULL)
     {
-      if (!strncmp (astr_cstr (buf), "DEFUN(", (size_t) 6))
+      if (!strncmp (astr_cstr (buf), "DEFUN (", (size_t) 6))
 	{
 	  int i, j;
 	  astr sub;
@@ -124,7 +124,7 @@ parse (void)
 	  j = astr_rfind_cstr (buf, "\"");
 	  if (i < 0 || j < 0 || i == j)
 	    {
-	      fprintf (stderr, "mkdoc: invalid DEFUN() syntax\n");
+	      fprintf (stderr, "mkdoc: invalid DEFUN () syntax\n");
 	      exit (1);
 	    }
 	  sub = astr_substr (buf, i + 1, (size_t) (j - i - 1));

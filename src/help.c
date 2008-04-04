@@ -42,7 +42,9 @@ Show the zile version.
 
   return TRUE;
 }
-END_DEFUN static int
+END_DEFUN
+
+static int
 show_file (char *filename)
 {
   if (!exist_file (filename))
@@ -65,8 +67,8 @@ Show a help window.
 {
   return show_file (PATH_DATA "/HELP");
 }
-
 END_DEFUN
+
 DEFUN ("view-zile-FAQ", view_zile_FAQ)
 /*+
 Show the Zile Frequently Asked Questions (FAQ).
@@ -74,8 +76,8 @@ Show the Zile Frequently Asked Questions (FAQ).
 {
   return show_file (PATH_DATA "/FAQ");
 }
-
 END_DEFUN
+
 DEFUN ("help-with-tutorial", help_with_tutorial)
 /*+
 Show a tutorial window.
@@ -95,8 +97,8 @@ Show a tutorial window.
 
   return FALSE;
 }
-
 END_DEFUN
+
 /*
  * Fetch the documentation of a function or variable from the
  * AUTODOC automatically generated file.
@@ -191,7 +193,9 @@ Display the full documentation of a function.
 
   return TRUE;
 }
-END_DEFUN static void
+END_DEFUN
+
+static void
 write_variable_description (va_list ap)
 {
   char *name = va_arg (ap, char *);
@@ -235,8 +239,8 @@ Display the full documentation of a variable.
 
   return TRUE;
 }
-
 END_DEFUN
+
 DEFUN ("describe-key", describe_key)
 /*+
 Display documentation of the command invoked by a key sequence.
@@ -275,5 +279,4 @@ Display documentation of the command invoked by a key sequence.
 
   return TRUE;
 }
-
 END_DEFUN
