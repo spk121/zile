@@ -211,11 +211,11 @@ get_next_buffer (void)
 char *
 make_buffer_name (const char *filename)
 {
-  const char *p;
+  const char *p = strrchr (filename, '/');
   char *name;
   int i;
 
-  if ((p = strrchr (filename, '/')) == NULL)
+  if (p == NULL)
     p = filename;
   else
     ++p;

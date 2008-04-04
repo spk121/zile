@@ -251,10 +251,12 @@ Position 1 is the beginning of the buffer.
 
   do
     {
-      if ((ms = minibuf_read ("Goto char: ", "")) == NULL)
-	return cancel ();
-      if ((to_char = atoi (ms)) < 0)
-	ding ();
+      ms = minibuf_read ("Goto char: ", "");
+      if (ms == NULL)
+        return cancel ();
+      to_char = atoi (ms);
+      if (to_char < 0)
+        ding ();
     }
   while (to_char < 0);
 
@@ -278,9 +280,11 @@ Line 1 is the beginning of the buffer.
 
   do
     {
-      if ((ms = minibuf_read ("Goto line: ", "")) == NULL)
+      ms = minibuf_read ("Goto line: ", "");
+      if (ms == NULL)
 	return cancel ();
-      if ((to_line = strtoul (ms, NULL, 10)) == ULONG_MAX)
+      to_line = strtoul (ms, NULL, 10);
+      if (to_line == ULONG_MAX)
 	ding ();
     }
   while (to_line == ULONG_MAX);

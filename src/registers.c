@@ -47,7 +47,8 @@ Copy region into the user specified register.
 
   minibuf_write ("Copy to register: ");
   term_refresh ();
-  if ((reg = getkey ()) == KBD_CANCEL)
+  reg = getkey ();
+  if (reg == KBD_CANCEL)
     return cancel ();
   minibuf_clear ();
   reg %= NUM_REGISTERS;
@@ -87,7 +88,8 @@ Puts point before and mark after the inserted text.
 
   minibuf_write ("Insert register: ");
   term_refresh ();
-  if ((reg = getkey ()) == KBD_CANCEL)
+  reg = getkey ();
+  if (reg == KBD_CANCEL)
     return cancel ();
   minibuf_clear ();
   reg %= NUM_REGISTERS;

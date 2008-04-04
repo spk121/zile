@@ -104,11 +104,11 @@ END_DEFUN
 static astr
 get_funcvar_doc (char *name, astr defval, int isfunc)
 {
-  FILE *f;
   astr buf, match, doc;
   int reading_doc = 0;
+  FILE *fp = fopen (PATH_DATA "/AUTODOC", "r");
 
-  if ((f = fopen (PATH_DATA "/AUTODOC", "r")) == NULL)
+  if (fp == NULL)
     {
       minibuf_error ("Unable to read file `%s'", PATH_DATA "/AUTODOC");
       return NULL;
@@ -121,7 +121,7 @@ get_funcvar_doc (char *name, astr defval, int isfunc)
     astr_afmt (match, "\fV_%s", name);
 
   doc = astr_new ();
-  while ((buf = astr_fgets (f)) != NULL)
+  while ((buf = astr_fgets (fp)) != NULL)
     {
       if (reading_doc)
 	{
@@ -143,7 +143,7 @@ get_funcvar_doc (char *name, astr defval, int isfunc)
       astr_delete (buf);
     }
 
-  fclose (f);
+  fclose (fp);
   astr_delete (match);
 
   if (!reading_doc)
@@ -177,7 +177,8 @@ Display the full documentation of a function.
   if (name == NULL)
     return FALSE;
 
-  if ((doc = get_funcvar_doc (name, NULL, TRUE)) == NULL)
+  doc = get_funcvar_doc (name, NULL, TRUE);
+  if (doc == NULL)
     return FALSE;
 
   bufname = astr_new ();
@@ -217,7 +218,8 @@ Display the full documentation of a variable.
     return FALSE;
 
   defval = astr_new ();
-  if ((doc = get_funcvar_doc (name, defval, FALSE)) == NULL)
+  doc = get_funcvar_doc (name, defval, FALSE);
+  if (doc == NULL)
     {
       astr_delete (defval);
       return FALSE;
@@ -260,7 +262,8 @@ Display documentation of the command invoked by a key sequence.
   minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
   astr_delete (binding);
 
-  if ((doc = get_funcvar_doc (name, NULL, TRUE)) == NULL)
+  doc = get_funcvar_doc (name, NULL, TRUE);
+  if (doc == NULL)
     return FALSE;
 
   bufname = astr_new ();

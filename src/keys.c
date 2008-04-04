@@ -286,7 +286,7 @@ keystrtovec (char *key, size_t ** keys)
     {
       size_t len, code = strtochord (key, &len);
       vec_item (v, size, size_t) = code;
-      if ((vec_item (v, size, size_t) = code) == KBD_NOKEY)
+      if (code == KBD_NOKEY)
 	{
 	  vec_delete (v);
 	  return -1;

@@ -155,10 +155,10 @@ copy_text_block (size_t startn, size_t starto, size_t size)
 astr
 shorten_string (char *s, int maxlen)
 {
-  int len;
   astr as = astr_new ();
+  int len = strlen (s);
 
-  if ((len = strlen (s)) <= maxlen)
+  if (len <= maxlen)
     astr_cpy_cstr (as, s);
   else
     {

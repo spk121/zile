@@ -292,9 +292,9 @@ DEFUN ("search-forward", search_forward)
 Search forward from point for the user specified text.
 +*/
 {
-  char *ms;
+  char *ms = minibuf_read ("Search: ", last_search);
 
-  if ((ms = minibuf_read ("Search: ", last_search)) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     return FALSE;
@@ -318,9 +318,9 @@ DEFUN ("search-backward", search_backward)
 Search backward from point for the user specified text.
 +*/
 {
-  char *ms;
+  char *ms = minibuf_read ("Search backward: ", last_search);
 
-  if ((ms = minibuf_read ("Search backward: ", last_search)) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     return FALSE;
@@ -344,9 +344,9 @@ DEFUN ("search-forward-regexp", search_forward_regexp)
 Search forward from point for regular expression REGEXP.
 +*/
 {
-  char *ms;
+  char *ms = minibuf_read ("Regexp search: ", last_search);
 
-  if ((ms = minibuf_read ("Regexp search: ", last_search)) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     return FALSE;
@@ -370,9 +370,9 @@ DEFUN ("search-backward-regexp", search_backward_regexp)
 Search backward from point for match for regular expression REGEXP.
 +*/
 {
-  char *ms;
+  char *ms = minibuf_read ("Regexp search backward: ", last_search);
 
-  if ((ms = minibuf_read ("Regexp search backward: ", last_search)) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     return FALSE;
@@ -616,18 +616,20 @@ DEFUN ("replace-string", replace_string)
 Replace occurrences of a string with other text.
 +*/
 {
-  char *find, *repl;
   int count = 0, find_no_upper;
   size_t find_len, repl_len;
+  char *find = minibuf_read ("Replace string: ", "");
+  char *repl;
 
-  if ((find = minibuf_read ("Replace string: ", "")) == NULL)
+  if (find == NULL)
     return cancel ();
   if (find[0] == '\0')
     return FALSE;
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, FALSE);
 
-  if ((repl = minibuf_read ("Replace `%s' with: ", "", find)) == NULL)
+  repl = minibuf_read ("Replace `%s' with: ", "", find);
+  if (repl == NULL)
     return cancel ();
   repl_len = strlen (repl);
 
@@ -658,18 +660,20 @@ As each match is found, the user must type a character saying
 what to do with it.
 +*/
 {
-  char *find, *repl;
   int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
   size_t find_len, repl_len;
-
-  if ((find = minibuf_read ("Query replace string: ", "")) == NULL)
+  char *find = minibuf_read ("Query replace string: ", "");
+  char *repl;
+  
+  if (find == NULL)
     return cancel ();
   if (*find == '\0')
     return FALSE;
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, FALSE);
 
-  if ((repl = minibuf_read ("Query replace `%s' with: ", "", find)) == NULL)
+  repl = minibuf_read ("Query replace `%s' with: ", "", find);
+  if (repl == NULL)
     return cancel ();
   repl_len = strlen (repl);
 

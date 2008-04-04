@@ -158,7 +158,8 @@ process_file (char *filename)
 {
   if (filename != NULL && strcmp (filename, "-") != 0)
     {
-      if ((input_file = fopen (filename, "r")) == NULL)
+      input_file = fopen (filename, "r");
+      if (input_file == NULL)
 	{
 	  fprintf (stderr, "mkdoc:%s: %s\n", filename, strerror (errno));
 	  exit (1);

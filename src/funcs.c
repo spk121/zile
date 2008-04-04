@@ -136,7 +136,8 @@ write_temp_buffer (const char *name, void (*func) (va_list ap), ...)
   va_list ap;
 
   /* Popup a window with the buffer "name". */
-  if ((wp = find_window (name)))
+  wp = find_window (name);
+  if (wp)
     set_current_window (wp);
   else
     {
@@ -181,7 +182,8 @@ write_buffers_list (va_list ap)
       /* Print all buffer less this one (the *Buffer List*). */
       if (cur_bp != bp)
 	print_buf (old_wp->bp, bp);
-      if ((bp = bp->next) == NULL)
+      bp = bp->next;
+      if (bp == NULL)
 	bp = head_bp;
     }
   while (bp != old_wp->bp);
@@ -1511,20 +1513,21 @@ A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
 command to insert any output into the current buffer.
 +*/
 {
-  char *ms;
   FILE *pipe;
   astr out, s;
   int lines = 0;
   astr cmd;
+  char *ms = minibuf_read ("Shell command: ", "");
 
-  if ((ms = minibuf_read ("Shell command: ", "")) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     return FALSE;
 
   cmd = astr_new ();
   astr_afmt (cmd, "%s 2>&1 </dev/null", ms);
-  if ((pipe = popen (astr_cstr (cmd), "r")) == NULL)
+  pipe = popen (astr_cstr (cmd), "r");
+  if (pipe == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
       return FALSE;
@@ -1576,14 +1579,14 @@ current buffer, then the old region is deleted first and the output replaces
 it as the contents of the region.
 +*/
 {
-  char *ms;
   FILE *pipe;
   astr out, s;
   int lines = 0;
   astr cmd;
   char tempfile[] = P_tmpdir "/zileXXXXXX";
+  char *ms = minibuf_read ("Shell command: ", "");
 
-  if ((ms = minibuf_read ("Shell command: ", "")) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     return FALSE;
@@ -1615,7 +1618,8 @@ it as the contents of the region.
     astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
   }
 
-  if ((pipe = popen (astr_cstr (cmd), "r")) == NULL)
+  pipe = popen (astr_cstr (cmd), "r");
+  if (pipe == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
       return FALSE;

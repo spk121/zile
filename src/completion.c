@@ -127,14 +127,16 @@ completion_scroll_down (void)
 static size_t
 calculate_max_length (list l, size_t size)
 {
-  size_t len, i, max = 0;
+  size_t i, maxlen = 0;
   list p;
 
   for (p = list_first (l), i = 0; p != l && i < size; p = list_next (p), i++)
-    if ((len = strlen (p->item)) > max)
-      max = len;
+    {
+      size_t len = strlen (p->item);
+      maxlen = max(len, maxlen);
+    }
 
-  return max;
+  return maxlen;
 }
 
 /*
@@ -249,7 +251,8 @@ completion_reread (Completion * cp, astr as)
 
   astr_cpy_cstr (as, base);
 
-  if ((dir = opendir (pdir)) == NULL)
+  dir = opendir (pdir);
+  if (dir == NULL)
     return FALSE;
 
   buf = astr_new ();

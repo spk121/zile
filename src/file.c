@@ -142,7 +142,8 @@ expand_path (astr path)
 	      /* Got `~/'. Restart from this point and insert the user's
 	         home directory. */
 	      astr_truncate (epath, 0);
-	      if ((pw = getpwuid (getuid ())) == NULL)
+              pw = getpwuid (getuid ());
+              if (pw == NULL)
 		{
 		  ret = FALSE;
 		  break;
@@ -232,10 +233,10 @@ astr
 compact_path (const astr path)
 {
   astr buf = astr_new ();
-  struct passwd *pw;
   size_t i;
+  struct passwd *pw = getpwuid (getuid ());
 
-  if ((pw = getpwuid (getuid ())) == NULL)
+  if (pw == NULL)
     {
       /* User not found in password file. */
       astr_cpy (buf, path);
@@ -330,13 +331,13 @@ void
 read_from_disk (const char *filename)
 {
   Line *lp;
-  FILE *fp;
   int i, size, first_eol = TRUE;
   char *this_eol_type;
   size_t eol_len = 0, total_eols = 0;
   char buf[BUFSIZ];
+  FILE *fp = fopen (filename, "r");
 
-  if ((fp = fopen (filename, "r")) == NULL)
+  if (fp == NULL)
     {
       if (errno != ENOENT)
 	{
@@ -354,7 +355,8 @@ read_from_disk (const char *filename)
   lp = cur_bp->pt.p;
 
   /* Read first chunk and determine EOL type. */
-  if ((size = fread (buf, 1, BUFSIZ, fp)) > 0)
+  size = fread (buf, 1, BUFSIZ, fp);
+  if (size > 0)
     {
       for (i = 0; i < size && total_eols < MAX_EOL_CHECK_COUNT; i++)
 	{
@@ -472,11 +474,10 @@ Switch to a buffer visiting the file,
 creating one if none already exists.
 +*/
 {
-  char *ms;
-  astr buf;
+  astr buf = get_current_dir ();
+  char *ms = minibuf_read_dir ("Find file: ", astr_cstr (buf));
 
-  buf = get_current_dir ();
-  if ((ms = minibuf_read_dir ("Find file: ", astr_cstr (buf))) == NULL)
+  if (ms == NULL)
     {
       astr_delete (buf);
       return cancel ();
@@ -502,8 +503,8 @@ Like `find-file' but marks buffer as read-only.
 Use M-x toggle-read-only to permit editing.
 +*/
 {
-  int ret_value;
-  if ((ret_value = FUNCALL (find_file)))
+  int ret_value = FUNCALL (find_file);
+  if (ret_value)
     cur_bp->flags |= BFLAG_READONLY;
   return ret_value;
 }
@@ -516,11 +517,10 @@ If the current buffer now contains an empty file that you just visited
 (presumably by mistake), use this command to visit the file you really want.
 +*/
 {
-  char *ms;
-  astr buf;
+  astr buf = get_current_dir ();
+  char *ms = minibuf_read_dir ("Find alternate: ", astr_cstr (buf));
 
-  buf = get_current_dir ();
-  if ((ms = minibuf_read_dir ("Find alternate: ", astr_cstr (buf))) == NULL)
+  if (ms == NULL)
     {
       astr_delete (buf);
       return cancel ();
@@ -561,7 +561,8 @@ Select to the user specified buffer in the current window.
 
   if (ms[0] != '\0')
     {
-      if ((swbuf = find_buffer (ms, FALSE)) == NULL)
+      swbuf = find_buffer (ms, FALSE);
+      if (swbuf == NULL)
 	{
 	  swbuf = find_buffer (ms, TRUE);
 	  swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
@@ -688,13 +689,15 @@ Kill the current buffer or the user specified one.
   Completion *cp;
 
   cp = make_buffer_completion ();
-  if ((ms = minibuf_read_completion ("Kill buffer (default %s): ",
-				     "", cp, NULL, cur_bp->name)) == NULL)
+  ms = minibuf_read_completion ("Kill buffer (default %s): ",
+                                "", cp, NULL, cur_bp->name);
+  if (ms == NULL)
     return cancel ();
   free_completion (cp);
   if (ms[0] != '\0')
     {
-      if ((bp = find_buffer (ms, FALSE)) == NULL)
+      bp = find_buffer (ms, FALSE);
+      if (bp == NULL)
 	{
 	  minibuf_error ("Buffer `%s' not found", ms);
 	  return FALSE;
@@ -744,13 +747,15 @@ Puts mark after the inserted text.
 
   swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
   cp = make_buffer_completion ();
-  if ((ms = minibuf_read_completion ("Insert buffer (default %s): ",
-				     "", cp, NULL, swbuf->name)) == NULL)
+  ms = minibuf_read_completion ("Insert buffer (default %s): ",
+                                "", cp, NULL, swbuf->name);
+  if (ms == NULL)
     return cancel ();
   free_completion (cp);
   if (ms[0] != '\0')
     {
-      if ((bp = find_buffer (ms, FALSE)) == NULL)
+      bp = find_buffer (ms, FALSE);
+      if (bp == NULL)
 	{
 	  minibuf_error ("Buffer `%s' not found", ms);
 	  return FALSE;
@@ -783,7 +788,8 @@ insert_file (char *filename)
       return FALSE;
     }
 
-  if ((fd = open (filename, O_RDONLY)) < 0)
+  fd = open (filename, O_RDONLY);
+  if (fd < 0)
     {
       minibuf_write ("%s: %s", filename, strerror (errno));
       return FALSE;
@@ -824,7 +830,8 @@ Set mark after the inserted text.
     return FALSE;
 
   buf = get_current_dir ();
-  if ((ms = minibuf_read_dir ("Insert file: ", astr_cstr (buf))) == NULL)
+  ms = minibuf_read_dir ("Insert file: ", astr_cstr (buf));
+  if (ms == NULL)
     {
       astr_delete (buf);
       return cancel ();
@@ -949,11 +956,11 @@ copy_file (const char *source, const char *dest)
 static int
 raw_write_to_disk (Buffer * bp, const char *filename, int umask)
 {
-  int fd;
   size_t eol_len = strlen (bp->eol);
   Line *lp;
+  int fd = open (filename, O_WRONLY | O_CREAT | O_TRUNC, umask);
 
-  if ((fd = open (filename, O_WRONLY | O_CREAT | O_TRUNC, umask)) < 0)
+  if (fd < 0)
     return FALSE;
 
   /* Save all the lines. */
@@ -1056,7 +1063,8 @@ save_buffer (Buffer * bp)
     {
       if (bp->flags & BFLAG_NEEDNAME)
 	{
-	  if ((ms = minibuf_read_dir ("File to save in: ", fname)) == NULL)
+          ms = minibuf_read_dir ("File to save in: ", fname);
+          if (ms == NULL)
 	    return cancel ();
 	  ms_is_from_minibuffer = 1;
 	  if (ms[0] == '\0')
@@ -1114,9 +1122,9 @@ Makes buffer visit that file, and marks it not modified.
 +*/
 {
   char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
-  char *ms;
+  char *ms = minibuf_read_dir ("Write file: ", fname);
 
-  if ((ms = minibuf_read_dir ("Write file: ", fname)) == NULL)
+  if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
     {
@@ -1294,13 +1302,12 @@ Make the user specified directory become the current buffer's default
 directory.
 +*/
 {
-  char *ms;
-  astr buf;
   struct stat st;
+  astr buf = get_current_dir ();
+  char *ms = minibuf_read_dir ("Change default directory: ",
+                         astr_cstr (buf));
 
-  buf = get_current_dir ();
-  if ((ms = minibuf_read_dir ("Change default directory: ",
-			      astr_cstr (buf))) == NULL)
+  if (ms == NULL)
     {
       astr_delete (buf);
       return cancel ();

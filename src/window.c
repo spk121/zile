@@ -175,7 +175,8 @@ Make current window one line bigger.
   if (cur_wp == head_wp && cur_wp->next == NULL)
     return FALSE;
 
-  if ((wp = cur_wp->next) == NULL || wp->fheight < 3)
+  wp = cur_wp->next;
+  if (wp == NULL || wp->fheight < 3)
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->next == cur_wp)
 	{
@@ -208,7 +209,8 @@ Make current window one line smaller.
   if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
     return FALSE;
 
-  if ((wp = cur_wp->next) == NULL)
+  wp = cur_wp->next;
+  if (wp == NULL)
     {
       for (wp = head_wp; wp != NULL; wp = wp->next)
 	{

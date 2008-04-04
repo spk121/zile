@@ -112,9 +112,8 @@ is_variable_equal (char *var, char *val)
 int
 lookup_bool_variable (char *var)
 {
-  char *p;
-
-  if ((p = get_variable (var)) != NULL)
+  char *p = get_variable (var);
+  if (p != NULL)
     return strcmp (p, "nil") != 0;
 
   return FALSE;
@@ -189,7 +188,8 @@ Set a variable value to the user-specified value.
     return FALSE;
 
   ent = get_variable_entry (var);
-  if ((val = minibuf_read ("Set %s to value: ", "", var)) == NULL)
+  val = minibuf_read ("Set %s to value: ", "", var);
+  if (val == NULL)
     return cancel ();
 
   /* Some variables automatically become buffer-local when set in

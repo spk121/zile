@@ -697,7 +697,8 @@ does nothing.
       /* If not at EOL on target line, insert spaces & tabs up to
          target_goalc; if already at EOL on target line, insert a tab.
        */
-      if ((cur_goalc = get_goalc ()) < target_goalc)
+      cur_goalc = get_goalc ();
+      if (cur_goalc < target_goalc)
 	{
 	  do
 	    {
@@ -771,7 +772,8 @@ Indentation is done using the `indent-for-tab-command' function.
 
       deactivate_mark ();
 
-      if ((ret = insert_newline ()))
+      ret = insert_newline ();
+      if (ret)
 	{
 	  size_t pos;
 	  Marker *old_point = point_marker ();

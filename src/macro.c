@@ -131,11 +131,11 @@ The symbol's function definition becomes the keyboard macro string.
 Such a "function" cannot be called from Lisp, but it is a valid editor command.
 +*/
 {
-  char *ms;
   Macro *mp;
   size_t size;
+  char *ms = minibuf_read ("Name for last kbd macro: ", "");
 
-  if ((ms = minibuf_read ("Name for last kbd macro: ", "")) == NULL)
+  if (ms == NULL)
     {
       minibuf_error ("No command name given");
       return FALSE;
@@ -147,7 +147,8 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
       return FALSE;
     }
 
-  if ((mp = get_macro (ms)))
+  mp = get_macro (ms);
+  if (mp)
     {
       /* If a macro with this name already exists, update its key list */
       free (mp->keys);

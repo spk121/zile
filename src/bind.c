@@ -109,9 +109,9 @@ add_leaf (leafp tree, leafp p)
 static void
 bind_key_vec (leafp tree, size_t * keys, size_t n, Function func)
 {
-  leafp p, s;
+  leafp p, s = search_leaf (tree, keys[0]);
 
-  if ((s = search_leaf (tree, keys[0])) == NULL)
+  if (s == NULL)
     {
       p = leaf_new (n == 1 ? 1 : 5);
       p->key = keys[0];
@@ -130,10 +130,10 @@ bind_key_vec (leafp tree, size_t * keys, size_t n, Function func)
 static int
 bind_key_string (char *key, Function func)
 {
-  int numkeys;
   size_t *keys;
+  int numkeys = keystrtovec (key, &keys);
 
-  if ((numkeys = keystrtovec (key, &keys)) > 0)
+  if (numkeys > 0)
     {
       bind_key_vec (leaf_tree, keys, numkeys, func);
       free (keys);
@@ -146,9 +146,9 @@ bind_key_string (char *key, Function func)
 static leafp
 search_key (leafp tree, size_t * keys, size_t n)
 {
-  leafp p;
+  leafp p = search_leaf (tree, keys[0]);
 
-  if ((p = search_leaf (tree, keys[0])) != NULL)
+  if (p != NULL)
     {
       if (n == 1)
 	return p;
@@ -203,7 +203,8 @@ completion_scan (size_t key, size_t ** keys, int *numkeys)
 
   do
     {
-      if ((p = search_key (leaf_tree, vec_array (v), *numkeys)) == NULL)
+      p = search_key (leaf_tree, vec_array (v), *numkeys);
+      if (p == NULL)
 	break;
       if (p->func == NULL)
 	{
@@ -263,16 +264,20 @@ process_key (size_t key)
   if (key & KBD_META && isdigit ((int) (key & 0xff)))
     /* Got an ESC x sequence where `x' is a digit. */
     universal_argument (KBD_META, (int) ((key & 0xff) - '0'));
-  else if ((p = completion_scan (key, &keys, &numkeys)) != NULL)
-    {
-      p->func (last_uniarg, NULL);
-      _last_command = p->func;
-    }
   else
     {
-      astr as = keyvectostr (keys, numkeys);
-      minibuf_error ("%s is undefined", astr_cstr (as));
-      astr_delete (as);
+      p = completion_scan (key, &keys, &numkeys);
+      if (p != NULL)
+        {
+          p->func (last_uniarg, NULL);
+          _last_command = p->func;
+        }
+      else
+        {
+          astr as = keyvectostr (keys, numkeys);
+          minibuf_error ("%s is undefined", astr_cstr (as));
+          astr_delete (as);
+        }
     }
   free (keys);
 
@@ -340,8 +345,13 @@ init_bindings (void)
 
   /* Bind all printing keys to self_insert_command */
   for (i = 0; i <= 0xff; i++)
-    if (isprint (*keys = i))
-      bind_key_vec (leaf_tree, keys, 1, F_self_insert_command);
+    {
+      if (isprint (i))
+        {
+          *keys = i;
+          bind_key_vec (leaf_tree, keys, 1, F_self_insert_command);
+        }
+    }
   free (keys);
 
   /* Bind all the default functions. */
@@ -490,18 +500,22 @@ minibuf_read_function_name (const char *fmt, ...)
 int
 execute_function (char *name, int uniarg)
 {
-  Function func;
+  Function func = get_function (name);
   Macro *mp;
 
-  if ((func = get_function (name)))
+  if (func)
     return func (uniarg, NULL);
-  else if ((mp = get_macro (name)))
-    {
-      call_macro (mp);
-      return TRUE;
-    }
   else
-    return FALSE;
+    {
+      mp = get_macro (name);
+      if (mp)
+        {
+          call_macro (mp);
+          return TRUE;
+        }
+      else
+        return FALSE;
+    }
 }
 
 DEFUN ("execute-extended-command", execute_extended_command)
@@ -659,25 +673,29 @@ message in the buffer.
   int ret = FALSE;
   gather_bindings_state g;
 
-  if (name && (g.f = get_function (name)))
+  if (name)
     {
-      g.bindings = astr_new ();
-      walk_bindings (leaf_tree, gather_bindings, &g);
-
-      if (astr_len (g.bindings) == 0)
-	minibuf_write ("%s is not on any key", name);
-      else
-	{
-	  astr as = astr_new ();
-	  astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
-	  if (lastflag & FLAG_SET_UNIARG)
-	    bprintf ("%s", astr_cstr (as));
-	  else
-	    minibuf_write ("%s", astr_cstr (as));
-	  astr_delete (as);
-	}
-      astr_delete (g.bindings);
-      ret = TRUE;
+      g.f = get_function (name);
+      if (g.f)
+        {
+          g.bindings = astr_new ();
+          walk_bindings (leaf_tree, gather_bindings, &g);
+          
+          if (astr_len (g.bindings) == 0)
+            minibuf_write ("%s is not on any key", name);
+          else
+            {
+              astr as = astr_new ();
+              astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
+              if (lastflag & FLAG_SET_UNIARG)
+                bprintf ("%s", astr_cstr (as));
+              else
+                minibuf_write ("%s", astr_cstr (as));
+              astr_delete (as);
+            }
+          astr_delete (g.bindings);
+          ret = TRUE;
+        }
     }
 
   free (name);

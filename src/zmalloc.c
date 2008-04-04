@@ -39,7 +39,8 @@ zmalloc (size_t size)
 
   assert (size > 0);
 
-  if ((ptr = calloc (size, (size_t) 1)) == NULL)
+  ptr = calloc (size, (size_t) 1);
+  if (ptr == NULL)
     {
       fprintf (stderr, PACKAGE ": cannot allocate memory\n");
       zile_exit (FALSE);
@@ -56,7 +57,8 @@ zrealloc (void *ptr, size_t size)
 {
   void *newptr;
 
-  if ((newptr = realloc (ptr, size)) == NULL)
+  newptr = realloc (ptr, size);
+  if (newptr == NULL)
     {
       fprintf (stderr, PACKAGE ": cannot reallocate memory\n");
       zile_exit (FALSE);
