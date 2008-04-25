@@ -1,6 +1,6 @@
 		    Zile FAQ - Frequently Asked Questions
 
-		   Last updated: $Date: 2008/04/02 22:48:45 $
+		   Last updated: $Date: 2008/04/25 23:32:33 $
 
      Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
      Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
@@ -77,10 +77,9 @@ INDEX
 
 1.6. Zile has a bug!
 
-    Bug reports can be sent to the developers at
-    <zile-devel@lists.sourceforge.net>, or entered directly into
-    Bugzilla at http://sourceforge.net/projects/zile. Patches are
-    appreciated.
+    Bug reports can be sent to the developers at <zile-devel@gnu.org>,
+    or entered directly into the bug tracking system at
+    http://savannah.gnu.org/projects/zile. Patches are appreciated.
 
 1.7. I like the xyz function of Emacs but it's not in Zile!
 

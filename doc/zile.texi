@@ -20,8 +20,8 @@
 
 @titlepage
 @title The Zile Manual
-@subtitle for Zile version 2.2
-@subtitle February 2008
+@subtitle for GNU Zile version 2.2
+@subtitle April 2008
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -44,9 +44,9 @@ entitled ``GNU Free Documentation License''.
 @c ---------------------------------------------------------------------------
 @node Top, Overview, (dir), (dir)
 
-This is the @emph{Zile} manual.
+This is the @emph{GNU Zile} manual.
 
-Zile is small Emacs clone.
+GNU Zile is small Emacs clone.
 Zile is a customizable, self-documenting real-time display editor.
 Zile was written to be as similar as possible to Emacs; every Emacs
 user should feel at home with Zile.
@@ -68,8 +68,8 @@ user should feel at home with Zile.
 @node Overview, Features, Top, Top
 @chapter Overview
 
-The Zile editor is written entirely in @emph{@w{ANSI C}}.
-It should run on any POSIX system.
+GNU Zile is written entirely in @emph{@w{ISO C89}}. It should run on any
+POSIX system.
 
 Zile should really appear like Emacs, but a lot of good ideas were
 also taken from other editors; in particular, ce for the internal
@@ -700,9 +700,9 @@ Default value is @samp{t}.
 @node Bug reports, GNU Free Documentation License, Variables, Top
 @chapter Bug reports
 
-Any questions, comments, or bug reports should be sent to the
-developers at @email{zile-devel@@lists.sourceforge.net}, or even better,
-filed in the relevant tracker at @uref{http://sourceforge.net/projects/zile/}.
+Any questions, comments, or bug reports should be sent to the developers
+at @email{zile-devel@@gnu.org}, or even better, filed in the relevant
+tracker at @uref{http://savannah.gnu.org/projects/zile/}.
 
 @c ---------------------------------------------------------------------------
 @node GNU Free Documentation License,  , Bug reports, Top

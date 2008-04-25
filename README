@@ -1,10 +1,10 @@
-                                 Zile
-                                 ----
+                               GNU Zile
+                               --------
 
-Zile (Zile Is Lossy Emacs) is a lightweight Emacs clone. Every Emacs
-user should feel at home with Zile. Zile is aimed at small footprint
-systems (a typical binary is about 100Kb) and quick editing sessions
-(it starts up and shuts down instantly).
+GNU Zile (Zile Is Lossy Emacs) is a lightweight Emacs clone. Every
+Emacs user should feel at home with Zile. Zile is aimed at small
+footprint systems (a typical binary is about 100Kb) and quick editing
+sessions (it starts up and shuts down instantly).
 
 Zile is written in ISO C89 using POSIX APIs; its only external
 dependency is ncurses.
@@ -13,7 +13,7 @@ Zile is free software, licensed under the GNU GPL.
 
 See INSTALL for installation instructions.
 
-Zile is hosted on SourceForge at http://zile.sourceforge.net/
+Zile is hosted on Savannah at http://savannah.gnu.org/
 
 Any questions, comments, or bug reports should be sent to the developers'
-mailing list <zile-devel@lists.sourceforge.net>.
+mailing list <zile-devel@gnu.org>.
