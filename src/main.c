@@ -48,8 +48,8 @@
 #define ZILE_VERSION_STRING	PACKAGE_NAME " " VERSION
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala <sandro@sigala.it>\n"\
-  "Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas <rrt@sc3d.org>\n"\
+  "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
+  "Copyright (C) 2003-2008 Reuben Thomas <rrt@sc3d.org>\n"\
   "Copyright (C) 2004 David A. Capello <dacap@users.sourceforge.net>"
 
 /* The current window; the first window in list. */
