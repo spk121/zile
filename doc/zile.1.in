@@ -47,7 +47,7 @@ user's Zile init file
 sample Zile init file
 .El
 .Sh BUGS
-Please report bugs to \fBzile-devel@gnu.org\fR.
+Please report bugs to \fBbug-zile@gnu.org\fR.
 .Sh SEE ALSO
 .Xr emacs 1 ,
 .Xr xemacs 1 ,

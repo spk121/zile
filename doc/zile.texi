@@ -701,7 +701,7 @@ Default value is @samp{t}.
 @chapter Bug reports
 
 Any questions, comments, or bug reports should be sent to the developers
-at @email{zile-devel@@gnu.org}, or even better, filed in the relevant
+at @email{bug-zile@@gnu.org}, or even better, filed in the relevant
 tracker at @uref{http://savannah.gnu.org/projects/zile/}.
 
 @c ---------------------------------------------------------------------------
