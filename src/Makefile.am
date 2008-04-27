@@ -21,8 +21,6 @@
 # Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
 # 02111-1301, USA.
 
-## Process this file with automake to produce Makefile.in
-
 if HAVE_REGEX_H
 regex =
 else
