@@ -1,4 +1,26 @@
-dnl Process this file with autoconf to produce a configure script.
+dnl configure.ac
+dnl
+dnl Copyright (c) 2008 Free Software Foundation, Inc.
+dnl Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
+dnl Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
+dnl Copyright (c) 2004 David Capello.
+dnl
+dnl This file is part of GNU Zile.
+dnl
+dnl GNU Zile is free software; you can redistribute it and/or modify
+dnl it under the terms of the GNU General Public License as published
+dnl by the Free Software Foundation; either version 3, or (at your
+dnl option) any later version.
+dnl
+dnl GNU Zile is distributed in the hope that it will be useful, but
+dnl WITHOUT ANY WARRANTY; without even the implied warranty of
+dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+dnl General Public License for more details.
+dnl
+dnl You should have received a copy of the GNU General Public License
+dnl along with GNU Zile; see the file COPYING.  If not, write to the
+dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+dnl MA 02111-1301, USA.
 
 dnl Every other copy of the package version number gets its value from here
 AC_INIT(Zile, 2.2.58, bug-zile@gnu.org)
@@ -72,10 +94,10 @@ dnl ==================================================================
 
 AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
 	[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
-        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
-        dnl Check if ncurses library is available as libncurses or libcurses
-        AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
-        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
+	AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
+	dnl Check if ncurses library is available as libncurses or libcurses
+	AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
 	AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
 
 dnl ==================================================================

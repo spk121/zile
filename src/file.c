@@ -1,24 +1,25 @@
 /* Disk file handling
+
+   Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
-   All rights reserved.
 
-   This file is part of Zile.
+   This file is part of GNU Zile.
 
-   Zile is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 3, or (at your option) any later
-   version.
+   GNU Zile is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   GNU Zile is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
-   02111-1301, USA.  */
+   along with GNU Zile; see the file COPYING.  If not, write to the
+   Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+   MA 02111-1301, USA.  */
 
 #include "config.h"
 
@@ -140,10 +141,10 @@ expand_path (astr path)
 	  if (*(sp + 1) == '/')
 	    {
 	      /* Got `~/'. Restart from this point and insert the user's
-	         home directory. */
+		 home directory. */
 	      astr_truncate (epath, 0);
-              pw = getpwuid (getuid ());
-              if (pw == NULL)
+	      pw = getpwuid (getuid ());
+	      if (pw == NULL)
 		{
 		  ret = FALSE;
 		  break;
@@ -155,7 +156,7 @@ expand_path (astr path)
 	  else
 	    {
 	      /* Got `~something'.  Restart from this point and insert that
-	         user's home directory. */
+		 user's home directory. */
 	      astr as = astr_new ();
 	      astr_truncate (epath, 0);
 	      ++sp;
@@ -621,7 +622,7 @@ kill_buffer (Buffer * kill_bp)
       Window *wp;
       Buffer *new_bp = create_buffer (cur_bp->name);
       /* If this is the sole buffer available, then remove the contents
-         and set the name to `*scratch*' if it is not already set. */
+	 and set the name to `*scratch*' if it is not already set. */
       assert (cur_bp == kill_bp);
 
       free_buffer (cur_bp);
@@ -690,7 +691,7 @@ Kill the current buffer or the user specified one.
 
   cp = make_buffer_completion ();
   ms = minibuf_read_completion ("Kill buffer (default %s): ",
-                                "", cp, NULL, cur_bp->name);
+				"", cp, NULL, cur_bp->name);
   if (ms == NULL)
     return cancel ();
   free_completion (cp);
@@ -750,7 +751,7 @@ Puts mark after the inserted text.
   swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
   cp = make_buffer_completion ();
   ms = minibuf_read_completion ("Insert buffer (default %s): ",
-                                "", cp, NULL, swbuf->name);
+				"", cp, NULL, swbuf->name);
   if (ms == NULL)
     return cancel ();
   free_completion (cp);
@@ -1067,8 +1068,8 @@ save_buffer (Buffer * bp)
     {
       if (bp->flags & BFLAG_NEEDNAME)
 	{
-          ms = minibuf_read_dir ("File to save in: ", fname);
-          if (ms == NULL)
+	  ms = minibuf_read_dir ("File to save in: ", fname);
+	  if (ms == NULL)
 	    return cancel ();
 	  ms_is_from_minibuffer = 1;
 	  if (ms[0] == '\0')
@@ -1311,7 +1312,7 @@ directory.
   struct stat st;
   astr buf = get_current_dir ();
   char *ms = minibuf_read_dir ("Change default directory: ",
-                         astr_cstr (buf));
+			 astr_cstr (buf));
 
   if (ms == NULL)
     {

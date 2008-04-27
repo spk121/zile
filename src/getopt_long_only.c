@@ -1,23 +1,24 @@
 /* Getopt for GNU.
-   This file is part of Zile.
 
-   Copyright (C) 1987, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99
-   	Free Software Foundation, Inc.
+   Copyright (C) 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995,
+   1996, 1997, 1998, 1999 Free Software Foundation, Inc.
 
-   Zile is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   This file is part of GNU Zile.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   GNU Zile is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GNU Zile is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
-   02111-1301, USA.  */
+   along with GNU Zile; see the file COPYING.  If not, write to the
+   Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+   MA 02111-1301, USA.  */
 
 #include "getopt.h"
 
@@ -347,7 +348,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
       /* Advance to the next ARGV-element.  */
 
       /* Give FIRST_NONOPT & LAST_NONOPT rational values if OPTIND has been
-         moved back by the user (who may also have changed the arguments).  */
+	 moved back by the user (who may also have changed the arguments).  */
       if (last_nonopt > optind)
 	last_nonopt = optind;
       if (first_nonopt > optind)
@@ -372,9 +373,9 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* The special ARGV-element `--' means premature end of options.
-         Skip it like a null option,
-         then exchange with previous non-options as if it were an option,
-         then skip everything else like a non-option.  */
+	 Skip it like a null option,
+	 then exchange with previous non-options as if it were an option,
+	 then skip everything else like a non-option.  */
 
       if (optind != argc && !strcmp (argv[optind], "--"))
 	{
@@ -390,7 +391,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* If we have done all the ARGV-elements, stop the scan
-         and back over any non-options that we skipped and permuted.  */
+	 and back over any non-options that we skipped and permuted.  */
 
       if (optind == argc)
 	{
@@ -402,7 +403,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* If we have come to a non-option and did not permute it,
-         either stop the scan or describe it to the caller and pass it by.  */
+	 either stop the scan or describe it to the caller and pass it by.  */
 
       if (NONOPTION_P)
 	{
@@ -413,7 +414,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* We have found another option-ARGV-element.
-         Skip the initial punctuation.  */
+	 Skip the initial punctuation.  */
 
       nextchar = (argv[optind] + 1
 		  + (longopts != NULL && argv[optind][1] == '-'));
@@ -452,7 +453,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	/* Do nothing.  */ ;
 
       /* Test all long options for either exact match
-         or abbreviated matches.  */
+	 or abbreviated matches.  */
       for (p = longopts, option_index = 0; p->name; p++, option_index++)
 	if (!strncmp (p->name, nextchar, nameend - nextchar))
 	  {
@@ -493,7 +494,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	  if (*nameend)
 	    {
 	      /* Don't test has_arg with >, because some C compilers don't
-	         allow it to be used on enums.  */
+		 allow it to be used on enums.  */
 	      if (pfound->has_arg)
 		optarg = nameend + 1;
 	      else
@@ -547,9 +548,9 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	}
 
       /* Can't find it as a long option.  If this is not getopt_long_only,
-         or the option starts with '--' or is not a valid short
-         option, then it's an error.
-         Otherwise interpret it as a short option.  */
+	 or the option starts with '--' or is not a valid short
+	 option, then it's an error.
+	 Otherwise interpret it as a short option.  */
       if (!long_only || argv[optind][1] == '-'
 	  || my_index (optstring, *nextchar) == NULL)
 	{
@@ -753,7 +754,7 @@ _getopt_internal (argc, argv, optstring, longopts, longind, long_only)
 	      }
 	    else
 	      /* We already incremented `optind' once;
-	         increment it again when taking next ARGV-elt as argument.  */
+		 increment it again when taking next ARGV-elt as argument.  */
 	      optarg = argv[optind++];
 	    nextchar = NULL;
 	  }

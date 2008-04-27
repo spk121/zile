@@ -1,21 +1,24 @@
 /* Declarations for getopt.
-   Copyright (C) 1989,90,91,92,93,94,96,97,98 Free Software Foundation, Inc.
-   This file is part of Zile.
 
-   The GNU C Library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public License as
-   published by the Free Software Foundation; either version 2 of the
-   License, or (at your option) any later version.
+   Copyright (C) 1989, 1990, 1991, 1992, 1993, 1994, 1996, 1997, 1998
+   Free Software Foundation, Inc.
 
-   The GNU C Library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   This file is part of GNU Zile.
+
+   GNU Zile is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GNU Zile is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Library General Public License for more details.
+   General Public License for more details.
 
-   You should have received a copy of the GNU Library General Public
-   License along with the GNU C Library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
-   Boston, MA 02111-1301, USA.  */
+   You should have received a copy of the GNU General Public License
+   along with GNU Zile; see the file COPYING.  If not, write to the
+   Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+   MA 02111-1301, USA.  */
 
 #ifndef _GETOPT_H
 
@@ -63,7 +66,7 @@ extern int optopt;
    The field `has_arg' is:
    no_argument		(or 0) if the option does not take an argument,
    required_argument	(or 1) if the option requires an argument,
-   optional_argument 	(or 2) if the option takes an optional argument.
+   optional_argument	(or 2) if the option takes an optional argument.
 
    If the field `flag' is not NULL, it points to a variable that is set
    to the value given in the field `val' when the option is found, but

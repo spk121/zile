@@ -1,24 +1,25 @@
 /* Key bindings and extended commands
+
+   Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
-   All rights reserved.
 
-   This file is part of Zile.
+   This file is part of GNU Zile.
 
-   Zile is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 3, or (at your option) any later
-   version.
+   GNU Zile is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-   Zile is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   GNU Zile is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zile; see the file COPYING.  If not, write to the Free
-   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
-   02111-1301, USA.  */
+   along with GNU Zile; see the file COPYING.  If not, write to the
+   Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+   MA 02111-1301, USA.  */
 
 #include "config.h"
 
@@ -270,16 +271,16 @@ process_key (size_t key)
     {
       p = completion_scan (key, &keys, &numkeys);
       if (p != NULL)
-        {
-          p->func (last_uniarg, NULL);
-          _last_command = p->func;
-        }
+	{
+	  p->func (last_uniarg, NULL);
+	  _last_command = p->func;
+	}
       else
-        {
-          astr as = keyvectostr (keys, numkeys);
-          minibuf_error ("%s is undefined", astr_cstr (as));
-          astr_delete (as);
-        }
+	{
+	  astr as = keyvectostr (keys, numkeys);
+	  minibuf_error ("%s is undefined", astr_cstr (as));
+	  astr_delete (as);
+	}
     }
   free (keys);
 
@@ -349,10 +350,10 @@ init_bindings (void)
   for (i = 0; i <= 0xff; i++)
     {
       if (isprint (i))
-        {
-          *keys = i;
-          bind_key_vec (leaf_tree, keys, 1, F_self_insert_command);
-        }
+	{
+	  *keys = i;
+	  bind_key_vec (leaf_tree, keys, 1, F_self_insert_command);
+	}
     }
   free (keys);
 
@@ -511,12 +512,12 @@ execute_function (char *name, int uniarg)
     {
       mp = get_macro (name);
       if (mp)
-        {
-          call_macro (mp);
-          return TRUE;
-        }
+	{
+	  call_macro (mp);
+	  return TRUE;
+	}
       else
-        return FALSE;
+	return FALSE;
     }
 }
 
@@ -681,25 +682,25 @@ message in the buffer.
     {
       g.f = get_function (name);
       if (g.f)
-        {
-          g.bindings = astr_new ();
-          walk_bindings (leaf_tree, gather_bindings, &g);
+	{
+	  g.bindings = astr_new ();
+	  walk_bindings (leaf_tree, gather_bindings, &g);
 
-          if (astr_len (g.bindings) == 0)
-            minibuf_write ("%s is not on any key", name);
-          else
-            {
-              astr as = astr_new ();
-              astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
-              if (lastflag & FLAG_SET_UNIARG)
-                bprintf ("%s", astr_cstr (as));
-              else
-                minibuf_write ("%s", astr_cstr (as));
-              astr_delete (as);
-            }
-          astr_delete (g.bindings);
-          ret = TRUE;
-        }
+	  if (astr_len (g.bindings) == 0)
+	    minibuf_write ("%s is not on any key", name);
+	  else
+	    {
+	      astr as = astr_new ();
+	      astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
+	      if (lastflag & FLAG_SET_UNIARG)
+		bprintf ("%s", astr_cstr (as));
+	      else
+		minibuf_write ("%s", astr_cstr (as));
+	      astr_delete (as);
+	    }
+	  astr_delete (g.bindings);
+	  ret = TRUE;
+	}
     }
 
   free (name);

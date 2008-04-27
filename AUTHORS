@@ -18,7 +18,5 @@ The following separate programs are included with Zile:
 
 * regex.c and regex.h are the GNU regex implementation.
 
-* getopt_long_only.c and getopt.h are from the GNU getopt package.
-
 * vasprintf.c is a slimmed-down version of David Taillandier's
   xnprintf.
