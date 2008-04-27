@@ -45,12 +45,10 @@
 #include "eval.h"
 #include "vars.h"
 
-#define ZILE_VERSION_STRING	PACKAGE_NAME " " VERSION
+#define ZILE_VERSION_STRING	"GNU " PACKAGE_NAME " " VERSION
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 1997-2004 Sandro Sigala <sandro@sigala.it>\n"\
-  "Copyright (C) 2003-2008 Reuben Thomas <rrt@sc3d.org>\n"\
-  "Copyright (C) 2004 David A. Capello <dacap@users.sourceforge.net>"
+  "Copyright (C) 2008 Free Software Foundation, Inc."
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -266,7 +264,7 @@ main (int argc, char **argv)
 	  fprintf (stderr,
 		   ZILE_VERSION_STRING "\n"
 		   ZILE_COPYRIGHT_STRING "\n"
-		   PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+		   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
 		   "You may redistribute copies of " PACKAGE_NAME "\n"
 		   "under the terms of the GNU General Public License.\n"
 		   "For more information about these matters, see the file named COPYING.\n");
@@ -287,7 +285,9 @@ main (int argc, char **argv)
 		   "--version              display version information and exit\n"
 		   "\n" "Action options:\n" "\n"
 		   "FILE                   visit FILE using find-file\n"
-		   "+LINE FILE             visit FILE using find-file, then go to line LINE\n");
+		   "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+		   "\n"
+		   "Report bugs to " PACKAGE_BUGREPORT ".\n");
 	  return 0;
 	case '?':		/* Unknown option */
 	  minibuf_error ("Unknown option `%s'", argv[this_optind]);
@@ -347,12 +347,23 @@ main (int argc, char **argv)
 	    }
 	}
 
-      if (!minibuf_written && argc == 0 && list_length (fargs) == 0)
-	/* Show the splash screen only if no files and no Lisp expression
-	   or load file is specified on the command line. */
+      /* Show the splash screen only if no files and no Lisp expression
+         or load file is specified on the command line. */
+      if (minibuf_contents == NULL && argc == 0 && list_length (fargs) == 0)
 	about_screen ();
 
       setup_main_screen (argc);
+
+      /* Refresh minibuffer in case there's an error that couldn't be
+	 written during startup */
+      if (minibuf_contents != NULL)
+	{
+	  char *buf = zstrdup (minibuf_contents);
+
+	  minibuf_write (buf);
+	  free (buf);
+	}
+
       execute_functions (fargs);
       list_delete (fargs);
 
@@ -364,6 +375,12 @@ main (int argc, char **argv)
       term_close ();
 
       free_bindings ();
+    }
+  else if (minibuf_contents) /* if in batch mode, print any error */
+    {
+      fputs (PACKAGE ": ", stderr);
+      fputs (minibuf_contents, stderr);
+      fputc ('\n', stderr);
     }
 
   /* Free Lisp state. */

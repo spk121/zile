@@ -440,7 +440,7 @@ minibuf_read_function_name (const char *fmt, ...)
   Completion *cp;
 
   va_start (ap, fmt);
-  buf = minibuf_format (fmt, ap);
+  zvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   cp = completion_new (FALSE);
@@ -482,7 +482,7 @@ minibuf_read_function_name (const char *fmt, ...)
 	    {
 	      add_history_element (&functions_history, ms);
 	      minibuf_clear ();	/* Remove any error message. */
-	      ms = zstrdup (ms);	/* Might be about to be freed. */
+	      ms = zstrdup (ms); /* Might be about to be freed. */
 	      break;		/* We're finished. */
 	    }
 	  else
@@ -684,7 +684,7 @@ message in the buffer.
         {
           g.bindings = astr_new ();
           walk_bindings (leaf_tree, gather_bindings, &g);
-          
+
           if (astr_len (g.bindings) == 0)
             minibuf_write ("%s is not on any key", name);
           else

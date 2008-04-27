@@ -30,44 +30,36 @@
 #include "extern.h"
 
 static History files_history;
-int minibuf_written = FALSE;
+char *minibuf_contents = NULL;
 
 /*--------------------------------------------------------------------------
  * Minibuffer wrapper functions.
  *--------------------------------------------------------------------------*/
 
-char *
-minibuf_format (const char *fmt, va_list ap)
-{
-  char *buf;
-  zvasprintf (&buf, fmt, ap);
-  return buf;
-}
-
 void
 free_minibuf (void)
 {
   free_history_elements (&files_history);
+  if (minibuf_contents != NULL)
+    free (minibuf_contents);
 }
 
 static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
-  char *buf = minibuf_format (fmt, ap);
+  if (minibuf_contents != NULL)
+    free (minibuf_contents);
+
+  zvasprintf (&minibuf_contents, fmt, ap);
 
   if (cur_wp)
     {
-      term_minibuf_write (buf);
+      term_minibuf_write (minibuf_contents);
 
       /* Redisplay (and leave the cursor in the correct position). */
       term_redisplay ();
       term_refresh ();
     }
-  else
-    fputs (buf, stderr);
-
-  free (buf);
-  minibuf_written = TRUE;
 }
 
 /*
@@ -108,7 +100,7 @@ minibuf_read (const char *fmt, const char *value, ...)
   char *buf, *p;
 
   va_start (ap, value);
-  buf = minibuf_format (fmt, ap);
+  zvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   p = term_minibuf_read (buf, value ? value : "", NULL, NULL);
@@ -130,7 +122,7 @@ minibuf_read_dir (const char *fmt, const char *value, ...)
   astr as, rbuf;
 
   va_start (ap, value);
-  buf = minibuf_format (fmt, ap);
+  zvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   as = expand_path (astr_new_cstr (value));	/* Guaranteed to work */
@@ -164,7 +156,7 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
   char *buf, *p;
 
   va_start (ap, cp);
-  buf = minibuf_format (fmt, ap);
+  zvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   for (;;)
@@ -213,7 +205,7 @@ minibuf_read_yesno (const char *fmt, ...)
   int retvalue;
 
   va_start (ap, fmt);
-  buf = minibuf_format (fmt, ap);
+  zvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   cp = completion_new (FALSE);
@@ -247,7 +239,7 @@ minibuf_read_completion (const char *fmt, char *value, Completion * cp,
   char *buf, *p;
 
   va_start (ap, hp);
-  buf = minibuf_format (fmt, ap);
+  zvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   p = term_minibuf_read (buf, value, cp, hp);
