@@ -261,7 +261,7 @@ main (int argc, char **argv)
 	  qflag = TRUE;
 	  break;
 	case 'v':
-	  fprintf (stderr,
+	  fprintf (stdout,
 		   ZILE_VERSION_STRING "\n"
 		   ZILE_COPYRIGHT_STRING "\n"
 		   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
@@ -270,7 +270,7 @@ main (int argc, char **argv)
 		   "For more information about these matters, see the file named COPYING.\n");
 	  return 0;
 	case 'h':
-	  fprintf (stderr,
+	  fprintf (stdout,
 		   "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
 		   "\n"
 		   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
