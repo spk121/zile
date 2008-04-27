@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 dnl Every other copy of the package version number gets its value from here
 AC_INIT(Zile, 2.2.58, bug-zile@gnu.org)
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE(std-options)
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
 AM_CONFIG_HEADER(config.h)
