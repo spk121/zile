@@ -961,25 +961,40 @@ copy_file (const char *source, const char *dest)
 static int
 raw_write_to_disk (Buffer * bp, const char *filename, int umask)
 {
-  size_t eol_len = strlen (bp->eol);
+  ssize_t eol_len = (ssize_t) strlen (bp->eol), written;
   Line *lp;
+  int ret = 0;
   int fd = open (filename, O_WRONLY | O_CREAT | O_TRUNC, umask);
 
   if (fd < 0)
-    return FALSE;
+    return -1;
 
-  /* Save all the lines. */
+  /* Save the lines. */
   for (lp = list_next (bp->lines); lp != bp->lines; lp = list_next (lp))
     {
-      write (fd, astr_cstr (lp->item), astr_len (lp->item));
+      ssize_t len = (ssize_t) astr_len(lp->item);
+
+      written = write (fd, astr_cstr (lp->item), len);
+      if (written != len)
+        {
+          ret = written;
+          break;
+        }
       if (list_next (lp) != bp->lines)
-	write (fd, bp->eol, eol_len);
+        {
+          written = write (fd, bp->eol, eol_len);
+          if (written != eol_len)
+            {
+              ret = written;
+              break;
+            }
+        }
     }
 
-  if (close (fd) < 0)
-    return FALSE;
+  if (close (fd) < 0 && ret == 0)
+    ret = -1;
 
-  return TRUE;
+  return ret;
 }
 
 /*
@@ -1024,7 +1039,7 @@ create_backup_filename (const char *filename, const char *backupdir)
 static int
 write_to_disk (Buffer * bp, char *filename)
 {
-  int fd, backup = lookup_bool_variable ("make-backup-files");
+  int fd, backup = lookup_bool_variable ("make-backup-files"), ret;
   char *backupdir = lookup_bool_variable ("backup-directory") ?
     get_variable ("backup-directory") : NULL;
 
@@ -1047,9 +1062,13 @@ write_to_disk (Buffer * bp, char *filename)
       astr_delete (bfilename);
     }
 
-  if (raw_write_to_disk (bp, filename, 0666) == FALSE)
+  ret = raw_write_to_disk (bp, filename, 0666);
+  if (ret != 0)
     {
-      minibuf_error ("%s: %s", filename, strerror (errno));
+      if (ret == -1)
+        minibuf_error ("Error writing `%s': %s", filename, strerror (errno));
+      else
+        minibuf_error ("Error writing `%s': %s", filename);
       return FALSE;
     }
 
@@ -1276,7 +1295,7 @@ END_DEFUN
  * If doabort is true, aborts to allow core dump generation;
  * otherwise, exit.
  */
-  void
+void
 zile_exit (int doabort)
 {
   Buffer *bp;

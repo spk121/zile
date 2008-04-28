@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "zile.h"
@@ -1601,6 +1602,7 @@ it as the contents of the region.
   FILE *pipe;
   astr out, s;
   int lines = 0, fd;
+  ssize_t written;
   astr cmd;
   char tempfile[] = P_tmpdir "/zileXXXXXX";
   char *ms = minibuf_read ("Shell command: ", ""), *p;
@@ -1625,9 +1627,19 @@ it as the contents of the region.
 
   calculate_the_region (&r);
   p = copy_text_block (r.start.n, r.start.o, r.size);
-  write (fd, p, r.size);
+  written = write (fd, p, r.size);
   free (p);
   close (fd);
+
+  if (written != (ssize_t) r.size)
+    {
+      if (written == -1)
+        minibuf_error ("Error writing to temporary file: %s",
+                       strerror (errno));
+      else
+        minibuf_error ("Error writing to temporary file");
+      return FALSE;
+    }
 
   astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
   pipe = popen (astr_cstr (cmd), "r");
