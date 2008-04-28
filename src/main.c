@@ -69,25 +69,25 @@ loop (void)
       size_t key;
 
       if (lastflag & FLAG_NEED_RESYNC)
-	resync_redisplay ();
+        resync_redisplay ();
       term_redisplay ();
       term_refresh ();
 
       thisflag = 0;
       if (lastflag & FLAG_DEFINING_MACRO)
-	thisflag |= FLAG_DEFINING_MACRO;
+        thisflag |= FLAG_DEFINING_MACRO;
 
       key = getkey ();
       minibuf_clear ();
       process_key (key);
 
       if (thisflag & FLAG_QUIT_ZILE)
-	break;
+        break;
       if (!(thisflag & FLAG_SET_UNIARG))
-	last_uniarg = 1;
+        last_uniarg = 1;
 
       if (last_command () != F_undo)
-	cur_bp->next_undop = cur_bp->last_undop;
+        cur_bp->next_undop = cur_bp->last_undop;
 
       lastflag = thisflag;
     }
@@ -136,7 +136,7 @@ execute_functions (list funcs)
       char *func = (char *) l->item;
       term_redisplay ();
       if (!execute_function (func, 1))
-	minibuf_error ("Function `%s' not defined", func);
+        minibuf_error ("Function `%s' not defined", func);
       lastflag |= FLAG_NEED_RESYNC;
     }
 }
@@ -151,7 +151,7 @@ setup_main_screen (int argc)
     {
       /* Last buffer that isn't *scratch*. */
       if (bp->next && !bp->next->next)
-	last_bp = bp;
+        last_bp = bp;
       c++;
     }
 
@@ -168,20 +168,20 @@ setup_main_screen (int argc)
   else
     {
       if (argc < 1)
-	{
-	  undo_nosave = TRUE;
+        {
+          undo_nosave = TRUE;
 
-	  if (!lookup_bool_variable ("inhibit-splash-screen"))
-	    insert_string ("\
+          if (!lookup_bool_variable ("inhibit-splash-screen"))
+            insert_string ("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
 
-	  undo_nosave = FALSE;
-	  cur_bp->flags &= ~BFLAG_MODIFIED;
-	  lastflag |= FLAG_NEED_RESYNC;
-	}
+          undo_nosave = FALSE;
+          cur_bp->flags &= ~BFLAG_MODIFIED;
+          lastflag |= FLAG_NEED_RESYNC;
+        }
     }
 }
 
@@ -189,8 +189,8 @@ static void
 segv_sig_handler (int signo GCC_UNUSED)
 {
   fprintf (stderr,
-	   PACKAGE_NAME " crashed.  Please send a bug report to <"
-	   PACKAGE_BUGREPORT ">.\r\n");
+           PACKAGE_NAME " crashed.  Please send a bug report to <"
+           PACKAGE_BUGREPORT ">.\r\n");
   zile_exit (TRUE);
 }
 
@@ -247,57 +247,57 @@ main (int argc, char **argv)
       c = getopt_long_only (argc, argv, ":bhf:qv", longopts, NULL);
 
       if (c == -1)
-	break;
+        break;
 
       switch (c)
-	{
-	case 'b':
-	  bflag = TRUE;
-	  qflag = TRUE;
-	  break;
-	case 'f':
-	  list_append (fargs, optarg);
-	  break;
-	case 'q':
-	  qflag = TRUE;
-	  break;
-	case 'v':
-	  fprintf (stdout,
-		   ZILE_VERSION_STRING "\n"
-		   ZILE_COPYRIGHT_STRING "\n"
-		   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-		   "You may redistribute copies of " PACKAGE_NAME "\n"
-		   "under the terms of the GNU General Public License.\n"
-		   "For more information about these matters, see the file named COPYING.\n");
-	  return 0;
-	case 'h':
-	  fprintf (stdout,
-		   "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
-		   "\n"
-		   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
-		   "\n"
-		   "Initialization options:\n"
-		   "\n"
-		   "--batch                do not do interactive display; implies -q\n"
-		   "--help                 display this help message and exit\n"
-		   "--funcall, -f FUNC     call " PACKAGE_NAME
-		   " function FUNC with no arguments\n"
-		   "--no-init-file, -q     do not load ~/." PACKAGE "\n"
-		   "--version              display version information and exit\n"
-		   "\n" "Action options:\n" "\n"
-		   "FILE                   visit FILE using find-file\n"
-		   "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
-		   "\n"
-		   "Report bugs to " PACKAGE_BUGREPORT ".\n");
-	  return 0;
-	case '?':		/* Unknown option */
-	  minibuf_error ("Unknown option `%s'", argv[this_optind]);
-	  break;
-	case ':':		/* Missing argument */
-	  fprintf (stderr, PACKAGE ": Option `%s' requires an argument\n\n",
-		   argv[this_optind]);
-	  exit (1);
-	}
+        {
+        case 'b':
+          bflag = TRUE;
+          qflag = TRUE;
+          break;
+        case 'f':
+          list_append (fargs, optarg);
+          break;
+        case 'q':
+          qflag = TRUE;
+          break;
+        case 'v':
+          fprintf (stdout,
+                   ZILE_VERSION_STRING "\n"
+                   ZILE_COPYRIGHT_STRING "\n"
+                   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+                   "You may redistribute copies of " PACKAGE_NAME "\n"
+                   "under the terms of the GNU General Public License.\n"
+                   "For more information about these matters, see the file named COPYING.\n");
+          return 0;
+        case 'h':
+          fprintf (stdout,
+                   "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
+                   "\n"
+                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
+                   "\n"
+                   "Initialization options:\n"
+                   "\n"
+                   "--batch                do not do interactive display; implies -q\n"
+                   "--help                 display this help message and exit\n"
+                   "--funcall, -f FUNC     call " PACKAGE_NAME
+                   " function FUNC with no arguments\n"
+                   "--no-init-file, -q     do not load ~/." PACKAGE "\n"
+                   "--version              display version information and exit\n"
+                   "\n" "Action options:\n" "\n"
+                   "FILE                   visit FILE using find-file\n"
+                   "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+                   "\n"
+                   "Report bugs to " PACKAGE_BUGREPORT ".\n");
+          return 0;
+        case '?':		/* Unknown option */
+          minibuf_error ("Unknown option `%s'", argv[this_optind]);
+          break;
+        case ':':		/* Missing argument */
+          fprintf (stderr, PACKAGE ": Option `%s' requires an argument\n\n",
+                   argv[this_optind]);
+          exit (1);
+        }
     }
 
   argc -= optind;
@@ -318,52 +318,52 @@ main (int argc, char **argv)
       term_redisplay ();
 
       /* Read settings after creating *scratch* buffer so that any
-	 buffer commands won't cause a crash. */
+         buffer commands won't cause a crash. */
       if (!qflag)
-	{
-	  le *list;
+        {
+          le *list;
 
-	  astr as = get_home_dir ();
-	  astr_cat_cstr (as, "/." PACKAGE);
-	  list = lisp_read_file (astr_cstr (as));
-	  astr_delete (lisp_dump (list));
-	  astr_delete (as);
-	  leWipe (list);
-	}
+          astr as = get_home_dir ();
+          astr_cat_cstr (as, "/." PACKAGE);
+          list = lisp_read_file (astr_cstr (as));
+          astr_delete (lisp_dump (list));
+          astr_delete (as);
+          leWipe (list);
+        }
 
       /* Reinitialise the scratch buffer to catch settings */
       init_buffer (cur_bp);
 
       /* Open files given on the command line */
       for (line = 1; *argv; argv++)
-	{
-	  if (**argv == '+')
-	    line = strtoul (*argv + 1, NULL, 10);
-	  else
-	    {
-	      find_file (*argv);
-	      ngotodown (line - 1);
-	      line = 1;
-	      lastflag |= FLAG_NEED_RESYNC;
-	    }
-	}
+        {
+          if (**argv == '+')
+            line = strtoul (*argv + 1, NULL, 10);
+          else
+            {
+              find_file (*argv);
+              ngotodown (line - 1);
+              line = 1;
+              lastflag |= FLAG_NEED_RESYNC;
+            }
+        }
 
       /* Show the splash screen only if no files and no Lisp expression
-	 or load file is specified on the command line. */
+         or load file is specified on the command line. */
       if (minibuf_contents == NULL && argc == 0 && list_length (fargs) == 0)
-	about_screen ();
+        about_screen ();
 
       setup_main_screen (argc);
 
       /* Refresh minibuffer in case there's an error that couldn't be
-	 written during startup */
+         written during startup */
       if (minibuf_contents != NULL)
-	{
-	  char *buf = zstrdup (minibuf_contents);
+        {
+          char *buf = zstrdup (minibuf_contents);
 
-	  minibuf_write (buf);
-	  free (buf);
-	}
+          minibuf_write (buf);
+          free (buf);
+        }
 
       execute_functions (fargs);
       list_delete (fargs);

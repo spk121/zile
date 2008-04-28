@@ -1600,10 +1600,11 @@ it as the contents of the region.
 {
   FILE *pipe;
   astr out, s;
-  int lines = 0;
+  int lines = 0, fd;
   astr cmd;
   char tempfile[] = P_tmpdir "/zileXXXXXX";
-  char *ms = minibuf_read ("Shell command: ", "");
+  char *ms = minibuf_read ("Shell command: ", ""), *p;
+  Region r;
 
   if (ms == NULL)
     return cancel ();
@@ -1615,28 +1616,20 @@ it as the contents of the region.
 
   cmd = astr_new ();
 
-  {
-    Region r;
-    char *p;
-    int fd;
+  fd = mkstemp (tempfile);
+  if (fd == -1)
+    {
+      minibuf_error ("Cannot open temporary file");
+      return FALSE;
+    }
 
-    fd = mkstemp (tempfile);
-    if (fd == -1)
-      {
-	minibuf_error ("Cannot open temporary file");
-	return FALSE;
-      }
+  calculate_the_region (&r);
+  p = copy_text_block (r.start.n, r.start.o, r.size);
+  write (fd, p, r.size);
+  free (p);
+  close (fd);
 
-    calculate_the_region (&r);
-    p = copy_text_block (r.start.n, r.start.o, r.size);
-    write (fd, p, r.size);
-    free (p);
-
-    close (fd);
-
-    astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
-  }
-
+  astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
   pipe = popen (astr_cstr (cmd), "r");
   if (pipe == NULL)
     {

@@ -1,6 +1,6 @@
 /* Vectors (auto-extending arrays)
 
-   Copyright (c) 2008 Free Software Foundation, Inc.   
+   Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 2004 Reuben Thomas.
 
    This file is part of GNU Zile.
