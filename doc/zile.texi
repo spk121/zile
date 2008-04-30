@@ -53,6 +53,8 @@ Zile is a customizable, self-documenting real-time display editor.
 Zile was written to be as similar as possible to Emacs; every Emacs
 user should feel at home with Zile.
 
+Zile's home page at @url{http://www.gnu.org/software/zile/}.
+
 @menu
 * Overview::                    An overview of the Zile editor.
 * Features::                    The characteristics of Zile.
@@ -62,7 +64,7 @@ user should feel at home with Zile.
 * Key names::                   How the keys are named.
 * Functions::                   The list of functions.
 * Variables::                   The list of variables.
-* Bug reports::                 How to report a bug.
+* Help and bug reports::        How to get help and report bugs.
 * GNU Free Documentation License::  The GNU Free Documentation License.
 @end menu
 
@@ -631,7 +633,7 @@ Show the version of Zile.
 @c LINT END FUNC
 
 @c ---------------------------------------------------------------------------
-@node Variables, Bug reports, Functions, Top
+@node Variables, Help and bug reports, Functions, Top
 @chapter Variables
 
 This table contains the full list of available variables, that can be
@@ -699,15 +701,17 @@ Default value is @samp{t}.
 @c LINT END VAR
 
 @c ---------------------------------------------------------------------------
-@node Bug reports, GNU Free Documentation License, Variables, Top
-@chapter Bug reports
+@node Help and bug reports, GNU Free Documentation License, Variables, Top
+@chapter Help and bug reports
 
-Any questions, comments, or bug reports should be sent to the developers
-at @email{bug-zile@@gnu.org}, or even better, filed in the relevant
-tracker at @uref{http://savannah.gnu.org/projects/zile/}.
+Questions, comments and requests should be sent to
+@email{help-zile@@gnu.org}. Bug reports should be sent to
+@email{bug-zile@@gnu.org}. Savannah users are welcome to file bug reports,
+feature requests and patches directly in the relevant tracker at
+@uref{http://savannah.gnu.org/projects/zile/}.
 
 @c ---------------------------------------------------------------------------
-@node GNU Free Documentation License,  , Bug reports, Top
+@node GNU Free Documentation License,  , Help and bug reports, Top
 @chapter The GNU Free Documentation License
 
 @center Version 1.2, November 2002

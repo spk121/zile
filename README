@@ -13,7 +13,9 @@ Zile is free software, licensed under the GNU GPL.
 
 See INSTALL for installation instructions.
 
-Zile is hosted on Savannah at http://savannah.gnu.org/
+Zile's home page at http://www.gnu.org/software/zile/
 
-Any questions, comments, or bug reports should be sent to the developers'
-mailing list <bug-zile@gnu.org>.
+Questions, comments and requests should be sent to <help-zile@gnu.org>.
+Bug reports should be sent to <bug-zile@gnu.org>. Savannah users are
+welcome to file bug reports, feature requests and patches directly in
+the relevant tracker at http://savannah.gnu.org/projects/zile/
