@@ -2,7 +2,7 @@
 @setfilename zile.info
 @settitle The Zile Manual
 
-@dircategory Text editors
+@dircategory Editors
 @direntry
 * Zile: (zile).                 A very small Emacs-subset editor.
 @end direntry
