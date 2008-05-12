@@ -89,7 +89,7 @@ zile_SOURCES =				\
 
 zile_LDADD = $(regex) @LIBOBJS@
 
-EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c getopt.h
+EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c getopt.h zile-startup-test
 
 loc:
 	sloccount $(zile_SOURCES)
