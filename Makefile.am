@@ -32,6 +32,9 @@ EXTRA_DIST =					\
 	README					\
 	THANKS
 
+# FIXME: make woger work for GNU
+# FIXME: auto-prepend release notes
+# FIXME: auto-update ChangeLog
 release: distcheck
 	cvs diff && \
 	cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
