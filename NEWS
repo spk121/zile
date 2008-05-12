@@ -1,3 +1,29 @@
+FIXME: auto-prepend release notes.
+
+Release 2.2.58:
+
+This release makes Zile's transition to being a GNU program. Note the
+new web site, distribution URL and support addresses. This release
+also fixes the display of errors that occur during startup.
+
+Release 2.2.57:
+
+This release changes the code to meet GNU coding standards. It's not
+recommended for users because there are no (intended!) functional
+changes whatsoever, and it's just possible that new bugs have been
+introduced.
+
+Release 2.2.56:
+
+This release fixes a bug that prevented top-bit-set characters being
+bindable to commands.
+
+Release 2.2.55:
+
+This release allows Zile to produce core dumps when it crashes,
+handles SIGBUS, and fixes a crash caused by trying to bind a command
+to the empty string.
+
 Changes since Zile 2.2
 
 * Fix macro creation.
