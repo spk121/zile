@@ -1,3 +1,10 @@
+Release 2.2.59:
+
+This release fixes various problems with release 2.2.58, including
+shipping the wrong source code (oops), and automates the GNU release
+process so that errors of this sort should no longer happen. The build
+system was tidied a little.
+
 Release 2.2.58:
 
 This release makes Zile's transition to being a GNU program. Note the
