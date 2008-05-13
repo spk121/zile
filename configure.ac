@@ -23,7 +23,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Every other copy of the package version number gets its value from here
-AC_INIT(Zile, 2.2.58, bug-zile@gnu.org)
+AC_INIT(Zile, 2.2.59, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
