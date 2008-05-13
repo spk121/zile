@@ -22,35 +22,31 @@ dnl along with GNU Zile; see the file COPYING.  If not, write to the
 dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
-dnl Every other copy of the package version number gets its value from here
+dnl ==================================================================
+dnl Initialise autoconf and automake
+dnl ==================================================================
+
 AC_INIT(Zile, 2.2.59, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
-dnl create a config.h file (Automake will add -DHAVE_CONFIG_H)
-AM_CONFIG_HEADER(config.h)
+dnl ==================================================================
+dnl Checks for programs
+dnl ==================================================================
 
-AC_SUBST(VERSION)
-
-dnl Allow GNU functions to be used if present (e.g. vasprintf)
 AC_GNU_SOURCE
-
-dnl ==================================================================
-dnl Checks for programs.
-dnl ==================================================================
-
 AC_PROG_CC
 BFD_CC_FOR_BUILD
 AM_PROG_CC_C_O
 
 dnl ==================================================================
-dnl Checks for functions.
+dnl Checks for functions
 dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
 AC_CHECK_FUNCS(getcwd fchmod fchown euidaccess)
 
 dnl ==================================================================
-dnl Checks for header files.
+dnl Checks for header files
 dnl ==================================================================
 
 AC_HEADER_STDC
@@ -118,8 +114,9 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
 rm -f src/paths.h
 
 dnl ==================================================================
-dnl Generate makefiles
+dnl Generate Makefiles and other configured files
 dnl ==================================================================
 
-AC_CONFIG_FILES(Makefile doc/Makefile src/Makefile)
+AC_CONFIG_HEADER(config.h)
+AC_CONFIG_FILES(Makefile doc/Makefile src/Makefile release-boilerplate)
 AC_OUTPUT
