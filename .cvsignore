@@ -9,6 +9,7 @@ compile
 depcomp
 install-sh
 missing
+ChangeLog
 Makefile
 Makefile.in
 config.h
