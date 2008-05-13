@@ -114,9 +114,9 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
 rm -f src/paths.h
 
 dnl ==================================================================
-dnl Generate Makefiles and other configured files
+dnl Generate configured files
 dnl ==================================================================
 
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_FILES(Makefile doc/Makefile src/Makefile release-boilerplate)
+AC_CONFIG_FILES(Makefile doc/Makefile src/Makefile)
 AC_OUTPUT
