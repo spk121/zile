@@ -25,7 +25,7 @@
 SUBDIRS = doc src
 
 dist-hook:
-	cvs2cl --FSF --usermap cvs2cl-usermap
+	if [ -d CVS ]; then cvs2cl --FSF --usermap cvs2cl-usermap; fi
 
 # Note: before writing release notes, check there are some for the current version
 release: distcheck
