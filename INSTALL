@@ -15,7 +15,7 @@ To build and install Zile:
 the GNU autotools installed (automake >= 1.9, autoconf >= 2.59) and
 run
 
-        autoreconf -i
+        ./autogen.sh
 ]
 
 1) Run configure:
