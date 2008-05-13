@@ -24,18 +24,14 @@
 
 SUBDIRS = doc src
 
-EXTRA_DIST =					\
-	AUTHORS					\
-	COPYING					\
-	INSTALL					\
-	NEWS					\
-	README					\
-	THANKS
+dist-hook:
+	cvs2cl --FSF --usermap cvs2cl-usermap
 
-# FIXME: make woger work for GNU
-# FIXME: auto-prepend release notes
-# FIXME: auto-update ChangeLog
+# Note: before writing release notes, check there are some for the current version
 release: distcheck
+	agrep -d '^Release' $(VERSION) NEWS && \
+	agrep -d '^Release' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
 	cvs diff && \
 	cvs tag rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
-	woger $(PACKAGE) $(VERSION) release-notes-$(VERSION)
+	woger gnu,freshmeat $(PACKAGE) $(VERSION) "the tiny Emacs clone" release-notes && \
+	rm -f release-notes
