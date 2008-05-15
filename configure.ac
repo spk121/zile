@@ -80,6 +80,7 @@ AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
 dnl ==================================================================
 dnl Turn on additional compiler warnings
 dnl ==================================================================
+
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic"
 fi
