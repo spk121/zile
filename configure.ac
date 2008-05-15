@@ -44,6 +44,7 @@ dnl ==================================================================
 
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
 AC_CHECK_FUNCS(getcwd fchmod fchown euidaccess alloca)
+AM_CONDITIONAL(HAVE_GETOPT_LONG_ONLY, test x$have_getopt_long_only = xtrue)
 
 dnl ==================================================================
 dnl Checks for header files
