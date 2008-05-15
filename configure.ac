@@ -93,10 +93,12 @@ dnl ==================================================================
 AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
 	[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
 	AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
-	dnl Check if ncurses library is available as libncurses or libcurses
-	AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+dnl Check if ncurses library is available as libncurses or libcurses
+AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
+	[AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses -ldl"],
 	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-	AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])
+	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses -ldl"],
+	AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])])])
 
 dnl ==================================================================
 dnl Extra definitions for config.h
