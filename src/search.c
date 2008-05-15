@@ -149,7 +149,7 @@ re_find_substr (const char *s1, size_t s1size,
   search_regs.end = zmalloc (sizeof (regoff_t));
 
   /* translate table is never written to, so this cast is safe */
-  pattern.translate = (char *) translate;
+  pattern.translate = (unsigned char *) translate;
   pattern.fastmap = NULL;
   pattern.buffer = NULL;
   pattern.allocated = 0;

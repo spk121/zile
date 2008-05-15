@@ -22,13 +22,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-if HAVE_REGEX_H
-regex =
-else
-regex = regex.o
-endif
-
-TESTS = astr $(top_srcdir)/src/zile-startup-test
+TESTS = astr $(top_srcdir)/src/zile-startup-test regexbug1
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
@@ -87,9 +81,27 @@ zile_SOURCES =				\
 	term_ncurses.c			\
 	zile.h
 
-zile_LDADD = $(regex) @LIBOBJS@
+zile_LDADD = $(LIBOBJS)
+if !HAVE_REGEX_H
+zile_LDADD += regcomp.o regex.o regexec.o regex_internal.o
+AM_CPPFLAGS += -Ireplacement_regex
+endif
 
-EXTRA_DIST = regex.c regex.h vasprintf.c strrstr.c getopt.h zile-startup-test
+if !HAVE_GETOPT_LONG_ONLY
+AM_CPPFLAGS += -Ireplacement_getopt
+endif
+
+EXTRA_DIST = 				\
+	strrstr.c			\
+	vasprintf.c			\
+	getopt.h			\
+	regcomp.c			\
+	regex.c				\
+	regex.h				\
+	regex_internal.h		\
+	regexec.c			\
+	regex_internal.c		\
+	zile-startup-test
 
 loc:
 	sloccount $(zile_SOURCES)
