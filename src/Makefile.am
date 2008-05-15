@@ -28,7 +28,8 @@ check_PROGRAMS = astr
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
 
-AM_CPPFLAGS = -DPATH_DATA="\"$(pkgdatadir)\""
+AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
+LDADD = $(top_builddir)/lib/libgnu.a
 
 bin_PROGRAMS = zile
 
@@ -81,7 +82,7 @@ zile_SOURCES =				\
 	term_ncurses.c			\
 	zile.h
 
-zile_LDADD = $(LIBOBJS)
+zile_LDADD = $(LDADD) $(LIBOBJS)
 if !HAVE_REGEX_H
 zile_LDADD += regcomp.o regex.o regexec.o regex_internal.o
 AM_CPPFLAGS += -Ireplacement_regex

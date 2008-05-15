@@ -22,7 +22,9 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-SUBDIRS = doc src
+SUBDIRS = doc lib src
+
+ACLOCAL_AMFLAGS = -I m4
 
 dist-hook:
 	if [ -d CVS ]; then cvs2cl --FSF --usermap cvs2cl-usermap; fi

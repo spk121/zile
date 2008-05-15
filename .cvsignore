@@ -20,3 +20,4 @@ stamp-h1
 zile*.tar.gz
 zile*.tar.gz.sig
 zile*.tar.gz.directive*
+lib

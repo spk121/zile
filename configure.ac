@@ -35,13 +35,16 @@ dnl ==================================================================
 
 AC_GNU_SOURCE
 AC_PROG_CC
+gl_EARLY
 BFD_CC_FOR_BUILD
 AM_PROG_CC_C_O
+AC_PROG_RANLIB
 
 dnl ==================================================================
 dnl Checks for functions
 dnl ==================================================================
 
+gl_INIT
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
 AC_CHECK_FUNCS(getcwd fchmod fchown euidaccess alloca)
 AM_CONDITIONAL(HAVE_GETOPT_LONG_ONLY, test x$have_getopt_long_only = xtrue)
@@ -122,5 +125,5 @@ dnl Generate configured files
 dnl ==================================================================
 
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_FILES(Makefile doc/Makefile src/Makefile)
+AC_CONFIG_FILES(Makefile doc/Makefile lib/Makefile src/Makefile)
 AC_OUTPUT
