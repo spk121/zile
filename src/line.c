@@ -244,11 +244,11 @@ check_case (const char *s, size_t len)
 {
   size_t i;
 
-  if (!isupper (*s))
+  if (!isupper ((int) *s))
     return 0;
 
   for (i = 1; i < len; i++)
-    if (!isupper (s[i]))
+    if (!isupper ((int) s[i]))
       return 1;
 
   return 2;

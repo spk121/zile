@@ -1346,7 +1346,7 @@ setcase_word (int rcase)
   i = cur_bp->pt.o;
   while (i < astr_len (cur_bp->pt.p->item))
     {
-      if (!ISWORDCHAR (*astr_char (cur_bp->pt.p->item, (ptrdiff_t) i)))
+      if (!ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->item, (ptrdiff_t) i)))
 	break;
       ++i;
     }
@@ -1358,9 +1358,9 @@ setcase_word (int rcase)
   while (cur_bp->pt.o < astr_len (cur_bp->pt.p->item))
     {
       char *p = astr_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o);
-      if (!ISWORDCHAR (*p))
+      if (!ISWORDCHAR ((int) *p))
 	break;
-      if (isalpha (*p))
+      if (isalpha ((int) *p))
 	{
 	  int oldc = *p, newc;
 	  if (rcase == UPPERCASE)

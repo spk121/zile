@@ -235,7 +235,7 @@ getint (const char **string)
 {
   int i = 0;
 
-  while (isdigit (**string) != 0)
+  while (isdigit ((int) **string) != 0)
     {
       i = i * 10 + (**string - '0');
       (*string)++;
@@ -332,7 +332,7 @@ dispatch (xprintf_struct * s)
       if ((size_t) width > 0x3fffU)	/* 'size_t' to check against negative values too */
 	width = 0x3fff;
     }
-  else if (isdigit (*SRCTXT))	/* width given as ASCII number */
+  else if (isdigit ((int) *SRCTXT))	/* width given as ASCII number */
     width = getint (&SRCTXT);
   else
     width = -1;			/* no width specified */
@@ -351,7 +351,7 @@ dispatch (xprintf_struct * s)
 	}
       else
 	{			/* .prec given as ASCII number */
-	  if (isdigit (*SRCTXT) == 0)
+	  if (isdigit ((int) *SRCTXT) == 0)
 	    INCOHERENT ();
 	  prec = getint (&SRCTXT);
 	}

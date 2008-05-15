@@ -86,7 +86,7 @@ is_blank_line (void)
 {
   size_t c;
   for (c = 0; c < astr_len (cur_bp->pt.p->item); c++)
-    if (!isspace (*astr_char (cur_bp->pt.p->item, (ptrdiff_t) c)))
+    if (!isspace ((int) *astr_char (cur_bp->pt.p->item, (ptrdiff_t) c)))
       return FALSE;
   return TRUE;
 }

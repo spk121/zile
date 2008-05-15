@@ -282,7 +282,7 @@ calculate_start_column (Window * wp)
 	    col |= t - 1;
 	    ++col;
 	  }
-	else if (isprint (*p))
+	else if (isprint ((int) *p))
 	  ++col;
 	else
 	  {

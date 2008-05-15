@@ -71,7 +71,7 @@ no_upper (const char *s, size_t len, int regex)
     {
       if (regex && s[i] == '\\')
 	quote_flag = !quote_flag;
-      else if (!quote_flag && isupper (s[i]))
+      else if (!quote_flag && isupper ((int) s[i]))
 	return FALSE;
     }
 
