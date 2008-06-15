@@ -1,0 +1,6 @@
+.deps
+.dirstamp
+Makefile.am
+Makefile.in
+Makefile
+dummy.c
