@@ -31,56 +31,30 @@
 #include "zile.h"
 #include "extern.h"
 
-static char *kill_ring_text;
-static size_t kill_ring_size;
-static size_t kill_ring_maxsize;
+static astr kill_ring_text;
 
-static void
-flush_kill_ring (void)
+void
+free_kill_ring (void)
 {
-  kill_ring_size = 0;
-  if (kill_ring_maxsize > 1024)
-    {
-      /*
-       * Deallocate memory area, since is big enough.
-       */
-      kill_ring_maxsize = 0;
-      free (kill_ring_text);
-      kill_ring_text = NULL;
-    }
+  if (kill_ring_text != NULL)
+    astr_delete (kill_ring_text);
+  kill_ring_text = NULL;
 }
 
 static void
 kill_ring_push (int c)
 {
   if (kill_ring_text == NULL)
-    {
-      kill_ring_maxsize = 16;
-      kill_ring_text = (char *) zmalloc (kill_ring_maxsize);
-    }
-  else if (kill_ring_size + 1 >= kill_ring_maxsize)
-    {
-      kill_ring_maxsize += 16;
-      kill_ring_text = (char *) zrealloc (kill_ring_text, kill_ring_maxsize);
-    }
-  kill_ring_text[kill_ring_size++] = (char) c;
+    kill_ring_text = astr_new ();
+  astr_cat_char (kill_ring_text, c);
 }
 
 static void
 kill_ring_push_nstring (char *s, size_t size)
 {
   if (kill_ring_text == NULL)
-    {
-      kill_ring_maxsize = size;
-      kill_ring_text = (char *) zmalloc (size);
-    }
-  else if (kill_ring_size + (int) size >= kill_ring_maxsize)
-    {
-      kill_ring_maxsize += size;
-      kill_ring_text = (char *) zrealloc (kill_ring_text, kill_ring_maxsize);
-    }
-  memcpy (kill_ring_text + kill_ring_size, s, size);
-  kill_ring_size += size;
+    kill_ring_text = astr_new ();
+  astr_ncat_cstr (kill_ring_text, s, size);
 }
 
 static int
@@ -133,7 +107,7 @@ With prefix argument, kill that many lines from point.
   int uni, ret = TRUE;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring ();
+    free_kill_ring ();
 
   if (!(lastflag & FLAG_SET_UNIARG))
     kill_line (lookup_bool_variable ("kill-whole-line"));
@@ -170,7 +144,7 @@ to make one entry in the kill ring.
   Region r;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring ();
+    free_kill_ring ();
 
   if (warn_if_no_mark ())
     return FALSE;
@@ -226,7 +200,7 @@ Save the region as if killed, but don't kill it.
   char *p;
 
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring ();
+    free_kill_ring ();
 
   if (warn_if_no_mark ())
     return FALSE;
@@ -251,7 +225,7 @@ With argument, do this that many times.
 +*/
 {
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring ();
+    free_kill_ring ();
 
   if (warn_if_readonly_buffer ())
     return FALSE;
@@ -289,7 +263,7 @@ Negative arg -N means kill N sexps before the cursor.
 +*/
 {
   if (!(lastflag & FLAG_DONE_KILL))
-    flush_kill_ring ();
+    free_kill_ring ();
 
   if (warn_if_readonly_buffer ())
     return FALSE;
@@ -316,7 +290,7 @@ More precisely, reinsert the stretch of killed text most recently
 killed OR yanked.  Put point at end, and set mark at beginning.
 +*/
 {
-  if (kill_ring_size == 0)
+  if (kill_ring_text == NULL)
     {
       minibuf_error ("Kill ring is empty");
       return FALSE;
@@ -327,9 +301,9 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
   set_mark_command ();
 
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, kill_ring_size, 0);
+  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, astr_len (kill_ring_text), 0);
   undo_nosave = TRUE;
-  insert_nstring (kill_ring_text, kill_ring_size);
+  insert_nstring (astr_cstr (kill_ring_text), astr_len (kill_ring_text));
   undo_nosave = FALSE;
 
   deactivate_mark ();
@@ -337,9 +311,3 @@ killed OR yanked.  Put point at end, and set mark at beginning.
   return TRUE;
 }
 END_DEFUN
-
-void
-free_kill_ring (void)
-{
-  free (kill_ring_text);
-}
