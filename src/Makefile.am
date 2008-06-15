@@ -23,7 +23,7 @@
 # MA 02111-1301, USA.
 
 TESTS = astr $(top_srcdir)/src/zile-startup-test regexbug1
-check_PROGRAMS = astr
+check_PROGRAMS = astr regexbug1
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
@@ -95,10 +95,10 @@ endif
 EXTRA_DIST = 				\
 	strrstr.c			\
 	vasprintf.c			\
-	getopt.h			\
+	replacement_getopt/getopt.h	\
 	regcomp.c			\
 	regex.c				\
-	regex.h				\
+	replacement_regex/regex.h	\
 	regex_internal.h		\
 	regexec.c			\
 	regex_internal.c		\
