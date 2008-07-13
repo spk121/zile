@@ -46,7 +46,7 @@ dnl ==================================================================
 
 gl_INIT
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
-AC_CHECK_FUNCS(getcwd fchmod fchown euidaccess alloca)
+AC_CHECK_FUNCS(basename getcwd fchmod fchown euidaccess alloca)
 AM_CONDITIONAL(HAVE_GETOPT_LONG_ONLY, test x$have_getopt_long_only = xtrue)
 
 dnl ==================================================================
@@ -54,7 +54,7 @@ dnl Checks for header files
 dnl ==================================================================
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(fcntl.h libgen.h)
 
 dnl ==================================================================
 dnl Check for GNU Regex library

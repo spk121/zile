@@ -43,7 +43,7 @@ zmalloc (size_t size)
   ptr = calloc (size, (size_t) 1);
   if (ptr == NULL)
     {
-      fprintf (stderr, PACKAGE ": cannot allocate memory\n");
+      fprintf (stderr, "%s: cannot allocate memory\n", prog_name);
       zile_exit (FALSE);
     }
 
@@ -61,7 +61,7 @@ zrealloc (void *ptr, size_t size)
   newptr = realloc (ptr, size);
   if (newptr == NULL)
     {
-      fprintf (stderr, PACKAGE ": cannot reallocate memory\n");
+      fprintf (stderr, "%s: cannot reallocate memory\n", prog_name);
       zile_exit (FALSE);
     }
 
@@ -90,7 +90,7 @@ zvasprintf (char **ptr, const char *fmt, va_list vargs)
 
   if (retval == -1)
     {
-      fprintf (stderr, PACKAGE ": cannot allocate memory for asprintf\n");
+      fprintf (stderr, "%s: cannot allocate memory for asprintf\n", prog_name);
       zile_exit (FALSE);
     }
 

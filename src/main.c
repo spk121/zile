@@ -40,6 +40,9 @@
 #include "getopt.h"
 #endif
 #include <signal.h>
+#if HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
 
 #include "zile.h"
 #include "extern.h"
@@ -50,6 +53,9 @@
 
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 2008 Free Software Foundation, Inc."
+
+/* The executable name */
+char *prog_name = PACKAGE;
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -189,15 +195,18 @@ static void
 segv_sig_handler (int signo GCC_UNUSED)
 {
   fprintf (stderr,
-           PACKAGE_NAME " crashed.  Please send a bug report to <"
-           PACKAGE_BUGREPORT ">.\r\n");
+           "%s: " PACKAGE_NAME
+           " crashed.  Please send a bug report to <"
+           PACKAGE_BUGREPORT ">.\r\n",
+           prog_name);
   zile_exit (TRUE);
 }
 
 static void
 other_sig_handler (int signo GCC_UNUSED)
 {
-  fprintf (stderr, PACKAGE_NAME " terminated with signal %d.\r\n", signo);
+  fprintf (stderr, "%s: terminated with signal %d.\r\n",
+           prog_name, signo);
   zile_exit (FALSE);
 }
 
@@ -231,6 +240,15 @@ main (int argc, char **argv)
   int c, bflag = FALSE, qflag = FALSE;
   list fargs = list_new ();
   size_t line;
+
+  /* Set prog_name to executable name, if available */
+#if HAVE_BASENAME
+  if (argv[0]) {
+    char *s = zstrdup (argv[0]);
+    prog_name = zstrdup (basename (s));
+    free (s);
+  }
+#endif
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
@@ -272,7 +290,7 @@ main (int argc, char **argv)
           return 0;
         case 'h':
           fprintf (stdout,
-                   "Usage: " PACKAGE " [OPTION-OR-FILENAME]...\n"
+                   "Usage: %s [OPTION-OR-FILENAME]...\n"
                    "\n"
                    "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
                    "\n"
@@ -288,14 +306,15 @@ main (int argc, char **argv)
                    "FILE                   visit FILE using find-file\n"
                    "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
                    "\n"
-                   "Report bugs to " PACKAGE_BUGREPORT ".\n");
+                   "Report bugs to " PACKAGE_BUGREPORT ".\n",
+                   prog_name);
           return 0;
         case '?':		/* Unknown option */
           minibuf_error ("Unknown option `%s'", argv[this_optind]);
           break;
         case ':':		/* Missing argument */
-          fprintf (stderr, PACKAGE ": Option `%s' requires an argument\n\n",
-                   argv[this_optind]);
+          fprintf (stderr, "%s: Option `%s' requires an argument\n\n",
+                   prog_name, argv[this_optind]);
           exit (1);
         }
     }
@@ -378,11 +397,7 @@ main (int argc, char **argv)
       free_bindings ();
     }
   else if (minibuf_contents) /* if in batch mode, print any error */
-    {
-      fputs (PACKAGE ": ", stderr);
-      fputs (minibuf_contents, stderr);
-      fputc ('\n', stderr);
-    }
+    fprintf (stderr, "%s: %s\n", prog_name, minibuf_contents);
 
   /* Free Lisp state. */
   variableFree (mainVarList);
@@ -396,10 +411,7 @@ main (int argc, char **argv)
   free_buffers ();
   free_minibuf ();
   free_rotation_buffers ();
+  /* Don't free prog_name, as it might not have been set dynamically. */
 
   return 0;
 }
-
-#ifdef ALLEGRO
-END_OF_MAIN ()
-#endif

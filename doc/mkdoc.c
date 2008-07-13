@@ -31,6 +31,7 @@
 
 /* #include other sources so this program can be easily built on the
    build host when cross-compiling */
+char *prog_name = "mkdoc";
 #include "strrstr.c"
 #include "vasprintf.c"
 #include "zmalloc.c"

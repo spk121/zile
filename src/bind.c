@@ -364,9 +364,8 @@ init_bindings (void)
 	if (!bind_key_string (fentry_table[i].key[j], fentry_table[i].func))
 	  {
 	    fprintf (stderr,
-		     PACKAGE
-		     ": Key sequence %s is invalid in default bindings\n\n",
-		     fentry_table[i].key[j]);
+		     "%s: Key sequence %s is invalid in default bindings\n\n",
+		     prog_name, fentry_table[i].key[j]);
 	    exit (1);
 	  }
 }

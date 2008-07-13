@@ -184,6 +184,7 @@ void free_macros (void);
 Macro *get_macro (char *name);
 
 /* main.c ----------------------------------------------------------------- */
+extern char *prog_name;
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
 extern Terminal *cur_tp;
