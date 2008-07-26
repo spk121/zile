@@ -323,13 +323,16 @@ assert_eq (astr as, const char *s)
 }
 
 /*
- * Stub to make zmalloc &c. happy.
+ * Stubs to make zmalloc &c. happy.
  */
+char *prog_name = "astr";
+
 void
 zile_exit (int doabort GCC_UNUSED)
 {
   exit (2);
 }
+
 
 int
 main (void)
