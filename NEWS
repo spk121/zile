@@ -1,3 +1,13 @@
+Release 2.2.60:
+
+This release attempts to improve portability by using gnulib for various
+non-standard features instead of idiosyncratic code and making various
+other fixes. Thanks to Nelson Beebe for reporting many build problems on
+a wide range of platforms; unfortunately I've not been able to establish
+how many of them this release fixes. A crash and related bug on
+attempting to kill when mark and point are the same have been fixed.
+Some fatal error messages have been improved.
+
 Release 2.2.59:
 
 This release fixes various problems with release 2.2.58, including
