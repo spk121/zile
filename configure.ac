@@ -26,7 +26,7 @@ dnl ==================================================================
 dnl Initialise autoconf and automake
 dnl ==================================================================
 
-AC_INIT(Zile, 2.2.60, bug-zile@gnu.org)
+AC_INIT(Zile, 2.2.61, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl ==================================================================
