@@ -22,8 +22,8 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-TESTS = astr $(top_srcdir)/src/zile-startup-test regexbug1
-check_PROGRAMS = astr regexbug1
+TESTS = astr $(top_srcdir)/src/zile-startup-test
+check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
 astr_LDADD = zmalloc.o strrstr.o
