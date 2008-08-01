@@ -83,10 +83,6 @@ zile_SOURCES =				\
 	zile.h
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
-if !HAVE_REGEX_H
-zile_LDADD += regex.o
-AM_CPPFLAGS += -Ireplacement_regex
-endif
 
 if !HAVE_GETOPT_LONG_ONLY
 AM_CPPFLAGS += -Ireplacement_getopt

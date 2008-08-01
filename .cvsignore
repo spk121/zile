@@ -21,3 +21,4 @@ zile*.tar.gz
 zile*.tar.gz.sig
 zile*.tar.gz.directive*
 lib
+link-warning.h
