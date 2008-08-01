@@ -86,7 +86,6 @@ zile_LDADD = $(LDADD) $(LIBOBJS)
 
 EXTRA_DIST = 				\
 	strrstr.c			\
-	vasprintf.c			\
 	zile-startup-test
 
 loc:

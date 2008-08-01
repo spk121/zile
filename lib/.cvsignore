@@ -5,7 +5,6 @@ Makefile.in
 Makefile
 dummy.c
 alloca.in.h
-alloca.h
 alloca.c
 config.charset
 gettext.h
@@ -30,3 +29,17 @@ getopt.c
 getopt.in.h
 getopt1.c
 getopt_int.h
+asnprintf.c
+asprintf.c
+float+.h
+float.in.h
+printf-args.c
+printf-args.h
+printf-parse.c
+printf-parse.h
+size_max.h
+stdio.in.h
+vasnprintf.c
+vasnprintf.h
+vasprintf.c
+xsize.h

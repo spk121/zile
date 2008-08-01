@@ -45,7 +45,7 @@ dnl Checks for functions
 dnl ==================================================================
 
 gl_INIT
-AC_REPLACE_FUNCS(vasprintf strrstr)
+AC_REPLACE_FUNCS(strrstr)
 AC_CHECK_FUNCS(basename getcwd fchmod fchown euidaccess)
 
 dnl ==================================================================

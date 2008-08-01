@@ -24,3 +24,14 @@ wchar.m4
 wctype.m4
 wint_t.m4
 getopt.m4
+eoverflow.m4
+float_h.m4
+intmax_t.m4
+inttypes_h.m4
+size_max.m4
+stdint_h.m4
+stdio_h.m4
+vasnprintf.m4
+vasprintf.m4
+wchar_t.m4
+xsize.m4
