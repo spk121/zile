@@ -1,3 +1,8 @@
+Release 2.2.61:
+
+This release uses gnulib for regex and getopt, rather than previous ad
+hoc solutions.
+
 Release 2.2.60:
 
 This release attempts to improve portability by using gnulib for various
