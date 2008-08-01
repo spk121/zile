@@ -4,3 +4,5 @@ Makefile.am
 Makefile.in
 Makefile
 dummy.c
+alloca.in.h
+alloca.h

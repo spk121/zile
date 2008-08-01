@@ -5,3 +5,4 @@ gnulib-tool.m4
 gnulib-comp.m4
 onceonly_2_57.m4
 stdarg.m4
+alloca.m4

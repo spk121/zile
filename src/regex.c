@@ -22,6 +22,11 @@
 #include "config.h"
 #endif
 
+/* XXX: Next line moved here from regex.c to comply with gnulib
+   restriction */
+#include <alloca.h>
+
+
 /* Make sure noone compiles this code with a C++ compiler.  */
 #ifdef __cplusplus
 # error "This is C code, use a C compiler"

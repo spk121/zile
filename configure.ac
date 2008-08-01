@@ -46,7 +46,7 @@ dnl ==================================================================
 
 gl_INIT
 AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
-AC_CHECK_FUNCS(basename getcwd fchmod fchown euidaccess alloca)
+AC_CHECK_FUNCS(basename getcwd fchmod fchown euidaccess)
 AM_CONDITIONAL(HAVE_GETOPT_LONG_ONLY, test x$have_getopt_long_only = xtrue)
 
 dnl ==================================================================

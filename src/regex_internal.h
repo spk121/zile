@@ -416,7 +416,9 @@ static unsigned int re_string_context_at (const re_string_t *input, int idx,
 #define re_string_skip_bytes(pstr,idx) ((pstr)->cur_idx += (idx))
 #define re_string_set_index(pstr,idx) ((pstr)->cur_idx = (idx))
 
-#include <alloca.h>
+/* XXX: Next line moved to start of regex.c to comply with gnulib
+   restriction */
+/* #include <alloca.h> */
 
 #ifndef _LIBC
 # if HAVE_ALLOCA
