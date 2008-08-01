@@ -26,3 +26,7 @@ stdlib.in.h
 unistd.in.h
 wchar.in.h
 wctype.in.h
+getopt.c
+getopt.in.h
+getopt1.c
+getopt_int.h

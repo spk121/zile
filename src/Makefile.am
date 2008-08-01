@@ -84,20 +84,9 @@ zile_SOURCES =				\
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
-if !HAVE_GETOPT_LONG_ONLY
-AM_CPPFLAGS += -Ireplacement_getopt
-endif
-
 EXTRA_DIST = 				\
 	strrstr.c			\
 	vasprintf.c			\
-	replacement_getopt/getopt.h	\
-	regcomp.c			\
-	regex.c				\
-	replacement_regex/regex.h	\
-	regex_internal.h		\
-	regexec.c			\
-	regex_internal.c		\
 	zile-startup-test
 
 loc:

@@ -45,9 +45,8 @@ dnl Checks for functions
 dnl ==================================================================
 
 gl_INIT
-AC_REPLACE_FUNCS(vasprintf strrstr getopt_long_only)
+AC_REPLACE_FUNCS(vasprintf strrstr)
 AC_CHECK_FUNCS(basename getcwd fchmod fchown euidaccess)
-AM_CONDITIONAL(HAVE_GETOPT_LONG_ONLY, test x$have_getopt_long_only = xtrue)
 
 dnl ==================================================================
 dnl Checks for header files
@@ -55,31 +54,6 @@ dnl ==================================================================
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h libgen.h)
-
-dnl ==================================================================
-dnl Check for GNU Regex library
-dnl ==================================================================
-
-AC_MSG_CHECKING([for GNU regex.h])
-AC_TRY_COMPILE([
-#include <sys/types.h>
-#include <regex.h>
-], [
-struct re_pattern_buffer pattern;
-struct re_registers search_regs;
-re_set_syntax(RE_SYNTAX_EMACS);
-re_compile_pattern(".*", 2, &pattern);
-re_search(&pattern, "test", 4, 0, 4, &search_regs);
-], have_regex_h=true, have_regex_h=false)
-
-if test x$have_regex_h = xtrue ; then
-	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_REGEX_H, 1, [Define this to use GNU regex.h.])
-else
-	AC_MSG_RESULT(no)
-fi
-
-AM_CONDITIONAL(HAVE_REGEX_H, test x$have_regex_h = xtrue)
 
 dnl ==================================================================
 dnl Turn on additional compiler warnings
