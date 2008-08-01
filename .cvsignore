@@ -3,6 +3,8 @@ configure.lineno
 autom4te.cache
 aclocal.m4
 config.log
+config.guess
+config.sub
 config.status
 config.status.lineno
 compile
