@@ -46,7 +46,7 @@ dnl ==================================================================
 
 gl_INIT
 AC_REPLACE_FUNCS(strrstr)
-AC_CHECK_FUNCS(basename getcwd fchmod fchown euidaccess)
+AC_CHECK_FUNCS(basename fchmod fchown)
 
 dnl ==================================================================
 dnl Checks for header files
