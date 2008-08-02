@@ -47,7 +47,7 @@ completion_new (int fileflag)
 {
   Completion *cp;
 
-  cp = (Completion *) zmalloc (sizeof (Completion));
+  cp = (Completion *) xmalloc (sizeof (Completion));
   memset (cp, 0, sizeof (Completion));
 
   cp->completions = list_new ();
@@ -229,8 +229,8 @@ completion_reread (Completion * cp, astr as)
 
   /* Split up path with dirname and basename, unless it ends in `/',
      in which case it's considered to be entirely dirname */
-  s1 = zstrdup (astr_cstr (as));
-  s2 = zstrdup (astr_cstr (as));
+  s1 = xstrdup (astr_cstr (as));
+  s2 = xstrdup (astr_cstr (as));
   if (*astr_char (as, -1) != '/')
     {
       pdir = dirname (s1);
@@ -266,7 +266,7 @@ completion_reread (Completion * cp, astr as)
 	}
       else
 	astr_cpy_cstr (buf, d->d_name);
-      list_append (cp->completions, zstrdup (astr_cstr (buf)));
+      list_append (cp->completions, xstrdup (astr_cstr (buf)));
     }
   closedir (dir);
 

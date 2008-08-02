@@ -37,10 +37,10 @@ vector *leRoot;
 le *
 leNew (const char *text)
 {
-  le *new = (le *) zmalloc (sizeof (le));
+  le *new = (le *) xmalloc (sizeof (le));
 
   new->branch = NULL;
-  new->data = text ? zstrdup (text) : NULL;
+  new->data = text ? xstrdup (text) : NULL;
   new->quoted = 0;
   new->tag = -1;
   new->list_prev = NULL;
@@ -192,7 +192,7 @@ leTagReplace (le * list, int tagval, le * newinfo)
 	      list->quoted = 1;
 	    }
 	  else if (newinfo->data)
-	    list->data = zstrdup (newinfo->data);
+	    list->data = xstrdup (newinfo->data);
 	}
       leTagReplace (list->branch, tagval, newinfo);
 

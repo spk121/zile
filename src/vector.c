@@ -33,7 +33,7 @@
 vector *
 vec_new (size_t itemsize)
 {
-  vector *v = zmalloc (sizeof (vector));
+  vector *v = xmalloc (sizeof (vector));
   vec_itemsize (v) = itemsize;
   vec_items (v) = 0;
   v->size = 0;
@@ -54,7 +54,7 @@ static vector *
 resize (vector * v, size_t items)
 {
   v->size = items;
-  v->array = zrealloc (v->array, items * vec_itemsize (v));
+  v->array = xrealloc (v->array, items * vec_itemsize (v));
   return v;
 }
 

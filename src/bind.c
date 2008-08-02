@@ -60,11 +60,11 @@ leaf_new (int vecmax)
 {
   leafp p;
 
-  p = (leafp) zmalloc (sizeof (*p));
+  p = (leafp) xmalloc (sizeof (*p));
   memset (p, 0, sizeof (*p));
 
   p->vecmax = vecmax;
-  p->vec = (leafp *) zmalloc (sizeof (*p) * vecmax);
+  p->vec = (leafp *) xmalloc (sizeof (*p) * vecmax);
 
   return p;
 }
@@ -90,7 +90,7 @@ add_leaf (leafp tree, leafp p)
   if (tree->vecnum + 1 >= tree->vecmax)
     {
       tree->vecmax += 5;
-      tree->vec = (leafp *) zrealloc (tree->vec, sizeof (*p) * tree->vecmax);
+      tree->vec = (leafp *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
     }
 
   /* Insert the leaf at the sorted position. */
@@ -343,7 +343,7 @@ init_bindings (void)
 {
   size_t i, j, *keys;
 
-  keys = zmalloc (sizeof (*keys));
+  keys = xmalloc (sizeof (*keys));
   leaf_tree = leaf_new (10);
 
   /* Bind all printing keys to self_insert_command */
@@ -445,7 +445,7 @@ minibuf_read_function_name (const char *fmt, ...)
 
   cp = completion_new (FALSE);
   for (i = 0; i < fentry_table_size; ++i)
-    list_append (cp->completions, zstrdup (fentry_table[i].name));
+    list_append (cp->completions, xstrdup (fentry_table[i].name));
 
   for (;;)
     {
@@ -482,7 +482,7 @@ minibuf_read_function_name (const char *fmt, ...)
 	    {
 	      add_history_element (&functions_history, ms);
 	      minibuf_clear ();	/* Remove any error message. */
-	      ms = zstrdup (ms); /* Might be about to be freed. */
+	      ms = xstrdup (ms); /* Might be about to be freed. */
 	      break;		/* We're finished. */
 	    }
 	  else

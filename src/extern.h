@@ -291,9 +291,7 @@ void delete_window (Window * del_wp);
 Point window_pt (Window * wp);
 
 /* zmalloc.c -------------------------------------------------------------- */
-void *zmalloc (size_t size);
-void *zrealloc (void *ptr, size_t size);
-char *zstrdup (const char *s);
+#include "xalloc.h"
 int zvasprintf (char **ptr, const char *fmt, va_list vargs);
 int zasprintf (char **ptr, const char *fmt, ...);
 

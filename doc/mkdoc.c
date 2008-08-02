@@ -176,7 +176,7 @@ process_file (char *filename)
 }
 
 /*
- * Stub to make zmalloc &c. happy.
+ * Stub to make xalloc_die happy.
  */
 void
 zile_exit (int doabort GCC_UNUSED)

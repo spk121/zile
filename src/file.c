@@ -76,14 +76,14 @@ astr
 agetcwd (void)
 {
   size_t len = PATH_MAX;
-  char *buf = (char *) zmalloc (len);
+  char *buf = (char *) xmalloc (len);
   char *res;
   astr as;
 
   while ((res = getcwd (buf, len)) == NULL && errno == ERANGE)
     {
       len *= 2;
-      buf = zrealloc (buf, len);
+      buf = xrealloc (buf, len);
     }
   /* If there was an error, return the empty string */
   if (res == NULL)
@@ -430,7 +430,7 @@ find_file (const char *filename)
 
   bp = create_buffer (s);
   free (s);
-  bp->filename = zstrdup (filename);
+  bp->filename = xstrdup (filename);
 
   switch_to_buffer (bp);
   read_from_disk (filename);
@@ -448,7 +448,7 @@ make_buffer_completion (void)
 
   cp = completion_new (FALSE);
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    list_append (cp->completions, zstrdup (bp->name));
+    list_append (cp->completions, xstrdup (bp->name));
 
   return cp;
 }

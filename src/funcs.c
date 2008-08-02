@@ -489,8 +489,8 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
   if (size == 0)
     return;
 
-  src = (char *) zmalloc (size + 1);
-  dest = (char *) zmalloc (size * t + 1);
+  src = (char *) xmalloc (size + 1);
+  dest = (char *) xmalloc (size * t + 1);
   strncpy (src, astr_cstr ((*lp)->item) + offset, size);
   src[size] = '\0';
 

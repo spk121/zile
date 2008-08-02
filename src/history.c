@@ -55,7 +55,7 @@ add_history_element (History * hp, const char *string)
 
   last = list_last (hp->elements)->item;
   if (!last || strcmp (last, string) != 0)
-    list_append (hp->elements, zstrdup (string));
+    list_append (hp->elements, xstrdup (string));
 }
 
 void

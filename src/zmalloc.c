@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
@@ -31,58 +32,17 @@
 #include "extern.h"
 
 /*
- * Return a zeroed allocated memory area.
+ * Routine called by gnulib's xalloc routines on OOM
  */
-void *
-zmalloc (size_t size)
+void xmalloc_die (void)
 {
-  void *ptr;
-
-  assert (size > 0);
-
-  ptr = calloc (size, (size_t) 1);
-  if (ptr == NULL)
-    {
-      fprintf (stderr, "%s: cannot allocate memory\n", prog_name);
-      zile_exit (FALSE);
-    }
-
-  return ptr;
-}
-
-/*
- * Resize an allocated memory area.
- */
-void *
-zrealloc (void *ptr, size_t size)
-{
-  void *newptr;
-
-  newptr = realloc (ptr, size);
-  if (newptr == NULL)
-    {
-      fprintf (stderr, "%s: cannot reallocate memory\n", prog_name);
-      zile_exit (FALSE);
-    }
-
-  return newptr;
-}
-
-/*
- * Duplicate a string.
- */
-char *
-zstrdup (const char *s)
-{
-  return strcpy (zmalloc (strlen (s) + 1), s);
+  fprintf (stderr, "%s: cannot allocate memory\n", prog_name);
+  zile_exit (FALSE);
 }
 
 /*
  * Wrapper for vasprintf.
  */
-#ifndef HAVE_VASPRINTF
-int vasprintf (char **ptr, const char *format_string, va_list vargs);
-#endif
 int
 zvasprintf (char **ptr, const char *fmt, va_list vargs)
 {

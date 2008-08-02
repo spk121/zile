@@ -141,8 +141,8 @@ re_find_substr (const char *s1, size_t s1size,
   old_syntax = re_set_syntax (RE_SYNTAX_EMACS);
 
   search_regs.num_regs = 1;
-  search_regs.start = zmalloc (sizeof (regoff_t));
-  search_regs.end = zmalloc (sizeof (regoff_t));
+  search_regs.start = xmalloc (sizeof (regoff_t));
+  search_regs.end = xmalloc (sizeof (regoff_t));
 
   /* translate table is never written to, so this cast is safe */
   pattern.translate = (unsigned char *) translate;
@@ -298,7 +298,7 @@ Search forward from point for the user specified text.
 
   if (last_search != NULL)
     free (last_search);
-  last_search = zstrdup (ms);
+  last_search = xstrdup (ms);
 
   if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, FALSE))
     {
@@ -324,7 +324,7 @@ Search backward from point for the user specified text.
 
   if (last_search != NULL)
     free (last_search);
-  last_search = zstrdup (ms);
+  last_search = xstrdup (ms);
 
   if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, FALSE))
     {
@@ -350,7 +350,7 @@ Search forward from point for regular expression REGEXP.
 
   if (last_search != NULL)
     free (last_search);
-  last_search = zstrdup (ms);
+  last_search = xstrdup (ms);
 
   if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, TRUE))
     {
@@ -376,7 +376,7 @@ Search backward from point for match for regular expression REGEXP.
 
   if (last_search != NULL)
     free (last_search);
-  last_search = zstrdup (ms);
+  last_search = xstrdup (ms);
 
   if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, TRUE))
     {
@@ -480,7 +480,7 @@ isearch (int dir, int regexp)
 	      /* Save search string. */
 	      if (last_search != NULL)
 		free (last_search);
-	      last_search = zstrdup (astr_cstr (pattern));
+	      last_search = xstrdup (astr_cstr (pattern));
 	    }
 	  else if (last_search != NULL)
 	    astr_cpy_cstr (pattern, last_search);
@@ -515,7 +515,7 @@ isearch (int dir, int regexp)
 		  /* Save search string. */
 		  if (last_search != NULL)
 		    free (last_search);
-		  last_search = zstrdup (astr_cstr (pattern));
+		  last_search = xstrdup (astr_cstr (pattern));
 
 		  minibuf_write ("Mark saved when search started");
 		}

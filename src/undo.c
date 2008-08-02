@@ -49,7 +49,7 @@ undo_save (int type, Point pt, size_t arg1, size_t arg2)
   if (cur_bp->flags & BFLAG_NOUNDO || undo_nosave)
     return;
 
-  up = (Undo *) zmalloc (sizeof (Undo));
+  up = (Undo *) xmalloc (sizeof (Undo));
 
   up->type = type;
   up->pt = pt;

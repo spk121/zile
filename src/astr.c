@@ -38,10 +38,10 @@ astr
 astr_new (void)
 {
   astr as;
-  as = (astr) zmalloc (sizeof *as);
+  as = (astr) xmalloc (sizeof *as);
   as->maxlen = ALLOCATION_CHUNK_SIZE;
   as->len = 0;
-  as->text = (char *) zmalloc (as->maxlen + 1);
+  as->text = (char *) xmalloc (as->maxlen + 1);
   memset (as->text, 0, as->maxlen + 1);
   return as;
 }
@@ -53,7 +53,7 @@ astr_resize (astr as, size_t reqsize)
   if (reqsize > as->maxlen)
     {
       as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-      as->text = (char *) zrealloc (as->text, as->maxlen + 1);
+      as->text = (char *) xrealloc (as->text, as->maxlen + 1);
     }
 }
 
@@ -323,7 +323,7 @@ assert_eq (astr as, const char *s)
 }
 
 /*
- * Stubs to make zmalloc &c. happy.
+ * Stubs to make xmalloc_die happy.
  */
 char *prog_name = "astr";
 

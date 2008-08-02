@@ -284,7 +284,7 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
 
   if (replace_case && lookup_bool_variable ("case-replace"))
     {
-      newtext = zstrdup (newtext);
+      newtext = xstrdup (newtext);
       recase (newtext, newlen, astr_char ((*lp)->item, (ptrdiff_t) offset),
 	      oldlen);
     }

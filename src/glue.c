@@ -115,7 +115,7 @@ copy_text_block (size_t startn, size_t starto, size_t size)
   Line *lp;
 
   max_size = 10;
-  dp = buf = (char *) zmalloc (max_size);
+  dp = buf = (char *) xmalloc (max_size);
 
   lp = cur_bp->pt.p;
   n = cur_bp->pt.n;
@@ -134,7 +134,7 @@ copy_text_block (size_t startn, size_t starto, size_t size)
 	{
 	  int save_off = dp - buf;
 	  max_size += 10;
-	  buf = (char *) zrealloc (buf, max_size);
+	  buf = (char *) xrealloc (buf, max_size);
 	  dp = buf + save_off;
 	}
       if (i < astr_len (lp->item))

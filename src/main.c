@@ -238,8 +238,8 @@ main (int argc, char **argv)
   /* Set prog_name to executable name, if available */
 #if HAVE_BASENAME
   if (argv[0]) {
-    char *s = zstrdup (argv[0]);
-    prog_name = zstrdup (basename (s));
+    char *s = xstrdup (argv[0]);
+    prog_name = xstrdup (basename (s));
     free (s);
   }
 #endif
@@ -372,7 +372,7 @@ main (int argc, char **argv)
          written during startup */
       if (minibuf_contents != NULL)
         {
-          char *buf = zstrdup (minibuf_contents);
+          char *buf = xstrdup (minibuf_contents);
 
           minibuf_write (buf);
           free (buf);

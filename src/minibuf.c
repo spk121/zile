@@ -143,7 +143,7 @@ minibuf_read_dir (const char *fmt, const char *value, ...)
       add_history_element (&files_history, p);
 
       rbuf = expand_path (astr_new_cstr (p));	/* Guaranteed to work */
-      p = zstrdup (astr_cstr (rbuf));
+      p = xstrdup (astr_cstr (rbuf));
       astr_delete (rbuf);
     }
 
@@ -211,8 +211,8 @@ minibuf_read_yesno (const char *fmt, ...)
   va_end (ap);
 
   cp = completion_new (FALSE);
-  list_append (cp->completions, zstrdup ("yes"));
-  list_append (cp->completions, zstrdup ("no"));
+  list_append (cp->completions, xstrdup ("yes"));
+  list_append (cp->completions, xstrdup ("no"));
 
   retvalue = minibuf_read_forced (buf, "Please answer yes or no.", cp);
   if (retvalue != -1)

@@ -128,7 +128,7 @@ minibuf_read_variable_name (char *msg)
   le *lp;
 
   for (lp = mainVarList; lp != NULL; lp = lp->list_next)
-    list_append (cp->completions, zstrdup (lp->data));
+    list_append (cp->completions, xstrdup (lp->data));
 
   for (;;)
     {

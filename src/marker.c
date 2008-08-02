@@ -33,7 +33,7 @@ Marker *
 make_marker (void)
 {
   Marker *marker;
-  marker = (Marker *) zmalloc (sizeof (Marker));
+  marker = (Marker *) xmalloc (sizeof (Marker));
   memset (marker, 0, sizeof (Marker));
   return marker;
 }

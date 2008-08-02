@@ -104,9 +104,9 @@ rot_vminibuf_read (const char *prompt, const char *value,
     {
       *max = i + 10;
       if (*p != NULL)
-	*p = (char *) zrealloc (*p, *max);
+	*p = (char *) xrealloc (*p, *max);
       else
-	*p = (char *) zmalloc (*max);
+	*p = (char *) xmalloc (*max);
     }
   strcpy (*p, value);
 
@@ -238,11 +238,11 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	      if (elem)
 		{
 		  if (!saved)
-		    saved = zstrdup (*p);
+		    saved = xstrdup (*p);
 
 		  len = i = strlen (elem);
 		  *max = i + 10;
-		  *p = zrealloc (*p, *max);
+		  *p = xrealloc (*p, *max);
 		  strcpy (*p, elem);
 		}
 	    }
@@ -256,14 +256,14 @@ rot_vminibuf_read (const char *prompt, const char *value,
 		{
 		  len = i = strlen (elem);
 		  *max = i + 10;
-		  *p = zrealloc (*p, *max);
+		  *p = xrealloc (*p, *max);
 		  strcpy (*p, elem);
 		}
 	      else if (saved)
 		{
 		  len = i = strlen (saved);
 		  *max = i + 10;
-		  *p = zrealloc (*p, *max);
+		  *p = xrealloc (*p, *max);
 		  strcpy (*p, saved);
 
 		  free (saved);
@@ -301,7 +301,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
 		  else
 		    len = i = cp->matchsize;
 		  *max = len + 1;
-		  s = (char *) zmalloc (*max);
+		  s = (char *) xmalloc (*max);
 		  if (cp->fl_dir)
 		    {
 		      strcpy (s, astr_cstr (cp->path));
@@ -336,7 +336,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	      if (len >= *max - 1)
 		{
 		  *max *= 2;
-		  *p = (char *) zrealloc (*p, *max);
+		  *p = (char *) xrealloc (*p, *max);
 		}
 	      s = *p;
 	      for (; *s != '\0'; s++)

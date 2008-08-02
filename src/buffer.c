@@ -43,7 +43,7 @@ buffer_new (void)
 {
   Buffer *bp;
 
-  bp = (Buffer *) zmalloc (sizeof (Buffer));
+  bp = (Buffer *) xmalloc (sizeof (Buffer));
 
   /* Allocate a line. */
   bp->pt.p = list_new ();
@@ -150,7 +150,7 @@ set_buffer_name (Buffer * bp, const char *name)
 {
   if (bp->name != NULL)
     free (bp->name);
-  bp->name = zstrdup (name);
+  bp->name = xstrdup (name);
 }
 
 /*
@@ -161,7 +161,7 @@ set_buffer_filename (Buffer * bp, const char *filename)
 {
   if (bp->filename != NULL)
     free (bp->filename);
-  bp->filename = zstrdup (filename);
+  bp->filename = xstrdup (filename);
 
   if (bp->name != NULL)
     free (bp->name);
@@ -222,14 +222,14 @@ make_buffer_name (const char *filename)
     ++p;
 
   if (find_buffer (p, FALSE) == NULL)
-    return zstrdup (p);
+    return xstrdup (p);
 
   /*
    * The limit of 999 buffers with the same name should
    * be enough; if it is too much restrictive for you,
    * just change 999 to your preferred value :-)
    */
-  name = (char *) zmalloc (strlen (p) + 6);	/* name + "<nnn>\0" */
+  name = (char *) xmalloc (strlen (p) + 6);	/* name + "<nnn>\0" */
   for (i = 2; i <= 999; i++)
     {
       sprintf (name, "%s<%d>", p, i);
