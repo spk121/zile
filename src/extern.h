@@ -290,7 +290,7 @@ void set_current_window (Window * wp);
 void delete_window (Window * del_wp);
 Point window_pt (Window * wp);
 
-/* zmalloc.c -------------------------------------------------------------- */
+/* xalloc.c --------------------------------------------------------------- */
 #include "xalloc.h"
 int xvasprintf (char **ptr, const char *fmt, va_list vargs);
 int xasprintf (char **ptr, const char *fmt, ...);
