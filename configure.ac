@@ -53,7 +53,7 @@ dnl Checks for header files
 dnl ==================================================================
 
 AC_HEADER_STDC
-AC_CHECK_HEADERS(fcntl.h libgen.h)
+AC_CHECK_HEADERS(libgen.h)
 
 dnl ==================================================================
 dnl Turn on additional compiler warnings
