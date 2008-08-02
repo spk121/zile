@@ -39,21 +39,18 @@ gl_EARLY
 BFD_CC_FOR_BUILD
 AM_PROG_CC_C_O
 AC_PROG_RANLIB
-
-dnl ==================================================================
-dnl Checks for functions
-dnl ==================================================================
-
 gl_INIT
-AC_REPLACE_FUNCS(strrstr)
-AC_CHECK_FUNCS(basename fchmod fchown)
 
 dnl ==================================================================
-dnl Checks for header files
+dnl Checks for functions and headers (hope eventually to use gnulib)
 dnl ==================================================================
 
 AC_HEADER_STDC
+AC_REPLACE_FUNCS(strrstr)
+AC_CHECK_FUNCS(fchmod fchown)
+dnl Next two lines are both for basename
 AC_CHECK_HEADERS(libgen.h)
+AC_CHECK_FUNCS(basename)
 
 dnl ==================================================================
 dnl Turn on additional compiler warnings
