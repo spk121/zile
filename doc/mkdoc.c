@@ -33,7 +33,7 @@
    build host when cross-compiling */
 char *prog_name = "mkdoc";
 #include "strrstr.c"
-#include "zmalloc.c"
+#include "xalloc.c"
 #include "astr.c"
 
 struct fentry

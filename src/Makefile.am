@@ -26,7 +26,7 @@ TESTS = astr $(top_srcdir)/src/zile-startup-test
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\""
-astr_LDADD = zmalloc.o strrstr.o
+astr_LDADD = xalloc.o strrstr.o
 
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
 LDADD = $(top_builddir)/lib/libgnu.a
@@ -40,7 +40,7 @@ zile_SOURCES =				\
 	astr.h				\
 	vector.c			\
 	vector.h			\
-	zmalloc.c			\
+	xalloc.c			\
 	eval.c				\
 	eval.h				\
 	lists.c				\
