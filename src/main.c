@@ -31,14 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-#if HAVE_GETOPT_LONG_ONLY
 #include <getopt.h>
-#else
-#include "getopt.h"
-#endif
 #include <signal.h>
 #if HAVE_LIBGEN_H
 #include <libgen.h>

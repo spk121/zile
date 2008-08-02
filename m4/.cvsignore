@@ -50,3 +50,4 @@ inline.m4
 strerror.m4
 sys_stat_h.m4
 xalloc.m4
+fcntl_h.m4

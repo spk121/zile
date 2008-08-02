@@ -23,25 +23,20 @@
 
 #include "config.h"
 
-#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #include <assert.h>
 #include <errno.h>
-#if HAVE_FCNTL_H
 #include <fcntl.h>
-#endif
 #include <limits.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
+#include "euidaccess.h"
 #include <utime.h>
 
 #include "zile.h"
@@ -301,20 +296,12 @@ get_home_dir (void)
   return as;
 }
 
-#if HAVE_UNISTD_H
 /* Return nonzero if file exists and can be written. */
 static int
 check_writable (const char *filename)
 {
-#ifdef HAVE_EUIDACCESS
   return euidaccess (filename, W_OK) >= 0;
-#else
-  /* Access isn't quite right because it uses the real uid
-     and we really want to test with the effective uid. */
-  return access (filename, W_OK) >= 0;
-#endif
 }
-#endif
 
 /* Formats of end-of-line. */
 char coding_eol_lf[3] = "\n";
@@ -348,10 +335,8 @@ read_from_disk (const char *filename)
       return;
     }
 
-#if HAVE_UNISTD_H
   if (!check_writable (filename))
     cur_bp->flags |= BFLAG_READONLY;
-#endif
 
   lp = cur_bp->pt.p;
 

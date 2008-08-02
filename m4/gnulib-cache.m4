@@ -15,11 +15,11 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --no-libtool --macro-prefix=gl alloca-opt euidaccess getcwd getopt regex stdarg vasprintf
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=doc --aux-dir=. --no-libtool --macro-prefix=gl alloca-opt euidaccess fcntl getcwd getopt regex stdarg sys_stat vasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
-gl_MODULES([alloca-opt euidaccess getcwd getopt regex stdarg vasprintf])
+gl_MODULES([alloca-opt euidaccess fcntl getcwd getopt regex stdarg sys_stat vasprintf])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])
 gl_M4_BASE([m4])

@@ -22,18 +22,14 @@
 
 #include "config.h"
 
-#if HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
 #include <assert.h>
 #include <dirent.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <libgen.h>
 
 #include "zile.h"

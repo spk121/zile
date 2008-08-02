@@ -34,14 +34,10 @@
 #if HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+#include "regex.h"
 
 #include "zile.h"
 #include "extern.h"
-#ifdef HAVE_REGEX_H
-#include <regex.h>
-#else
-#include "regex.h"
-#endif
 
 /* Downcasing table for case-folding search */
 static char id[UCHAR_MAX + 1];
