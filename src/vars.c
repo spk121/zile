@@ -79,7 +79,7 @@ variableSetNumber (le ** varlist, char *key, int value)
 {
   char *buf;
 
-  zasprintf (&buf, "%d", value);
+  xasprintf (&buf, "%d", value);
   variableSetString (varlist, key, buf);
   free (buf);
 }

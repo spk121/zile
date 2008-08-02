@@ -33,7 +33,7 @@
 vector *
 vec_new (size_t itemsize)
 {
-  vector *v = xmalloc (sizeof (vector));
+  vector *v = xzalloc (sizeof (vector));
   vec_itemsize (v) = itemsize;
   vec_items (v) = 0;
   v->size = 0;

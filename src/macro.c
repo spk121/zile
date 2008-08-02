@@ -67,7 +67,7 @@ void
 add_key_to_cmd (size_t key)
 {
   if (cmd_mp == NULL)
-    cmd_mp = xmalloc (sizeof (Macro));
+    cmd_mp = xzalloc (sizeof (Macro));
 
   add_macro_key (cmd_mp, key);
 }
@@ -101,7 +101,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
   minibuf_write ("Defining keyboard macro...");
 
   thisflag |= FLAG_DEFINING_MACRO;
-  cur_mp = xmalloc (sizeof (Macro));
+  cur_mp = xzalloc (sizeof (Macro));
   return TRUE;
 }
 END_DEFUN
@@ -157,7 +157,7 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
   else
     {
       /* Add a new macro to the list */
-      mp = xmalloc (sizeof (*mp));
+      mp = xzalloc (sizeof (*mp));
       mp->next = head_mp;
       mp->name = xstrdup (ms);
       head_mp = mp;
@@ -166,7 +166,7 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
   /* Copy the keystrokes from cur_mp. */
   mp->nkeys = cur_mp->nkeys;
   size = sizeof (*(mp->keys)) * mp->nkeys;
-  mp->keys = xmalloc (size);
+  mp->keys = xzalloc (size);
   memcpy (mp->keys, cur_mp->keys, size);
 
   return TRUE;

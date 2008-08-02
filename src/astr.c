@@ -38,10 +38,10 @@ astr
 astr_new (void)
 {
   astr as;
-  as = (astr) xmalloc (sizeof *as);
+  as = (astr) xzalloc (sizeof *as);
   as->maxlen = ALLOCATION_CHUNK_SIZE;
   as->len = 0;
-  as->text = (char *) xmalloc (as->maxlen + 1);
+  as->text = (char *) xzalloc (as->maxlen + 1);
   memset (as->text, 0, as->maxlen + 1);
   return as;
 }
@@ -295,7 +295,7 @@ astr
 astr_vafmt (astr as, const char *fmt, va_list ap)
 {
   char *buf;
-  zvasprintf (&buf, fmt, ap);
+  xvasprintf (&buf, fmt, ap);
   astr_cat_cstr (as, buf);
   free (buf);
   return as;

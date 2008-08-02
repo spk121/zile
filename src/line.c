@@ -448,7 +448,7 @@ bprintf (const char *fmt, ...)
   va_list ap;
   char *buf;
   va_start (ap, fmt);
-  zvasprintf (&buf, fmt, ap);
+  xvasprintf (&buf, fmt, ap);
   va_end (ap);
   insert_string (buf);
   free (buf);

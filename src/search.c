@@ -141,8 +141,8 @@ re_find_substr (const char *s1, size_t s1size,
   old_syntax = re_set_syntax (RE_SYNTAX_EMACS);
 
   search_regs.num_regs = 1;
-  search_regs.start = xmalloc (sizeof (regoff_t));
-  search_regs.end = xmalloc (sizeof (regoff_t));
+  search_regs.start = xzalloc (sizeof (regoff_t));
+  search_regs.end = xzalloc (sizeof (regoff_t));
 
   /* translate table is never written to, so this cast is safe */
   pattern.translate = (unsigned char *) translate;

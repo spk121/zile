@@ -31,7 +31,7 @@
 list
 list_new (void)
 {
-  list l = xmalloc (sizeof (struct list_s));
+  list l = xzalloc (sizeof (struct list_s));
 
   l->next = l->prev = l;
   l->item = NULL;
@@ -71,7 +71,7 @@ list_length (list l)
 list
 list_prepend (list l, void *i)
 {
-  list n = xmalloc (sizeof (struct list_s));
+  list n = xzalloc (sizeof (struct list_s));
 
   n->next = l->next;
   n->prev = l;
@@ -85,7 +85,7 @@ list_prepend (list l, void *i)
 list
 list_append (list l, void *i)
 {
-  list n = xmalloc (sizeof (struct list_s));
+  list n = xzalloc (sizeof (struct list_s));
 
   n->next = l;
   n->prev = l->prev;
@@ -169,7 +169,7 @@ list_sort (list l, int (*cmp) (const void *p1, const void *p2))
 
   assert (l != NULL && cmp != NULL);
 
-  vec = (void **) xmalloc (sizeof (void *) * len);
+  vec = (void **) xzalloc (sizeof (void *) * len);
 
   for (p = list_first (l), i = 0; i < len; p = list_next (p), ++i)
     vec[i] = (void *) p->item;

@@ -292,8 +292,8 @@ Point window_pt (Window * wp);
 
 /* zmalloc.c -------------------------------------------------------------- */
 #include "xalloc.h"
-int zvasprintf (char **ptr, const char *fmt, va_list vargs);
-int zasprintf (char **ptr, const char *fmt, ...);
+int xvasprintf (char **ptr, const char *fmt, va_list vargs);
+int xasprintf (char **ptr, const char *fmt, ...);
 
 
 /*

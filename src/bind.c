@@ -60,11 +60,11 @@ leaf_new (int vecmax)
 {
   leafp p;
 
-  p = (leafp) xmalloc (sizeof (*p));
+  p = (leafp) xzalloc (sizeof (*p));
   memset (p, 0, sizeof (*p));
 
   p->vecmax = vecmax;
-  p->vec = (leafp *) xmalloc (sizeof (*p) * vecmax);
+  p->vec = (leafp *) xzalloc (sizeof (*p) * vecmax);
 
   return p;
 }
@@ -343,7 +343,7 @@ init_bindings (void)
 {
   size_t i, j, *keys;
 
-  keys = xmalloc (sizeof (*keys));
+  keys = xzalloc (sizeof (*keys));
   leaf_tree = leaf_new (10);
 
   /* Bind all printing keys to self_insert_command */
@@ -440,7 +440,7 @@ minibuf_read_function_name (const char *fmt, ...)
   Completion *cp;
 
   va_start (ap, fmt);
-  zvasprintf (&buf, fmt, ap);
+  xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
   cp = completion_new (FALSE);

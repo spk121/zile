@@ -76,7 +76,7 @@ astr
 agetcwd (void)
 {
   size_t len = PATH_MAX;
-  char *buf = (char *) xmalloc (len);
+  char *buf = (char *) xzalloc (len);
   char *res;
   astr as;
 
@@ -866,7 +866,7 @@ copy_file (const char *source, const char *dest)
       return FALSE;
     }
 
-  if (zasprintf (&tname, "%s_XXXXXXXXXX", dest) == -1)
+  if (xasprintf (&tname, "%s_XXXXXXXXXX", dest) == -1)
     {
       minibuf_error ("Cannot allocate temporary file name `%s'",
 		     strerror (errno));

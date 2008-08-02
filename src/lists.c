@@ -37,7 +37,7 @@ vector *leRoot;
 le *
 leNew (const char *text)
 {
-  le *new = (le *) xmalloc (sizeof (le));
+  le *new = (le *) xzalloc (sizeof (le));
 
   new->branch = NULL;
   new->data = text ? xstrdup (text) : NULL;

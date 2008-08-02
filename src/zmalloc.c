@@ -1,4 +1,4 @@
-/* Memory allocation functions
+/* Checked memory-allocating functions
 
    Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
@@ -25,8 +25,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
-#include <string.h>
 
 #include "zile.h"
 #include "extern.h"
@@ -34,17 +32,19 @@
 /*
  * Routine called by gnulib's xalloc routines on OOM
  */
-void xmalloc_die (void)
+void
+xalloc_die (void)
 {
   fprintf (stderr, "%s: cannot allocate memory\n", prog_name);
   zile_exit (FALSE);
+  abort ();
 }
 
 /*
- * Wrapper for vasprintf.
+ * Checked vasprintf.
  */
 int
-zvasprintf (char **ptr, const char *fmt, va_list vargs)
+xvasprintf (char **ptr, const char *fmt, va_list vargs)
 {
   int retval = vasprintf (ptr, fmt, vargs);
 
@@ -58,16 +58,16 @@ zvasprintf (char **ptr, const char *fmt, va_list vargs)
 }
 
 /*
- * Wrapper for asprintf.
+ * Checked asprintf.
  */
 int
-zasprintf (char **ptr, const char *fmt, ...)
+xasprintf (char **ptr, const char *fmt, ...)
 {
   va_list vargs;
   int retval;
 
   va_start (vargs, fmt);
-  retval = zvasprintf (ptr, fmt, vargs);
+  retval = xvasprintf (ptr, fmt, vargs);
   va_end (vargs);
 
   return retval;

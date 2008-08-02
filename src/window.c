@@ -36,7 +36,7 @@ window_new (void)
 {
   Window *wp;
 
-  wp = (Window *) xmalloc (sizeof (Window));
+  wp = (Window *) xzalloc (sizeof (Window));
   memset (wp, 0, sizeof (Window));
 
   return wp;

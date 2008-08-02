@@ -73,11 +73,11 @@ static int
 make_char_printable (char **buf, size_t c)
 {
   if (c == '\0')
-    return zasprintf (buf, "^@");
+    return xasprintf (buf, "^@");
   else if (c <= '\32')
-    return zasprintf (buf, "^%c", 'A' + c - 1);
+    return xasprintf (buf, "^%c", 'A' + c - 1);
   else
-    return zasprintf (buf, "\\%o", c & 0xff);
+    return xasprintf (buf, "\\%o", c & 0xff);
 }
 
 static void
@@ -312,13 +312,13 @@ make_screen_pos (Window * wp, char **buf)
   Point pt = window_pt (wp);
 
   if (wp->bp->num_lines <= wp->eheight && wp->topdelta == pt.n)
-    zasprintf (buf, "All");
+    xasprintf (buf, "All");
   else if (pt.n == wp->topdelta)
-    zasprintf (buf, "Top");
+    xasprintf (buf, "Top");
   else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
-    zasprintf (buf, "Bot");
+    xasprintf (buf, "Bot");
   else
-    zasprintf (buf, "%2d%%", (int) ((float) pt.n / wp->bp->num_lines * 100));
+    xasprintf (buf, "%2d%%", (int) ((float) pt.n / wp->bp->num_lines * 100));
 
   return *buf;
 }

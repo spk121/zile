@@ -106,7 +106,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
       if (*p != NULL)
 	*p = (char *) xrealloc (*p, *max);
       else
-	*p = (char *) xmalloc (*max);
+	*p = (char *) xzalloc (*max);
     }
   strcpy (*p, value);
 
@@ -301,7 +301,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
 		  else
 		    len = i = cp->matchsize;
 		  *max = len + 1;
-		  s = (char *) xmalloc (*max);
+		  s = (char *) xzalloc (*max);
 		  if (cp->fl_dir)
 		    {
 		      strcpy (s, astr_cstr (cp->path));

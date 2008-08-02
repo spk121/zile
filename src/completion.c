@@ -47,7 +47,7 @@ completion_new (int fileflag)
 {
   Completion *cp;
 
-  cp = (Completion *) xmalloc (sizeof (Completion));
+  cp = (Completion *) xzalloc (sizeof (Completion));
   memset (cp, 0, sizeof (Completion));
 
   cp->completions = list_new ();

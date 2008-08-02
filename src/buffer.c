@@ -43,7 +43,7 @@ buffer_new (void)
 {
   Buffer *bp;
 
-  bp = (Buffer *) xmalloc (sizeof (Buffer));
+  bp = (Buffer *) xzalloc (sizeof (Buffer));
 
   /* Allocate a line. */
   bp->pt.p = list_new ();
@@ -229,7 +229,7 @@ make_buffer_name (const char *filename)
    * be enough; if it is too much restrictive for you,
    * just change 999 to your preferred value :-)
    */
-  name = (char *) xmalloc (strlen (p) + 6);	/* name + "<nnn>\0" */
+  name = (char *) xzalloc (strlen (p) + 6);	/* name + "<nnn>\0" */
   for (i = 2; i <= 999; i++)
     {
       sprintf (name, "%s<%d>", p, i);

@@ -115,7 +115,7 @@ copy_text_block (size_t startn, size_t starto, size_t size)
   Line *lp;
 
   max_size = 10;
-  dp = buf = (char *) xmalloc (max_size);
+  dp = buf = (char *) xzalloc (max_size);
 
   lp = cur_bp->pt.p;
   n = cur_bp->pt.n;
