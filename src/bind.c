@@ -330,7 +330,7 @@ static struct fentry fentry_table[] = {
 #undef X3
 };
 
-#define fentry_table_size (sizeof(fentry_table) / sizeof(fentry_table[0]))
+#define fentry_table_size (sizeof (fentry_table) / sizeof (fentry_table[0]))
 
 static int
 bind_compar (const void *p1, const void *p2)
