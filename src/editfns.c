@@ -49,7 +49,7 @@ push_mark (void)
     }
 }
 
-/* Pop a mark from the mark-ring a put it as current mark. */
+/* Pop a mark from the mark-ring and put it as current mark. */
 void
 pop_mark (void)
 {
