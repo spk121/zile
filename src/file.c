@@ -957,7 +957,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, int umask)
   /* Save the lines. */
   for (lp = list_next (bp->lines); lp != bp->lines; lp = list_next (lp))
     {
-      ssize_t len = (ssize_t) astr_len(lp->item);
+      ssize_t len = (ssize_t) astr_len (lp->item);
 
       written = write (fd, astr_cstr (lp->item), len);
       if (written != len)

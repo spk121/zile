@@ -131,7 +131,7 @@ calculate_max_length (list l, size_t size)
   for (p = list_first (l), i = 0; p != l && i < size; p = list_next (p), i++)
     {
       size_t len = strlen (p->item);
-      maxlen = max(len, maxlen);
+      maxlen = max (len, maxlen);
     }
 
   return maxlen;

@@ -858,7 +858,7 @@ END_DEFUN
 /***********************************************************************
 			  Move through words
 ***********************************************************************/
-#define ISWORDCHAR(c)	(isalnum(c) || c == '$')
+#define ISWORDCHAR(c)	(isalnum (c) || c == '$')
   static int
 forward_word (void)
 {
@@ -959,17 +959,17 @@ END_DEFUN
 /***********************************************************************
 	       Move through balanced expressions (sexp)
 ***********************************************************************/
-#define ISSEXPCHAR(c)	      (isalnum(c) || c == '$' || c == '_')
-#define ISOPENBRACKETCHAR(c)  ((c=='(') || (c=='[') || (c=='{')	||	\
-			       ((c=='\"') && !double_quote) ||		\
-			       ((c=='\'') && !single_quote))
-#define ISCLOSEBRACKETCHAR(c) ((c==')') || (c==']') || (c=='}')	||	\
-			       ((c=='\"') && double_quote) ||		\
-			       ((c=='\'') && single_quote))
-#define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR(c) ||	\
-			       ISCLOSEBRACKETCHAR(c))
+#define ISSEXPCHAR(c)	      (isalnum (c) || c == '$' || c == '_')
+#define ISOPENBRACKETCHAR(c)  ((c == '(') || (c == '[') || ( c== '{') ||\
+			       ((c == '\"') && !double_quote) ||	\
+			       ((c == '\'') && !single_quote))
+#define ISCLOSEBRACKETCHAR(c) ((c == ')') || (c == ']') || (c == '}') ||\
+			       ((c == '\"') && double_quote) ||		\
+			       ((c == '\'') && single_quote))
+#define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
+			       ISCLOSEBRACKETCHAR (c))
 #define CONTROL_SEXP_LEVEL(open, close)					\
-	if (open(c)) {							\
+	if (open (c)) {							\
 		if (level == 0 && gotsexp)				\
 			return TRUE;					\
 									\
@@ -978,7 +978,7 @@ END_DEFUN
 		if (c == '\"') double_quote ^= 1;			\
 		if (c == '\'') single_quote ^= 1;			\
 	}								\
-	else if (close(c)) {						\
+	else if (close (c)) {						\
 		if (level == 0 && gotsexp)				\
 			return TRUE;					\
 									\
@@ -988,7 +988,7 @@ END_DEFUN
 		if (c == '\'') single_quote ^= 1;			\
 									\
 		if (level < 0) {					\
-			minibuf_error("Scan error: \"Containing "	\
+			minibuf_error ("Scan error: \"Containing "	\
 				      "expression ends prematurely\"");	\
 			return FALSE;					\
 		}							\
