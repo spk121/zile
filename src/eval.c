@@ -40,14 +40,14 @@ eval_cb_command_helper (Function f, int argc, le * branch)
 }
 
 #define X(zile_name, c_name) \
-  static le *eval_cb_ ## c_name(int argc, le *branch) \
+  static le *eval_cb_ ## c_name (int argc, le *branch) \
   { \
-    return eval_cb_command_helper(F_ ## c_name, argc, branch); \
+    return eval_cb_command_helper (F_ ## c_name, argc, branch); \
   }
-#define X0(zile_name, c_name)                    X(zile_name, c_name)
-#define X1(zile_name, c_name, key1)              X(zile_name, c_name)
-#define X2(zile_name, c_name, key1, key2)        X(zile_name, c_name)
-#define X3(zile_name, c_name, key1, key2, key3)  X(zile_name, c_name)
+#define X0(zile_name, c_name)                    X (zile_name, c_name)
+#define X1(zile_name, c_name, key1)              X (zile_name, c_name)
+#define X2(zile_name, c_name, key1, key2)        X (zile_name, c_name)
+#define X3(zile_name, c_name, key1, key2, key3)  X (zile_name, c_name)
 #include "tbl_funcs.h"
 #undef X
 #undef X0
