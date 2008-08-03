@@ -45,7 +45,7 @@ Stop Zile and return to superior process.
 +*/
 {
   raise (SIGTSTP);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -54,7 +54,7 @@ cancel (void)
 {
   deactivate_mark ();
   minibuf_error ("Quit");
-  return FALSE;
+  return false;
 }
 
 DEFUN ("keyboard-quit", keyboard_quit)
@@ -83,7 +83,7 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
     set_variable ("transient-mark-mode", uniarg > 0 ? "t" : "nil");
 
   activate_mark ();
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -148,7 +148,7 @@ write_temp_buffer (const char *name, void (*func) (va_list ap), ...)
   else
     {
       set_current_window (popup_window ());
-      switch_to_buffer (find_buffer (name, TRUE));
+      switch_to_buffer (find_buffer (name, true));
     }
 
   /* Remove all the content of that buffer. */
@@ -206,7 +206,7 @@ The R column contains a % for buffers that are read-only.
 +*/
 {
   write_temp_buffer ("*Buffer List*", write_buffers_list, cur_wp);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -220,7 +220,7 @@ to make it easier to insert characters when necessary.
 +*/
 {
   cur_bp->flags ^= BFLAG_OVERWRITE;
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -230,7 +230,7 @@ Change whether this buffer is visiting its file read-only.
 +*/
 {
   cur_bp->flags ^= BFLAG_READONLY;
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -242,7 +242,7 @@ automatically breaks the line at a previous space.
 +*/
 {
   cur_bp->flags ^= BFLAG_AUTOFILL;
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -259,7 +259,7 @@ that value, otherwise with the current column value.
     variableSetNumber (&cur_bp->vars, "fill-column",
 		       (int) (cur_bp->pt.o + 1));
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -268,7 +268,7 @@ set_mark_command (void)
 {
   set_mark ();
   minibuf_write ("Mark set");
-  return TRUE;
+  return true;
 }
 
 DEFUN ("set-mark-command", set_mark_command)
@@ -289,12 +289,12 @@ exchange_point_and_mark (void)
   if (!cur_bp->mark)
     {
       minibuf_error ("No mark set in this buffer");
-      return FALSE;
+      return false;
     }
 
   /* Swap the point with the mark.  */
   swap_point (&cur_bp->pt, &cur_bp->mark->pt);
-  return TRUE;
+  return true;
 }
 
 
@@ -304,7 +304,7 @@ Put the mark where point is now, and point where the mark is now.
 +*/
 {
   if (!exchange_point_and_mark ())
-    return FALSE;
+    return false;
 
   /* In transient-mark-mode we must reactivate the mark.  */
   if (transient_mark_mode ())
@@ -312,7 +312,7 @@ Put the mark where point is now, and point where the mark is now.
 
   thisflag |= FLAG_NEED_RESYNC;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -324,7 +324,7 @@ Put point at beginning and mark at end of buffer.
   gotoeob ();
   FUNCALL (set_mark_command);
   gotobob ();
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -339,7 +339,7 @@ quoted_insert_octal (int c1)
     {
       insert_char_in_insert_mode (c1 - '0');
       insert_char_in_insert_mode (c2);
-      return TRUE;
+      return true;
     }
 
   minibuf_write ("C-q %d %d-", c1 - '0', c2 - '0');
@@ -349,12 +349,12 @@ quoted_insert_octal (int c1)
     {
       insert_char_in_insert_mode ((c1 - '0') * 8 + (c2 - '0'));
       insert_char_in_insert_mode (c3);
-      return TRUE;
+      return true;
     }
 
   insert_char_in_insert_mode ((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("quoted-insert", quoted_insert)
@@ -376,7 +376,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 
   minibuf_clear ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -460,7 +460,7 @@ universal_argument (int keytype, int xarg)
   minibuf_clear ();
   astr_delete (as);
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("universal-argument", universal_argument)
@@ -513,7 +513,7 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
     {
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
 		 size, strlen (dest));
-      line_replace_text (lp, offset, size, dest, strlen (dest), FALSE);
+      line_replace_text (lp, offset, size, dest, strlen (dest), false);
     }
 
   free (src);
@@ -529,11 +529,11 @@ edit_tab_region (int action)
   Marker *marker;
 
   if (warn_if_readonly_buffer () || warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   calculate_the_region (&r);
   if (r.size == 0)
-    return TRUE;
+    return true;
 
   marker = point_marker ();
 
@@ -566,7 +566,7 @@ edit_tab_region (int action)
   free_marker (marker);
   deactivate_mark ();
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("tabify", tabify)
@@ -603,7 +603,7 @@ Move point to the first non-whitespace character on this line.
 	break;
       forward_char ();
     }
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -637,7 +637,7 @@ transpose_subr (Function f)
   Marker *p0, *p1, *p2;
   astr s1 = NULL;
   astr s2 = NULL;
-  int seq_started = FALSE;
+  int seq_started = false;
 
   p0 = point_marker ();
 
@@ -662,7 +662,7 @@ transpose_subr (Function f)
     {
       minibuf_error ("Beginning of buffer");
       free_marker (p0);
-      return FALSE;
+      return false;
     }
 
   /* Save mark. */
@@ -681,7 +681,7 @@ transpose_subr (Function f)
 	{
 	  if (!seq_started)
 	    {
-	      seq_started = TRUE;
+	      seq_started = true;
 	      undo_save (UNDO_START_SEQUENCE, p0->pt, 0, 0);
 	    }
 
@@ -702,7 +702,7 @@ transpose_subr (Function f)
 
 	  free_marker (p0);
 	  free_marker (p1);
-	  return FALSE;
+	  return false;
 	}
     }
 
@@ -717,7 +717,7 @@ transpose_subr (Function f)
 
   if (!seq_started)
     {
-      seq_started = TRUE;
+      seq_started = true;
       undo_save (UNDO_START_SEQUENCE, p0->pt, 0, 0);
     }
 
@@ -780,7 +780,7 @@ transpose_subr (Function f)
   free_marker (p0);
   free_marker (p1);
   free_marker (p2);
-  return TRUE;
+  return true;
 }
 
 DEFUN ("transpose-chars", transpose_chars)
@@ -792,13 +792,13 @@ end of line, the previous two chars are exchanged.
 +*/
 {
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (!(lastflag & FLAG_SET_UNIARG))
     return transpose_subr (F_forward_char);
 
   minibuf_error ("transpose-chars doesn't support uniarg yet");
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -811,13 +811,13 @@ around or after point and around or after mark are interchanged.
 +*/
 {
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (!(lastflag & FLAG_SET_UNIARG))
     return transpose_subr (F_forward_word);
 
   minibuf_error ("transpose-words doesn't support uniarg yet");
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -827,13 +827,13 @@ Like M-t but applies to sexps.
 +*/
 {
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (!(lastflag & FLAG_SET_UNIARG))
     return transpose_subr (F_forward_sexp);
 
   minibuf_error ("transpose-sexps doesn't support uniarg yet");
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -845,13 +845,13 @@ With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (!(lastflag & FLAG_SET_UNIARG))
     return transpose_subr (F_forward_line);
 
   minibuf_error ("transpose-lines doesn't support uniarg yet");
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -862,7 +862,7 @@ END_DEFUN
   static int
 forward_word (void)
 {
-  int gotword = FALSE;
+  int gotword = false;
   for (;;)
     {
       while (!eolp ())
@@ -871,20 +871,20 @@ forward_word (void)
 	  if (!ISWORDCHAR (c))
 	    {
 	      if (gotword)
-		return TRUE;
+		return true;
 	    }
 	  else
-	    gotword = TRUE;
+	    gotword = true;
 	  cur_bp->pt.o++;
 	}
       if (gotword)
-	return TRUE;
+	return true;
       cur_bp->pt.o = astr_len (cur_bp->pt.p->item);
       if (!next_line ())
 	break;
       cur_bp->pt.o = 0;
     }
-  return FALSE;
+  return false;
 }
 
 DEFUN ("forward-word", forward_word)
@@ -900,16 +900,16 @@ With argument, do this that many times.
 
   for (uni = 0; uni < uniarg; ++uni)
     if (!forward_word ())
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
 static int
 backward_word (void)
 {
-  int gotword = FALSE;
+  int gotword = false;
   for (;;)
     {
       if (bolp ())
@@ -924,16 +924,16 @@ backward_word (void)
 	  if (!ISWORDCHAR (c))
 	    {
 	      if (gotword)
-		return TRUE;
+		return true;
 	    }
 	  else
-	    gotword = TRUE;
+	    gotword = true;
 	  cur_bp->pt.o--;
 	}
       if (gotword)
-	return TRUE;
+	return true;
     }
-  return FALSE;
+  return false;
 }
 
 DEFUN ("backward-word", backward_word)
@@ -950,9 +950,9 @@ With argument, do this that many times.
 
   for (uni = 0; uni < uniarg; ++uni)
     if (!backward_word ())
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -971,32 +971,32 @@ END_DEFUN
 #define CONTROL_SEXP_LEVEL(open, close)					\
 	if (open (c)) {							\
 		if (level == 0 && gotsexp)				\
-			return TRUE;					\
+			return true;					\
 									\
 		level++;						\
-		gotsexp = TRUE;						\
+		gotsexp = true;						\
 		if (c == '\"') double_quote ^= 1;			\
 		if (c == '\'') single_quote ^= 1;			\
 	}								\
 	else if (close (c)) {						\
 		if (level == 0 && gotsexp)				\
-			return TRUE;					\
+			return true;					\
 									\
 		level--;						\
-		gotsexp = TRUE;						\
+		gotsexp = true;						\
 		if (c == '\"') double_quote ^= 1;			\
 		if (c == '\'') single_quote ^= 1;			\
 									\
 		if (level < 0) {					\
 			minibuf_error ("Scan error: \"Containing "	\
 				      "expression ends prematurely\"");	\
-			return FALSE;					\
+			return false;					\
 		}							\
 	}
   int
 forward_sexp (void)
 {
-  int gotsexp = FALSE;
+  int gotsexp = false;
   int level = 0;
   int double_quote = 0;
   int single_quote = 0;
@@ -1032,14 +1032,14 @@ forward_sexp (void)
 		{
 		  if (!ISSEXPSEPARATOR (c))
 		    cur_bp->pt.o--;
-		  return TRUE;
+		  return true;
 		}
 	    }
 	  else
-	    gotsexp = TRUE;
+	    gotsexp = true;
 	}
       if (gotsexp && level == 0)
-	return TRUE;
+	return true;
       cur_bp->pt.o = astr_len (cur_bp->pt.p->item);
       if (!next_line ())
 	{
@@ -1049,7 +1049,7 @@ forward_sexp (void)
 	}
       cur_bp->pt.o = 0;
     }
-  return FALSE;
+  return false;
 }
 
 DEFUN ("forward-sexp", forward_sexp)
@@ -1066,16 +1066,16 @@ move backward across N balanced expressions.
 
   for (uni = 0; uni < uniarg; ++uni)
     if (!forward_sexp ())
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
 int
 backward_sexp (void)
 {
-  int gotsexp = FALSE;
+  int gotsexp = false;
   int level = 0;
   int double_quote = 1;
   int single_quote = 1;
@@ -1118,16 +1118,16 @@ backward_sexp (void)
 		{
 		  if (!ISSEXPSEPARATOR (c))
 		    cur_bp->pt.o++;
-		  return TRUE;
+		  return true;
 		}
 	    }
 	  else
-	    gotsexp = TRUE;
+	    gotsexp = true;
 	}
       if (gotsexp && level == 0)
-	return TRUE;
+	return true;
     }
-  return FALSE;
+  return false;
 }
 
 DEFUN ("backward-sexp", backward_sexp)
@@ -1144,9 +1144,9 @@ move forward across N balanced expressions.
 
   for (uni = 0; uni < uniarg; ++uni)
     if (!backward_sexp ())
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1192,7 +1192,7 @@ Precisely, if point is on line I, move to the start of line I + N.
     {
       while (uniarg++)
 	if (!previous_line ())
-	  return FALSE;
+	  return false;
     }
   else
     {
@@ -1201,10 +1201,10 @@ Precisely, if point is on line I, move to the start of line I + N.
 
       while (uniarg--)
 	if (!next_line ())
-	  return FALSE;
+	  return false;
     }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1227,7 +1227,7 @@ Move backward to start of paragraph.  With argument N, do it N times.
 
   FUNCALL (beginning_of_line);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1253,7 +1253,7 @@ Move forward to end of paragraph.  With argument N, do it N times.
   else
     FUNCALL (end_of_line);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1276,7 +1276,7 @@ The paragraph marked is the one that contains point or follows point.
       FUNCALL_ARG (backward_paragraph, uniarg);
     }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1322,7 +1322,7 @@ Fill paragraph at or after point.
 
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1338,9 +1338,9 @@ setcase_word (int rcase)
   if (!ISWORDCHAR (following_char ()))
     {
       if (!forward_word ())
-	return FALSE;
+	return false;
       if (!backward_word ())
-	return FALSE;
+	return false;
     }
 
   i = cur_bp->pt.o;
@@ -1354,7 +1354,7 @@ setcase_word (int rcase)
   if (size > 0)
     undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
 
-  gotword = FALSE;
+  gotword = false;
   while (cur_bp->pt.o < astr_len (cur_bp->pt.p->item))
     {
       char *p = astr_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o);
@@ -1379,13 +1379,13 @@ setcase_word (int rcase)
 	      *p = newc;
 	    }
 	}
-      gotword = TRUE;
+      gotword = true;
       cur_bp->pt.o++;
     }
 
   cur_bp->flags |= BFLAG_MODIFIED;
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("downcase-word", downcase_word)
@@ -1393,13 +1393,13 @@ DEFUN ("downcase-word", downcase_word)
 Convert following word (or argument N words) to lower case, moving over.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word (LOWERCASE))
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -1413,13 +1413,13 @@ DEFUN ("upcase-word", upcase_word)
 Convert following word (or argument N words) to upper case, moving over.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word (UPPERCASE))
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -1435,13 +1435,13 @@ This gives the word(s) a first character in upper case and the rest
 lower case.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     if (!setcase_word (CAPITALIZE))
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -1461,7 +1461,7 @@ setcase_region (int rcase)
   size_t size, i;
 
   if (warn_if_readonly_buffer () || warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   calculate_the_region (&r);
   size = r.size;
@@ -1491,7 +1491,7 @@ setcase_region (int rcase)
 
   cur_bp->flags |= BFLAG_MODIFIED;
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("upcase-region", upcase_region)
@@ -1542,7 +1542,7 @@ command to insert any output into the current buffer.
   if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
-    return FALSE;
+    return false;
 
   cmd = astr_new ();
   astr_afmt (cmd, "%s 2>&1 </dev/null", ms);
@@ -1550,7 +1550,7 @@ command to insert any output into the current buffer.
   if (pipe == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
-      return FALSE;
+      return false;
     }
   astr_delete (cmd);
 
@@ -1581,7 +1581,7 @@ command to insert any output into the current buffer.
     }
   astr_delete (out);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1611,10 +1611,10 @@ it as the contents of the region.
   if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
-    return FALSE;
+    return false;
 
   if (warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   cmd = astr_new ();
 
@@ -1622,7 +1622,7 @@ it as the contents of the region.
   if (fd == -1)
     {
       minibuf_error ("Cannot open temporary file");
-      return FALSE;
+      return false;
     }
 
   calculate_the_region (&r);
@@ -1638,7 +1638,7 @@ it as the contents of the region.
                        strerror (errno));
       else
         minibuf_error ("Error writing to temporary file");
-      return FALSE;
+      return false;
     }
 
   astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
@@ -1646,7 +1646,7 @@ it as the contents of the region.
   if (pipe == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
-      return FALSE;
+      return false;
     }
   astr_delete (cmd);
 
@@ -1675,10 +1675,10 @@ it as the contents of the region.
 	    if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
 	      FUNCALL (exchange_point_and_mark);
 	    undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, r.size, 0);
-	    undo_nosave = TRUE;
+	    undo_nosave = true;
 	    while (r.size--)
 	      FUNCALL (delete_char);
-	    undo_nosave = FALSE;
+	    undo_nosave = false;
 	  }
 	  insert_string ((char *) astr_cstr (out));
 	  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -1694,7 +1694,7 @@ it as the contents of the region.
     }
   astr_delete (out);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1706,7 +1706,7 @@ Delete the text between point and mark.
   Region r;
 
   if (warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   calculate_the_region (&r);
 
@@ -1722,14 +1722,14 @@ Delete the text between point and mark.
 	FUNCALL (exchange_point_and_mark);
 
       undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
-      undo_nosave = TRUE;
+      undo_nosave = true;
       while (size--)
 	FUNCALL (delete_char);
-      undo_nosave = FALSE;
+      undo_nosave = false;
     }
 
   deactivate_mark ();
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1741,7 +1741,7 @@ On nonblank line, delete any immediately following blank lines.
 +*/
 {
   Marker *old_marker = point_marker ();
-  int seq_started = FALSE;
+  int seq_started = false;
 
   /* Delete any immediately following blank lines.  */
   if (next_line ())
@@ -1760,7 +1760,7 @@ On nonblank line, delete any immediately following blank lines.
 	  while (is_blank_line ());
 	  if (!seq_started)
 	    {
-	      seq_started = TRUE;
+	      seq_started = true;
 	      undo_save (UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
 	    }
 	  FUNCALL (delete_region);
@@ -1772,7 +1772,7 @@ On nonblank line, delete any immediately following blank lines.
   /* Delete any immediately preceding blank lines.  */
   if (is_blank_line ())
     {
-      int forward = TRUE;
+      int forward = true;
       push_mark ();
       FUNCALL (beginning_of_line);
       set_mark ();
@@ -1781,7 +1781,7 @@ On nonblank line, delete any immediately following blank lines.
 	{
 	  if (!FUNCALL_ARG (forward_line, -1))
 	    {
-	      forward = FALSE;
+	      forward = false;
 	      break;
 	    }
 	}
@@ -1792,7 +1792,7 @@ On nonblank line, delete any immediately following blank lines.
 	{
 	  if (!seq_started)
 	    {
-	      seq_started = TRUE;
+	      seq_started = true;
 	      undo_save (UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
 	    }
 	  FUNCALL (delete_region);
@@ -1821,6 +1821,6 @@ On nonblank line, delete any immediately following blank lines.
   free_marker (old_marker);
   deactivate_mark ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN

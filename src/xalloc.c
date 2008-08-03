@@ -36,7 +36,7 @@ void
 xalloc_die (void)
 {
   fprintf (stderr, "%s: cannot allocate memory\n", prog_name);
-  zile_exit (FALSE);
+  zile_exit (false);
   abort ();
 }
 
@@ -51,7 +51,7 @@ xvasprintf (char **ptr, const char *fmt, va_list vargs)
   if (retval == -1)
     {
       fprintf (stderr, "%s: cannot allocate memory for asprintf\n", prog_name);
-      zile_exit (FALSE);
+      zile_exit (false);
     }
 
   return retval;

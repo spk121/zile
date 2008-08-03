@@ -32,7 +32,7 @@
 #include "config.h"
 #include "extern.h"
 
-static int initted = FALSE;
+static int initted = false;
 static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
@@ -47,7 +47,7 @@ term_initted (void)
 void
 term_set_initted (void)
 {
-  initted = TRUE;
+  initted = true;
 }
 
 size_t
@@ -116,25 +116,25 @@ in_region (size_t lineno, size_t x, Region * r)
       if (r->start.n == r->end.n)
 	{
 	  if (x >= r->start.o && x < r->end.o)
-	    return TRUE;
+	    return true;
 	}
       else if (lineno == r->start.n)
 	{
 	  if (x >= r->start.o)
-	    return TRUE;
+	    return true;
 	}
       else if (lineno == r->end.n)
 	{
 	  if (x < r->end.o)
-	    return TRUE;
+	    return true;
 	}
       else
 	{
-	  return TRUE;
+	  return true;
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 static void
@@ -185,11 +185,11 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
       || (!transient_mark_mode ())
       || (transient_mark_mode () && !(wp->bp->mark_active)))
     {
-      *highlight = FALSE;
+      *highlight = false;
       return;
     }
 
-  *highlight = TRUE;
+  *highlight = true;
   r->start = window_pt (wp);
   r->end = wp->bp->mark->pt;
   if (cmp_point (r->end, r->start) < 0)
@@ -362,7 +362,7 @@ draw_status_line (size_t line, Window * wp)
     astr_cat_cstr (as, " Isearch");
 
   astr_cat_char (as, ')');
-  term_addnstr (astr_cstr (as), min (term_width (), astr_len (as)));
+  term_addnstr (astr_cstr (as), MIN (term_width (), astr_len (as)));
   astr_delete (as);
 
   term_attrset (1, FONT_NORMAL);

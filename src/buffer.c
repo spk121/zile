@@ -171,7 +171,7 @@ set_buffer_filename (Buffer * bp, const char *filename)
 
 /*
  * Search for a buffer named `name'.  If not buffer is found and
- * the `cflag' variable is set to `TRUE', create a new buffer.
+ * the `cflag' variable is set to `true', create a new buffer.
  */
 Buffer *
 find_buffer (const char *name, int cflag)
@@ -221,7 +221,7 @@ make_buffer_name (const char *filename)
   else
     ++p;
 
-  if (find_buffer (p, FALSE) == NULL)
+  if (find_buffer (p, false) == NULL)
     return xstrdup (p);
 
   /*
@@ -233,7 +233,7 @@ make_buffer_name (const char *filename)
   for (i = 2; i <= 999; i++)
     {
       sprintf (name, "%s<%d>", p, i);
-      if (find_buffer (name, FALSE) == NULL)
+      if (find_buffer (name, false) == NULL)
 	return name;
     }
 
@@ -289,8 +289,8 @@ switch_to_buffer (Buffer * bp)
 }
 
 /*
- * Print an error message into the echo area and return TRUE
- * if the current buffer is readonly; otherwise return FALSE.
+ * Print an error message into the echo area and return true
+ * if the current buffer is readonly; otherwise return false.
  */
 int
 warn_if_readonly_buffer (void)
@@ -298,10 +298,10 @@ warn_if_readonly_buffer (void)
   if (cur_bp->flags & BFLAG_READONLY)
     {
       minibuf_error ("Buffer is readonly: %s", cur_bp->name);
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 int
@@ -310,15 +310,15 @@ warn_if_no_mark (void)
   if (!cur_bp->mark)
     {
       minibuf_error ("The mark is not set now");
-      return TRUE;
+      return true;
     }
   else if (transient_mark_mode () && !cur_bp->mark_active)
     {
       minibuf_error ("The mark is not active now");
-      return TRUE;
+      return true;
     }
   else
-    return FALSE;
+    return false;
 }
 
 /*
@@ -352,10 +352,10 @@ int
 calculate_the_region (Region * rp)
 {
   if (!is_mark_actived ())
-    return FALSE;
+    return false;
 
   calculate_region (rp, cur_bp->pt, cur_bp->mark->pt);
-  return TRUE;
+  return true;
 }
 
 /*
@@ -422,24 +422,24 @@ transient_mark_mode (void)
 void
 activate_mark (void)
 {
-  cur_bp->mark_active = TRUE;
+  cur_bp->mark_active = true;
 }
 
 void
 deactivate_mark (void)
 {
-  cur_bp->mark_active = FALSE;
+  cur_bp->mark_active = false;
 }
 
 int
 is_mark_actived (void)
 {
   if (!cur_bp->mark)
-    return FALSE;
+    return false;
   else if (transient_mark_mode ())
-    return (cur_bp->mark_active) ? TRUE : FALSE;
+    return (cur_bp->mark_active) ? true : false;
   else
-    return TRUE;
+    return true;
 }
 
 /*

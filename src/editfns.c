@@ -87,8 +87,8 @@ is_blank_line (void)
   size_t c;
   for (c = 0; c < astr_len (cur_bp->pt.p->item); c++)
     if (!isspace ((int) *astr_char (cur_bp->pt.p->item, (ptrdiff_t) c)))
-      return FALSE;
-  return TRUE;
+      return false;
+  return true;
 }
 
 int
@@ -129,7 +129,7 @@ preceding_char (void)
   return char_before (&cur_bp->pt);
 }
 
-/* This function returns TRUE if point is at the beginning of the
+/* This function returns true if point is at the beginning of the
    buffer. */
 int
 bobp (void)
@@ -137,7 +137,7 @@ bobp (void)
   return (list_prev (cur_bp->pt.p) == cur_bp->lines && cur_bp->pt.o == 0);
 }
 
-/* This function returns TRUE if point is at the end of the
+/* This function returns true if point is at the end of the
    buffer. */
 int
 eobp (void)
@@ -146,14 +146,14 @@ eobp (void)
 	  cur_bp->pt.o == astr_len (cur_bp->pt.p->item));
 }
 
-/* Returns TRUE if point is at the beginning of a line. */
+/* Returns true if point is at the beginning of a line. */
 int
 bolp (void)
 {
   return cur_bp->pt.o == 0;
 }
 
-/* Returns TRUE if point is at the end of a line. */
+/* Returns true if point is at the end of a line. */
 int
 eolp (void)
 {

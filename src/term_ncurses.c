@@ -104,9 +104,9 @@ term_init (void)
   noecho ();
   nonl ();
   raw ();
-  meta (stdscr, TRUE);
-  intrflush (stdscr, FALSE);
-  keypad (stdscr, TRUE);
+  meta (stdscr, true);
+  intrflush (stdscr, false);
+  keypad (stdscr, true);
 }
 
 void

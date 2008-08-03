@@ -31,12 +31,12 @@
 #include "zile.h"
 #include "extern.h"
 
-/* This variable is set to TRUE when the `undo_save()' function should not
+/* This variable is set to true when the `undo_save()' function should not
    register the undo information. */
-int undo_nosave = FALSE;
+int undo_nosave = false;
 
-/* This variable is set to TRUE when the undo is in execution. */
-static int doing_undo = FALSE;
+/* This variable is set to true when the undo is in execution. */
+static int doing_undo = false;
 
 /*
  * Save a reverse delta for doing undo.
@@ -56,7 +56,7 @@ undo_save (int type, Point pt, size_t arg1, size_t arg2)
 
   /* If the buffer is currently unchanged, record the fact. */
   if (!(cur_bp->flags & BFLAG_MODIFIED))
-    up->unchanged = TRUE;
+    up->unchanged = true;
 
   switch (type)
     {
@@ -96,7 +96,7 @@ revert_action (Undo * up)
 {
   size_t i;
 
-  doing_undo = TRUE;
+  doing_undo = true;
 
   if (up->type == UNDO_END_SEQUENCE)
     {
@@ -123,23 +123,23 @@ revert_action (Undo * up)
       break;
     case UNDO_INSERT_BLOCK:
       undo_save (UNDO_REMOVE_BLOCK, up->pt, up->delta.block.size, 0);
-      undo_nosave = TRUE;
+      undo_nosave = true;
       for (i = 0; i < up->delta.block.size; ++i)
 	if (up->delta.block.text[i] != '\n')
 	  insert_char (up->delta.block.text[i]);
 	else
 	  insert_newline ();
-      undo_nosave = FALSE;
+      undo_nosave = false;
       break;
     case UNDO_REMOVE_CHAR:
       delete_char ();
       break;
     case UNDO_REMOVE_BLOCK:
       undo_save (UNDO_INSERT_BLOCK, up->pt, up->delta.block.size, 0);
-      undo_nosave = TRUE;
+      undo_nosave = true;
       for (i = 0; i < up->delta.block.size; ++i)
 	delete_char ();
-      undo_nosave = FALSE;
+      undo_nosave = false;
       break;
     case UNDO_REPLACE_CHAR:
       undo_save (UNDO_REPLACE_CHAR, up->pt,
@@ -151,7 +151,7 @@ revert_action (Undo * up)
     case UNDO_REPLACE_BLOCK:
       undo_save (UNDO_REPLACE_BLOCK, up->pt,
 		 up->delta.block.size, up->delta.block.osize);
-      undo_nosave = TRUE;
+      undo_nosave = true;
       for (i = 0; i < up->delta.block.size; ++i)
 	delete_char ();
       for (i = 0; i < up->delta.block.osize; ++i)
@@ -159,11 +159,11 @@ revert_action (Undo * up)
 	  insert_char (up->delta.block.text[i]);
 	else
 	  insert_newline ();
-      undo_nosave = FALSE;
+      undo_nosave = false;
       break;
     }
 
-  doing_undo = FALSE;
+  doing_undo = false;
 
   /* If reverting this undo action leaves the buffer unchanged,
      unset the modified flag. */
@@ -182,23 +182,23 @@ Repeat this command to undo more changes.
   if (cur_bp->flags & BFLAG_NOUNDO)
     {
       minibuf_error ("Undo disabled in this buffer");
-      return FALSE;
+      return false;
     }
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (cur_bp->next_undop == NULL)
     {
       minibuf_error ("No further undo information");
       cur_bp->next_undop = cur_bp->last_undop;
-      return FALSE;
+      return false;
     }
 
   cur_bp->next_undop = revert_action (cur_bp->next_undop);
 
   minibuf_write ("Undo!");
 
-  return TRUE;
+  return true;
 }
 END_DEFUN

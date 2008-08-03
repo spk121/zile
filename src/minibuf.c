@@ -131,7 +131,7 @@ minibuf_read_dir (const char *fmt, const char *value, ...)
   rbuf = compact_path (as);
   astr_delete (as);
 
-  cp = completion_new (TRUE);
+  cp = completion_new (true);
   p = term_minibuf_read (buf, astr_cstr (rbuf), cp, &files_history);
   free_completion (cp);
   astr_delete (rbuf);
@@ -177,7 +177,7 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 
 	  /* Complete partial words if possible. */
 	  astr_cpy_cstr (as, p);
-	  if (completion_try (cp, as, FALSE) == COMPLETION_MATCHED)
+	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
 	    p = cp->match;
 	  astr_delete (as);
 
@@ -195,7 +195,7 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
     }
 
   assert (0);
-  return FALSE;
+  return false;
 }
 
 int
@@ -210,7 +210,7 @@ minibuf_read_yesno (const char *fmt, ...)
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  cp = completion_new (FALSE);
+  cp = completion_new (false);
   list_append (cp->completions, xstrdup ("yes"));
   list_append (cp->completions, xstrdup ("no"));
 
@@ -220,9 +220,9 @@ minibuf_read_yesno (const char *fmt, ...)
       /* The completions may be sorted by the minibuf completion
 	 routines. */
       if (!strcmp (list_at (cp->completions, (size_t) retvalue), "yes"))
-	retvalue = TRUE;
+	retvalue = true;
       else
-	retvalue = FALSE;
+	retvalue = false;
     }
   free_completion (cp);
   free (buf);

@@ -73,10 +73,10 @@ resize_windows (void)
     }
   else
     {				/* Decrease windows' height, and close windows if necessary. */
-      int decreased = TRUE;
+      int decreased = true;
       while (decreased)
 	{
-	  decreased = FALSE;
+	  decreased = false;
 	  for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
 	    {
 	      if (wp->fheight > 2)
@@ -84,14 +84,14 @@ resize_windows (void)
 		  --wp->fheight;
 		  --wp->eheight;
 		  ++hdelta;
-		  decreased = TRUE;
+		  decreased = true;
 		}
 	      else if (cur_wp != head_wp || cur_wp->next != NULL)
 		{
 		  Window *new_wp = wp->next;
 		  delete_window (wp);
 		  wp = new_wp;
-		  decreased = TRUE;
+		  decreased = true;
 		}
 	    }
 	}
@@ -119,6 +119,6 @@ The desired position of point is always relative to the current window.
 {
   recenter (cur_wp);
   term_full_redisplay ();
-  return TRUE;
+  return true;
 }
 END_DEFUN

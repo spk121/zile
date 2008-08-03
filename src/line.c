@@ -64,13 +64,13 @@ int
 intercalate_char (int c)
 {
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   undo_save (UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
   astr_insert_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
-  return TRUE;
+  return true;
 }
 
 /*
@@ -83,7 +83,7 @@ insert_char (int c)
   size_t t = tab_width (cur_bp);
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (cur_bp->flags & BFLAG_OVERWRITE)
     {
@@ -107,7 +107,7 @@ insert_char (int c)
 
 	  cur_bp->flags |= BFLAG_MODIFIED;
 
-	  return TRUE;
+	  return true;
 	}
       /*
        * Fall through the "insertion" mode of a character
@@ -119,7 +119,7 @@ insert_char (int c)
   intercalate_char (c);
   adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
 
-  return TRUE;
+  return true;
 }
 
 /*
@@ -156,14 +156,14 @@ int
 insert_tab (void)
 {
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   if (lookup_bool_variable ("indent-tabs-mode"))
     insert_char ('\t');
   else
     insert_expanded_tab (insert_char_in_insert_mode);
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("tab-to-tab-stop", tab_to_tab_stop)
@@ -172,13 +172,13 @@ Insert a tabulation at the current point position into the current
 buffer.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     if (!insert_tab ())
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -199,7 +199,7 @@ intercalate_newline ()
   astr as;
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   undo_save (UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
 
@@ -225,7 +225,7 @@ intercalate_newline ()
 
   thisflag |= FLAG_NEED_RESYNC;
 
-  return TRUE;
+  return true;
 }
 
 int
@@ -273,7 +273,7 @@ recase (char *str, size_t len, const char *tmpl, size_t tmpl_len)
 
 /*
  * Replace text in the line "lp" with "newtext". If "replace_case" is
- * TRUE then the new characters will be the same case as the old.
+ * true then the new characters will be the same case as the old.
  */
 void
 line_replace_text (Line ** lp, size_t offset, size_t oldlen,
@@ -376,7 +376,7 @@ Insert a newline at the current point position into
 the current buffer.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -386,7 +386,7 @@ the current buffer.
 	fill_break_line ();
       if (!insert_newline ())
 	{
-	  ret = FALSE;
+	  ret = false;
 	  break;
 	}
     }
@@ -401,13 +401,13 @@ DEFUN ("open-line", open_line)
 Insert a newline and leave point before it.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     if (!intercalate_newline ())
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -420,26 +420,26 @@ void
 insert_string (const char *s)
 {
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, strlen (s), 0);
-  undo_nosave = TRUE;
+  undo_nosave = true;
   for (; *s != '\0'; ++s)
     if (*s == '\n')
       insert_newline ();
     else
       insert_char (*s);
-  undo_nosave = FALSE;
+  undo_nosave = false;
 }
 
 void
 insert_nstring (const char *s, size_t size)
 {
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-  undo_nosave = TRUE;
+  undo_nosave = true;
   for (; 0 < size--; ++s)
     if (*s == '\n')
       insert_newline ();
     else
       insert_char_in_insert_mode (*s);
-  undo_nosave = FALSE;
+  undo_nosave = false;
 }
 
 void
@@ -462,7 +462,7 @@ delete_char (void)
   if (!eolp ())
     {
       if (warn_if_readonly_buffer ())
-	return FALSE;
+	return false;
 
       undo_save (UNDO_INTERCALATE_CHAR, cur_bp->pt,
 		 (size_t) (*astr_char (cur_bp->pt.p->item,
@@ -471,7 +471,7 @@ delete_char (void)
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
       cur_bp->flags |= BFLAG_MODIFIED;
 
-      return TRUE;
+      return true;
     }
   else if (!eobp ())
     {
@@ -479,7 +479,7 @@ delete_char (void)
       size_t lp1len;
 
       if (warn_if_readonly_buffer ())
-	return FALSE;
+	return false;
 
       undo_save (UNDO_INTERCALATE_CHAR, cur_bp->pt, '\n', 0);
 
@@ -499,12 +499,12 @@ delete_char (void)
 
       thisflag |= FLAG_NEED_RESYNC;
 
-      return TRUE;
+      return true;
     }
 
   minibuf_error ("End of buffer");
 
-  return FALSE;
+  return false;
 }
 
 DEFUN ("delete-char", delete_char)
@@ -513,7 +513,7 @@ Delete the following character.
 Join lines if the character is a newline.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   if (uniarg < 0)
     return FUNCALL_ARG (backward_delete_char, -uniarg);
@@ -522,7 +522,7 @@ Join lines if the character is a newline.
   for (uni = 0; uni < uniarg; ++uni)
     if (!delete_char ())
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -539,12 +539,12 @@ backward_delete_char (void)
   if (backward_char ())
     {
       delete_char ();
-      return TRUE;
+      return true;
     }
   else
     {
       minibuf_error ("Beginning of buffer");
-      return FALSE;
+      return false;
     }
 }
 
@@ -554,7 +554,7 @@ backward_delete_char_overwrite (void)
   if (!bolp () && !eolp ())
     {
       if (warn_if_readonly_buffer ())
-	return FALSE;
+	return false;
 
       backward_char ();
       if (following_char () == '\t')
@@ -565,7 +565,7 @@ backward_delete_char_overwrite (void)
 
       cur_bp->flags |= BFLAG_MODIFIED;
 
-      return TRUE;
+      return true;
     }
   else
     return backward_delete_char ();
@@ -579,7 +579,7 @@ Join lines if the character is a newline.
 {
   int (*f) (void) = cur_bp->flags & BFLAG_OVERWRITE ?
     backward_delete_char_overwrite : backward_delete_char;
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   if (uniarg < 0)
     return FUNCALL_ARG (delete_char, -uniarg);
@@ -588,7 +588,7 @@ Join lines if the character is a newline.
   for (uni = 0; uni < uniarg; ++uni)
     if (!(*f) ())
       {
-	ret = FALSE;
+	ret = false;
 	break;
       }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -611,7 +611,7 @@ Delete all spaces and tabs around point.
     backward_delete_char ();
 
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -624,7 +624,7 @@ Delete all spaces and tabs around point, leaving one space.
   FUNCALL (delete_horizontal_space);
   insert_char_in_insert_mode (' ');
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -661,11 +661,11 @@ does nothing.
 {
   size_t target_goalc = 0, cur_goalc = get_goalc ();
   Marker *old_point;
-  int ok = TRUE;
+  int ok = true;
   size_t t = tab_width (cur_bp);
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   deactivate_mark ();
 
@@ -759,7 +759,7 @@ the indentation.  Else stay at same point in text.
     return insert_tab ();
   else if (get_goalc () < previous_line_indent ())
     return FUNCALL (indent_relative);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -772,7 +772,7 @@ Indentation is done using the `indent-for-tab-command' function.
   int ret;
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
   else
     {
       int indent;

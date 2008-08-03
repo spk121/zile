@@ -56,7 +56,7 @@ Copy region into the user specified register.
   reg %= NUM_REGISTERS;
 
   if (warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   calculate_the_region (&r);
 
@@ -66,7 +66,7 @@ Copy region into the user specified register.
   regs[reg].text = p;
   regs[reg].size = r.size;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -74,9 +74,9 @@ static void
 insert_register (int reg)
 {
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
-  undo_nosave = TRUE;
+  undo_nosave = true;
   insert_nstring (regs[reg].text, regs[reg].size);
-  undo_nosave = FALSE;
+  undo_nosave = false;
 }
 
 DEFUN ("insert-register", insert_register)
@@ -88,7 +88,7 @@ Puts point before and mark after the inserted text.
   int reg, uni;
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   minibuf_write ("Insert register: ");
   term_refresh ();
@@ -101,7 +101,7 @@ Puts point before and mark after the inserted text.
   if (regs[reg].text == NULL)
     {
       minibuf_error ("Register does not contain text");
-      return FALSE;
+      return false;
     }
 
   set_mark_command ();
@@ -114,7 +114,7 @@ Puts point before and mark after the inserted text.
   exchange_point_and_mark ();
   deactivate_mark ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -147,7 +147,7 @@ List defined registers.
 +*/
 {
   write_temp_buffer ("*Registers List*", write_registers_list);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 

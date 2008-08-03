@@ -56,7 +56,7 @@ completion_new (int fileflag)
   if (fileflag)
     {
       cp->path = astr_new ();
-      cp->fl_dir = TRUE;
+      cp->fl_dir = true;
     }
 
   return cp;
@@ -131,7 +131,7 @@ calculate_max_length (list l, size_t size)
   for (p = list_first (l), i = 0; p != l && i < size; p = list_next (p), i++)
     {
       size_t len = strlen (p->item);
-      maxlen = max (len, maxlen);
+      maxlen = MAX (len, maxlen);
     }
 
   return maxlen;
@@ -225,7 +225,7 @@ completion_reread (Completion * cp, astr as)
   cp->fl_sorted = 0;
 
   if (expand_path (as) == NULL)
-    return FALSE;
+    return false;
 
   /* Split up path with dirname and basename, unless it ends in `/',
      in which case it's considered to be entirely dirname */
@@ -251,7 +251,7 @@ completion_reread (Completion * cp, astr as)
 
   dir = opendir (pdir);
   if (dir == NULL)
-    return FALSE;
+    return false;
 
   buf = astr_new ();
   while ((d = readdir (dir)) != NULL)
@@ -278,7 +278,7 @@ completion_reread (Completion * cp, astr as)
   free (s1);
   free (s2);
 
-  return TRUE;
+  return true;
 }
 
 /*
@@ -313,7 +313,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
       if (list_length (cp->completions) > 1)
 	{
 	  cp->matchsize = 0;
-	  popup_completion (cp, TRUE, 0);
+	  popup_completion (cp, true, 0);
 	  return COMPLETION_NONUNIQUE;
 	}
       else
@@ -347,7 +347,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
       cp->match = list_first (cp->matches)->item;
       cp->matchsize = strlen (cp->match);
       if (popup_when_complete)
-	popup_completion (cp, FALSE, partmatches);
+	popup_completion (cp, false, partmatches);
       return COMPLETION_MATCHEDNONUNIQUE;
     }
 
@@ -365,7 +365,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 	    {
 	      cp->match = list_first (cp->matches)->item;
 	      cp->matchsize = j;
-	      popup_completion (cp, FALSE, partmatches);
+	      popup_completion (cp, false, partmatches);
 	      return COMPLETION_NONUNIQUE;
 	    }
 	}

@@ -92,7 +92,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
   if (thisflag & FLAG_DEFINING_MACRO)
     {
       minibuf_error ("Already defining a keyboard macro");
-      return FALSE;
+      return false;
     }
 
   if (cur_mp)
@@ -102,7 +102,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
 
   thisflag |= FLAG_DEFINING_MACRO;
   cur_mp = xzalloc (sizeof (Macro));
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -116,11 +116,11 @@ The macro is now available for use via C-x e.
   if (!(thisflag & FLAG_DEFINING_MACRO))
     {
       minibuf_error ("Not defining a keyboard macro");
-      return FALSE;
+      return false;
     }
 
   thisflag &= ~FLAG_DEFINING_MACRO;
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -139,13 +139,13 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
   if (ms == NULL)
     {
       minibuf_error ("No command name given");
-      return FALSE;
+      return false;
     }
 
   if (cur_mp == NULL)
     {
       minibuf_error ("No keyboard macro defined");
-      return FALSE;
+      return false;
     }
 
   mp = get_macro (ms);
@@ -169,7 +169,7 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
   mp->keys = xzalloc (size);
   memcpy (mp->keys, cur_mp->keys, size);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -193,12 +193,12 @@ To make a macro permanent so you can call it even after
 defining others, use M-x name-last-kbd-macro.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   if (cur_mp == NULL)
     {
       minibuf_error ("No kbd macro has been defined");
-      return FALSE;
+      return false;
     }
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);

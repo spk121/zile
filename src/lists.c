@@ -247,7 +247,7 @@ leDumpEval (le * list, int indent GCC_UNUSED)
 astr
 leDumpReformat (le * tree)
 {
-  int notfirst = FALSE;
+  int notfirst = false;
   astr as = astr_new ();
 
   if (tree)
@@ -259,7 +259,7 @@ leDumpReformat (le * tree)
 	  if (tree->data)
 	    {
 	      astr_afmt (as, "%s%s", notfirst ? " " : "", tree->data);
-	      notfirst = TRUE;
+	      notfirst = true;
 	    }
 
 	  if (tree->branch)

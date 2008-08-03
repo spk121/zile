@@ -68,10 +68,10 @@ no_upper (const char *s, size_t len, int regex)
       if (regex && s[i] == '\\')
 	quote_flag = !quote_flag;
       else if (!quote_flag && isupper ((int) s[i]))
-	return FALSE;
+	return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 static const char *
@@ -209,7 +209,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
   size_t s1size, s2size = strlen (s);
 
   if (s2size < 1)
-    return FALSE;
+    return false;
 
   for (lp = startp; lp != cur_bp->lines; lp = list_next (lp))
     {
@@ -228,7 +228,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
 
       if (regexp)
 	sp2 = re_find_substr (sp, s1size, s, s2size,
-			      sp == astr_cstr (lp->item), TRUE, FALSE,
+			      sp == astr_cstr (lp->item), true, false,
 			      translate);
       else
 	sp2 = find_substr (sp, s1size, s, s2size, translate);
@@ -237,11 +237,11 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
 	{
 	  goto_linep (lp);
 	  cur_bp->pt.o = sp2 - astr_cstr (lp->item);
-	  return TRUE;
+	  return true;
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 static int
@@ -252,7 +252,7 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
   size_t s1size, ssize = strlen (s);
 
   if (ssize < 1)
-    return FALSE;
+    return false;
 
   for (lp = startp; lp != cur_bp->lines; lp = list_prev (lp))
     {
@@ -266,7 +266,7 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
 
       if (regexp)
 	sp2 = re_find_substr (sp, s1size, s, ssize,
-			      TRUE, s1size == astr_len (lp->item), TRUE,
+			      true, s1size == astr_len (lp->item), true,
 			      translate);
       else
 	sp2 = rfind_substr (sp, s1size, s, ssize, translate);
@@ -275,11 +275,11 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
 	{
 	  goto_linep (lp);
 	  cur_bp->pt.o = sp2 - astr_cstr (lp->item);
-	  return TRUE;
+	  return true;
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 static char *last_search = NULL;
@@ -294,19 +294,19 @@ Search forward from point for the user specified text.
   if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
-    return FALSE;
+    return false;
 
   if (last_search != NULL)
     free (last_search);
   last_search = xstrdup (ms);
 
-  if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, FALSE))
+  if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, false))
     {
       minibuf_error ("Failing search: `%s'", ms);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -320,19 +320,19 @@ Search backward from point for the user specified text.
   if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
-    return FALSE;
+    return false;
 
   if (last_search != NULL)
     free (last_search);
   last_search = xstrdup (ms);
 
-  if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, FALSE))
+  if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, false))
     {
       minibuf_error ("Failing search: `%s'", ms);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -346,19 +346,19 @@ Search forward from point for regular expression REGEXP.
   if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
-    return FALSE;
+    return false;
 
   if (last_search != NULL)
     free (last_search);
   last_search = xstrdup (ms);
 
-  if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, TRUE))
+  if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, true))
     {
       minibuf_error ("Failing regexp search: `%s'", ms);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -372,19 +372,19 @@ Search backward from point for match for regular expression REGEXP.
   if (ms == NULL)
     return cancel ();
   if (ms[0] == '\0')
-    return FALSE;
+    return false;
 
   if (last_search != NULL)
     free (last_search);
   last_search = xstrdup (ms);
 
-  if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, TRUE))
+  if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, true))
     {
       minibuf_error ("Failing regexp search backward: `%s'", ms);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -397,7 +397,7 @@ END_DEFUN
 isearch (int dir, int regexp)
 {
   int c;
-  int last = TRUE;
+  int last = true;
   astr buf = astr_new ();
   astr pattern = astr_new ();
   Point start, cur;
@@ -538,7 +538,7 @@ isearch (int dir, int regexp)
 	      search_backward (cur.p, cur.o, astr_cstr (pattern), regexp);
 	}
       else
-	last = TRUE;
+	last = true;
 
       if (thisflag & FLAG_NEED_RESYNC)
 	resync_redisplay ();
@@ -553,7 +553,7 @@ isearch (int dir, int regexp)
   if (old_mark)
     free_marker (old_mark);
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("isearch-forward", isearch_forward)
@@ -621,16 +621,16 @@ Replace occurrences of a string with other text.
   if (find == NULL)
     return cancel ();
   if (find[0] == '\0')
-    return FALSE;
+    return false;
   find_len = strlen (find);
-  find_no_upper = no_upper (find, find_len, FALSE);
+  find_no_upper = no_upper (find, find_len, false);
 
   repl = minibuf_read ("Replace `%s' with: ", "", find);
   if (repl == NULL)
     return cancel ();
   repl_len = strlen (repl);
 
-  while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, FALSE))
+  while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
     {
       ++count;
       undo_save (UNDO_REPLACE_BLOCK,
@@ -646,7 +646,7 @@ Replace occurrences of a string with other text.
 
   minibuf_write ("Replaced %d occurrences", count);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -657,7 +657,7 @@ As each match is found, the user must type a character saying
 what to do with it.
 +*/
 {
-  int count = 0, noask = FALSE, exitloop = FALSE, find_no_upper;
+  int count = 0, noask = false, exitloop = false, find_no_upper;
   size_t find_len, repl_len;
   char *find = minibuf_read ("Query replace string: ", "");
   char *repl;
@@ -665,9 +665,9 @@ what to do with it.
   if (find == NULL)
     return cancel ();
   if (*find == '\0')
-    return FALSE;
+    return false;
   find_len = strlen (find);
-  find_no_upper = no_upper (find, find_len, FALSE);
+  find_no_upper = no_upper (find, find_len, false);
 
   repl = minibuf_read ("Query replace `%s' with: ", "", find);
   if (repl == NULL)
@@ -675,7 +675,7 @@ what to do with it.
   repl_len = strlen (repl);
 
   /* Spaghetti code follows... :-( */
-  while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, FALSE))
+  while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
     {
       if (!noask)
 	{
@@ -704,10 +704,10 @@ what to do with it.
 	    case 'q':		/* Quit immediately. */
 	      goto endoffunc;
 	    case '.':		/* Replace and quit. */
-	      exitloop = TRUE;
+	      exitloop = true;
 	      goto replblock;
 	    case '!':		/* Replace all without asking. */
-	      noask = TRUE;
+	      noask = true;
 	      goto replblock;
 	    case ' ':		/* Replace. */
 	    case 'y':
@@ -739,6 +739,6 @@ endoffunc:
 
   minibuf_write ("Replaced %d occurrences", count);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN

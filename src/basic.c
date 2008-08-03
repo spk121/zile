@@ -48,7 +48,7 @@ Move point to beginning of current line.
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -64,7 +64,7 @@ Move point to end of current line.
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -142,10 +142,10 @@ previous_line (void)
 
       goto_goalc (cur_goalc);
 
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 DEFUN ("previous-line", previous_line)
@@ -174,7 +174,7 @@ column, or at the end of the line if it is not long enough.
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -193,10 +193,10 @@ next_line (void)
 
       goto_goalc (cur_goalc);
 
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 DEFUN ("next-line", next_line)
@@ -227,7 +227,7 @@ column, or at the end of the line if it is not long enough.
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -269,7 +269,7 @@ Position 1 is the beginning of the buffer.
     if (!forward_char ())
       break;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -296,7 +296,7 @@ Line 1 is the beginning of the buffer.
   goto_line (to_line - 1);
   cur_bp->pt.o = 0;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -317,7 +317,7 @@ Move point to the beginning of the buffer; leave mark at previous position.
 {
   set_mark_command ();
   gotobob ();
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -338,7 +338,7 @@ Move point to the end of the buffer; leave mark at previous position.
 {
   set_mark_command ();
   gotoeob ();
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -348,7 +348,7 @@ backward_char (void)
   if (!bolp ())
     {
       cur_bp->pt.o--;
-      return TRUE;
+      return true;
     }
   else if (!bobp ())
     {
@@ -356,10 +356,10 @@ backward_char (void)
       cur_bp->pt.p = list_prev (cur_bp->pt.p);
       cur_bp->pt.n--;
       FUNCALL (end_of_line);
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 DEFUN ("backward-char", backward_char)
@@ -377,10 +377,10 @@ On attempt to pass beginning or end of buffer, stop and signal error.
     if (!backward_char ())
       {
 	minibuf_error ("Beginning of buffer");
-	return FALSE;
+	return false;
       }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -390,7 +390,7 @@ forward_char (void)
   if (!eolp ())
     {
       cur_bp->pt.o++;
-      return TRUE;
+      return true;
     }
   else if (!eobp ())
     {
@@ -398,10 +398,10 @@ forward_char (void)
       cur_bp->pt.p = list_next (cur_bp->pt.p);
       cur_bp->pt.n++;
       FUNCALL (beginning_of_line);
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 
 DEFUN ("forward-char", forward_char)
@@ -419,10 +419,10 @@ On reaching end of buffer, stop and signal error.
     if (!forward_char ())
       {
 	minibuf_error ("End of buffer");
-	return FALSE;
+	return false;
       }
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -433,9 +433,9 @@ ngotoup (size_t n)
     if (list_prev (cur_bp->pt.p) != cur_bp->lines)
       FUNCALL (previous_line);
     else
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 
 int
@@ -445,20 +445,20 @@ ngotodown (size_t n)
     if (list_next (cur_bp->pt.p) != cur_bp->lines)
       FUNCALL (next_line);
     else
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 
 int
 scroll_down (void)
 {
   if (cur_bp->pt.n > 0)
-    return ngotoup (cur_wp->eheight) ? TRUE : FALSE;
+    return ngotoup (cur_wp->eheight) ? true : false;
   else
     {
       minibuf_error ("Beginning of buffer");
-      return FALSE;
+      return false;
     }
 }
 
@@ -474,9 +474,9 @@ Scroll text of current window downward near full screen.
 
   for (i = 0; i < uniarg; i++)
     if (!scroll_down ())
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -484,11 +484,11 @@ int
 scroll_up (void)
 {
   if (cur_bp->pt.n < cur_bp->num_lines)
-    return ngotodown (cur_wp->eheight) ? TRUE : FALSE;
+    return ngotodown (cur_wp->eheight) ? true : false;
   else
     {
       minibuf_error ("End of buffer");
-      return FALSE;
+      return false;
     }
 }
 
@@ -504,8 +504,8 @@ Scroll text of current window upward near full screen.
 
   for (i = 0; i < uniarg; i++)
     if (!scroll_up ())
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN

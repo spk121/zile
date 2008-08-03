@@ -71,7 +71,7 @@ draw_minibuf_read (const char *prompt, const char *value,
     }
 
   term_addnstr (value + n,
-		min (term_width () - prompt_len - margin,
+		MIN (term_width () - prompt_len - margin,
 		     strlen (value) - n));
   term_addnstr (match, strlen (match));
 
@@ -289,7 +289,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	    {
 	      astr as = astr_new ();
 	      astr_cpy_cstr (as, *p);
-	      thistab = completion_try (cp, as, TRUE);
+	      thistab = completion_try (cp, as, true);
 	      astr_delete (as);
 	      switch (thistab)
 		{

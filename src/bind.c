@@ -138,10 +138,10 @@ bind_key_string (char *key, Function func)
     {
       bind_key_vec (leaf_tree, keys, numkeys, func);
       free (keys);
-      return TRUE;
+      return true;
     }
   else
-    return FALSE;
+    return false;
 }
 
 static leafp
@@ -226,7 +226,7 @@ Insert the character you type.
 Whichever character you type to run this command is inserted.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
@@ -244,7 +244,7 @@ Whichever character you type to run this command is inserted.
       else
 	{
 	  ding ();
-	  ret = FALSE;
+	  ret = false;
 	  break;
 	}
     }
@@ -443,7 +443,7 @@ minibuf_read_function_name (const char *fmt, ...)
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  cp = completion_new (FALSE);
+  cp = completion_new (false);
   for (i = 0; i < fentry_table_size; ++i)
     list_append (cp->completions, xstrdup (fentry_table[i].name));
 
@@ -468,7 +468,7 @@ minibuf_read_function_name (const char *fmt, ...)
 	  astr as = astr_new ();
 	  astr_cpy_cstr (as, ms);
 	  /* Complete partial words if possible. */
-	  if (completion_try (cp, as, FALSE) == COMPLETION_MATCHED)
+	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
 	    ms = cp->match;
 	  astr_delete (as);
 	  for (p = list_first (cp->completions); p != cp->completions;
@@ -513,10 +513,10 @@ execute_function (char *name, int uniarg)
       if (mp)
 	{
 	  call_macro (mp);
-	  return TRUE;
+	  return true;
 	}
       else
-	return FALSE;
+	return false;
     }
 }
 
@@ -537,7 +537,7 @@ Read function name, then read its arguments and call it.
   name = minibuf_read_function_name (astr_cstr (msg));
   astr_delete (msg);
   if (name == NULL)
-    return FALSE;
+    return false;
 
   res = execute_function (name, uniarg);
   free (name);
@@ -553,7 +553,7 @@ Read key sequence and function name, and bind the function to the key
 sequence.
 +*/
 {
-  int ok = FALSE, numkeys;
+  int ok = false, numkeys;
   size_t key, *keys = NULL;
   Function func;
   char *name;
@@ -565,7 +565,7 @@ sequence.
 	{
 	  minibuf_error ("Key sequence %s is invalid",
 			 arglist->list_next->data);
-	  return FALSE;
+	  return false;
 	}
       name = arglist->list_next->list_next->data;
     }
@@ -585,12 +585,12 @@ sequence.
     }
 
   if (name == NULL)
-    return FALSE;
+    return false;
 
   func = get_function (name);
   if (func)
     {
-      ok = TRUE;
+      ok = true;
       bind_key_vec (leaf_tree, keys, numkeys, func);
     }
   else
@@ -674,7 +674,7 @@ message in the buffer.
 +*/
 {
   char *name = minibuf_read_function_name ("Where is command: ");
-  int ret = FALSE;
+  int ret = false;
   gather_bindings_state g;
 
   if (name)
@@ -698,7 +698,7 @@ message in the buffer.
 	      astr_delete (as);
 	    }
 	  astr_delete (g.bindings);
-	  ret = TRUE;
+	  ret = true;
 	}
     }
 
@@ -750,6 +750,6 @@ Show a list of all defined keys, and their definitions.
 +*/
 {
   write_temp_buffer ("*Help*", write_bindings_list);
-  return TRUE;
+  return true;
 }
 END_DEFUN

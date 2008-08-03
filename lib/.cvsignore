@@ -63,3 +63,4 @@ xalloc-die.c
 xalloc.h
 xmalloc.c
 fcntl.in.h
+minmax.h

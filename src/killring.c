@@ -63,39 +63,39 @@ kill_line (int literally)
   if (!eolp ())
     {
       if (warn_if_readonly_buffer ())
-	return FALSE;
+	return false;
 
       undo_save (UNDO_INSERT_BLOCK, cur_bp->pt,
 		 astr_len (cur_bp->pt.p->item) - cur_bp->pt.o, 0);
-      undo_nosave = TRUE;
+      undo_nosave = true;
       while (!eolp ())
 	{
 	  kill_ring_push (following_char ());
 	  FUNCALL (delete_char);
 	}
-      undo_nosave = FALSE;
+      undo_nosave = false;
 
       thisflag |= FLAG_DONE_KILL;
 
       if (!literally)
-	return TRUE;
+	return true;
     }
 
   if (list_next (cur_bp->pt.p) != cur_bp->lines)
     {
       if (!FUNCALL (delete_char))
-	return FALSE;
+	return false;
 
       kill_ring_push ('\n');
 
       thisflag |= FLAG_DONE_KILL;
 
-      return TRUE;
+      return true;
     }
 
   minibuf_error ("End of buffer");
 
-  return FALSE;
+  return false;
 }
 
 DEFUN ("kill-line", kill_line)
@@ -104,7 +104,7 @@ Kill the rest of the current line; if no nonblanks there, kill thru newline.
 With prefix argument, kill that many lines from point.
 +*/
 {
-  int uni, ret = TRUE;
+  int uni, ret = true;
 
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
@@ -115,9 +115,9 @@ With prefix argument, kill that many lines from point.
     {
       undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
       for (uni = 0; uni < uniarg; ++uni)
-	if (!kill_line (TRUE))
+	if (!kill_line (true))
 	  {
-	    ret = FALSE;
+	    ret = false;
 	    break;
 	  }
       undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
@@ -147,7 +147,7 @@ to make one entry in the kill ring.
     free_kill_ring ();
 
   if (warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   calculate_the_region (&r);
 
@@ -172,7 +172,7 @@ to make one entry in the kill ring.
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
 	FUNCALL (exchange_point_and_mark);
       undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
-      undo_nosave = TRUE;
+      undo_nosave = true;
       while (size--)
 	{
 	  if (!eolp ())
@@ -181,13 +181,13 @@ to make one entry in the kill ring.
 	    kill_ring_push ('\n');
 	  FUNCALL (delete_char);
 	}
-      undo_nosave = FALSE;
+      undo_nosave = false;
     }
 
   thisflag |= FLAG_DONE_KILL;
   deactivate_mark ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -203,7 +203,7 @@ Save the region as if killed, but don't kill it.
     free_kill_ring ();
 
   if (warn_if_no_mark ())
-    return FALSE;
+    return false;
 
   calculate_the_region (&r);
 
@@ -214,7 +214,7 @@ Save the region as if killed, but don't kill it.
   thisflag |= FLAG_DONE_KILL;
   deactivate_mark ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -228,7 +228,7 @@ With argument, do this that many times.
     free_kill_ring ();
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   push_mark ();
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
@@ -241,7 +241,7 @@ With argument, do this that many times.
 
   minibuf_write ("");		/* Don't write "Set mark" message.  */
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -266,7 +266,7 @@ Negative arg -N means kill N sexps before the cursor.
     free_kill_ring ();
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   push_mark ();
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
@@ -279,7 +279,7 @@ Negative arg -N means kill N sexps before the cursor.
 
   minibuf_write ("");		/* Don't write "Set mark" message.  */
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -293,21 +293,21 @@ killed OR yanked.  Put point at end, and set mark at beginning.
   if (kill_ring_text == NULL)
     {
       minibuf_error ("Kill ring is empty");
-      return FALSE;
+      return false;
     }
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   set_mark_command ();
 
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, astr_len (kill_ring_text), 0);
-  undo_nosave = TRUE;
+  undo_nosave = true;
   insert_nstring (astr_cstr (kill_ring_text), astr_len (kill_ring_text));
-  undo_nosave = FALSE;
+  undo_nosave = false;
 
   deactivate_mark ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN

@@ -117,14 +117,14 @@ lookup_bool_variable (char *var)
   if (p != NULL)
     return strcmp (p, "nil") != 0;
 
-  return FALSE;
+  return false;
 }
 
 char *
 minibuf_read_variable_name (char *msg)
 {
   char *ms;
-  Completion *cp = completion_new (FALSE);
+  Completion *cp = completion_new (false);
   le *lp;
 
   for (lp = mainVarList; lp != NULL; lp = lp->list_next)
@@ -186,7 +186,7 @@ Set a variable value to the user-specified value.
 
   var = minibuf_read_variable_name ("Set variable: ");
   if (var == NULL)
-    return FALSE;
+    return false;
 
   ent = get_variable_entry (var);
   val = minibuf_read ("Set %s to value: ", "", var);
@@ -200,6 +200,6 @@ Set a variable value to the user-specified value.
   else
     set_variable (var, val);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN

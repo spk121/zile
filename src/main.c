@@ -169,7 +169,7 @@ setup_main_screen (int argc)
     {
       if (argc < 1)
         {
-          undo_nosave = TRUE;
+          undo_nosave = true;
 
           if (!lookup_bool_variable ("inhibit-splash-screen"))
             insert_string ("\
@@ -178,7 +178,7 @@ If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
 
-          undo_nosave = FALSE;
+          undo_nosave = false;
           cur_bp->flags &= ~BFLAG_MODIFIED;
           lastflag |= FLAG_NEED_RESYNC;
         }
@@ -193,7 +193,7 @@ segv_sig_handler (int signo GCC_UNUSED)
            " crashed.  Please send a bug report to <"
            PACKAGE_BUGREPORT ">.\r\n",
            prog_name);
-  zile_exit (TRUE);
+  zile_exit (true);
 }
 
 static void
@@ -201,7 +201,7 @@ other_sig_handler (int signo GCC_UNUSED)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
            prog_name, signo);
-  zile_exit (FALSE);
+  zile_exit (false);
 }
 
 static void
@@ -231,7 +231,7 @@ struct option longopts[] = {
 int
 main (int argc, char **argv)
 {
-  int c, bflag = FALSE, qflag = FALSE;
+  int c, bflag = false, qflag = false;
   list fargs = list_new ();
   size_t line;
 
@@ -251,7 +251,7 @@ main (int argc, char **argv)
   init_variables ();
 
   opterr = 0;			/* Don't display errors for unknown options */
-  while (TRUE)
+  while (true)
     {
       int this_optind = optind ? optind : 1;
 
@@ -264,14 +264,14 @@ main (int argc, char **argv)
       switch (c)
         {
         case 'b':
-          bflag = TRUE;
-          qflag = TRUE;
+          bflag = true;
+          qflag = true;
           break;
         case 'f':
           list_append (fargs, optarg);
           break;
         case 'q':
-          qflag = TRUE;
+          qflag = true;
           break;
         case 'v':
           fprintf (stdout,

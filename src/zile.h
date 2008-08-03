@@ -25,23 +25,15 @@
 #define ZILE_H
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include <limits.h>
+#include "minmax.h"
 
 #include "list.h"
 #include "astr.h"
 #include "vector.h"
 #include "parser.h"
 #include "eval.h"
-
-#undef TRUE
-#define TRUE                            1
-#undef FALSE
-#define FALSE                           0
-
-#undef min
-#define min(a, b)                       ((a) < (b) ? (a) : (b))
-#undef max
-#define max(a, b)                       ((a) > (b) ? (a) : (b))
 
 /*--------------------------------------------------------------------------
  * Main editor structures.

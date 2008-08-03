@@ -49,9 +49,9 @@ exist_file (const char *filename)
 
   if (stat (filename, &st) == -1)
     if (errno == ENOENT)
-      return FALSE;
+      return false;
 
-  return TRUE;
+  return true;
 }
 
 int
@@ -62,13 +62,13 @@ is_regular_file (const char *filename)
   if (stat (filename, &st) == -1)
     {
       if (errno == ENOENT)
-	return TRUE;
-      return FALSE;
+	return true;
+      return false;
     }
   if (S_ISREG (st.st_mode))
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Safe getcwd */
@@ -106,7 +106,7 @@ agetcwd (void)
 astr
 expand_path (astr path)
 {
-  int ret = TRUE;
+  int ret = true;
   struct passwd *pw;
   const char *sp = astr_cstr (path);
   astr epath = astr_new ();
@@ -141,7 +141,7 @@ expand_path (astr path)
 	      pw = getpwuid (getuid ());
 	      if (pw == NULL)
 		{
-		  ret = FALSE;
+		  ret = false;
 		  break;
 		}
 	      if (strcmp (pw->pw_dir, "/") != 0)
@@ -161,7 +161,7 @@ expand_path (astr path)
 	      astr_delete (as);
 	      if (pw == NULL)
 		{
-		  ret = FALSE;
+		  ret = false;
 		  break;
 		}
 	      astr_cat_cstr (epath, pw->pw_dir);
@@ -319,7 +319,7 @@ void
 read_from_disk (const char *filename)
 {
   Line *lp;
-  int i, size, first_eol = TRUE;
+  int i, size, first_eol = true;
   char *this_eol_type;
   size_t eol_len = 0, total_eols = 0;
   char buf[BUFSIZ];
@@ -363,7 +363,7 @@ read_from_disk (const char *filename)
 		{
 		  /* This is the first end-of-line. */
 		  cur_bp->eol = this_eol_type;
-		  first_eol = FALSE;
+		  first_eol = false;
 		}
 	      else if (cur_bp->eol != this_eol_type)
 		{
@@ -411,21 +411,21 @@ find_file (const char *filename)
     if (bp->filename != NULL && !strcmp (bp->filename, filename))
       {
 	switch_to_buffer (bp);
-	return TRUE;
+	return true;
       }
 
   s = make_buffer_name (filename);
   if (strlen (s) < 1)
     {
       free (s);
-      return FALSE;
+      return false;
     }
 
   if (!is_regular_file (filename))
     {
       minibuf_error ("%s is not a regular file", filename);
       waitkey (WAITKEY_DEFAULT);
-      return FALSE;
+      return false;
     }
 
   bp = create_buffer (s);
@@ -437,7 +437,7 @@ find_file (const char *filename)
 
   thisflag |= FLAG_NEED_RESYNC;
 
-  return TRUE;
+  return true;
 }
 
 Completion *
@@ -446,7 +446,7 @@ make_buffer_completion (void)
   Buffer *bp;
   Completion *cp;
 
-  cp = completion_new (FALSE);
+  cp = completion_new (false);
   for (bp = head_bp; bp != NULL; bp = bp->next)
     list_append (cp->completions, xstrdup (bp->name));
 
@@ -478,7 +478,7 @@ creating one if none already exists.
     }
 
   free (ms);
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -523,7 +523,7 @@ If the current buffer now contains an empty file that you just visited
     }
 
   free (ms);
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -547,24 +547,24 @@ Select to the user specified buffer in the current window.
 
   if (ms[0] != '\0')
     {
-      swbuf = find_buffer (ms, FALSE);
+      swbuf = find_buffer (ms, false);
       if (swbuf == NULL)
 	{
-	  swbuf = find_buffer (ms, TRUE);
+	  swbuf = find_buffer (ms, true);
 	  swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
 	}
     }
 
   switch_to_buffer (swbuf);
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
 /*
  * Check if the buffer has been modified.  If so, asks the user if
  * he/she wants to save the changes.  If the response is positive, return
- * TRUE, else FALSE.
+ * true, else false.
  */
   int
 check_modified_buffer (Buffer * bp)
@@ -580,11 +580,11 @@ check_modified_buffer (Buffer * bp)
 	      bp->name)) == -1)
 	  return cancel ();
 	else if (!ans)
-	  return FALSE;
+	  return false;
 	break;
       }
 
-  return TRUE;
+  return true;
 }
 
 /*
@@ -682,11 +682,11 @@ Kill the current buffer or the user specified one.
   free_completion (cp);
   if (ms[0] != '\0')
     {
-      bp = find_buffer (ms, FALSE);
+      bp = find_buffer (ms, false);
       if (bp == NULL)
 	{
 	  minibuf_error ("Buffer `%s' not found", ms);
-	  return FALSE;
+	  return false;
 	}
     }
   else
@@ -695,10 +695,10 @@ Kill the current buffer or the user specified one.
   if (check_modified_buffer (bp))
     {
       kill_buffer (bp);
-      return TRUE;
+      return true;
     }
 
-  return FALSE;
+  return false;
 }
 END_DEFUN
 
@@ -709,7 +709,7 @@ insert_buffer (Buffer * bp)
   size_t size = calculate_buffer_size (bp), i;
 
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-  undo_nosave = TRUE;
+  undo_nosave = true;
   for (lp = list_next (bp->lines); lp != bp->lines; lp = list_next (lp))
     {
       for (i = 0; i < astr_len (lp->item); i++)
@@ -717,7 +717,7 @@ insert_buffer (Buffer * bp)
       if (list_next (lp) != bp->lines)
 	insert_newline ();
     }
-  undo_nosave = FALSE;
+  undo_nosave = false;
 }
 
 DEFUN ("insert-buffer", insert_buffer)
@@ -731,7 +731,7 @@ Puts mark after the inserted text.
   Completion *cp;
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
   cp = make_buffer_completion ();
@@ -742,11 +742,11 @@ Puts mark after the inserted text.
   free_completion (cp);
   if (ms[0] != '\0')
     {
-      bp = find_buffer (ms, FALSE);
+      bp = find_buffer (ms, false);
       if (bp == NULL)
 	{
 	  minibuf_error ("Buffer `%s' not found", ms);
-	  return FALSE;
+	  return false;
 	}
     }
   else
@@ -755,13 +755,13 @@ Puts mark after the inserted text.
   if (bp == cur_bp)
     {
       minibuf_error ("Cannot insert the current buffer");
-      return FALSE;
+      return false;
     }
 
   insert_buffer (bp);
   set_mark_command ();
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -775,36 +775,36 @@ insert_file (char *filename)
   if (!exist_file (filename))
     {
       minibuf_error ("Unable to read file `%s'", filename);
-      return FALSE;
+      return false;
     }
 
   fd = open (filename, O_RDONLY);
   if (fd < 0)
     {
       minibuf_write ("%s: %s", filename, strerror (errno));
-      return FALSE;
+      return false;
     }
 
   size = lseek (fd, 0, SEEK_END);
   if (size < 1)
     {
       close (fd);
-      return TRUE;
+      return true;
     }
 
   lseek (fd, 0, SEEK_SET);
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
-  undo_nosave = TRUE;
+  undo_nosave = true;
   while ((size = read (fd, buf, BUFSIZ)) > 0)
     for (i = 0; i < size; i++)
       if (buf[i] != '\n')
 	insert_char (buf[i]);
       else
 	insert_newline ();
-  undo_nosave = FALSE;
+  undo_nosave = false;
   close (fd);
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("insert-file", insert_file)
@@ -817,7 +817,7 @@ Set mark after the inserted text.
   astr buf;
 
   if (warn_if_readonly_buffer ())
-    return FALSE;
+    return false;
 
   buf = get_current_dir ();
   ms = minibuf_read_dir ("Insert file: ", astr_cstr (buf));
@@ -831,19 +831,19 @@ Set mark after the inserted text.
   if (ms[0] == '\0')
     {
       free (ms);
-      return FALSE;
+      return false;
     }
 
   if (!insert_file (ms))
     {
       free (ms);
-      return FALSE;
+      return false;
     }
 
   set_mark_command ();
 
   free (ms);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -863,14 +863,14 @@ copy_file (const char *source, const char *dest)
   if (ifd < 0)
     {
       minibuf_error ("%s: unable to backup", source);
-      return FALSE;
+      return false;
     }
 
   if (xasprintf (&tname, "%s_XXXXXXXXXX", dest) == -1)
     {
       minibuf_error ("Cannot allocate temporary file name `%s'",
 		     strerror (errno));
-      return FALSE;
+      return false;
     }
 
   ofd = mkstemp (tname);
@@ -881,7 +881,7 @@ copy_file (const char *source, const char *dest)
       minibuf_error ("%s: unable to create backup", dest);
       free (tname);
       errno = serrno;
-      return FALSE;
+      return false;
     }
 
   while ((len = read (ifd, buf, sizeof buf)) > 0)
@@ -890,7 +890,7 @@ copy_file (const char *source, const char *dest)
 	minibuf_error ("Unable to write to backup file `%s'", dest);
 	close (ifd);
 	close (ofd);
-	return FALSE;
+	return false;
       }
 
   serrno = errno;
@@ -919,7 +919,7 @@ copy_file (const char *source, const char *dest)
 	  minibuf_error ("Cannot rename temporary file `%s'",
 			 strerror (errno));
 	  unlink (tname);
-	  stat_valid = FALSE;
+	  stat_valid = false;
 	}
     }
   else if (unlink (tname) == -1)
@@ -1054,10 +1054,10 @@ write_to_disk (Buffer * bp, char *filename)
         minibuf_error ("Error writing `%s': %s", filename, strerror (errno));
       else
         minibuf_error ("Error writing `%s': %s", filename);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 static int
@@ -1079,7 +1079,7 @@ save_buffer (Buffer * bp)
 	  if (ms[0] == '\0')
 	    {
 	      free (ms);
-	      return FALSE;
+	      return false;
 	    }
 
 	  set_buffer_filename (bp, ms);
@@ -1096,13 +1096,13 @@ save_buffer (Buffer * bp)
 	  minibuf_write ("Wrote %s", ms);
 	  bp->flags &= ~BFLAG_MODIFIED;
 
-	  /* Set unchanged flags to FALSE except for the
-	     last undo action, which is set to TRUE. */
+	  /* Set unchanged flags to false except for the
+	     last undo action, which is set to true. */
 	  up = bp->last_undop;
 	  if (up)
-	    up->unchanged = TRUE;
+	    up->unchanged = true;
 	  for (up = up->next; up; up = up->next)
-	    up->unchanged = FALSE;
+	    up->unchanged = false;
 	}
 
       bp->flags &= ~BFLAG_TEMPORARY;
@@ -1111,7 +1111,7 @@ save_buffer (Buffer * bp)
 	free (ms);
     }
 
-  return TRUE;
+  return true;
 }
 
 DEFUN ("save-buffer", save_buffer)
@@ -1138,7 +1138,7 @@ Makes buffer visit that file, and marks it not modified.
   if (ms[0] == '\0')
     {
       free (ms);
-      return FALSE;
+      return false;
     }
 
   set_buffer_filename (cur_bp, ms);
@@ -1152,7 +1152,7 @@ Makes buffer visit that file, and marks it not modified.
     }
 
   free (ms);
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1160,7 +1160,7 @@ static int
 save_some_buffers (void)
 {
   Buffer *bp;
-  int i = 0, noask = FALSE, c;
+  int i = 0, noask = false, c;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
     if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
@@ -1207,9 +1207,9 @@ save_some_buffers (void)
 	      case '.':
 		save_buffer (bp);
 		++i;
-		return TRUE;
+		return true;
 	      case '!':
-		noask = TRUE;
+		noask = true;
 		/* FALLTHROUGH */
 	      case ' ':
 	      case 'y':
@@ -1228,7 +1228,7 @@ endoffunc:
   if (i == 0)
     minibuf_write ("(No files need saving)");
 
-  return TRUE;
+  return true;
 }
 
 
@@ -1250,7 +1250,7 @@ Offer to save each buffer, then kill this Zile process.
   int ans, i = 0;
 
   if (!save_some_buffers ())
-    return FALSE;
+    return false;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
     if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
@@ -1264,13 +1264,13 @@ Offer to save each buffer, then kill this Zile process.
 	     ("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
 	  return cancel ();
 	else if (!ans)
-	  return FALSE;
+	  return false;
 	break;
       }
 
   thisflag |= FLAG_QUIT_ZILE;
 
-  return TRUE;
+  return true;
 }
 END_DEFUN
 
@@ -1331,19 +1331,19 @@ directory.
 	{
 	  minibuf_error ("`%s' is not a directory", ms);
 	  free (ms);
-	  return FALSE;
+	  return false;
 	}
       if (chdir (ms) == -1)
 	{
 	  minibuf_write ("%s: %s", ms, strerror (errno));
 	  free (ms);
-	  return FALSE;
+	  return false;
 	}
       free (ms);
-      return TRUE;
+      return true;
     }
 
   free (ms);
-  return FALSE;
+  return false;
 }
 END_DEFUN
