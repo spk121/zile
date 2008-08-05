@@ -29,7 +29,7 @@ astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
 astr_LDADD = xalloc.o strrstr.o $(LDADD)
 
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
-LDADD = $(top_builddir)/lib/libgnu.a
+LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS)
 
 bin_PROGRAMS = zile
 
