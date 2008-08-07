@@ -29,6 +29,7 @@ dnl Checks for programs
 AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
+AM_PROG_CC_C_O
 
 dnl Checks for functions and headers
 gl_INIT
