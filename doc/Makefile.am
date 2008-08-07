@@ -38,8 +38,12 @@ EXTRA_DIST =					\
 	dotzile.sample				\
 	dotzile.texi				\
 	zlint					\
-	zile.1.in				\
-	mkdoc.c
+	zile.1.in
+
+AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -I$(top_srcdir)/src -DPATH_DATA="\"$(pkgdatadir)\""
+LDADD = $(top_builddir)/lib/libgnu.a
+
+EXTRA_PROGRAMS = mkdoc
 
 man_MANS = zile.1
 
@@ -47,13 +51,6 @@ HELP: zile.info
 	makeinfo --no-header --no-split -I$(top_srcdir)/doc $(top_srcdir)/doc/zile.texi >$@
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
-
-AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -I$(top_srcdir)/src -DPATH_DATA="\"$(pkgdatadir)\""
-LDADD = $(top_builddir)/lib/libgnu.a
-
-EXTRA_PROGRAMS = mkdoc
-
-mkdoc_SOURCES = mkdoc.c
 
 AUTODOC: $(AUTODOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
 	./mkdoc $(AUTODOCSRCS) >AUTODOC
