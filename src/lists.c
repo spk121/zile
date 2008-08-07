@@ -140,63 +140,6 @@ leDup (le * list)
   return temp;
 }
 
-static void
-leClearTag (le * list)
-{
-  if (!list)
-    return;
-  list->tag = -1;
-  leClearTag (list->branch);
-  leClearTag (list->list_next);
-}
-
-static void
-leTagData (le * list, char *data, int tagval)
-{
-  if (!data || !list)
-    return;
-
-  for (; list; list = list->list_next)
-    {
-      if (list->data && !strcmp (list->data, data))
-	list->tag = tagval;
-
-      leTagData (list->branch, data, tagval);
-    }
-}
-
-static void
-leTagReplace (le * list, int tagval, le * newinfo)
-{
-  if (!list || !newinfo)
-    return;
-
-  while (list)
-    {
-      if (list->tag == tagval)
-	{
-	  /* free any existing stuff */
-	  if (list->data)
-	    {
-	      free (list->data);
-	      list->data = NULL;
-	    }
-
-	  /* NOTE: This next comparison might be flawed */
-	  if (newinfo->list_next || newinfo->branch)
-	    {
-	      list->branch = leDup (newinfo);
-	      list->quoted = 1;
-	    }
-	  else if (newinfo->data)
-	    list->data = xstrdup (newinfo->data);
-	}
-      leTagReplace (list->branch, tagval, newinfo);
-
-      list = list->list_next;
-    }
-}
-
 static astr
 leDumpReformat (le * tree)
 {
