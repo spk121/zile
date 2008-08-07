@@ -258,9 +258,7 @@ that value, otherwise with the current column value.
   char *buf;
 
   xasprintf (&buf, "%d", fill_col);
-  /* FIXME: Make set-variable able to be used non-interactively and
-     call it here. */
-  variableSetString (&cur_bp->vars, "fill-column", buf);
+  F_set_variable (0, leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0));
   free (buf);
 
   return true;

@@ -177,17 +177,25 @@ Set a variable value to the user-specified value.
   char *var, *val;
   struct var_entry *ent;
 
-  var = minibuf_read_variable_name ("Set variable: ");
-  if (var == NULL)
-    return false;
+  if (arglist)
+    {
+      var = arglist->list_next->data;
+      val = arglist->list_next->list_next->data;
+    }
+  else
+    {
+      var = minibuf_read_variable_name ("Set variable: ");
+      if (var == NULL)
+        return false;
 
-  ent = get_variable_entry (var);
-  val = minibuf_read ("Set %s to value: ", "", var);
-  if (val == NULL)
-    return cancel ();
+      val = minibuf_read ("Set %s to value: ", "", var);
+      if (val == NULL)
+        return cancel ();
+    }
 
   /* Some variables automatically become buffer-local when set in
      any fashion. */
+  ent = get_variable_entry (var);
   if (ent->local)
     variableSetString (&cur_bp->vars, var, val);
   else
