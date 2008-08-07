@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gl_array_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -249,13 +250,12 @@ Display documentation of the command invoked by a key sequence.
 {
   char *name;
   astr bufname, doc, binding;
-  size_t *keys;
-  int numkeys;
+  gl_list_t keys;
 
   minibuf_write ("Describe key:");
-  name = get_function_by_key_sequence (&keys, &numkeys);
-  binding = keyvectostr (keys, numkeys);
-  free (keys);
+  name = get_function_by_key_sequence (&keys);
+  binding = keyvectostr (keys);
+  gl_list_free (keys);
 
   if (name == NULL)
     {

@@ -41,7 +41,7 @@ ding (void)
   if (thisflag & FLAG_DEFINING_MACRO)
     cancel_kbd_macro ();
 
-  if (lookup_bool_variable ("ring-bell"))
+  if (get_variable_bool ("ring-bell"))
     term_beep ();
 }
 

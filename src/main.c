@@ -117,7 +117,7 @@ static void
 about_screen (void)
 {
   minibuf_write (about_minibuf_str);
-  if (!lookup_bool_variable ("inhibit-splash-screen"))
+  if (!get_variable_bool ("inhibit-splash-screen"))
     {
       show_splash_screen (about_splash_str);
       term_refresh ();
@@ -169,7 +169,7 @@ setup_main_screen (int argc)
         {
           undo_nosave = true;
 
-          if (!lookup_bool_variable ("inhibit-splash-screen"))
+          if (!get_variable_bool ("inhibit-splash-screen"))
             insert_string ("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\

@@ -1022,8 +1022,8 @@ create_backup_filename (const char *filename, const char *backupdir)
 static int
 write_to_disk (Buffer * bp, char *filename)
 {
-  int fd, backup = lookup_bool_variable ("make-backup-files"), ret;
-  char *backupdir = lookup_bool_variable ("backup-directory") ?
+  int fd, backup = get_variable_bool ("make-backup-files"), ret;
+  char *backupdir = get_variable_bool ("backup-directory") ?
     get_variable ("backup-directory") : NULL;
 
   /*

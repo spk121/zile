@@ -32,7 +32,6 @@
 
 #include "list.h"
 #include "astr.h"
-#include "vector.h"
 #include "parser.h"
 #include "eval.h"
 

@@ -158,7 +158,7 @@ insert_tab (void)
   if (warn_if_readonly_buffer ())
     return false;
 
-  if (lookup_bool_variable ("indent-tabs-mode"))
+  if (get_variable_bool ("indent-tabs-mode"))
     insert_char ('\t');
   else
     insert_expanded_tab (insert_char_in_insert_mode);
@@ -282,7 +282,7 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
   if (oldlen == 0)
     return;
 
-  if (replace_case && lookup_bool_variable ("case-replace"))
+  if (replace_case && get_variable_bool ("case-replace"))
     {
       newtext = xstrdup (newtext);
       recase (newtext, newlen, astr_char ((*lp)->item, (ptrdiff_t) offset),
@@ -755,7 +755,7 @@ If initial point was within line's indentation, position after
 the indentation.  Else stay at same point in text.
 +*/
 {
-  if (lookup_bool_variable ("tab-always-indent"))
+  if (get_variable_bool ("tab-always-indent"))
     return insert_tab ();
   else if (get_goalc () < previous_line_indent ())
     return FUNCALL (indent_relative);

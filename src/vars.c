@@ -74,16 +74,6 @@ variableSetString (le ** varlist, char *key, char *value)
     }
 }
 
-void
-variableSetNumber (le ** varlist, char *key, int value)
-{
-  char *buf;
-
-  xasprintf (&buf, "%d", value);
-  variableSetString (varlist, key, buf);
-  free (buf);
-}
-
 le *
 variableGet (le * varlist, char *key)
 {
@@ -98,22 +88,4 @@ variableGetString (le * varlist, char *key)
   if (temp && temp->data && countNodes (temp) == 1)
     return temp->data;
   return NULL;
-}
-
-astr
-variableDump (le * varlist)
-{
-  astr as = astr_new ();
-
-  for (; varlist; varlist = varlist->list_next)
-    {
-      if (varlist->branch)
-	{
-	  astr_afmt (as, "%s \t", varlist->data);
-	  astr_cat_delete (as, leDumpReformat (varlist->branch));
-	  astr_cat_char (as, '\n');
-	}
-    }
-
-  return as;
 }

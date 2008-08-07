@@ -59,3 +59,4 @@ strndup.m4
 strnlen.m4
 xstrndup.m4
 chown.m4
+gl_list.m4

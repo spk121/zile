@@ -77,3 +77,7 @@ version-etc.c
 version-etc.h
 chown.c
 fchown-stub.c
+gl_array_list.c
+gl_array_list.h
+gl_list.c
+gl_list.h

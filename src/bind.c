@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gl_array_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -108,22 +109,23 @@ add_leaf (leafp tree, leafp p)
 }
 
 static void
-bind_key_vec (leafp tree, size_t * keys, size_t n, Function func)
+bind_key_vec (leafp tree, gl_list_t keys, size_t from, Function func)
 {
-  leafp p, s = search_leaf (tree, keys[0]);
+  leafp p, s = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
+  size_t n = gl_list_size (keys) - from;
 
   if (s == NULL)
     {
       p = leaf_new (n == 1 ? 1 : 5);
-      p->key = keys[0];
+      p->key = (size_t) gl_list_get_at (keys, from);
       add_leaf (tree, p);
       if (n == 1)
 	p->func = func;
       else if (n > 0)
-	bind_key_vec (p, &keys[1], n - 1, func);
+	bind_key_vec (p, keys, from + 1, func);
     }
   else if (n > 1)
-    bind_key_vec (s, &keys[1], n - 1, func);
+    bind_key_vec (s, keys, from + 1, func);
   else
     s->func = func;
 }
@@ -131,30 +133,33 @@ bind_key_vec (leafp tree, size_t * keys, size_t n, Function func)
 static int
 bind_key_string (char *key, Function func)
 {
-  size_t *keys;
-  int numkeys = keystrtovec (key, &keys);
+  gl_list_t keys = keystrtovec (key);
+  bool ok = false;
 
-  if (numkeys > 0)
+  if (keys)
     {
-      bind_key_vec (leaf_tree, keys, numkeys, func);
-      free (keys);
-      return true;
+      if (gl_list_size (keys) > 0)
+        {
+          bind_key_vec (leaf_tree, keys, 0, func);
+          ok = true;
+        }
+      gl_list_free (keys);
     }
-  else
-    return false;
+
+  return ok;
 }
 
 static leafp
-search_key (leafp tree, size_t * keys, size_t n)
+search_key (leafp tree, gl_list_t keys, size_t from)
 {
-  leafp p = search_leaf (tree, keys[0]);
+  leafp p = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
 
   if (p != NULL)
     {
-      if (n == 1)
+      if (gl_list_size (keys) - from == 1)
 	return p;
       else
-	return search_key (p, &keys[1], n - 1);
+	return search_key (p, keys, from + 1);
     }
 
   return NULL;
@@ -173,19 +178,19 @@ do_completion (astr as)
 }
 
 static astr
-make_completion (size_t * keys, size_t numkeys)
+make_completion (gl_list_t keys)
 {
   astr as = astr_new (), key;
   size_t i, len = 0;
 
-  for (i = 0; i < numkeys; i++)
+  for (i = 0; i < gl_list_size (keys); i++)
     {
       if (i > 0)
 	{
 	  astr_cat_char (as, ' ');
 	  len++;
 	}
-      key = chordtostr (keys[i]);
+      key = chordtostr ((size_t) gl_list_get_at (keys, i));
       astr_cat (as, key);
       astr_delete (key);
     }
@@ -194,29 +199,28 @@ make_completion (size_t * keys, size_t numkeys)
 }
 
 static leafp
-completion_scan (size_t key, size_t ** keys, int *numkeys)
+completion_scan (size_t key, gl_list_t * keys)
 {
   leafp p;
-  vector *v = vec_new (sizeof (key));
+  *keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                NULL, NULL, NULL, true);
 
-  vec_item (v, (size_t) 0, size_t) = key;
-  *numkeys = 1;
+  gl_list_add_last (*keys, (void *) key);
 
   do
     {
-      p = search_key (leaf_tree, vec_array (v), *numkeys);
+      p = search_key (leaf_tree, *keys, 0);
       if (p == NULL)
 	break;
       if (p->func == NULL)
 	{
-	  astr as = make_completion (vec_array (v), *numkeys);
-	  vec_item (v, (*numkeys)++, size_t) = do_completion (as);
+	  astr as = make_completion (*keys);
+	  gl_list_add_last (*keys, (void *) do_completion (as));
 	  astr_delete (as);
 	}
     }
   while (p->func == NULL);
 
-  *keys = vec_toarray (v);
   return p;
 }
 
@@ -257,8 +261,7 @@ END_DEFUN
 void
 process_key (size_t key)
 {
-  int numkeys;
-  size_t *keys = NULL;
+  gl_list_t keys;
   leafp p;
 
   if (key == KBD_NOKEY)
@@ -269,7 +272,7 @@ process_key (size_t key)
     universal_argument (KBD_META, (int) ((key & 0xff) - '0'));
   else
     {
-      p = completion_scan (key, &keys, &numkeys);
+      p = completion_scan (key, &keys);
       if (p != NULL)
 	{
 	  p->func (last_uniarg, NULL);
@@ -277,7 +280,7 @@ process_key (size_t key)
 	}
       else
 	{
-	  astr as = keyvectostr (keys, numkeys);
+	  astr as = keyvectostr (keys);
 	  minibuf_error ("%s is undefined", astr_cstr (as));
 	  astr_delete (as);
 	}
@@ -341,21 +344,23 @@ bind_compar (const void *p1, const void *p2)
 void
 init_bindings (void)
 {
-  size_t i, j, *keys;
+  size_t i, j;
+  gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                         NULL, NULL, NULL, true);
 
-  keys = xzalloc (sizeof (*keys));
   leaf_tree = leaf_new (10);
 
   /* Bind all printing keys to self_insert_command */
+  gl_list_add_last (keys, NULL);
   for (i = 0; i <= 0xff; i++)
     {
       if (isprint (i))
 	{
-	  *keys = i;
-	  bind_key_vec (leaf_tree, keys, 1, F_self_insert_command);
+	  gl_list_set_at (keys, 0, (void *) i);
+	  bind_key_vec (leaf_tree, keys, 0, F_self_insert_command);
 	}
     }
-  free (keys);
+  gl_list_free (keys);
 
   /* Bind all the default functions. */
   for (i = 0; i < fentry_table_size; i++)
@@ -553,15 +558,16 @@ Read key sequence and function name, and bind the function to the key
 sequence.
 +*/
 {
-  int ok = false, numkeys;
-  size_t key, *keys = NULL;
+  int ok = false;
+  size_t key;
+  gl_list_t keys;
   Function func;
   char *name;
 
   if (arglist)
     {
-      numkeys = keystrtovec (arglist->list_next->data, &keys);
-      if (numkeys == -1)
+      keys = keystrtovec (arglist->list_next->data);
+      if (keys == NULL)
 	{
 	  minibuf_error ("Key sequence %s is invalid",
 			 arglist->list_next->data);
@@ -575,12 +581,11 @@ sequence.
 
       minibuf_write ("Set key globally: ");
       key = getkey ();
-      completion_scan (key, &keys, &numkeys);
+      completion_scan (key, &keys);
 
-      as = keyvectostr (keys, numkeys);
-      name =
-	minibuf_read_function_name ("Set key %s to command: ",
-				    astr_cstr (as));
+      as = keyvectostr (keys);
+      name = minibuf_read_function_name ("Set key %s to command: ",
+                                         astr_cstr (as));
       astr_delete (as);
     }
 
@@ -591,14 +596,14 @@ sequence.
   if (func)
     {
       ok = true;
-      bind_key_vec (leaf_tree, keys, numkeys, func);
+      bind_key_vec (leaf_tree, keys, 0, func);
     }
   else
     minibuf_error ("No such function `%s'", name);
 
   if (!arglist)
     free (name);
-  free (keys);
+  gl_list_free (keys);
 
   return ok;
 }
@@ -708,20 +713,20 @@ message in the buffer.
 END_DEFUN
 
 char *
-get_function_by_key_sequence (size_t ** keys, int *numkeys)
+get_function_by_key_sequence (gl_list_t * keys)
 {
   leafp p;
   size_t c = getkey ();
 
   if (c & KBD_META && isdigit ((int) (c & 0xff)))
     {
-      *numkeys = 1;
-      *keys = malloc (sizeof (**keys));
-      *keys[0] = c;
+      *keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                    NULL, NULL, NULL, true);
+      gl_list_add_last (*keys, (void *) c);
       return "universal-argument";
     }
 
-  p = completion_scan (c, keys, numkeys);
+  p = completion_scan (c, keys);
   if (p == NULL)
     return NULL;
   else

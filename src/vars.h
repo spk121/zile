@@ -33,8 +33,5 @@ le *variableFind (le * varlist, char *key);
 
 void variableSet (le ** varlist, char *key, le * value);
 void variableSetString (le ** varlist, char *key, char *value);
-void variableSetNumber (le ** varlist, char *key, int value);
 le *variableGet (le * varlist, char *key);
 char *variableGetString (le * varlist, char *key);
-
-astr variableDump (le * varlist);

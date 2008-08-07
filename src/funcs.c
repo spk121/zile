@@ -253,11 +253,15 @@ If an argument value is passed, set the `fill-column' variable with
 that value, otherwise with the current column value.
 +*/
 {
-  if (lastflag & FLAG_SET_UNIARG)
-    variableSetNumber (&cur_bp->vars, "fill-column", uniarg);
-  else
-    variableSetNumber (&cur_bp->vars, "fill-column",
-		       (int) (cur_bp->pt.o + 1));
+  size_t fill_col = lastflag & FLAG_SET_UNIARG ? (size_t) uniarg :
+    cur_bp->pt.o + 1;
+  char *buf;
+
+  xasprintf (&buf, "%d", fill_col);
+  /* FIXME: Make set-variable able to be used non-interactively and
+     call it here. */
+  variableSetString (&cur_bp->vars, "fill-column", buf);
+  free (buf);
 
   return true;
 }

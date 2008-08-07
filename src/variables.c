@@ -104,14 +104,7 @@ get_variable_number (char *var)
 }
 
 int
-is_variable_equal (char *var, char *val)
-{
-  char *v = get_variable (var);
-  return v != NULL && !strcmp (v, val);
-}
-
-int
-lookup_bool_variable (char *var)
+get_variable_bool (char *var)
 {
   char *p = get_variable (var);
   if (p != NULL)

@@ -77,7 +77,7 @@ no_upper (const char *s, size_t len, int regex)
 static const char *
 fold_table (const char *s, int regex)
 {
-  if (lookup_bool_variable ("case-fold-search")
+  if (get_variable_bool ("case-fold-search")
       && no_upper (s, strlen (s), regex))
     return downcase;
   else

@@ -198,28 +198,6 @@ leTagReplace (le * list, int tagval, le * newinfo)
 }
 
 astr
-leDump (le * list, int indent)
-{
-  int c;
-  astr as = astr_new ();
-
-  for (; list; list = list->list_next)
-    {
-      if (list->data)
-	{
-	  for (c = 0; c < indent; c++)
-	    astr_cat_char (as, ' ');
-	  astr_afmt (as, "%s%s\n", list->data,
-		     list->quoted == 1 ? " quoted" : "");
-	}
-      else
-	leDump (list->branch, indent + 4);
-    }
-
-  return as;
-}
-
-astr
 leDumpEval (le * list, int indent GCC_UNUSED)
 {
   le *start = list;

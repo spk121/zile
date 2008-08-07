@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 
-#if 0
+#if 1
 # if 0
 #  ifndef REPLACE_CHOWN
 #   define REPLACE_CHOWN 1

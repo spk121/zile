@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "gl_array_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -277,43 +278,42 @@ strtochord (char *buf, size_t * len)
 /*
  * Convert a key sequence string into a key code sequence.
  */
-int
-keystrtovec (char *key, size_t ** keys)
+gl_list_t
+keystrtovec (char *key)
 {
-  vector *v = vec_new (sizeof (size_t));
-  size_t size;
+  gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                         NULL, NULL, NULL, true);
 
-  for (size = 0; *key != '\0'; size++)
+  while (*key != '\0')
     {
       size_t len, code = strtochord (key, &len);
-      vec_item (v, size, size_t) = code;
       if (code == KBD_NOKEY)
 	{
-	  vec_delete (v);
-	  return -1;
+	  gl_list_free (keys);
+	  return NULL;
 	}
+      gl_list_add_last (keys, (void *) code);
       key += len;
     }
 
-  *keys = vec_toarray (v);
-  return size;
+  return keys;
 }
 
 /*
  * Convert a key code sequence into a key code sequence string.
  */
 astr
-keyvectostr (size_t * keys, size_t numkeys)
+keyvectostr (gl_list_t keys)
 {
   size_t i;
   astr as = astr_new ();
 
-  for (i = 0; i < numkeys; i++)
+  for (i = 0; i < gl_list_size (keys); i++)
     {
-      astr key = chordtostr (keys[i]);
+      astr key = chordtostr ((size_t) gl_list_get_at (keys, i));
       astr_cat (as, key);
       astr_delete (key);
-      if (i < numkeys - 1)
+      if (i < gl_list_size (keys) - 1)
 	astr_cat_char (as, ' ');
     }
 
@@ -326,24 +326,26 @@ keyvectostr (size_t * keys, size_t numkeys)
 astr
 simplify_key (char *key)
 {
-  int i, j;
-  size_t *keys;
+  size_t i;
   astr dest = astr_new ();
+  gl_list_t keys;
 
   if (key == NULL)
     return dest;
-  i = keystrtovec (key, &keys);
-  for (j = 0; j < i; j++)
+  keys = keystrtovec (key);
+  if (keys)
     {
-      astr as;
-      if (j > 0)
-	astr_cat_char (dest, ' ');
-      as = chordtostr (keys[j]);
-      astr_cat (dest, as);
-      astr_delete (as);
+      for (i = 0; i < gl_list_size (keys); i++)
+        {
+          astr as;
+          if (i > 0)
+            astr_cat_char (dest, ' ');
+          as = chordtostr ((size_t) gl_list_get_at (keys, i));
+          astr_cat (dest, as);
+          astr_delete (as);
+        }
+      gl_list_free (keys);
     }
-  if (i > 0)
-    free (keys);
 
   return dest;
 }

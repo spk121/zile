@@ -180,7 +180,7 @@ static void
 calculate_highlight_region (Window * wp, Region * r, int *highlight)
 {
   if ((wp != cur_wp
-       && !lookup_bool_variable ("highlight-nonselected-windows"))
+       && !get_variable_bool ("highlight-nonselected-windows"))
       || (!wp->bp->mark)
       || (!transient_mark_mode ())
       || (transient_mark_mode () && !(wp->bp->mark_active)))

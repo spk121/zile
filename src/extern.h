@@ -22,6 +22,7 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
+#include "gl_list.h"
 #include "eval.h"
 
 /* basic.c ---------------------------------------------------------------- */
@@ -44,7 +45,7 @@ int scroll_up (void);
 size_t do_completion (astr as);
 char *minibuf_read_function_name (const char *fmt, ...);
 int execute_function (char *name, int uniarg);
-char *get_function_by_key_sequence (size_t ** keys, int *numkeys);
+char *get_function_by_key_sequence (gl_list_t * keys);
 void process_key (size_t key);
 void init_bindings (void);
 Function last_command (void);
@@ -145,8 +146,8 @@ const char *next_history_element (History * hp);
 /* keys.c ----------------------------------------------------------------- */
 astr chordtostr (size_t key);
 size_t strtochord (char *buf, size_t * len);
-int keystrtovec (char *key, size_t ** keyvec);
-astr keyvectostr (size_t * keys, size_t numkeys);
+gl_list_t keystrtovec (char *key);
+astr keyvectostr (gl_list_t keys);
 astr simplify_key (char *key);
 
 /* line.c ----------------------------------------------------------------- */
@@ -271,8 +272,7 @@ void undo_save (int type, Point pt, size_t arg1, size_t arg2);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
-int is_variable_equal (char *var, char *val);
-int lookup_bool_variable (char *var);
+int get_variable_bool (char *var);
 char *minibuf_read_variable_name (char *msg);
 void set_variable (char *var, char *val);
 char *get_variable_bp (Buffer * bp, char *var);

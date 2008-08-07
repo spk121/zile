@@ -94,8 +94,6 @@ lisp_dump (le * list)
 
   astr_cat_cstr (as, "Eval results:\n");
   astr_cat_delete (as, leDumpEval (list, 0));
-  astr_cat_cstr (as, "\n\nVariables:\n");
-  astr_cat_delete (as, variableDump (mainVarList));
 
   return as;
 }

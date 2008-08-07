@@ -26,7 +26,7 @@ TESTS = astr $(top_srcdir)/src/zile-startup-test
 check_PROGRAMS = astr
 
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
-LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS)
+LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS) $(LIBINTL)
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
 astr_LDADD = xalloc.o $(LDADD)
@@ -38,8 +38,6 @@ zile_SOURCES =				\
 	list.h				\
 	astr.c				\
 	astr.h				\
-	vector.c			\
-	vector.h			\
 	xalloc.c			\
 	eval.c				\
 	eval.h				\
@@ -56,6 +54,7 @@ zile_SOURCES =				\
 	completion.c			\
 	editfns.c			\
 	extern.h			\
+	zile.h				\
 	file.c				\
 	funcs.c				\
 	glue.c				\
@@ -79,13 +78,11 @@ zile_SOURCES =				\
 	window.c			\
 	term_minibuf.c			\
 	term_redisplay.c		\
-	term_ncurses.c			\
-	zile.h
+	term_ncurses.c
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
-EXTRA_DIST = 				\
-	zile-startup-test
+EXTRA_DIST = zile-startup-test
 
 loc:
 	sloccount $(zile_SOURCES)

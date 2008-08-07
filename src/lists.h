@@ -55,7 +55,6 @@ void leClearTag (le * list);
 void leTagData (le * list, char *data, int tagval);
 void leTagReplace (le * list, int tagval, le * newinfo);
 
-astr leDump (le * list, int indent);
 astr leDumpEval (le * list, int indent);
 astr leDumpReformat (le * tree);
 

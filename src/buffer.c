@@ -119,7 +119,7 @@ free_buffers (void)
 void
 init_buffer (Buffer * bp)
 {
-  if (lookup_bool_variable ("auto-fill-mode"))
+  if (get_variable_bool ("auto-fill-mode"))
     bp->flags ^= BFLAG_AUTOFILL;
 }
 
@@ -416,7 +416,7 @@ calculate_buffer_size (Buffer * bp)
 int
 transient_mark_mode (void)
 {
-  return lookup_bool_variable ("transient-mark-mode");
+  return get_variable_bool ("transient-mark-mode");
 }
 
 void
