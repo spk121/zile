@@ -94,10 +94,9 @@ variableGet (le * varlist, char *key)
 char *
 variableGetString (le * varlist, char *key)
 {
-  le *temp = variableFind (varlist, key);
-  if (temp && temp->branch && temp->branch->data
-      && countNodes (temp->branch) == 1)
-    return temp->branch->data;
+  le *temp = variableGet (varlist, key);
+  if (temp && temp->data && countNodes (temp) == 1)
+    return temp->data;
   return NULL;
 }
 
