@@ -262,7 +262,7 @@ static astr
 get_current_dir (void)
 {
   astr buf;
-  char *p, *q;
+  const char *p, *q;
 
   if (cur_bp->filename != NULL)
     /* If the current buffer has a filename, get the current directory
