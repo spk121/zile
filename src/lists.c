@@ -65,6 +65,7 @@ leReallyWipe (le * list)
 void
 leWipe (le * list)
 {
+  assert (list);
   if (list != leNIL && list != leT)
     leReallyWipe (list);
 }
