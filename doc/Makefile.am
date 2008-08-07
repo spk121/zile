@@ -39,8 +39,7 @@ EXTRA_DIST =					\
 	dotzile.texi				\
 	zlint					\
 	zile.1.in				\
-	mkdoc.c					\
-	config.h
+	mkdoc.c
 
 man_MANS = zile.1
 
@@ -49,12 +48,12 @@ HELP: zile.info
 
 AUTODOCSRCS = $(top_srcdir)/src/*.c
 
-mkdoc$(EXEEXT_FOR_BUILD): mkdoc.o
-	$(CC_FOR_BUILD) $(CFLAGS) $(LDFLAGS) -o $@ mkdoc.o $(top_builddir)/lib/libgnu.a
+AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -I$(top_srcdir)/src -DPATH_DATA="\"$(pkgdatadir)\""
+LDADD = $(top_builddir)/lib/libgnu.a
 
-mkdoc.o: mkdoc.c config.h $(top_srcdir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_vars.h \
-         $(top_srcdir)/src/strrstr.c $(top_srcdir)/src/xalloc.c $(top_srcdir)/src/astr.c
-	$(CC_FOR_BUILD) -c -I$(top_srcdir)/doc -I$(top_srcdir) -I$(top_srcdir)/lib -I$(top_srcdir)/src $(CFLAGS) $(srcdir)/mkdoc.c
+EXTRA_PROGRAMS = mkdoc
+
+mkdoc_SOURCES = mkdoc.c
 
 AUTODOC: $(AUTODOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
 	./mkdoc $(AUTODOCSRCS) >AUTODOC

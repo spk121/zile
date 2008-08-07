@@ -34,9 +34,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <signal.h>
-#if HAVE_LIBGEN_H
-#include <libgen.h>
-#endif
+#include "dirname.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -236,13 +234,8 @@ main (int argc, char **argv)
   size_t line;
 
   /* Set prog_name to executable name, if available */
-#if HAVE_BASENAME
-  if (argv[0]) {
-    char *s = xstrdup (argv[0]);
-    prog_name = xstrdup (basename (s));
-    free (s);
-  }
-#endif
+  if (argv[0])
+    prog_name = base_name (argv[0]);
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
@@ -405,7 +398,7 @@ main (int argc, char **argv)
   free_buffers ();
   free_minibuf ();
   free_rotation_buffers ();
-  /* Don't free prog_name, as it might not have been set dynamically. */
+  free (prog_name);
 
   return 0;
 }

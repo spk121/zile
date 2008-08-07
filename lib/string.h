@@ -171,7 +171,7 @@ extern char *strdup (char const *__s);
 #endif
 
 /* Return a newly allocated copy of at most N bytes of STRING.  */
-#if 0
+#if 1
 # if ! 1
 #  undef strndup
 #  define strndup rpl_strndup
@@ -190,7 +190,7 @@ extern char *strndup (char const *__string, size_t __n);
 /* Find the length (number of bytes) of STRING, but scan at most
    MAXLEN bytes.  If no '\0' terminator is found in that many bytes,
    return MAXLEN.  */
-#if 0
+#if 1
 # if ! 1
 extern size_t strnlen (char const *__string, size_t __maxlen);
 # endif
@@ -526,7 +526,7 @@ extern char * mbstok_r (char *string, const char *delim, char **save_ptr);
 #endif
 
 /* Map any int, typically from errno, into an error message.  */
-#if 0
+#if 1
 # if 0
 #  undef strerror
 #  define strerror rpl_strerror

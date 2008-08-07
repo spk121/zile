@@ -52,3 +52,9 @@ sys_stat_h.m4
 xalloc.m4
 fcntl_h.m4
 minmax.m4
+dirname.m4
+dos.m4
+double-slash-root.m4
+strndup.m4
+strnlen.m4
+xstrndup.m4

@@ -180,21 +180,6 @@ astr_find_cstr (const astr as, const char *s)
   return (sp == NULL) ? -1 : sp - as->text;
 }
 
-int
-astr_rfind (const astr as, const astr src)
-{
-  return astr_rfind_cstr (as, src->text);
-}
-
-int
-astr_rfind_cstr (const astr as, const char *s)
-{
-  char *sp;
-  assert (as != NULL && s != NULL);
-  sp = strrstr (as->text, s);
-  return (sp == NULL) ? -1 : sp - as->text;
-}
-
 static astr
 astr_replace_x (astr as, ptrdiff_t pos, size_t size, const char *s,
 		size_t csize)

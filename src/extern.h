@@ -291,7 +291,6 @@ void delete_window (Window * del_wp);
 Point window_pt (Window * wp);
 
 /* xalloc.c --------------------------------------------------------------- */
-#include "xalloc.h"
 int xvasprintf (char **ptr, const char *fmt, va_list vargs);
 int xasprintf (char **ptr, const char *fmt, ...);
 

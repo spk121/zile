@@ -34,9 +34,6 @@ The Zile team would like to thank:
 * Marius Nita <marius@cs.pdx.edu> for the `shrink-window' feature
 * Alan James <alan@tomun.org> for suggestions
 * Joseph Boyd <k963@bonbon.net> for the `back-to-indentation' feature
-* Richard Smith <richard@ex-parrot.com> for autotools code (mostly
-  stolen from binutils) to build mkdoc for the build platform when
-  cross-compiling
 * Han Boetes for a security fix
 * Thomas Dickey for help with ncurses
 * Robert Millan for bug reports and fixes

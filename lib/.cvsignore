@@ -64,3 +64,14 @@ xalloc.h
 xmalloc.c
 fcntl.in.h
 minmax.h
+basename.c
+dirname.c
+dirname.h
+stripslash.c
+strndup.c
+strnlen.c
+xstrndup.c
+xstrndup.h
+version-etc-fsf.c
+version-etc.c
+version-etc.h

@@ -26,15 +26,18 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include "xalloc.h"
 
-/* #include other sources so this program can be easily built on the
-   build host when cross-compiling */
+#include "astr.h"
+
 char *prog_name = "mkdoc";
-#include "strrstr.c"
-#include "xalloc.c"
+/* #include sources because the doc directory must be built before the
+    src directory */
 #include "astr.c"
+#include "xalloc.c"
 
 struct fentry
 {
@@ -119,16 +122,17 @@ parse (void)
     {
       if (!strncmp (astr_cstr (buf), "DEFUN (", (size_t) 6))
 	{
-	  int i, j;
+          const char *p, *q, *r;
 	  astr sub;
-	  i = astr_find_cstr (buf, "\"");
-	  j = astr_rfind_cstr (buf, "\"");
-	  if (i < 0 || j < 0 || i == j)
+          p = astr_cstr (buf);
+          q = strchr (p, '\"');
+          r = strrchr (p, '\"');
+	  if (q == NULL || r == NULL || q == r)
 	    {
 	      fprintf (stderr, "mkdoc: invalid DEFUN () syntax\n");
 	      exit (1);
 	    }
-	  sub = astr_substr (buf, i + 1, (size_t) (j - i - 1));
+	  sub = astr_substr (buf, (size_t) (q - p + 1), (size_t) (r - q - 1));
 	  astr_cpy (buf, sub);
 	  astr_delete (sub);
 	  fdecl (astr_cstr (buf));
@@ -179,7 +183,7 @@ process_file (char *filename)
  * Stub to make xalloc_die happy.
  */
 void
-zile_exit (int doabort GCC_UNUSED)
+zile_exit (int doabort)
 {
   exit (2);
 }

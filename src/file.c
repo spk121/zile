@@ -262,7 +262,7 @@ static astr
 get_current_dir (void)
 {
   astr buf;
-  int p;
+  char *p, *q;
 
   if (cur_bp->filename != NULL)
     /* If the current buffer has a filename, get the current directory
@@ -275,8 +275,10 @@ get_current_dir (void)
 	astr_cat_char (buf, '/');
     }
 
-  p = astr_rfind_cstr (buf, "/");
-  astr_truncate (buf, p + 1);
+  p = astr_cstr (buf);
+  q = strrchr (p, '/');
+  if (q)
+    astr_truncate (buf, q - p + 1);
 
   return buf;
 }

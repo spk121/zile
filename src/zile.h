@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "xalloc.h"
 #include "minmax.h"
 
 #include "list.h"
@@ -349,7 +350,7 @@ typedef size_t Font;
 #endif
 #endif
 
-/* Avoid warnings about unused `uniarg' parameters. */
+/* Avoid warnings about unused parameters. */
 #undef GCC_UNUSED
 #ifdef __GNUC__
 #define GCC_UNUSED __attribute__ ((unused))

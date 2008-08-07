@@ -3,7 +3,6 @@ dnl
 dnl Copyright (c) 2008 Free Software Foundation, Inc.
 dnl Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 dnl Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
-dnl Copyright (c) 2004 David Capello.
 dnl
 dnl This file is part of GNU Zile.
 dnl
@@ -22,48 +21,26 @@ dnl along with GNU Zile; see the file COPYING.  If not, write to the
 dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
-dnl ==================================================================
 dnl Initialise autoconf and automake
-dnl ==================================================================
-
 AC_INIT(Zile, 2.2.62, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
-dnl ==================================================================
 dnl Checks for programs
-dnl ==================================================================
-
 AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
-BFD_CC_FOR_BUILD
-AM_PROG_CC_C_O
-AC_PROG_RANLIB
+
+dnl Checks for functions and headers
 gl_INIT
-
-dnl ==================================================================
-dnl Checks for functions and headers (hope eventually to use gnulib)
-dnl ==================================================================
-
 AC_HEADER_STDC
-AC_REPLACE_FUNCS(strrstr)
 AC_CHECK_FUNCS(fchmod fchown)
-dnl Next two lines are both for basename
-AC_CHECK_HEADERS(libgen.h)
-AC_CHECK_FUNCS(basename)
 
-dnl ==================================================================
 dnl Turn on additional compiler warnings
-dnl ==================================================================
-
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic"
 fi
 
-dnl ==================================================================
 dnl Curses
-dnl ==================================================================
-
 AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
 	[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
 	AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
@@ -74,27 +51,13 @@ AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
 	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses -ldl"],
 	AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])])])
 
-dnl ==================================================================
 dnl Extra definitions for config.h
-dnl ==================================================================
-
-AH_BOTTOM([
-#ifndef HAVE_STRRSTR
-extern char *strrstr(const char *, const char *);
-#endif
-])
-
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
 		   [The date of compilation.])
 AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
 		   [The host of compilation.])
 
-rm -f src/paths.h
-
-dnl ==================================================================
 dnl Generate configured files
-dnl ==================================================================
-
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_FILES(Makefile doc/Makefile lib/Makefile src/Makefile)
 AC_OUTPUT

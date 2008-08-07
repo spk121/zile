@@ -147,13 +147,6 @@ extern int astr_find (const astr as, const astr src);
 extern int astr_find_cstr (const astr as, const char *s);
 
 /*
- * Find the last occurrence of the argument string in as, returning
- * the position starting from the end of the string.
- */
-extern int astr_rfind (const astr as, const astr src);
-extern int astr_rfind_cstr (const astr as, const char *s);
-
-/*
  * Read a string from the stream f and return it. The trailing newline
  * is removed from the string. If the stream is at eof when astr_fgets
  * is called, it returns NULL.

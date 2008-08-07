@@ -131,11 +131,11 @@ extern int ftruncate (int fd, off_t length);
 #endif
 
 
-#if 0
+#if 1
 /* Include the headers that might declare getcwd so that they will not
    cause confusion if included after this file.  */
 # include <stdlib.h>
-# if 0
+# if 1
 /* Get the name of the current working directory, and put it in SIZE bytes
    of BUF.
    Return BUF if successful, or NULL if the directory couldn't be determined
