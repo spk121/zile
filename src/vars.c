@@ -33,7 +33,7 @@
 le *mainVarList = NULL;
 
 
-le *
+static le *
 variableFind (le * varlist, char *key)
 {
   if (varlist != NULL && key != NULL)

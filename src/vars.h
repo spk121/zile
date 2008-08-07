@@ -27,7 +27,6 @@
 
 extern le *mainVarList;
 
-le *variableFind (le * varlist, char *key);
 #define variableFree(L) \
   leWipe(L)
 
