@@ -95,6 +95,10 @@ free_buffer (Buffer * bp)
   if (bp->filename != NULL)
     free (bp->filename);
 
+  /* Free the variables. */
+  if (bp->vars != NULL)
+    leWipe(bp->vars);
+
   free (bp);
 }
 
