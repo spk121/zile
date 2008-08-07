@@ -33,7 +33,7 @@ gl_EARLY
 dnl Checks for functions and headers
 gl_INIT
 AC_HEADER_STDC
-AC_CHECK_FUNCS(fchmod fchown)
+AC_CHECK_FUNCS(fchmod)
 
 dnl Turn on additional compiler warnings
 if test "$GCC" = "yes"; then

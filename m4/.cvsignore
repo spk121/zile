@@ -58,3 +58,4 @@ double-slash-root.m4
 strndup.m4
 strnlen.m4
 xstrndup.m4
+chown.m4

@@ -898,18 +898,14 @@ copy_file (const char *source, const char *dest)
   serrno = errno;
   stat_valid = fstat (ifd, &st) != -1;
 
-#if defined(HAVE_FCHMOD) || defined(HAVE_FCHOWN)
   /* Recover file permissions and ownership. */
   if (stat_valid)
     {
 #ifdef HAVE_FCHMOD
       fchmod (ofd, st.st_mode);
 #endif
-#ifdef HAVE_FCHOWN
       fchown (ofd, st.st_uid, st.st_gid);
-#endif
     }
-#endif
 
   close (ifd);
   close (ofd);

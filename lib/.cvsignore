@@ -75,3 +75,5 @@ xstrndup.h
 version-etc-fsf.c
 version-etc.c
 version-etc.h
+chown.c
+fchown-stub.c
