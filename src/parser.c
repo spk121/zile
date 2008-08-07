@@ -98,12 +98,6 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
 	    {
 	      ungetachar (c);
 	      astr_truncate (tok, (ptrdiff_t) - 1);
-
-	      if (!astr_cmp_cstr (tok, "quote"))
-		{
-		  *tokenid = T_QUOTE;
-		  return tok;
-		}
 	      *tokenid = T_WORD;
 	      return tok;
 	    }
@@ -122,7 +116,6 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
 	      astr_truncate (tok, (ptrdiff_t) - 1);
 	      *tokenid = T_WORD;
 	      return tok;
-
 	    }
 	}
 
