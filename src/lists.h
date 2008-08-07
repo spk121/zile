@@ -44,7 +44,7 @@ le *leNew (const char *text);
 void leReallyWipe (le * list);
 void leWipe (le * list);
 
-le *leAddHead (le * list, le * element);
+le *leAddTail (le * list, le * element);
 
 le *leAddBranchElement (le * list, le * branch, int quoted);
 le *leAddDataElement (le * list, const char *data, int quoted);

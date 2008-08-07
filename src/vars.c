@@ -56,7 +56,7 @@ variableSet (le ** varlist, char *key, le * value)
       else
 	{
 	  temp = leNew (key);
-	  *varlist = leAddHead (*varlist, temp);
+	  *varlist = leAddTail (*varlist, temp);
 	}
 
       temp->branch = leDup (value);

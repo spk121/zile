@@ -70,23 +70,11 @@ leWipe (le * list)
 }
 
 le *
-leAddHead (le * list, le * element)
-{
-  if (!element)
-    return list;
-
-  element->list_next = list;
-  if (list)
-    list->list_prev = element;
-  return element;
-}
-
-static le *
 leAddTail (le * list, le * element)
 {
   le *temp = list;
 
-  /* if either element or list doesn't exist, return the 'new' list */
+  /* if either element or list doesn't exist, return the `new' list */
   if (!element)
     return list;
   if (!list)
