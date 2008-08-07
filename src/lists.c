@@ -81,7 +81,7 @@ leAddHead (le * list, le * element)
   return element;
 }
 
-le *
+static le *
 leAddTail (le * list, le * element)
 {
   le *temp = list;
@@ -140,7 +140,7 @@ leDup (le * list)
   return temp;
 }
 
-void
+static void
 leClearTag (le * list)
 {
   if (!list)
@@ -150,7 +150,7 @@ leClearTag (le * list)
   leClearTag (list->list_next);
 }
 
-void
+static void
 leTagData (le * list, char *data, int tagval)
 {
   if (!data || !list)
@@ -165,7 +165,7 @@ leTagData (le * list, char *data, int tagval)
     }
 }
 
-void
+static void
 leTagReplace (le * list, int tagval, le * newinfo)
 {
   if (!list || !newinfo)
@@ -197,29 +197,7 @@ leTagReplace (le * list, int tagval, le * newinfo)
     }
 }
 
-astr
-leDumpEval (le * list, int indent GCC_UNUSED)
-{
-  le *start = list;
-  astr as = astr_new ();
-
-  for (; list; list = list->list_next)
-    {
-      if (list->branch)
-	{
-	  le *le_value = evaluateBranch (list->branch);
-	  if (list != start)
-	    astr_cat_char (as, '\n');
-	  astr_cat_delete (as, leDumpReformat (le_value));
-	  if (le_value && le_value != leNIL)
-	    leWipe (le_value);
-	}
-    }
-
-  return as;
-}
-
-astr
+static astr
 leDumpReformat (le * tree)
 {
   int notfirst = false;
@@ -245,6 +223,28 @@ leDumpReformat (le * tree)
 	}
 
       astr_cat_char (as, ')');
+    }
+
+  return as;
+}
+
+astr
+leDumpEval (le * list, int indent GCC_UNUSED)
+{
+  le *start = list;
+  astr as = astr_new ();
+
+  for (; list; list = list->list_next)
+    {
+      if (list->branch)
+	{
+	  le *le_value = evaluateBranch (list->branch);
+	  if (list != start)
+	    astr_cat_char (as, '\n');
+	  astr_cat_delete (as, leDumpReformat (le_value));
+	  if (le_value && le_value != leNIL)
+	    leWipe (le_value);
+	}
     }
 
   return as;

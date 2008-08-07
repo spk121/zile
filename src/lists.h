@@ -45,17 +45,11 @@ void leReallyWipe (le * list);
 void leWipe (le * list);
 
 le *leAddHead (le * list, le * element);
-le *leAddTail (le * list, le * element);
 
 le *leAddBranchElement (le * list, le * branch, int quoted);
 le *leAddDataElement (le * list, const char *data, int quoted);
 le *leDup (le * list);
 
-void leClearTag (le * list);
-void leTagData (le * list, char *data, int tagval);
-void leTagReplace (le * list, int tagval, le * newinfo);
-
 astr leDumpEval (le * list, int indent);
-astr leDumpReformat (le * tree);
 
 #endif
