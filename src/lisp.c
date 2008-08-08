@@ -159,7 +159,7 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
 
 static struct le *
 parseInFile (getcCallback getachar, ungetcCallback ungetachar,
-	     struct le *list, int *line)
+	     struct le *list)
 {
   astr tok;
   enum tokenname tokenid;
@@ -179,14 +179,13 @@ parseInFile (getcCallback getachar, ungetcCallback ungetachar,
 
 	case T_OPENPAREN:
 	  list = leAddBranchElement (list,
-				     parseInFile (getachar, ungetachar, NULL,
-						  line), isquoted);
+				     parseInFile (getachar, ungetachar, NULL),
+                                     isquoted);
 	  isquoted = 0;
 	  break;
 
 	case T_NEWLINE:
 	  isquoted = 0;
-	  *line = *line + 1;
 	  break;
 
 	case T_WORD:
@@ -203,17 +202,6 @@ parseInFile (getcCallback getachar, ungetcCallback ungetachar,
 
       astr_delete (tok);
     }
-}
-
-static le *
-lisp_read (getcCallback getcp, ungetcCallback ungetcp)
-{
-  int lineno = 0;
-  struct le *list = NULL;
-
-  list = parseInFile (getcp, ungetcp, list, &lineno);
-
-  return list;
 }
 
 
@@ -234,13 +222,13 @@ ungetc_file (int c)
 le *
 lisp_read_file (const char *file)
 {
-  le *list;
+  le *list = NULL;
   fp = fopen (file, "r");
 
   if (fp == NULL)
     return NULL;
 
-  list = lisp_read (getc_file, ungetc_file);
+  list = parseInFile (getc_file, ungetc_file, list);
   fclose (fp);
 
   return list;
