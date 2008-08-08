@@ -151,6 +151,9 @@ gl_list_t keystrtovec (char *key);
 astr keyvectostr (gl_list_t keys);
 astr simplify_key (char *key);
 
+/* killring.c ------------------------------------------------------------- */
+void free_kill_ring (void);
+
 /* line.c ----------------------------------------------------------------- */
 Line *line_new (void);
 void line_delete (Line *l);
@@ -171,7 +174,6 @@ void bprintf (const char *fmt, ...);
 int delete_char (void);
 int backward_delete_char (void);
 void free_registers (void);
-void free_kill_ring (void);
 
 /* lisp.c ----------------------------------------------------------------- */
 void lisp_init (void);
