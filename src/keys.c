@@ -319,33 +319,3 @@ keyvectostr (gl_list_t keys)
 
   return as;
 }
-
-/*
- * Convert a key like "\\C-xrs" to "C-x r s"
- */
-astr
-simplify_key (char *key)
-{
-  size_t i;
-  astr dest = astr_new ();
-  gl_list_t keys;
-
-  if (key == NULL)
-    return dest;
-  keys = keystrtovec (key);
-  if (keys)
-    {
-      for (i = 0; i < gl_list_size (keys); i++)
-        {
-          astr as;
-          if (i > 0)
-            astr_cat_char (dest, ' ');
-          as = chordtostr ((size_t) gl_list_get_at (keys, i));
-          astr_cat (dest, as);
-          astr_delete (as);
-        }
-      gl_list_free (keys);
-    }
-
-  return dest;
-}

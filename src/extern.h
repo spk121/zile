@@ -149,7 +149,6 @@ astr chordtostr (size_t key);
 size_t strtochord (char *buf, size_t * len);
 gl_list_t keystrtovec (char *key);
 astr keyvectostr (gl_list_t keys);
-astr simplify_key (char *key);
 
 /* killring.c ------------------------------------------------------------- */
 void free_kill_ring (void);
