@@ -68,20 +68,6 @@ list_prepend (list l, void *i)
   return n;
 }
 
-/* Add an item to the tail of a list, returning the new list tail */
-list
-list_append (list l, void *i)
-{
-  list n = XZALLOC (struct list_s);
-
-  n->next = l;
-  n->prev = l->prev;
-  n->item = i;
-  l->prev = l->prev->next = n;
-
-  return n;
-}
-
 /* Remove the first item of a list, returning the item, or NULL if the
    list is empty */
 void *
