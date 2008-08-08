@@ -57,7 +57,7 @@ enum tokenname
 };
 
 static int
-getachar (astr as, ptrdiff_t * pos)
+read_char (astr as, ptrdiff_t * pos)
 {
   if ((size_t) *pos < astr_len (as))
     return *astr_char (as, (*pos)++);
@@ -65,7 +65,7 @@ getachar (astr as, ptrdiff_t * pos)
 }
 
 static astr
-snagAToken (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
+read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
 {
   int c;
   int doublequotes = 0;
@@ -76,12 +76,12 @@ snagAToken (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
   /* Chew space to next token */
   do
     {
-      c = getachar (as, pos);
+      c = read_char (as, pos);
 
       /* Munch comments */
       if (c == ';')
 	do
-          c = getachar (as, pos);
+          c = read_char (as, pos);
 	while (c != EOF && c != '\n');
     }
   while (c != EOF && (c == ' ' || c == '\t'));
@@ -117,7 +117,7 @@ snagAToken (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
   if (c == '\"')
     {
       doublequotes = 1;
-      c = getachar (as, pos);
+      c = read_char (as, pos);
     }
 
   while (1)
@@ -152,7 +152,7 @@ snagAToken (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
 	    }
 	}
 
-      c = getachar (as, pos);
+      c = read_char (as, pos);
     }
 
   return tok;
@@ -167,7 +167,7 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
 
   while (1)
     {
-      tok = snagAToken (&tokenid, as, pos);
+      tok = read_token (&tokenid, as, pos);
 
       switch (tokenid)
 	{
