@@ -36,7 +36,6 @@ struct list_s
 
 list list_new (void);
 void list_delete (list l);
-size_t list_length (list l);
 list list_prepend (list l, void *i);
 list list_append (list l, void *i);
 void *list_behead (list l);

@@ -54,19 +54,6 @@ list_delete (list l)
   while (p != l);
 }
 
-/* Return the length of a list */
-size_t
-list_length (list l)
-{
-  list p;
-  size_t length = 0;
-
-  for (p = l->next; p != l; p = p->next)
-    ++length;
-
-  return length;
-}
-
 /* Add an item to the head of a list, returning the new list head */
 list
 list_prepend (list l, void *i)

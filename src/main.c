@@ -35,6 +35,7 @@
 #include <getopt.h>
 #include <signal.h>
 #include "dirname.h"
+#include "gl_linked_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -125,12 +126,12 @@ about_screen (void)
 }
 
 static void
-execute_functions (list funcs)
+execute_functions (gl_list_t funcs)
 {
-  list l;
-  for (l = list_first (funcs); l != funcs; l = list_next (l))
+  size_t i;
+  for (i = 0; i < gl_list_size (funcs); i++)
     {
-      char *func = (char *) l->item;
+      char *func = (char *) gl_list_get_at(funcs, i);
       term_redisplay ();
       if (!execute_function (func, 1))
         minibuf_error ("Function `%s' not defined", func);
@@ -229,7 +230,8 @@ int
 main (int argc, char **argv)
 {
   int c, bflag = false, qflag = false;
-  list fargs = list_new ();
+  gl_list_t fargs = gl_list_create_empty (GL_LINKED_LIST,
+                                          NULL, NULL, NULL, false);
   size_t line;
 
   /* Set prog_name to executable name, if available */
@@ -260,7 +262,7 @@ main (int argc, char **argv)
           qflag = true;
           break;
         case 'f':
-          list_append (fargs, optarg);
+          gl_list_add_last (fargs, optarg);
           break;
         case 'q':
           qflag = true;
@@ -355,7 +357,7 @@ main (int argc, char **argv)
 
       /* Show the splash screen only if no files and no Lisp expression
          or load file is specified on the command line. */
-      if (minibuf_contents == NULL && argc == 0 && list_length (fargs) == 0)
+      if (minibuf_contents == NULL && argc == 0 && gl_list_size (fargs) == 0)
         about_screen ();
 
       setup_main_screen (argc);
@@ -371,7 +373,7 @@ main (int argc, char **argv)
         }
 
       execute_functions (fargs);
-      list_delete (fargs);
+      gl_list_free (fargs);
 
       /* Run the main loop. */
       loop ();
