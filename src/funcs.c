@@ -36,7 +36,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "vars.h"
 
 
 DEFUN ("suspend-zile", suspend_zile)

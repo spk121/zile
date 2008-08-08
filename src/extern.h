@@ -272,11 +272,12 @@ void undo_save (int type, Point pt, size_t arg1, size_t arg2);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
+void free_variables (void);
 int get_variable_bool (char *var);
 char *minibuf_read_variable_name (char *msg);
-void set_variable (char *var, char *val);
-char *get_variable_bp (Buffer * bp, char *var);
-char *get_variable (char *var);
+void set_variable (const char *var, const char *val);
+const char *get_variable_bp (Buffer * bp, char *var);
+const char *get_variable (char *var);
 int get_variable_number_bp (Buffer * bp, char *var);
 int get_variable_number (char *var);
 

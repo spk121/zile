@@ -39,7 +39,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "eval.h"
-#include "vars.h"
 
 #define ZILE_VERSION_STRING	"GNU " PACKAGE_NAME " " VERSION
 
@@ -387,7 +386,7 @@ main (int argc, char **argv)
     fprintf (stderr, "%s: %s\n", prog_name, minibuf_contents);
 
   /* Free Lisp state. */
-  variableFree (mainVarList);
+  free_variables ();
   lisp_finalise ();
 
   /* Free all the memory allocated. */

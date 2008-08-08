@@ -25,7 +25,6 @@
 #include <assert.h>
 #include "zile.h"
 #include "extern.h"
-#include "vars.h"
 #include "eval.h"
 
 

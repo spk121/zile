@@ -29,6 +29,7 @@
 #include <limits.h>
 #include "xalloc.h"
 #include "minmax.h"
+#include "hash.h"
 
 #include "list.h"
 #include "astr.h"
@@ -182,7 +183,7 @@ struct Buffer
   int mark_active;
 
   /* Buffer-local variables. */
-  le *vars;
+  Hash_table *vars;
 
   /* The total number of lines in the buffer. */
   size_t num_lines;

@@ -27,59 +27,122 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
+#include "hash.h"
 
 #include "zile.h"
 #include "extern.h"
 #include "eval.h"
-#include "vars.h"
 
 /*
- * Default variables values table.
+ * Variable type.
  */
-static struct var_entry
+typedef struct var_entry
 {
-  char *var;			/* Variable name. */
-  char *val;			/* Default value. */
-  int local;			/* If true, becomes local when set. */
-} def_vars[] =
+  const char *var;		/* Variable name. */
+  const char *defval;		/* Default value. */
+  const char *val;		/* Current value, if any. */
+  bool local;			/* If true, becomes local when set. */
+} var_entry;
+
+static Hash_table *main_var_list;
+
+static size_t
+var_hash (const void *v, size_t n)
 {
-#define X(var, val, local, doc) { var, val, local },
-#include "tbl_vars.h"
-#undef X
-};
+  return hash_string (((var_entry *) v)->var, n);
+}
+
+static bool
+var_cmp (const void *v, const void *w)
+{
+  return strcmp (((var_entry *) v)->var, ((var_entry *) w)->var) == 0;
+}
+
+static void
+var_free (void *v)
+{
+  var_entry *p = (var_entry *) v;
+  free ((char *) p->var);
+  if (p->defval != p->val)
+    free ((char *) p->defval);
+  free ((char *) p->val);
+  free (p);
+}
 
 void
 init_variables (void)
 {
-  struct var_entry *p;
+  var_entry *p;
 
-  for (p = &def_vars[0];
-       p < &def_vars[sizeof (def_vars) / sizeof (def_vars[0])]; p++)
-    set_variable (p->var, p->val);
+  /* Initial size of 32 is big enough for default variables and some
+     more */
+  main_var_list = hash_initialize (32, NULL, var_hash, var_cmp, var_free);
+#define X(var_init, defval_init, local_init, doc_init)  \
+  p = XMALLOC (var_entry);                              \
+  p->var = xstrdup (var_init);                          \
+  p->defval = p->val = xstrdup (defval_init);           \
+  p->local = local_init;                                \
+  hash_insert (main_var_list, p);
+#include "tbl_vars.h"
+#undef X
+}
+
+static void
+set_variable_in_list (Hash_table *var_list, const char *var, const char *val)
+{
+  var_entry *p = XZALLOC (var_entry), *q;
+
+  /* Insert variable if it doesn't already exist */
+  p->var = xstrdup (var);
+  q = hash_insert (var_list, p);
+
+  /* Update value */
+  val = xstrdup (val);
+  q->val = val;
+
+  /* If variable is new, initialise other fields */
+  if (q == p)
+    {
+      p->defval = val;
+      p->local = false;
+    }
+  else
+    var_free (p);
 }
 
 void
-set_variable (char *var, char *val)
+set_variable (const char *var, const char *val)
 {
-  variableSetString (&mainVarList, var, val);
+  set_variable_in_list (main_var_list, var, val);
 }
 
-char *
+void
+free_variables (void)
+{
+  hash_free (main_var_list);
+}
+
+const char *
 get_variable_bp (Buffer * bp, char *var)
 {
-  char *s = NULL;
+  var_entry *p = NULL, *key = XMALLOC (var_entry);
 
-  if (bp)
-    s = variableGetString (bp->vars, var);
+  key->var = var;
 
-  if (s == NULL)
-    s = variableGetString (mainVarList, var);
+  if (bp && bp->vars)
+    p = hash_lookup (bp->vars, key);
 
-  return s;
+  if (p == NULL)
+    p = hash_lookup (main_var_list, key);
+
+  free (key);
+
+  return p ? p->val : NULL;
 }
 
-char *
+const char *
 get_variable (char *var)
 {
   return get_variable_bp (cur_bp, var);
@@ -89,7 +152,7 @@ int
 get_variable_number_bp (Buffer * bp, char *var)
 {
   int t = 0;
-  char *s = get_variable_bp (bp, var);
+  const char *s = get_variable_bp (bp, var);
 
   if (s)
     t = atoi (s);
@@ -106,7 +169,7 @@ get_variable_number (char *var)
 int
 get_variable_bool (char *var)
 {
-  char *p = get_variable (var);
+  const char *p = get_variable (var);
   if (p != NULL)
     return strcmp (p, "nil") != 0;
 
@@ -118,10 +181,14 @@ minibuf_read_variable_name (char *msg)
 {
   char *ms;
   Completion *cp = completion_new (false);
-  le *lp;
+  var_entry *p;
 
-  for (lp = mainVarList; lp != NULL; lp = lp->list_next)
-    list_append (cp->completions, xstrdup (lp->data));
+  for (p = hash_get_first (main_var_list);
+       p != NULL;
+       p = hash_get_next (main_var_list, p))
+    {
+      list_append (cp->completions, xstrdup (p->var));
+    }
 
   for (;;)
     {
@@ -157,25 +224,13 @@ minibuf_read_variable_name (char *msg)
   return ms;
 }
 
-static struct var_entry *
-get_variable_entry (char *var)
-{
-  struct var_entry *p;
-  for (p = &def_vars[0];
-       p < &def_vars[sizeof (def_vars) / sizeof (def_vars[0])]; p++)
-    if (!strcmp (p->var, var))
-      return p;
-
-  return NULL;
-}
-
 DEFUN ("set-variable", set_variable)
 /*+
 Set a variable value to the user-specified value.
 +*/
 {
   char *var, *val;
-  struct var_entry *ent;
+  struct var_entry *ent, *key = XMALLOC (var_entry);
 
   if (arglist)
     {
@@ -195,9 +250,11 @@ Set a variable value to the user-specified value.
 
   /* Some variables automatically become buffer-local when set in
      any fashion. */
-  ent = get_variable_entry (var);
+  key->var = var;
+  ent = hash_lookup (main_var_list, key);
+  free (key);
   if (ent->local)
-    variableSetString (&cur_bp->vars, var, val);
+    set_variable_in_list (cur_bp->vars, var, val);
   else
     set_variable (var, val);
 

@@ -97,7 +97,7 @@ free_buffer (Buffer * bp)
 
   /* Free the variables. */
   if (bp->vars != NULL)
-    leWipe(bp->vars);
+    hash_free (bp->vars);
 
   free (bp);
 }

@@ -1023,7 +1023,7 @@ static int
 write_to_disk (Buffer * bp, char *filename)
 {
   int fd, backup = get_variable_bool ("make-backup-files"), ret;
-  char *backupdir = get_variable_bool ("backup-directory") ?
+  const char *backupdir = get_variable_bool ("backup-directory") ?
     get_variable ("backup-directory") : NULL;
 
   /*

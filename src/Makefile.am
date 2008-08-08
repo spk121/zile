@@ -45,8 +45,6 @@ zile_SOURCES =				\
 	lists.h				\
 	parser.c			\
 	parser.h			\
-	vars.c				\
-	vars.h				\
 	lisp.c				\
 	basic.c				\
 	bind.c				\

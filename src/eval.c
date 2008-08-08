@@ -29,7 +29,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "eval.h"
-#include "vars.h"
 
 
 static le *
@@ -130,16 +129,11 @@ evaluateNode (le * node)
 	value = leDup (node->branch);
       else
 	value = evaluateBranch (node->branch);
-
     }
   else
     {
-      value = variableGet (mainVarList, node->data);
-
-      if (value != NULL)
-	value = leDup (value);
-      else
-	value = leNew (node->data);
+      const char *s = get_variable (node->data);
+      value = leNew (s ? s : node->data);
     }
 
   return value;
@@ -171,7 +165,7 @@ eval_cb_setq (int argc, le * branch)
 
 	  newvalue = evaluateNode (current->list_next);
 
-	  variableSet (&mainVarList, current->data, newvalue);
+	  set_variable (current->data, newvalue->data);
 
 	  if (current->list_next == NULL)
 	    break;
