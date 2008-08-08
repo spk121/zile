@@ -95,18 +95,6 @@ list_append (list l, void *i)
   return n;
 }
 
-/* Return the first item of a list, or NULL if the list is empty */
-void *
-list_head (list l)
-{
-  list p = l->next;
-
-  if (p == l)
-    return NULL;
-
-  return p->item;
-}
-
 /* Remove the first item of a list, returning the item, or NULL if the
    list is empty */
 void *
@@ -141,43 +129,4 @@ list_betail (list l)
   free (p);
 
   return i;
-}
-
-/* Return the nth item of l, or l->item (usually NULL) if that is out
-   of range */
-void *
-list_at (list l, size_t n)
-{
-  size_t i;
-  list p;
-
-  assert (l != NULL);
-
-  for (p = list_first (l), i = 0; p != l && i < n; p = list_next (p), i++)
-    ;
-
-  return p->item;
-}
-
-/* Sort list l with qsort using comparison function cmp */
-void
-list_sort (list l, int (*cmp) (const void *p1, const void *p2))
-{
-  list p;
-  void **vec;
-  size_t i, len = list_length (l);
-
-  assert (l != NULL && cmp != NULL);
-
-  vec = (void **) XCALLOC (len, void *);
-
-  for (p = list_first (l), i = 0; i < len; p = list_next (p), ++i)
-    vec[i] = (void *) p->item;
-
-  qsort (vec, len, sizeof (void *), cmp);
-
-  for (p = list_first (l), i = 0; i < len; p = list_next (p), ++i)
-    p->item = vec[i];
-
-  free (vec);
 }
