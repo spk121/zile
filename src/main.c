@@ -329,11 +329,19 @@ main (int argc, char **argv)
       if (!qflag)
         {
           le *list;
+          FILE *fp;
 
           astr as = get_home_dir ();
           astr_cat_cstr (as, "/." PACKAGE);
-          list = lisp_read_file (astr_cstr (as));
-          leEval (list);
+          fp = fopen (astr_cstr (as), "r");
+          if (fp != NULL)
+            {
+              astr bs = astr_fread (fp);
+              list = lisp_read (bs);
+              leEval (list);
+              astr_delete (bs);
+            }
+          fclose (fp);
           astr_delete (as);
           leWipe (list);
         }

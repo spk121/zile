@@ -220,16 +220,27 @@ astr_truncate (astr as, ptrdiff_t pos)
   return as;
 }
 
+astr astr_fread(FILE * fp)
+{
+  int c;
+  astr as = astr_new ();
+
+  while ((c = getc (fp)) != EOF)
+    astr_cat_char (as, c);
+
+  return as;
+}
+
 astr
-astr_fgets (FILE * f)
+astr_fgets (FILE * fp)
 {
   int c;
   astr as;
 
-  if (feof (f))
+  if (feof (fp))
     return NULL;
   as = astr_new ();
-  while ((c = fgetc (f)) != EOF && c != '\n')
+  while ((c = fgetc (fp)) != EOF && c != '\n')
     astr_cat_char (as, c);
   return as;
 }

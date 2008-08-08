@@ -134,11 +134,16 @@ extern astr astr_remove (astr as, ptrdiff_t pos, size_t size);
 extern astr astr_truncate (astr as, ptrdiff_t pos);
 
 /*
- * Read a string from the stream f and return it. The trailing newline
- * is removed from the string. If the stream is at eof when astr_fgets
- * is called, it returns NULL.
+ * Read the stream fp into a string and return it.
  */
-extern astr astr_fgets (FILE * f);
+astr astr_fread(FILE * fp);
+
+/*
+ * Read a string from the stream fp and return it. The trailing
+ * newline is removed from the string. If the stream is at EOF when
+ * astr_fgets is called, it returns NULL.
+ */
+extern astr astr_fgets (FILE * fp);
 
 /*
  * Append formatted text to the argument string

@@ -60,9 +60,19 @@ lisp_finalise (void)
 }
 
 
+static astr string;
+static ptrdiff_t pos;
+
+static int
+getachar (void)
+{
+  if ((size_t) pos < astr_len (string))
+    return *astr_char (string, pos++);
+  return EOF;
+}
+
 static astr
-snagAToken (getcCallback getachar, ungetcCallback ungetachar,
-	    enum tokenname *tokenid)
+snagAToken (enum tokenname *tokenid)
 {
   int c;
   int doublequotes = 0;
@@ -78,9 +88,7 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
       /* Munch comments */
       if (c == ';')
 	do
-	  {
-	    c = getachar ();
-	  }
+          c = getachar ();
 	while (c != EOF && c != '\n');
     }
   while (c != EOF && (c == ' ' || c == '\t'));
@@ -128,7 +136,7 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
 	  if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n'
 	      || c == '\r' || c == EOF)
 	    {
-	      ungetachar (c);
+	      pos--;
 	      astr_truncate (tok, (ptrdiff_t) - 1);
 	      *tokenid = T_WORD;
 	      return tok;
@@ -141,7 +149,7 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
 	    case '\n':
 	    case '\r':
 	    case EOF:
-	      ungetachar (c);
+	      pos--;
 	      /* Fall through */
 
 	    case '\"':
@@ -157,19 +165,16 @@ snagAToken (getcCallback getachar, ungetcCallback ungetachar,
   return tok;
 }
 
-static struct le *
-parseInFile (getcCallback getachar, ungetcCallback ungetachar,
-	     struct le *list)
+static le *
+parseInFile (le * list)
 {
   astr tok;
   enum tokenname tokenid;
   int isquoted = 0;
 
-  assert (getachar && ungetachar);
-
   while (1)
     {
-      tok = snagAToken (getachar, ungetachar, &tokenid);
+      tok = snagAToken (&tokenid);
 
       switch (tokenid)
 	{
@@ -178,9 +183,7 @@ parseInFile (getcCallback getachar, ungetcCallback ungetachar,
 	  break;
 
 	case T_OPENPAREN:
-	  list = leAddBranchElement (list,
-				     parseInFile (getachar, ungetachar, NULL),
-                                     isquoted);
+	  list = leAddBranchElement (list, parseInFile (NULL), isquoted);
 	  isquoted = 0;
 	  break;
 
@@ -204,32 +207,10 @@ parseInFile (getcCallback getachar, ungetcCallback ungetachar,
     }
 }
 
-
-static FILE *fp = NULL;
-
-static int
-getc_file (void)
-{
-  return getc (fp);
-}
-
-static void
-ungetc_file (int c)
-{
-  ungetc (c, fp);
-}
-
 le *
-lisp_read_file (const char *file)
+lisp_read (astr as)
 {
-  le *list = NULL;
-  fp = fopen (file, "r");
-
-  if (fp == NULL)
-    return NULL;
-
-  list = parseInFile (getc_file, ungetc_file, list);
-  fclose (fp);
-
-  return list;
+  string = as;
+  pos = 0;
+  return parseInFile (NULL);
 }

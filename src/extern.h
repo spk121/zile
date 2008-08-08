@@ -177,7 +177,7 @@ void free_registers (void);
 /* lisp.c ----------------------------------------------------------------- */
 void lisp_init (void);
 void lisp_finalise (void);
-le *lisp_read_file (const char *file);
+le *lisp_read (astr as);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro (void);
