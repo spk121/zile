@@ -75,7 +75,7 @@ is_regular_file (const char *filename)
 astr
 agetcwd (void)
 {
-  size_t len = PATH_MAX;
+  size_t len = 256;
   char *buf = (char *) xzalloc (len);
   char *res;
   astr as;
@@ -291,7 +291,7 @@ get_home_dir (void)
 {
   char *s = getenv ("HOME");
   astr as;
-  if (s != NULL && strlen (s) < PATH_MAX)
+  if (s != NULL)
     as = astr_new_cstr (s);
   else
     as = agetcwd ();

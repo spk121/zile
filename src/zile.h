@@ -342,16 +342,6 @@ typedef size_t Font;
  * Miscellaneous stuff.
  *--------------------------------------------------------------------------*/
 
-/* Ensure PATH_MAX is defined */
-#ifndef PATH_MAX
-#ifdef _POSIX_PATH_MAX
-#define PATH_MAX	_POSIX_PATH_MAX
-#else
-/* Guess if all else fails */
-#define PATH_MAX	254
-#endif
-#endif
-
 /* Avoid warnings about unused parameters. */
 #undef GCC_UNUSED
 #ifdef __GNUC__
