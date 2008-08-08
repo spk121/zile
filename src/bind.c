@@ -642,7 +642,7 @@ walk_bindings_tree (leafp tree, gl_list_t keys,
     }
 
   astr_delete ((astr) gl_list_get_at (keys, gl_list_size (keys) - 1));
-  gl_list_remove_at (keys, gl_list_size (keys) - 1);
+  assert (gl_list_remove_at (keys, gl_list_size (keys) - 1));
 }
 
 static void

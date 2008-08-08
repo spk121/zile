@@ -99,21 +99,3 @@ list_behead (list l)
 
   return i;
 }
-
-/* Remove the last item of a list, returning the item, or NULL if the
-   list is empty */
-void *
-list_betail (list l)
-{
-  void *i;
-  list p = l->prev;
-
-  if (p == l)
-    return NULL;
-  i = p->item;
-  l->prev = l->prev->prev;
-  l->prev->next = l;
-  free (p);
-
-  return i;
-}

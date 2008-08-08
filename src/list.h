@@ -39,10 +39,8 @@ void list_delete (list l);
 list list_prepend (list l, void *i);
 list list_append (list l, void *i);
 void *list_behead (list l);
-void *list_betail (list l);
 
 #define list_first(l) ((l)->next)
-#define list_last(l)  ((l)->prev)
 #define list_next(l)  ((l)->next)
 #define list_prev(l)  ((l)->prev)
 

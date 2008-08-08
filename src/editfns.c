@@ -22,38 +22,42 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "gl_linked_list.h"
 
 #include "zile.h"
 #include "extern.h"
 
-static list mark_ring = NULL;	/* Mark ring. */
+static gl_list_t mark_ring = NULL;	/* Mark ring. */
 
-/* Push the current mark in the mark-ring. */
+/* Push the current mark to the mark-ring. */
 void
 push_mark (void)
 {
   if (!mark_ring)
-    mark_ring = list_new ();
+    mark_ring = gl_list_create_empty (GL_LINKED_LIST,
+                                      NULL, NULL, NULL, true);
 
   /* Save the mark.  */
   if (cur_bp->mark)
-    list_append (mark_ring, copy_marker (cur_bp->mark));
+    gl_list_add_last (mark_ring, copy_marker (cur_bp->mark));
   /* Save an invalid mark.  */
   else
     {
       Marker *m = point_min_marker ();
       m->pt.p = NULL;
-      list_append (mark_ring, m);
+      gl_list_add_last (mark_ring, m);
     }
 }
 
-/* Pop a mark from the mark-ring and put it as current mark. */
+/* Pop a mark from the mark-ring and make it the current mark. */
 void
 pop_mark (void)
 {
-  Marker *m = list_last (mark_ring)->item;
+  Marker *m = (Marker *) gl_list_get_at (mark_ring,
+                                         gl_list_size (mark_ring) - 1);
 
   /* Replace the mark. */
   if (m->bp->mark)
@@ -61,11 +65,11 @@ pop_mark (void)
 
   m->bp->mark = (m->pt.p) ? copy_marker (m) : NULL;
 
-  list_betail (mark_ring);
+  assert (gl_list_remove_at (mark_ring, gl_list_size (mark_ring) - 1));
   free_marker (m);
 }
 
-/* Set the mark to the point position. */
+/* Set the mark to point. */
 void
 set_mark (void)
 {
@@ -113,32 +117,28 @@ char_before (Point * pt)
     return *astr_char (pt->p->item, (ptrdiff_t) (pt->o - 1));
 }
 
-/* This function returns the character following point in the current
-   buffer. */
+/* Returns the character following point in the current buffer. */
 int
 following_char (void)
 {
   return char_after (&cur_bp->pt);
 }
 
-/* This function returns the character preceding point in the current
-   buffer. */
+/* Return the character preceding point in the current buffer. */
 int
 preceding_char (void)
 {
   return char_before (&cur_bp->pt);
 }
 
-/* This function returns true if point is at the beginning of the
-   buffer. */
+/* Return true if point is at the beginning of the buffer. */
 int
 bobp (void)
 {
   return (list_prev (cur_bp->pt.p) == cur_bp->lines && cur_bp->pt.o == 0);
 }
 
-/* This function returns true if point is at the end of the
-   buffer. */
+/* Return true if point is at the end of the buffer. */
 int
 eobp (void)
 {
@@ -146,14 +146,14 @@ eobp (void)
 	  cur_bp->pt.o == astr_len (cur_bp->pt.p->item));
 }
 
-/* Returns true if point is at the beginning of a line. */
+/* Return true if point is at the beginning of a line. */
 int
 bolp (void)
 {
   return cur_bp->pt.o == 0;
 }
 
-/* Returns true if point is at the end of a line. */
+/* Return true if point is at the end of a line. */
 int
 eolp (void)
 {
