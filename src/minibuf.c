@@ -42,15 +42,13 @@ void
 free_minibuf (void)
 {
   free_history_elements (&files_history);
-  if (minibuf_contents != NULL)
-    free (minibuf_contents);
+  free (minibuf_contents);
 }
 
 static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
-  if (minibuf_contents != NULL)
-    free (minibuf_contents);
+  free (minibuf_contents);
 
   xvasprintf (&minibuf_contents, fmt, ap);
 

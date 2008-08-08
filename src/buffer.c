@@ -92,8 +92,7 @@ free_buffer (Buffer * bp)
 
   /* Free the name and the filename. */
   free (bp->name);
-  if (bp->filename != NULL)
-    free (bp->filename);
+  free (bp->filename);
 
   /* Free the variables. */
   if (bp->vars != NULL)
@@ -152,8 +151,7 @@ create_buffer (const char *name)
 void
 set_buffer_name (Buffer * bp, const char *name)
 {
-  if (bp->name != NULL)
-    free (bp->name);
+  free (bp->name);
   bp->name = xstrdup (name);
 }
 
@@ -163,12 +161,10 @@ set_buffer_name (Buffer * bp, const char *name)
 void
 set_buffer_filename (Buffer * bp, const char *filename)
 {
-  if (bp->filename != NULL)
-    free (bp->filename);
+  free (bp->filename);
   bp->filename = xstrdup (filename);
 
-  if (bp->name != NULL)
-    free (bp->name);
+  free (bp->name);
   bp->name = "";
   bp->name = make_buffer_name (filename);
 }

@@ -61,8 +61,7 @@ Copy region into the user specified register.
   calculate_the_region (&r);
 
   p = copy_text_block (r.start.n, r.start.o, r.size);
-  if (regs[reg].text != NULL)
-    free (regs[reg].text);
+  free (regs[reg].text);
   regs[reg].text = p;
   regs[reg].size = r.size;
 
@@ -156,6 +155,5 @@ free_registers (void)
 {
   int i;
   for (i = 0; i < NUM_REGISTERS; ++i)
-    if (regs[i].text != NULL)
-      free (regs[i].text);
+    free (regs[i].text);
 }

@@ -296,8 +296,7 @@ Search forward from point for the user specified text.
   if (ms[0] == '\0')
     return false;
 
-  if (last_search != NULL)
-    free (last_search);
+  free (last_search);
   last_search = xstrdup (ms);
 
   if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, false))
@@ -322,8 +321,7 @@ Search backward from point for the user specified text.
   if (ms[0] == '\0')
     return false;
 
-  if (last_search != NULL)
-    free (last_search);
+  free (last_search);
   last_search = xstrdup (ms);
 
   if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, false))
@@ -348,8 +346,7 @@ Search forward from point for regular expression REGEXP.
   if (ms[0] == '\0')
     return false;
 
-  if (last_search != NULL)
-    free (last_search);
+  free (last_search);
   last_search = xstrdup (ms);
 
   if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, true))
@@ -374,8 +371,7 @@ Search backward from point for match for regular expression REGEXP.
   if (ms[0] == '\0')
     return false;
 
-  if (last_search != NULL)
-    free (last_search);
+  free (last_search);
   last_search = xstrdup (ms);
 
   if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, true))
@@ -478,8 +474,7 @@ isearch (int dir, int regexp)
 	      /* Find next match. */
 	      cur = cur_bp->pt;
 	      /* Save search string. */
-	      if (last_search != NULL)
-		free (last_search);
+              free (last_search);
 	      last_search = xstrdup (astr_cstr (pattern));
 	    }
 	  else if (last_search != NULL)
@@ -513,8 +508,7 @@ isearch (int dir, int regexp)
 		  cur_bp->mark->pt = start;
 
 		  /* Save search string. */
-		  if (last_search != NULL)
-		    free (last_search);
+                  free (last_search);
 		  last_search = xstrdup (astr_cstr (pattern));
 
 		  minibuf_write ("Mark saved when search started");

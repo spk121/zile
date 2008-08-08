@@ -140,14 +140,12 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	case KBD_RET:
 	  term_move (term_height () - 1, 0);
 	  term_clrtoeol ();
-	  if (saved)
-	    free (saved);
+          free (saved);
 	  return *p;
 	case KBD_CANCEL:
 	  term_move (term_height () - 1, 0);
 	  term_clrtoeol ();
-	  if (saved)
-	    free (saved);
+          free (saved);
 	  return NULL;
 	case KBD_CTRL | 'a':
 	case KBD_HOME:
@@ -401,6 +399,5 @@ free_rotation_buffers (void)
 {
   int i;
   for (i = 0; i < MAX_ROTATIONS; ++i)
-    if (rotation_buffers[i] != NULL)
-      free (rotation_buffers[i]);
+    free (rotation_buffers[i]);
 }
