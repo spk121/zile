@@ -127,6 +127,5 @@ void
 leEval (le * list)
 {
   for (; list; list = list->next)
-    if (list->branch)
-      leWipe (evaluateBranch (list->branch));
+    leWipe (evaluateBranch (list->branch));
 }
