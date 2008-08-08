@@ -32,7 +32,6 @@
 #include "hash.h"
 #include "gl_list.h"
 
-#include "list.h"
 #include "astr.h"
 #include "parser.h"
 #include "eval.h"
@@ -44,9 +43,9 @@
 /*
  * The forward opaque types used in the editor.
  */
+typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
-typedef struct list_s Line;	/* This is evil! */
 typedef struct Undo Undo;
 typedef struct Region Region;
 typedef struct Buffer Buffer;
@@ -65,6 +64,12 @@ typedef int (*Function) (int uniarg, le * list);
  * A line is a list whose items are astrs. The newline at the end of
  * each line is implicit.
  */
+struct Line
+{
+  Line *prev;
+  Line *next;
+  astr item;
+};
 
 /* Point and Marker. */
 struct Point

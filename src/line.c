@@ -35,6 +35,70 @@
 #include "extern.h"
 
 
+/*
+ * Circular doubly-linked lists
+ */
+
+/* Create an empty list, returning a pointer to the list */
+Line *
+line_new (void)
+{
+  Line *l = XZALLOC (Line);
+
+  l->next = l->prev = l;
+  l->item = NULL;
+
+  return l;
+}
+
+/* Delete a list, freeing its nodes */
+void
+line_delete (Line *l)
+{
+  Line *p = l, *q;
+
+  do
+    {
+      q = p;
+      p = p->next;
+      free (q);
+    }
+  while (p != l);
+}
+
+/* Insert an item into list before the given point, returning the new item */
+Line *
+line_insert (Line *l, astr i)
+{
+  Line *n = XZALLOC (Line);
+
+  n->next = l->next;
+  n->prev = l;
+  n->item = i;
+  l->next = l->next->prev = n;
+
+  return n;
+}
+
+/* Remove the next item of a list, returning the item, or NULL if the
+   list is empty */
+astr
+line_remove (Line *l)
+{
+  astr i;
+  Line *p = l->next;
+
+  if (p == l)
+    return NULL;
+  i = p->item;
+  l->next = l->next->next;
+  l->next->prev = l;
+  free (p);
+
+  return i;
+}
+
+
 static void
 adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir,
 		int offset)
@@ -210,7 +274,7 @@ intercalate_newline ()
   lp1 = cur_bp->pt.p;
 
   /* Update line linked list. */
-  lp2 = list_prepend (lp1, astr_new ());
+  lp2 = line_insert (lp1, astr_new ());
   ++cur_bp->num_lines;
 
   /* Move the text after the point into the new line. */
@@ -484,13 +548,13 @@ delete_char (void)
       undo_save (UNDO_INTERCALATE_CHAR, cur_bp->pt, '\n', 0);
 
       lp1 = cur_bp->pt.p;
-      lp2 = list_next (lp1);
+      lp2 = lp1->next;
       lp1len = astr_len (lp1->item);
 
       /* Move the next line text into the current line. */
-      lp2 = list_next (cur_bp->pt.p);
-      astr_cat (lp1->item, list_next (cur_bp->pt.p)->item);
-      astr_delete (list_behead (lp1));
+      lp2 = cur_bp->pt.p->next;
+      astr_cat (lp1->item, cur_bp->pt.p->next->item);
+      astr_delete (line_remove (lp1));
       --cur_bp->num_lines;
 
       adjust_markers (lp1, lp2, lp1len, -1, 0);
@@ -670,7 +734,7 @@ does nothing.
   deactivate_mark ();
 
   /* If we're on first line, set target to 0. */
-  if (list_prev (cur_bp->pt.p) == cur_bp->lines)
+  if (cur_bp->pt.p->prev == cur_bp->lines)
     target_goalc = 0;
   else
     {				/* Find goalc in previous non-blank line. */

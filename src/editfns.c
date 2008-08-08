@@ -135,14 +135,14 @@ preceding_char (void)
 int
 bobp (void)
 {
-  return (list_prev (cur_bp->pt.p) == cur_bp->lines && cur_bp->pt.o == 0);
+  return (cur_bp->pt.p->prev == cur_bp->lines && cur_bp->pt.o == 0);
 }
 
 /* Return true if point is at the end of the buffer. */
 int
 eobp (void)
 {
-  return (list_next (cur_bp->pt.p) == cur_bp->lines &&
+  return (cur_bp->pt.p->next == cur_bp->lines &&
 	  cur_bp->pt.o == astr_len (cur_bp->pt.p->item));
 }
 

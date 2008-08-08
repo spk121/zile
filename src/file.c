@@ -387,7 +387,7 @@ read_from_disk (const char *filename)
 		astr_cat_char (lp->item, buf[i]);
 	      else
 		{
-		  lp = list_prepend (lp, astr_new ());
+		  lp = line_insert (lp, astr_new ());
 		  ++cur_bp->num_lines;
 		  i += eol_len - 1;
 		}
@@ -396,9 +396,9 @@ read_from_disk (const char *filename)
       while ((size = fread (buf, 1, BUFSIZ, fp)) > 0);
     }
 
-  list_next (lp) = cur_bp->lines;
-  list_prev (cur_bp->lines) = lp;
-  cur_bp->pt.p = list_next (cur_bp->lines);
+  lp->next = cur_bp->lines;
+  cur_bp->lines->prev = lp;
+  cur_bp->pt.p = cur_bp->lines->next;
 
   fclose (fp);
 }
@@ -713,11 +713,11 @@ insert_buffer (Buffer * bp)
 
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
   undo_nosave = true;
-  for (lp = list_next (bp->lines); lp != bp->lines; lp = list_next (lp))
+  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     {
       for (i = 0; i < astr_len (lp->item); i++)
 	insert_char (*astr_char (lp->item, (ptrdiff_t) i));
-      if (list_next (lp) != bp->lines)
+      if (lp->next != bp->lines)
 	insert_newline ();
     }
   undo_nosave = false;
@@ -954,7 +954,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, int umask)
     return -1;
 
   /* Save the lines. */
-  for (lp = list_next (bp->lines); lp != bp->lines; lp = list_next (lp))
+  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     {
       ssize_t len = (ssize_t) astr_len (lp->item);
 
@@ -964,7 +964,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, int umask)
           ret = written;
           break;
         }
-      if (list_next (lp) != bp->lines)
+      if (lp->next != bp->lines)
         {
           written = write (fd, bp->eol, eol_len);
           if (written != eol_len)

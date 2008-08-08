@@ -46,14 +46,14 @@ buffer_new (void)
   bp = (Buffer *) XZALLOC (Buffer);
 
   /* Allocate a line. */
-  bp->pt.p = list_new ();
+  bp->pt.p = line_new ();
   bp->pt.p->item = astr_new ();
 
   /* Allocate the limit marker. */
-  bp->lines = list_new ();
+  bp->lines = line_new ();
 
-  list_prev (bp->lines) = list_next (bp->lines) = bp->pt.p;
-  list_prev (bp->pt.p) = list_next (bp->pt.p) = bp->lines;
+  bp->lines->prev = bp->lines->next = bp->pt.p;
+  bp->pt.p->prev = bp->pt.p->next = bp->lines;
 
   /* Set default EOL string. */
   bp->eol = coding_eol_lf;
@@ -71,9 +71,9 @@ free_buffer (Buffer * bp)
   Undo *up, *next_up;
 
   /* Free all the lines. */
-  for (lp = list_first (bp->lines); lp != bp->lines; lp = list_next (lp))
+  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     astr_delete (lp->item);
-  list_delete (bp->lines);
+  line_delete (bp->lines);
 
   /* Free all the undo operations. */
   up = bp->last_undop;
@@ -399,7 +399,7 @@ set_temporary_buffer (Buffer * bp)
 size_t
 calculate_buffer_size (Buffer * bp)
 {
-  Line *lp = list_next (bp->lines);
+  Line *lp = bp->lines->next;
   size_t size = 0;
 
   if (lp == bp->lines)
@@ -408,7 +408,7 @@ calculate_buffer_size (Buffer * bp)
   for (;;)
     {
       size += astr_len (lp->item);
-      lp = list_next (lp);
+      lp = lp->next;
       if (lp == bp->lines)
 	break;
       ++size;

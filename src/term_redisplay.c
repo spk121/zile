@@ -209,8 +209,8 @@ draw_window (size_t topline, Window * wp)
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && list_prev (lp) != wp->bp->lines;
-       lp = list_prev (lp), --i, --lineno)
+       i > 0 && lp->prev != wp->bp->lines;
+       lp = lp->prev, --i, --lineno)
     ;
 
   cur_tab_width = tab_width (wp->bp);
@@ -236,7 +236,7 @@ draw_window (size_t topline, Window * wp)
 	  term_addch ('$');
 	}
 
-      lp = list_next (lp);
+      lp = lp->next;
     }
 }
 

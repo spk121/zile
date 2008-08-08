@@ -130,14 +130,14 @@ goto_goalc (int goalc)
 int
 previous_line (void)
 {
-  if (list_prev (cur_bp->pt.p) != cur_bp->lines)
+  if (cur_bp->pt.p->prev != cur_bp->lines)
     {
       thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
       if (!(lastflag & FLAG_DONE_CPCN))
 	cur_goalc = get_goalc ();
 
-      cur_bp->pt.p = list_prev (cur_bp->pt.p);
+      cur_bp->pt.p = cur_bp->pt.p->prev;
       cur_bp->pt.n--;
 
       goto_goalc (cur_goalc);
@@ -181,14 +181,14 @@ END_DEFUN
 int
 next_line (void)
 {
-  if (list_next (cur_bp->pt.p) != cur_bp->lines)
+  if (cur_bp->pt.p->next != cur_bp->lines)
     {
       thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
       if (!(lastflag & FLAG_DONE_CPCN))
 	cur_goalc = get_goalc ();
 
-      cur_bp->pt.p = list_next (cur_bp->pt.p);
+      cur_bp->pt.p = cur_bp->pt.p->next;
       cur_bp->pt.n++;
 
       goto_goalc (cur_goalc);
@@ -353,7 +353,7 @@ backward_char (void)
   else if (!bobp ())
     {
       thisflag |= FLAG_NEED_RESYNC;
-      cur_bp->pt.p = list_prev (cur_bp->pt.p);
+      cur_bp->pt.p = cur_bp->pt.p->prev;
       cur_bp->pt.n--;
       FUNCALL (end_of_line);
       return true;
@@ -395,7 +395,7 @@ forward_char (void)
   else if (!eobp ())
     {
       thisflag |= FLAG_NEED_RESYNC;
-      cur_bp->pt.p = list_next (cur_bp->pt.p);
+      cur_bp->pt.p = cur_bp->pt.p->next;
       cur_bp->pt.n++;
       FUNCALL (beginning_of_line);
       return true;
@@ -430,7 +430,7 @@ int
 ngotoup (size_t n)
 {
   for (; n > 0; n--)
-    if (list_prev (cur_bp->pt.p) != cur_bp->lines)
+    if (cur_bp->pt.p->prev != cur_bp->lines)
       FUNCALL (previous_line);
     else
       return false;
@@ -442,7 +442,7 @@ int
 ngotodown (size_t n)
 {
   for (; n > 0; n--)
-    if (list_next (cur_bp->pt.p) != cur_bp->lines)
+    if (cur_bp->pt.p->next != cur_bp->lines)
       FUNCALL (next_line);
     else
       return false;

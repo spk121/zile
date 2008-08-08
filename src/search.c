@@ -211,7 +211,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
   if (s2size < 1)
     return false;
 
-  for (lp = startp; lp != cur_bp->lines; lp = list_next (lp))
+  for (lp = startp; lp != cur_bp->lines; lp = lp->next)
     {
       if (lp == startp)
 	{
@@ -254,7 +254,7 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
   if (ssize < 1)
     return false;
 
-  for (lp = startp; lp != cur_bp->lines; lp = list_prev (lp))
+  for (lp = startp; lp != cur_bp->lines; lp = lp->prev)
     {
       sp = astr_cstr (lp->item);
       if (lp == startp)

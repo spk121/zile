@@ -81,7 +81,7 @@ kill_line (int literally)
 	return true;
     }
 
-  if (list_next (cur_bp->pt.p) != cur_bp->lines)
+  if (cur_bp->pt.p->next != cur_bp->lines)
     {
       if (!FUNCALL (delete_char))
 	return false;

@@ -34,8 +34,6 @@ astr_LDADD = xalloc.o $(LDADD)
 bin_PROGRAMS = zile
 
 zile_SOURCES =				\
-	list.c				\
-	list.h				\
 	astr.c				\
 	astr.h				\
 	xalloc.c			\

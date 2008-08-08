@@ -121,11 +121,11 @@ copy_text_block (size_t startn, size_t starto, size_t size)
   n = cur_bp->pt.n;
   if (n > startn)
     do
-      lp = list_prev (lp);
+      lp = lp->prev;
     while (--n > startn);
   else if (n < startn)
     do
-      lp = list_next (lp);
+      lp = lp->next;
     while (++n < startn);
 
   for (i = starto; dp - buf < (int) size;)
@@ -142,7 +142,7 @@ copy_text_block (size_t startn, size_t starto, size_t size)
       else
 	{
 	  *dp++ = '\n';
-	  lp = list_next (lp);
+	  lp = lp->next;
 	  i = 0;
 	}
     }

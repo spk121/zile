@@ -29,12 +29,12 @@ Point
 make_point (size_t lineno, size_t offset)
 {
   Point pt;
-  pt.p = list_next (cur_bp->lines);
+  pt.p = cur_bp->lines->next;
   pt.n = lineno;
   pt.o = offset;
   while (lineno > 0)
     {
-      pt.p = list_next (pt.p);
+      pt.p = pt.p->next;
       lineno--;
     }
   return pt;
@@ -60,7 +60,7 @@ point_dist (Point pt1, Point pt2)
   if (cmp_point (pt1, pt2) > 0)
     swap_point (&pt1, &pt2);
 
-  for (lp = pt1.p;; lp = list_next (lp))
+  for (lp = pt1.p;; lp = lp->next)
     {
       size += astr_len (lp->item);
 
@@ -100,7 +100,7 @@ Point
 point_min (void)
 {
   Point pt;
-  pt.p = list_next (cur_bp->lines);
+  pt.p = cur_bp->lines->next;
   pt.n = 0;
   pt.o = 0;
   return pt;
@@ -110,9 +110,9 @@ Point
 point_max (void)
 {
   Point pt;
-  pt.p = list_prev (cur_bp->lines);
+  pt.p = cur_bp->lines->prev;
   pt.n = cur_bp->num_lines;
-  pt.o = astr_len (list_prev (cur_bp->lines)->item);
+  pt.o = astr_len (cur_bp->lines->prev->item);
   return pt;
 }
 
@@ -127,10 +127,10 @@ line_beginning_position (int count)
   pt.o = 0;
 
   count--;
-  for (; count < 0 && list_prev (pt.p) != cur_bp->lines; pt.n--, count++)
-    pt.p = list_prev (pt.p);
-  for (; count > 0 && list_next (pt.p) != cur_bp->lines; pt.n++, count--)
-    pt.p = list_next (pt.p);
+  for (; count < 0 && pt.p->prev != cur_bp->lines; pt.n--, count++)
+    pt.p = pt.p->prev;
+  for (; count > 0 && pt.p->next != cur_bp->lines; pt.n++, count--)
+    pt.p = pt.p->next;
 
   return pt;
 }

@@ -539,7 +539,7 @@ edit_tab_region (int action)
   marker = point_marker ();
 
   undo_save (UNDO_START_SEQUENCE, marker->pt, 0, 0);
-  for (lp = r.start.p, lineno = r.start.n;; lp = list_next (lp), ++lineno)
+  for (lp = r.start.p, lineno = r.start.n;; lp = lp->next, ++lineno)
     {
       /* First line.  */
       if (lineno == r.start.n)
@@ -652,7 +652,7 @@ transpose_subr (Function f)
   else if (f == F_forward_line)
     {
       /* If we are in first line, go to next line. */
-      if (list_prev (cur_bp->pt.p) == cur_bp->lines)
+      if (cur_bp->pt.p->prev == cur_bp->lines)
 	{
 	  f (1, NULL);
 	}
@@ -1486,7 +1486,7 @@ setcase_region (int rcase)
 	}
       else
 	{
-	  lp = list_next (lp);
+	  lp = lp->next;
 	  i = 0;
 	}
     }
