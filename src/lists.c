@@ -36,11 +36,8 @@ leNew (const char *text)
 {
   le *new = (le *) xzalloc (sizeof (le));
 
-  new->branch = NULL;
-  new->data = text ? xstrdup (text) : NULL;
-  new->quoted = 0;
-  new->tag = -1;
-  new->next = NULL;
+  if (text)
+    new->data = xstrdup (text);
 
   return new;
 }

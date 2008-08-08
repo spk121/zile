@@ -32,7 +32,6 @@ struct le
   struct le *branch;
   char *data;
   int quoted;
-  int tag;
 
   /* for the next in the list in the current parenlevel */
   struct le *next;
