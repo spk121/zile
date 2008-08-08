@@ -127,12 +127,6 @@ void
 leEval (le * list)
 {
   for (; list; list = list->next)
-    {
-      if (list->branch)
-	{
-	  le *le_value = evaluateBranch (list->branch);
-	  if (le_value && le_value != leNIL)
-	    leWipe (le_value);
-	}
-    }
+    if (list->branch)
+      leWipe (evaluateBranch (list->branch));
 }
