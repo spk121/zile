@@ -176,8 +176,6 @@ void free_kill_ring (void);
 /* lisp.c ----------------------------------------------------------------- */
 void lisp_init (void);
 void lisp_finalise (void);
-le *lisp_read (getcCallback getcp, ungetcCallback ungetcp);
-le *lisp_read_string (const char *string);
 le *lisp_read_file (const char *file);
 
 /* macro.c ---------------------------------------------------------------- */

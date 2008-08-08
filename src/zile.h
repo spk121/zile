@@ -33,7 +33,6 @@
 #include "gl_list.h"
 
 #include "astr.h"
-#include "parser.h"
 #include "eval.h"
 
 /*--------------------------------------------------------------------------
