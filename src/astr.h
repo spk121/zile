@@ -151,9 +151,7 @@ extern astr astr_afmt (astr as, const char *fmt, ...);
  * Internal data structure
  *
  * Internally, each string has three fields: a buffer that contains
- * the C string, the buffer size and the size of the string. Each time
- * the string is enlarged beyond the current size of the buffer it is
- * reallocated with realloc.
+ * the C string, the buffer size and the size of the string.
  *
  * You should never directly access the struct fields.
  */
