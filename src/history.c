@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "gl_linked_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -33,35 +34,30 @@ free_history_elements (History * hp)
 {
   if (hp->elements)
     {
-      list l;
-
-      for (l = list_first (hp->elements); l != hp->elements;
-	   l = list_next (l))
-	free (l->item);
-
-      list_delete (hp->elements);
+      gl_list_free (hp->elements);
       hp->elements = NULL;
-      hp->sel = NULL;
+      hp->sel = -1;
     }
 }
 
 void
 add_history_element (History * hp, const char *string)
 {
-  const char *last;
+  const char *last = NULL;
 
   if (!hp->elements)
-    hp->elements = list_new ();
-
-  last = list_last (hp->elements)->item;
+    hp->elements = gl_list_create_empty (GL_LINKED_LIST,
+                                         NULL, NULL, NULL, true);
+  else
+    last = (char *) gl_list_get_at (hp->elements, gl_list_size (hp->elements) - 1);
   if (!last || strcmp (last, string) != 0)
-    list_append (hp->elements, xstrdup (string));
+    gl_list_add_last (hp->elements, xstrdup (string));
 }
 
 void
 prepare_history (History * hp)
 {
-  hp->sel = NULL;
+  hp->sel = -1;
 }
 
 const char *
@@ -72,21 +68,21 @@ previous_history_element (History * hp)
   if (hp->elements)
     {
       /* First time that we use `previous-history-element'. */
-      if (!hp->sel)
+      if (hp->sel == -1)
 	{
 	  /* Select last element. */
-	  if (list_last (hp->elements) != hp->elements)
+	  if (gl_list_size (hp->elements) > 0)
 	    {
-	      hp->sel = list_last (hp->elements);
-	      s = hp->sel->item;
+	      hp->sel = gl_list_size (hp->elements) - 1;
+	      s = (char *) gl_list_get_at (hp->elements, hp->sel);
 	    }
 	}
       /* Is there another element? */
-      else if (list_prev (hp->sel) != hp->elements)
+      else if (hp->sel > 0)
 	{
 	  /* Select it. */
-	  hp->sel = list_prev (hp->sel);
-	  s = hp->sel->item;
+	  hp->sel--;
+          s = (char *) gl_list_get_at (hp->elements, hp->sel);
 	}
     }
 
@@ -98,17 +94,17 @@ next_history_element (History * hp)
 {
   const char *s = NULL;
 
-  if (hp->elements && hp->sel)
+  if (hp->elements && hp->sel != -1)
     {
       /* Next element. */
-      if (list_next (hp->sel) != hp->elements)
+      if (hp->sel < (ptrdiff_t) (gl_list_size(hp->elements) - 1))
 	{
-	  hp->sel = list_next (hp->sel);
-	  s = hp->sel->item;
+	  hp->sel++;
+          s = (char *) gl_list_get_at (hp->elements, hp->sel);
 	}
       /* No more elements (back to original status). */
       else
-	hp->sel = NULL;
+	hp->sel = -1;
     }
 
   return s;

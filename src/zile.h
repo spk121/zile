@@ -255,8 +255,8 @@ struct Completion
 
 struct History
 {
-  list elements;		/* Elements (strings).  */
-  list sel;
+  gl_list_t elements;		/* Elements (strings). */
+  ptrdiff_t sel;		/* Selected element. */
 };
 
 struct Macro
