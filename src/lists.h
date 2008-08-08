@@ -49,6 +49,6 @@ le *leAddBranchElement (le * list, le * branch, int quoted);
 le *leAddDataElement (le * list, const char *data, int quoted);
 le *leDup (le * list);
 
-astr leDumpEval (le * list, int indent);
+void leEval (le * list);
 
 #endif

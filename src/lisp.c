@@ -84,15 +84,3 @@ lisp_read_file (const char *file)
 
   return list;
 }
-
-
-astr
-lisp_dump (le * list)
-{
-  astr as = astr_new ();
-
-  astr_cat_cstr (as, "Eval results:\n");
-  astr_cat_delete (as, leDumpEval (list, 0));
-
-  return as;
-}

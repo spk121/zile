@@ -331,7 +331,7 @@ main (int argc, char **argv)
           astr as = get_home_dir ();
           astr_cat_cstr (as, "/." PACKAGE);
           list = lisp_read_file (astr_cstr (as));
-          astr_delete (lisp_dump (list));
+          leEval (list);
           astr_delete (as);
           leWipe (list);
         }

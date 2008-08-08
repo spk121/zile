@@ -123,55 +123,16 @@ leDup (le * list)
   return temp;
 }
 
-static astr
-leDumpReformat (le * tree)
+void
+leEval (le * list)
 {
-  int notfirst = false;
-  astr as = astr_new ();
-
-  if (tree)
-    {
-      astr_cat_char (as, '(');
-
-      for (; tree; tree = tree->next)
-	{
-	  if (tree->data)
-	    {
-	      astr_afmt (as, "%s%s", notfirst ? " " : "", tree->data);
-	      notfirst = true;
-	    }
-
-	  if (tree->branch)
-	    {
-	      astr_afmt (as, " %s", tree->quoted ? "\'" : "");
-	      astr_cat_delete (as, leDumpReformat (tree->branch));
-	    }
-	}
-
-      astr_cat_char (as, ')');
-    }
-
-  return as;
-}
-
-astr
-leDumpEval (le * list, int indent GCC_UNUSED)
-{
-  le *start = list;
-  astr as = astr_new ();
-
   for (; list; list = list->next)
     {
       if (list->branch)
 	{
 	  le *le_value = evaluateBranch (list->branch);
-	  if (list != start)
-	    astr_cat_char (as, '\n');
-	  astr_cat_delete (as, leDumpReformat (le_value));
 	  if (le_value && le_value != leNIL)
 	    leWipe (le_value);
 	}
     }
-
-  return as;
 }
