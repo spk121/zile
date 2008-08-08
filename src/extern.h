@@ -198,7 +198,6 @@ void free_marker (Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, Point pt);
 Marker *copy_marker (Marker * marker);
 Marker *point_marker (void);
-Marker *point_min_marker (void);
 
 /* minibuf.c -------------------------------------------------------------- */
 extern char *minibuf_contents;
