@@ -192,7 +192,6 @@ Macro *get_macro (const char *name);
 extern char *prog_name;
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
-extern Terminal *cur_tp;
 extern int thisflag, lastflag, last_uniarg;
 
 /* marker.c --------------------------------------------------------------- */

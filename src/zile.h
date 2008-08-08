@@ -52,7 +52,6 @@ typedef struct Buffer Buffer;
 typedef struct Window Window;
 typedef struct Completion Completion;
 typedef struct History History;
-typedef struct Terminal Terminal;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
