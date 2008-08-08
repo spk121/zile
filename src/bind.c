@@ -442,7 +442,6 @@ minibuf_read_function_name (const char *fmt, ...)
   size_t i;
   char *buf;
   const char *ms;
-  list p;
   Completion *cp;
 
   va_start (ap, fmt);
@@ -479,11 +478,14 @@ minibuf_read_function_name (const char *fmt, ...)
 	    ms = cp->match;
 	  astr_delete (as);
 	  for (i = 0; i < gl_list_size (cp->completions); i++)
-	    if (!strcmp (ms, (char *) gl_list_get_at (cp->completions, i)))
+            {
+              char *s = (char *) gl_list_get_at (cp->completions, i);
+              if (!strcmp (ms, s))
 	      {
-		ms = p->item;
+		ms = s;
 		break;
 	      }
+            }
 	  if (bsearch_function (ms) || get_macro (ms))
 	    {
 	      add_history_element (&functions_history, ms);

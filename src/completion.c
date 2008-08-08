@@ -298,7 +298,6 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
   size_t i, j, ssize;
   size_t fullmatches = 0, partmatches = 0;
   char c;
-  list p;
 
   gl_list_free (cp->matches);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_streq, NULL, NULL, false);
@@ -331,7 +330,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
       if (!strncmp (s, astr_cstr (search), ssize))
         {
           ++partmatches;
-          gl_sortedlist_add (cp->matches, completion_strcmp, p->item);
+          gl_sortedlist_add (cp->matches, completion_strcmp, s);
           if (!strcmp (s, astr_cstr (search)))
             ++fullmatches;
         }
