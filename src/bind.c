@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "gl_array_list.h"
+#include "gl_linked_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -612,14 +613,13 @@ sequence.
 END_DEFUN
 
 static void
-walk_bindings_tree (leafp tree, list keys,
+walk_bindings_tree (leafp tree, gl_list_t keys,
 		    void (*process) (astr key, leafp p, void *st), void *st)
 {
-  size_t i;
-  list l;
+  size_t i, j;
   astr as = chordtostr (tree->key);
 
-  list_append (keys, as);
+  gl_list_add_last (keys, as);
 
   for (i = 0; i < tree->vecnum; ++i)
     {
@@ -628,10 +628,9 @@ walk_bindings_tree (leafp tree, list keys,
 	{
 	  astr key = astr_new ();
 	  astr as = chordtostr (p->key);
-	  for (l = list_next (list_first (keys));
-	       l != keys; l = list_next (l))
+	  for (j = 1; j < gl_list_size (keys); j++)
 	    {
-	      astr_cat (key, l->item);
+	      astr_cat (key, (astr) gl_list_get_at (keys, j));
 	      astr_cat_char (key, ' ');
 	    }
 	  astr_cat_delete (key, as);
@@ -642,16 +641,18 @@ walk_bindings_tree (leafp tree, list keys,
 	walk_bindings_tree (p, keys, process, st);
     }
 
-  astr_delete (list_betail (keys));
+  astr_delete ((astr) gl_list_get_at (keys, gl_list_size (keys) - 1));
+  gl_list_remove_at (keys, gl_list_size (keys) - 1);
 }
 
 static void
 walk_bindings (leafp tree, void (*process) (astr key, leafp p, void *st),
 	       void *st)
 {
-  list l = list_new ();
+  gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
+                                      NULL, NULL, NULL, true);
   walk_bindings_tree (tree, l, process, st);
-  list_delete (l);
+  gl_list_free (l);
 }
 
 typedef struct
