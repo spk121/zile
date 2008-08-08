@@ -30,6 +30,7 @@
 #include "eval.h"
 #include "lists.h"
 
+
 void
 lisp_init (void)
 {
@@ -45,17 +46,6 @@ lisp_finalise (void)
 }
 
 
-static astr string;
-static ptrdiff_t pos;
-
-static int
-getachar (void)
-{
-  if ((size_t) pos < astr_len (string))
-    return *astr_char (string, pos++);
-  return EOF;
-}
-
 enum tokenname
 {
   T_EOF,
@@ -66,8 +56,16 @@ enum tokenname
   T_WORD
 };
 
+static int
+getachar (astr as, ptrdiff_t * pos)
+{
+  if ((size_t) *pos < astr_len (as))
+    return *astr_char (as, (*pos)++);
+  return EOF;
+}
+
 static astr
-snagAToken (enum tokenname *tokenid)
+snagAToken (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
 {
   int c;
   int doublequotes = 0;
@@ -78,12 +76,12 @@ snagAToken (enum tokenname *tokenid)
   /* Chew space to next token */
   do
     {
-      c = getachar ();
+      c = getachar (as, pos);
 
       /* Munch comments */
       if (c == ';')
 	do
-          c = getachar ();
+          c = getachar (as, pos);
 	while (c != EOF && c != '\n');
     }
   while (c != EOF && (c == ' ' || c == '\t'));
@@ -119,7 +117,7 @@ snagAToken (enum tokenname *tokenid)
   if (c == '\"')
     {
       doublequotes = 1;
-      c = getachar ();
+      c = getachar (as, pos);
     }
 
   while (1)
@@ -131,7 +129,7 @@ snagAToken (enum tokenname *tokenid)
 	  if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n'
 	      || c == '\r' || c == EOF)
 	    {
-	      pos--;
+	      (*pos)--;
 	      astr_truncate (tok, (ptrdiff_t) - 1);
 	      *tokenid = T_WORD;
 	      return tok;
@@ -144,7 +142,7 @@ snagAToken (enum tokenname *tokenid)
 	    case '\n':
 	    case '\r':
 	    case EOF:
-	      pos--;
+	      (*pos)--;
 	      /* Fall through */
 
 	    case '\"':
@@ -154,14 +152,14 @@ snagAToken (enum tokenname *tokenid)
 	    }
 	}
 
-      c = getachar ();
+      c = getachar (as, pos);
     }
 
   return tok;
 }
 
-static le *
-parseInFile (le * list)
+le *
+lisp_read (le * list, astr as, ptrdiff_t * pos)
 {
   astr tok;
   enum tokenname tokenid;
@@ -169,7 +167,7 @@ parseInFile (le * list)
 
   while (1)
     {
-      tok = snagAToken (&tokenid);
+      tok = snagAToken (&tokenid, as, pos);
 
       switch (tokenid)
 	{
@@ -178,7 +176,7 @@ parseInFile (le * list)
 	  break;
 
 	case T_OPENPAREN:
-	  list = leAddBranchElement (list, parseInFile (NULL), isquoted);
+	  list = leAddBranchElement (list, lisp_read (NULL, as, pos), isquoted);
 	  isquoted = 0;
 	  break;
 
@@ -200,12 +198,4 @@ parseInFile (le * list)
 
       astr_delete (tok);
     }
-}
-
-le *
-lisp_read (astr as)
-{
-  string = as;
-  pos = 0;
-  return parseInFile (NULL);
 }

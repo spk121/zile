@@ -177,7 +177,7 @@ void free_registers (void);
 /* lisp.c ----------------------------------------------------------------- */
 void lisp_init (void);
 void lisp_finalise (void);
-le *lisp_read (astr as);
+le *lisp_read (le * list, astr as, ptrdiff_t * pos);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro (void);
@@ -301,7 +301,7 @@ int xasprintf (char **ptr, const char *fmt, ...);
  * Declare external Zile functions.
  */
 #define X0(zile_name, c_name)			\
-	extern int F_ ## c_name(int uniarg, le *l);
+	extern int F_ ## c_name(int uniarg, le * l);
 #define X1(zile_name, c_name, k1)		\
 	X0(zile_name, c_name)
 #define X2(zile_name, c_name, k1, k2)		\

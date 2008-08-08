@@ -337,7 +337,8 @@ main (int argc, char **argv)
           if (fp != NULL)
             {
               astr bs = astr_fread (fp);
-              list = lisp_read (bs);
+              ptrdiff_t pos = 0;
+              list = lisp_read (NULL, bs, &pos);
               leEval (list);
               astr_delete (bs);
             }
