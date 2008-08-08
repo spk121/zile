@@ -81,3 +81,9 @@ gl_array_list.c
 gl_array_list.h
 gl_list.c
 gl_list.h
+hash.c
+hash.h
+gl_anylinked_list1.h
+gl_anylinked_list2.h
+gl_linked_list.c
+gl_linked_list.h
