@@ -393,7 +393,7 @@ END_DEFUN
 /*
  * Incremental search engine.
  */
-  static int
+static int
 isearch (int dir, int regexp)
 {
   int c;

@@ -480,7 +480,7 @@ END_DEFUN
 
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
-  static void
+static void
 edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
 	       int action)
 {
@@ -611,7 +611,7 @@ END_DEFUN
 /***********************************************************************
 			  Transpose functions
 ***********************************************************************/
-  static void
+static void
 astr_append_region (astr s)
 {
   Region r;
@@ -860,7 +860,7 @@ END_DEFUN
 			  Move through words
 ***********************************************************************/
 #define ISWORDCHAR(c)	(isalnum (c) || c == '$')
-  static int
+static int
 forward_word (void)
 {
   int gotword = false;
@@ -994,7 +994,8 @@ END_DEFUN
 			return false;					\
 		}							\
 	}
-  int
+
+int
 forward_sexp (void)
 {
   int gotsexp = false;
@@ -1330,7 +1331,7 @@ END_DEFUN
 #define UPPERCASE		1
 #define LOWERCASE		2
 #define CAPITALIZE		3
-  static int
+static int
 setcase_word (int rcase)
 {
   int gotword;
@@ -1454,7 +1455,7 @@ END_DEFUN
 /*
  * Set the region case.
  */
-  static int
+static int
 setcase_region (int rcase)
 {
   Region r;

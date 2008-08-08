@@ -235,7 +235,7 @@ END_DEFUN
  * Go to the line `to_line', counting from 0.  Point will end up in
  * "random" column.
  */
-  void
+void
 goto_line (size_t to_line)
 {
   if (cur_bp->pt.n > to_line)
@@ -303,7 +303,7 @@ END_DEFUN
 /*
  * Move point to the beginning of the buffer; do not touch the mark.
  */
-  void
+void
 gotobob (void)
 {
   cur_bp->pt = point_min ();
@@ -324,7 +324,7 @@ END_DEFUN
 /*
  * Move point to the end of the buffer; do not touch the mark.
  */
-  void
+void
 gotoeob (void)
 {
   cur_bp->pt = point_max ();

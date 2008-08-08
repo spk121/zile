@@ -294,7 +294,7 @@ END_DEFUN
  * This function is called once in main(), for creating
  * the scratch buffer.
  */
-  void
+void
 create_first_window (void)
 {
   Window *wp;

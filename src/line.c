@@ -191,7 +191,7 @@ END_DEFUN
  * Insert a newline at the current position without moving the cursor.
  * Update all other cursors if they point on the splitted line.
  */
-  int
+int
 intercalate_newline ()
 {
   Line *lp1, *lp2;
@@ -634,7 +634,7 @@ END_DEFUN
 /*
  * Go to cur_goalc() in the previous non-blank line.
  */
-  static void
+static void
 previous_nonblank_goalc (void)
 {
   size_t cur_goalc = get_goalc ();

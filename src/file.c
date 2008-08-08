@@ -568,7 +568,7 @@ END_DEFUN
  * he/she wants to save the changes.  If the response is positive, return
  * true, else false.
  */
-  int
+int
 check_modified_buffer (Buffer * bp)
 {
   int ans;
@@ -852,7 +852,7 @@ END_DEFUN
 /*
  * Copy a file.
  */
-  static int
+static int
 copy_file (const char *source, const char *dest)
 {
   char buf[BUFSIZ];
