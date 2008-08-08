@@ -492,14 +492,14 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
 
   src = (char *) xzalloc (size + 1);
   dest = (char *) xzalloc (size * t + 1);
-  strncpy (src, astr_cstr ((*lp)->item) + offset, size);
+  strncpy (src, astr_cstr ((*lp)->text) + offset, size);
   src[size] = '\0';
 
   /* Get offset's column.  */
   col = 0;
   for (i = 0; i < offset; i++)
     {
-      if (*astr_char ((*lp)->item, (ptrdiff_t) i) == '\t')
+      if (*astr_char ((*lp)->text, (ptrdiff_t) i) == '\t')
 	col |= t - 1;
       ++col;
     }
@@ -550,14 +550,14 @@ edit_tab_region (int action)
 	  /* Region is multi-line. */
 	  else
 	    edit_tab_line (&lp, lineno, r.start.o,
-			   astr_len (lp->item) - r.start.o, action);
+			   astr_len (lp->text) - r.start.o, action);
 	}
       /* Last line of multi-line region. */
       else if (lineno == r.end.n)
 	edit_tab_line (&lp, lineno, 0, r.end.o, action);
       /* Middle line of multi-line region. */
       else
-	edit_tab_line (&lp, lineno, 0, astr_len (lp->item), action);
+	edit_tab_line (&lp, lineno, 0, astr_len (lp->text), action);
       /* Done?  */
       if (lineno == r.end.n)
 	break;
@@ -880,7 +880,7 @@ forward_word (void)
 	}
       if (gotword)
 	return true;
-      cur_bp->pt.o = astr_len (cur_bp->pt.p->item);
+      cur_bp->pt.o = astr_len (cur_bp->pt.p->text);
       if (!next_line ())
 	break;
       cur_bp->pt.o = 0;
@@ -917,7 +917,7 @@ backward_word (void)
 	{
 	  if (!previous_line ())
 	    break;
-	  cur_bp->pt.o = astr_len (cur_bp->pt.p->item);
+	  cur_bp->pt.o = astr_len (cur_bp->pt.p->text);
 	}
       while (!bolp ())
 	{
@@ -1011,13 +1011,13 @@ forward_sexp (void)
 
 	  /* Jump quotes that aren't sexp separators. */
 	  if (c == '\\'
-	      && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->item)
+	      && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->text)
 	      &&
 	      ((*astr_char
-		(cur_bp->pt.p->item, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\"')
+		(cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\"')
 	       ||
 	       (*astr_char
-		(cur_bp->pt.p->item,
+		(cur_bp->pt.p->text,
 		 (ptrdiff_t) (cur_bp->pt.o + 1)) == '\'')))
 	    {
 	      cur_bp->pt.o++;
@@ -1042,7 +1042,7 @@ forward_sexp (void)
 	}
       if (gotsexp && level == 0)
 	return true;
-      cur_bp->pt.o = astr_len (cur_bp->pt.p->item);
+      cur_bp->pt.o = astr_len (cur_bp->pt.p->text);
       if (!next_line ())
 	{
 	  if (level != 0)
@@ -1092,7 +1092,7 @@ backward_sexp (void)
 		minibuf_error ("Scan error: \"Unbalanced parentheses\"");
 	      break;
 	    }
-	  cur_bp->pt.o = astr_len (cur_bp->pt.p->item);
+	  cur_bp->pt.o = astr_len (cur_bp->pt.p->text);
 	}
       while (!bolp ())
 	{
@@ -1102,7 +1102,7 @@ backward_sexp (void)
 	  if (((c == '\'') || (c == '\"'))
 	      && cur_bp->pt.o - 1 > 0
 	      &&
-	      (*astr_char (cur_bp->pt.p->item, (ptrdiff_t) (cur_bp->pt.o - 2))
+	      (*astr_char (cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o - 2))
 	       == '\\'))
 	    {
 	      cur_bp->pt.o--;
@@ -1346,9 +1346,9 @@ setcase_word (int rcase)
     }
 
   i = cur_bp->pt.o;
-  while (i < astr_len (cur_bp->pt.p->item))
+  while (i < astr_len (cur_bp->pt.p->text))
     {
-      if (!ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->item, (ptrdiff_t) i)))
+      if (!ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i)))
 	break;
       ++i;
     }
@@ -1357,9 +1357,9 @@ setcase_word (int rcase)
     undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
 
   gotword = false;
-  while (cur_bp->pt.o < astr_len (cur_bp->pt.p->item))
+  while (cur_bp->pt.o < astr_len (cur_bp->pt.p->text))
     {
-      char *p = astr_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o);
+      char *p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
       if (!ISWORDCHAR ((int) *p))
 	break;
       if (isalpha ((int) *p))
@@ -1474,14 +1474,14 @@ setcase_region (int rcase)
   i = r.start.o;
   while (size--)
     {
-      if (i < astr_len (lp->item))
+      if (i < astr_len (lp->text))
 	{
 	  if (rcase == UPPERCASE)
-	    *astr_char (lp->item, (ptrdiff_t) i) =
-	      toupper (*astr_char (lp->item, (ptrdiff_t) i));
+	    *astr_char (lp->text, (ptrdiff_t) i) =
+	      toupper (*astr_char (lp->text, (ptrdiff_t) i));
 	  else
-	    *astr_char (lp->item, (ptrdiff_t) i) =
-	      tolower (*astr_char (lp->item, (ptrdiff_t) i));
+	    *astr_char (lp->text, (ptrdiff_t) i) =
+	      tolower (*astr_char (lp->text, (ptrdiff_t) i));
 	  ++i;
 	}
       else

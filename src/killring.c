@@ -66,7 +66,7 @@ kill_line (int literally)
 	return false;
 
       undo_save (UNDO_INSERT_BLOCK, cur_bp->pt,
-		 astr_len (cur_bp->pt.p->item) - cur_bp->pt.o, 0);
+		 astr_len (cur_bp->pt.p->text) - cur_bp->pt.o, 0);
       undo_nosave = true;
       while (!eolp ())
 	{

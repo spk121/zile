@@ -62,14 +62,14 @@ point_dist (Point pt1, Point pt2)
 
   for (lp = pt1.p;; lp = lp->next)
     {
-      size += astr_len (lp->item);
+      size += astr_len (lp->text);
 
       if (lp == pt1.p)
 	size -= pt1.o;
 
       if (lp == pt2.p)
 	{
-	  size -= astr_len (lp->item) - pt2.o;
+	  size -= astr_len (lp->text) - pt2.o;
 	  break;
 	}
       else
@@ -112,7 +112,7 @@ point_max (void)
   Point pt;
   pt.p = cur_bp->lines->prev;
   pt.n = cur_bp->num_lines;
-  pt.o = astr_len (cur_bp->lines->prev->item);
+  pt.o = astr_len (cur_bp->lines->prev->text);
   return pt;
 }
 
@@ -139,6 +139,6 @@ Point
 line_end_position (int count)
 {
   Point pt = line_beginning_position (count);
-  pt.o = astr_len (pt.p->item);
+  pt.o = astr_len (pt.p->text);
   return pt;
 }

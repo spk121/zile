@@ -46,7 +46,7 @@ line_new (void)
   Line *l = XZALLOC (Line);
 
   l->next = l->prev = l;
-  l->item = NULL;
+  l->text = NULL;
 
   return l;
 }
@@ -74,7 +74,7 @@ line_insert (Line *l, astr i)
 
   n->next = l->next;
   n->prev = l;
-  n->item = i;
+  n->text = i;
   l->next = l->next->prev = n;
 
   return n;
@@ -90,7 +90,7 @@ line_remove (Line *l)
 
   if (p == l)
     return NULL;
-  i = p->item;
+  i = p->text;
   l->next = l->next->next;
   l->next->prev = l;
   free (p);
@@ -131,7 +131,7 @@ intercalate_char (int c)
     return false;
 
   undo_save (UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
-  astr_insert_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o, c);
+  astr_insert_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
   return true;
@@ -155,18 +155,18 @@ insert_char (int c)
 	 && isn't a \t
 	 || tab width isn't correct
 	 || current char is a \t && we are in the tab limit.  */
-      if ((cur_bp->pt.o < astr_len (cur_bp->pt.p->item))
+      if ((cur_bp->pt.o < astr_len (cur_bp->pt.p->text))
 	  &&
-	  ((*astr_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o) != '\t')
+	  ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) != '\t')
 	   ||
-	   ((*astr_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o) ==
+	   ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) ==
 	     '\t') && ((get_goalc () % t) == t))))
 	{
 	  /* Replace the character.  */
 	  undo_save (UNDO_REPLACE_CHAR, cur_bp->pt,
-		     (size_t) (*astr_char (cur_bp->pt.p->item,
+		     (size_t) (*astr_char (cur_bp->pt.p->text,
 					   (ptrdiff_t) cur_bp->pt.o)), 0);
-	  *astr_char (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o) = c;
+	  *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) = c;
 	  ++cur_bp->pt.o;
 
 	  cur_bp->flags |= BFLAG_MODIFIED;
@@ -269,7 +269,7 @@ intercalate_newline ()
 
   /* Calculate the two line lengths. */
   lp1len = cur_bp->pt.o;
-  lp2len = astr_len (cur_bp->pt.p->item) - lp1len;
+  lp2len = astr_len (cur_bp->pt.p->text) - lp1len;
 
   lp1 = cur_bp->pt.p;
 
@@ -278,10 +278,10 @@ intercalate_newline ()
   ++cur_bp->num_lines;
 
   /* Move the text after the point into the new line. */
-  as = astr_substr (lp1->item, (ptrdiff_t) lp1len, lp2len);
-  astr_cpy (lp2->item, as);
+  as = astr_substr (lp1->text, (ptrdiff_t) lp1len, lp2len);
+  astr_cpy (lp2->text, as);
   astr_delete (as);
-  astr_truncate (lp1->item, (ptrdiff_t) lp1len);
+  astr_truncate (lp1->text, (ptrdiff_t) lp1len);
 
   adjust_markers (lp2, lp1, lp1len, 1, 0);
 
@@ -349,20 +349,20 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
   if (replace_case && get_variable_bool ("case-replace"))
     {
       newtext = xstrdup (newtext);
-      recase (newtext, newlen, astr_char ((*lp)->item, (ptrdiff_t) offset),
+      recase (newtext, newlen, astr_char ((*lp)->text, (ptrdiff_t) offset),
 	      oldlen);
     }
 
   if (newlen != oldlen)
     {
       cur_bp->flags |= BFLAG_MODIFIED;
-      astr_replace_cstr ((*lp)->item, (ptrdiff_t) offset, oldlen, newtext);
+      astr_replace_cstr ((*lp)->text, (ptrdiff_t) offset, oldlen, newtext);
       adjust_markers (*lp, *lp, offset, 0, (int) (newlen - oldlen));
     }
-  else if (memcmp (astr_char ((*lp)->item, (ptrdiff_t) offset),
+  else if (memcmp (astr_char ((*lp)->text, (ptrdiff_t) offset),
 		   newtext, newlen) != 0)
     {
-      memcpy (astr_char ((*lp)->item, (ptrdiff_t) offset), newtext, newlen);
+      memcpy (astr_char ((*lp)->text, (ptrdiff_t) offset), newtext, newlen);
       cur_bp->flags |= BFLAG_MODIFIED;
     }
 
@@ -397,7 +397,7 @@ fill_break_line (void)
   /* Find break point moving left from fill-column. */
   for (i = cur_bp->pt.o; i > 0; i--)
     {
-      int c = *astr_char (cur_bp->pt.p->item, (ptrdiff_t) (i - 1));
+      int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
       if (isspace (c))
 	{
 	  break_col = i;
@@ -409,9 +409,9 @@ fill_break_line (void)
      possible moving right. */
   if (break_col == 0)
     {
-      for (i = cur_bp->pt.o + 1; i < astr_len (cur_bp->pt.p->item); i++)
+      for (i = cur_bp->pt.o + 1; i < astr_len (cur_bp->pt.p->text); i++)
 	{
-	  int c = *astr_char (cur_bp->pt.p->item, (ptrdiff_t) (i - 1));
+	  int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
 	  if (isspace (c))
 	    {
 	      break_col = i;
@@ -529,9 +529,9 @@ delete_char (void)
 	return false;
 
       undo_save (UNDO_INTERCALATE_CHAR, cur_bp->pt,
-		 (size_t) (*astr_char (cur_bp->pt.p->item,
+		 (size_t) (*astr_char (cur_bp->pt.p->text,
 				       (ptrdiff_t) cur_bp->pt.o)), 0);
-      astr_remove (cur_bp->pt.p->item, (ptrdiff_t) cur_bp->pt.o, 1);
+      astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
       cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -549,11 +549,11 @@ delete_char (void)
 
       lp1 = cur_bp->pt.p;
       lp2 = lp1->next;
-      lp1len = astr_len (lp1->item);
+      lp1len = astr_len (lp1->text);
 
       /* Move the next line text into the current line. */
       lp2 = cur_bp->pt.p->next;
-      astr_cat (lp1->item, cur_bp->pt.p->next->item);
+      astr_cat (lp1->text, cur_bp->pt.p->next->text);
       astr_delete (line_remove (lp1));
       --cur_bp->num_lines;
 

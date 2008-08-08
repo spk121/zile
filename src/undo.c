@@ -143,9 +143,9 @@ revert_action (Undo * up)
       break;
     case UNDO_REPLACE_CHAR:
       undo_save (UNDO_REPLACE_CHAR, up->pt,
-		 (size_t) (*astr_char (cur_bp->pt.p->item,
+		 (size_t) (*astr_char (cur_bp->pt.p->text,
 				       (ptrdiff_t) up->pt.o)), 0);
-      *astr_char (cur_bp->pt.p->item, (ptrdiff_t) up->pt.o) = up->delta.c;
+      *astr_char (cur_bp->pt.p->text, (ptrdiff_t) up->pt.o) = up->delta.c;
       cur_bp->flags |= BFLAG_MODIFIED;
       break;
     case UNDO_REPLACE_BLOCK:

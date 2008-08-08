@@ -384,7 +384,7 @@ read_from_disk (const char *filename)
 	  for (i = 0; i < size; i++)
 	    {
 	      if (strncmp (cur_bp->eol, buf + i, eol_len) != 0)
-		astr_cat_char (lp->item, buf[i]);
+		astr_cat_char (lp->text, buf[i]);
 	      else
 		{
 		  lp = line_insert (lp, astr_new ());
@@ -715,8 +715,8 @@ insert_buffer (Buffer * bp)
   undo_nosave = true;
   for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     {
-      for (i = 0; i < astr_len (lp->item); i++)
-	insert_char (*astr_char (lp->item, (ptrdiff_t) i));
+      for (i = 0; i < astr_len (lp->text); i++)
+	insert_char (*astr_char (lp->text, (ptrdiff_t) i));
       if (lp->next != bp->lines)
 	insert_newline ();
     }
@@ -956,9 +956,9 @@ raw_write_to_disk (Buffer * bp, const char *filename, int umask)
   /* Save the lines. */
   for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     {
-      ssize_t len = (ssize_t) astr_len (lp->item);
+      ssize_t len = (ssize_t) astr_len (lp->text);
 
-      written = write (fd, astr_cstr (lp->item), len);
+      written = write (fd, astr_cstr (lp->text), len);
       if (written != len)
         {
           ret = written;

@@ -137,8 +137,8 @@ copy_text_block (size_t startn, size_t starto, size_t size)
 	  buf = (char *) xrealloc (buf, max_size);
 	  dp = buf + save_off;
 	}
-      if (i < astr_len (lp->item))
-	*dp++ = *astr_char (lp->item, (ptrdiff_t) (i++));
+      if (i < astr_len (lp->text))
+	*dp++ = *astr_char (lp->text, (ptrdiff_t) (i++));
       else
 	{
 	  *dp++ = '\n';

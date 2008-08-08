@@ -47,7 +47,7 @@ buffer_new (void)
 
   /* Allocate a line. */
   bp->pt.p = line_new ();
-  bp->pt.p->item = astr_new ();
+  bp->pt.p->text = astr_new ();
 
   /* Allocate the limit marker. */
   bp->lines = line_new ();
@@ -72,7 +72,7 @@ free_buffer (Buffer * bp)
 
   /* Free all the lines. */
   for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
-    astr_delete (lp->item);
+    astr_delete (lp->text);
   line_delete (bp->lines);
 
   /* Free all the undo operations. */
@@ -407,7 +407,7 @@ calculate_buffer_size (Buffer * bp)
 
   for (;;)
     {
-      size += astr_len (lp->item);
+      size += astr_len (lp->text);
       lp = lp->next;
       if (lp == bp->lines)
 	break;

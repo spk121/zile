@@ -68,7 +68,7 @@ struct Line
 {
   Line *prev;
   Line *next;
-  astr item;
+  astr text;
 };
 
 /* Point and Marker. */

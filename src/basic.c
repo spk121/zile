@@ -75,7 +75,7 @@ size_t
 get_goalc_bp (Buffer * bp, Point pt)
 {
   size_t col = 0, t = tab_width (bp), i;
-  const char *sp = astr_cstr (pt.p->item);
+  const char *sp = astr_cstr (pt.p->text);
 
   for (i = 0; i < pt.o; i++)
     {
@@ -108,9 +108,9 @@ goto_goalc (int goalc)
 {
   int col = 0, t = tab_width (cur_bp), w;
   size_t i;
-  const char *sp = astr_cstr (cur_bp->pt.p->item);
+  const char *sp = astr_cstr (cur_bp->pt.p->text);
 
-  for (i = 0; i < astr_len (cur_bp->pt.p->item); i++)
+  for (i = 0; i < astr_len (cur_bp->pt.p->text); i++)
     {
       if (col == goalc)
 	break;

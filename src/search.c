@@ -215,20 +215,20 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
     {
       if (lp == startp)
 	{
-	  sp = astr_char (lp->item, (ptrdiff_t) starto);
-	  s1size = astr_len (lp->item) - starto;
+	  sp = astr_char (lp->text, (ptrdiff_t) starto);
+	  s1size = astr_len (lp->text) - starto;
 	}
       else
 	{
-	  sp = astr_cstr (lp->item);
-	  s1size = astr_len (lp->item);
+	  sp = astr_cstr (lp->text);
+	  s1size = astr_len (lp->text);
 	}
       if (s1size < 1)
 	continue;
 
       if (regexp)
 	sp2 = re_find_substr (sp, s1size, s, s2size,
-			      sp == astr_cstr (lp->item), true, false,
+			      sp == astr_cstr (lp->text), true, false,
 			      translate);
       else
 	sp2 = find_substr (sp, s1size, s, s2size, translate);
@@ -236,7 +236,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
       if (sp2 != NULL)
 	{
 	  goto_linep (lp);
-	  cur_bp->pt.o = sp2 - astr_cstr (lp->item);
+	  cur_bp->pt.o = sp2 - astr_cstr (lp->text);
 	  return true;
 	}
     }
@@ -256,17 +256,17 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
 
   for (lp = startp; lp != cur_bp->lines; lp = lp->prev)
     {
-      sp = astr_cstr (lp->item);
+      sp = astr_cstr (lp->text);
       if (lp == startp)
 	s1size = starto;
       else
-	s1size = astr_len (lp->item);
+	s1size = astr_len (lp->text);
       if (s1size < 1)
 	continue;
 
       if (regexp)
 	sp2 = re_find_substr (sp, s1size, s, ssize,
-			      true, s1size == astr_len (lp->item), true,
+			      true, s1size == astr_len (lp->text), true,
 			      translate);
       else
 	sp2 = rfind_substr (sp, s1size, s, ssize, translate);
@@ -274,7 +274,7 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
       if (sp2 != NULL)
 	{
 	  goto_linep (lp);
-	  cur_bp->pt.o = sp2 - astr_cstr (lp->item);
+	  cur_bp->pt.o = sp2 - astr_cstr (lp->text);
 	  return true;
 	}
     }
