@@ -30,20 +30,6 @@
 #include "eval.h"
 #include "lists.h"
 
-enum tokenname
-{
-  T_EOF,
-  T_CLOSEPAREN,
-  T_OPENPAREN,
-  T_NEWLINE,
-  T_QUOTE,
-  T_WORD
-};
-
-typedef int (*getcCallback) (void);
-typedef void (*ungetcCallback) (int c);
-
-
 void
 lisp_init (void)
 {
@@ -69,6 +55,16 @@ getachar (void)
     return *astr_char (string, pos++);
   return EOF;
 }
+
+enum tokenname
+{
+  T_EOF,
+  T_CLOSEPAREN,
+  T_OPENPAREN,
+  T_NEWLINE,
+  T_QUOTE,
+  T_WORD
+};
 
 static astr
 snagAToken (enum tokenname *tokenid)
