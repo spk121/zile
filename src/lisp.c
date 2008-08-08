@@ -33,8 +33,8 @@
 void
 lisp_init (void)
 {
-  leNIL = leNew ("NIL");
-  leT = leNew ("T");
+  leNIL = leNew ("nil");
+  leT = leNew ("t");
 }
 
 void
