@@ -91,7 +91,6 @@ extern astr astr_substr (const astr as, ptrdiff_t pos, size_t size);
  * Do strcmp on the contents of s1 and s2
  */
 #define astr_cmp(as1, as2)      (strcmp(((astr)(as1))->text, ((astr)(as2))->text))
-#define astr_cmp_cstr(as, s)    (strcmp(((astr)(as))->text, (s)))
 
 /*
  * Assign the contents of the argument string to the string as.
@@ -116,17 +115,12 @@ extern astr astr_cat_delete (astr as, const astr src);
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */
-extern astr astr_replace (astr as, ptrdiff_t pos, size_t size,
-			  const astr src);
 extern astr astr_replace_cstr (astr as, ptrdiff_t pos, size_t size,
 			       const char *s);
-extern astr astr_replace_char (astr as, ptrdiff_t pos, size_t size, int c);
 
 /*
  * Insert the contents of the argument string or character in as.
  */
-extern astr astr_insert (astr as, ptrdiff_t pos, const astr src);
-extern astr astr_insert_cstr (astr as, ptrdiff_t pos, const char *s);
 extern astr astr_insert_char (astr as, ptrdiff_t pos, int c);
 
 /*
@@ -138,13 +132,6 @@ extern astr astr_remove (astr as, ptrdiff_t pos, size_t size);
  * Truncate as to given position.
  */
 extern astr astr_truncate (astr as, ptrdiff_t pos);
-
-/*
- * Find the first occurrence of the argument string in as, returning
- * the position starting from the beginning of the string.
- */
-extern int astr_find (const astr as, const astr src);
-extern int astr_find_cstr (const astr as, const char *s);
 
 /*
  * Read a string from the stream f and return it. The trailing newline
