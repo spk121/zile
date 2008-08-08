@@ -192,7 +192,7 @@ extern Terminal *cur_tp;
 extern int thisflag, lastflag, last_uniarg;
 
 /* marker.c --------------------------------------------------------------- */
-Marker *make_marker (void);
+Marker *marker_new (void);
 void free_marker (Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, Point pt);
 Marker *copy_marker (Marker * marker);

@@ -43,7 +43,7 @@ buffer_new (void)
 {
   Buffer *bp;
 
-  bp = (Buffer *) xzalloc (sizeof (Buffer));
+  bp = (Buffer *) XZALLOC (Buffer);
 
   /* Allocate a line. */
   bp->pt.p = list_new ();

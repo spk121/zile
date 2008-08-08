@@ -38,7 +38,7 @@ astr
 astr_new (void)
 {
   astr as;
-  as = (astr) xzalloc (sizeof *as);
+  as = (astr) XZALLOC (struct astr_s);
   as->maxlen = ALLOCATION_CHUNK_SIZE;
   as->len = 0;
   as->text = (char *) xzalloc (as->maxlen + 1);

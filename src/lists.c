@@ -34,7 +34,7 @@
 le *
 leNew (const char *text)
 {
-  le *new = (le *) xzalloc (sizeof (le));
+  le *new = (le *) XZALLOC (le);
 
   if (text)
     new->data = xstrdup (text);
@@ -110,6 +110,7 @@ le *
 leDup (le * list)
 {
   le *temp;
+
   if (!list)
     return NULL;
 

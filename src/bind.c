@@ -61,11 +61,10 @@ leaf_new (int vecmax)
 {
   leafp p;
 
-  p = (leafp) xzalloc (sizeof (*p));
-  memset (p, 0, sizeof (*p));
+  p = (leafp) XZALLOC (struct leaf);
 
   p->vecmax = vecmax;
-  p->vec = (leafp *) xzalloc (sizeof (*p) * vecmax);
+  p->vec = (leafp *) XCALLOC (vecmax, struct leaf);
 
   return p;
 }

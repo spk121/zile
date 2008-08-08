@@ -34,12 +34,7 @@
 static Window *
 window_new (void)
 {
-  Window *wp;
-
-  wp = (Window *) xzalloc (sizeof (Window));
-  memset (wp, 0, sizeof (Window));
-
-  return wp;
+  return (Window *) XZALLOC (Window);
 }
 
 /*

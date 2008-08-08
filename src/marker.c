@@ -1,6 +1,6 @@
 /* Marker facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.   
+   Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 2004 David A. Capello.
 
    This file is part of GNU Zile.
@@ -30,12 +30,9 @@
 #include "extern.h"
 
 Marker *
-make_marker (void)
+marker_new (void)
 {
-  Marker *marker;
-  marker = (Marker *) xzalloc (sizeof (Marker));
-  memset (marker, 0, sizeof (Marker));
-  return marker;
+  return (Marker *) XZALLOC (Marker);
 }
 
 static void
@@ -93,7 +90,7 @@ move_marker (Marker * marker, Buffer * bp, Point pt)
 Marker *
 copy_marker (Marker * m)
 {
-  Marker *marker = make_marker ();
+  Marker *marker = marker_new ();
   move_marker (marker, m->bp, m->pt);
   return marker;
 }
@@ -101,7 +98,7 @@ copy_marker (Marker * m)
 Marker *
 point_marker (void)
 {
-  Marker *marker = make_marker ();
+  Marker *marker = marker_new ();
   move_marker (marker, cur_bp, cur_bp->pt);
   return marker;
 }
@@ -109,7 +106,7 @@ point_marker (void)
 Marker *
 point_min_marker (void)
 {
-  Marker *marker = make_marker ();
+  Marker *marker = marker_new ();
   move_marker (marker, cur_bp, point_min ());
   return marker;
 }
