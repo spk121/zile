@@ -145,7 +145,7 @@ countNodes (le * branch)
 {
   int count;
 
-  for (count = 0; branch; branch = branch->list_next, count++);
+  for (count = 0; branch; branch = branch->next, count++);
   return count;
 }
 
@@ -157,17 +157,17 @@ eval_cb_setq (int argc, le * branch)
 
   if (branch != NULL && argc >= 3)
     {
-      for (current = branch->list_next; current;
-	   current = current->list_next->list_next)
+      for (current = branch->next; current;
+	   current = current->next->next)
 	{
 	  if (newvalue != leNIL)
 	    leWipe (newvalue);
 
-	  newvalue = evaluateNode (current->list_next);
+	  newvalue = evaluateNode (current->next);
 
 	  set_variable (current->data, newvalue->data);
 
-	  if (current->list_next == NULL)
+	  if (current->next == NULL)
 	    break;
 	}
     }

@@ -40,8 +40,7 @@ leNew (const char *text)
   new->data = text ? xstrdup (text) : NULL;
   new->quoted = 0;
   new->tag = -1;
-  new->list_prev = NULL;
-  new->list_next = NULL;
+  new->next = NULL;
 
   return new;
 }
@@ -53,7 +52,7 @@ leReallyWipe (le * list)
     {
       /* free descendants */
       leWipe (list->branch);
-      leWipe (list->list_next);
+      leWipe (list->next);
 
       /* free ourself */
       if (list->data)
@@ -81,12 +80,11 @@ leAddTail (le * list, le * element)
     return element;
 
   /* find the end element of the list */
-  while (temp->list_next)
-    temp = temp->list_next;
+  while (temp->next)
+    temp = temp->next;
 
   /* tack ourselves on */
-  temp->list_next = element;
-  element->list_prev = temp;
+  temp->next = element;
 
   /* return the list */
   return list;
@@ -120,10 +118,7 @@ leDup (le * list)
 
   temp = leNew (list->data);
   temp->branch = leDup (list->branch);
-  temp->list_next = leDup (list->list_next);
-
-  if (temp->list_next)
-    temp->list_next->list_prev = temp;
+  temp->next = leDup (list->next);
 
   return temp;
 }
@@ -138,7 +133,7 @@ leDumpReformat (le * tree)
     {
       astr_cat_char (as, '(');
 
-      for (; tree; tree = tree->list_next)
+      for (; tree; tree = tree->next)
 	{
 	  if (tree->data)
 	    {
@@ -165,7 +160,7 @@ leDumpEval (le * list, int indent GCC_UNUSED)
   le *start = list;
   astr as = astr_new ();
 
-  for (; list; list = list->list_next)
+  for (; list; list = list->next)
     {
       if (list->branch)
 	{

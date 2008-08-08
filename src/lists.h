@@ -35,8 +35,7 @@ struct le
   int tag;
 
   /* for the next in the list in the current parenlevel */
-  struct le *list_prev;
-  struct le *list_next;
+  struct le *next;
 };
 typedef struct le le;
 

@@ -569,14 +569,14 @@ sequence.
 
   if (arglist)
     {
-      keys = keystrtovec (arglist->list_next->data);
+      keys = keystrtovec (arglist->next->data);
       if (keys == NULL)
 	{
 	  minibuf_error ("Key sequence %s is invalid",
-			 arglist->list_next->data);
+			 arglist->next->data);
 	  return false;
 	}
-      name = arglist->list_next->list_next->data;
+      name = arglist->next->next->data;
     }
   else
     {

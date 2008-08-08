@@ -236,8 +236,8 @@ Set a variable value to the user-specified value.
 
   if (arglist)
     {
-      var = arglist->list_next->data;
-      val = arglist->list_next->list_next->data;
+      var = arglist->next->data;
+      val = arglist->next->next->data;
     }
   else
     {
