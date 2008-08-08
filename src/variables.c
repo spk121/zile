@@ -30,6 +30,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "hash.h"
+#include "gl_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -187,7 +188,8 @@ minibuf_read_variable_name (char *msg)
        p != NULL;
        p = hash_get_next (main_var_list, p))
     {
-      list_append (cp->completions, xstrdup (p->var));
+      gl_sortedlist_add (cp->completions, completion_strcmp,
+                         xstrdup (p->var));
     }
 
   for (;;)

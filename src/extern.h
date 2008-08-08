@@ -42,16 +42,17 @@ int scroll_down (void);
 int scroll_up (void);
 
 /* bind.c ----------------------------------------------------------------- */
+int completion_strcmp (const void *p1, const void *p2);
 size_t do_completion (astr as);
-char *minibuf_read_function_name (const char *fmt, ...);
-int execute_function (char *name, int uniarg);
-char *get_function_by_key_sequence (gl_list_t * keys);
+const char *minibuf_read_function_name (const char *fmt, ...);
+int execute_function (const char *name, int uniarg);
+const char *get_function_by_key_sequence (gl_list_t * keys);
 void process_key (size_t key);
 void init_bindings (void);
 Function last_command (void);
 void free_bindings (void);
-Function get_function (char *name);
-char *get_function_name (Function p);
+Function get_function (const char *name);
+const char *get_function_name (Function p);
 
 /* buffer.c --------------------------------------------------------------- */
 void calculate_region (Region * rp, Point from, Point to);
@@ -182,7 +183,7 @@ void add_cmd_to_macro (void);
 void add_key_to_cmd (size_t key);
 void call_macro (Macro * mp);
 void free_macros (void);
-Macro *get_macro (char *name);
+Macro *get_macro (const char *name);
 
 /* main.c ----------------------------------------------------------------- */
 extern char *prog_name;

@@ -213,7 +213,7 @@ END_DEFUN
 /*
  * Free all the macros (used at Zile exit).
  */
-  void
+void
 free_macros (void)
 {
   Macro *mp, *next;
@@ -231,7 +231,7 @@ free_macros (void)
  * Find a macro given its name.
  */
 Macro *
-get_macro (char *name)
+get_macro (const char *name)
 {
   Macro *mp;
   assert (name);

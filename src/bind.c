@@ -306,7 +306,7 @@ last_command (void)
 struct fentry
 {
   /* The function name. */
-  char *name;
+  const char *name;
 
   /* The function pointer. */
   Function func;
@@ -392,8 +392,8 @@ free_bindings (void)
   free_history_elements (&functions_history);
 }
 
-static char *
-bsearch_function (char *name)
+static const char *
+bsearch_function (const char *name)
 {
   struct fentry key, *entryp;
   key.name = name;
@@ -404,7 +404,7 @@ bsearch_function (char *name)
 }
 
 static fentryp
-get_fentry (char *name)
+get_fentry (const char *name)
 {
   size_t i;
   assert (name);
@@ -415,13 +415,13 @@ get_fentry (char *name)
 }
 
 Function
-get_function (char *name)
+get_function (const char *name)
 {
   fentryp f = get_fentry (name);
   return f ? f->func : NULL;
 }
 
-char *
+const char *
 get_function_name (Function p)
 {
   size_t i;
@@ -435,12 +435,13 @@ get_function_name (Function p)
  * Read a function name from the minibuffer.
  * The returned buffer must be freed by the caller.
  */
-char *
+const char *
 minibuf_read_function_name (const char *fmt, ...)
 {
   va_list ap;
   size_t i;
-  char *buf, *ms;
+  char *buf;
+  const char *ms;
   list p;
   Completion *cp;
 
@@ -450,7 +451,8 @@ minibuf_read_function_name (const char *fmt, ...)
 
   cp = completion_new (false);
   for (i = 0; i < fentry_table_size; ++i)
-    list_append (cp->completions, xstrdup (fentry_table[i].name));
+    gl_sortedlist_add (cp->completions, completion_strcmp,
+                       xstrdup (fentry_table[i].name));
 
   for (;;)
     {
@@ -476,9 +478,8 @@ minibuf_read_function_name (const char *fmt, ...)
 	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
 	    ms = cp->match;
 	  astr_delete (as);
-	  for (p = list_first (cp->completions); p != cp->completions;
-	       p = list_next (p))
-	    if (!strcmp (ms, p->item))
+	  for (i = 0; i < gl_list_size (cp->completions); i++)
+	    if (!strcmp (ms, (char *) gl_list_get_at (cp->completions, i)))
 	      {
 		ms = p->item;
 		break;
@@ -505,7 +506,7 @@ minibuf_read_function_name (const char *fmt, ...)
 }
 
 int
-execute_function (char *name, int uniarg)
+execute_function (const char *name, int uniarg)
 {
   Function func = get_function (name);
   Macro *mp;
@@ -531,7 +532,7 @@ Read function name, then read its arguments and call it.
 +*/
 {
   int res;
-  char *name;
+  const char *name;
   astr msg = astr_new ();
 
   if (lastflag & FLAG_SET_UNIARG)
@@ -545,7 +546,7 @@ Read function name, then read its arguments and call it.
     return false;
 
   res = execute_function (name, uniarg);
-  free (name);
+  free ((char *) name);
 
   return res;
 }
@@ -562,7 +563,7 @@ sequence.
   size_t key;
   gl_list_t keys;
   Function func;
-  char *name;
+  const char *name;
 
   if (arglist)
     {
@@ -602,7 +603,7 @@ sequence.
     minibuf_error ("No such function `%s'", name);
 
   if (!arglist)
-    free (name);
+    free ((char *) name);
   gl_list_free (keys);
 
   return ok;
@@ -678,7 +679,7 @@ Argument is a command name.  If the prefix arg is non-nil, insert the
 message in the buffer.
 +*/
 {
-  char *name = minibuf_read_function_name ("Where is command: ");
+  const char *name = minibuf_read_function_name ("Where is command: ");
   int ret = false;
   gather_bindings_state g;
 
@@ -707,12 +708,12 @@ message in the buffer.
 	}
     }
 
-  free (name);
+  free ((char *) name);
   return ret;
 }
 END_DEFUN
 
-char *
+const char *
 get_function_by_key_sequence (gl_list_t * keys)
 {
   leafp p;

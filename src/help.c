@@ -106,7 +106,7 @@ END_DEFUN
  * AUTODOC automatically generated file.
  */
 static astr
-get_funcvar_doc (char *name, astr defval, int isfunc)
+get_funcvar_doc (const char *name, astr defval, int isfunc)
 {
   astr buf, match, doc;
   int reading_doc = 0;
@@ -174,7 +174,7 @@ DEFUN ("describe-function", describe_function)
 Display the full documentation of a function.
 +*/
 {
-  char *name;
+  const char *name;
   astr bufname, doc;
 
   name = minibuf_read_function_name ("Describe function: ");
@@ -189,7 +189,7 @@ Display the full documentation of a function.
   astr_afmt (bufname, "*Help: function `%s'*", name);
   write_temp_buffer (astr_cstr (bufname), write_function_description,
 		     name, doc);
-  free (name);
+  free ((char *) name);
   astr_delete (bufname);
   astr_delete (doc);
 
@@ -248,7 +248,7 @@ DEFUN ("describe-key", describe_key)
 Display documentation of the command invoked by a key sequence.
 +*/
 {
-  char *name;
+  const char *name;
   astr bufname, doc, binding;
   gl_list_t keys;
 

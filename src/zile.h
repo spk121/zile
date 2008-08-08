@@ -30,6 +30,7 @@
 #include "xalloc.h"
 #include "minmax.h"
 #include "hash.h"
+#include "gl_list.h"
 
 #include "list.h"
 #include "astr.h"
@@ -230,8 +231,6 @@ enum
 
 struct Completion
 {
-  /* This flag is set when the vector is sorted. */
-  int fl_sorted;
   /* This flag is set when a completion window has been popped up. */
   int fl_poppedup;
 
@@ -247,10 +246,10 @@ struct Completion
   /* This flag is set when the space character is allowed. */
   int fl_space;
 
-  list completions;		/* The completions list. */
+  gl_list_t completions;	/* The completions list. */
 
-  list matches;			/* The matches list. */
-  char *match;			/* The match buffer. */
+  gl_list_t matches;		/* The matches list. */
+  const char *match;		/* The match buffer. */
   size_t matchsize;		/* The match buffer size. */
 };
 

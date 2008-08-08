@@ -31,6 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <libgen.h>
+#include "gl_linked_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -40,18 +41,40 @@
  *----------------------------------------------------------------------*/
 
 /*
+ * List methods for completions and matches
+ */
+int
+completion_strcmp (const void *p1, const void *p2)
+{
+  return strcmp ((char *) p1, (char *) p2);
+}
+
+static bool
+completion_streq (const void *p1, const void *p2)
+{
+  return strcmp ((char *) p1, (char *) p2) == 0;
+}
+
+static void
+completion_free (const void *p)
+{
+  free ((void *)p);
+}
+
+/*
  * Allocate a new completion structure.
  */
 Completion *
 completion_new (int fileflag)
 {
-  Completion *cp;
+  Completion *cp = (Completion *) XZALLOC (Completion);
 
-  cp = (Completion *) xzalloc (sizeof (Completion));
-  memset (cp, 0, sizeof (Completion));
-
-  cp->completions = list_new ();
-  cp->matches = list_new ();
+  cp->completions = gl_list_create_empty (GL_LINKED_LIST,
+                                          completion_streq, NULL,
+                                          completion_free, false);
+  cp->matches = gl_list_create_empty (GL_LINKED_LIST,
+                                      completion_streq, NULL,
+                                      NULL, false);
 
   if (fileflag)
     {
@@ -68,13 +91,8 @@ completion_new (int fileflag)
 void
 free_completion (Completion * cp)
 {
-  list p;
-
-  for (p = list_first (cp->completions); p != cp->completions;
-       p = list_next (p))
-    free (p->item);
-  list_delete (cp->completions);
-  list_delete (cp->matches);
+  gl_list_free (cp->completions);
+  gl_list_free (cp->matches);
   if (cp->fl_dir)
     astr_delete (cp->path);
   free (cp);
@@ -123,14 +141,13 @@ completion_scroll_down (void)
  * Calculate the maximum length of the completions.
  */
 static size_t
-calculate_max_length (list l, size_t size)
+calculate_max_length (gl_list_t l, size_t size)
 {
   size_t i, maxlen = 0;
-  list p;
 
-  for (p = list_first (l), i = 0; p != l && i < size; p = list_next (p), i++)
+  for (i = 0; i < MIN (size, gl_list_size (l)); i++)
     {
-      size_t len = strlen (p->item);
+      size_t len = strlen ((char *) gl_list_get_at (l, i));
       maxlen = MAX (len, maxlen);
     }
 
@@ -141,25 +158,24 @@ calculate_max_length (list l, size_t size)
  * Print the list of completions in a set of columns.
  */
 static void
-completion_print (list l, size_t size)
+completion_print (gl_list_t l, size_t size)
 {
   size_t i, j, col, max, numcols;
-  list p;
 
   max = calculate_max_length (l, size) + 5;
   numcols = (cur_wp->ewidth - 1) / max;
 
   bprintf ("Possible completions are:\n");
-  for (p = list_first (l), i = col = 0; p != l && i < size;
-       p = list_next (p), i++)
+  for (i = col = 0; i < MIN (size, gl_list_size (l)); i++)
     {
+      char *s = (char *) gl_list_get_at (l, i);
       if (col >= numcols)
 	{
 	  col = 0;
 	  insert_newline ();
 	}
-      insert_string (p->item);
-      for (j = max - strlen (p->item); j > 0; --j)
+      insert_string (s);
+      for (j = max - strlen (s); j > 0; --j)
 	insert_char (' ');
       ++col;
     }
@@ -172,7 +188,7 @@ write_completion (va_list ap)
   int allflag = va_arg (ap, int);
   size_t num = va_arg (ap, size_t);
   if (allflag)
-    completion_print (cp->completions, list_length (cp->completions));
+    completion_print (cp->completions, gl_list_size (cp->completions));
   else
     completion_print (cp->matches, num);
 }
@@ -195,12 +211,6 @@ popup_completion (Completion * cp, int allflag, size_t num)
   term_redisplay ();
 }
 
-static int
-hcompar (const void *p1, const void *p2)
-{
-  return strcmp (*(const char **) p1, *(const char **) p2);
-}
-
 /*
  * Reread directory for completions.
  */
@@ -213,16 +223,13 @@ completion_reread (Completion * cp, astr as)
   const char *pdir, *base;
   struct dirent *d;
   struct stat st;
-  list p;
   astr bs = astr_new ();
 
-  for (p = list_first (cp->completions); p != cp->completions;
-       p = list_next (p))
-    free (p->item);
-  list_delete (cp->completions);
+  gl_list_free (cp->completions);
 
-  cp->completions = list_new ();
-  cp->fl_sorted = 0;
+  cp->completions = gl_list_create_empty (GL_LINKED_LIST,
+                                          completion_streq, NULL,
+                                          completion_free, false);
 
   if (expand_path (as) == NULL)
     return false;
@@ -266,7 +273,8 @@ completion_reread (Completion * cp, astr as)
 	}
       else
 	astr_cpy_cstr (buf, d->d_name);
-      list_append (cp->completions, xstrdup (astr_cstr (buf)));
+      gl_sortedlist_add (cp->completions, completion_strcmp,
+                         xstrdup (astr_cstr (buf)));
     }
   closedir (dir);
 
@@ -292,25 +300,19 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
   char c;
   list p;
 
-  list_delete (cp->matches);
-  cp->matches = list_new ();
+  gl_list_free (cp->matches);
+  cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_streq, NULL, NULL, false);
 
   if (cp->fl_dir)
     if (!completion_reread (cp, search))
       return COMPLETION_NOTMATCHED;
 
-  if (!cp->fl_sorted)
-    {
-      list_sort (cp->completions, hcompar);
-      cp->fl_sorted = 1;
-    }
-
   ssize = astr_len (search);
 
   if (ssize == 0)
     {
-      cp->match = list_first (cp->completions)->item;
-      if (list_length (cp->completions) > 1)
+      cp->match = (char *) gl_list_get_at (cp->completions, 0);
+      if (gl_list_size (cp->completions) > 1)
 	{
 	  cp->matchsize = 0;
 	  popup_completion (cp, true, 0);
@@ -323,28 +325,30 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 	}
     }
 
-  for (p = list_first (cp->completions); p != cp->completions;
-       p = list_next (p))
-    if (!strncmp (p->item, astr_cstr (search), ssize))
-      {
-	++partmatches;
-	list_append (cp->matches, p->item);
-	if (!strcmp (p->item, astr_cstr (search)))
-	  ++fullmatches;
-      }
+  for (i = 0; i < gl_list_size (cp->completions); i++)
+    {
+      char *s = (char *) gl_list_get_at (cp->completions, i);
+      if (!strncmp (s, astr_cstr (search), ssize))
+        {
+          ++partmatches;
+          gl_sortedlist_add (cp->matches, completion_strcmp, p->item);
+          if (!strcmp (s, astr_cstr (search)))
+            ++fullmatches;
+        }
+    }
 
   if (partmatches == 0)
     return COMPLETION_NOTMATCHED;
   else if (partmatches == 1)
     {
-      cp->match = list_first (cp->matches)->item;
+      cp->match = (char *) gl_list_get_at (cp->matches, 0);
       cp->matchsize = strlen (cp->match);
       return COMPLETION_MATCHED;
     }
 
   if (fullmatches == 1 && partmatches > 1)
     {
-      cp->match = list_first (cp->matches)->item;
+      cp->match = (char *) gl_list_get_at (cp->matches, 0);
       cp->matchsize = strlen (cp->match);
       if (popup_when_complete)
 	popup_completion (cp, false, partmatches);
@@ -353,17 +357,15 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 
   for (j = ssize;; ++j)
     {
-      list p = list_first (cp->matches);
-      char *s = p->item;
+      const char *s = (char *) gl_list_get_at (cp->matches, 0);
 
       c = s[j];
       for (i = 1; i < partmatches; ++i)
 	{
-	  p = list_next (p);
-	  s = p->item;
+	  s = gl_list_get_at (cp->matches, i);
 	  if (s[j] != c)
 	    {
-	      cp->match = list_first (cp->matches)->item;
+	      cp->match = (char *) gl_list_get_at (cp->matches, 0);
 	      cp->matchsize = j;
 	      popup_completion (cp, false, partmatches);
 	      return COMPLETION_NONUNIQUE;

@@ -155,7 +155,8 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 		     Completion * cp, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf;
+  const char *s;
 
   va_start (ap, cp);
   xvasprintf (&buf, fmt, ap);
@@ -163,27 +164,25 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 
   for (;;)
     {
-      p = term_minibuf_read (buf, "", cp, NULL);
-      if (p == NULL)
+      s = term_minibuf_read (buf, "", cp, NULL);
+      if (s == NULL)
 	{			/* Cancelled. */
 	  free (buf);
 	  return -1;
 	}
       else
 	{
-	  list s;
-	  int i;
+	  size_t i;
 	  astr as = astr_new ();
 
 	  /* Complete partial words if possible. */
-	  astr_cpy_cstr (as, p);
+	  astr_cpy_cstr (as, s);
 	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-	    p = cp->match;
+	    s = cp->match;
 	  astr_delete (as);
 
-	  for (s = list_first (cp->completions), i = 0; s != cp->completions;
-	       s = list_next (s), i++)
-	    if (!strcmp (p, s->item))
+	  for (i = 0; i < gl_list_size (cp->completions); i++)
+	    if (!strcmp (s, (char *) gl_list_get_at (cp->completions, i)))
 	      {
 		free (buf);
 		return i;
@@ -211,15 +210,15 @@ minibuf_read_yesno (const char *fmt, ...)
   va_end (ap);
 
   cp = completion_new (false);
-  list_append (cp->completions, xstrdup ("yes"));
-  list_append (cp->completions, xstrdup ("no"));
+  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("yes"));
+  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("no"));
 
   retvalue = minibuf_read_forced (buf, "Please answer yes or no.", cp);
   if (retvalue != -1)
     {
       /* The completions may be sorted by the minibuf completion
 	 routines. */
-      if (!strcmp (list_at (cp->completions, (size_t) retvalue), "yes"))
+      if (!strcmp (gl_list_get_at (cp->completions, (size_t) retvalue), "yes"))
 	retvalue = true;
       else
 	retvalue = false;
