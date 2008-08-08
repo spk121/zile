@@ -140,7 +140,7 @@ evaluateNode (le * node)
 }
 
 
-int
+static int
 countNodes (le * branch)
 {
   int count;

@@ -37,15 +37,6 @@ eval_cb lookupFunction (char *name);
 le *evaluateBranch (le * trybranch);
 le *evaluateNode (le * node);
 
-int countNodes (le * branch);
-
-enum setfcn
-{
-  S_SET,
-  S_SETQ
-};
-
-le *eval_cb_set (int argc, le * branch);
 le *eval_cb_setq (int argc, le * branch);
 
 le *leNIL, *leT;
