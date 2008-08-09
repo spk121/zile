@@ -51,8 +51,7 @@ leReallyWipe (le * list)
       leWipe (list->next);
 
       /* free ourself */
-      if (list->data)
-	free (list->data);
+      free (list->data);
       free (list);
     }
 }
