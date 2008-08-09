@@ -99,7 +99,6 @@ le *
 leAddDataElement (le * list, const char *data, int quoted)
 {
   le *newdata = leNew (data);
-  assert (newdata);
   newdata->quoted = quoted;
   return leAddTail (list, newdata);
 }
