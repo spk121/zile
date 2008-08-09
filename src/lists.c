@@ -64,7 +64,7 @@ leWipe (le * list)
     leReallyWipe (list);
 }
 
-le *
+static le *
 leAddTail (le * list, le * element)
 {
   le *temp = list;
@@ -85,7 +85,6 @@ leAddTail (le * list, le * element)
   /* return the list */
   return list;
 }
-
 
 le *
 leAddBranchElement (le * list, le * branch, int quoted)
