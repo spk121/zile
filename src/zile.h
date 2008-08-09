@@ -33,7 +33,7 @@
 #include "gl_list.h"
 
 #include "astr.h"
-#include "eval.h"
+#include "lists.h"
 
 /*--------------------------------------------------------------------------
  * Main editor structures.
@@ -270,6 +270,13 @@ struct Macro
   struct Macro *next;		/* Next macro in the list. */
 };
 typedef struct Macro Macro;
+
+typedef le *(*eval_cb) (int argc, le * branch);
+typedef struct
+{
+  char *word;
+  eval_cb callback;
+} evalLookupNode;
 
 /* Type of font attributes */
 typedef size_t Font;

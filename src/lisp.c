@@ -27,7 +27,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "eval.h"
 #include "lists.h"
 
 

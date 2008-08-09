@@ -39,7 +39,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "eval.h"
 
 #define ZILE_VERSION_STRING	"GNU " PACKAGE_NAME " " VERSION
 

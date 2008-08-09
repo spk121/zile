@@ -38,7 +38,6 @@ zile_SOURCES =				\
 	astr.h				\
 	xalloc.c			\
 	eval.c				\
-	eval.h				\
 	lists.c				\
 	lists.h				\
 	lisp.c				\

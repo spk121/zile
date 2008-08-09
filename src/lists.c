@@ -28,7 +28,6 @@
 #include "zile.h"
 #include "extern.h"
 #include "lists.h"
-#include "eval.h"
 
 
 le *

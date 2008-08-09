@@ -28,7 +28,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "eval.h"
 
 
 static le *
@@ -54,6 +53,41 @@ eval_cb_command_helper (Function f, int argc, le * branch)
 #undef X2
 #undef X3
 
+
+static int
+countNodes (le * branch)
+{
+  int count;
+
+  for (count = 0; branch; branch = branch->next, count++);
+  return count;
+}
+
+static le *
+eval_cb_setq (int argc, le * branch)
+{
+  le *newvalue = leNIL, *current;
+  argc = countNodes (branch);
+
+  if (branch != NULL && argc >= 3)
+    {
+      for (current = branch->next; current;
+	   current = current->next->next)
+	{
+	  if (newvalue != leNIL)
+	    leWipe (newvalue);
+
+	  newvalue = evaluateNode (current->next);
+
+	  set_variable (current->data, newvalue->data);
+
+	  if (current->next == NULL)
+	    break;
+	}
+    }
+
+  return newvalue;
+}
 
 static evalLookupNode evalTable[] = {
   {"setq", eval_cb_setq},
@@ -137,40 +171,4 @@ evaluateNode (le * node)
     }
 
   return value;
-}
-
-
-static int
-countNodes (le * branch)
-{
-  int count;
-
-  for (count = 0; branch; branch = branch->next, count++);
-  return count;
-}
-
-le *
-eval_cb_setq (int argc, le * branch)
-{
-  le *newvalue = leNIL, *current;
-  argc = countNodes (branch);
-
-  if (branch != NULL && argc >= 3)
-    {
-      for (current = branch->next; current;
-	   current = current->next->next)
-	{
-	  if (newvalue != leNIL)
-	    leWipe (newvalue);
-
-	  newvalue = evaluateNode (current->next);
-
-	  set_variable (current->data, newvalue->data);
-
-	  if (current->next == NULL)
-	    break;
-	}
-    }
-
-  return newvalue;
 }

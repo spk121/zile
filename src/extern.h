@@ -23,7 +23,6 @@
    MA 02111-1301, USA.  */
 
 #include "gl_list.h"
-#include "eval.h"
 
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp (Buffer * bp, Point pt);
@@ -98,6 +97,12 @@ int bobp (void);
 int eobp (void);
 int bolp (void);
 int eolp (void);
+
+/* eval.c ----------------------------------------------------------------- */
+eval_cb lookupFunction (char *name);
+le *evaluateBranch (le * trybranch);
+le *evaluateNode (le * node);
+le *leNIL, *leT;
 
 /* file.c ----------------------------------------------------------------- */
 int exist_file (const char *filename);

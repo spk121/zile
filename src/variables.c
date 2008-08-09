@@ -34,7 +34,6 @@
 
 #include "zile.h"
 #include "extern.h"
-#include "eval.h"
 
 /*
  * Variable type.
