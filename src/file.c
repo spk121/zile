@@ -71,29 +71,6 @@ is_regular_file (const char *filename)
   return false;
 }
 
-/* Safe getcwd */
-astr
-agetcwd (void)
-{
-  size_t len = 256;
-  char *buf = (char *) xzalloc (len);
-  char *res;
-  astr as;
-
-  while ((res = getcwd (buf, len)) == NULL && errno == ERANGE)
-    {
-      len *= 2;
-      buf = xrealloc (buf, len);
-    }
-  /* If there was an error, return the empty string */
-  if (res == NULL)
-    *buf = '\0';
-  as = astr_new_cstr (buf);
-  free (buf);
-
-  return as;
-}
-
 /*
  * This functions does some corrections and expansions to
  * the passed path:
@@ -256,10 +233,22 @@ compact_path (const astr path)
 }
 
 /*
- * Return the current directory.
+ * Return the current directory, if available.
+ */
+astr
+agetcwd (void)
+{
+  char *s = getcwd (NULL, 0);
+  astr as = astr_new_cstr (s);
+  free (s);
+  return as;
+}
+
+/*
+ * Return the current directory for the buffer.
  */
 static astr
-get_current_dir (void)
+get_buffer_dir (void)
 {
   astr buf;
   const char *p, *q;
@@ -290,12 +279,9 @@ astr
 get_home_dir (void)
 {
   char *s = getenv ("HOME");
-  astr as;
   if (s != NULL)
-    as = astr_new_cstr (s);
-  else
-    as = agetcwd ();
-  return as;
+    return astr_new_cstr (s);
+  return NULL;
 }
 
 /* Return nonzero if file exists and can be written. */
@@ -463,7 +449,7 @@ Switch to a buffer visiting the file,
 creating one if none already exists.
 +*/
 {
-  astr buf = get_current_dir ();
+  astr buf = get_buffer_dir ();
   char *ms = minibuf_read_dir ("Find file: ", astr_cstr (buf));
 
   if (ms == NULL)
@@ -506,7 +492,7 @@ If the current buffer now contains an empty file that you just visited
 (presumably by mistake), use this command to visit the file you really want.
 +*/
 {
-  astr buf = get_current_dir ();
+  astr buf = get_buffer_dir ();
   char *ms = minibuf_read_dir ("Find alternate: ", astr_cstr (buf));
 
   if (ms == NULL)
@@ -822,7 +808,7 @@ Set mark after the inserted text.
   if (warn_if_readonly_buffer ())
     return false;
 
-  buf = get_current_dir ();
+  buf = get_buffer_dir ();
   ms = minibuf_read_dir ("Insert file: ", astr_cstr (buf));
   if (ms == NULL)
     {
@@ -1313,7 +1299,7 @@ directory.
 +*/
 {
   struct stat st;
-  astr buf = get_current_dir ();
+  astr buf = get_buffer_dir ();
   char *ms = minibuf_read_dir ("Change default directory: ",
 			 astr_cstr (buf));
 

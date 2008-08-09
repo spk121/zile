@@ -102,10 +102,10 @@ int eolp (void);
 /* file.c ----------------------------------------------------------------- */
 int exist_file (const char *filename);
 int is_regular_file (const char *filename);
-astr agetcwd (void);
 astr get_home_dir (void);
 astr expand_path (astr path);
 astr compact_path (const astr path);
+astr agetcwd (void);
 void read_from_disk (const char *filename);
 int find_file (const char *filename);
 Completion *make_buffer_completion (void);

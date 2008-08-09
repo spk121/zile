@@ -332,18 +332,21 @@ main (int argc, char **argv)
           FILE *fp;
 
           astr as = get_home_dir ();
-          astr_cat_cstr (as, "/." PACKAGE);
-          fp = fopen (astr_cstr (as), "r");
-          if (fp != NULL)
+          if (as)
             {
-              astr bs = astr_fread (fp);
-              ptrdiff_t pos = 0;
-              list = lisp_read (NULL, bs, &pos);
-              leEval (list);
-              astr_delete (bs);
+              astr_cat_cstr (as, "/." PACKAGE);
+              fp = fopen (astr_cstr (as), "r");
+              if (fp != NULL)
+                {
+                  astr bs = astr_fread (fp);
+                  ptrdiff_t pos = 0;
+                  list = lisp_read (NULL, bs, &pos);
+                  leEval (list);
+                  astr_delete (bs);
+                }
+              fclose (fp);
+              astr_delete (as);
             }
-          fclose (fp);
-          astr_delete (as);
           leWipe (list);
         }
 

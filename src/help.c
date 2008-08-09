@@ -88,7 +88,8 @@ Show a tutorial window.
   if (show_file (PATH_DATA "/TUTORIAL"))
     {
       astr buf = get_home_dir ();
-
+      if (buf == NULL)
+        buf = agetcwd ();
       cur_bp->flags = 0;
       astr_cat_cstr (buf, "/TUTORIAL");
       set_buffer_filename (cur_bp, astr_cstr (buf));
