@@ -99,10 +99,11 @@ int bolp (void);
 int eolp (void);
 
 /* eval.c ----------------------------------------------------------------- */
+extern le *leNIL, *leT;
 eval_cb lookupFunction (char *name);
 le *evaluateBranch (le * trybranch);
 le *evaluateNode (le * node);
-le *leNIL, *leT;
+void leEval (le * list);
 
 /* file.c ----------------------------------------------------------------- */
 int exist_file (const char *filename);

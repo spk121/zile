@@ -119,10 +119,3 @@ leDup (le * list)
 
   return temp;
 }
-
-void
-leEval (le * list)
-{
-  for (; list; list = list->next)
-    leWipe (evaluateBranch (list->branch));
-}

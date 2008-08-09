@@ -30,6 +30,8 @@
 #include "extern.h"
 
 
+le *leNIL, *leT;
+
 static le *
 eval_cb_command_helper (Function f, int argc, le * branch)
 {
@@ -119,6 +121,29 @@ lookupFunction (char *name)
   return NULL;
 }
 
+le *
+evaluateNode (le * node)
+{
+  le *value;
+
+  if (node == NULL)
+    return leNIL;
+
+  if (node->branch != NULL)
+    {
+      if (node->quoted)
+	value = leDup (node->branch);
+      else
+	value = evaluateBranch (node->branch);
+    }
+  else
+    {
+      const char *s = get_variable (node->data);
+      value = leNew (s ? s : node->data);
+    }
+
+  return value;
+}
 
 le *
 evaluateBranch (le * trybranch)
@@ -148,27 +173,9 @@ evaluateBranch (le * trybranch)
   return NULL;
 }
 
-
-le *
-evaluateNode (le * node)
+void
+leEval (le * list)
 {
-  le *value;
-
-  if (node == NULL)
-    return leNIL;
-
-  if (node->branch != NULL)
-    {
-      if (node->quoted)
-	value = leDup (node->branch);
-      else
-	value = evaluateBranch (node->branch);
-    }
-  else
-    {
-      const char *s = get_variable (node->data);
-      value = leNew (s ? s : node->data);
-    }
-
-  return value;
+  for (; list; list = list->next)
+    leWipe (evaluateBranch (list->branch));
 }
