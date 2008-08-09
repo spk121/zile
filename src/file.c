@@ -24,9 +24,6 @@
 #include "config.h"
 
 #include <sys/stat.h>
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
