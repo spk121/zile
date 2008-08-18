@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -111,7 +110,6 @@ minibuf_read (const char *fmt, const char *value, ...)
 
 /*
  * Read a directory from the minibuffer.
- * The returned buffer must be freed by the caller.
  */
 char *
 minibuf_read_dir (const char *fmt, const char *value, ...)
@@ -163,8 +161,8 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
   for (;;)
     {
       s = term_minibuf_read (buf, "", cp, NULL);
-      if (s == NULL)
-	{			/* Cancelled. */
+      if (s == NULL) /* Cancelled. */
+	{
 	  free (buf);
 	  return -1;
 	}
@@ -191,8 +189,7 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 	}
     }
 
-  assert (0);
-  return false;
+  abort ();
 }
 
 int

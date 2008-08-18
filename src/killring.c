@@ -98,13 +98,19 @@ kill_line (int literally)
   return false;
 }
 
+static int
+kill_line_literally (void)
+{
+  return kill_line (true);
+}
+
 DEFUN ("kill-line", kill_line)
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
 With prefix argument, kill that many lines from point.
 +*/
 {
-  int uni, ret = true;
+  le * ret = leT;
 
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
@@ -112,16 +118,7 @@ With prefix argument, kill that many lines from point.
   if (!(lastflag & FLAG_SET_UNIARG))
     kill_line (get_variable_bool ("kill-whole-line"));
   else
-    {
-      undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-      for (uni = 0; uni < uniarg; ++uni)
-	if (!kill_line (true))
-	  {
-	    ret = false;
-	    break;
-	  }
-      undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-    }
+    ret = execute_with_uniarg (true, uniarg, kill_line_literally, NULL);
 
   deactivate_mark ();
   return ret;
@@ -147,7 +144,7 @@ to make one entry in the kill ring.
     free_kill_ring ();
 
   if (warn_if_no_mark ())
-    return false;
+    return leNIL;
 
   calculate_the_region (&r);
 
@@ -187,7 +184,7 @@ to make one entry in the kill ring.
   thisflag |= FLAG_DONE_KILL;
   deactivate_mark ();
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -203,7 +200,7 @@ Save the region as if killed, but don't kill it.
     free_kill_ring ();
 
   if (warn_if_no_mark ())
-    return false;
+    return leNIL;
 
   calculate_the_region (&r);
 
@@ -214,9 +211,30 @@ Save the region as if killed, but don't kill it.
   thisflag |= FLAG_DONE_KILL;
   deactivate_mark ();
 
-  return true;
+  return leT;
 }
 END_DEFUN
+
+static le *
+kill (int uniarg, Function mark_func)
+{
+  if (!(lastflag & FLAG_DONE_KILL))
+    free_kill_ring ();
+
+  if (warn_if_readonly_buffer ())
+    return leNIL;
+
+  push_mark ();
+  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  mark_func (uniarg, NULL);
+  FUNCALL (kill_region);
+  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  pop_mark ();
+
+  thisflag |= FLAG_DONE_KILL;
+  minibuf_write ("");		/* Erase "Set mark" message.  */
+  return leT;
+}
 
 DEFUN ("kill-word", kill_word)
 /*+
@@ -224,24 +242,7 @@ Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  if (!(lastflag & FLAG_DONE_KILL))
-    free_kill_ring ();
-
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  push_mark ();
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  FUNCALL_ARG (mark_word, uniarg);
-  FUNCALL (kill_region);
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  pop_mark ();
-
-  thisflag |= FLAG_DONE_KILL;
-
-  minibuf_write ("");		/* Don't write "Set mark" message.  */
-
-  return true;
+  return kill (uniarg, F_mark_word);
 }
 END_DEFUN
 
@@ -262,24 +263,7 @@ With ARG, kill that many sexps after the cursor.
 Negative arg -N means kill N sexps before the cursor.
 +*/
 {
-  if (!(lastflag & FLAG_DONE_KILL))
-    free_kill_ring ();
-
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  push_mark ();
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  FUNCALL_ARG (mark_sexp, uniarg);
-  FUNCALL (kill_region);
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  pop_mark ();
-
-  thisflag |= FLAG_DONE_KILL;
-
-  minibuf_write ("");		/* Don't write "Set mark" message.  */
-
-  return true;
+  return kill (uniarg, F_mark_sexp);
 }
 END_DEFUN
 
@@ -293,13 +277,13 @@ killed OR yanked.  Put point at end, and set mark at beginning.
   if (kill_ring_text == NULL)
     {
       minibuf_error ("Kill ring is empty");
-      return false;
+      return leNIL;
     }
 
   if (warn_if_readonly_buffer ())
-    return false;
+    return leNIL;
 
-  set_mark_command ();
+  set_mark_interactive ();
 
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, astr_len (kill_ring_text), 0);
   undo_nosave = true;
@@ -308,6 +292,6 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
   deactivate_mark ();
 
-  return true;
+  return leT;
 }
 END_DEFUN

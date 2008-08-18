@@ -448,23 +448,17 @@ creating one if none already exists.
 {
   astr buf = get_buffer_dir ();
   char *ms = minibuf_read_dir ("Find file: ", astr_cstr (buf));
+  int ret = false;
 
-  if (ms == NULL)
-    {
-      astr_delete (buf);
-      return cancel ();
-    }
   astr_delete (buf);
+  if (ms == NULL)
+    return FUNCALL (keyboard_quit);
 
   if (ms[0] != '\0')
-    {
-      int ret_value = find_file (ms);
-      free (ms);
-      return ret_value;
-    }
+    ret = find_file (ms);
 
   free (ms);
-  return false;
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -475,12 +469,41 @@ Like `find-file' but marks buffer as read-only.
 Use M-x toggle-read-only to permit editing.
 +*/
 {
-  int ret_value = FUNCALL (find_file);
-  if (ret_value)
+  le * ret = FUNCALL (find_file);
+  if (ret == leT)
     cur_bp->flags |= BFLAG_READONLY;
-  return ret_value;
+  return ret;
 }
 END_DEFUN
+
+/*
+ * Check if the buffer has been modified.  If so, asks the user if
+ * he/she wants to save the changes.  If the response is positive, return
+ * true, else false.
+ */
+static int
+check_modified_buffer (Buffer * bp)
+{
+  int ans;
+
+  if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
+    for (;;)
+      {
+	if ((ans =
+	     minibuf_read_yesno
+	     ("Buffer %s modified; kill anyway? (yes or no) ",
+	      bp->name)) == -1)
+          {
+            FUNCALL (keyboard_quit);
+            return false;
+          }
+	else if (!ans)
+	  return false;
+	break;
+      }
+
+  return true;
+}
 
 DEFUN ("find-alternate-file", find_alternate_file)
 /*+
@@ -491,25 +514,20 @@ If the current buffer now contains an empty file that you just visited
 {
   astr buf = get_buffer_dir ();
   char *ms = minibuf_read_dir ("Find alternate: ", astr_cstr (buf));
+  int ret = false;
 
-  if (ms == NULL)
-    {
-      astr_delete (buf);
-      return cancel ();
-    }
   astr_delete (buf);
+  if (ms == NULL)
+    return FUNCALL (keyboard_quit);
 
   if (ms[0] != '\0' && check_modified_buffer (cur_bp))
     {
-      int ret_value;
       kill_buffer (cur_bp);
-      ret_value = find_file (ms);
-      free (ms);
-      return ret_value;
+      ret = find_file (ms);
     }
 
   free (ms);
-  return false;
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -529,7 +547,7 @@ Select to the user specified buffer in the current window.
 				"", cp, NULL, swbuf->name);
   free_completion (cp);
   if (ms == NULL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
 
   if (ms[0] != '\0')
     {
@@ -542,36 +560,11 @@ Select to the user specified buffer in the current window.
     }
 
   switch_to_buffer (swbuf);
+  free ((char *) ms);
 
-  return true;
+  return leT;
 }
 END_DEFUN
-
-/*
- * Check if the buffer has been modified.  If so, asks the user if
- * he/she wants to save the changes.  If the response is positive, return
- * true, else false.
- */
-int
-check_modified_buffer (Buffer * bp)
-{
-  int ans;
-
-  if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
-    for (;;)
-      {
-	if ((ans =
-	     minibuf_read_yesno
-	     ("Buffer %s modified; kill anyway? (yes or no) ",
-	      bp->name)) == -1)
-	  return cancel ();
-	else if (!ans)
-	  return false;
-	break;
-      }
-
-  return true;
-}
 
 /*
  * Remove the specified buffer from the buffer list and deallocate
@@ -664,7 +657,7 @@ Kill the current buffer or the user specified one.
   ms = minibuf_read_completion ("Kill buffer (default %s): ",
 				"", cp, NULL, cur_bp->name);
   if (ms == NULL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   free_completion (cp);
   if (ms[0] != '\0')
     {
@@ -672,7 +665,8 @@ Kill the current buffer or the user specified one.
       if (bp == NULL)
 	{
 	  minibuf_error ("Buffer `%s' not found", ms);
-	  return false;
+          free ((char *) ms);
+	  return leNIL;
 	}
     }
   else
@@ -681,10 +675,12 @@ Kill the current buffer or the user specified one.
   if (check_modified_buffer (bp))
     {
       kill_buffer (bp);
-      return true;
+      free ((char *) ms);
+      return leT;
     }
 
-  return false;
+  free ((char *) ms);
+  return leNIL;
 }
 END_DEFUN
 
@@ -717,14 +713,14 @@ Puts mark after the inserted text.
   Completion *cp;
 
   if (warn_if_readonly_buffer ())
-    return false;
+    return leNIL;
 
   swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
   cp = make_buffer_completion ();
   ms = minibuf_read_completion ("Insert buffer (default %s): ",
 				"", cp, NULL, swbuf->name);
   if (ms == NULL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   free_completion (cp);
   if (ms[0] != '\0')
     {
@@ -732,7 +728,8 @@ Puts mark after the inserted text.
       if (bp == NULL)
 	{
 	  minibuf_error ("Buffer `%s' not found", ms);
-	  return false;
+          free ((char *) ms);
+	  return leNIL;
 	}
     }
   else
@@ -741,13 +738,15 @@ Puts mark after the inserted text.
   if (bp == cur_bp)
     {
       minibuf_error ("Cannot insert the current buffer");
-      return false;
+      free ((char *) ms);
+      return leNIL;
     }
 
   insert_buffer (bp);
-  set_mark_command ();
+  set_mark_interactive ();
 
-  return true;
+  free ((char *) ms);
+  return leT;
 }
 END_DEFUN
 
@@ -803,33 +802,33 @@ Set mark after the inserted text.
   astr buf;
 
   if (warn_if_readonly_buffer ())
-    return false;
+    return leNIL;
 
   buf = get_buffer_dir ();
   ms = minibuf_read_dir ("Insert file: ", astr_cstr (buf));
   if (ms == NULL)
     {
       astr_delete (buf);
-      return cancel ();
+      return FUNCALL (keyboard_quit);
     }
   astr_delete (buf);
 
   if (ms[0] == '\0')
     {
       free (ms);
-      return false;
+      return leNIL;
     }
 
   if (!insert_file (ms))
     {
       free (ms);
-      return false;
+      return leNIL;
     }
 
-  set_mark_command ();
+  set_mark_interactive ();
 
   free (ms);
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -1056,7 +1055,10 @@ save_buffer (Buffer * bp)
 	{
 	  ms = minibuf_read_dir ("File to save in: ", fname);
 	  if (ms == NULL)
-	    return cancel ();
+            {
+              FUNCALL (keyboard_quit);
+              return false;
+            }
 	  ms_is_from_minibuffer = 1;
 	  if (ms[0] == '\0')
 	    {
@@ -1102,7 +1104,7 @@ Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
 +*/
 {
-  return save_buffer (cur_bp);
+  return bool_to_lisp (save_buffer (cur_bp));
 }
 END_DEFUN
 
@@ -1116,11 +1118,11 @@ Makes buffer visit that file, and marks it not modified.
   char *ms = minibuf_read_dir ("Write file: ", fname);
 
   if (ms == NULL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   if (ms[0] == '\0')
     {
       free (ms);
-      return false;
+      return leNIL;
     }
 
   set_buffer_filename (cur_bp, ms);
@@ -1134,7 +1136,7 @@ Makes buffer visit that file, and marks it not modified.
     }
 
   free (ms);
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -1183,7 +1185,8 @@ save_some_buffers (void)
 	    switch (c)
 	      {
 	      case KBD_CANCEL:	/* C-g */
-		return cancel ();
+		FUNCALL (keyboard_quit);
+                return false;
 	      case 'q':
 		goto endoffunc;
 	      case '.':
@@ -1219,7 +1222,7 @@ DEFUN ("save-some-buffers", save_some_buffers)
 Save some modified file-visiting buffers.  Asks user about each one.
 +*/
 {
-  return save_some_buffers ();
+  return bool_to_lisp (save_some_buffers ());
 }
 END_DEFUN
 
@@ -1232,7 +1235,7 @@ Offer to save each buffer, then kill this Zile process.
   int ans, i = 0;
 
   if (!save_some_buffers ())
-    return false;
+    return leNIL;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
     if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
@@ -1244,15 +1247,15 @@ Offer to save each buffer, then kill this Zile process.
 	if ((ans =
 	     minibuf_read_yesno
 	     ("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
-	  return cancel ();
+	  return FUNCALL (keyboard_quit);
 	else if (!ans)
-	  return false;
+	  return leNIL;
 	break;
       }
 
   thisflag |= FLAG_QUIT_ZILE;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -1303,7 +1306,7 @@ directory.
   if (ms == NULL)
     {
       astr_delete (buf);
-      return cancel ();
+      return FUNCALL (keyboard_quit);
     }
   astr_delete (buf);
 
@@ -1313,19 +1316,19 @@ directory.
 	{
 	  minibuf_error ("`%s' is not a directory", ms);
 	  free (ms);
-	  return false;
+	  return leNIL;
 	}
       if (chdir (ms) == -1)
 	{
 	  minibuf_write ("%s: %s", ms, strerror (errno));
 	  free (ms);
-	  return false;
+	  return leNIL;
 	}
       free (ms);
-      return true;
+      return leT;
     }
 
   free (ms);
-  return false;
+  return leNIL;
 }
 END_DEFUN

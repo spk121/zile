@@ -48,7 +48,7 @@ Move point to beginning of current line.
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -64,7 +64,7 @@ Move point to end of current line.
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -174,7 +174,7 @@ column, or at the end of the line if it is not long enough.
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -227,7 +227,7 @@ column, or at the end of the line if it is not long enough.
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -250,15 +250,15 @@ Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
 +*/
 {
-  char *ms;
   int to_char, count;
 
   do
     {
-      ms = minibuf_read ("Goto char: ", "");
+      char *ms = minibuf_read ("Goto char: ", "");
       if (ms == NULL)
-	return cancel ();
+	return FUNCALL (keyboard_quit);
       to_char = atoi (ms);
+      free (ms);
       if (to_char < 0)
 	ding ();
     }
@@ -269,7 +269,7 @@ Position 1 is the beginning of the buffer.
     if (!forward_char ())
       break;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -279,15 +279,15 @@ Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
 +*/
 {
-  char *ms;
   size_t to_line;
 
   do
     {
-      ms = minibuf_read ("Goto line: ", "");
+      char *ms = minibuf_read ("Goto line: ", "");
       if (ms == NULL)
-	return cancel ();
+	return FUNCALL (keyboard_quit);
       to_line = strtoul (ms, NULL, 10);
+      free (ms);
       if (to_line == ULONG_MAX)
 	ding ();
     }
@@ -296,7 +296,7 @@ Line 1 is the beginning of the buffer.
   goto_line (to_line - 1);
   cur_bp->pt.o = 0;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -315,9 +315,9 @@ DEFUN ("beginning-of-buffer", beginning_of_buffer)
 Move point to the beginning of the buffer; leave mark at previous position.
 +*/
 {
-  set_mark_command ();
+  set_mark_interactive ();
   gotobob ();
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -336,9 +336,9 @@ DEFUN ("end-of-buffer", end_of_buffer)
 Move point to the end of the buffer; leave mark at previous position.
 +*/
 {
-  set_mark_command ();
+  set_mark_interactive ();
   gotoeob ();
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -362,28 +362,6 @@ backward_char (void)
   return false;
 }
 
-DEFUN ("backward-char", backward_char)
-/*+
-Move point left N characters (right if N is negative).
-On attempt to pass beginning or end of buffer, stop and signal error.
-+*/
-{
-  int i;
-
-  if (uniarg < 0)
-    return FUNCALL_ARG (forward_char, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!backward_char ())
-      {
-	minibuf_error ("Beginning of buffer");
-	return false;
-      }
-
-  return true;
-}
-END_DEFUN
-
 int
 forward_char (void)
 {
@@ -404,25 +382,29 @@ forward_char (void)
   return false;
 }
 
+DEFUN ("backward-char", backward_char)
+/*+
+Move point left N characters (right if N is negative).
+On attempt to pass beginning or end of buffer, stop and signal error.
++*/
+{
+  le * ret = execute_with_uniarg (false, uniarg, backward_char, forward_char);
+  if (ret == leNIL)
+    minibuf_error ("Beginning of buffer");
+  return ret;
+}
+END_DEFUN
+
 DEFUN ("forward-char", forward_char)
 /*+
 Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    return FUNCALL_ARG (backward_char, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!forward_char ())
-      {
-	minibuf_error ("End of buffer");
-	return false;
-      }
-
-  return true;
+  le * ret = execute_with_uniarg (false, uniarg, forward_char, backward_char);
+  if (ret == leNIL)
+    minibuf_error ("End of buffer");
+  return ret;
 }
 END_DEFUN
 
@@ -450,7 +432,7 @@ ngotodown (size_t n)
   return true;
 }
 
-int
+static int
 scroll_down (void)
 {
   if (cur_bp->pt.n > 0)
@@ -462,25 +444,7 @@ scroll_down (void)
     }
 }
 
-DEFUN ("scroll-down", scroll_down)
-/*+
-Scroll text of current window downward near full screen.
-+*/
-{
-  int i;
-
-  if (uniarg < 0)
-    return FUNCALL_ARG (scroll_up, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!scroll_down ())
-      return false;
-
-  return true;
-}
-END_DEFUN
-
-int
+static int
 scroll_up (void)
 {
   if (cur_bp->pt.n < cur_bp->num_lines)
@@ -492,20 +456,20 @@ scroll_up (void)
     }
 }
 
+DEFUN ("scroll-down", scroll_down)
+/*+
+Scroll text of current window downward near full screen.
++*/
+{
+  return execute_with_uniarg (false, uniarg, scroll_down, scroll_up);
+}
+END_DEFUN
+
 DEFUN ("scroll-up", scroll_up)
 /*+
 Scroll text of current window upward near full screen.
 +*/
 {
-  int i;
-
-  if (uniarg < 0)
-    return FUNCALL_ARG (scroll_down, -uniarg);
-
-  for (i = 0; i < uniarg; i++)
-    if (!scroll_up ())
-      return false;
-
-  return true;
+  return execute_with_uniarg (false, uniarg, scroll_up, scroll_down);
 }
 END_DEFUN

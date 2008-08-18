@@ -31,14 +31,14 @@
 
 
 void
-lisp_init (void)
+init_lisp (void)
 {
   leNIL = leNew ("nil");
   leT = leNew ("t");
 }
 
 void
-lisp_finalise (void)
+free_lisp (void)
 {
   leReallyWipe (leNIL);
   leReallyWipe (leT);
@@ -162,7 +162,7 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
 {
   astr tok;
   enum tokenname tokenid;
-  int isquoted = 0;
+  int quoted = 0;
 
   while (1)
     {
@@ -171,26 +171,26 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
       switch (tokenid)
 	{
 	case T_QUOTE:
-	  isquoted = 1;
+	  quoted = 1;
 	  break;
 
 	case T_OPENPAREN:
-	  list = leAddBranchElement (list, lisp_read (NULL, as, pos), isquoted);
-	  isquoted = 0;
+	  list = leAddBranchElement (list, lisp_read (NULL, as, pos), quoted);
+	  quoted = 0;
 	  break;
 
 	case T_NEWLINE:
-	  isquoted = 0;
+	  quoted = 0;
 	  break;
 
 	case T_WORD:
-	  list = leAddDataElement (list, astr_cstr (tok), isquoted);
-	  isquoted = 0;
+	  list = leAddDataElement (list, astr_cstr (tok), quoted);
+	  quoted = 0;
 	  break;
 
 	case T_CLOSEPAREN:
 	case T_EOF:
-	  isquoted = 0;
+	  quoted = 0;
 	  astr_delete (tok);
 	  return list;
 	}
@@ -198,3 +198,28 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
       astr_delete (tok);
     }
 }
+
+DEFUN ("load", load)
+{
+  char *file;
+  FILE *fp;
+  le *list;
+
+  if (!arglist)
+    return false;
+  file = arglist->next->data;
+  fp = fopen (file, "r");
+  if (fp != NULL)
+    {
+      astr bs = astr_fread (fp);
+      ptrdiff_t pos = 0;
+      list = lisp_read (NULL, bs, &pos);
+      leEval (list);
+      astr_delete (bs);
+      leWipe (list);
+    }
+  fclose (fp);
+
+  return leT;
+}
+END_DEFUN

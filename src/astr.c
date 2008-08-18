@@ -194,6 +194,13 @@ astr_replace_cstr (astr as, ptrdiff_t pos, size_t size, const char *s)
 }
 
 astr
+astr_replace_char (astr as, ptrdiff_t pos, int c)
+{
+  char ch = (char) c;
+  return astr_replace_x (as, pos, (size_t) 1, &ch, (size_t) 1);
+}
+
+astr
 astr_insert_char (astr as, ptrdiff_t pos, int c)
 {
   char ch = (char) c;

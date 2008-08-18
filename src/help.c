@@ -40,26 +40,26 @@ DEFUN ("zile-version", zile_version)
 Show the zile version.
 +*/
 {
-  minibuf_write ("Zile " VERSION " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
+  minibuf_write (ZILE_VERSION_STRING " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
-static int
+static le *
 show_file (char *filename)
 {
   if (!exist_file (filename))
     {
       minibuf_error ("Unable to read file `%s'", filename);
-      return false;
+      return leNIL;
     }
 
   find_file (filename);
   cur_bp->flags = BFLAG_READONLY | BFLAG_NOSAVE | BFLAG_NEEDNAME
     | BFLAG_NOUNDO;
 
-  return true;
+  return leT;
 }
 
 DEFUN ("help", help)
@@ -95,10 +95,10 @@ Show a tutorial window.
       set_buffer_filename (cur_bp, astr_cstr (buf));
       astr_delete (buf);
 
-      return true;
+      return leT;
     }
 
-  return false;
+  return leNIL;
 }
 END_DEFUN
 
@@ -180,11 +180,14 @@ Display the full documentation of a function.
 
   name = minibuf_read_function_name ("Describe function: ");
   if (name == NULL)
-    return false;
+    return leNIL;
 
   doc = get_funcvar_doc (name, NULL, true);
   if (doc == NULL)
-    return false;
+    {
+      free ((char *) name);
+      return leNIL;
+    }
 
   bufname = astr_new ();
   astr_afmt (bufname, "*Help: function `%s'*", name);
@@ -194,7 +197,7 @@ Display the full documentation of a function.
   astr_delete (bufname);
   astr_delete (doc);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -222,25 +225,27 @@ Display the full documentation of a variable.
 
   name = minibuf_read_variable_name ("Describe variable: ");
   if (name == NULL)
-    return false;
+    return leNIL;
 
   defval = astr_new ();
   doc = get_funcvar_doc (name, defval, false);
   if (doc == NULL)
     {
       astr_delete (defval);
-      return false;
+      free (name);
+      return leNIL;
     }
 
   bufname = astr_new ();
   astr_afmt (bufname, "*Help: variable `%s'*", name);
   write_temp_buffer (astr_cstr (bufname), write_variable_description,
 		     name, defval, get_variable (name), doc);
+  free ((char *) name);
   astr_delete (bufname);
   astr_delete (doc);
   astr_delete (defval);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -262,7 +267,7 @@ Display documentation of the command invoked by a key sequence.
     {
       minibuf_error ("%s is undefined", astr_cstr (binding));
       astr_delete (binding);
-      return false;
+      return leNIL;
     }
 
   minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
@@ -270,7 +275,7 @@ Display documentation of the command invoked by a key sequence.
 
   doc = get_funcvar_doc (name, NULL, true);
   if (doc == NULL)
-    return false;
+    return leNIL;
 
   bufname = astr_new ();
   astr_afmt (bufname, "*Help: function `%s'*", name);
@@ -279,6 +284,6 @@ Display documentation of the command invoked by a key sequence.
   astr_delete (bufname);
   astr_delete (doc);
 
-  return true;
+  return leT;
 }
 END_DEFUN

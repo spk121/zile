@@ -40,8 +40,6 @@
 #include "zile.h"
 #include "extern.h"
 
-#define ZILE_VERSION_STRING	"GNU " PACKAGE_NAME " " VERSION
-
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 2008 Free Software Foundation, Inc."
 
@@ -70,10 +68,7 @@ loop (void)
       term_redisplay ();
       term_refresh ();
 
-      thisflag = 0;
-      if (lastflag & FLAG_DEFINING_MACRO)
-        thisflag |= FLAG_DEFINING_MACRO;
-
+      thisflag = lastflag & FLAG_DEFINING_MACRO;
       key = getkey ();
       minibuf_clear ();
       process_key (key);
@@ -100,7 +95,7 @@ Type `C-h h' for help; `C-x u; to undo changes.\n\
 Type `C-h C-d' for information on getting the latest version.\n\
 Type `C-h t' for a tutorial on using " PACKAGE_NAME ".\n\
 Type `C-h s' for a sample configuration file.\n\
-Type `C-g' at any time to cancel the current operation.\n\
+Type `C-g' at any time to FUNCALL (keyboard_quit)the current operation.\n\
 \n\
 `C-x' means hold the CTRL key while typing the character `x'.\n\
 `M-x' means hold the META or ALT key down while typing `x'.\n\
@@ -152,14 +147,14 @@ setup_main_screen (int argc)
       c++;
     }
 
-  /* *scratch* and two files.  */
+  /* *scratch* and two files. */
   if (c == 3)
     {
       FUNCALL (split_window);
       switch_to_buffer (last_bp);
       FUNCALL (other_window);
     }
-  /* More than two files.  */
+  /* More than two files. */
   else if (c > 3)
     FUNCALL (list_buffers);
   else
@@ -240,7 +235,7 @@ main (int argc, char **argv)
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
   init_search ();
-  lisp_init ();
+  init_lisp ();
   init_variables ();
 
   opterr = 0;			/* Don't display errors for unknown options */
@@ -283,15 +278,15 @@ main (int argc, char **argv)
                    "\n"
                    "Initialization options:\n"
                    "\n"
-                   "--batch                do not do interactive display; implies -q\n"
-                   "--help                 display this help message and exit\n"
-                   "--funcall, -f FUNC     call " PACKAGE_NAME
-                   " function FUNC with no arguments\n"
-                   "--no-init-file, -q     do not load ~/." PACKAGE "\n"
-                   "--version              display version information and exit\n"
+                   "--batch                 do not do interactive display; implies -q\n"
+                   "--help                  display this help message and exit\n"
+                   "--funcall, -f FUNC      call " PACKAGE_NAME " function FUNC with no arguments\n"
+                   "--no-init-file, -q      do not load ~/." PACKAGE "\n"
+                   "--version               display version information and exit\n"
                    "\n" "Action options:\n" "\n"
-                   "FILE                   visit FILE using find-file\n"
-                   "+LINE FILE             visit FILE using find-file, then go to line LINE\n"
+                   "FILE                    visit FILE using find-file\n"
+                   "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
+                   "--load, -l FILE         load " PACKAGE_NAME " Lisp FILE using the load function\n"
                    "\n"
                    "Report bugs to " PACKAGE_BUGREPORT ".\n",
                    prog_name);
@@ -327,26 +322,17 @@ main (int argc, char **argv)
          buffer commands won't cause a crash. */
       if (!qflag)
         {
-          le *list;
-          FILE *fp;
-
           astr as = get_home_dir ();
           if (as)
             {
+              le *branch;
+
               astr_cat_cstr (as, "/." PACKAGE);
-              fp = fopen (astr_cstr (as), "r");
-              if (fp != NULL)
-                {
-                  astr bs = astr_fread (fp);
-                  ptrdiff_t pos = 0;
-                  list = lisp_read (NULL, bs, &pos);
-                  leEval (list);
-                  astr_delete (bs);
-                }
-              fclose (fp);
+              branch = leAddDataElement (leAddDataElement (NULL, "", 0), astr_cstr (as), 0);
+              F_load (0, branch);
               astr_delete (as);
+              leWipe (branch);
             }
-          leWipe (list);
         }
 
       /* Reinitialise the scratch buffer to catch settings */
@@ -394,13 +380,14 @@ main (int argc, char **argv)
       term_close ();
 
       free_bindings ();
+      free_eval ();
     }
   else if (minibuf_contents) /* if in batch mode, print any error */
     fprintf (stderr, "%s: %s\n", prog_name, minibuf_contents);
 
   /* Free Lisp state. */
   free_variables ();
-  lisp_finalise ();
+  free_lisp ();
 
   /* Free all the memory allocated. */
   free_kill_ring ();
@@ -409,7 +396,6 @@ main (int argc, char **argv)
   free_windows ();
   free_buffers ();
   free_minibuf ();
-  free_rotation_buffers ();
   free (prog_name);
 
   return 0;

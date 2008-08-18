@@ -51,12 +51,12 @@ Copy region into the user specified register.
   term_refresh ();
   reg = getkey ();
   if (reg == KBD_CANCEL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   minibuf_clear ();
   reg %= NUM_REGISTERS;
 
   if (warn_if_no_mark ())
-    return false;
+    return leNIL;
 
   calculate_the_region (&r);
 
@@ -65,17 +65,20 @@ Copy region into the user specified register.
   regs[reg].text = p;
   regs[reg].size = r.size;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
-static void
-insert_register (int reg)
+static int reg;
+
+static int
+insert_register (void)
 {
   undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
   undo_nosave = true;
   insert_nstring (regs[reg].text, regs[reg].size);
   undo_nosave = false;
+  return true;
 }
 
 DEFUN ("insert-register", insert_register)
@@ -84,36 +87,29 @@ Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
 +*/
 {
-  int reg, uni;
-
   if (warn_if_readonly_buffer ())
-    return false;
+    return leNIL;
 
   minibuf_write ("Insert register: ");
   term_refresh ();
   reg = getkey ();
   if (reg == KBD_CANCEL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   minibuf_clear ();
   reg %= NUM_REGISTERS;
 
   if (regs[reg].text == NULL)
     {
       minibuf_error ("Register does not contain text");
-      return false;
+      return leNIL;
     }
 
-  set_mark_command ();
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < last_uniarg; ++uni)
-    insert_register (reg);
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
+  set_mark_interactive ();
+  execute_with_uniarg (true, uniarg, insert_register, NULL);
   exchange_point_and_mark ();
   deactivate_mark ();
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -146,7 +142,7 @@ List defined registers.
 +*/
 {
   write_temp_buffer ("*Registers List*", write_registers_list);
-  return true;
+  return leT;
 }
 END_DEFUN
 

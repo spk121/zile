@@ -372,6 +372,5 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 	}
     }
 
-  assert (0);
-  return COMPLETION_NOTMATCHED;
+  abort ();
 }

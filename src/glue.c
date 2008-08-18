@@ -32,8 +32,7 @@
 #include "extern.h"
 
 /*
- * Emit an error sound only when the appropriate variable
- * is set.
+ * Ring the bell if ring-bell is set.
  */
 void
 ding (void)
@@ -45,8 +44,8 @@ ding (void)
     term_beep ();
 }
 
+/* FIXME: Use an array list */
 #define MAX_KEY_BUF	16
-
 static int key_buf[MAX_KEY_BUF];
 static int *keyp = key_buf;
 static size_t _last_key;
@@ -169,91 +168,6 @@ shorten_string (char *s, int maxlen)
     }
 
   return as;
-}
-
-/*
- * Replace the matches of `match' into `s' with the string `subst'.  The
- * two strings `match' and `subst' must have the same length.
- */
-char *
-replace_string (char *s, char *match, char *subst)
-{
-  char *sp = s, *p;
-  size_t slen = strlen (subst);
-
-  if (strlen (match) != slen)
-    return NULL;
-  while ((p = strstr (sp, match)) != NULL)
-    {
-      strncpy (p, subst, slen);
-      sp = p + slen;
-    }
-
-  return s;
-}
-
-/*
- * Compact the spaces into tabulations according to the `tw' tab width.
- */
-void
-tabify_string (char *dest, char *src, size_t scol, size_t tw)
-{
-  char *sp, *dp;
-  size_t dcol = scol, ocol = scol;
-
-  for (sp = src, dp = dest;; ++sp)
-    switch (*sp)
-      {
-      case ' ':
-	++dcol;
-	break;
-      case '\t':
-	dcol += tw;
-	dcol -= dcol % tw;
-	break;
-      default:
-	while (((ocol + tw) - (ocol + tw) % tw) <= dcol)
-	  {
-	    if (ocol + 1 == dcol)
-	      break;
-	    *dp++ = '\t';
-	    ocol += tw;
-	    ocol -= ocol % tw;
-	  }
-	while (ocol < dcol)
-	  {
-	    *dp++ = ' ';
-	    ocol++;
-	  }
-	*dp++ = *sp;
-	if (*sp == '\0')
-	  return;
-	++ocol;
-	++dcol;
-      }
-}
-
-/*
- * Expand the tabulations into spaces according to the `tw' tab width.
- * The output buffer should be big enough to contain the expanded string.
- * To be sure, sizeof(dest) should be >= strlen(src)*tw + 1.
- */
-void
-untabify_string (char *dest, char *src, size_t scol, size_t tw)
-{
-  char *sp, *dp;
-  int col = scol;
-
-  for (sp = src, dp = dest; *sp != '\0'; ++sp)
-    if (*sp == '\t')
-      {
-	do
-	  *dp++ = ' ', ++col;
-	while ((col % tw) > 0);
-      }
-    else
-      *dp++ = *sp, ++col;
-  *dp = '\0';
 }
 
 /*

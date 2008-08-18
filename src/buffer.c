@@ -237,11 +237,8 @@ make_buffer_name (const char *filename)
 	return name;
     }
 
-  /*
-   * This should never happen.
-   */
-  assert (0);
-  return NULL;
+   /* This should never happen. */
+  abort ();
 }
 
 /* Move the selected buffer to head.  */

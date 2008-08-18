@@ -38,7 +38,7 @@ AC_CHECK_FUNCS(fchmod)
 
 dnl Turn on additional compiler warnings
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic"
+  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
 
 dnl Curses

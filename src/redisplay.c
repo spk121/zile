@@ -119,6 +119,6 @@ The desired position of point is always relative to the current window.
 {
   recenter (cur_wp);
   term_full_redisplay ();
-  return true;
+  return leT;
 }
 END_DEFUN

@@ -23,9 +23,9 @@
    MA 02111-1301, USA.  */
 
 /*
- * Add an entry to this list for declaring a new function, in
- * alphabetic order. X0 means no key binding, X1 means one key
- * binding, etc.
+ * Add an entry to this list for declaring a new interactive function,
+ * in alphabetic order. X0 means no key binding, X1 means one key
+ * binding, etc.; XX is for a non-interactive function.
  *
  * Please remember to keep in sync with the Texinfo documentation
  * `../doc/zile.texi', and to keep functions lexically sorted!
@@ -96,6 +96,7 @@ X1 ("kill-sexp", kill_sexp, "\\C-\\M-k")
 X1 ("kill-word", kill_word, "\\M-d")
 X1 ("list-buffers", list_buffers, "\\C-x\\C-b")
 X0 ("list-registers", list_registers)
+XX ("load", load)
 X1 ("mark-paragraph", mark_paragraph, "\\M-h")
 X1 ("mark-sexp", mark_sexp, "\\C-\\M-@")
 X1 ("mark-whole-buffer", mark_whole_buffer, "\\C-xh")
@@ -125,6 +126,7 @@ X0 ("self-insert-command", self_insert_command)
 X1 ("set-fill-column", set_fill_column, "\\C-xf")
 X1 ("set-mark-command", set_mark_command, "\\C-@")
 X0 ("set-variable", set_variable)
+XX ("setq", setq)
 X1 ("shell-command", shell_command, "\\M-!")
 X1 ("shell-command-on-region", shell_command_on_region, "\\M-|")
 X0 ("shrink-window", shrink_window)

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "size_max.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -92,7 +93,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
   if (thisflag & FLAG_DEFINING_MACRO)
     {
       minibuf_error ("Already defining a keyboard macro");
-      return false;
+      return leNIL;
     }
 
   if (cur_mp)
@@ -102,7 +103,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
 
   thisflag |= FLAG_DEFINING_MACRO;
   cur_mp = XZALLOC (Macro);
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -116,11 +117,11 @@ The macro is now available for use via C-x e.
   if (!(thisflag & FLAG_DEFINING_MACRO))
     {
       minibuf_error ("Not defining a keyboard macro");
-      return false;
+      return leNIL;
     }
 
   thisflag &= ~FLAG_DEFINING_MACRO;
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -139,13 +140,13 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
   if (ms == NULL)
     {
       minibuf_error ("No command name given");
-      return false;
+      return leNIL;
     }
 
   if (cur_mp == NULL)
     {
       minibuf_error ("No keyboard macro defined");
-      return false;
+      return leNIL;
     }
 
   mp = get_macro (ms);
@@ -169,7 +170,7 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
   mp->keys = xzalloc (size);
   memcpy (mp->keys, cur_mp->keys, size);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -178,9 +179,7 @@ call_macro (Macro * mp)
 {
   size_t i;
 
-  /* The loop termination condition is really i >= 0, but unsigned
-     types are always >= 0, and we can't easily get SIZE_T_MAX. */
-  for (i = mp->nkeys - 1; i < mp->nkeys; i--)
+  for (i = mp->nkeys - 1; i != SIZE_MAX; i--)
     ungetkey (mp->keys[i]);
 }
 
@@ -193,12 +192,13 @@ To make a macro permanent so you can call it even after
 defining others, use M-x name-last-kbd-macro.
 +*/
 {
-  int uni, ret = true;
+  int uni;
+  le *ret = leT;
 
   if (cur_mp == NULL)
     {
       minibuf_error ("No kbd macro has been defined");
-      return false;
+      return leNIL;
     }
 
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);

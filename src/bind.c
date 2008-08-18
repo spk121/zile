@@ -35,7 +35,6 @@
 #include "zile.h"
 #include "extern.h"
 
-static History functions_history;
 static Function _last_command;
 
 /*--------------------------------------------------------------------------
@@ -130,23 +129,21 @@ bind_key_vec (leafp tree, gl_list_t keys, size_t from, Function func)
     s->func = func;
 }
 
-static int
+static void
 bind_key_string (char *key, Function func)
 {
   gl_list_t keys = keystrtovec (key);
-  bool ok = false;
 
-  if (keys)
+  if (keys && gl_list_size (keys) > 0)
+    bind_key_vec (leaf_tree, keys, 0, func);
+  else
     {
-      if (gl_list_size (keys) > 0)
-        {
-          bind_key_vec (leaf_tree, keys, 0, func);
-          ok = true;
-        }
-      gl_list_free (keys);
+      fprintf (stderr,
+               "%s: Key sequence %s is invalid in default bindings\n\n",
+               prog_name, key);
+      exit (1);
     }
-
-  return ok;
+  gl_list_free (keys);
 }
 
 static leafp
@@ -224,37 +221,36 @@ completion_scan (size_t key, gl_list_t * keys)
   return p;
 }
 
+static int
+self_insert_command (void)
+{
+  int ret = true;
+  /* Mask out ~KBD_CTRL to allow control sequences to be themselves. */
+  int key = lastkey () & ~KBD_CTRL;
+  deactivate_mark ();
+  if (key <= 0xff)
+    {
+      if (isspace (key) && cur_bp->flags & BFLAG_AUTOFILL &&
+          get_goalc () > (size_t) get_variable_number ("fill-column"))
+        fill_break_line ();
+      insert_char (key);
+    }
+  else
+    {
+      ding ();
+      ret = false;
+    }
+
+  return ret;
+}
+
 DEFUN ("self-insert-command", self_insert_command)
 /*+
 Insert the character you type.
 Whichever character you type to run this command is inserted.
 +*/
 {
-  int uni, ret = true;
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    {
-      /* Mask out ~KBD_CTRL to allow control sequences to be themselves. */
-      int key = lastkey () & ~KBD_CTRL;
-      deactivate_mark ();
-      if (key <= 0xff)
-	{
-	  if (isspace (key) && cur_bp->flags & BFLAG_AUTOFILL &&
-	      get_goalc () > (size_t) get_variable_number ("fill-column"))
-	    fill_break_line ();
-	  insert_char (key);
-	}
-      else
-	{
-	  ding ();
-	  ret = false;
-	  break;
-	}
-    }
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
+  return execute_with_uniarg (true, uniarg, self_insert_command, NULL);
 }
 END_DEFUN
 
@@ -285,7 +281,7 @@ process_key (size_t key)
 	  astr_delete (as);
 	}
     }
-  free (keys);
+  gl_list_free (keys);
 
   /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
@@ -299,52 +295,10 @@ last_command (void)
   return _last_command;
 }
 
-/*--------------------------------------------------------------------------
- * Default functions binding.
- *--------------------------------------------------------------------------*/
-
-struct fentry
-{
-  /* The function name. */
-  const char *name;
-
-  /* The function pointer. */
-  Function func;
-
-  /* The assigned keys. */
-  char *key[3];
-};
-
-typedef struct fentry *fentryp;
-
-static struct fentry fentry_table[] = {
-#define X0(zile_name, c_name) \
-	{zile_name, F_ ## c_name, {NULL, NULL, NULL}},
-#define X1(zile_name, c_name, key1) \
-	{zile_name, F_ ## c_name, {key1, NULL, NULL}},
-#define X2(zile_name, c_name, key1, key2) \
-	{zile_name, F_ ## c_name, {key1, key2, NULL}},
-#define X3(zile_name, c_name, key1, key2, key3) \
-	{zile_name, F_ ## c_name, {key1, key2, key3}},
-#include "tbl_funcs.h"
-#undef X0
-#undef X1
-#undef X2
-#undef X3
-};
-
-#define fentry_table_size (sizeof (fentry_table) / sizeof (fentry_table[0]))
-
-static int
-bind_compar (const void *p1, const void *p2)
-{
-  return strcmp (((fentryp) p1)->name, ((fentryp) p2)->name);
-}
-
 void
 init_bindings (void)
 {
-  size_t i, j;
+  size_t i;
   gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
                                          NULL, NULL, NULL, true);
 
@@ -362,17 +316,23 @@ init_bindings (void)
     }
   gl_list_free (keys);
 
-  /* Bind all the default functions. */
-  for (i = 0; i < fentry_table_size; i++)
-    for (j = 0; j < 3; ++j)
-      if (fentry_table[i].key[j] != NULL)
-	if (!bind_key_string (fentry_table[i].key[j], fentry_table[i].func))
-	  {
-	    fprintf (stderr,
-		     "%s: Key sequence %s is invalid in default bindings\n\n",
-		     prog_name, fentry_table[i].key[j]);
-	    exit (1);
-	  }
+#define XX(zile_name, c_name)
+#define X0(zile_name, c_name)
+#define X1(zile_name, c_name, key1)             \
+  bind_key_string (key1, F_ ## c_name);
+#define X2(zile_name, c_name, key1, key2)       \
+  bind_key_string (key1, F_ ## c_name);         \
+  bind_key_string (key2, F_ ## c_name);
+#define X3(zile_name, c_name, key1, key2, key3) \
+  bind_key_string (key1, F_ ## c_name);         \
+  bind_key_string (key2, F_ ## c_name);         \
+  bind_key_string (key3, F_ ## c_name);
+#include "tbl_funcs.h"
+#undef XX
+#undef X0
+#undef X1
+#undef X2
+#undef X3
 }
 
 static void
@@ -389,170 +349,7 @@ void
 free_bindings (void)
 {
   recursive_free_bindings (leaf_tree);
-  free_history_elements (&functions_history);
 }
-
-static const char *
-bsearch_function (const char *name)
-{
-  struct fentry key, *entryp;
-  key.name = name;
-  entryp =
-    bsearch (&key, fentry_table, fentry_table_size, sizeof (fentry_table[0]),
-	     bind_compar);
-  return entryp ? entryp->name : NULL;
-}
-
-static fentryp
-get_fentry (const char *name)
-{
-  size_t i;
-  assert (name);
-  for (i = 0; i < fentry_table_size; ++i)
-    if (!strcmp (name, fentry_table[i].name))
-      return &fentry_table[i];
-  return NULL;
-}
-
-Function
-get_function (const char *name)
-{
-  fentryp f = get_fentry (name);
-  return f ? f->func : NULL;
-}
-
-const char *
-get_function_name (Function p)
-{
-  size_t i;
-  for (i = 0; i < fentry_table_size; ++i)
-    if (fentry_table[i].func == p)
-      return fentry_table[i].name;
-  return NULL;
-}
-
-/*
- * Read a function name from the minibuffer.
- * The returned buffer must be freed by the caller.
- */
-const char *
-minibuf_read_function_name (const char *fmt, ...)
-{
-  va_list ap;
-  size_t i;
-  char *buf;
-  const char *ms;
-  Completion *cp;
-
-  va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
-  va_end (ap);
-
-  cp = completion_new (false);
-  for (i = 0; i < fentry_table_size; ++i)
-    gl_sortedlist_add (cp->completions, completion_strcmp,
-                       xstrdup (fentry_table[i].name));
-
-  for (;;)
-    {
-      ms = minibuf_read_completion (buf, "", cp, &functions_history);
-
-      if (ms == NULL)
-	{
-	  cancel ();
-	  ms = NULL;
-	  break;
-	}
-      else if (ms[0] == '\0')
-	{
-	  minibuf_error ("No function name given");
-	  ms = NULL;
-	  break;
-	}
-      else
-	{
-	  astr as = astr_new ();
-	  astr_cpy_cstr (as, ms);
-	  /* Complete partial words if possible. */
-	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-	    ms = cp->match;
-	  astr_delete (as);
-	  for (i = 0; i < gl_list_size (cp->completions); i++)
-            {
-              char *s = (char *) gl_list_get_at (cp->completions, i);
-              if (!strcmp (ms, s))
-	      {
-		ms = s;
-		break;
-	      }
-            }
-	  if (bsearch_function (ms) || get_macro (ms))
-	    {
-	      add_history_element (&functions_history, ms);
-	      minibuf_clear ();	/* Remove any error message. */
-	      ms = xstrdup (ms); /* Might be about to be freed. */
-	      break;		/* We're finished. */
-	    }
-	  else
-	    {
-	      minibuf_error ("Undefined function name `%s'", ms);
-	      waitkey (WAITKEY_DEFAULT);
-	    }
-	}
-    }
-
-  free (buf);
-  free_completion (cp);
-
-  return ms;
-}
-
-int
-execute_function (const char *name, int uniarg)
-{
-  Function func = get_function (name);
-  Macro *mp;
-
-  if (func)
-    return func (uniarg, NULL);
-  else
-    {
-      mp = get_macro (name);
-      if (mp)
-	{
-	  call_macro (mp);
-	  return true;
-	}
-      else
-	return false;
-    }
-}
-
-DEFUN ("execute-extended-command", execute_extended_command)
-/*+
-Read function name, then read its arguments and call it.
-+*/
-{
-  int res;
-  const char *name;
-  astr msg = astr_new ();
-
-  if (lastflag & FLAG_SET_UNIARG)
-    astr_afmt (msg, "%d M-x ", uniarg);
-  else
-    astr_cat_cstr (msg, "M-x ");
-
-  name = minibuf_read_function_name (astr_cstr (msg));
-  astr_delete (msg);
-  if (name == NULL)
-    return false;
-
-  res = execute_function (name, uniarg);
-  free ((char *) name);
-
-  return res;
-}
-END_DEFUN
 
 DEFUN ("global-set-key", global_set_key)
 /*+
@@ -561,13 +358,14 @@ Read key sequence and function name, and bind the function to the key
 sequence.
 +*/
 {
-  int ok = false;
+  int ret = false;
   size_t key;
   gl_list_t keys;
   Function func;
   const char *name;
+  size_t argc = countNodes (arglist);
 
-  if (arglist)
+  if (arglist && argc >= 3)
     {
       keys = keystrtovec (arglist->next->data);
       if (keys == NULL)
@@ -598,7 +396,7 @@ sequence.
   func = get_function (name);
   if (func)
     {
-      ok = true;
+      ret = true;
       bind_key_vec (leaf_tree, keys, 0, func);
     }
   else
@@ -608,7 +406,7 @@ sequence.
     free ((char *) name);
   gl_list_free (keys);
 
-  return ok;
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -711,7 +509,7 @@ message in the buffer.
     }
 
   free ((char *) name);
-  return ret;
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -758,6 +556,6 @@ Show a list of all defined keys, and their definitions.
 +*/
 {
   write_temp_buffer ("*Help*", write_bindings_list);
-  return true;
+  return leT;
 }
 END_DEFUN

@@ -88,27 +88,19 @@ draw_minibuf_read (const char *prompt, const char *value,
   term_refresh ();
 }
 
-static char *
-rot_vminibuf_read (const char *prompt, const char *value,
-		   Completion * cp, History * hp, char **p, size_t * max)
+static astr
+do_minibuf_read (const char *prompt, const char *value,
+               Completion * cp, History * hp)
 {
   static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
-  size_t i, len, prompt_len;
-  char *s, *saved = NULL;
+  size_t i, prompt_len;
+  char *s;
+  astr as = astr_new_cstr (value), saved = NULL;
 
   prompt_len = strlen (prompt);
-
-  len = i = strlen (value);
-  if (*max < i + 10)
-    {
-      *max = i + 10;
-      if (*p != NULL)
-	*p = (char *) xrealloc (*p, *max);
-      else
-	*p = (char *) xzalloc (*max);
-    }
-  strcpy (*p, value);
+  i = strlen (value);
+  as = astr_new_cstr (value);
 
   for (;;)
     {
@@ -126,7 +118,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	default:
 	  s = "";
 	}
-      draw_minibuf_read (prompt, *p, prompt_len, s, i);
+      draw_minibuf_read (prompt, astr_cstr (as), prompt_len, s, i);
 
       thistab = -1;
 
@@ -140,12 +132,14 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	case KBD_RET:
 	  term_move (term_height () - 1, 0);
 	  term_clrtoeol ();
-          free (saved);
-	  return *p;
+          if (saved)
+            astr_delete (saved);
+	  return as;
 	case KBD_CANCEL:
 	  term_move (term_height () - 1, 0);
 	  term_clrtoeol ();
-          free (saved);
+          if (saved)
+            astr_delete (saved);
 	  return NULL;
 	case KBD_CTRL | 'a':
 	case KBD_HOME:
@@ -153,7 +147,7 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	  break;
 	case KBD_CTRL | 'e':
 	case KBD_END:
-	  i = len;
+	  i = astr_len (as);
 	  break;
 	case KBD_CTRL | 'b':
 	case KBD_LEFT:
@@ -164,36 +158,27 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	  break;
 	case KBD_CTRL | 'f':
 	case KBD_RIGHT:
-	  if (i < len)
+	  if (i < astr_len (as))
 	    ++i;
 	  else
 	    ding ();
 	  break;
 	case KBD_CTRL | 'k':
-	  /* XXX no kill-register save is done yet. */
-	  if (i < len)
-	    {
-	      len -= len - i;
-	      (*p)[i] = '\0';
-	    }
+	  /* FIXME: no kill-register save is done yet. */
+	  if (i < astr_len (as))
+            astr_truncate (as, i);
 	  else
 	    ding ();
 	  break;
 	case KBD_BS:
 	  if (i > 0)
-	    {
-	      --i, --len;
-	      strcpy (*p + i, *p + i + 1);
-	    }
+            astr_remove (as, --i, 1);
 	  else
 	    ding ();
 	  break;
 	case KBD_DEL:
-	  if (i < len)
-	    {
-	      --len;
-	      strcpy (*p + i, *p + i + 1);
-	    }
+	  if (i < astr_len (as))
+            astr_remove (as, i, i);
 	  else
 	    ding ();
 	  break;
@@ -236,12 +221,9 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	      if (elem)
 		{
 		  if (!saved)
-		    saved = xstrdup (*p);
+		    saved = astr_cpy (astr_new(), as);
 
-		  len = i = strlen (elem);
-		  *max = i + 10;
-		  *p = xrealloc (*p, *max);
-		  strcpy (*p, elem);
+		  astr_cpy_cstr (as, elem);
 		}
 	    }
 	  break;
@@ -251,20 +233,11 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	    {
 	      const char *elem = next_history_element (hp);
 	      if (elem)
-		{
-		  len = i = strlen (elem);
-		  *max = i + 10;
-		  *p = xrealloc (*p, *max);
-		  strcpy (*p, elem);
-		}
+                astr_cpy_cstr (as, elem);
 	      else if (saved)
 		{
-		  len = i = strlen (saved);
-		  *max = i + 10;
-		  *p = xrealloc (*p, *max);
-		  strcpy (*p, saved);
-
-		  free (saved);
+		  astr_cpy (as, saved);
+		  astr_delete (saved);
 		  saved = NULL;
 		}
 	    }
@@ -285,21 +258,18 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	    }
 	  else
 	    {
-	      astr as = astr_new ();
-	      astr_cpy_cstr (as, *p);
 	      thistab = completion_try (cp, as, true);
-	      astr_delete (as);
 	      switch (thistab)
 		{
 		case COMPLETION_NONUNIQUE:
 		case COMPLETION_MATCHED:
 		case COMPLETION_MATCHEDNONUNIQUE:
 		  if (cp->fl_dir)
-		    len = i = cp->matchsize + strlen (astr_cstr (cp->path));
+                    i = cp->matchsize + strlen (astr_cstr (cp->path));
 		  else
-		    len = i = cp->matchsize;
-		  *max = len + 1;
-		  s = (char *) xzalloc (*max);
+                    i = cp->matchsize;
+                  astr_truncate (as, i);
+		  s = (char *) xzalloc (astr_len (as) + 1);
 		  if (cp->fl_dir)
 		    {
 		      strcpy (s, astr_cstr (cp->path));
@@ -307,11 +277,10 @@ rot_vminibuf_read (const char *prompt, const char *value,
 		    }
 		  else
 		    strncpy (s, cp->match, cp->matchsize);
-		  s[len] = '\0';
-		  if (strncmp (s, *p, len) != 0)
+		  s[astr_len (as)] = '\0';
+		  if (strncmp (s, astr_cstr (as), astr_len (as)) != 0)
 		    thistab = -1;
-		  free (*p);
-		  *p = s;
+		  astr_cpy_cstr (as, s);
 		  break;
 		case COMPLETION_NOTMATCHED:
 		  ding ();
@@ -328,57 +297,33 @@ rot_vminibuf_read (const char *prompt, const char *value,
 	      ding ();
 	      break;
 	    }
-	  if (!overwrite_mode || i == len)
-	    {
-	      char *s;
-	      if (len >= *max - 1)
-		{
-		  *max *= 2;
-		  *p = (char *) xrealloc (*p, *max);
-		}
-	      s = *p;
-	      for (; *s != '\0'; s++)
-		;
-	      for (++s; s > *p + i; --s)
-		*s = *(s - 1);
-	      *(*p + i) = c;
-	      ++i, ++len;
-	    }
+	  if (!overwrite_mode || i == astr_len (as))
+            astr_insert_char (as, i++, c);
 	  else
-	    (*p)[i++] = c;
+	    astr_replace_char (as, i, c);
 	}
 
       lasttab = thistab;
     }
 }
 
-/*
- * Rotation of text buffer prevents trashing of the returned string
- * when doing less or equal `MAX_ROTATIONS' sequential calls.
- * This means that the string returned by `minibuf_read()' need
- * not be deallocated by the user.
- */
-#define MAX_ROTATIONS	5
-
-static char *rotation_buffers[MAX_ROTATIONS];
-
 char *
 term_minibuf_read (const char *prompt, const char *value,
 		   Completion * cp, History * hp)
 {
-  static size_t max[MAX_ROTATIONS], rot;
   Window *wp, *old_wp = cur_wp;
-  char **p = rotation_buffers, *s;
+  char *s = NULL;
+  astr as;
 
-  /* Prepare the history. */
   if (hp)
     prepare_history (hp);
 
-  /* Rotate text buffer. */
-  if (++rot >= MAX_ROTATIONS)
-    rot = 0;
-
-  s = rot_vminibuf_read (prompt, value, cp, hp, &p[rot], &max[rot]);
+  as = do_minibuf_read (prompt, value, cp, hp);
+  if (as)
+    {
+      s = xstrdup (astr_cstr (as));
+      astr_delete (as);
+    }
 
   if (cp != NULL && cp->fl_poppedup
       && (wp = find_window ("*Completions*")) != NULL)
@@ -392,12 +337,4 @@ term_minibuf_read (const char *prompt, const char *value,
     }
 
   return s;
-}
-
-void
-free_rotation_buffers (void)
-{
-  int i;
-  for (i = 0; i < MAX_ROTATIONS; ++i)
-    free (rotation_buffers[i]);
 }

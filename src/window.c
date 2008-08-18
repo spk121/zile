@@ -104,7 +104,7 @@ Both windows display the same buffer now current.
     {
       minibuf_error ("Window height %d too small for splitting",
 		     cur_wp->fheight);
-      return false;
+      return leNIL;
     }
 
   newwp = window_new ();
@@ -121,7 +121,7 @@ Both windows display the same buffer now current.
   newwp->next = cur_wp->next;
   cur_wp->next = newwp;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -155,12 +155,12 @@ Remove the current window from the screen.
   if (cur_wp == head_wp && cur_wp->next == NULL)
     {
       minibuf_error ("Attempt to delete sole ordinary window");
-      return false;
+      return leNIL;
     }
 
   delete_window (cur_wp);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -172,7 +172,7 @@ Make current window one line bigger.
   Window *wp;
 
   if (cur_wp == head_wp && cur_wp->next == NULL)
-    return false;
+    return leNIL;
 
   wp = cur_wp->next;
   if (wp == NULL || wp->fheight < 3)
@@ -180,12 +180,12 @@ Make current window one line bigger.
       if (wp->next == cur_wp)
 	{
 	  if (wp->fheight < 3)
-	    return false;
+	    return leNIL;
 	  break;
 	}
 
   if (cur_wp == head_wp && cur_wp->next->fheight < 3)
-    return false;
+    return leNIL;
 
   --wp->fheight;
   --wp->eheight;
@@ -194,7 +194,7 @@ Make current window one line bigger.
   ++cur_wp->fheight;
   ++cur_wp->eheight;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -206,16 +206,14 @@ Make current window one line smaller.
   Window *wp;
 
   if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
-    return false;
+    return leNIL;
 
   wp = cur_wp->next;
   if (wp == NULL)
     {
       for (wp = head_wp; wp != NULL; wp = wp->next)
-	{
-	  if (wp->next == cur_wp)
-	    break;
-	}
+        if (wp->next == cur_wp)
+          break;
     }
 
   ++wp->fheight;
@@ -225,7 +223,7 @@ Make current window one line smaller.
   if (cur_wp->topdelta >= cur_wp->eheight)
     recenter (cur_wp);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -269,7 +267,7 @@ Make the selected window fill the screen.
   cur_wp->next = NULL;
   head_wp = cur_wp;
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -281,7 +279,7 @@ This command selects the window one step away in that order.
 +*/
 {
   set_current_window ((cur_wp->next != NULL) ? cur_wp->next : head_wp);
-  return true;
+  return leT;
 }
 END_DEFUN
 

@@ -37,21 +37,15 @@ int next_line (void);
 int ngotodown (size_t n);
 int ngotoup (size_t n);
 int previous_line (void);
-int scroll_down (void);
-int scroll_up (void);
 
 /* bind.c ----------------------------------------------------------------- */
 int completion_strcmp (const void *p1, const void *p2);
 size_t do_completion (astr as);
-const char *minibuf_read_function_name (const char *fmt, ...);
-int execute_function (const char *name, int uniarg);
 const char *get_function_by_key_sequence (gl_list_t * keys);
 void process_key (size_t key);
 void init_bindings (void);
 Function last_command (void);
 void free_bindings (void);
-Function get_function (const char *name);
-const char *get_function_name (Function p);
 
 /* buffer.c --------------------------------------------------------------- */
 void calculate_region (Region * rp, Point from, Point to);
@@ -100,10 +94,17 @@ int eolp (void);
 
 /* eval.c ----------------------------------------------------------------- */
 extern le *leNIL, *leT;
-eval_cb lookupFunction (char *name);
+size_t countNodes (le * branch);
 le *evaluateBranch (le * trybranch);
 le *evaluateNode (le * node);
 void leEval (le * list);
+le *execute_with_uniarg (bool undo, int uniarg, int (*forward) (void),
+                            int (*backward) (void));
+le *execute_function (const char *name, int uniarg);
+Function get_function (const char *name);
+const char *get_function_name (Function p);
+const char *minibuf_read_function_name (const char *fmt, ...);
+void free_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
 int exist_file (const char *filename);
@@ -115,18 +116,14 @@ astr agetcwd (void);
 void read_from_disk (const char *filename);
 int find_file (const char *filename);
 Completion *make_buffer_completion (void);
-int check_modified_buffer (Buffer * bp);
 void kill_buffer (Buffer * kill_bp);
 void zile_exit (int doabort);
 
 /* funcs.c ---------------------------------------------------------------- */
-int cancel (void);
-int set_mark_command (void);
+void set_mark_interactive (void);
 int exchange_point_and_mark (void);
-int universal_argument (int keytype, int xarg);
+le *universal_argument (int keytype, int xarg);
 void write_temp_buffer (const char *name, void (*func) (va_list ap), ...);
-int forward_sexp (void);
-int backward_sexp (void);
 
 /* glue.c ----------------------------------------------------------------- */
 void ding (void);
@@ -137,9 +134,6 @@ size_t getkey (void);
 void waitkey (size_t delay);
 char *copy_text_block (size_t startn, size_t starto, size_t size);
 astr shorten_string (char *s, int maxlen);
-char *replace_string (char *s, char *match, char *subst);
-void tabify_string (char *dest, char *src, size_t scol, size_t tw);
-void untabify_string (char *dest, char *src, size_t scol, size_t tw);
 void goto_point (Point pt);
 char *getln (FILE * fp);
 
@@ -177,12 +171,11 @@ void insert_string (const char *s);
 void insert_nstring (const char *s, size_t size);
 void bprintf (const char *fmt, ...);
 int delete_char (void);
-int backward_delete_char (void);
 void free_registers (void);
 
 /* lisp.c ----------------------------------------------------------------- */
-void lisp_init (void);
-void lisp_finalise (void);
+void init_lisp (void);
+void free_lisp (void);
 le *lisp_read (le * list, astr as, ptrdiff_t * pos);
 
 /* macro.c ---------------------------------------------------------------- */
@@ -242,7 +235,6 @@ void init_search (void);
 void term_minibuf_write (const char *fmt);
 char *term_minibuf_read (const char *prompt, const char *value,
 			 Completion * cp, History * hp);
-void free_rotation_buffers (void);
 
 /* term_redisplay.c ------------------------------------------------------- */
 int term_initted (void);
@@ -280,7 +272,7 @@ void undo_save (int type, Point pt, size_t arg1, size_t arg2);
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
 void free_variables (void);
-int get_variable_bool (char *var);
+bool get_variable_bool (char *var);
 char *minibuf_read_variable_name (char *msg);
 void set_variable (const char *var, const char *val);
 const char *get_variable_bp (Buffer * bp, char *var);
@@ -306,15 +298,18 @@ int xasprintf (char **ptr, const char *fmt, ...);
 /*
  * Declare external Zile functions.
  */
+#define XX(zile_name, c_name)			\
+  extern le *F_ ## c_name (int uniarg, le * l);
 #define X0(zile_name, c_name)			\
-	extern int F_ ## c_name(int uniarg, le * l);
+  XX (zile_name, c_name)
 #define X1(zile_name, c_name, k1)		\
-	X0(zile_name, c_name)
+  XX (zile_name, c_name)
 #define X2(zile_name, c_name, k1, k2)		\
-	X0(zile_name, c_name)
+  XX (zile_name, c_name)
 #define X3(zile_name, c_name, k1, k2, k3)	\
-	X0(zile_name, c_name)
+  XX (zile_name, c_name)
 #include "tbl_funcs.h"
+#undef XX
 #undef X0
 #undef X1
 #undef X2

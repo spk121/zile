@@ -182,23 +182,23 @@ Repeat this command to undo more changes.
   if (cur_bp->flags & BFLAG_NOUNDO)
     {
       minibuf_error ("Undo disabled in this buffer");
-      return false;
+      return leNIL;
     }
 
   if (warn_if_readonly_buffer ())
-    return false;
+    return leNIL;
 
   if (cur_bp->next_undop == NULL)
     {
       minibuf_error ("No further undo information");
       cur_bp->next_undop = cur_bp->last_undop;
-      return false;
+      return leNIL;
     }
 
   cur_bp->next_undop = revert_action (cur_bp->next_undop);
 
   minibuf_write ("Undo!");
 
-  return true;
+  return leT;
 }
 END_DEFUN

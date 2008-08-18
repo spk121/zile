@@ -24,7 +24,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -236,18 +235,7 @@ Insert a tabulation at the current point position into the current
 buffer.
 +*/
 {
-  int uni, ret = true;
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!insert_tab ())
-      {
-	ret = false;
-	break;
-      }
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
+  return execute_with_uniarg (true, uniarg, insert_tab, NULL);
 }
 END_DEFUN
 
@@ -434,29 +422,22 @@ fill_break_line (void)
     cur_bp->pt.o = old_col;
 }
 
+static int
+newline (void)
+{
+  if (cur_bp->flags & BFLAG_AUTOFILL &&
+      get_goalc () > (size_t) get_variable_number ("fill-column"))
+    fill_break_line ();
+  return insert_newline ();
+}
+
 DEFUN ("newline", newline)
 /*+
 Insert a newline at the current point position into
 the current buffer.
 +*/
 {
-  int uni, ret = true;
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    {
-      if (cur_bp->flags & BFLAG_AUTOFILL &&
-	  get_goalc () > (size_t) get_variable_number ("fill-column"))
-	fill_break_line ();
-      if (!insert_newline ())
-	{
-	  ret = false;
-	  break;
-	}
-    }
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
+  return execute_with_uniarg (true, uniarg, newline, NULL);
 }
 END_DEFUN
 
@@ -465,18 +446,7 @@ DEFUN ("open-line", open_line)
 Insert a newline and leave point before it.
 +*/
 {
-  int uni, ret = true;
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!intercalate_newline ())
-      {
-	ret = false;
-	break;
-      }
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
+  return execute_with_uniarg (true, uniarg, intercalate_newline, NULL);
 }
 END_DEFUN
 
@@ -571,31 +541,7 @@ delete_char (void)
   return false;
 }
 
-DEFUN ("delete-char", delete_char)
-/*+
-Delete the following character.
-Join lines if the character is a newline.
-+*/
-{
-  int uni, ret = true;
-
-  if (uniarg < 0)
-    return FUNCALL_ARG (backward_delete_char, -uniarg);
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!delete_char ())
-      {
-	ret = false;
-	break;
-      }
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
-}
-END_DEFUN
-
-int
+static int
 backward_delete_char (void)
 {
   deactivate_mark ();
@@ -617,6 +563,8 @@ backward_delete_char_overwrite (void)
 {
   if (!bolp () && !eolp ())
     {
+      deactivate_mark ();
+
       if (warn_if_readonly_buffer ())
 	return false;
 
@@ -635,29 +583,25 @@ backward_delete_char_overwrite (void)
     return backward_delete_char ();
 }
 
+DEFUN ("delete-char", delete_char)
+/*+
+Delete the following character.
+Join lines if the character is a newline.
++*/
+{
+  return execute_with_uniarg (true, uniarg, delete_char, backward_delete_char);
+}
+END_DEFUN
+
 DEFUN ("backward-delete-char", backward_delete_char)
 /*+
 Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-  int (*f) (void) = cur_bp->flags & BFLAG_OVERWRITE ?
+  int (*forward) (void) = cur_bp->flags & BFLAG_OVERWRITE ?
     backward_delete_char_overwrite : backward_delete_char;
-  int uni, ret = true;
-
-  if (uniarg < 0)
-    return FUNCALL_ARG (delete_char, -uniarg);
-
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
-    if (!(*f) ())
-      {
-	ret = false;
-	break;
-      }
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
+  return execute_with_uniarg (true, uniarg, forward, delete_char);
 }
 END_DEFUN
 
@@ -675,7 +619,7 @@ Delete all spaces and tabs around point.
     backward_delete_char ();
 
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -688,7 +632,7 @@ Delete all spaces and tabs around point, leaving one space.
   FUNCALL (delete_horizontal_space);
   insert_char_in_insert_mode (' ');
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -725,11 +669,11 @@ does nothing.
 {
   size_t target_goalc = 0, cur_goalc = get_goalc ();
   Marker *old_point;
-  int ok = true;
+  int ret = true;
   size_t t = tab_width (cur_bp);
 
   if (warn_if_readonly_buffer ())
-    return false;
+    return leNIL;
 
   deactivate_mark ();
 
@@ -772,20 +716,20 @@ does nothing.
 	  do
 	    {
 	      if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
-		ok = insert_tab ();
+		ret = insert_tab ();
 	      else
-		ok = insert_char (' ');
+		ret = insert_char (' ');
 	    }
-	  while (ok && (cur_goalc = get_goalc ()) < target_goalc);
+	  while (ret && (cur_goalc = get_goalc ()) < target_goalc);
 	}
       else
-	ok = insert_tab ();
+	ret = insert_tab ();
     }
   else
-    ok = insert_tab ();
+    ret = insert_tab ();
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  return ok;
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -820,10 +764,10 @@ the indentation.  Else stay at same point in text.
 +*/
 {
   if (get_variable_bool ("tab-always-indent"))
-    return insert_tab ();
+    return bool_to_lisp (insert_tab ());
   else if (get_goalc () < previous_line_indent ())
     return FUNCALL (indent_relative);
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -833,39 +777,33 @@ Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.
 +*/
 {
-  int ret;
+  int indent;
+  size_t pos;
+  Marker *old_point;
 
   if (warn_if_readonly_buffer ())
-    return false;
-  else
-    {
-      int indent;
+    return leNIL;
 
-      deactivate_mark ();
+  deactivate_mark ();
+  if (!insert_newline ())
+    return leNIL;
 
-      ret = insert_newline ();
-      if (ret)
-	{
-	  size_t pos;
-	  Marker *old_point = point_marker ();
+  old_point = point_marker ();
+  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 
-	  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  /* Check where last non-blank goalc is. */
+  previous_nonblank_goalc ();
+  pos = get_goalc ();
+  indent = pos > 0 || (!eolp () && isspace (following_char ()));
+  cur_bp->pt = old_point->pt;
+  free_marker (old_point);
+  /* Only indent if we're in column > 0 or we're in column 0 and
+     there is a space character there in the last non-blank line. */
+  if (indent)
+    FUNCALL (indent_for_tab_command);
 
-	  /* Check where last non-blank goalc is. */
-	  previous_nonblank_goalc ();
-	  pos = get_goalc ();
-	  indent = pos > 0 || (!eolp () && isspace (following_char ()));
-	  cur_bp->pt = old_point->pt;
-	  free_marker (old_point);
-	  /* Only indent if we're in column > 0 or we're in column 0 and
-	     there is a space character there in the last non-blank line. */
-	  if (indent)
-	    FUNCALL (indent_for_tab_command);
+  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-	  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-	}
-
-      return ret;
-    }
+  return leT;
 }
 END_DEFUN

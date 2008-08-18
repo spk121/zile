@@ -35,6 +35,8 @@
 #include "astr.h"
 #include "lists.h"
 
+#define ZILE_VERSION_STRING	"GNU " PACKAGE_NAME " " VERSION
+
 /*--------------------------------------------------------------------------
  * Main editor structures.
  *--------------------------------------------------------------------------*/
@@ -56,7 +58,10 @@ typedef struct History History;
  * The type of a Zile exported function.  `uniarg' is the number of
  * times to repeat the function.
  */
-typedef int (*Function) (int uniarg, le * list);
+typedef le * (*Function) (int uniarg, le * list);
+
+/* Turn a bool into a Lisp boolean */
+#define bool_to_lisp(b) ((b) ? leT : leNIL)
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -271,13 +276,6 @@ struct Macro
 };
 typedef struct Macro Macro;
 
-typedef le *(*eval_cb) (int argc, le * branch);
-typedef struct
-{
-  char *word;
-  eval_cb callback;
-} evalLookupNode;
-
 /* Type of font attributes */
 typedef size_t Font;
 
@@ -359,20 +357,20 @@ typedef size_t Font;
 
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
-	int F_ ## c_func(int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
+	le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
 	{ \
 	  if (arglist && arglist->data) \
-	    uniarg = atoi(arglist->data);
+	    uniarg = atoi (arglist->data);
 #define END_DEFUN \
 	}
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-	F_ ## c_func(1, NULL)
+	F_ ## c_func (1, NULL)
 
 /* Call an interactive function with a universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
-	F_ ## c_func(uniarg, NULL)
+	F_ ## c_func (uniarg, NULL)
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20

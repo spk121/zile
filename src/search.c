@@ -284,28 +284,41 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
 
 static char *last_search = NULL;
 
+typedef int (*Searcher) (Line * startp, size_t starto, const char *s, int regexp);
+
+static le *
+search (Searcher searcher, bool regexp, const char *search_msg)
+{
+  char *ms = minibuf_read (search_msg, last_search);
+
+  if (ms == NULL)
+    return FUNCALL (keyboard_quit);
+  if (ms[0] == '\0')
+    {
+      free (ms);
+      return leNIL;
+    }
+
+  free (last_search);
+  last_search = xstrdup (ms);
+
+  if (!searcher (cur_bp->pt.p, cur_bp->pt.o, ms, regexp))
+    {
+      minibuf_error ("Search failed: \"%s\"", ms);
+      free (ms);
+      return leNIL;
+    }
+
+  free (ms);
+  return leT;
+}
+
 DEFUN ("search-forward", search_forward)
 /*+
 Search forward from point for the user specified text.
 +*/
 {
-  char *ms = minibuf_read ("Search: ", last_search);
-
-  if (ms == NULL)
-    return cancel ();
-  if (ms[0] == '\0')
-    return false;
-
-  free (last_search);
-  last_search = xstrdup (ms);
-
-  if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, false))
-    {
-      minibuf_error ("Failing search: `%s'", ms);
-      return false;
-    }
-
-  return true;
+  return search (search_forward, false, "Search: ");
 }
 END_DEFUN
 
@@ -314,23 +327,7 @@ DEFUN ("search-backward", search_backward)
 Search backward from point for the user specified text.
 +*/
 {
-  char *ms = minibuf_read ("Search backward: ", last_search);
-
-  if (ms == NULL)
-    return cancel ();
-  if (ms[0] == '\0')
-    return false;
-
-  free (last_search);
-  last_search = xstrdup (ms);
-
-  if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, false))
-    {
-      minibuf_error ("Failing search: `%s'", ms);
-      return false;
-    }
-
-  return true;
+  return search (search_backward, false, "Search backward: ");
 }
 END_DEFUN
 
@@ -339,23 +336,7 @@ DEFUN ("search-forward-regexp", search_forward_regexp)
 Search forward from point for regular expression REGEXP.
 +*/
 {
-  char *ms = minibuf_read ("Regexp search: ", last_search);
-
-  if (ms == NULL)
-    return cancel ();
-  if (ms[0] == '\0')
-    return false;
-
-  free (last_search);
-  last_search = xstrdup (ms);
-
-  if (!search_forward (cur_bp->pt.p, cur_bp->pt.o, ms, true))
-    {
-      minibuf_error ("Failing regexp search: `%s'", ms);
-      return false;
-    }
-
-  return true;
+  return search (search_forward, true, "RE search: ");
 }
 END_DEFUN
 
@@ -364,23 +345,7 @@ DEFUN ("search-backward-regexp", search_backward_regexp)
 Search backward from point for match for regular expression REGEXP.
 +*/
 {
-  char *ms = minibuf_read ("Regexp search backward: ", last_search);
-
-  if (ms == NULL)
-    return cancel ();
-  if (ms[0] == '\0')
-    return false;
-
-  free (last_search);
-  last_search = xstrdup (ms);
-
-  if (!search_backward (cur_bp->pt.p, cur_bp->pt.o, ms, true))
-    {
-      minibuf_error ("Failing regexp search backward: `%s'", ms);
-      return false;
-    }
-
-  return true;
+  return search (search_backward, true, "RE search backward: ");
 }
 END_DEFUN
 
@@ -389,7 +354,7 @@ END_DEFUN
 /*
  * Incremental search engine.
  */
-static int
+static le *
 isearch (int dir, int regexp)
 {
   int c;
@@ -439,7 +404,7 @@ isearch (int dir, int regexp)
 	  thisflag |= FLAG_NEED_RESYNC;
 
 	  /* Quit. */
-	  cancel ();
+	  FUNCALL (keyboard_quit);
 
 	  /* Restore old mark position. */
 	  if (cur_bp->mark)
@@ -547,7 +512,7 @@ isearch (int dir, int regexp)
   if (old_mark)
     free_marker (old_mark);
 
-  return true;
+  return leT;
 }
 
 DEFUN ("isearch-forward", isearch_forward)
@@ -613,15 +578,21 @@ Replace occurrences of a string with other text.
   char *repl;
 
   if (find == NULL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   if (find[0] == '\0')
-    return false;
+    {
+      free (find);
+      return leNIL;
+    }
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, false);
 
   repl = minibuf_read ("Replace `%s' with: ", "", find);
   if (repl == NULL)
-    return cancel ();
+    {
+      free (find);
+      return FUNCALL (keyboard_quit);
+    }
   repl_len = strlen (repl);
 
   while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
@@ -634,13 +605,16 @@ Replace occurrences of a string with other text.
 			 find_len, repl, repl_len, find_no_upper);
     }
 
+  free (find);
+  free (repl);
+
   if (thisflag & FLAG_NEED_RESYNC)
     resync_redisplay ();
   term_redisplay ();
 
   minibuf_write ("Replaced %d occurrences", count);
 
-  return true;
+  return leT;
 }
 END_DEFUN
 
@@ -657,15 +631,21 @@ what to do with it.
   char *repl;
 
   if (find == NULL)
-    return cancel ();
+    return FUNCALL (keyboard_quit);
   if (*find == '\0')
-    return false;
+    {
+      free (find);
+      return leNIL;
+    }
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, false);
 
   repl = minibuf_read ("Query replace `%s' with: ", "", find);
   if (repl == NULL)
-    return cancel ();
+    {
+      free (find);
+      return FUNCALL (keyboard_quit);
+    }
   repl_len = strlen (repl);
 
   /* Spaghetti code follows... :-( */
@@ -694,7 +674,7 @@ what to do with it.
 	  switch (c)
 	    {
 	    case KBD_CANCEL:	/* C-g */
-	      return cancel ();
+	      return FUNCALL (keyboard_quit);
 	    case 'q':		/* Quit immediately. */
 	      goto endoffunc;
 	    case '.':		/* Replace and quit. */
@@ -727,12 +707,15 @@ what to do with it.
     }
 
 endoffunc:
+  free (find);
+  free (repl);
+
   if (thisflag & FLAG_NEED_RESYNC)
     resync_redisplay ();
   term_redisplay ();
 
   minibuf_write ("Replaced %d occurrences", count);
 
-  return true;
+  return leT;
 }
 END_DEFUN
