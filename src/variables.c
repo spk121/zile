@@ -72,21 +72,24 @@ var_free (void *v)
   free (p);
 }
 
+static void
+init_builtin_var (const char *var, const char *defval, bool local)
+{
+  var_entry *p = XMALLOC (var_entry);
+  p->var = xstrdup (var);
+  p->defval = p->val = xstrdup (defval);
+  p->local = local;
+  hash_insert (main_vars, p);
+}
+
 void
 init_variables (void)
 {
-  var_entry *p;
-
   /* Initial size of 32 is big enough for default variables and some
      more */
   main_vars = hash_initialize (32, NULL, var_hash, var_cmp, var_free);
-  /* FIXME: Make the following into a function */
-#define X(var_init, defval_init, local_init, doc_init)  \
-  p = XMALLOC (var_entry);                              \
-  p->var = xstrdup (var_init);                          \
-  p->defval = p->val = xstrdup (defval_init);           \
-  p->local = local_init;                                \
-  hash_insert (main_vars, p);
+#define X(var, defval, local, doc)              \
+  init_builtin_var (var, defval, local);
 #include "tbl_vars.h"
 #undef X
 }
