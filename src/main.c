@@ -378,8 +378,12 @@ main (int argc, char **argv)
       free_bindings ();
       free_eval ();
     }
-  else if (minibuf_contents) /* if in batch mode, print any error */
-    fprintf (stderr, "%s: %s\n", prog_name, minibuf_contents);
+  else if (minibuf_contents)
+    {
+      /* if in batch mode, print any error */
+      fprintf (stderr, "%s: %s\n", prog_name, minibuf_contents);
+      exit (255);
+    }
 
   /* Free Lisp state. */
   free_variables ();
