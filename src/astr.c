@@ -299,7 +299,6 @@ int
 main (void)
 {
   astr as1, as2, as3;
-  int i;
   FILE *fp;
 
   as1 = astr_new ();
