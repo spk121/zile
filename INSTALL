@@ -1,8 +1,8 @@
              GNU Zile build and installation instructions
              --------------------------------------------
 
-     Copyright (c) 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
      Copyright (c) 2008 Free Software Foundation, Inc.
+     Copyright (c) 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
 
      Copying and distribution of this file, with or without
      modification, are permitted in any medium without royalty
@@ -11,9 +11,9 @@
 
 To build and install Zile:
 
-[Only if you're compiling the CVS sources, first make sure you have
-the GNU autotools installed (automake >= 1.9, autoconf >= 2.59) and
-run
+[Only if you're compiling the CVS sources, first make sure you have the
+GNU autotools installed (automake >= 1.9, autoconf >= 2.59), and a
+version of gnulib from 2008 or later, and run
 
         ./autogen.sh
 ]
