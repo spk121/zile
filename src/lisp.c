@@ -157,7 +157,7 @@ read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
   return tok;
 }
 
-le *
+static le *
 lisp_read (le * list, astr as, ptrdiff_t * pos)
 {
   astr tok;
@@ -199,15 +199,12 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
     }
 }
 
-DEFUN ("load", load)
+bool
+lisp_load (const char *file)
 {
-  char *file;
   FILE *fp;
   le *list;
 
-  if (!arglist)
-    return false;
-  file = arglist->next->data;
   fp = fopen (file, "r");
   if (fp != NULL)
     {
@@ -217,9 +214,9 @@ DEFUN ("load", load)
       leEval (list);
       astr_delete (bs);
       leWipe (list);
+      fclose (fp);
+      return true;
     }
-  fclose (fp);
 
-  return leT;
+    return false;
 }
-END_DEFUN

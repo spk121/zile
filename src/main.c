@@ -325,13 +325,9 @@ main (int argc, char **argv)
           astr as = get_home_dir ();
           if (as)
             {
-              le *branch;
-
               astr_cat_cstr (as, "/." PACKAGE);
-              branch = leAddDataElement (leAddDataElement (NULL, "", 0), astr_cstr (as), 0);
-              F_load (0, branch);
+              lisp_load (astr_cstr (as));
               astr_delete (as);
-              leWipe (branch);
             }
         }
 
