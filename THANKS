@@ -1,4 +1,4 @@
-The Zile team would like to thank:
+The Zile maintainers would like to thank:
 
 * Richard M. Stallman <rms@gnu.ai.mit.edu> for creating the powerful
   Emacs editor
@@ -6,8 +6,6 @@ The Zile team would like to thank:
   package, and fixing and reporting several bugs
 * Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
   `goto-line' function, Debian package and continuous support
-* Scott "Jerry" Lawrence <yorgle@gmail.com> for lithp, on version 0.6
-  of which the minimal Lisp interpreter is based
 * Daniel Sobral <Daniel_Sobral@voga.com.br> for suggestions
 * Mikael Karpberg <karpen@ocean.campus.luth.se> for bug reports, fixes
   and suggestions
@@ -39,5 +37,6 @@ The Zile team would like to thank:
 * Robert Millan for bug reports and fixes
 * Aaron Swartz for clarifying problems on Mac OS X
 * Julien Chaffraix for indenting fixes
+* Nelson Beebe for portability reports and fixes
 
 and everyone else who has reported bugs and made suggestions.
