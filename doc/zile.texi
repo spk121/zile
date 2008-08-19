@@ -158,8 +158,7 @@ line switch @samp{-q} to tell Zile not to load the initialization file.
 
 The initialization file is written in Zile Lisp.  Zile Lisp is a tiny
 subset of Emacs Lisp that consists of the Zile commands plus
-@code{setq} and @code{load}.  See the next subsection for a sample
-initialization file.
+@code{setq}.  See the next subsection for a sample initialization file.
 
 @c ---------------------------------------------------------------------------
 @node Sample file,  , File syntax, Initialization file
@@ -537,6 +536,12 @@ that value, otherwise with the current column value.
 Set mark at where point is.
 @item set-variable
 Set a variable value to the user specified value.
+@item setq
+(setq [sym val]...)
+
+Set each sym to the value of its val.
+The symbols sym are variables; they are literal (not evaluated).
+The values val are expressions; they are evaluated.
 @item shell-command
 Reads a line of text using the minibuffer and creates an inferior shell
 to execute the line as a command.
