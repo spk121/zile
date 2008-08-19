@@ -44,7 +44,6 @@ ding (void)
     term_beep ();
 }
 
-/* FIXME: Use an array list */
 #define MAX_KEY_BUF	16
 static int key_buf[MAX_KEY_BUF];
 static int *keyp = key_buf;
