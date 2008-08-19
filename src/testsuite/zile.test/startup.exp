@@ -1,0 +1,10 @@
+# Check zile starts up without crashing
+
+set test startup
+
+if { [catch { exec $zile_path --batch } msg] } {
+    puts "Error: $::errorCode"
+    fail $test
+} else {
+    pass $test
+}

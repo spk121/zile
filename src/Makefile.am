@@ -22,7 +22,14 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-TESTS = astr $(top_srcdir)/src/zile-startup-test
+SUBDIRS = testsuite
+
+EXTRA_DIST =				\
+	testsuite/zile.test/zile.exp	\
+	testsuite/config/unix.exp	\
+	testsuite/lib/zile.exp
+
+TESTS = astr
 check_PROGRAMS = astr
 
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
@@ -74,8 +81,6 @@ zile_SOURCES =				\
 	term_ncurses.c
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
-
-EXTRA_DIST = zile-startup-test
 
 loc:
 	sloccount $(zile_SOURCES)

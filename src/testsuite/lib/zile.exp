@@ -1,0 +1,15 @@
+set zile_path $objdir/../zile
+
+proc zile_version {} {
+    global zile_path
+    set tmp [exec $zile_path --version]
+    regexp "GNU Zile (\[^\n\]*)\n.*" $tmp tmp version
+    clone_output "$zile_path version $version\n"
+}
+
+proc zile_start {args} {
+    global zile_path
+    spawn $zile_path $args
+}
+
+proc zile_exit {} {}
