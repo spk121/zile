@@ -38,6 +38,8 @@ version of gnulib from 2008 or later, and run
    You can also run it in place (src/zile), but if you do that the
    built-in documentation won't be available.
 
+To run the test suite, you will need DejaGnu.
+
 
 Options
 -------
