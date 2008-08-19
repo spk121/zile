@@ -1,22 +1,15 @@
 The authors of Zile:
 
 * Sandro Sigala <sandro@sigala.it> conceived and wrote Zile
-  single-handed up to version 1.6.1
+  single-handed up to version 1.6.1.
 * Reuben Thomas <rrt@sc3d.org> joined the project at version 1.6.1,
   and has been responsible for maintenance and releases since then,
-  fixing bugs and adding a few features along the way
+  fixing bugs and adding a few features along the way.
 * David A. Capello <dacap@users.sourceforge.net> contributed to Zile
   from version 1.7 to 2.0, adding many new features such as regex
-  search
+  search.
 * Scott Lawrence <yorgle@gmail.com> wrote the "lithp" interpreter
   which was used as the basis for the tiny Lisp interpreter.
 
 For each source file, the original author is listed first and other
 contributors are listed afterwards.
-
-The following separate programs are included with Zile:
-
-* regex.c and regex.h are the GNU regex implementation.
-
-* vasprintf.c is a slimmed-down version of David Taillandier's
-  xnprintf.
