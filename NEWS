@@ -1,3 +1,13 @@
+Release 2.2.62:
+
+This release fixes some small bugs, but probably introduces many more,
+as it includes considerable code cleanup, including dead code removal
+and refactoring, resulting in the removal of about 1,000 lines of
+code, or about 10% of the code base, and greater use of gnulib,
+leading to improved portability. To help find and fix bugs and help
+prevent their reoccurrence, a DejaGnu-based testsuite has been added,
+which already contains test cases for most Zile commands.
+
 Release 2.2.61:
 
 This release uses gnulib for regex, getopt, vasprintf, and various other

@@ -21,7 +21,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle for GNU Zile version 2.2
-@subtitle April 2008
+@subtitle August 2008
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -33,6 +33,8 @@ Copyright @copyright{} 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sig
 Copyright @copyright{} 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas
 
 Copyright @copyright{} 2004 David A. Capello
+
+Copyright @copyright{} 2001 Scott Lawrence
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2 or
@@ -122,12 +124,8 @@ The options are as follows:
 Edit file @file{FILE}.
 @item +NUMBER
 Go to line @samp{NUMBER} in the next file opened.
-@item --batch
-Do not do interactive display; implies @samp{-q}.
 @item --help
 Display a help message and exit.
-@item -f, --funcall FUNC
-Call Zile function @samp{FUNC} with no arguments.
 @item --no-init-file, -q
 Do not load an init file.
 @item --version

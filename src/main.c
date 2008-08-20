@@ -212,9 +212,7 @@ signal_init (void)
 /* Options which take no argument have optional_argument, so that no
    arguments are signalled as extraneous, to mimic Emacs */
 struct option longopts[] = {
-  {"batch", optional_argument, NULL, 'b'},
   {"help", optional_argument, NULL, 'h'},
-  {"funcall", required_argument, NULL, 'f'},
   {"no-init-file", optional_argument, NULL, 'q'},
   {"version", optional_argument, NULL, 'v'},
   {0, 0, 0, 0}
@@ -223,7 +221,7 @@ struct option longopts[] = {
 int
 main (int argc, char **argv)
 {
-  int c, bflag = false, qflag = false;
+  int c, qflag = false;
   gl_list_t fargs = gl_list_create_empty (GL_LINKED_LIST,
                                           NULL, NULL, NULL, false);
   size_t line;
@@ -244,20 +242,13 @@ main (int argc, char **argv)
       int this_optind = optind ? optind : 1;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
-      c = getopt_long_only (argc, argv, ":bhf:qv", longopts, NULL);
+      c = getopt_long_only (argc, argv, ":h:qv", longopts, NULL);
 
       if (c == -1)
         break;
 
       switch (c)
         {
-        case 'b':
-          bflag = true;
-          qflag = true;
-          break;
-        case 'f':
-          gl_list_add_last (fargs, optarg);
-          break;
         case 'q':
           qflag = true;
           break;
@@ -278,9 +269,7 @@ main (int argc, char **argv)
                    "\n"
                    "Initialization options:\n"
                    "\n"
-                   "--batch                 do not do interactive display; implies -q\n"
                    "--help                  display this help message and exit\n"
-                   "--funcall, -f FUNC      call " PACKAGE_NAME " function FUNC with no arguments\n"
                    "--no-init-file, -q      do not load ~/." PACKAGE "\n"
                    "--version               display version information and exit\n"
                    "\n" "Action options:\n" "\n"
@@ -309,80 +298,71 @@ main (int argc, char **argv)
 
   init_bindings ();
 
-  if (!bflag)
+  term_init ();
+
+  /* Create the `*scratch*' buffer. */
+  create_first_window ();
+  term_redisplay ();
+
+  /* Read settings after creating *scratch* buffer so that any
+     buffer commands won't cause a crash. */
+  if (!qflag)
     {
-      term_init ();
-
-      /* Create the `*scratch*' buffer. */
-      create_first_window ();
-      term_redisplay ();
-
-      /* Read settings after creating *scratch* buffer so that any
-         buffer commands won't cause a crash. */
-      if (!qflag)
+      astr as = get_home_dir ();
+      if (as)
         {
-          astr as = get_home_dir ();
-          if (as)
-            {
-              astr_cat_cstr (as, "/." PACKAGE);
-              lisp_load (astr_cstr (as));
-              astr_delete (as);
-            }
+          astr_cat_cstr (as, "/." PACKAGE);
+          lisp_load (astr_cstr (as));
+          astr_delete (as);
         }
-
-      /* Reinitialise the scratch buffer to catch settings */
-      init_buffer (cur_bp);
-
-      /* Open files given on the command line */
-      for (line = 1; *argv; argv++)
-        {
-          if (**argv == '+')
-            line = strtoul (*argv + 1, NULL, 10);
-          else
-            {
-              find_file (*argv);
-              ngotodown (line - 1);
-              line = 1;
-              lastflag |= FLAG_NEED_RESYNC;
-            }
-        }
-
-      /* Show the splash screen only if no files and no Lisp expression
-         or load file is specified on the command line. */
-      if (minibuf_contents == NULL && argc == 0 && gl_list_size (fargs) == 0)
-        about_screen ();
-
-      setup_main_screen (argc);
-
-      /* Refresh minibuffer in case there's an error that couldn't be
-         written during startup */
-      if (minibuf_contents != NULL)
-        {
-          char *buf = xstrdup (minibuf_contents);
-
-          minibuf_write (buf);
-          free (buf);
-        }
-
-      execute_functions (fargs);
-      gl_list_free (fargs);
-
-      /* Run the main loop. */
-      loop ();
-
-      /* Tidy and close the terminal. */
-      term_tidy ();
-      term_close ();
-
-      free_bindings ();
-      free_eval ();
     }
-  else if (minibuf_contents)
+
+  /* Reinitialise the scratch buffer to catch settings */
+  init_buffer (cur_bp);
+
+  /* Open files given on the command line */
+  for (line = 1; *argv; argv++)
     {
-      /* if in batch mode, print any error */
-      fprintf (stderr, "%s: %s\n", prog_name, minibuf_contents);
-      exit (255);
+      if (**argv == '+')
+        line = strtoul (*argv + 1, NULL, 10);
+      else
+        {
+          find_file (*argv);
+          ngotodown (line - 1);
+          line = 1;
+          lastflag |= FLAG_NEED_RESYNC;
+        }
     }
+
+  /* Show the splash screen only if no files and no Lisp expression
+     or load file is specified on the command line. */
+  if (minibuf_contents == NULL && argc == 0 && gl_list_size (fargs) == 0)
+    about_screen ();
+
+  setup_main_screen (argc);
+
+  /* Refresh minibuffer in case there's an error that couldn't be
+     written during startup */
+  if (minibuf_contents != NULL)
+    {
+      char *buf = xstrdup (minibuf_contents);
+
+      minibuf_write (buf);
+      free (buf);
+    }
+
+  execute_functions (fargs);
+  gl_list_free (fargs);
+
+  /* Run the main loop. */
+  loop ();
+
+  /* Tidy and close the terminal. */
+  term_tidy ();
+  term_close ();
+
+  free_bindings ();
+  free_eval ();
 
   /* Free Lisp state. */
   free_variables ();

@@ -25,12 +25,8 @@ manual (`info zile').
 .Bl -tag -width indent
 .It Ar +NUMBER
 Go to line \fINUMBER\fR in the next file opened.
-.It Fl -batch
-Do not do interactive display; implies -q.
 .It Fl -help
 Display a help message and exit.
-.It Fl -funcall, f Ar FUNC
-call Zile function \fIFUNC\fR with no arguments.
 .It Fl -no-init-file, q
 Do not load an init file.
 .It Fl -version
@@ -38,9 +34,8 @@ Display version information and exit.
 .El
 .Sh DIAGNOSTICS
 Zile returns 0 on successful termination, 1 if it cannot start up, for
-example because of an invalid command-line argument, 2 if it crashes
-or runs out of memory, and 255 if a non-fatal error is encountered
-during startup in batch mode.
+example because of an invalid command-line argument, and 2 if it
+crashes or runs out of memory.
 .Sh FILES
 .Bl -tag -width Fl
 .It Pa ~/.zile
@@ -60,3 +55,5 @@ Sandro Sigala <sandro@sigala.it>
 Reuben Thomas <rrt@sc3d.org>
 .br
 David A. Capello <dacap@users.sourceforge.net>
+.br
+Scott Lawrence <yorgle@gmail.com>
