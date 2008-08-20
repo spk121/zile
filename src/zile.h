@@ -63,6 +63,23 @@ typedef le * (*Function) (int uniarg, le * list);
 /* Turn a bool into a Lisp boolean */
 #define bool_to_lisp(b) ((b) ? leT : leNIL)
 
+/* Define an interactive function. */
+#define DEFUN(zile_func, c_func) \
+	le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
+	{ \
+	  if (arglist && arglist->data) \
+	    uniarg = atoi (arglist->data);
+#define END_DEFUN \
+	}
+
+/* Call an interactive function. */
+#define FUNCALL(c_func)                         \
+	F_ ## c_func (1, NULL)
+
+/* Call an interactive function with a universal argument. */
+#define FUNCALL_ARG(c_func, uniarg)             \
+	F_ ## c_func (uniarg, NULL)
+
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
  * each line is implicit.
@@ -345,23 +362,6 @@ typedef size_t Font;
 #else
 #define GCC_UNUSED
 #endif
-
-/* Define an interactive function. */
-#define DEFUN(zile_func, c_func) \
-	le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
-	{ \
-	  if (arglist && arglist->data) \
-	    uniarg = atoi (arglist->data);
-#define END_DEFUN \
-	}
-
-/* Call an interactive function. */
-#define FUNCALL(c_func)                         \
-	F_ ## c_func (1, NULL)
-
-/* Call an interactive function with a universal argument. */
-#define FUNCALL_ARG(c_func, uniarg)             \
-	F_ ## c_func (uniarg, NULL)
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
