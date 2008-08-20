@@ -50,7 +50,7 @@ proc interactive_test { test input } {
     global test_path
 
     set edit_file $test_path/$test.wrong
-    exec cp $test_path/zile_test_input $edit_file
+    exec cp $test_path/zile_test.input $edit_file
     zile_start $edit_file
 
     send -- $input
