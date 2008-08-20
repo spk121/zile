@@ -286,7 +286,6 @@ main (int argc, char **argv)
                    "\n" "Action options:\n" "\n"
                    "FILE                    visit FILE using find-file\n"
                    "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
-                   "--load, -l FILE         load " PACKAGE_NAME " Lisp FILE using the load function\n"
                    "\n"
                    "Report bugs to " PACKAGE_BUGREPORT ".\n",
                    prog_name);
