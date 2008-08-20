@@ -26,7 +26,6 @@
 
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp (Buffer * bp, Point pt);
-size_t get_goalc_wp (Window * wp);
 size_t get_goalc (void);
 int backward_char (void);
 int forward_char (void);
@@ -48,7 +47,6 @@ Function last_command (void);
 void free_bindings (void);
 
 /* buffer.c --------------------------------------------------------------- */
-void calculate_region (Region * rp, Point from, Point to);
 int calculate_the_region (Region * rp);
 void init_buffer (Buffer * bp);
 Buffer *create_buffer (const char *name);
@@ -57,17 +55,14 @@ void free_buffers (void);
 void set_buffer_name (Buffer * bp, const char *name);
 void set_buffer_filename (Buffer * bp, const char *filename);
 Buffer *find_buffer (const char *name, int cflag);
-Buffer *get_next_buffer (void);
 char *make_buffer_name (const char *filename);
 void switch_to_buffer (Buffer * bp);
 int warn_if_readonly_buffer (void);
-int warn_if_no_mark (void);
 void set_temporary_buffer (Buffer * bp);
 size_t calculate_buffer_size (Buffer * bp);
 int transient_mark_mode (void);
 void activate_mark (void);
 void deactivate_mark (void);
-int is_mark_actived (void);
 size_t tab_width (Buffer * bp);
 
 /* completion.c ----------------------------------------------------------- */
@@ -83,8 +78,6 @@ void pop_mark (void);
 void set_mark (void);
 int is_empty_line (void);
 int is_blank_line (void);
-int char_after (Point * pt);
-int char_before (Point * pt);
 int following_char (void);
 int preceding_char (void);
 int bobp (void);
@@ -237,8 +230,6 @@ char *term_minibuf_read (const char *prompt, const char *value,
 			 Completion * cp, History * hp);
 
 /* term_redisplay.c ------------------------------------------------------- */
-int term_initted (void);
-void term_set_initted (void);
 size_t term_width (void);
 size_t term_height (void);
 void term_set_size (size_t cols, size_t rows);

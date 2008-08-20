@@ -55,10 +55,8 @@ Copy region into the user specified register.
   minibuf_clear ();
   reg %= NUM_REGISTERS;
 
-  if (warn_if_no_mark ())
+  if (!calculate_the_region (&r))
     return leNIL;
-
-  calculate_the_region (&r);
 
   p = copy_text_block (r.start.n, r.start.o, r.size);
   free (regs[reg].text);

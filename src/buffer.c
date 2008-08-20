@@ -198,15 +198,6 @@ find_buffer (const char *name, int cflag)
 }
 
 /*
- * Find the next buffer in buffer list.
- */
-Buffer *
-get_next_buffer (void)
-{
-  return cur_bp->next ? cur_bp->next : head_bp;
-}
-
-/*
  * Create a buffer name using the file name.
  */
 char *
@@ -301,7 +292,7 @@ warn_if_readonly_buffer (void)
   return false;
 }
 
-int
+static int
 warn_if_no_mark (void)
 {
   if (!cur_bp->mark)
@@ -309,7 +300,7 @@ warn_if_no_mark (void)
       minibuf_error ("The mark is not set now");
       return true;
     }
-  else if (transient_mark_mode () && !cur_bp->mark_active)
+  else if (!cur_bp->mark_active && transient_mark_mode ())
     {
       minibuf_error ("The mark is not active now");
       return true;
@@ -319,39 +310,30 @@ warn_if_no_mark (void)
 }
 
 /*
- * Calculate a region size and set the region structure.
- */
-void
-calculate_region (Region * rp, Point from, Point to)
-{
-  if (cmp_point (from, to) < 0)
-    {
-      /* The point is before the mark. */
-      rp->start = from;
-      rp->end = to;
-    }
-  else
-    {
-      /* The mark is before the point. */
-      rp->start = to;
-      rp->end = from;
-    }
-
-  rp->size = point_dist (rp->start, rp->end);
-  rp->num_lines = count_lines (rp->start, rp->end);
-}
-
-/*
  * Calculate the region size between point and mark and set the region
    structure.
  */
 int
 calculate_the_region (Region * rp)
 {
-  if (!is_mark_actived ())
+  if (warn_if_no_mark ())
     return false;
 
-  calculate_region (rp, cur_bp->pt, cur_bp->mark->pt);
+  if (cmp_point (cur_bp->pt, cur_bp->mark->pt) < 0)
+    {
+      /* Point is before mark. */
+      rp->start = cur_bp->pt;
+      rp->end = cur_bp->mark->pt;
+    }
+  else
+    {
+      /* Mark is before point. */
+      rp->start = cur_bp->mark->pt;
+      rp->end = cur_bp->pt;
+    }
+
+  rp->size = point_dist (rp->start, rp->end);
+  rp->num_lines = count_lines (rp->start, rp->end);
   return true;
 }
 
@@ -426,17 +408,6 @@ void
 deactivate_mark (void)
 {
   cur_bp->mark_active = false;
-}
-
-int
-is_mark_actived (void)
-{
-  if (!cur_bp->mark)
-    return false;
-  else if (transient_mark_mode ())
-    return (cur_bp->mark_active) ? true : false;
-  else
-    return true;
 }
 
 /*

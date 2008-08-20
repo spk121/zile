@@ -239,20 +239,11 @@ enum
 
 struct Completion
 {
-  /* This flag is set when a completion window has been popped up. */
-  int fl_poppedup;
-
-  /* This flag is set when the completion window should be closed. */
-  int fl_close;
-  /* The old buffer. */
-  Buffer *old_bp;
-
-  /* This flag is set when this is a filename completion. */
-  int fl_dir;
+  int fl_poppedup; /* Set when a completion window has been popped up. */
+  int fl_close; /* Set when the completion window should be closed. */
+  Buffer *old_bp;		/* The old buffer. */
+  int fl_dir; /* Set when this is a filename completion. */
   astr path;
-
-  /* This flag is set when the space character is allowed. */
-  int fl_space;
 
   gl_list_t completions;	/* The completions list. */
 
@@ -291,7 +282,7 @@ typedef size_t Font;
 #define GETKEY_DELAYED                  0001
 #define GETKEY_UNFILTERED               0002
 
-/* Special value returned in non blocking mode, when no key is pressed. */
+/* Special value returned for invalid key codes, or when no key is pressed. */
 #define KBD_NOKEY                       UINT_MAX
 
 /* Key modifiers. */

@@ -95,40 +95,29 @@ is_blank_line (void)
   return true;
 }
 
+/* Returns the character following point in the current buffer. */
 int
-char_after (Point * pt)
+following_char (void)
 {
   if (eobp ())
     return 0;
   else if (eolp ())
     return '\n';
   else
-    return *astr_char (pt->p->text, (ptrdiff_t) pt->o);
-}
-
-int
-char_before (Point * pt)
-{
-  if (bobp ())
-    return 0;
-  else if (bolp ())
-    return '\n';
-  else
-    return *astr_char (pt->p->text, (ptrdiff_t) (pt->o - 1));
-}
-
-/* Returns the character following point in the current buffer. */
-int
-following_char (void)
-{
-  return char_after (&cur_bp->pt);
+    return *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
 }
 
 /* Return the character preceding point in the current buffer. */
 int
 preceding_char (void)
 {
-  return char_before (&cur_bp->pt);
+  if (bobp ())
+    return 0;
+  else if (bolp ())
+    return '\n';
+  else
+    return *astr_char (cur_bp->pt.p->text,
+                       (ptrdiff_t) (cur_bp->pt.o - 1));
 }
 
 /* Return true if point is at the beginning of the buffer. */

@@ -143,10 +143,8 @@ to make one entry in the kill ring.
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
 
-  if (warn_if_no_mark ())
+  if (!calculate_the_region (&r))
     return leNIL;
-
-  calculate_the_region (&r);
 
   if (cur_bp->flags & BFLAG_READONLY)
     {
@@ -199,10 +197,8 @@ Save the region as if killed, but don't kill it.
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
 
-  if (warn_if_no_mark ())
+  if (!calculate_the_region (&r))
     return leNIL;
-
-  calculate_the_region (&r);
 
   p = copy_text_block (r.start.n, r.start.o, r.size);
   kill_ring_push_nstring (p, r.size);

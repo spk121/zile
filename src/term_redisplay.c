@@ -38,18 +38,6 @@ static size_t cur_tab_width;
 static size_t cur_topline;
 static size_t point_screen_column;
 
-int
-term_initted (void)
-{
-  return initted;
-}
-
-void
-term_set_initted (void)
-{
-  initted = true;
-}
-
 size_t
 term_width (void)
 {
@@ -345,7 +333,8 @@ draw_status_line (size_t line, Window * wp)
     eol_type = ":";
 
   term_move (line, 0);
-  bs = astr_afmt (astr_new (), "(%d,%d)", pt.n + 1, get_goalc_wp (wp));
+  bs = astr_afmt (astr_new (), "(%d,%d)", pt.n + 1,
+                  get_goalc_bp (wp->bp, window_pt (wp)));
   as = astr_afmt (astr_new (), "--%s%2s  %-15s   %s %-9s (Text",
 		  eol_type, make_mode_line_flags (wp), wp->bp->name,
 		  make_screen_pos (wp, &buf), astr_cstr (bs));

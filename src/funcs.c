@@ -586,10 +586,9 @@ edit_tab_region (int action)
   size_t lineno;
   Marker *marker;
 
-  if (warn_if_readonly_buffer () || warn_if_no_mark ())
+  if (warn_if_readonly_buffer () || !calculate_the_region (&r))
     return leNIL;
 
-  calculate_the_region (&r);
   if (r.size == 0)
     return leT;
 
@@ -1361,10 +1360,9 @@ setcase_region (int rcase)
   Line *lp;
   size_t size, i;
 
-  if (warn_if_readonly_buffer () || warn_if_no_mark ())
+  if (warn_if_readonly_buffer () || !calculate_the_region (&r))
     return leNIL;
 
-  calculate_the_region (&r);
   size = r.size;
 
   undo_save (UNDO_REPLACE_BLOCK, r.start, size, size);
@@ -1521,10 +1519,8 @@ it as the contents of the region.
       return leNIL;
     }
 
-  if (warn_if_no_mark ())
+  if (!calculate_the_region (&r))
     return leNIL;
-
-  cmd = astr_new ();
 
   fd = mkstemp (tempfile);
   if (fd == -1)
@@ -1533,7 +1529,6 @@ it as the contents of the region.
       return leNIL;
     }
 
-  calculate_the_region (&r);
   p = copy_text_block (r.start.n, r.start.o, r.size);
   written = write (fd, p, r.size);
   free (p);
@@ -1549,6 +1544,7 @@ it as the contents of the region.
       return leNIL;
     }
 
+  cmd = astr_new ();
   astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
   free (ms);
   pipe = popen (astr_cstr (cmd), "r");
@@ -1579,8 +1575,6 @@ it as the contents of the region.
 	{
 	  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
 	  {
-	    Region r;
-	    calculate_the_region (&r);
 	    if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
 	      FUNCALL (exchange_point_and_mark);
 	    undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, r.size, 0);
@@ -1613,29 +1607,24 @@ Delete the text between point and mark.
 +*/
 {
   Region r;
+  size_t size;
 
-  if (warn_if_no_mark ())
+  if (!calculate_the_region (&r))
     return leNIL;
 
-  calculate_the_region (&r);
+  if (warn_if_readonly_buffer ())
+    return leNIL;
 
-  if (cur_bp->flags & BFLAG_READONLY)
-    {
-      warn_if_readonly_buffer ();
-    }
-  else
-    {
-      size_t size = r.size;
+  size = r.size;
 
-      if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-	FUNCALL (exchange_point_and_mark);
+  if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
+    FUNCALL (exchange_point_and_mark);
 
-      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
-      undo_nosave = true;
-      while (size--)
-	FUNCALL (delete_char);
-      undo_nosave = false;
-    }
+  undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
+  undo_nosave = true;
+  while (size--)
+    FUNCALL (delete_char);
+  undo_nosave = false;
 
   deactivate_mark ();
   return leT;

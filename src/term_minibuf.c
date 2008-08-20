@@ -288,7 +288,7 @@ do_minibuf_read (const char *prompt, const char *value,
 	    }
 	  break;
 	case ' ':
-	  if (cp != NULL && !cp->fl_space)
+	  if (cp != NULL)
 	    goto got_tab;
 	  /* FALLTHROUGH */
 	default:

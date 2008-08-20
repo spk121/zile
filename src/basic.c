@@ -88,12 +88,6 @@ get_goalc_bp (Buffer * bp, Point pt)
 }
 
 size_t
-get_goalc_wp (Window * wp)
-{
-  return get_goalc_bp (wp->bp, window_pt (wp));
-}
-
-size_t
 get_goalc (void)
 {
   return get_goalc_bp (cur_bp, cur_bp->pt);
