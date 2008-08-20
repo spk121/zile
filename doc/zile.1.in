@@ -5,7 +5,7 @@
 .\" Copying and distribution of this file, with or without
 .\" modification, are permitted in any medium without royalty
 .\" provided the copyright notice and this notice are preserved.
-.Dd Jun, 2007
+.Dd Aug, 2008
 .Os
 .Dt ZILE 1
 .Sh NAME
@@ -38,8 +38,9 @@ Display version information and exit.
 .El
 .Sh DIAGNOSTICS
 Zile returns 0 on successful termination, 1 if it cannot start up, for
-example because of an invalid command-line argument, and 2 if it
-crashes or runs out of memory.
+example because of an invalid command-line argument, 2 if it crashes
+or runs out of memory, and 255 if a non-fatal error is encountered
+during startup in batch mode.
 .Sh FILES
 .Bl -tag -width Fl
 .It Pa ~/.zile
