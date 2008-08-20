@@ -261,14 +261,15 @@ do_minibuf_read (const char *prompt, const char *value,
 	      thistab = completion_try (cp, as, true);
 	      switch (thistab)
 		{
-		case COMPLETION_NONUNIQUE:
 		case COMPLETION_MATCHED:
 		case COMPLETION_MATCHEDNONUNIQUE:
+		case COMPLETION_NONUNIQUE:
 		  if (cp->fl_dir)
                     i = cp->matchsize + strlen (astr_cstr (cp->path));
 		  else
                     i = cp->matchsize;
-                  astr_truncate (as, i);
+                  astr_truncate (as, 0);
+                  astr_ncat_cstr (as, cp->match, cp->matchsize);
 		  s = (char *) xzalloc (astr_len (as) + 1);
 		  if (cp->fl_dir)
 		    {
