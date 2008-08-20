@@ -24,11 +24,6 @@
 
 SUBDIRS = testsuite
 
-EXTRA_DIST =				\
-	testsuite/zile.test/zile.exp	\
-	testsuite/config/unix.exp	\
-	testsuite/lib/zile.exp
-
 TESTS = astr
 check_PROGRAMS = astr
 
