@@ -16,6 +16,4 @@ See INSTALL for installation instructions.
 Zile's home page at http://www.gnu.org/software/zile/
 
 Questions, comments and requests should be sent to <help-zile@gnu.org>.
-Bug reports should be sent to <bug-zile@gnu.org>. Savannah users are
-welcome to file bug reports, feature requests and patches directly in
-the relevant tracker at http://savannah.gnu.org/projects/zile/
+For instructions on reporting bugs, see the file BUGS.
