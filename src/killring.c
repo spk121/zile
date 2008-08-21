@@ -248,7 +248,7 @@ Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  return FUNCALL_ARG (kill_word, !uniarg ? -1 : -uniarg);
+  return kill (-uniarg, F_mark_word);
 }
 END_DEFUN
 
