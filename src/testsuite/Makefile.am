@@ -24,16 +24,22 @@
 
 AUTOMAKE_OPTIONS = dejagnu
 
-EXTRA_DIST =				\
-	config/default.exp		\
-	lib/zile.exp			\
-	zile.test/make-interactive-test	\
-	zile.test/delete_char.exp	\
-	zile.test/delete_char.output	\
-	zile.test/end_of_line.exp	\
-	zile.test/end_of_line.output	\
-	zile.test/forward_char.exp	\
-	zile.test/forward_char.output	\
-	zile.test/insert_char.exp	\
-	zile.test/insert_char.output	\
+EXTRA_DIST =					\
+	config/default.exp			\
+	lib/zile.exp				\
+	zile.test/make-interactive-test		\
+	zile.test/backward_char.exp		\
+	zile.test/backward_char.output		\
+	zile.test/backward_delete_char.exp	\
+	zile.test/backward_delete_char.output	\
+	zile.test/backward_kill_word.exp	\
+	zile.test/backward_kill_word.output	\
+	zile.test/delete_char.exp		\
+	zile.test/delete_char.output		\
+	zile.test/end_of_line.exp		\
+	zile.test/end_of_line.output		\
+	zile.test/forward_char.exp		\
+	zile.test/forward_char.output		\
+	zile.test/insert_char.exp		\
+	zile.test/insert_char.output		\
 	zile.test/zile_test.input

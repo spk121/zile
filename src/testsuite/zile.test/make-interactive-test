@@ -28,6 +28,6 @@
 cp zile_test.input $1.output
 autoexpect -f log.exp ../../zile -q $1.output
 ( echo -n "interactive_test $1 \"";
-grep -v -e "^expect -exact" log.exp | grep ^send | cut -d " " -f 3 | cut -d "\"" -f 2 | tr -d "\n";
+grep -v -e "^expect -exact" log.exp | grep ^send | sed -e 's/^send -- "//' | sed -e 's/"$//' | tr -d "\n";
 echo -n "\"" ) > $1.exp
 rm log.exp $1.output~
