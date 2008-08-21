@@ -25,7 +25,7 @@
 # Zile is run on zile_test_input copied to TEST-NAME.output, and the
 # script is written to TEST-NAME.script
 
-cp zile_test_input $1.output
+cp zile_test.input $1.output
 autoexpect -f log.exp ../../zile -q $1.output
 ( echo -n "interactive_test $1 \"";
 grep -v -e "^expect -exact" log.exp | grep ^send | cut -d " " -f 3 | cut -d "\"" -f 2 | tr -d "\n";
