@@ -34,6 +34,20 @@ EXTRA_DIST =					\
 	zile.test/backward_delete_char.output	\
 	zile.test/backward_kill_word.exp	\
 	zile.test/backward_kill_word.output	\
+	zile.test/backward_paragraph.exp	\
+	zile.test/backward_paragraph.output	\
+	zile.test/backward_sexp.exp		\
+	zile.test/backward_sexp.output		\
+	zile.test/backward_word.exp		\
+	zile.test/backward_word.output		\
+	zile.test/beginning_of_buffer.exp	\
+	zile.test/beginning_of_buffer.output	\
+	zile.test/beginning_of_line.exp		\
+	zile.test/beginning_of_line.output	\
+	zile.test/call_last_kbd_macro.exp	\
+	zile.test/call_last_kbd_macro.output	\
+	zile.test/capitalize_word.exp		\
+	zile.test/capitalize_word.output	\
 	zile.test/delete_char.exp		\
 	zile.test/delete_char.output		\
 	zile.test/end_of_line.exp		\
