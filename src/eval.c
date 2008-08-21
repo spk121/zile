@@ -226,7 +226,7 @@ execute_with_uniarg (bool undo, int uniarg, int (*forward) (void), int (*backwar
   if (undo)
     undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
   for (uni = 0; ret && uni < uniarg; ++uni)
-    ret = forward ();
+    ret = func ();
   if (undo)
     undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
