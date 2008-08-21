@@ -61,7 +61,7 @@ proc interactive_test { test input } {
         puts "Error: $::errorCode"
         fail $test
     } else {
-        exec rm $edit_file
+        exec rm $edit_file $edit_file~
         pass $test
     }
 }
