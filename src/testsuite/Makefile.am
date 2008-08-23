@@ -60,8 +60,6 @@ EXTRA_DIST =						\
 	zile.test/delete_horizontal_space.output	\
 	zile.test/delete_region.exp			\
 	zile.test/delete_region.output			\
-	zile.test/delete_window.exp			\
-	zile.test/delete_window.output			\
 	zile.test/describe_bindings.exp			\
 	zile.test/describe_bindings.output		\
 	zile.test/describe_function.exp			\
