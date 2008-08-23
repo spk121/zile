@@ -567,57 +567,6 @@ is treated as a regexp.  See M-x isearch-forward for more info.
 }
 END_DEFUN
 
-DEFUN ("replace-string", replace_string)
-/*+
-Replace occurrences of a string with other text.
-+*/
-{
-  int count = 0, find_no_upper;
-  size_t find_len, repl_len;
-  char *find = minibuf_read ("Replace string: ", "");
-  char *repl;
-
-  if (find == NULL)
-    return FUNCALL (keyboard_quit);
-  if (find[0] == '\0')
-    {
-      free (find);
-      return leNIL;
-    }
-  find_len = strlen (find);
-  find_no_upper = no_upper (find, find_len, false);
-
-  repl = minibuf_read ("Replace `%s' with: ", "", find);
-  if (repl == NULL)
-    {
-      free (find);
-      return FUNCALL (keyboard_quit);
-    }
-  repl_len = strlen (repl);
-
-  while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
-    {
-      ++count;
-      undo_save (UNDO_REPLACE_BLOCK,
-		 make_point (cur_bp->pt.n,
-			     cur_bp->pt.o - find_len), find_len, repl_len);
-      line_replace_text (&cur_bp->pt.p, cur_bp->pt.o - find_len,
-			 find_len, repl, repl_len, find_no_upper);
-    }
-
-  free (find);
-  free (repl);
-
-  if (thisflag & FLAG_NEED_RESYNC)
-    resync_redisplay ();
-  term_redisplay ();
-
-  minibuf_write ("Replaced %d occurrences", count);
-
-  return leT;
-}
-END_DEFUN
-
 DEFUN ("query-replace", query_replace)
 /*+
 Replace occurrences of a string with other text.

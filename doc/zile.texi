@@ -503,8 +503,6 @@ You may also type up to 3 octal digits, to insert a character with that code.
 @item recenter
 Center point in window and redisplay screen.
 The desired position of point is always relative to the current window.
-@item replace-string
-Replace occurrences of a string with other text.
 @item save-buffer
 Save current buffer in visited file if modified.  By default, makes the
 previous version into a backup file if this is the first save.
