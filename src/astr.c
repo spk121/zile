@@ -84,32 +84,30 @@ astr_delete (astr as)
   free (as);
 }
 
-static astr
-astr_cpy_x (astr as, const char *s, size_t csize)
+astr
+astr_ncpy_cstr (astr as, const char *s, size_t len)
 {
-  astr_resize (as, csize);
-  memcpy (as->text, s, csize);
-  as->len = csize;
-  as->text[csize] = '\0';
+  astr_resize (as, len);
+  memcpy (as->text, s, len);
+  as->len = len;
+  as->text[len] = '\0';
   return as;
 }
 
 astr
 astr_cpy (astr as, const astr src)
 {
-  assert (src != NULL);
-  return astr_cpy_x (as, src->text, src->len);
+  return astr_ncpy_cstr (as, src->text, src->len);
 }
 
 astr
 astr_cpy_cstr (astr as, const char *s)
 {
-  assert (s != NULL);
-  return astr_cpy_x (as, s, strlen (s));
+  return astr_ncpy_cstr (as, s, strlen (s));
 }
 
-static astr
-astr_cat_x (astr as, const char *s, size_t csize)
+astr
+astr_ncat_cstr(astr as, const char *s, size_t csize)
 {
   astr_resize (as, as->len + csize);
   memcpy (as->text + as->len, s, csize);
@@ -121,14 +119,7 @@ astr_cat_x (astr as, const char *s, size_t csize)
 astr
 astr_cat (astr as, const astr src)
 {
-  assert (src != NULL);
-  return astr_cat_x (as, src->text, src->len);
-}
-
-astr
-astr_ncat_cstr (astr as, const char *s, size_t len)
-{
-  return astr_cat_x (as, s, len);
+  return astr_ncat_cstr (as, src->text, src->len);
 }
 
 astr
@@ -151,7 +142,7 @@ astr
 astr_cat_delete (astr as, const astr src)
 {
   assert (src != NULL);
-  astr_cat_x (as, src->text, src->len);
+  astr_cat (as, src);
   astr_delete (src);
   return as;
 }

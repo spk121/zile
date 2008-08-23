@@ -96,6 +96,7 @@ astr astr_substr (const astr as, ptrdiff_t pos, size_t size);
  * Assign the contents of the argument string to the string as.
  */
 astr astr_cpy (astr as, const astr src);
+astr astr_ncpy_cstr (astr as, const char *s, size_t len);
 astr astr_cpy_cstr (astr as, const char *s);
 
 /*
