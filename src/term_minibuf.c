@@ -264,28 +264,22 @@ do_minibuf_read (const char *prompt, const char *value,
 		case COMPLETION_MATCHED:
 		case COMPLETION_MATCHEDNONUNIQUE:
 		case COMPLETION_NONUNIQUE:
-		  if (cp->fl_dir)
-                    i = cp->matchsize + strlen (astr_cstr (cp->path));
-		  else
-                    i = cp->matchsize;
-                  astr_truncate (as, 0);
-                  astr_ncat_cstr (as, cp->match, cp->matchsize);
-		  s = (char *) xzalloc (astr_len (as) + 1);
-		  if (cp->fl_dir)
-		    {
-		      strcpy (s, astr_cstr (cp->path));
-		      strncat (s, cp->match, cp->matchsize);
-		    }
-		  else
-		    strncpy (s, cp->match, cp->matchsize);
-		  s[astr_len (as)] = '\0';
-		  if (strncmp (s, astr_cstr (as), astr_len (as)) != 0)
-		    thistab = -1;
-		  astr_cpy_cstr (as, s);
-		  break;
-		case COMPLETION_NOTMATCHED:
-		  ding ();
-		}
+                  {
+                    astr bs = astr_new ();
+                    if (cp->fl_dir)
+                      astr_cat (bs, cp->path);
+                    astr_ncat_cstr (bs, cp->match, cp->matchsize);
+                    if (strncmp (astr_cstr (as), astr_cstr (bs),
+                                 astr_len (bs)) != 0)
+                      thistab = -1;
+                    astr_delete (as);
+                    as = bs;
+                    i = astr_len (as);
+                    break;
+                  }
+                case COMPLETION_NOTMATCHED:
+                  ding ();
+                }
 	    }
 	  break;
 	case ' ':
