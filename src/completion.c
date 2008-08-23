@@ -215,7 +215,7 @@ popup_completion (Completion * cp, int allflag, size_t num)
  * Reread directory for completions.
  */
 static int
-completion_reread (Completion * cp, astr as)
+completion_readdir (Completion * cp, astr as)
 {
   astr buf;
   DIR *dir;
@@ -303,7 +303,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
   cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_streq, NULL, NULL, false);
 
   if (cp->fl_dir)
-    if (!completion_reread (cp, search))
+    if (!completion_readdir (cp, search))
       return COMPLETION_NOTMATCHED;
 
   ssize = astr_len (search);
