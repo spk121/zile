@@ -58,8 +58,6 @@ EXTRA_DIST =						\
 	zile.test/delete_char.output			\
 	zile.test/delete_horizontal_space.exp		\
 	zile.test/delete_horizontal_space.output	\
-	zile.test/delete_other_windows.exp		\
-	zile.test/delete_other_windows.output		\
 	zile.test/delete_region.exp			\
 	zile.test/delete_region.output			\
 	zile.test/delete_window.exp			\
