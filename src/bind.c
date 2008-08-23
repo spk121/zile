@@ -543,7 +543,7 @@ print_binding (astr key, leafp p, void *st GCC_UNUSED)
 static void
 write_bindings_list (va_list ap GCC_UNUSED)
 {
-  bprintf ("Global Bindings:");
+  bprintf ("Key translations:\n");
   bprintf ("%-15s %s\n", "key", "binding");
   bprintf ("%-15s %s\n", "---", "-------");
 
