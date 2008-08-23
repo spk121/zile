@@ -72,8 +72,6 @@ EXTRA_DIST =						\
 	zile.test/downcase_region.output		\
 	zile.test/downcase_word.exp			\
 	zile.test/downcase_word.output			\
-	zile.test/end_kbd_macro.exp			\
-	zile.test/end_kbd_macro.output			\
 	zile.test/end_of_buffer.exp			\
 	zile.test/end_of_buffer.output			\
 	zile.test/end_of_line.exp			\
@@ -202,8 +200,6 @@ EXTRA_DIST =						\
 	zile.test/shell_command.output			\
 	zile.test/shell_command_on_region.exp		\
 	zile.test/shell_command_on_region.output	\
-	zile.test/start_kbd_macro.exp			\
-	zile.test/start_kbd_macro.output		\
 	zile.test/switch_to_buffer.exp			\
 	zile.test/switch_to_buffer.output		\
 	zile.test/tab_to_tab_stop.exp			\
