@@ -79,13 +79,13 @@ void astr_delete (astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-char *astr_char (const astr as, ptrdiff_t pos);
+char *astr_char (astr as, ptrdiff_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-astr astr_substr (const astr as, ptrdiff_t pos, size_t size);
+astr astr_substr (astr as, ptrdiff_t pos, size_t size);
 
 /*
  * Do strcmp on the contents of s1 and s2
@@ -95,14 +95,14 @@ astr astr_substr (const astr as, ptrdiff_t pos, size_t size);
 /*
  * Assign the contents of the argument string to the string as.
  */
-astr astr_cpy (astr as, const astr src);
+astr astr_cpy (astr as, astr src);
 astr astr_ncpy_cstr (astr as, const char *s, size_t len);
 astr astr_cpy_cstr (astr as, const char *s);
 
 /*
  * Append the contents of the argument string or character to as.
  */
-astr astr_cat (astr as, const astr src);
+astr astr_cat (astr as, astr src);
 astr astr_cat_cstr (astr as, const char *s);
 astr astr_ncat_cstr (astr as, const char *s, size_t len);
 astr astr_cat_char (astr as, int c);
@@ -110,7 +110,7 @@ astr astr_cat_char (astr as, int c);
 /*
  * Append the contents of src to as and free src.
  */
-astr astr_cat_delete (astr as, const astr src);
+astr astr_cat_delete (astr as, astr src);
 
 /*
  * Replace size characters of as, starting at pos, with the argument

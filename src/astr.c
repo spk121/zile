@@ -68,7 +68,7 @@ astr_pos (astr as, ptrdiff_t pos)
 }
 
 char *
-astr_char (const astr as, ptrdiff_t pos)
+astr_char (astr as, ptrdiff_t pos)
 {
   assert (as != NULL);
   pos = astr_pos (as, pos);
@@ -95,7 +95,7 @@ astr_ncpy_cstr (astr as, const char *s, size_t len)
 }
 
 astr
-astr_cpy (astr as, const astr src)
+astr_cpy (astr as, astr src)
 {
   return astr_ncpy_cstr (as, src->text, src->len);
 }
@@ -117,7 +117,7 @@ astr_ncat_cstr(astr as, const char *s, size_t csize)
 }
 
 astr
-astr_cat (astr as, const astr src)
+astr_cat (astr as, astr src)
 {
   return astr_ncat_cstr (as, src->text, src->len);
 }
@@ -139,7 +139,7 @@ astr_cat_char (astr as, int c)
 }
 
 astr
-astr_cat_delete (astr as, const astr src)
+astr_cat_delete (astr as, astr src)
 {
   assert (src != NULL);
   astr_cat (as, src);
@@ -148,7 +148,7 @@ astr_cat_delete (astr as, const astr src)
 }
 
 astr
-astr_substr (const astr as, ptrdiff_t pos, size_t size)
+astr_substr (astr as, ptrdiff_t pos, size_t size)
 {
   assert (as != NULL);
   pos = astr_pos (as, pos);
