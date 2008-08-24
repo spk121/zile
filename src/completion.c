@@ -31,6 +31,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <libgen.h>
+#include "dirname.h"
 #include "gl_linked_list.h"
 
 #include "zile.h"
@@ -246,15 +247,16 @@ completion_readdir (Completion * cp, astr as)
       if (*astr_char (bs, -1) != '/')
 	astr_cat_char (bs, '/');
       pdir = astr_cstr (bs);
-      base = basename (s2);
+      base = base_name (s2);
     }
   else
     {
       pdir = s1;
-      base = "";
+      base = xstrdup ("");
     }
 
   astr_cpy_cstr (as, base);
+  free ((char *) base);
 
   dir = opendir (pdir);
   if (dir == NULL)
