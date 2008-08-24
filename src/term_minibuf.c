@@ -177,9 +177,10 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
 	  else
 	    ding ();
 	  break;
+        case KBD_CTRL | 'd':
 	case KBD_DEL:
 	  if (pos < astr_len (as))
-            astr_remove (as, pos, pos);
+            astr_remove (as, pos, 1);
 	  else
 	    ding ();
 	  break;
