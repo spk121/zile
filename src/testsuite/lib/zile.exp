@@ -1,9 +1,6 @@
 # DejaGnu framework for Zile
 #
 # Copyright (c) 2008 Free Software Foundation, Inc.
-# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
-# Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
-# Copyright (c) 2004 David Capello.
 #
 # This file is part of GNU Zile.
 #
@@ -49,7 +46,7 @@ proc send {ignore arg} {
 proc interactive_test { test input } {
     global test_path
 
-    set edit_file $test_path/$test.wrong
+    set edit_file $test_path/$test.input
     exec cp $test_path/zile_test.input $edit_file
     zile_start $edit_file
 
