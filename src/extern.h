@@ -104,7 +104,7 @@ int exist_file (const char *filename);
 int is_regular_file (const char *filename);
 astr get_home_dir (void);
 astr expand_path (astr path);
-astr compact_path (const astr path);
+astr compact_path (astr path);
 astr agetcwd (void);
 void read_from_disk (const char *filename);
 int find_file (const char *filename);
@@ -200,7 +200,8 @@ void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
 int minibuf_read_yesno (const char *fmt, ...);
-char *minibuf_read_dir (const char *fmt, const char *value, ...);
+char *minibuf_read_filename (const char *fmt, const char *value,
+                             const char *file, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
 			       History * hp, ...);
 void minibuf_clear (void);
@@ -226,7 +227,7 @@ void init_search (void);
 
 /* term_minibuf.c --------------------------------------------------------- */
 void term_minibuf_write (const char *fmt);
-char *term_minibuf_read (const char *prompt, const char *value,
+char *term_minibuf_read (const char *prompt, const char *value, size_t pos,
 			 Completion * cp, History * hp);
 
 /* term_redisplay.c ------------------------------------------------------- */

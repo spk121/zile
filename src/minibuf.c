@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "size_max.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -102,45 +103,55 @@ minibuf_read (const char *fmt, const char *value, ...)
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  p = term_minibuf_read (buf, value ? value : "", NULL, NULL);
+  p = term_minibuf_read (buf, value ? value : "", SIZE_MAX, NULL, NULL);
   free (buf);
 
   return p;
 }
 
 /*
- * Read a directory from the minibuffer.
+ * Read a filename from the minibuffer.
  */
 char *
-minibuf_read_dir (const char *fmt, const char *value, ...)
+minibuf_read_filename (const char *fmt, const char *value,
+                       const char *file, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf, *p = NULL;
   Completion *cp;
-  astr as, rbuf;
+  astr as;
+  ptrdiff_t pos;
 
-  va_start (ap, value);
+  va_start (ap, file);
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  as = expand_path (astr_new_cstr (value));	/* Guaranteed to work */
-  rbuf = compact_path (as);
-  astr_delete (as);
-
-  cp = completion_new (true);
-  p = term_minibuf_read (buf, astr_cstr (rbuf), cp, &files_history);
-  free_completion (cp);
-  astr_delete (rbuf);
-  free (buf);
-
-  if (p != NULL)
+  as = expand_path (astr_new_cstr (value));
+  if (as)
     {
-      /* Add history element. */
-      add_history_element (&files_history, p);
+      as = compact_path (as);
 
-      rbuf = expand_path (astr_new_cstr (p));	/* Guaranteed to work */
-      p = xstrdup (astr_cstr (rbuf));
-      astr_delete (rbuf);
+      cp = completion_new (true);
+      pos = astr_len (as);
+      if (file)
+        pos -= strlen (file);
+      p = term_minibuf_read (buf, astr_cstr (as), pos, cp, &files_history);
+      free_completion (cp);
+      astr_delete (as);
+      free (buf);
+
+      if (p != NULL)
+        {
+          as = expand_path (astr_new_cstr (p));
+          if (as)
+            {
+              add_history_element (&files_history, p);
+              p = xstrdup (astr_cstr (as));
+              astr_delete (as);
+            }
+          else
+            p = NULL;
+        }
     }
 
   return p;
@@ -160,7 +171,7 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 
   for (;;)
     {
-      s = term_minibuf_read (buf, "", cp, NULL);
+      s = term_minibuf_read (buf, "", SIZE_MAX, cp, NULL);
       if (s == NULL) /* Cancelled. */
 	{
 	  free (buf);
@@ -238,7 +249,7 @@ minibuf_read_completion (const char *fmt, char *value, Completion * cp,
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  p = term_minibuf_read (buf, value, cp, hp);
+  p = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
   free (buf);
 
   return p;

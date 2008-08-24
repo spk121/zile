@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include "euidaccess.h"
 #include <utime.h>
+#include "dirname.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -75,7 +76,7 @@ is_regular_file (const char *filename)
  * - replaces `//' with `/' (restarting from the root directory);
  * - removes `..' and `.' entries.
  *
- * If something goes wrong, the string is deleted and NULL returned
+ * If something goes wrong, the string is deleted and NULL returned.
  */
 astr
 expand_path (astr path)
@@ -196,11 +197,10 @@ expand_path (astr path)
 
 /*
  * Return a `~/foo' like path if the user is under his home directory,
- * and restart from / if // found,
- * else the unmodified path.
+ * and restart from / if // found, else the unmodified path.
  */
 astr
-compact_path (const astr path)
+compact_path (astr path)
 {
   astr buf = astr_new ();
   size_t i;
@@ -255,7 +255,7 @@ get_buffer_dir (void)
        name from it. */
     buf = astr_new_cstr (cur_bp->filename);
   else
-    {				/* Get the current directory name from the system. */
+    { /* Get the current directory name from the system. */
       buf = agetcwd ();
       if (astr_len (buf) != 0 && *astr_char (buf, -1) != '/')
 	astr_cat_char (buf, '/');
@@ -263,8 +263,7 @@ get_buffer_dir (void)
 
   p = astr_cstr (buf);
   q = strrchr (p, '/');
-  if (q)
-    astr_truncate (buf, q - p + 1);
+  astr_truncate (buf, q ? q - p + 1 : 0);
 
   return buf;
 }
@@ -447,7 +446,7 @@ creating one if none already exists.
 +*/
 {
   astr buf = get_buffer_dir ();
-  char *ms = minibuf_read_dir ("Find file: ", astr_cstr (buf));
+  char *ms = minibuf_read_filename ("Find file: ", astr_cstr (buf), NULL);
   int ret = false;
 
   astr_delete (buf);
@@ -512,11 +511,11 @@ If the current buffer now contains an empty file that you just visited
 (presumably by mistake), use this command to visit the file you really want.
 +*/
 {
-  astr buf = get_buffer_dir ();
-  char *ms = minibuf_read_dir ("Find alternate: ", astr_cstr (buf));
+  const char *buf = cur_bp->filename;
+  char *base = base_name (cur_bp->filename);
+  char *ms = minibuf_read_filename ("Find alternate: ", buf, base);
   int ret = false;
 
-  astr_delete (buf);
   if (ms == NULL)
     return FUNCALL (keyboard_quit);
 
@@ -527,6 +526,7 @@ If the current buffer now contains an empty file that you just visited
     }
 
   free (ms);
+  free (base);
   return bool_to_lisp (ret);
 }
 END_DEFUN
@@ -805,7 +805,7 @@ Set mark after the inserted text.
     return leNIL;
 
   buf = get_buffer_dir ();
-  ms = minibuf_read_dir ("Insert file: ", astr_cstr (buf));
+  ms = minibuf_read_filename ("Insert file: ", astr_cstr (buf), NULL);
   if (ms == NULL)
     {
       astr_delete (buf);
@@ -1053,7 +1053,7 @@ save_buffer (Buffer * bp)
     {
       if (bp->flags & BFLAG_NEEDNAME)
 	{
-	  ms = minibuf_read_dir ("File to save in: ", fname);
+	  ms = minibuf_read_filename ("File to save in: ", fname, NULL);
 	  if (ms == NULL)
             {
               FUNCALL (keyboard_quit);
@@ -1115,7 +1115,8 @@ Makes buffer visit that file, and marks it not modified.
 +*/
 {
   char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
-  char *ms = minibuf_read_dir ("Write file: ", fname);
+  char *ms = minibuf_read_filename ("Write file: ", fname, NULL);
+
 
   if (ms == NULL)
     return FUNCALL (keyboard_quit);
@@ -1124,6 +1125,10 @@ Makes buffer visit that file, and marks it not modified.
       free (ms);
       return leNIL;
     }
+
+  //  if (file_exists (ms)
+      //(or (y-or-n-p (format "File `%s' exists; overwrite? " filename))
+// (error "Canceled")))
 
   set_buffer_filename (cur_bp, ms);
 
@@ -1300,8 +1305,8 @@ directory.
 {
   struct stat st;
   astr buf = get_buffer_dir ();
-  char *ms = minibuf_read_dir ("Change default directory: ",
-			 astr_cstr (buf));
+  char *ms = minibuf_read_filename ("Change default directory: ",
+                                    astr_cstr (buf), NULL);
 
   if (ms == NULL)
     {

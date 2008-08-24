@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "size_max.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -89,18 +90,18 @@ draw_minibuf_read (const char *prompt, const char *value,
 }
 
 static astr
-do_minibuf_read (const char *prompt, const char *value,
+do_minibuf_read (const char *prompt, const char *value, size_t pos,
                Completion * cp, History * hp)
 {
   static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
-  size_t i, prompt_len;
+  size_t prompt_len;
   char *s;
   astr as = astr_new_cstr (value), saved = NULL;
 
   prompt_len = strlen (prompt);
-  i = strlen (value);
-  as = astr_new_cstr (value);
+  if (pos == SIZE_MAX)
+    pos = astr_len (as);
 
   for (;;)
     {
@@ -118,7 +119,7 @@ do_minibuf_read (const char *prompt, const char *value,
 	default:
 	  s = "";
 	}
-      draw_minibuf_read (prompt, astr_cstr (as), prompt_len, s, i);
+      draw_minibuf_read (prompt, astr_cstr (as), prompt_len, s, pos);
 
       thistab = -1;
 
@@ -143,42 +144,42 @@ do_minibuf_read (const char *prompt, const char *value,
 	  return NULL;
 	case KBD_CTRL | 'a':
 	case KBD_HOME:
-	  i = 0;
+	  pos = 0;
 	  break;
 	case KBD_CTRL | 'e':
 	case KBD_END:
-	  i = astr_len (as);
+	  pos = astr_len (as);
 	  break;
 	case KBD_CTRL | 'b':
 	case KBD_LEFT:
-	  if (i > 0)
-	    --i;
+	  if (pos > 0)
+	    --pos;
 	  else
 	    ding ();
 	  break;
 	case KBD_CTRL | 'f':
 	case KBD_RIGHT:
-	  if (i < astr_len (as))
-	    ++i;
+	  if (pos < astr_len (as))
+	    ++pos;
 	  else
 	    ding ();
 	  break;
 	case KBD_CTRL | 'k':
 	  /* FIXME: no kill-register save is done yet. */
-	  if (i < astr_len (as))
-            astr_truncate (as, i);
+	  if (pos < astr_len (as))
+            astr_truncate (as, pos);
 	  else
 	    ding ();
 	  break;
 	case KBD_BS:
-	  if (i > 0)
-            astr_remove (as, --i, 1);
+	  if (pos > 0)
+            astr_remove (as, --pos, 1);
 	  else
 	    ding ();
 	  break;
 	case KBD_DEL:
-	  if (i < astr_len (as))
-            astr_remove (as, i, i);
+	  if (pos < astr_len (as))
+            astr_remove (as, pos, pos);
 	  else
 	    ding ();
 	  break;
@@ -258,14 +259,17 @@ do_minibuf_read (const char *prompt, const char *value,
 	    }
 	  else
 	    {
-	      thistab = completion_try (cp, as, true);
+              astr bs = astr_new ();
+              astr_cpy (bs, as);
+	      thistab = completion_try (cp, bs, true);
+              astr_delete (bs);
 	      switch (thistab)
 		{
 		case COMPLETION_MATCHED:
 		case COMPLETION_MATCHEDNONUNIQUE:
 		case COMPLETION_NONUNIQUE:
                   {
-                    astr bs = astr_new ();
+                    bs = astr_new ();
                     if (cp->fl_dir)
                       astr_cat (bs, cp->path);
                     astr_ncat_cstr (bs, cp->match, cp->matchsize);
@@ -274,7 +278,7 @@ do_minibuf_read (const char *prompt, const char *value,
                       thistab = -1;
                     astr_delete (as);
                     as = bs;
-                    i = astr_len (as);
+                    pos = astr_len (as);
                     break;
                   }
                 case COMPLETION_NOTMATCHED:
@@ -292,10 +296,10 @@ do_minibuf_read (const char *prompt, const char *value,
 	      ding ();
 	      break;
 	    }
-	  if (!overwrite_mode || i == astr_len (as))
-            astr_insert_char (as, i++, c);
+	  if (!overwrite_mode || pos == astr_len (as))
+            astr_insert_char (as, pos++, c);
 	  else
-	    astr_replace_char (as, i, c);
+	    astr_replace_char (as, pos, c);
 	}
 
       lasttab = thistab;
@@ -303,7 +307,7 @@ do_minibuf_read (const char *prompt, const char *value,
 }
 
 char *
-term_minibuf_read (const char *prompt, const char *value,
+term_minibuf_read (const char *prompt, const char *value, size_t pos,
 		   Completion * cp, History * hp)
 {
   Window *wp, *old_wp = cur_wp;
@@ -313,7 +317,7 @@ term_minibuf_read (const char *prompt, const char *value,
   if (hp)
     prepare_history (hp);
 
-  as = do_minibuf_read (prompt, value, cp, hp);
+  as = do_minibuf_read (prompt, value, pos, cp, hp);
   if (as)
     {
       s = xstrdup (astr_cstr (as));
