@@ -21,6 +21,7 @@
 
 set zile_path $objdir/../zile
 set test_path $srcdir/zile.test
+set scratch_path $objdir
 
 proc zile_version {} {
     global zile_path
@@ -45,9 +46,11 @@ proc send {ignore arg} {
 
 proc interactive_test { test input } {
     global test_path
+    global scratch_path
 
-    set edit_file $test_path/$test.input
+    set edit_file $scratch_path/$test.input
     exec cp $test_path/zile_test.input $edit_file
+    exec chmod +w $edit_file
     zile_start $edit_file
 
     send -- $input
