@@ -28,8 +28,8 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = BUGS
 
-dist-hook:
-	if [ -d CVS ]; then cvs2cl --FSF --usermap cvs2cl-usermap; fi
+ChangeLog:
+	git2cl > ChangeLog
 
 # Note: before writing release notes, check there are some for the current version
 release: distcheck

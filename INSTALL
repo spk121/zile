@@ -11,9 +11,9 @@
 
 To build and install Zile:
 
-[Only if you're compiling the CVS sources, first make sure you have the
-GNU autotools installed (automake >= 1.9, autoconf >= 2.59), and a
-version of gnulib from 2008 or later, and run
+[Only if you're compiling the sources checked out from git, first make
+sure you have the GNU autotools installed (automake >= 1.9, autoconf
+>= 2.59), and a version of gnulib from 2008 or later, and run
 
         ./autogen.sh
 ]

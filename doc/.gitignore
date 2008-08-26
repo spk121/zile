@@ -1,6 +1,5 @@
+gendocs_template
 .deps
-Makefile
-Makefile.in
 mkdoc
 AUTODOC
 HELP
@@ -8,7 +7,6 @@ zile.info
 dotzile.texi
 zile.1
 texinfo.tex
-gendocs_template
 manual
 zile.aux
 zile.cp

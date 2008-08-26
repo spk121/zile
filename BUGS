@@ -8,10 +8,10 @@ the relevant tracker at http://savannah.gnu.org/projects/zile/
 Zile has a testsuite (built using DejaGnu) of interactive tests. If
 you can create a test that shows the problem, the maintainers will be
 most grateful. To do this, you need to build Zile from source (it's
-best to check out CVS head if you can; otherwise, use the latest
-release; see INSTALL for building instructions). You must also install
-expect, and, in particular, the autoexpect script. Then, from the
-top-level directory execute the commands:
+best to check out the git master branch if you can; otherwise, use the
+latest release; see INSTALL for building instructions). You must also
+install expect, and, in particular, the autoexpect script. Then, from
+the top-level directory execute the commands:
 
     cd src/testsuite/zile.test
     ./make-interactive-test TEST_NAME

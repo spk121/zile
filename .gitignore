@@ -12,8 +12,6 @@ depcomp
 install-sh
 missing
 ChangeLog
-Makefile
-Makefile.in
 config.h
 config.h.in
 stamp-h
@@ -25,3 +23,6 @@ zile*.tar.gz.directive*
 lib
 link-warning.h
 gendocs.sh
+Makefile
+Makefile.in
+zile-*
