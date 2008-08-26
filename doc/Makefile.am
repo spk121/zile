@@ -33,9 +33,7 @@ zile_DATA =					\
 	dotzile.sample
 
 EXTRA_DIST =					\
-	FAQ					\
 	TUTORIAL				\
-	dotzile.sample				\
 	dotzile.texi				\
 	zlint					\
 	zile.1.in
