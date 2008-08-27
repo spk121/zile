@@ -24,8 +24,6 @@
 #ifndef LISTS_H
 #define LISTS_H
 
-#include "astr.h"
-
 struct le
 {
   /* either data or a branch */
