@@ -179,14 +179,10 @@ session to get help.
 Show the Frequently Asked Questions about Zile.
 @item C-h f, @key{f1} f
 Describe a function.
-@item C-h h, @key{f1} h, @key{f1} @key{f1}
-Show this manual.
 @item C-h k, @key{f1} k
 Describe a key sequence.
 @item C-h b, @key{f1} b
 Show the defined bindings.
-@item C-h t, @key{f1} t
-Show a tutorial window.
 @item C-h v, @key{f1} v
 Describe a variable.
 @item C-h w, @key{f1} w
