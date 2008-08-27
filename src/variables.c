@@ -156,7 +156,7 @@ get_variable_doc (Buffer * bp, char *var, char **defval)
   var_entry *p = get_variable_entry (bp, var);
   if (p != NULL)
     {
-      *defval = p->defval;
+      *defval = (char *) p->defval;
       return p->doc;
     }
   return NULL;
