@@ -107,7 +107,7 @@ END_DEFUN
  * AUTODOC automatically generated file.
  */
 static astr
-get_funcvar_doc (const char *name, astr defval, int isfunc)
+get_func_doc (const char *name)
 {
   astr buf, match, doc;
   int reading_doc = 0;
@@ -120,10 +120,7 @@ get_funcvar_doc (const char *name, astr defval, int isfunc)
     }
 
   match = astr_new ();
-  if (isfunc)
-    astr_afmt (match, "\fF_%s", name);
-  else
-    astr_afmt (match, "\fV_%s", name);
+  astr_afmt (match, "\fF_%s", name);
 
   doc = astr_new ();
   while ((buf = astr_fgets (fp)) != NULL)
@@ -135,13 +132,8 @@ get_funcvar_doc (const char *name, astr defval, int isfunc)
 	      astr_delete (buf);
 	      break;
 	    }
-	  if (isfunc || astr_len (defval) > 0)
-	    {
-	      astr_cat (doc, buf);
-	      astr_cat_char (doc, '\n');
-	    }
-	  else
-	    astr_cpy (defval, buf);
+          astr_cat (doc, buf);
+          astr_cat_char (doc, '\n');
 	}
       else if (!astr_cmp (buf, match))
 	reading_doc = 1;
@@ -182,7 +174,7 @@ Display the full documentation of a function.
   if (name == NULL)
     return leNIL;
 
-  doc = get_funcvar_doc (name, NULL, true);
+  doc = get_func_doc (name);
   if (doc == NULL)
     {
       free ((char *) name);
@@ -205,14 +197,14 @@ static void
 write_variable_description (va_list ap)
 {
   char *name = va_arg (ap, char *);
-  astr defval = va_arg (ap, astr);
+  char *defval = va_arg (ap, char *);
   char *curval = va_arg (ap, char *);
-  astr doc = va_arg (ap, astr);
+  char *doc = va_arg (ap, char *);
   bprintf ("Variable: %s\n\n"
 	   "Default value: %s\n"
 	   "Current value: %s\n\n"
 	   "Documentation:\n%s",
-	   name, astr_cstr (defval), curval, astr_cstr (doc));
+	   name, defval, curval, doc);
 }
 
 DEFUN ("describe-variable", describe_variable)
@@ -220,18 +212,17 @@ DEFUN ("describe-variable", describe_variable)
 Display the full documentation of a variable.
 +*/
 {
-  char *name;
-  astr bufname, defval, doc;
+  char *name, *defval;
+  const char *doc;
+  astr bufname;
 
   name = minibuf_read_variable_name ("Describe variable: ");
   if (name == NULL)
     return leNIL;
 
-  defval = astr_new ();
-  doc = get_funcvar_doc (name, defval, false);
+  doc = get_variable_doc (cur_bp, name, &defval);
   if (doc == NULL)
     {
-      astr_delete (defval);
       free (name);
       return leNIL;
     }
@@ -242,8 +233,6 @@ Display the full documentation of a variable.
 		     name, defval, get_variable (name), doc);
   free ((char *) name);
   astr_delete (bufname);
-  astr_delete (doc);
-  astr_delete (defval);
 
   return leT;
 }
@@ -273,7 +262,7 @@ Display documentation of the command invoked by a key sequence.
   minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
   astr_delete (binding);
 
-  doc = get_funcvar_doc (name, NULL, true);
+  doc = get_func_doc (name);
   if (doc == NULL)
     return leNIL;
 

@@ -267,6 +267,7 @@ void free_variables (void);
 bool get_variable_bool (char *var);
 char *minibuf_read_variable_name (char *msg);
 void set_variable (const char *var, const char *val);
+const char *get_variable_doc (Buffer * bp, char *var, char **defval);
 const char *get_variable_bp (Buffer * bp, char *var);
 const char *get_variable (char *var);
 int get_variable_number_bp (Buffer * bp, char *var);

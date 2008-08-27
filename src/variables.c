@@ -44,6 +44,7 @@ struct var_entry
   const char *defval;		/* Default value. */
   const char *val;		/* Current value, if any. */
   bool local;			/* If true, becomes local when set. */
+  const char *doc;              /* Documentation */
 };
 typedef struct var_entry var_entry;
 
@@ -73,12 +74,13 @@ var_free (void *v)
 }
 
 static void
-init_builtin_var (const char *var, const char *defval, bool local)
+init_builtin_var (const char *var, const char *defval, bool local, const char *doc)
 {
   var_entry *p = XMALLOC (var_entry);
   p->var = xstrdup (var);
   p->defval = p->val = xstrdup (defval);
   p->local = local;
+  p->doc = doc;
   hash_insert (main_vars, p);
 }
 
@@ -89,7 +91,7 @@ init_variables (void)
      more */
   main_vars = hash_initialize (32, NULL, var_hash, var_cmp, var_free);
 #define X(var, defval, local, doc)              \
-  init_builtin_var (var, defval, local);
+  init_builtin_var (var, defval, local, doc);
 #include "tbl_vars.h"
 #undef X
 }
@@ -112,6 +114,7 @@ set_variable_in_list (Hash_table *var_list, const char *var, const char *val)
     {
       p->defval = val;
       p->local = false;
+      p->doc = "";
     }
   else
     var_free (p);
@@ -129,8 +132,8 @@ free_variables (void)
   hash_free (main_vars);
 }
 
-const char *
-get_variable_bp (Buffer * bp, char *var)
+static var_entry *
+get_variable_entry (Buffer * bp, char *var)
 {
   var_entry *p = NULL, *key = XMALLOC (var_entry);
 
@@ -144,6 +147,25 @@ get_variable_bp (Buffer * bp, char *var)
 
   free (key);
 
+  return p;
+}
+
+const char *
+get_variable_doc (Buffer * bp, char *var, char **defval)
+{
+  var_entry *p = get_variable_entry (bp, var);
+  if (p != NULL)
+    {
+      *defval = p->defval;
+      return p->doc;
+    }
+  return NULL;
+}
+
+const char *
+get_variable_bp (Buffer * bp, char *var)
+{
+  var_entry *p = get_variable_entry (bp, var);
   return p ? p->val : NULL;
 }
 
