@@ -43,10 +43,9 @@ struct fentry
   bool interactive;             /* Whether function can be used interactively. */
   const char *doc;		/* Documentation string. */
 };
-typedef struct fentry *fentryp;
+typedef struct fentry fentry;
 
-/* FIXME: Fix interactive flag for setq */
-static struct fentry fentry_table[] = {
+static fentry fentry_table[] = {
 #define X(zile_name, c_name, doc)               \
   {zile_name, F_ ## c_name, true, doc},
 #include "tbl_funcs.h"
@@ -55,7 +54,7 @@ static struct fentry fentry_table[] = {
 
 #define fentry_table_size (sizeof (fentry_table) / sizeof (fentry_table[0]))
 
-static fentryp
+static fentry *
 get_fentry (const char *name)
 {
   size_t i;
@@ -69,14 +68,14 @@ get_fentry (const char *name)
 Function
 get_function (const char *name)
 {
-  fentryp f = get_fentry (name);
+  fentry * f = get_fentry (name);
   return f ? f->func : NULL;
 }
 
 const char *
 get_function_doc (const char *name)
 {
-  fentryp f = get_fentry (name);
+  fentry * f = get_fentry (name);
   return f ? f->doc : NULL;
 }
 
@@ -160,7 +159,7 @@ le *
 evaluateBranch (le * trybranch)
 {
   le *keyword;
-  fentryp func;
+  fentry * func;
 
   if (trybranch == NULL)
     return NULL;
