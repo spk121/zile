@@ -110,7 +110,6 @@ struct Marker
 enum
 {
   UNDO_INSERT_BLOCK,		/* Insert a block of characters. */
-  UNDO_REMOVE_CHAR,		/* Remove a character. */
   UNDO_REMOVE_BLOCK,		/* Remove a block of characters. */
   UNDO_REPLACE_CHAR,		/* Replace a character. */
   UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */

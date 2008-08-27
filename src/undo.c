@@ -130,9 +130,6 @@ revert_action (Undo * up)
 	  insert_newline ();
       undo_nosave = false;
       break;
-    case UNDO_REMOVE_CHAR:
-      delete_char ();
-      break;
     case UNDO_REMOVE_BLOCK:
       undo_save (UNDO_INSERT_BLOCK, up->pt, up->delta.block.size, 0);
       undo_nosave = true;

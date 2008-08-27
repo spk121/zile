@@ -129,7 +129,7 @@ intercalate_char (int c)
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
+  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, 1, 0);
   astr_insert_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -253,7 +253,7 @@ intercalate_newline ()
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REMOVE_CHAR, cur_bp->pt, 0, 0);
+  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, 1, 0);
 
   /* Calculate the two line lengths. */
   lp1len = cur_bp->pt.o;
