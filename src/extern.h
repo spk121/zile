@@ -95,6 +95,7 @@ le *execute_with_uniarg (bool undo, int uniarg, int (*forward) (void),
                             int (*backward) (void));
 le *execute_function (const char *name, int uniarg);
 Function get_function (const char *name);
+const char *get_function_doc (const char *name);
 const char *get_function_name (Function p);
 const char *minibuf_read_function_name (const char *fmt, ...);
 void free_eval (void);
@@ -291,19 +292,7 @@ int xasprintf (char **ptr, const char *fmt, ...);
 /*
  * Declare external Zile functions.
  */
-#define XX(zile_name, c_name)			\
+#define X(zile_name, c_name, doc)                \
   extern le *F_ ## c_name (int uniarg, le * l);
-#define X0(zile_name, c_name)			\
-  XX (zile_name, c_name)
-#define X1(zile_name, c_name, k1)		\
-  XX (zile_name, c_name)
-#define X2(zile_name, c_name, k1, k2)		\
-  XX (zile_name, c_name)
-#define X3(zile_name, c_name, k1, k2, k3)	\
-  XX (zile_name, c_name)
 #include "tbl_funcs.h"
-#undef XX
-#undef X0
-#undef X1
-#undef X2
-#undef X3
+#undef X

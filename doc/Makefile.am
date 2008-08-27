@@ -22,36 +22,20 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+TESTS = zlint
+
 info_TEXINFOS = zile.texi
 
 ziledir = $(datadir)/zile
 zile_DATA =					\
-	AUTODOC					\
 	FAQ					\
-	HELP					\
-	TUTORIAL				\
 	dotzile.sample
 
 EXTRA_DIST =					\
-	TUTORIAL				\
 	dotzile.texi				\
-	zlint					\
-	zile.1.in
-
-AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -I$(top_srcdir)/src -DPATH_DATA="\"$(pkgdatadir)\""
-LDADD = $(top_builddir)/lib/libgnu.a
-
-EXTRA_PROGRAMS = mkdoc
+	zlint
 
 man_MANS = zile.1
-
-HELP: zile.info
-	makeinfo --no-header --no-split -I$(top_srcdir)/doc $(top_srcdir)/doc/zile.texi >$@
-
-AUTODOCSRCS = $(top_srcdir)/src/*.c
-
-AUTODOC: $(AUTODOCSRCS) mkdoc$(EXEEXT_FOR_BUILD)
-	./mkdoc $(AUTODOCSRCS) >AUTODOC
 
 zile.info: dotzile.texi
 
@@ -61,16 +45,3 @@ dotzile.texi: dotzile.sample
 	@echo "@example" >>$@
 	expand $? >>$@
 	@echo "@end example" >>$@
-
-zile.1: zile.1.in
-	rm -f $@
-	sed s+'@'pkgdatadir@+$(pkgdatadir)+g $? > $@
-
-all-local: HELP AUTODOC
-
-clean-local:
-	rm -f mkdoc$(EXEEXT_FOR_BUILD) AUTODOC HELP *.o
-	rm -f zile.1
-
-check-local:
-	cd $(top_srcdir)/doc && $(top_srcdir)/doc/zlint

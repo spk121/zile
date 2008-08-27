@@ -41,47 +41,19 @@ struct fentry
   const char *name;		/* The function name. */
   Function func;		/* The function pointer. */
   bool interactive;             /* Whether function can be used interactively. */
+  const char *doc;		/* Documentation string. */
 };
 typedef struct fentry *fentryp;
 
+/* FIXME: Fix interactive flag for setq */
 static struct fentry fentry_table[] = {
-#define XX(zile_name, c_name) \
-	{zile_name, F_ ## c_name, false},
-#define X0(zile_name, c_name) \
-	{zile_name, F_ ## c_name, true},
-#define X1(zile_name, c_name, key1) \
-	{zile_name, F_ ## c_name, true},
-#define X2(zile_name, c_name, key1, key2) \
-	{zile_name, F_ ## c_name, true},
-#define X3(zile_name, c_name, key1, key2, key3) \
-	{zile_name, F_ ## c_name, true},
+#define X(zile_name, c_name, doc)               \
+  {zile_name, F_ ## c_name, true, doc},
 #include "tbl_funcs.h"
-#undef XX
-#undef X0
-#undef X1
-#undef X2
-#undef X3
+#undef X
 };
 
 #define fentry_table_size (sizeof (fentry_table) / sizeof (fentry_table[0]))
-
-static int
-func_compar (const void *p1, const void *p2)
-{
-  return strcmp (((fentryp) p1)->name, ((fentryp) p2)->name);
-}
-
-static const char *
-bsearch_function (const char *name)
-{
-  struct fentry key;
-  fentryp entryp;
-  key.name = name;
-  entryp =
-    bsearch (&key, fentry_table, fentry_table_size, sizeof (fentry_table[0]),
-	     func_compar);
-  return entryp ? entryp->name : NULL;
-}
 
 static fentryp
 get_fentry (const char *name)
@@ -99,6 +71,13 @@ get_function (const char *name)
 {
   fentryp f = get_fentry (name);
   return f ? f->func : NULL;
+}
+
+const char *
+get_function_doc (const char *name)
+{
+  fentryp f = get_fentry (name);
+  return f ? f->doc : NULL;
 }
 
 const char *
@@ -289,7 +268,7 @@ minibuf_read_function_name (const char *fmt, ...)
   va_list ap;
   size_t i;
   char *buf;
-  const char *ms, *s_to_free;
+  const char *ms;
   Completion *cp;
 
   va_start (ap, fmt);
@@ -314,7 +293,7 @@ minibuf_read_function_name (const char *fmt, ...)
       else if (ms[0] == '\0')
 	{
 	  minibuf_error ("No function name given");
-          s_to_free = ms;
+          free ((char *) ms);
 	  ms = NULL;
 	  break;
 	}
@@ -325,24 +304,26 @@ minibuf_read_function_name (const char *fmt, ...)
 	  /* Complete partial words if possible. */
 	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
             {
-              s_to_free = ms;
-              ms = cp->match;
+              free ((char *) ms);
+              ms = xstrdup (cp->match);
             }
 	  astr_delete (as);
+
 	  for (i = 0; i < gl_list_size (cp->completions); i++)
             {
               char *s = (char *) gl_list_get_at (cp->completions, i);
               if (!strcmp (ms, s))
 	      {
-		ms = s;
+                free ((char *) ms);
+		ms = xstrdup (s);
 		break;
 	      }
             }
-	  if (bsearch_function (ms) || get_macro (ms))
+
+	  if (get_function (ms) || get_macro (ms))
 	    {
 	      add_history_element (&functions_history, ms);
 	      minibuf_clear ();
-	      ms = xstrdup (ms); /* Is about to be freed. */
 	      break;
 	    }
 	  else

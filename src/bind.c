@@ -316,20 +316,16 @@ init_bindings (void)
     }
   gl_list_free (keys);
 
-#define XX(zile_name, c_name)
-#define X0(zile_name, c_name)
-#define X1(zile_name, c_name, key1)             \
+#define X1(c_name, key1)                 \
   bind_key_string (key1, F_ ## c_name);
-#define X2(zile_name, c_name, key1, key2)       \
-  bind_key_string (key1, F_ ## c_name);         \
+#define X2(c_name, key1, key2)           \
+  bind_key_string (key1, F_ ## c_name);  \
   bind_key_string (key2, F_ ## c_name);
-#define X3(zile_name, c_name, key1, key2, key3) \
-  bind_key_string (key1, F_ ## c_name);         \
-  bind_key_string (key2, F_ ## c_name);         \
+#define X3(c_name, key1, key2, key3)     \
+  bind_key_string (key1, F_ ## c_name);  \
+  bind_key_string (key2, F_ ## c_name);  \
   bind_key_string (key3, F_ ## c_name);
-#include "tbl_funcs.h"
-#undef XX
-#undef X0
+#include "tbl_bind.h"
 #undef X1
 #undef X2
 #undef X3

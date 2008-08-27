@@ -130,7 +130,7 @@ DEFUN ("name-last-kbd-macro", name_last_kbd_macro)
 Assign a name to the last keyboard macro defined.
 Argument SYMBOL is the name to define.
 The symbol's function definition becomes the keyboard macro string.
-Such a "function" cannot be called from Lisp, but it is a valid editor command.
+Such a \"function\" cannot be called from Lisp, but it is a valid editor command.
 +*/
 {
   Macro *mp;
@@ -151,10 +151,8 @@ Such a "function" cannot be called from Lisp, but it is a valid editor command.
 
   mp = get_macro (ms);
   if (mp)
-    {
-      /* If a macro with this name already exists, update its key list */
-      free (mp->keys);
-    }
+    /* If a macro with this name already exists, update its key list */
+    free (mp->keys);
   else
     {
       /* Add a new macro to the list */

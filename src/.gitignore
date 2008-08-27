@@ -1,3 +1,5 @@
 .deps
 astr
 zile
+mkfuncs
+tbl_funcs.h

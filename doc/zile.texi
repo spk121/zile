@@ -359,10 +359,6 @@ Position 1 is the beginning of the buffer.
 @item goto-line
 Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
-@item help
-Show a help window.
-@item help-with-tutorial
-Show a tutorial.
 @item indent-for-tab-command
 Indent line or insert a tab.
 Depending on @i{tab-always-indent}, either insert a tab or indent.

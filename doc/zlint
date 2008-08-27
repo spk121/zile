@@ -38,22 +38,19 @@ echo "Extracting info..."
 
 name=`basename $0`
 
-TMPFILE1=`mktemp /tmp/$name.XXXXXX` || exit 1
-TMPFUNCS=`mktemp /tmp/$name.XXXXXX` || exit 1
-TMPVARS=`mktemp /tmp/$name.XXXXXX` || exit 1
-TMPFUNCST=`mktemp /tmp/$name.XXXXXX` || exit 1
-TMPVARST=`mktemp /tmp/$name.XXXXXX` || exit 1
+TMPFILE1=`mktemp /tmp/${name}_temp.XXXXXX` || exit 1
+TMPFUNCS=`mktemp /tmp/${name}_funcs.XXXXXX` || exit 1
+TMPVARS=`mktemp /tmp/${name}_vars.XXXXXX` || exit 1
+TMPFUNCST=`mktemp /tmp/${name}_funcst.XXXXXX` || exit 1
+TMPVARST=`mktemp /tmp/${name}_varst.XXXXXX` || exit 1
 
 cat >$TMPFILE1 <<EOF
-#define XX(z, c)			z
-#define X0(z, c)			z
-#define X1(z, c, k1)			z
-#define X2(z, c, k1, k2)		z
-#define X3(z, c, k1, k2, k3)		z
+#define X(z, c, d)	z
 EOF
 
+export LC_COLLATE=C # Ensure byte sorting for sort
 cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
-	| sed -e "/^#/d" -e "/^$/d" >$TMPFUNCS
+	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
 
 cat >$TMPFILE1 <<EOF
 #define X(v, d, l, c)	v
@@ -62,7 +59,7 @@ EOF
 cat $TMPFILE1 ../src/tbl_vars.h | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" >$TMPVARS
 
-cat ../doc/zile.texi | awk '
+cat zile.texi | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT FUNC/ { v=1 }
 /^@c LINT END FUNC/ { v=0 }
@@ -71,7 +68,7 @@ BEGIN { v=0;i=0 }
 { if (v && !i) print }
 ' | grep "@item" | sed "s/@item //" >$TMPFUNCST
 
-cat ../doc/zile.texi | awk '
+cat zile.texi | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT VAR/ { v=1 }
 /^@c LINT END VAR/ { v=0 }
@@ -100,5 +97,5 @@ for f in `comm -23 $TMPVARS $TMPVARST`; do
         ret=1
 done
 
-rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
+#rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
 exit $ret

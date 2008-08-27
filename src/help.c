@@ -62,15 +62,6 @@ show_file (char *filename)
   return leT;
 }
 
-DEFUN ("help", help)
-/*+
-Show a help window.
-+*/
-{
-  return show_file (PATH_DATA "/HELP");
-}
-END_DEFUN
-
 DEFUN ("view-zile-FAQ", view_zile_FAQ)
 /*+
 Show the Zile Frequently Asked Questions (FAQ).
@@ -80,86 +71,13 @@ Show the Zile Frequently Asked Questions (FAQ).
 }
 END_DEFUN
 
-DEFUN ("help-with-tutorial", help_with_tutorial)
-/*+
-Show a tutorial window.
-+*/
-{
-  if (show_file (PATH_DATA "/TUTORIAL"))
-    {
-      astr buf = get_home_dir ();
-      if (buf == NULL)
-        buf = agetcwd ();
-      cur_bp->flags = 0;
-      astr_cat_cstr (buf, "/TUTORIAL");
-      set_buffer_filename (cur_bp, astr_cstr (buf));
-      astr_delete (buf);
-
-      return leT;
-    }
-
-  return leNIL;
-}
-END_DEFUN
-
-/*
- * Fetch the documentation of a function or variable from the
- * AUTODOC automatically generated file.
- */
-static astr
-get_func_doc (const char *name)
-{
-  astr buf, match, doc;
-  int reading_doc = 0;
-  FILE *fp = fopen (PATH_DATA "/AUTODOC", "r");
-
-  if (fp == NULL)
-    {
-      minibuf_error ("Unable to read file `%s'", PATH_DATA "/AUTODOC");
-      return NULL;
-    }
-
-  match = astr_new ();
-  astr_afmt (match, "\fF_%s", name);
-
-  doc = astr_new ();
-  while ((buf = astr_fgets (fp)) != NULL)
-    {
-      if (reading_doc)
-	{
-	  if (*astr_char (buf, 0) == '\f')
-	    {
-	      astr_delete (buf);
-	      break;
-	    }
-          astr_cat (doc, buf);
-          astr_cat_char (doc, '\n');
-	}
-      else if (!astr_cmp (buf, match))
-	reading_doc = 1;
-      astr_delete (buf);
-    }
-
-  fclose (fp);
-  astr_delete (match);
-
-  if (!reading_doc)
-    {
-      minibuf_error ("Cannot find documentation for `%s'", name);
-      astr_delete (doc);
-      return NULL;
-    }
-
-  return doc;
-}
-
 static void
 write_function_description (va_list ap)
 {
   const char *name = va_arg (ap, const char *);
-  astr doc = va_arg (ap, astr);
+  const char *doc = va_arg (ap, const char *);
 
-  bprintf ("Function: %s\n\n" "Documentation:\n%s", name, astr_cstr (doc));
+  bprintf ("Function: %s\n\n" "Documentation:\n%s", name, doc);
 }
 
 DEFUN ("describe-function", describe_function)
@@ -167,14 +85,14 @@ DEFUN ("describe-function", describe_function)
 Display the full documentation of a function.
 +*/
 {
-  const char *name;
-  astr bufname, doc;
+  const char *name, *doc;
+  astr bufname;
 
   name = minibuf_read_function_name ("Describe function: ");
   if (name == NULL)
     return leNIL;
 
-  doc = get_func_doc (name);
+  doc = get_function_doc (name);
   if (doc == NULL)
     {
       free ((char *) name);
@@ -185,10 +103,9 @@ Display the full documentation of a function.
   astr_afmt (bufname, "*Help: function `%s'*", name);
   write_temp_buffer (astr_cstr (bufname), write_function_description,
 		     name, doc);
-  free ((char *) name);
   astr_delete (bufname);
-  astr_delete (doc);
 
+  free ((char *) name);
   return leT;
 }
 END_DEFUN
@@ -243,8 +160,8 @@ DEFUN ("describe-key", describe_key)
 Display documentation of the command invoked by a key sequence.
 +*/
 {
-  const char *name;
-  astr bufname, doc, binding;
+  const char *name, *doc;
+  astr bufname, binding;
   gl_list_t keys;
 
   minibuf_write ("Describe key:");
@@ -262,7 +179,7 @@ Display documentation of the command invoked by a key sequence.
   minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
   astr_delete (binding);
 
-  doc = get_func_doc (name);
+  doc = get_function_doc (name);
   if (doc == NULL)
     return leNIL;
 
@@ -271,7 +188,6 @@ Display documentation of the command invoked by a key sequence.
   write_temp_buffer (astr_cstr (bufname), write_function_description,
 		     name, doc);
   astr_delete (bufname);
-  astr_delete (doc);
 
   return leT;
 }

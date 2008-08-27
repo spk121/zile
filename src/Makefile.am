@@ -35,10 +35,21 @@ astr_LDADD = xalloc.o $(LDADD)
 
 bin_PROGRAMS = zile
 
+EXTRA_PROGRAMS = mkfuncs
+
+FUNCDOCSRCS = *.c
+
+tbl_funcs.h: $(FUNCDOCSRCS) mkfuncs$(EXEEXT_FOR_BUILD)
+	./mkfuncs $(FUNCDOCSRCS) > tbl_funcs.h
+
 zile_SOURCES =				\
 	astr.c				\
 	astr.h				\
 	xalloc.c			\
+	extern.h			\
+	zile.h				\
+	tbl_bind.h			\
+	tbl_vars.h			\
 	eval.c				\
 	lists.c				\
 	lists.h				\
@@ -48,8 +59,6 @@ zile_SOURCES =				\
 	buffer.c			\
 	completion.c			\
 	editfns.c			\
-	extern.h			\
-	zile.h				\
 	file.c				\
 	funcs.c				\
 	glue.c				\
@@ -66,8 +75,6 @@ zile_SOURCES =				\
 	redisplay.c			\
 	registers.c			\
 	search.c			\
-	tbl_funcs.h			\
-	tbl_vars.h			\
 	undo.c				\
 	variables.c			\
 	window.c			\
@@ -75,7 +82,12 @@ zile_SOURCES =				\
 	term_redisplay.c		\
 	term_ncurses.c
 
+BUILT_SOURCES =				\
+	tbl_funcs.h
+
+CLEANFILES = $(BUILT_SOURCES)
+
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
 loc:
-	sloccount $(zile_SOURCES)
+	sloccount $(zile_SOURCES) mkfuncs.c
