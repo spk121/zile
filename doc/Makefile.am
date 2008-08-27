@@ -22,12 +22,10 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-TESTS = zlint
-
 info_TEXINFOS = zile.texi
 
 ziledir = $(datadir)/zile
-zile_DATA =					\
+dist_zile_DATA =				\
 	FAQ					\
 	dotzile.sample
 
@@ -35,7 +33,7 @@ EXTRA_DIST =					\
 	dotzile.texi				\
 	zlint
 
-man_MANS = zile.1
+dist_man_MANS = zile.1
 
 zile.info: dotzile.texi
 
@@ -45,3 +43,6 @@ dotzile.texi: dotzile.sample
 	@echo "@example" >>$@
 	expand $? >>$@
 	@echo "@end example" >>$@
+
+check-local:
+	$(top_srcdir)/doc/zlint $(top_builddir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/doc/zile.texi

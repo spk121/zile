@@ -3,7 +3,7 @@
 # Check the consistency of the keys and functions definitions between
 # the Zile sources and the Texinfo documentation.
 #
-# This script is a big hack, like all shell scripts.
+# This script is a big hack. Invoked as zlint TBL_FUNCS.H TBL_VARS.H ZILE.TEXI
 
 # Copyright (c) 2008 Free Software Foundation, Inc.
 # Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
@@ -29,13 +29,6 @@
 
 ret=0
 
-if [ ! -f ./zlint ]; then
-	echo "Please run this script in the sources directory \`doc/'";
-	exit 1
-fi
-
-echo "Extracting info..."
-
 name=`basename $0`
 
 TMPFILE1=`mktemp /tmp/${name}_temp.XXXXXX` || exit 1
@@ -49,17 +42,17 @@ cat >$TMPFILE1 <<EOF
 EOF
 
 export LC_COLLATE=C # Ensure byte sorting for sort
-cat $TMPFILE1 ../src/tbl_funcs.h | cpp | tr -d " \t\"" \
+cat $TMPFILE1 $1 | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
 
 cat >$TMPFILE1 <<EOF
 #define X(v, d, l, c)	v
 EOF
 
-cat $TMPFILE1 ../src/tbl_vars.h | cpp | tr -d " \t\"" \
+cat $TMPFILE1 $2 | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" >$TMPVARS
 
-cat zile.texi | awk '
+cat $3 | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT FUNC/ { v=1 }
 /^@c LINT END FUNC/ { v=0 }
@@ -68,7 +61,7 @@ BEGIN { v=0;i=0 }
 { if (v && !i) print }
 ' | grep "@item" | sed "s/@item //" >$TMPFUNCST
 
-cat zile.texi | awk '
+cat $3 | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT VAR/ { v=1 }
 /^@c LINT END VAR/ { v=0 }
@@ -97,5 +90,5 @@ for f in `comm -23 $TMPVARS $TMPVARST`; do
         ret=1
 done
 
-#rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
+rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
 exit $ret

@@ -37,57 +37,57 @@ bin_PROGRAMS = zile
 
 EXTRA_PROGRAMS = mkfuncs
 
-FUNCDOCSRCS = *.c
+tbl_funcs.h: $(zile_SOURCES) mkfuncs$(EXEEXT_FOR_BUILD)
+	./mkfuncs $(zile_SOURCES) > tbl_funcs.h
 
-tbl_funcs.h: $(FUNCDOCSRCS) mkfuncs$(EXEEXT_FOR_BUILD)
-	./mkfuncs $(FUNCDOCSRCS) > tbl_funcs.h
+zile_SOURCES =					\
+	$(top_srcdir)/src/astr.c		\
+	$(top_srcdir)/src/astr.h		\
+	$(top_srcdir)/src/xalloc.c		\
+	$(top_srcdir)/src/extern.h		\
+	$(top_srcdir)/src/zile.h		\
+	$(top_srcdir)/src/tbl_bind.h		\
+	$(top_srcdir)/src/tbl_vars.h		\
+	$(top_srcdir)/src/eval.c		\
+	$(top_srcdir)/src/lists.c		\
+	$(top_srcdir)/src/lists.h		\
+	$(top_srcdir)/src/lisp.c		\
+	$(top_srcdir)/src/basic.c		\
+	$(top_srcdir)/src/bind.c		\
+	$(top_srcdir)/src/buffer.c		\
+	$(top_srcdir)/src/completion.c		\
+	$(top_srcdir)/src/editfns.c		\
+	$(top_srcdir)/src/file.c		\
+	$(top_srcdir)/src/funcs.c		\
+	$(top_srcdir)/src/glue.c		\
+	$(top_srcdir)/src/help.c		\
+	$(top_srcdir)/src/history.c		\
+	$(top_srcdir)/src/keys.c		\
+	$(top_srcdir)/src/killring.c		\
+	$(top_srcdir)/src/line.c		\
+	$(top_srcdir)/src/macro.c		\
+	$(top_srcdir)/src/main.c		\
+	$(top_srcdir)/src/marker.c		\
+	$(top_srcdir)/src/minibuf.c		\
+	$(top_srcdir)/src/point.c		\
+	$(top_srcdir)/src/redisplay.c		\
+	$(top_srcdir)/src/registers.c		\
+	$(top_srcdir)/src/search.c		\
+	$(top_srcdir)/src/undo.c		\
+	$(top_srcdir)/src/variables.c		\
+	$(top_srcdir)/src/window.c		\
+	$(top_srcdir)/src/term_minibuf.c	\
+	$(top_srcdir)/src/term_redisplay.c	\
+	$(top_srcdir)/src/term_ncurses.c
 
-zile_SOURCES =				\
-	astr.c				\
-	astr.h				\
-	xalloc.c			\
-	extern.h			\
-	zile.h				\
-	tbl_bind.h			\
-	tbl_vars.h			\
-	eval.c				\
-	lists.c				\
-	lists.h				\
-	lisp.c				\
-	basic.c				\
-	bind.c				\
-	buffer.c			\
-	completion.c			\
-	editfns.c			\
-	file.c				\
-	funcs.c				\
-	glue.c				\
-	help.c				\
-	history.c			\
-	keys.c				\
-	killring.c			\
-	line.c				\
-	macro.c				\
-	main.c				\
-	marker.c			\
-	minibuf.c			\
-	point.c				\
-	redisplay.c			\
-	registers.c			\
-	search.c			\
-	undo.c				\
-	variables.c			\
-	window.c			\
-	term_minibuf.c			\
-	term_redisplay.c		\
-	term_ncurses.c
+ALLSOURCES = $(zile_SOURCES) mkdoc.c
 
 BUILT_SOURCES =				\
 	tbl_funcs.h
 
-CLEANFILES = $(BUILT_SOURCES)
+CLEANFILES = $(BUILT_SOURCES) $(EXTRA_PROGRAMS)
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
 loc:
-	sloccount $(zile_SOURCES) mkfuncs.c
+	sloccount $(ALLSOURCES)
