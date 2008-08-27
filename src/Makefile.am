@@ -40,6 +40,8 @@ EXTRA_PROGRAMS = mkfuncs
 tbl_funcs.h: $(zile_SOURCES) mkfuncs$(EXEEXT_FOR_BUILD)
 	./mkfuncs $(zile_SOURCES) > tbl_funcs.h
 
+zile_LDADD = $(LDADD) $(LIBOBJS)
+
 zile_SOURCES =					\
 	$(top_srcdir)/src/astr.c		\
 	$(top_srcdir)/src/astr.h		\
@@ -85,8 +87,6 @@ ALLSOURCES = $(zile_SOURCES) mkdoc.c
 BUILT_SOURCES = tbl_funcs.h
 
 CLEANFILES = $(BUILT_SOURCES) $(EXTRA_PROGRAMS)
-
-zile_LDADD = $(LDADD) $(LIBOBJS)
 
 loc:
 	sloccount $(ALLSOURCES)
