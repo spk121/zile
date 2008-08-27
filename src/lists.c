@@ -23,11 +23,9 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include "zile.h"
 #include "extern.h"
-
 
 le *
 leNew (const char *text)

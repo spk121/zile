@@ -142,3 +142,25 @@ line_end_position (int count)
   pt.o = astr_len (pt.p->text);
   return pt;
 }
+
+void
+goto_point (Point pt)
+{
+  if (cur_bp->pt.n > pt.n)
+    do
+      FUNCALL (previous_line);
+    while (cur_bp->pt.n > pt.n);
+  else if (cur_bp->pt.n < pt.n)
+    do
+      FUNCALL (next_line);
+    while (cur_bp->pt.n < pt.n);
+
+  if (cur_bp->pt.o > pt.o)
+    do
+      FUNCALL (backward_char);
+    while (cur_bp->pt.o > pt.o);
+  else if (cur_bp->pt.o < pt.o)
+    do
+      FUNCALL (forward_char);
+    while (cur_bp->pt.o < pt.o);
+}

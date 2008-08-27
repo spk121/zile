@@ -1,4 +1,4 @@
-/* Key sequences functions
+/* Key encoding and decoding functions
 
    Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
@@ -23,7 +23,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

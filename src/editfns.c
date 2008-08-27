@@ -148,3 +148,14 @@ eolp (void)
 {
   return cur_bp->pt.o == astr_len (cur_bp->pt.p->text);
 }
+
+/* Signal an error, and abort any ongoing macro definition. */
+void
+ding (void)
+{
+  if (thisflag & FLAG_DEFINING_MACRO)
+    cancel_kbd_macro ();
+
+  if (get_variable_bool ("ring-bell"))
+    term_beep ();
+}

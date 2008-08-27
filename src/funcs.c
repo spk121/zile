@@ -24,7 +24,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -102,6 +101,27 @@ make_buffer_modeline (Buffer * bp)
 
   if (bp->flags & BFLAG_AUTOFILL)
     astr_cat_cstr (as, " Fill");
+
+  return as;
+}
+
+/*
+ * Return a string of maximum length `maxlen', prepending `...'
+ * if a cut is needed.
+ */
+static astr
+shorten_string (char *s, int maxlen)
+{
+  astr as = astr_new ();
+  int len = strlen (s);
+
+  if (len <= maxlen)
+    astr_cpy_cstr (as, s);
+  else
+    {
+      astr_cpy_cstr (as, "...");
+      astr_cat_cstr (as, s + len - maxlen + 3);
+    }
 
   return as;
 }

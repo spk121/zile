@@ -22,7 +22,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,19 +29,6 @@
 
 #include "zile.h"
 #include "extern.h"
-
-/*
- * Ring the bell if ring-bell is set.
- */
-void
-ding (void)
-{
-  if (thisflag & FLAG_DEFINING_MACRO)
-    cancel_kbd_macro ();
-
-  if (get_variable_bool ("ring-bell"))
-    term_beep ();
-}
 
 #define MAX_KEY_BUF	16
 static int key_buf[MAX_KEY_BUF];
@@ -100,96 +86,4 @@ ungetkey (size_t key)
 {
   if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
     *keyp++ = key;
-}
-
-/*
- * Copy a region of text into an allocated buffer.
- */
-char *
-copy_text_block (size_t startn, size_t starto, size_t size)
-{
-  char *buf, *dp;
-  size_t max_size, n, i;
-  Line *lp;
-
-  max_size = 10;
-  dp = buf = (char *) xzalloc (max_size);
-
-  lp = cur_bp->pt.p;
-  n = cur_bp->pt.n;
-  if (n > startn)
-    do
-      lp = lp->prev;
-    while (--n > startn);
-  else if (n < startn)
-    do
-      lp = lp->next;
-    while (++n < startn);
-
-  for (i = starto; dp - buf < (int) size;)
-    {
-      if (dp >= buf + max_size)
-	{
-	  int save_off = dp - buf;
-	  max_size += 10;
-	  buf = (char *) xrealloc (buf, max_size);
-	  dp = buf + save_off;
-	}
-      if (i < astr_len (lp->text))
-	*dp++ = *astr_char (lp->text, (ptrdiff_t) (i++));
-      else
-	{
-	  *dp++ = '\n';
-	  lp = lp->next;
-	  i = 0;
-	}
-    }
-
-  return buf;
-}
-
-/*
- * Return a string of maximum length `maxlen' beginning with a `...'
- * sequence if a cut is need.
- */
-astr
-shorten_string (char *s, int maxlen)
-{
-  astr as = astr_new ();
-  int len = strlen (s);
-
-  if (len <= maxlen)
-    astr_cpy_cstr (as, s);
-  else
-    {
-      astr_cpy_cstr (as, "...");
-      astr_cat_cstr (as, s + len - maxlen + 3);
-    }
-
-  return as;
-}
-
-/*
- * Jump to the specified line number and offset.
- */
-void
-goto_point (Point pt)
-{
-  if (cur_bp->pt.n > pt.n)
-    do
-      FUNCALL (previous_line);
-    while (cur_bp->pt.n > pt.n);
-  else if (cur_bp->pt.n < pt.n)
-    do
-      FUNCALL (next_line);
-    while (cur_bp->pt.n < pt.n);
-
-  if (cur_bp->pt.o > pt.o)
-    do
-      FUNCALL (backward_char);
-    while (cur_bp->pt.o > pt.o);
-  else if (cur_bp->pt.o < pt.o)
-    do
-      FUNCALL (forward_char);
-    while (cur_bp->pt.o < pt.o);
 }

@@ -420,3 +420,49 @@ tab_width (Buffer * bp)
 
   return t ? t : 1;
 }
+
+/*
+ * Copy a region of text into an allocated buffer.
+ */
+char *
+copy_text_block (size_t startn, size_t starto, size_t size)
+{
+  char *buf, *dp;
+  size_t max_size, n, i;
+  Line *lp;
+
+  max_size = 10;
+  dp = buf = (char *) xzalloc (max_size);
+
+  lp = cur_bp->pt.p;
+  n = cur_bp->pt.n;
+  if (n > startn)
+    do
+      lp = lp->prev;
+    while (--n > startn);
+  else if (n < startn)
+    do
+      lp = lp->next;
+    while (++n < startn);
+
+  for (i = starto; dp - buf < (int) size;)
+    {
+      if (dp >= buf + max_size)
+	{
+	  int save_off = dp - buf;
+	  max_size += 10;
+	  buf = (char *) xrealloc (buf, max_size);
+	  dp = buf + save_off;
+	}
+      if (i < astr_len (lp->text))
+	*dp++ = *astr_char (lp->text, (ptrdiff_t) (i++));
+      else
+	{
+	  *dp++ = '\n';
+	  lp = lp->next;
+	  i = 0;
+	}
+    }
+
+  return buf;
+}

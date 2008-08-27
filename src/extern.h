@@ -64,6 +64,7 @@ int transient_mark_mode (void);
 void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);
+char *copy_text_block (size_t startn, size_t starto, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
 Completion *completion_new (int fileflag);
@@ -84,6 +85,7 @@ int bobp (void);
 int eobp (void);
 int bolp (void);
 int eolp (void);
+void ding (void);
 
 /* eval.c ----------------------------------------------------------------- */
 extern le *leNIL, *leT;
@@ -119,17 +121,12 @@ int exchange_point_and_mark (void);
 le *universal_argument (int keytype, int xarg);
 void write_temp_buffer (const char *name, void (*func) (va_list ap), ...);
 
-/* glue.c ----------------------------------------------------------------- */
-void ding (void);
+/* getkey.c --------------------------------------------------------------- */
 void ungetkey (size_t key);
 size_t lastkey (void);
 size_t xgetkey (int mode, size_t timeout);
 size_t getkey (void);
 void waitkey (size_t delay);
-char *copy_text_block (size_t startn, size_t starto, size_t size);
-astr shorten_string (char *s, int maxlen);
-void goto_point (Point pt);
-char *getln (FILE * fp);
 
 /* history.c -------------------------------------------------------------- */
 void free_history_elements (History * hp);
@@ -138,7 +135,7 @@ void prepare_history (History * hp);
 const char *previous_history_element (History * hp);
 const char *next_history_element (History * hp);
 
-/* keys.c ----------------------------------------------------------------- */
+/* keycode.c -------------------------------------------------------------- */
 astr chordtostr (size_t key);
 size_t strtochord (char *buf, size_t * len);
 gl_list_t keystrtovec (char *key);
@@ -217,6 +214,7 @@ Point point_min (void);
 Point point_max (void);
 Point line_beginning_position (int count);
 Point line_end_position (int count);
+void goto_point (Point pt);
 
 /* redisplay.c ------------------------------------------------------------ */
 void resync_redisplay (void);

@@ -61,10 +61,10 @@ zile_SOURCES =					\
 	$(top_srcdir)/src/editfns.c		\
 	$(top_srcdir)/src/file.c		\
 	$(top_srcdir)/src/funcs.c		\
-	$(top_srcdir)/src/glue.c		\
+	$(top_srcdir)/src/getkey.c		\
 	$(top_srcdir)/src/help.c		\
 	$(top_srcdir)/src/history.c		\
-	$(top_srcdir)/src/keys.c		\
+	$(top_srcdir)/src/keycode.c		\
 	$(top_srcdir)/src/killring.c		\
 	$(top_srcdir)/src/line.c		\
 	$(top_srcdir)/src/macro.c		\
