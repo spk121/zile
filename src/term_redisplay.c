@@ -32,7 +32,6 @@
 #include "config.h"
 #include "extern.h"
 
-static int initted = false;
 static size_t width = 0, height = 0;
 static size_t cur_tab_width;
 static size_t cur_topline;
