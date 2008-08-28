@@ -82,12 +82,6 @@ EXTRA_DIST =						\
 	zile.test/execute_extended_command.output	\
 	zile.test/fill_paragraph.exp			\
 	zile.test/fill_paragraph.output			\
-	zile.test/find_alternate_file.exp		\
-	zile.test/find_alternate_file.output		\
-	zile.test/find_file.exp				\
-	zile.test/find_file.output			\
-	zile.test/find_file_read_only.exp		\
-	zile.test/find_file_read_only.output		\
 	zile.test/forward_char.exp			\
 	zile.test/forward_char.output			\
 	zile.test/forward_line.exp			\
