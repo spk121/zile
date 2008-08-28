@@ -81,7 +81,7 @@ free_buffer (Buffer * bp)
   while (up != NULL)
     {
       next_up = up->next;
-      if (up->type == UNDO_INSERT_BLOCK || up->type == UNDO_REPLACE_BLOCK)
+      if (up->type == UNDO_REPLACE_BLOCK)
 	free (up->block.text);
       free (up);
       up = next_up;

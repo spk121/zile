@@ -109,8 +109,6 @@ struct Marker
 /* Undo delta types. */
 enum
 {
-  UNDO_INSERT_BLOCK,		/* Insert a block of characters. */
-  UNDO_REMOVE_BLOCK,		/* Remove a block of characters. */
   UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
   UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
   UNDO_END_SEQUENCE,		/* End a multi operation sequence. */
@@ -136,7 +134,7 @@ struct Undo
   struct
   {
     char *text;
-    size_t osize;		/* Original size; only for replace. */
+    size_t osize;		/* Original size. */
     size_t size;		/* New block size. */
   } block;
 };

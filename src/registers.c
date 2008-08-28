@@ -72,7 +72,7 @@ static int reg;
 static int
 insert_register (void)
 {
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, regs[reg].size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, regs[reg].size);
   undo_nosave = true;
   insert_nstring (regs[reg].text, regs[reg].size);
   undo_nosave = false;

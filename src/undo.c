@@ -41,7 +41,7 @@ static int doing_undo = false;
  * Save a reverse delta for doing undo.
  */
 void
-undo_save (int type, Point pt, size_t arg1, size_t arg2)
+undo_save (int type, Point pt, size_t osize, size_t size)
 {
   Undo *up;
 
@@ -57,23 +57,11 @@ undo_save (int type, Point pt, size_t arg1, size_t arg2)
   if (!(cur_bp->flags & BFLAG_MODIFIED))
     up->unchanged = true;
 
-  switch (type)
+  if (type == UNDO_REPLACE_BLOCK)
     {
-    case UNDO_INSERT_BLOCK:
-      up->block.size = arg1;
-      up->block.text = copy_text_block (pt.n, pt.o, arg1);
-      break;
-    case UNDO_REPLACE_BLOCK:
-      up->block.osize = arg1;
-      up->block.size = arg2;
-      up->block.text = copy_text_block (pt.n, pt.o, arg1);
-      break;
-    case UNDO_REMOVE_BLOCK:
-      up->block.size = arg1;
-      break;
-    case UNDO_START_SEQUENCE:
-    case UNDO_END_SEQUENCE:
-      break;
+      up->block.osize = osize;
+      up->block.size = size;
+      up->block.text = copy_text_block (pt.n, pt.o, osize);
     }
 
   up->next = cur_bp->last_undop;
@@ -108,26 +96,8 @@ revert_action (Undo * up)
 
   goto_point (up->pt);
 
-  switch (up->type)
+  if (up->type == UNDO_REPLACE_BLOCK)
     {
-    case UNDO_INSERT_BLOCK:
-      undo_save (UNDO_REMOVE_BLOCK, up->pt, up->block.size, 0);
-      undo_nosave = true;
-      for (i = 0; i < up->block.size; ++i)
-	if (up->block.text[i] != '\n')
-	  insert_char (up->block.text[i]);
-	else
-	  insert_newline ();
-      undo_nosave = false;
-      break;
-    case UNDO_REMOVE_BLOCK:
-      undo_save (UNDO_INSERT_BLOCK, up->pt, up->block.size, 0);
-      undo_nosave = true;
-      for (i = 0; i < up->block.size; ++i)
-	delete_char ();
-      undo_nosave = false;
-      break;
-    case UNDO_REPLACE_BLOCK:
       undo_save (UNDO_REPLACE_BLOCK, up->pt,
 		 up->block.size, up->block.osize);
       undo_nosave = true;
@@ -139,7 +109,6 @@ revert_action (Undo * up)
 	else
 	  insert_newline ();
       undo_nosave = false;
-      break;
     }
 
   doing_undo = false;

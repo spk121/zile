@@ -129,7 +129,7 @@ intercalate_char (int c)
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, 1, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
   astr_insert_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
@@ -251,7 +251,7 @@ intercalate_newline ()
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, 1, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
 
   /* Calculate the two line lengths. */
   lp1len = cur_bp->pt.o;
@@ -451,7 +451,7 @@ END_DEFUN
 void
 insert_string (const char *s)
 {
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, strlen (s), 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, strlen (s));
   undo_nosave = true;
   for (; *s != '\0'; ++s)
     if (*s == '\n')
@@ -464,7 +464,7 @@ insert_string (const char *s)
 void
 insert_nstring (const char *s, size_t size)
 {
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = true;
   for (; 0 < size--; ++s)
     if (*s == '\n')
@@ -496,7 +496,7 @@ delete_char (void)
       if (warn_if_readonly_buffer ())
 	return false;
 
-      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, 1, 0);
+      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
       astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
       cur_bp->flags |= BFLAG_MODIFIED;
@@ -511,7 +511,7 @@ delete_char (void)
       if (warn_if_readonly_buffer ())
 	return false;
 
-      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, 1, 0);
+      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
 
       lp1 = cur_bp->pt.p;
       lp2 = lp1->next;

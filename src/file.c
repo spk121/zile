@@ -690,7 +690,7 @@ insert_buffer (Buffer * bp)
   Line *lp;
   size_t size = calculate_buffer_size (bp), i;
 
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = true;
   for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     {
@@ -778,7 +778,7 @@ insert_file (char *filename)
     }
 
   lseek (fd, 0, SEEK_SET);
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = true;
   while ((size = read (fd, buf, BUFSIZ)) > 0)
     for (i = 0; i < size; i++)

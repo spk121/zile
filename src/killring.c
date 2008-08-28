@@ -65,7 +65,7 @@ kill_line (int literally)
       if (warn_if_readonly_buffer ())
 	return false;
 
-      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt,
+      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt,
 		 astr_len (cur_bp->pt.p->text) - cur_bp->pt.o, 0);
       undo_nosave = true;
       while (!eolp ())
@@ -166,7 +166,7 @@ to make one entry in the kill ring.
 
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
 	FUNCALL (exchange_point_and_mark);
-      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, size, 0);
+      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
       undo_nosave = true;
       while (size--)
 	{
@@ -281,7 +281,7 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
   set_mark_interactive ();
 
-  undo_save (UNDO_REMOVE_BLOCK, cur_bp->pt, astr_len (kill_ring_text), 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len (kill_ring_text));
   undo_nosave = true;
   insert_nstring (astr_cstr (kill_ring_text), astr_len (kill_ring_text));
   undo_nosave = false;
