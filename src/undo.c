@@ -30,11 +30,11 @@
 #include "zile.h"
 #include "extern.h"
 
-/* This variable is set to true when the `undo_save()' function should not
-   register the undo information. */
+/* Setting this variable to true stops undo_save saving the given
+   information. */
 int undo_nosave = false;
 
-/* This variable is set to true when the undo is in execution. */
+/* This variable is set to true when an undo is in execution. */
 static int doing_undo = false;
 
 /*
@@ -86,9 +86,7 @@ revert_action (Undo * up)
       undo_save (UNDO_START_SEQUENCE, up->pt, 0, 0);
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
-	{
-	  up = revert_action (up);
-	}
+        up = revert_action (up);
       undo_save (UNDO_END_SEQUENCE, up->pt, 0, 0);
       goto_point (up->pt);
       return up->next;
