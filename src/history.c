@@ -29,8 +29,19 @@
 #include "zile.h"
 #include "extern.h"
 
+struct History
+{
+  gl_list_t elements;		/* Elements (strings). */
+  ptrdiff_t sel;		/* Selected element. */
+};
+
+History *history_new (void)
+{
+  return XZALLOC (History);
+}
+
 void
-free_history_elements (History * hp)
+free_history (History * hp)
 {
   if (hp->elements)
     {

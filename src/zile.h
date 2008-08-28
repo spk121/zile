@@ -231,12 +231,6 @@ struct Completion
   size_t matchsize;		/* The match buffer size. */
 };
 
-struct History
-{
-  gl_list_t elements;		/* Elements (strings). */
-  ptrdiff_t sel;		/* Selected element. */
-};
-
 struct Macro
 {
   size_t nkeys;			/* The number of keystrokes. */

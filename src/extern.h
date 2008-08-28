@@ -100,6 +100,7 @@ Function get_function (const char *name);
 const char *get_function_doc (const char *name);
 const char *get_function_name (Function p);
 const char *minibuf_read_function_name (const char *fmt, ...);
+void init_eval (void);
 void free_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
@@ -129,7 +130,8 @@ size_t getkey (void);
 void waitkey (size_t delay);
 
 /* history.c -------------------------------------------------------------- */
-void free_history_elements (History * hp);
+History *history_new (void);
+void free_history (History * hp);
 void add_history_element (History * hp, const char *string);
 void prepare_history (History * hp);
 const char *previous_history_element (History * hp);
@@ -193,6 +195,7 @@ Marker *point_min_marker (void);
 
 /* minibuf.c -------------------------------------------------------------- */
 extern char *minibuf_contents;
+void minibuf_init (void);
 void free_minibuf (void);
 void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);

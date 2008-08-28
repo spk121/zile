@@ -234,6 +234,7 @@ main (int argc, char **argv)
   init_search ();
   init_lisp ();
   init_variables ();
+  init_eval ();
 
   opterr = 0;			/* Don't display errors for unknown options */
   while (true)
@@ -374,6 +375,7 @@ main (int argc, char **argv)
   free_windows ();
   free_buffers ();
   free_minibuf ();
+  free_eval ();
   free (prog_name);
 
   return 0;

@@ -31,7 +31,7 @@
 #include "zile.h"
 #include "extern.h"
 
-static History files_history;
+static History *files_history = NULL;
 char *minibuf_contents = NULL;
 
 /*--------------------------------------------------------------------------
@@ -39,9 +39,15 @@ char *minibuf_contents = NULL;
  *--------------------------------------------------------------------------*/
 
 void
+minibuf_init (void)
+{
+  files_history = history_new ();
+}
+
+void
 free_minibuf (void)
 {
-  free_history_elements (&files_history);
+  free_history (files_history);
   free (minibuf_contents);
 }
 
@@ -135,7 +141,7 @@ minibuf_read_filename (const char *fmt, const char *value,
       pos = astr_len (as);
       if (file)
         pos -= strlen (file);
-      p = term_minibuf_read (buf, astr_cstr (as), pos, cp, &files_history);
+      p = term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history);
       free_completion (cp);
       astr_delete (as);
       free (buf);
@@ -145,7 +151,7 @@ minibuf_read_filename (const char *fmt, const char *value,
           as = expand_path (astr_new_cstr (p));
           if (as)
             {
-              add_history_element (&files_history, p);
+              add_history_element (files_history, p);
               p = xstrdup (astr_cstr (as));
               astr_delete (as);
             }

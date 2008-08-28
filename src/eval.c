@@ -260,7 +260,7 @@ END_DEFUN
 /*
  * Read a function name from the minibuffer.
  */
-static History functions_history;
+static History *functions_history = NULL;
 const char *
 minibuf_read_function_name (const char *fmt, ...)
 {
@@ -282,7 +282,7 @@ minibuf_read_function_name (const char *fmt, ...)
 
   for (;;)
     {
-      ms = minibuf_read_completion (buf, "", cp, &functions_history);
+      ms = minibuf_read_completion (buf, "", cp, functions_history);
 
       if (ms == NULL)
 	{
@@ -321,7 +321,7 @@ minibuf_read_function_name (const char *fmt, ...)
 
 	  if (get_function (ms) || get_macro (ms))
 	    {
-	      add_history_element (&functions_history, ms);
+	      add_history_element (functions_history, ms);
 	      minibuf_clear ();
 	      break;
 	    }
@@ -340,7 +340,13 @@ minibuf_read_function_name (const char *fmt, ...)
 }
 
 void
+init_eval (void)
+{
+  functions_history = history_new ();
+}
+
+void
 free_eval (void)
 {
-  free_history_elements (&functions_history);
+  free_history (functions_history);
 }
