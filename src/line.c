@@ -491,25 +491,19 @@ delete_char (void)
 {
   deactivate_mark ();
 
-  if (!eolp ())
+  if (eobp ())
     {
-      if (warn_if_readonly_buffer ())
-	return false;
-
-      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
-      astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
-      adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
-      cur_bp->flags |= BFLAG_MODIFIED;
-
-      return true;
+      minibuf_error ("End of buffer");
+      return false;
     }
-  else if (!eobp ())
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  if (eolp ())
     {
       Line *lp1, *lp2;
       size_t lp1len;
-
-      if (warn_if_readonly_buffer ())
-	return false;
 
       undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
 
@@ -528,13 +522,16 @@ delete_char (void)
       cur_bp->flags |= BFLAG_MODIFIED;
 
       thisflag |= FLAG_NEED_RESYNC;
-
-      return true;
+    }
+  else
+    {
+      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
+      astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
+      adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
+      cur_bp->flags |= BFLAG_MODIFIED;
     }
 
-  minibuf_error ("End of buffer");
-
-  return false;
+  return true;
 }
 
 static int
@@ -542,41 +539,37 @@ backward_delete_char (void)
 {
   deactivate_mark ();
 
-  if (backward_char ())
-    {
-      delete_char ();
-      return true;
-    }
-  else
+  if (!backward_char ())
     {
       minibuf_error ("Beginning of buffer");
       return false;
     }
+
+  delete_char ();
+  return true;
 }
 
 static int
 backward_delete_char_overwrite (void)
 {
-  if (!bolp () && !eolp ())
-    {
-      deactivate_mark ();
-
-      if (warn_if_readonly_buffer ())
-	return false;
-
-      backward_char ();
-      if (following_char () == '\t')
-	insert_expanded_tab (insert_char);
-      else
-	insert_char (' ');
-      backward_char ();
-
-      cur_bp->flags |= BFLAG_MODIFIED;
-
-      return true;
-    }
-  else
+  if (bolp () || eolp ())
     return backward_delete_char ();
+
+  deactivate_mark ();
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  backward_char ();
+  if (following_char () == '\t')
+    insert_expanded_tab (insert_char);
+  else
+    insert_char (' ');
+  backward_char ();
+
+  cur_bp->flags |= BFLAG_MODIFIED;
+
+  return true;
 }
 
 DEFUN ("delete-char", delete_char)
