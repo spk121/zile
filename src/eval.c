@@ -343,6 +343,7 @@ void
 init_eval (void)
 {
   functions_history = history_new ();
+  get_fentry ("setq")->interactive = false;
 }
 
 void
