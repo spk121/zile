@@ -42,17 +42,22 @@
  *--------------------------------------------------------------------------*/
 
 /*
+ * Opaque types.
+ */
+typedef struct History History;
+typedef struct Undo Undo;
+typedef struct Macro Macro;
+
+/*
  * Types which should really be opaque.
  */
 typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
-typedef struct Undo Undo;
 typedef struct Region Region;
 typedef struct Buffer Buffer;
 typedef struct Window Window;
 typedef struct Completion Completion;
-typedef struct History History;
 
 /*
  * The type of a Zile exported function.  `uniarg' is the number of
@@ -230,15 +235,6 @@ struct Completion
   const char *match;		/* The match buffer. */
   size_t matchsize;		/* The match buffer size. */
 };
-
-struct Macro
-{
-  size_t nkeys;			/* The number of keystrokes. */
-  size_t *keys;			/* Vector of keystrokes. */
-  char *name;			/* Name of the macro. */
-  struct Macro *next;		/* Next macro in the list. */
-};
-typedef struct Macro Macro;
 
 /* Type of font attributes */
 typedef size_t Font;

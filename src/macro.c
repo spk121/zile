@@ -34,6 +34,14 @@
 #include "extern.h"
 
 
+struct Macro
+{
+  size_t nkeys;		/* The number of keystrokes. */
+  size_t *keys;		/* Vector of keystrokes. */
+  char *name;		/* Name of the macro. */
+  Macro *next;		/* Next macro in the list. */
+};
+
 static Macro *cur_mp, *cmd_mp = NULL, *head_mp = NULL;
 
 static void
