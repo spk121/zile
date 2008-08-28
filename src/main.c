@@ -297,6 +297,7 @@ main (int argc, char **argv)
   setlocale (LC_ALL, "");
 
   init_bindings ();
+  init_minibuf ();
 
   term_init ();
 

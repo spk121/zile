@@ -39,7 +39,7 @@ char *minibuf_contents = NULL;
  *--------------------------------------------------------------------------*/
 
 void
-minibuf_init (void)
+init_minibuf (void)
 {
   files_history = history_new ();
 }

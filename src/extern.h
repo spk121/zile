@@ -195,7 +195,7 @@ Marker *point_min_marker (void);
 
 /* minibuf.c -------------------------------------------------------------- */
 extern char *minibuf_contents;
-void minibuf_init (void);
+void init_minibuf (void);
 void free_minibuf (void);
 void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);
