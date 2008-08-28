@@ -152,7 +152,7 @@ revert_action (Undo * up)
 	delete_char ();
       for (i = 0; i < up->delta.block.osize; ++i)
 	if (up->delta.block.text[i] != '\n')
-	  insert_char (up->delta.block.text[i]);
+          insert_char_in_insert_mode (up->delta.block.text[i]);
 	else
 	  insert_newline ();
       undo_nosave = false;
