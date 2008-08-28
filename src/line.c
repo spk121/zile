@@ -115,7 +115,7 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir,
     else if (marker->pt.n > cur_bp->pt.n)
       marker->pt.n += dir;
 
-  cur_bp->pt = pt->pt;
+  cur_bp->pt = pt->pt; /* This marker has been updated to new position */
   free_marker (pt);
 }
 
@@ -162,9 +162,7 @@ insert_char (int c)
 	     '\t') && ((get_goalc () % t) == t))))
 	{
 	  /* Replace the character.  */
-	  undo_save (UNDO_REPLACE_CHAR, cur_bp->pt,
-		     (size_t) (*astr_char (cur_bp->pt.p->text,
-					   (ptrdiff_t) cur_bp->pt.o)), 0);
+          undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
 	  *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) = c;
 	  ++cur_bp->pt.o;
 

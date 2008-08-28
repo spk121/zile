@@ -111,7 +111,6 @@ enum
 {
   UNDO_INSERT_BLOCK,		/* Insert a block of characters. */
   UNDO_REMOVE_BLOCK,		/* Remove a block of characters. */
-  UNDO_REPLACE_CHAR,		/* Replace a character. */
   UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
   UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
   UNDO_END_SEQUENCE,		/* End a multi operation sequence. */

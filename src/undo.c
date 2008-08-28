@@ -59,7 +59,6 @@ undo_save (int type, Point pt, size_t arg1, size_t arg2)
 
   switch (type)
     {
-    case UNDO_REPLACE_CHAR:
     case UNDO_INTERCALATE_CHAR:
       up->delta.c = (char) arg1;
       break;
@@ -136,13 +135,6 @@ revert_action (Undo * up)
       for (i = 0; i < up->delta.block.size; ++i)
 	delete_char ();
       undo_nosave = false;
-      break;
-    case UNDO_REPLACE_CHAR:
-      undo_save (UNDO_REPLACE_CHAR, up->pt,
-		 (size_t) (*astr_char (cur_bp->pt.p->text,
-				       (ptrdiff_t) up->pt.o)), 0);
-      *astr_char (cur_bp->pt.p->text, (ptrdiff_t) up->pt.o) = up->delta.c;
-      cur_bp->flags |= BFLAG_MODIFIED;
       break;
     case UNDO_REPLACE_BLOCK:
       undo_save (UNDO_REPLACE_BLOCK, up->pt,
