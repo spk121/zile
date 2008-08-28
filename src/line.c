@@ -496,9 +496,7 @@ delete_char (void)
       if (warn_if_readonly_buffer ())
 	return false;
 
-      undo_save (UNDO_INTERCALATE_CHAR, cur_bp->pt,
-		 (size_t) (*astr_char (cur_bp->pt.p->text,
-				       (ptrdiff_t) cur_bp->pt.o)), 0);
+      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, 1, 0);
       astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
       cur_bp->flags |= BFLAG_MODIFIED;
@@ -513,7 +511,7 @@ delete_char (void)
       if (warn_if_readonly_buffer ())
 	return false;
 
-      undo_save (UNDO_INTERCALATE_CHAR, cur_bp->pt, '\n', 0);
+      undo_save (UNDO_INSERT_BLOCK, cur_bp->pt, 1, 0);
 
       lp1 = cur_bp->pt.p;
       lp2 = lp1->next;

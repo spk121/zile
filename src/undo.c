@@ -59,20 +59,17 @@ undo_save (int type, Point pt, size_t arg1, size_t arg2)
 
   switch (type)
     {
-    case UNDO_INTERCALATE_CHAR:
-      up->delta.c = (char) arg1;
-      break;
     case UNDO_INSERT_BLOCK:
-      up->delta.block.size = arg1;
-      up->delta.block.text = copy_text_block (pt.n, pt.o, arg1);
+      up->block.size = arg1;
+      up->block.text = copy_text_block (pt.n, pt.o, arg1);
       break;
     case UNDO_REPLACE_BLOCK:
-      up->delta.block.osize = arg1;
-      up->delta.block.size = arg2;
-      up->delta.block.text = copy_text_block (pt.n, pt.o, arg1);
+      up->block.osize = arg1;
+      up->block.size = arg2;
+      up->block.text = copy_text_block (pt.n, pt.o, arg1);
       break;
     case UNDO_REMOVE_BLOCK:
-      up->delta.block.size = arg1;
+      up->block.size = arg1;
       break;
     case UNDO_START_SEQUENCE:
     case UNDO_END_SEQUENCE:
@@ -113,38 +110,32 @@ revert_action (Undo * up)
 
   switch (up->type)
     {
-    case UNDO_INTERCALATE_CHAR:
-      if (up->delta.c == '\n')
-	intercalate_newline ();
-      else
-	intercalate_char (up->delta.c);
-      break;
     case UNDO_INSERT_BLOCK:
-      undo_save (UNDO_REMOVE_BLOCK, up->pt, up->delta.block.size, 0);
+      undo_save (UNDO_REMOVE_BLOCK, up->pt, up->block.size, 0);
       undo_nosave = true;
-      for (i = 0; i < up->delta.block.size; ++i)
-	if (up->delta.block.text[i] != '\n')
-	  insert_char (up->delta.block.text[i]);
+      for (i = 0; i < up->block.size; ++i)
+	if (up->block.text[i] != '\n')
+	  insert_char (up->block.text[i]);
 	else
 	  insert_newline ();
       undo_nosave = false;
       break;
     case UNDO_REMOVE_BLOCK:
-      undo_save (UNDO_INSERT_BLOCK, up->pt, up->delta.block.size, 0);
+      undo_save (UNDO_INSERT_BLOCK, up->pt, up->block.size, 0);
       undo_nosave = true;
-      for (i = 0; i < up->delta.block.size; ++i)
+      for (i = 0; i < up->block.size; ++i)
 	delete_char ();
       undo_nosave = false;
       break;
     case UNDO_REPLACE_BLOCK:
       undo_save (UNDO_REPLACE_BLOCK, up->pt,
-		 up->delta.block.size, up->delta.block.osize);
+		 up->block.size, up->block.osize);
       undo_nosave = true;
-      for (i = 0; i < up->delta.block.size; ++i)
+      for (i = 0; i < up->block.size; ++i)
 	delete_char ();
-      for (i = 0; i < up->delta.block.osize; ++i)
-	if (up->delta.block.text[i] != '\n')
-          insert_char_in_insert_mode (up->delta.block.text[i]);
+      for (i = 0; i < up->block.osize; ++i)
+	if (up->block.text[i] != '\n')
+          insert_char_in_insert_mode (up->block.text[i]);
 	else
 	  insert_newline ();
       undo_nosave = false;

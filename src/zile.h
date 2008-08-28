@@ -114,8 +114,6 @@ enum
   UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
   UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
   UNDO_END_SEQUENCE,		/* End a multi operation sequence. */
-  UNDO_INTERCALATE_CHAR		/* Insert a char without moving the
-				   current pointer. */
 };
 
 struct Undo
@@ -134,20 +132,13 @@ struct Undo
      in an unchanged state. */
   int unchanged;
 
-  /* The undo delta. */
-  union
+  /* The block to insert. */
+  struct
   {
-    /* The character to insert or replace. */
-    int c;
-
-    /* The block to insert. */
-    struct
-    {
-      char *text;
-      size_t osize;		/* Original size; only for replace. */
-      size_t size;		/* New block size. */
-    } block;
-  } delta;
+    char *text;
+    size_t osize;		/* Original size; only for replace. */
+    size_t size;		/* New block size. */
+  } block;
 };
 
 struct Region

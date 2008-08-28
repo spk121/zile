@@ -76,12 +76,13 @@ free_buffer (Buffer * bp)
   line_delete (bp->lines);
 
   /* Free all the undo operations. */
+  /* FIXME: Move this into a functio in undo.c. */
   up = bp->last_undop;
   while (up != NULL)
     {
       next_up = up->next;
       if (up->type == UNDO_INSERT_BLOCK || up->type == UNDO_REPLACE_BLOCK)
-	free (up->delta.block.text);
+	free (up->block.text);
       free (up);
       up = next_up;
     }

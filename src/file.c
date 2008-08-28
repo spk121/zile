@@ -1075,6 +1075,8 @@ save_buffer (Buffer * bp)
 
       if (write_to_disk (bp, ms))
 	{
+          /* FIXME: Move this into a function in undo.c, then make
+             struct Undo private. */
 	  Undo *up;
 
 	  minibuf_write ("Wrote %s", ms);
