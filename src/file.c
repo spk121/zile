@@ -1075,20 +1075,10 @@ save_buffer (Buffer * bp)
 
       if (write_to_disk (bp, ms))
 	{
-          /* FIXME: Move this into a function in undo.c, then make
-             struct Undo private. */
-	  Undo *up;
-
 	  minibuf_write ("Wrote %s", ms);
 	  bp->flags &= ~BFLAG_MODIFIED;
 
-	  /* Set unchanged flags to false except for the
-	     last undo action, which is set to true. */
-	  up = bp->last_undop;
-	  if (up)
-	    up->unchanged = true;
-	  for (up = up->next; up; up = up->next)
-	    up->unchanged = false;
+          undo_set_unchanged (bp->last_undop);
 	}
 
       bp->flags &= ~BFLAG_TEMPORARY;

@@ -42,7 +42,7 @@
  *--------------------------------------------------------------------------*/
 
 /*
- * The forward opaque types used in the editor.
+ * Types which should really be opaque.
  */
 typedef struct Line Line;
 typedef struct Point Point;
@@ -112,31 +112,6 @@ enum
   UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
   UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
   UNDO_END_SEQUENCE,		/* End a multi operation sequence. */
-};
-
-struct Undo
-{
-  /* Next undo delta in list. */
-  Undo *next;
-
-  /* The type of undo delta. */
-  int type;
-
-  /* Where the undo delta need to be applied.
-     Warning!: Do not use the "pt.p" field. */
-  Point pt;
-
-  /* Flag indicating that reverting this undo leaves the buffer
-     in an unchanged state. */
-  int unchanged;
-
-  /* The block to insert. */
-  struct
-  {
-    char *text;
-    size_t osize;		/* Original size. */
-    size_t size;		/* New block size. */
-  } block;
 };
 
 struct Region

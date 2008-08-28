@@ -30,6 +30,34 @@
 #include "zile.h"
 #include "extern.h"
 
+/*
+ * Undo action
+ */
+struct Undo
+{
+  /* Next undo delta in list. */
+  Undo *next;
+
+  /* The type of undo delta. */
+  int type;
+
+  /* Where the undo delta need to be applied.
+     Warning!: Do not use the "pt.p" field. */
+  Point pt;
+
+  /* Flag indicating that reverting this undo leaves the buffer
+     in an unchanged state. */
+  int unchanged;
+
+  /* The block to insert. */
+  struct
+  {
+    char *text;
+    size_t osize;		/* Original size. */
+    size_t size;		/* New block size. */
+  } block;
+};
+
 /* Setting this variable to true stops undo_save saving the given
    information. */
 int undo_nosave = false;
@@ -49,11 +77,8 @@ undo_save (int type, Point pt, size_t osize, size_t size)
     return;
 
   up = (Undo *) XZALLOC (Undo);
-
   up->type = type;
   up->pt = pt;
-
-  /* If the buffer is currently unchanged, record the fact. */
   if (!(cur_bp->flags & BFLAG_MODIFIED))
     up->unchanged = true;
 
@@ -142,9 +167,33 @@ Repeat this command to undo more changes.
     }
 
   cur_bp->next_undop = revert_action (cur_bp->next_undop);
-
   minibuf_write ("Undo!");
-
   return leT;
 }
 END_DEFUN
+
+void
+free_undo (Undo *up)
+{
+  while (up != NULL)
+    {
+      Undo *next_up = up->next;
+      if (up->type == UNDO_REPLACE_BLOCK)
+	free (up->block.text);
+      free (up);
+      up = next_up;
+    }
+}
+
+/*
+ * Set unchanged flags to false except for the last undo action (the
+ * argument), which is set to true.
+ */
+void
+undo_set_unchanged (Undo *up)
+{
+  if (up)
+    up->unchanged = true;
+  for (up = up->next; up; up = up->next)
+    up->unchanged = false;
+}

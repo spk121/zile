@@ -68,34 +68,19 @@ void
 free_buffer (Buffer * bp)
 {
   Line *lp;
-  Undo *up, *next_up;
 
-  /* Free all the lines. */
   for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     astr_delete (lp->text);
   line_delete (bp->lines);
 
-  /* Free all the undo operations. */
-  /* FIXME: Move this into a functio in undo.c. */
-  up = bp->last_undop;
-  while (up != NULL)
-    {
-      next_up = up->next;
-      if (up->type == UNDO_REPLACE_BLOCK)
-	free (up->block.text);
-      free (up);
-      up = next_up;
-    }
+  free_undo (bp->last_undop);
 
-  /* Free markers. */
   while (bp->markers)
     free_marker (bp->markers);
 
-  /* Free the name and the filename. */
   free (bp->name);
   free (bp->filename);
 
-  /* Free the variables. */
   if (bp->vars != NULL)
     hash_free (bp->vars);
 
