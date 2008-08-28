@@ -257,7 +257,6 @@ END_DEFUN
 void
 process_key (size_t key)
 {
-  gl_list_t keys;
   leafp p;
 
   if (key == KBD_NOKEY)
@@ -268,6 +267,7 @@ process_key (size_t key)
     universal_argument (KBD_META, (int) ((key & 0xff) - '0'));
   else
     {
+      gl_list_t keys;
       p = completion_scan (key, &keys);
       if (p != NULL)
 	{
@@ -280,8 +280,8 @@ process_key (size_t key)
 	  minibuf_error ("%s is undefined", astr_cstr (as));
 	  astr_delete (as);
 	}
+      gl_list_free (keys);
     }
-  gl_list_free (keys);
 
   /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
