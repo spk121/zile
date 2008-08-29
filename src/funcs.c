@@ -1670,12 +1670,8 @@ On nonblank line, delete any immediately following blank lines.
 	  FUNCALL (beginning_of_line);
 	  set_mark ();
 	  activate_mark ();
-	  do
-	    {
-	      if (!FUNCALL (forward_line))
-		break;
-	    }
-	  while (is_blank_line ());
+	  while (FUNCALL (forward_line) == leT && is_blank_line ())
+	    ;
 	  if (!seq_started)
 	    {
 	      seq_started = true;
