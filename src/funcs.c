@@ -1283,10 +1283,11 @@ setcase_word (int rcase)
     if (!forward_word () || !backward_word ())
       return false;
 
-  i = cur_bp->pt.o;
-  while (i < astr_len (cur_bp->pt.p->text) &&
-         !ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i)))
-    ++i;
+  for (i = cur_bp->pt.o;
+       i < astr_len (cur_bp->pt.p->text) &&
+         ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i));
+       i++)
+    ;
   size = i - cur_bp->pt.o;
   if (size > 0)
     undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
