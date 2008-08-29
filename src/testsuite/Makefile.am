@@ -106,8 +106,6 @@ EXTRA_DIST =						\
 	zile.test/insert_buffer.output			\
 	zile.test/insert_file.exp			\
 	zile.test/insert_file.output			\
-	zile.test/insert_register.exp			\
-	zile.test/insert_register.output		\
 	zile.test/isearch_backward.exp			\
 	zile.test/isearch_backward.output		\
 	zile.test/isearch_backward_regexp.exp		\
