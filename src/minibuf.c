@@ -120,7 +120,7 @@ minibuf_read (const char *fmt, const char *value, ...)
  */
 char *
 minibuf_read_filename (const char *fmt, const char *value,
-                       const char *file, ...)
+		       const char *file, ...)
 {
   va_list ap;
   char *buf, *p = NULL;
@@ -148,15 +148,15 @@ minibuf_read_filename (const char *fmt, const char *value,
 
       if (p != NULL)
         {
-          as = expand_path (astr_new_cstr (p));
-          if (as)
-            {
-              add_history_element (files_history, p);
-              p = xstrdup (astr_cstr (as));
-              astr_delete (as);
-            }
-          else
-            p = NULL;
+	  as = expand_path (astr_new_cstr (p));
+	  if (as)
+	    {
+	      add_history_element (files_history, p);
+	      p = xstrdup (astr_cstr (as));
+	      astr_delete (as);
+	    }
+	  else
+	    p = NULL;
         }
     }
 
@@ -169,7 +169,7 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 {
   va_list ap;
   char *buf;
-  const char *s;
+  const char *ms;
 
   va_start (ap, cp);
   xvasprintf (&buf, fmt, ap);
@@ -177,8 +177,9 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 
   for (;;)
     {
-      s = term_minibuf_read (buf, "", SIZE_MAX, cp, NULL);
-      if (s == NULL) /* Cancelled. */
+      ms = term_minibuf_read (buf, "", SIZE_MAX, cp, NULL);
+
+      if (ms == NULL) /* Cancelled. */
 	{
 	  free (buf);
 	  return -1;
@@ -187,16 +188,19 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 	{
 	  size_t i;
 	  astr as = astr_new ();
-
+	  astr_cpy_cstr (as, ms);
 	  /* Complete partial words if possible. */
-	  astr_cpy_cstr (as, s);
 	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-	    s = cp->match;
+	    {
+	      free ((char *) ms);
+	      ms = xstrdup (cp->match);
+	    }
 	  astr_delete (as);
 
 	  for (i = 0; i < gl_list_size (cp->completions); i++)
-	    if (!strcmp (s, (char *) gl_list_get_at (cp->completions, i)))
+	    if (!strcmp (ms, (char *) gl_list_get_at (cp->completions, i)))
 	      {
+                free ((char *) ms);
 		free (buf);
 		return i;
 	      }

@@ -278,21 +278,22 @@ minibuf_read_function_name (const char *fmt, ...)
   for (i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].interactive)
       gl_sortedlist_add (cp->completions, completion_strcmp,
-                         xstrdup (fentry_table[i].name));
+			 xstrdup (fentry_table[i].name));
 
   for (;;)
     {
       ms = minibuf_read_completion (buf, "", cp, functions_history);
 
-      if (ms == NULL)
+      if (ms == NULL) /* Cancelled. */
 	{
+	  free (buf);
 	  FUNCALL (keyboard_quit);
 	  break;
 	}
       else if (ms[0] == '\0')
 	{
 	  minibuf_error ("No function name given");
-          free ((char *) ms);
+	  free ((char *) ms);
 	  ms = NULL;
 	  break;
 	}
@@ -302,22 +303,22 @@ minibuf_read_function_name (const char *fmt, ...)
 	  astr_cpy_cstr (as, ms);
 	  /* Complete partial words if possible. */
 	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-            {
-              free ((char *) ms);
-              ms = xstrdup (cp->match);
-            }
+	    {
+	      free ((char *) ms);
+	      ms = xstrdup (cp->match);
+	    }
 	  astr_delete (as);
 
 	  for (i = 0; i < gl_list_size (cp->completions); i++)
-            {
-              char *s = (char *) gl_list_get_at (cp->completions, i);
-              if (!strcmp (ms, s))
+	    {
+	      char *s = (char *) gl_list_get_at (cp->completions, i);
+	      if (!strcmp (ms, s))
 	      {
                 free ((char *) ms);
 		ms = xstrdup (s);
 		break;
 	      }
-            }
+	    }
 
 	  if (get_function (ms) || get_macro (ms))
 	    {
