@@ -19,6 +19,9 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+# FIXME: Some problem with sending ^J: newline-and-indent test has to
+# be done with M-x newline-and-indent.
+
 set zile_path $objdir/../zile
 set test_path $srcdir/zile.test
 set scratch_path $objdir
@@ -38,6 +41,7 @@ proc zile_start {args} {
 
 proc zile_exit {} {}
 
+# FIXME: Why is this delay needed? Tom Dickey thinks it shouldn't be.
 set send_slow {1 .01}
 proc send {ignore arg} {
     sleep .1
