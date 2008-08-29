@@ -1296,8 +1296,8 @@ setcase_word (int rcase)
   gotword = false;
   for (gotword = false;
        cur_bp->pt.o < astr_len (cur_bp->pt.p->text) &&
-	 ISWORDCHAR ((int) (*p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o)));
-       cur_bp->pt.o++, gotword = true;)
+	 ISWORDCHAR ((int) *(p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o)));
+       cur_bp->pt.o++, gotword = true)
     {
       if (isalpha ((int) *p))
 	{
@@ -1313,6 +1313,7 @@ setcase_word (int rcase)
 	      *p = (gotword ? tolower : toupper) (*p);
 	      break;
 	    default:
+	      break;
 	    }
         }
     }

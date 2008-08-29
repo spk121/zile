@@ -162,7 +162,7 @@ insert_char (int c)
 	     '\t') && ((get_goalc () % t) == t))))
 	{
 	  /* Replace the character.  */
-          undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
+	  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
 	  *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) = c;
 	  ++cur_bp->pt.o;
 
@@ -766,33 +766,34 @@ Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.
 +*/
 {
-  int indent;
-  size_t pos;
-  Marker *old_point;
+  le *ret = leNIL;
 
   if (warn_if_readonly_buffer ())
     return leNIL;
 
   deactivate_mark ();
-  if (!insert_newline ())
-    return leNIL;
 
-  old_point = point_marker ();
   undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  if (insert_newline ())
+    {
+      Marker *old_point = point_marker ();
+      int indent;
+      size_t pos;
 
-  /* Check where last non-blank goalc is. */
-  previous_nonblank_goalc ();
-  pos = get_goalc ();
-  indent = pos > 0 || (!eolp () && isspace (following_char ()));
-  cur_bp->pt = old_point->pt;
-  free_marker (old_point);
-  /* Only indent if we're in column > 0 or we're in column 0 and
-     there is a space character there in the last non-blank line. */
-  if (indent)
-    FUNCALL (indent_for_tab_command);
-
+      /* Check where last non-blank goalc is. */
+      previous_nonblank_goalc ();
+      pos = get_goalc ();
+      indent = pos > 0 || (!eolp () && isspace (following_char ()));
+      cur_bp->pt = old_point->pt;
+      free_marker (old_point);
+      /* Only indent if we're in column > 0 or we're in column 0 and
+	 there is a space character there in the last non-blank line. */
+      if (indent)
+        FUNCALL (indent_for_tab_command);
+      ret = leT;
+    }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  return leT;
+  return ret;
 }
 END_DEFUN
