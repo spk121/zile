@@ -172,12 +172,8 @@ EXTRA_DIST =						\
 	zile.test/search_forward.output			\
 	zile.test/search_forward_regexp.exp		\
 	zile.test/search_forward_regexp.output		\
-	zile.test/self_insert_command.exp		\
-	zile.test/self_insert_command.output		\
 	zile.test/set_fill_column.exp			\
 	zile.test/set_fill_column.output		\
-	zile.test/set_mark_command.exp			\
-	zile.test/set_mark_command.output		\
 	zile.test/set_variable.exp			\
 	zile.test/set_variable.output			\
 	zile.test/shell_command.exp			\
