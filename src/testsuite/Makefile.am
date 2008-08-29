@@ -158,14 +158,6 @@ EXTRA_DIST =						\
 	zile.test/query_replace.output			\
 	zile.test/quoted_insert.exp			\
 	zile.test/quoted_insert.output			\
-	zile.test/recenter.exp				\
-	zile.test/recenter.output			\
-	zile.test/replace_string.exp			\
-	zile.test/replace_string.output			\
-	zile.test/save_buffer.exp			\
-	zile.test/save_buffer.output			\
-	zile.test/save_buffers_kill_zile.exp		\
-	zile.test/save_buffers_kill_zile.output		\
 	zile.test/save_some_buffers.exp			\
 	zile.test/save_some_buffers.output		\
 	zile.test/scroll_down.exp			\
