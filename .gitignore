@@ -26,3 +26,4 @@ gendocs.sh
 Makefile
 Makefile.in
 zile-*
+*.o
