@@ -1021,37 +1021,37 @@ move_sexp (int dir)
 	      c = 'a';		/* Treat ' and " like word chars. */
 	    }
 
-          if (dir > 0 ? ISOPENBRACKETCHAR (c) : ISCLOSEBRACKETCHAR (c))
-            {
-              if (level == 0 && gotsexp)
+	  if (dir > 0 ? ISOPENBRACKETCHAR (c) : ISCLOSEBRACKETCHAR (c))
+	    {
+	      if (level == 0 && gotsexp)
                 return true;
 
-              level++;
-              gotsexp = true;
-              if (c == '\"')
+	      level++;
+	      gotsexp = true;
+	      if (c == '\"')
                 double_quote ^= 1;
-              if (c == '\'')
+	      if (c == '\'')
                 single_quote ^= 1;
-            }
-          else if (dir > 0 ? ISCLOSEBRACKETCHAR (c) : ISOPENBRACKETCHAR (c))
-            {
-              if (level == 0 && gotsexp)
+	    }
+	  else if (dir > 0 ? ISCLOSEBRACKETCHAR (c) : ISOPENBRACKETCHAR (c))
+	    {
+	      if (level == 0 && gotsexp)
                 return true;
 
-              level--;
-              gotsexp = true;
-              if (c == '\"')
+	      level--;
+	      gotsexp = true;
+	      if (c == '\"')
                 double_quote ^= 1;
-              if (c == '\'')
+	      if (c == '\'')
                 single_quote ^= 1;
 
-              if (level < 0)
+	      if (level < 0)
                 {
-                  minibuf_error ("Scan error: \"Containing "
-                                 "expression ends prematurely\"");
-                  return false;
+		  minibuf_error ("Scan error: \"Containing "
+				 "expression ends prematurely\"");
+		  return false;
                 }
-            }
+	    }
 
 	  cur_bp->pt.o += dir;
 
@@ -1159,7 +1159,7 @@ END_DEFUN
 
 static le *
 move_paragraph (int uniarg, int (*forward) (void), int (*backward) (void),
-                     Function line_extremum)
+		     Function line_extremum)
 {
   if (uniarg < 0)
     {
@@ -1278,6 +1278,7 @@ setcase_word (int rcase)
 {
   int gotword;
   size_t i, size;
+  char *p;
 
   if (!ISWORDCHAR (following_char ()))
     if (!forward_word () || !backward_word ())
@@ -1285,7 +1286,7 @@ setcase_word (int rcase)
 
   for (i = cur_bp->pt.o;
        i < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i));
+	 ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i));
        i++)
     ;
   size = i - cur_bp->pt.o;
@@ -1293,30 +1294,27 @@ setcase_word (int rcase)
     undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
 
   gotword = false;
-  while (cur_bp->pt.o < astr_len (cur_bp->pt.p->text))
+  for (gotword = false;
+       cur_bp->pt.o < astr_len (cur_bp->pt.p->text) &&
+	 ISWORDCHAR ((int) (*p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o)));
+       cur_bp->pt.o++, gotword = true;)
     {
-      char *p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
-      if (!ISWORDCHAR ((int) *p))
-	break;
       if (isalpha ((int) *p))
 	{
-	  int oldc = *p, newc;
-	  if (rcase == UPPERCASE)
-	    newc = toupper (oldc);
-	  else if (rcase == LOWERCASE)
-	    newc = tolower (oldc);
-	  else
-	    {			/* rcase == CAPITALIZE */
-	      if (!gotword)
-		newc = toupper (oldc);
-	      else
-		newc = tolower (oldc);
+	  switch (rcase)
+	    {
+	    case UPPERCASE:
+	      *p = toupper (*p);
+	      break;
+	    case LOWERCASE:
+	      *p = tolower (*p);
+	      break;
+	    case CAPITALIZE:
+	      *p = (gotword ? tolower : toupper) (*p);
+	      break;
+	    default:
 	    }
-	  if (oldc != newc)
-            *p = newc;
-	}
-      gotword = true;
-      cur_bp->pt.o++;
+        }
     }
 
   cur_bp->flags |= BFLAG_MODIFIED;
@@ -1559,7 +1557,7 @@ it as the contents of the region.
     {
       if (written == -1)
         minibuf_error ("Error writing to temporary file: %s",
-                       strerror (errno));
+		       strerror (errno));
       else
         minibuf_error ("Error writing to temporary file");
       return leNIL;
