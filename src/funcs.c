@@ -261,9 +261,10 @@ END_DEFUN
 
 DEFUN ("set-fill-column", set_fill_column)
 /*+
-Set the fill column.
-If an argument value is passed, set the `fill-column' variable with
-that value, otherwise with the current column value.
+FIXME: Require C-u to use current column.
+Set `fill-column' to specified argument.
+Use C-u followed by a number to specify a column.
+Just C-u as argument means to use the current column.
 +*/
 {
   size_t fill_col = lastflag & FLAG_SET_UNIARG ? (size_t) uniarg :
