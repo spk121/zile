@@ -45,7 +45,7 @@ X ("case-fold-search", "t", true, "\
 Non-nil means searches ignore case.")
 X ("case-replace", "t", false, "\
 Non-nil means `query-replace' should preserve case in replacements.")
-X ("fill-column", "72", true, "\
+X ("fill-column", "70", true, "\
 Column beyond which automatic line-wrapping should happen.\n\
 Automatically becomes buffer-local when set in any fashion.")
 X ("highlight-nonselected-windows", "nil", false, "\
