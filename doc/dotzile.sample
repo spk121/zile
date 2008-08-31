@@ -19,8 +19,8 @@
 ; inserts spaces.
 (setq indent-tabs-mode nil)
 
-; The default fill column (in Auto Fill Mode) [default: 72]
-(setq fill-column 72)
+; The default fill column (in Auto Fill Mode) [default: 70]
+(setq fill-column 70)
 
 ; Enable Auto Fill Mode [default: nil]
 (setq auto-fill-mode nil)
