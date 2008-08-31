@@ -35,7 +35,7 @@ astr_LDADD = xalloc.o $(LDADD)
 
 bin_PROGRAMS = zile
 
-EXTRA_PROGRAMS = mkfuncs
+noinst_PROGRAMS = mkfuncs
 
 tbl_funcs.h: $(zile_SOURCES) mkfuncs$(EXEEXT_FOR_BUILD)
 	./mkfuncs $(zile_SOURCES) > tbl_funcs.h
@@ -86,7 +86,7 @@ ALLSOURCES = $(zile_SOURCES) mkdoc.c
 
 BUILT_SOURCES = tbl_funcs.h
 
-CLEANFILES = $(BUILT_SOURCES) $(EXTRA_PROGRAMS)
+CLEANFILES = $(BUILT_SOURCES)
 
 loc:
 	sloccount $(ALLSOURCES)
