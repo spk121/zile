@@ -279,10 +279,10 @@ Just C-u as argument means to use the current column.
         buf = arglist->next->data;
       else
         {
-          xasprintf (&buf, "%d", fill_col);
-          /* Only print message when run interactively. */
-          minibuf_write ("Fill column set to %s (was %d)", buf,
-                         get_variable_number ("fill-column"));
+	  xasprintf (&buf, "%d", fill_col);
+	  /* Only print message when run interactively. */
+	  minibuf_write ("Fill column set to %s (was %d)", buf,
+			 get_variable_number ("fill-column"));
         }
       branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
       F_set_variable (0, branch);
@@ -445,7 +445,7 @@ universal_argument (int keytype, int xarg)
       else if (isdigit (key & 0xff))
 	{
 	  digit = (key & 0xff) - '0';
-          empty_param = false;
+	  empty_param = false;
 
 	  if (key & KBD_META)
 	    astr_cat_cstr (as, " ESC");
@@ -475,7 +475,7 @@ universal_argument (int keytype, int xarg)
 	      astr_cat_cstr (as, " -");
 	      /* The default negative arg isn't -4, it's -1. */
 	      arg = 1;
-              empty_param = false;
+	      empty_param = false;
 	    }
 	}
       else
