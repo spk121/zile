@@ -37,6 +37,9 @@
 #include "extern.h"
 
 
+/* True if current universal arg is just C-u's with no number. */
+static bool empty_param = false;
+
 DEFUN ("suspend-zile", suspend_zile)
 /*+
 Stop Zile and return to superior process.
@@ -261,24 +264,38 @@ END_DEFUN
 
 DEFUN ("set-fill-column", set_fill_column)
 /*+
-FIXME: Require C-u to use current column.
 Set `fill-column' to specified argument.
 Use C-u followed by a number to specify a column.
 Just C-u as argument means to use the current column.
 +*/
 {
-  size_t fill_col = lastflag & FLAG_SET_UNIARG ? (size_t) uniarg :
-    cur_bp->pt.o + 1;
+  size_t fill_col = empty_param ? cur_bp->pt.o + 1 : (size_t) uniarg;
   char *buf;
   le *branch;
 
-  xasprintf (&buf, "%d", fill_col);
-  branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
-  F_set_variable (0, branch);
-  free (buf);
-  leWipe (branch);
-
-  return leT;
+  if (lastflag & FLAG_SET_UNIARG || arglist != NULL)
+    {
+      if (arglist != NULL)
+        buf = arglist->next->data;
+      else
+        {
+          xasprintf (&buf, "%d", fill_col);
+          /* Only print message when run interactively. */
+          minibuf_write ("Fill column set to %s (was %d)", buf,
+                         get_variable_number ("fill-column"));
+        }
+      branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
+      F_set_variable (0, branch);
+      if (arglist == NULL)
+        free (buf);
+      leWipe (branch);
+      return leT;
+    }
+  else
+    {
+      minibuf_error ("set-fill-column requires an explicit argument");
+      return leNIL;
+    }
 }
 END_DEFUN
 
@@ -402,13 +419,18 @@ universal_argument (int keytype, int xarg)
   size_t key;
   astr as = astr_new ();
 
+  empty_param = false;
+
   if (keytype == KBD_META)
     {
       astr_cpy_cstr (as, "ESC");
       ungetkey ((size_t) (xarg + '0'));
     }
   else
-    astr_cpy_cstr (as, "C-u");
+    {
+      astr_cpy_cstr (as, "C-u");
+      empty_param = true;
+    }
 
   for (;;)
     {
@@ -423,6 +445,7 @@ universal_argument (int keytype, int xarg)
       else if (isdigit (key & 0xff))
 	{
 	  digit = (key & 0xff) - '0';
+          empty_param = false;
 
 	  if (key & KBD_META)
 	    astr_cat_cstr (as, " ESC");
@@ -444,23 +467,15 @@ universal_argument (int keytype, int xarg)
 	  else
 	    break;
 	}
-      else if (key == '-')
+      else if (key == '-' && i == 0)
 	{
-	  /* After any number && if sign doesn't change. */
-	  if (i == 0 && sgn > 0)
+	  if (sgn > 0)
 	    {
 	      sgn = -sgn;
 	      astr_cat_cstr (as, " -");
 	      /* The default negative arg isn't -4, it's -1. */
 	      arg = 1;
-	    }
-	  else if (i != 0)
-	    {
-	      /* If i == 0 do nothing (the Emacs behavior is a little
-		 strange in this case, it waits for one more key that is
-		 eaten, and then goes back to the normal state). */
-	      ungetkey (key);
-	      break;
+              empty_param = false;
 	    }
 	}
       else
