@@ -206,8 +206,8 @@ int minibuf_read_yesno (const char *fmt, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
 			       History * hp, ...);
 char *vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
-			  History * hp, const char *empty_err,
-			  bool (*test) (const char *s, gl_list_t completions),
+                                History * hp, const char *empty_err,
+                                bool (*test) (const char *s, gl_list_t completions),
                                 const char *invalid_err, va_list ap);
 char *minibuf_read_filename (const char *fmt, const char *value,
 			     const char *file, ...);
