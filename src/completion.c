@@ -56,12 +56,6 @@ completion_streq (const void *p1, const void *p2)
   return strcmp ((char *) p1, (char *) p2) == 0;
 }
 
-static void
-completion_free (const void *p)
-{
-  free ((void *)p);
-}
-
 /*
  * Allocate a new completion structure.
  */
@@ -72,7 +66,7 @@ completion_new (int fileflag)
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
                                           completion_streq, NULL,
-                                          completion_free, false);
+                                          list_free, false);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST,
                                       completion_streq, NULL,
                                       NULL, false);
@@ -229,8 +223,8 @@ completion_readdir (Completion * cp, astr as)
   gl_list_free (cp->completions);
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
-                                          completion_streq, NULL,
-                                          completion_free, false);
+					  completion_streq, NULL,
+					  list_free, false);
 
   if (expand_path (as) == NULL)
     return false;

@@ -22,6 +22,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -163,30 +164,88 @@ minibuf_read_filename (const char *fmt, const char *value,
   return p;
 }
 
-static int
-minibuf_read_forced (const char *fmt, const char *errmsg,
-		     Completion * cp, ...)
+bool
+minibuf_test_in_completions (const char *ms, gl_list_t completions)
+{
+  return gl_sortedlist_search (completions, completion_strcmp, ms) != NULL;
+}
+
+int
+minibuf_read_yesno (const char *fmt, ...)
 {
   va_list ap;
-  char *buf;
-  const char *ms;
+  char *ms;
+  const char *errmsg = "Please answer yes or no.";
+  Completion *cp = completion_new (false);
+  int retvalue = false;
 
-  va_start (ap, cp);
+  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("yes"));
+  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("no"));
+
+  va_start (ap, fmt);
+  ms = vminibuf_read_completion (fmt, "", cp, NULL, errmsg,
+				 minibuf_test_in_completions, errmsg, ap);
+  va_end (ap);
+
+  if (ms != NULL)
+    {
+      gl_list_node_t n = gl_sortedlist_search (cp->completions, completion_strcmp, ms);
+      assert (n);
+      retvalue = !strcmp ((char *) gl_list_node_value (cp->completions, n), "yes");
+    }
+  free_completion (cp);
+
+  return retvalue;
+}
+
+char *
+minibuf_read_completion (const char *fmt, char *value, Completion * cp,
+			 History * hp, ...)
+{
+  va_list ap;
+  char *buf, *ms;
+
+  va_start (ap, hp);
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
+  ms = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
+
+ free (buf);
+ return ms;
+}
+
+/*
+ * Read a string from the minibuffer using a completion.
+ */
+char *
+vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
+			  History * hp, const char *empty_err,
+			  bool (*test) (const char *s, gl_list_t completions),
+			  const char *invalid_err, va_list ap)
+{
+  char *buf, *ms;
+
+  xvasprintf (&buf, fmt, ap);
+
   for (;;)
     {
-      ms = term_minibuf_read (buf, "", SIZE_MAX, cp, NULL);
+      ms = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
 
       if (ms == NULL) /* Cancelled. */
 	{
-	  free (buf);
-	  return -1;
+	  FUNCALL (keyboard_quit);
+	  break;
+	}
+      else if (ms[0] == '\0')
+	{
+	  minibuf_error (empty_err);
+	  free ((char *) ms);
+	  ms = NULL;
+	  break;
 	}
       else
 	{
-	  size_t i;
 	  astr as = astr_new ();
 	  astr_cpy_cstr (as, ms);
 	  /* Complete partial words if possible. */
@@ -197,72 +256,24 @@ minibuf_read_forced (const char *fmt, const char *errmsg,
 	    }
 	  astr_delete (as);
 
-	  for (i = 0; i < gl_list_size (cp->completions); i++)
-	    if (!strcmp (ms, (char *) gl_list_get_at (cp->completions, i)))
-	      {
-                free ((char *) ms);
-		free (buf);
-		return i;
-	      }
-
-	  minibuf_error (errmsg);
-	  waitkey (WAITKEY_DEFAULT);
+	  if (test (ms, cp->completions))
+	    {
+	      if (hp)
+                add_history_element (hp, ms);
+	      minibuf_clear ();
+	      break;
+	    }
+	  else
+	    {
+	      minibuf_error (invalid_err, ms);
+	      waitkey (WAITKEY_DEFAULT);
+	    }
 	}
     }
 
-  abort ();
-}
-
-int
-minibuf_read_yesno (const char *fmt, ...)
-{
-  va_list ap;
-  char *buf;
-  Completion *cp;
-  int retvalue;
-
-  va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
-  va_end (ap);
-
-  cp = completion_new (false);
-  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("yes"));
-  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("no"));
-
-  retvalue = minibuf_read_forced (buf, "Please answer yes or no.", cp);
-  if (retvalue != -1)
-    {
-      /* The completions may be sorted by the minibuf completion
-	 routines. */
-      if (!strcmp (gl_list_get_at (cp->completions, (size_t) retvalue), "yes"))
-	retvalue = true;
-      else
-	retvalue = false;
-    }
-  free_completion (cp);
   free (buf);
 
-  return retvalue;
-}
-
-/*
- * Read a string from the minibuffer using a completion.
- */
-char *
-minibuf_read_completion (const char *fmt, char *value, Completion * cp,
-			 History * hp, ...)
-{
-  va_list ap;
-  char *buf, *p;
-
-  va_start (ap, hp);
-  xvasprintf (&buf, fmt, ap);
-  va_end (ap);
-
-  p = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
-  free (buf);
-
-  return p;
+  return ms;
 }
 
 /*

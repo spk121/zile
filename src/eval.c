@@ -265,76 +265,22 @@ const char *
 minibuf_read_function_name (const char *fmt, ...)
 {
   va_list ap;
+  char *ms;
+  Completion *cp = completion_new (false);
   size_t i;
-  char *buf;
-  const char *ms;
-  Completion *cp;
 
-  va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
-  va_end (ap);
-
-  cp = completion_new (false);
   for (i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].interactive)
       gl_sortedlist_add (cp->completions, completion_strcmp,
 			 xstrdup (fentry_table[i].name));
+  add_macros_to_list (cp->completions, completion_strcmp);
 
-  for (;;)
-    {
-      ms = minibuf_read_completion (buf, "", cp, functions_history);
-
-      if (ms == NULL) /* Cancelled. */
-	{
-	  free (buf);
-	  FUNCALL (keyboard_quit);
-	  break;
-	}
-      else if (ms[0] == '\0')
-	{
-	  minibuf_error ("No function name given");
-	  free ((char *) ms);
-	  ms = NULL;
-	  break;
-	}
-      else
-	{
-	  astr as = astr_new ();
-	  astr_cpy_cstr (as, ms);
-	  /* Complete partial words if possible. */
-	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-	    {
-	      free ((char *) ms);
-	      ms = xstrdup (cp->match);
-	    }
-	  astr_delete (as);
-
-	  for (i = 0; i < gl_list_size (cp->completions); i++)
-	    {
-	      char *s = (char *) gl_list_get_at (cp->completions, i);
-	      if (!strcmp (ms, s))
-	      {
-                free ((char *) ms);
-		ms = xstrdup (s);
-		break;
-	      }
-	    }
-
-	  if (get_function (ms) || get_macro (ms))
-	    {
-	      add_history_element (functions_history, ms);
-	      minibuf_clear ();
-	      break;
-	    }
-	  else
-	    {
-	      minibuf_error ("Undefined function name `%s'", ms);
-	      waitkey (WAITKEY_DEFAULT);
-	    }
-	}
-    }
-
-  free (buf);
+  va_start (ap, fmt);
+  ms = vminibuf_read_completion (fmt, "", cp, functions_history,
+				 "No function name given",
+				 minibuf_test_in_completions,
+				 "Undefined function name `%s'", ap);
+  va_end (ap);
   free_completion (cp);
 
   return ms;

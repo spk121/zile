@@ -246,3 +246,15 @@ get_macro (const char *name)
       return mp;
   return NULL;
 }
+
+/*
+ * Add macro names to a list.
+ */
+void
+add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f)
+{
+  Macro *mp;
+
+  for (mp = head_mp; mp; mp = mp->next)
+    gl_sortedlist_add (l, f, xstrdup (mp->name));
+}

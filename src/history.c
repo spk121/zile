@@ -44,11 +44,8 @@ void
 free_history (History * hp)
 {
   if (hp->elements)
-    {
-      gl_list_free (hp->elements);
-      hp->elements = NULL;
-      hp->sel = -1;
-    }
+    gl_list_free (hp->elements);
+  free (hp);
 }
 
 void
@@ -58,7 +55,7 @@ add_history_element (History * hp, const char *string)
 
   if (!hp->elements)
     hp->elements = gl_list_create_empty (GL_LINKED_LIST,
-                                         NULL, NULL, NULL, true);
+					 NULL, NULL, list_free, true);
   else
     last = (char *) gl_list_get_at (hp->elements, gl_list_size (hp->elements) - 1);
   if (!last || strcmp (last, string) != 0)
@@ -84,15 +81,15 @@ previous_history_element (History * hp)
 	  /* Select last element. */
 	  if (gl_list_size (hp->elements) > 0)
 	    {
-	      hp->sel = gl_list_size (hp->elements) - 1;
-	      s = (char *) gl_list_get_at (hp->elements, hp->sel);
+              hp->sel = gl_list_size (hp->elements) - 1;
+              s = (char *) gl_list_get_at (hp->elements, hp->sel);
 	    }
 	}
       /* Is there another element? */
       else if (hp->sel > 0)
 	{
 	  /* Select it. */
-	  hp->sel--;
+          hp->sel--;
           s = (char *) gl_list_get_at (hp->elements, hp->sel);
 	}
     }
@@ -111,7 +108,7 @@ next_history_element (History * hp)
       if (hp->sel < (ptrdiff_t) (gl_list_size(hp->elements) - 1))
 	{
 	  hp->sel++;
-          s = (char *) gl_list_get_at (hp->elements, hp->sel);
+	  s = (char *) gl_list_get_at (hp->elements, hp->sel);
 	}
       /* No more elements (back to original status). */
       else

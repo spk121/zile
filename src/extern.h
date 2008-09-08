@@ -94,7 +94,7 @@ le *evaluateBranch (le * trybranch);
 le *evaluateNode (le * node);
 void leEval (le * list);
 le *execute_with_uniarg (bool undo, int uniarg, int (*forward) (void),
-                            int (*backward) (void));
+                         int (*backward) (void));
 le *execute_function (const char *name, int uniarg);
 Function get_function (const char *name);
 const char *get_function_doc (const char *name);
@@ -178,6 +178,7 @@ void add_key_to_cmd (size_t key);
 void call_macro (Macro * mp);
 void free_macros (void);
 Macro *get_macro (const char *name);
+void add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f);
 
 /* main.c ----------------------------------------------------------------- */
 extern char *prog_name;
@@ -200,11 +201,16 @@ void free_minibuf (void);
 void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
+bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
 int minibuf_read_yesno (const char *fmt, ...);
-char *minibuf_read_filename (const char *fmt, const char *value,
-                             const char *file, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
 			       History * hp, ...);
+char *vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
+			  History * hp, const char *empty_err,
+			  bool (*test) (const char *s, gl_list_t completions),
+                                const char *invalid_err, va_list ap);
+char *minibuf_read_filename (const char *fmt, const char *value,
+			     const char *file, ...);
 void minibuf_clear (void);
 
 /* point.c ---------------------------------------------------------------- */
@@ -290,6 +296,7 @@ Point window_pt (Window * wp);
 /* xalloc.c --------------------------------------------------------------- */
 int xvasprintf (char **ptr, const char *fmt, va_list vargs);
 int xasprintf (char **ptr, const char *fmt, ...);
+void list_free (const void *p);
 
 
 /*

@@ -72,3 +72,12 @@ xasprintf (char **ptr, const char *fmt, ...)
 
   return retval;
 }
+
+/*
+ * Wrapper for free used as gl_listelement_dispose_fn.
+ */
+void
+list_free (const void *p)
+{
+  free ((void *)p);
+}
