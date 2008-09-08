@@ -160,7 +160,7 @@ setup_main_screen (int argc)
     {
       if (argc < 1)
         {
-	  undo_nosave = true;
+          undo_nosave = true;
 
 	  if (!get_variable_bool ("inhibit-splash-screen"))
 	    insert_string ("\
@@ -169,9 +169,9 @@ If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
 
-	  undo_nosave = false;
-	  cur_bp->flags &= ~BFLAG_MODIFIED;
-	  lastflag |= FLAG_NEED_RESYNC;
+          undo_nosave = false;
+          cur_bp->flags &= ~BFLAG_MODIFIED;
+          lastflag |= FLAG_NEED_RESYNC;
         }
     }
 }
@@ -180,10 +180,10 @@ static void
 segv_sig_handler (int signo GCC_UNUSED)
 {
   fprintf (stderr,
-	   "%s: " PACKAGE_NAME
-	   " crashed.  Please send a bug report to <"
-	   PACKAGE_BUGREPORT ">.\r\n",
-	   prog_name);
+           "%s: " PACKAGE_NAME
+           " crashed.  Please send a bug report to <"
+           PACKAGE_BUGREPORT ">.\r\n",
+           prog_name);
   zile_exit (true);
 }
 
@@ -250,16 +250,16 @@ main (int argc, char **argv)
       switch (c)
         {
         case 'q':
-	  qflag = true;
-	  break;
+          qflag = true;
+          break;
         case 'v':
-	  fprintf (stdout,
-		   ZILE_VERSION_STRING "\n"
-		   ZILE_COPYRIGHT_STRING "\n"
-		   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-		   "You may redistribute copies of " PACKAGE_NAME "\n"
-		   "under the terms of the GNU General Public License.\n"
-		   "For more information about these matters, see the file named COPYING.\n");
+          fprintf (stdout,
+                   ZILE_VERSION_STRING "\n"
+                   ZILE_COPYRIGHT_STRING "\n"
+                   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+                   "You may redistribute copies of " PACKAGE_NAME "\n"
+                   "under the terms of the GNU General Public License.\n"
+                   "For more information about these matters, see the file named COPYING.\n");
 	  return 0;
         case 'h':
 	  fprintf (stdout,
