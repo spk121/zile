@@ -82,7 +82,7 @@ zile_SOURCES =					\
 	$(top_srcdir)/src/term_redisplay.c	\
 	$(top_srcdir)/src/term_ncurses.c
 
-ALLSOURCES = $(zile_SOURCES) mkdoc.c
+ALLSOURCES = $(zile_SOURCES) mkfuncs.c
 
 BUILT_SOURCES = tbl_funcs.h
 
