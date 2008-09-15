@@ -200,7 +200,7 @@ minibuf_read_yesno (const char *fmt, ...)
 
 char *
 minibuf_read_completion (const char *fmt, char *value, Completion * cp,
-			 History * hp, ...)
+                         History * hp, ...)
 {
   va_list ap;
   char *buf, *ms;
