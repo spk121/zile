@@ -35,7 +35,7 @@ EXTRA_DIST =					\
 
 dist_man_MANS = zile.1
 
-zile.info: dotzile.texi
+$(srcdir)/zile.info: dotzile.texi
 
 dotzile.texi: dotzile.sample
 	@echo "@c Automatically generated file: NO DOT EDIT!" >$@
