@@ -224,19 +224,6 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-/*
- * Go to the line `to_line', counting from 0.  Point will end up in
- * "random" column.
- */
-void
-goto_line (size_t to_line)
-{
-  if (cur_bp->pt.n > to_line)
-    ngotoup (cur_bp->pt.n - to_line);
-  else if (cur_bp->pt.n < to_line)
-    ngotodown (to_line - cur_bp->pt.n);
-}
-
 DEFUN ("goto-char", goto_char)
 /*+
 Read a number N and move the cursor to character number N.
@@ -286,7 +273,11 @@ Line 1 is the beginning of the buffer.
     }
   while (to_line == ULONG_MAX);
 
-  goto_line (to_line - 1);
+  --to_line; /* Re-base to counting from zero */
+  if (cur_bp->pt.n > to_line)
+    ngotoup (cur_bp->pt.n - to_line);
+  else if (cur_bp->pt.n < to_line)
+    ngotodown (to_line -cur_bp->pt.n);
   cur_bp->pt.o = 0;
 
   return leT;

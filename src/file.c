@@ -52,7 +52,7 @@ exist_file (const char *filename)
   return true;
 }
 
-int
+static int
 is_regular_file (const char *filename)
 {
   struct stat st;
@@ -67,6 +67,18 @@ is_regular_file (const char *filename)
     return true;
 
   return false;
+}
+
+/*
+ * Return the current directory, if available.
+ */
+static astr
+agetcwd (void)
+{
+  char *s = getcwd (NULL, 0);
+  astr as = astr_new_cstr (s);
+  free (s);
+  return as;
 }
 
 /*
@@ -230,18 +242,6 @@ compact_path (astr path)
 }
 
 /*
- * Return the current directory, if available.
- */
-astr
-agetcwd (void)
-{
-  char *s = getcwd (NULL, 0);
-  astr as = astr_new_cstr (s);
-  free (s);
-  return as;
-}
-
-/*
  * Return the current directory for the buffer.
  */
 static astr
@@ -299,7 +299,7 @@ char coding_eol_cr[3] = "\r";
  * Read the file contents into a buffer.
  * Return quietly if the file doesn't exist, or other error.
  */
-void
+static void
 read_from_disk (const char *filename)
 {
   Line *lp;
@@ -424,7 +424,7 @@ find_file (const char *filename)
   return true;
 }
 
-Completion *
+static Completion *
 make_buffer_completion (void)
 {
   Buffer *bp;

@@ -29,7 +29,6 @@ size_t get_goalc_bp (Buffer * bp, Point pt);
 size_t get_goalc (void);
 int backward_char (void);
 int forward_char (void);
-void goto_line (size_t to_line);
 void gotobob (void);
 void gotoeob (void);
 int next_line (void);
@@ -90,8 +89,6 @@ void ding (void);
 /* eval.c ----------------------------------------------------------------- */
 extern le *leNIL, *leT;
 size_t countNodes (le * branch);
-le *evaluateBranch (le * trybranch);
-le *evaluateNode (le * node);
 void leEval (le * list);
 le *execute_with_uniarg (bool undo, int uniarg, int (*forward) (void),
                          int (*backward) (void));
@@ -105,14 +102,10 @@ void free_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
 int exist_file (const char *filename);
-int is_regular_file (const char *filename);
 astr get_home_dir (void);
 astr expand_path (astr path);
 astr compact_path (astr path);
-astr agetcwd (void);
-void read_from_disk (const char *filename);
 int find_file (const char *filename);
-Completion *make_buffer_completion (void);
 void kill_buffer (Buffer * kill_bp);
 void zile_exit (int doabort);
 
@@ -139,7 +132,6 @@ const char *next_history_element (History * hp);
 
 /* keycode.c -------------------------------------------------------------- */
 astr chordtostr (size_t key);
-size_t strtochord (char *buf, size_t * len);
 gl_list_t keystrtovec (char *key);
 astr keyvectostr (gl_list_t keys);
 
@@ -150,16 +142,12 @@ void free_kill_ring (void);
 Line *line_new (void);
 void line_delete (Line *l);
 Line *line_insert (Line *l, astr i);
-astr line_remove (Line *l);
 void line_replace_text (Line ** lp, size_t offset, size_t oldlen,
 			char *newtext, size_t newlen, int replace_case);
 int insert_char (int c);
 int insert_char_in_insert_mode (int c);
-int intercalate_char (int c);
-int insert_tab (void);
 void fill_break_line (void);
 int insert_newline (void);
-int intercalate_newline (void);
 void insert_string (const char *s);
 void insert_nstring (const char *s, size_t size);
 void bprintf (const char *fmt, ...);
@@ -187,7 +175,6 @@ extern Buffer *cur_bp, *head_bp;
 extern int thisflag, lastflag, last_uniarg;
 
 /* marker.c --------------------------------------------------------------- */
-Marker *marker_new (void);
 void free_marker (Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, Point pt);
 Marker *copy_marker (Marker * marker);
@@ -248,7 +235,7 @@ void show_splash_screen (const char *splash);
 void term_tidy (void);
 void term_addnstr (const char *s, size_t len);
 
-/* term_termcap.c --------------------------------------------------------- */
+/* term_ncurses.c --------------------------------------------------------- */
 void term_init (void);
 void term_close (void);
 void term_suspend (void);
@@ -256,7 +243,6 @@ void term_resume (void);
 void term_move (size_t y, size_t x);
 void term_clrtoeol (void);
 void term_refresh (void);
-void term_redraw_cursor (void);
 void term_clear (void);
 void term_addch (int c);
 void term_attrset (size_t attrs, ...);
@@ -285,7 +271,6 @@ int get_variable_number (char *var);
 
 /* window.c --------------------------------------------------------------- */
 void create_first_window (void);
-void free_window (Window * wp);
 Window *find_window (const char *name);
 void free_windows (void);
 Window *popup_window (void);

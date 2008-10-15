@@ -79,24 +79,6 @@ line_insert (Line *l, astr i)
   return n;
 }
 
-/* Remove the next item of a list, returning the item, or NULL if the
-   list is empty */
-astr
-line_remove (Line *l)
-{
-  astr i;
-  Line *p = l->next;
-
-  if (p == l)
-    return NULL;
-  i = p->text;
-  l->next = l->next->next;
-  l->next->prev = l;
-  free (p);
-
-  return i;
-}
-
 
 static void
 adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir,
@@ -123,7 +105,7 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir,
  * whatever the insert/overwrite mode is.
  * This function doesn't change the current position of the pointer.
  */
-int
+static int
 intercalate_char (int c)
 {
   if (warn_if_readonly_buffer ())
@@ -213,7 +195,7 @@ insert_expanded_tab (int (*inschr) (int chr))
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 }
 
-int
+static int
 insert_tab (void)
 {
   if (warn_if_readonly_buffer ())
@@ -241,7 +223,7 @@ END_DEFUN
  * Insert a newline at the current position without moving the cursor.
  * Update all other cursors if they point on the splitted line.
  */
-int
+static int
 intercalate_newline ()
 {
   Line *lp1, *lp2;
@@ -502,7 +484,7 @@ delete_char (void)
 
   if (eolp ())
     {
-      Line *lp1, *lp2;
+      Line *lp1, *lp2, *lp3;
       size_t lp1len;
 
       undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
@@ -514,7 +496,18 @@ delete_char (void)
       /* Move the next line text into the current line. */
       lp2 = cur_bp->pt.p->next;
       astr_cat (lp1->text, cur_bp->pt.p->next->text);
-      astr_delete (line_remove (lp1));
+
+      /* Delete old current line, as long as it's not the only one. */
+      lp3 = l->next;
+      if (lp3 != l)
+        {
+          astr as = lp3->text;
+          l->next = l->next->next;
+          l->next->prev = l;
+          free (lp3);
+          astr_delete (as);
+        }
+
       --cur_bp->num_lines;
 
       adjust_markers (lp1, lp2, lp1len, -1, 0);

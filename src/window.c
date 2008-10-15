@@ -38,9 +38,9 @@ window_new (void)
 }
 
 /*
- * Free the window allocated memory.
+ * Free a window's allocated memory.
  */
-void
+static void
 free_window (Window * wp)
 {
   if (wp->saved_pt)

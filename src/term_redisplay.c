@@ -381,12 +381,7 @@ term_redisplay (void)
       topline += wp->fheight;
     }
 
-  term_redraw_cursor ();
-}
-
-void
-term_redraw_cursor (void)
-{
+  /* Redraw cursor. */
   term_move (cur_topline + cur_wp->topdelta, point_screen_column);
 }
 

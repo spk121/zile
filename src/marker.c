@@ -29,7 +29,7 @@
 #include "zile.h"
 #include "extern.h"
 
-Marker *
+static Marker *
 marker_new (void)
 {
   return (Marker *) XZALLOC (Marker);

@@ -101,6 +101,58 @@ countNodes (le * branch)
   return count;
 }
 
+static le *
+evaluateBranch (le * trybranch)
+{
+  le *keyword;
+  fentry * func;
+
+  if (trybranch == NULL)
+    return NULL;
+
+  if (trybranch->branch)
+    keyword = evaluateBranch (trybranch->branch);
+  else
+    keyword = leNew (trybranch->data);
+
+  if (keyword->data == NULL)
+    {
+      leWipe (keyword);
+      return leNIL;
+    }
+
+  func = get_fentry (keyword->data);
+  leWipe (keyword);
+  if (func)
+    return func->func (0, trybranch);
+
+  return NULL;
+}
+
+static le *
+evaluateNode (le * node)
+{
+  le *value;
+
+  if (node == NULL)
+    return leNIL;
+
+  if (node->branch != NULL)
+    {
+      if (node->quoted)
+	value = leDup (node->branch);
+      else
+	value = evaluateBranch (node->branch);
+    }
+  else
+    {
+      const char *s = get_variable (node->data);
+      value = leNew (s ? s : node->data);
+    }
+
+  return value;
+}
+
 DEFUN ("setq", setq)
 /*+
 (setq [sym val]...)
@@ -130,58 +182,6 @@ The values val are expressions; they are evaluated.
   return newvalue;
 }
 END_DEFUN
-
-le *
-evaluateNode (le * node)
-{
-  le *value;
-
-  if (node == NULL)
-    return leNIL;
-
-  if (node->branch != NULL)
-    {
-      if (node->quoted)
-	value = leDup (node->branch);
-      else
-	value = evaluateBranch (node->branch);
-    }
-  else
-    {
-      const char *s = get_variable (node->data);
-      value = leNew (s ? s : node->data);
-    }
-
-  return value;
-}
-
-le *
-evaluateBranch (le * trybranch)
-{
-  le *keyword;
-  fentry * func;
-
-  if (trybranch == NULL)
-    return NULL;
-
-  if (trybranch->branch)
-    keyword = evaluateBranch (trybranch->branch);
-  else
-    keyword = leNew (trybranch->data);
-
-  if (keyword->data == NULL)
-    {
-      leWipe (keyword);
-      return leNIL;
-    }
-
-  func = get_fentry (keyword->data);
-  leWipe (keyword);
-  if (func)
-    return func->func (0, trybranch);
-
-  return NULL;
-}
 
 void
 leEval (le * list)
