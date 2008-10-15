@@ -224,7 +224,7 @@ END_DEFUN
  * Update all other cursors if they point on the splitted line.
  */
 static int
-intercalate_newline ()
+intercalate_newline (void)
 {
   Line *lp1, *lp2;
   size_t lp1len, lp2len;
@@ -484,33 +484,31 @@ delete_char (void)
 
   if (eolp ())
     {
-      Line *lp1, *lp2, *lp3;
-      size_t lp1len;
+      Line *lp1, *lp2;
+      size_t lp1oldlen;
 
       undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
 
       lp1 = cur_bp->pt.p;
-      lp2 = lp1->next;
-      lp1len = astr_len (lp1->text);
+      lp1oldlen = astr_len (lp1->text);
 
-      /* Move the next line text into the current line. */
-      lp2 = cur_bp->pt.p->next;
+      /* Cat the next line's text to the current line. */
       astr_cat (lp1->text, cur_bp->pt.p->next->text);
 
       /* Delete old current line, as long as it's not the only one. */
-      lp3 = l->next;
-      if (lp3 != l)
+      lp2 = lp1->next;
+      if (lp2 != lp1)
         {
-          astr as = lp3->text;
-          l->next = l->next->next;
-          l->next->prev = l;
-          free (lp3);
+          astr as = lp2->text;
+          lp1->next = lp1->next->next;
+          lp1->next->prev = lp1;
+          free (lp2);
           astr_delete (as);
         }
 
       --cur_bp->num_lines;
 
-      adjust_markers (lp1, lp2, lp1len, -1, 0);
+      adjust_markers (lp1, cur_bp->pt.p->next, lp1oldlen, -1, 0);
 
       cur_bp->flags |= BFLAG_MODIFIED;
 
