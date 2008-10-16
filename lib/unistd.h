@@ -1,6 +1,6 @@
 /* DO NOT EDIT! GENERATED AUTOMATICALLY! */
 /* Substitute for and wrapper around <unistd.h>.
-   Copyright (C) 2004-2007 Free Software Foundation, Inc.
+   Copyright (C) 2004-2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@
 
 #ifndef _GL_UNISTD_H
 
+#pragma GCC system_header
+
 /* The include_next requires a split double-inclusion guard.  */
 #if 1
 # include_next <unistd.h>
@@ -34,7 +36,40 @@
 /* mingw fails to declare _exit in <unistd.h>.  */
 #include <stdlib.h>
 
+#if 0 && 0 && 0
+/* Get ssize_t.  */
+# include <sys/types.h>
+#endif
+
 /* The definition of GL_LINK_WARNING is copied here.  */
+/* GL_LINK_WARNING("literal string") arranges to emit the literal string as
+   a linker warning on most glibc systems.
+   We use a linker warning rather than a preprocessor warning, because
+   #warning cannot be used inside macros.  */
+#ifndef GL_LINK_WARNING
+  /* This works on platforms with GNU ld and ELF object format.
+     Testing __GLIBC__ is sufficient for asserting that GNU ld is in use.
+     Testing __ELF__ guarantees the ELF object format.
+     Testing __GNUC__ is necessary for the compound expression syntax.  */
+# if defined __GLIBC__ && defined __ELF__ && defined __GNUC__
+#  define GL_LINK_WARNING(message) \
+     GL_LINK_WARNING1 (__FILE__, __LINE__, message)
+#  define GL_LINK_WARNING1(file, line, message) \
+     GL_LINK_WARNING2 (file, line, message)  /* macroexpand file and line */
+#  define GL_LINK_WARNING2(file, line, message) \
+     GL_LINK_WARNING3 (file ":" #line ": warning: " message)
+#  define GL_LINK_WARNING3(message) \
+     ({ static const char warning[sizeof (message)]		\
+          __attribute__ ((__unused__,				\
+                          __section__ (".gnu.warning"),		\
+                          __aligned__ (1)))			\
+          = message "\n";					\
+        (void)0;						\
+     })
+# else
+#  define GL_LINK_WARNING(message) ((void) 0)
+# endif
+#endif
 
 
 /* Declare overridden functions.  */
@@ -69,7 +104,7 @@ extern int chown (const char *file, uid_t uid, gid_t gid);
 #endif
 
 
-#if 0
+#if 1
 # if !1
 /* Copy the file descriptor OLDFD into file descriptor NEWFD.  Do nothing if
    NEWFD = OLDFD, otherwise close NEWFD first if it is open.
@@ -88,6 +123,26 @@ extern int dup2 (int oldfd, int newfd);
 
 
 #if 0
+# if !1
+/* Set of environment variables and values.  An array of strings of the form
+   "VARIABLE=VALUE", terminated with a NULL.  */
+#  if defined __APPLE__ && defined __MACH__
+#   include <crt_externs.h>
+#   define environ (*_NSGetEnviron ())
+#  else
+extern char **environ;
+#  endif
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef environ
+# define environ \
+    (GL_LINK_WARNING ("environ is unportable - " \
+                      "use gnulib module environ for portability"), \
+     environ)
+#endif
+
+
+#if 1
 # if 0
 
 /* Change the process' current working directory to the directory on which
@@ -182,7 +237,10 @@ extern int getlogin_r (char *name, size_t size);
 
 
 #if 0
-# if !1
+# if 0
+#  define getpagesize rpl_getpagesize
+extern int getpagesize (void);
+# elif !1
 /* This is for POSIX systems.  */
 #  if !defined getpagesize && defined _SC_PAGESIZE
 #   if ! (defined __VMS && __VMS_VER < 70000000)
@@ -236,7 +294,7 @@ extern int getlogin_r (char *name, size_t size);
 #endif
 
 
-#if 0
+#if 1
 # if 0
 /* Change the owner of FILE to UID (if UID is not -1) and the group of FILE
    to GID (if GID is not -1).  Do not follow symbolic links.
@@ -273,7 +331,7 @@ extern int lchown (char const *file, uid_t owner, gid_t group);
 #endif
 
 
-#if 0
+#if 1
 /* Read the contents of the symbolic link FILE and place the first BUFSIZE
    bytes of it into BUF.  Return the number of bytes placed into BUF if
    successful, otherwise -1 and errno set.
@@ -306,6 +364,16 @@ extern unsigned int sleep (unsigned int n);
     (GL_LINK_WARNING ("sleep is unportable - " \
                       "use gnulib module sleep for portability"), \
      sleep (n))
+#endif
+
+
+#if 0 && 0 && 0
+/* Write up to COUNT bytes starting at BUF to file descriptor FD.
+   See the POSIX:2001 specification
+   <http://www.opengroup.org/susv3xsh/write.html>.  */
+# undef write
+# define write rpl_write
+extern ssize_t write (int fd, const void *buf, size_t count);
 #endif
 
 

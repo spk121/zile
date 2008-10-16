@@ -1,7 +1,7 @@
 /* DO NOT EDIT! GENERATED AUTOMATICALLY! */
 /* A GNU-like <stdio.h>.
 
-   Copyright (C) 2004, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2007-2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+
+#pragma GCC system_header
 
 #if defined __need_FILE || defined __need___FILE
 /* Special invocation convention inside glibc header files.  */
@@ -46,7 +48,7 @@
 
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
-# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5) || __STRICT_ANSI__
+# if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
 #  define __attribute__(Spec) /* empty */
 # endif
 /* The __-protected variants of `format' and `printf' attributes
@@ -100,6 +102,10 @@ extern "C" {
 extern int fprintf (FILE *fp, const char *format, ...)
        __attribute__ ((__format__ (__printf__, 2, 3)));
 # endif
+#elif 1 && 0 && 0
+# define fprintf rpl_fprintf
+extern int fprintf (FILE *fp, const char *format, ...)
+       __attribute__ ((__format__ (__printf__, 2, 3)));
 #elif defined GNULIB_POSIXCHECK
 # undef fprintf
 # define fprintf \
@@ -115,6 +121,10 @@ extern int fprintf (FILE *fp, const char *format, ...)
 extern int vfprintf (FILE *fp, const char *format, va_list args)
        __attribute__ ((__format__ (__printf__, 2, 0)));
 # endif
+#elif 1 && 0 && 0
+# define vfprintf rpl_vfprintf
+extern int vfprintf (FILE *fp, const char *format, va_list args)
+       __attribute__ ((__format__ (__printf__, 2, 0)));
 #elif defined GNULIB_POSIXCHECK
 # undef vfprintf
 # define vfprintf(s,f,a) \
@@ -131,6 +141,11 @@ extern int vfprintf (FILE *fp, const char *format, va_list args)
 extern int printf (const char *format, ...)
        __attribute__ ((__format__ (__printf__, 1, 2)));
 # endif
+#elif 1 && 0 && 0
+/* Don't break __attribute__((format(printf,M,N))).  */
+# define printf __printf__
+extern int printf (const char *format, ...)
+       __attribute__ ((__format__ (__printf__, 1, 2)));
 #elif defined GNULIB_POSIXCHECK
 # undef printf
 # define printf \
@@ -153,6 +168,10 @@ extern int printf (const char *format, ...)
 extern int vprintf (const char *format, va_list args)
        __attribute__ ((__format__ (__printf__, 1, 0)));
 # endif
+#elif 1 && 0 && 0
+# define vprintf rpl_vprintf
+extern int vprintf (const char *format, va_list args)
+       __attribute__ ((__format__ (__printf__, 1, 0)));
 #elif defined GNULIB_POSIXCHECK
 # undef vprintf
 # define vprintf(f,a) \
@@ -243,6 +262,27 @@ extern int vsprintf (char *str, const char *format, va_list args)
 
 #if 0
 # if 0
+#  define obstack_printf rpl_osbtack_printf
+#  define obstack_vprintf rpl_obstack_vprintf
+# endif
+# if 0 || !1
+  struct obstack;
+  /* Grow an obstack with formatted output.  Return the number of
+     bytes added to OBS.  No trailing nul byte is added, and the
+     object should be closed with obstack_finish before use.  Upon
+     memory allocation error, call obstack_alloc_failed_handler.  Upon
+     other error, return -1.  */
+  extern int obstack_printf (struct obstack *obs, const char *format, ...)
+    __attribute__ ((__format__ (__printf__, 2, 3)));
+  extern int obstack_vprintf (struct obstack *obs, const char *format,
+			      va_list args)
+    __attribute__ ((__format__ (__printf__, 2, 0)));
+# endif
+#endif
+
+#if 0
+# if 0
+#  undef fopen
 #  define fopen rpl_fopen
 extern FILE * fopen (const char *filename, const char *mode);
 # endif
@@ -256,6 +296,7 @@ extern FILE * fopen (const char *filename, const char *mode);
 
 #if 0
 # if 0
+#  undef freopen
 #  define freopen rpl_freopen
 extern FILE * freopen (const char *filename, const char *mode, FILE *stream);
 # endif
@@ -361,6 +402,42 @@ extern long rpl_ftell (FILE *fp);
     fflush (f))
 #endif
 
+#if 1 && 0 && 0
+# undef fputc
+# define fputc rpl_fputc
+extern int fputc (int c, FILE *stream);
+#endif
+
+#if 1 && 0 && 0
+# undef putc
+# define putc rpl_fputc
+extern int putc (int c, FILE *stream);
+#endif
+
+#if 1 && 0 && 0
+# undef putchar
+# define putchar rpl_putchar
+extern int putchar (int c);
+#endif
+
+#if 1 && 0 && 0
+# undef fputs
+# define fputs rpl_fputs
+extern int fputs (const char *string, FILE *stream);
+#endif
+
+#if 1 && 0 && 0
+# undef puts
+# define puts rpl_puts
+extern int puts (const char *string);
+#endif
+
+#if 1 && 0 && 0
+# undef fwrite
+# define fwrite rpl_fwrite
+extern size_t fwrite (const void *ptr, size_t s, size_t n, FILE *stream);
+#endif
+
 #if 0
 # if !1
 /* Read input, up to (and including) the next occurrence of DELIMITER, from
@@ -400,6 +477,22 @@ extern ssize_t getline (char **lineptr, size_t *linesize, FILE *stream);
   (GL_LINK_WARNING ("getline is unportable - "				\
 		    "use gnulib module getline for portability"),	\
    getline (l, s, f))
+#endif
+
+#if 0
+# if 0
+#  define perror rpl_perror
+/* Print a message to standard error, describing the value of ERRNO,
+   (if STRING is not NULL and not empty) prefixed with STRING and ": ",
+   and terminated with a newline.  */
+extern void perror (const char *string);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef perror
+# define perror(s) \
+    (GL_LINK_WARNING ("perror is not always POSIX compliant - " \
+                      "use gnulib module perror for portability"), \
+     perror (s))
 #endif
 
 #ifdef __cplusplus

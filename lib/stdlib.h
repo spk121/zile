@@ -1,7 +1,7 @@
 /* DO NOT EDIT! GENERATED AUTOMATICALLY! */
 /* A GNU-like <stdlib.h>.
 
-   Copyright (C) 1995, 2001-2002, 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 1995, 2001-2004, 2006-2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+
+#pragma GCC system_header
 
 #if defined __need_malloc_and_calloc
 /* Special invocation convention inside glibc header files.  */
@@ -202,6 +204,61 @@ extern int mkstemp (char * /*template*/);
 #  define putenv rpl_putenv
 extern int putenv (char *string);
 # endif
+#endif
+
+
+#if 0
+# if !1
+/* Test a user response to a question.
+   Return 1 if it is affirmative, 0 if it is negative, or -1 if not clear.  */
+extern int rpmatch (const char *response);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef rpmatch
+# define rpmatch(r) \
+    (GL_LINK_WARNING ("rpmatch is unportable - " \
+                      "use gnulib module rpmatch for portability"), \
+     rpmatch (r))
+#endif
+
+
+#if 0
+# if !1
+/* Set NAME to VALUE in the environment.
+   If REPLACE is nonzero, overwrite an existing value.  */
+extern int setenv (const char *name, const char *value, int replace);
+# endif
+#endif
+
+
+#if 0
+# if 1
+#  if 0
+/* On some systems, unsetenv() returns void.
+   This is the case for MacOS X 10.3, FreeBSD 4.8, NetBSD 1.6, OpenBSD 3.4.  */
+#   define unsetenv(name) ((unsetenv)(name), 0)
+#  endif
+# else
+/* Remove the variable NAME from the environment.  */
+extern int unsetenv (const char *name);
+# endif
+#endif
+
+
+#if 0
+# if 0
+#  define strtod rpl_strtod
+# endif
+# if !1 || 0
+ /* Parse a double from STRING, updating ENDP if appropriate.  */
+extern double strtod (const char *str, char **endp);
+# endif
+#elif defined GNULIB_POSIXCHECK
+# undef strtod
+# define strtod(s, e)                           \
+    (GL_LINK_WARNING ("strtod is unportable - " \
+                      "use gnulib module strtod for portability"), \
+     strtod (s, e))
 #endif
 
 

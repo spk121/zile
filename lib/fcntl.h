@@ -1,7 +1,7 @@
 /* DO NOT EDIT! GENERATED AUTOMATICALLY! */
 /* Like <fcntl.h>, but with non-working flags defined to 0.
 
-   Copyright (C) 2006-2007 Free Software Foundation, Inc.
+   Copyright (C) 2006-2008 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,6 +17,19 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* written by Paul Eggert */
+
+#pragma GCC system_header
+
+#if defined __need_system_fcntl_h
+/* Special invocation convention.  */
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include_next <fcntl.h>
+
+#else
+/* Normal invocation convention.  */
 
 #ifndef _GL_FCNTL_H
 
@@ -36,7 +49,8 @@
 extern "C" {
 #endif
 
-#if (0 && 0) || defined FCHDIR_REPLACEMENT
+#if (1 && 0) || defined FCHDIR_REPLACEMENT
+# undef open
 # define open rpl_open
 extern int open (const char *filename, int flags, ...);
 #endif
@@ -119,3 +133,4 @@ extern int open (const char *filename, int flags, ...);
 
 #endif /* _GL_FCNTL_H */
 #endif /* _GL_FCNTL_H */
+#endif
