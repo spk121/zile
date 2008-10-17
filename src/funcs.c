@@ -605,9 +605,10 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
 
   if (strcmp (src, dest) != 0)
     {
+      size_t dest_len = strlen (dest);
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
-		 size, strlen (dest));
-      line_replace_text (lp, offset, size, dest, strlen (dest), false);
+		 size, dest_len);
+      line_replace_text (lp, offset, size, dest, dest_len, false);
     }
 
   free (src);
