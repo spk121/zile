@@ -24,6 +24,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -54,18 +55,13 @@ line_new (void)
 void
 line_delete (Line *l)
 {
-  Line *p = l, *q;
+  while (l->next != l)
+    line_remove (l->next);
 
-  do
-    {
-      q = p;
-      p = p->next;
-      free (q);
-    }
-  while (p != l);
+  free (l);
 }
 
-/* Insert an item into list before the given point, returning the new item */
+/* Insert a line into list before the given point, returning the new line */
 Line *
 line_insert (Line *l, astr i)
 {
@@ -79,23 +75,48 @@ line_insert (Line *l, astr i)
   return n;
 }
 
-
-static void
-adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir,
-		int offset)
+/* Remove a line from a list, if not sole line in list */
+void
+line_remove (Line *l)
 {
-  Marker *pt = point_marker (), *marker;
+  if (l->next || l->prev)
+    {
+      astr as = l->text;
+      l->prev->next = l->next;
+      l->prev->next->prev = l->prev;
+      free (l);
+      astr_delete (as);
+    }
+}
 
-  for (marker = cur_bp->markers; marker != NULL; marker = marker->next)
-    if (marker->pt.p == oldlp &&
-	(dir == -1 || marker->pt.o >= pointo + dir + (offset < 0)))
+
+/*
+ * Adjust markers (including point) when line at point is split, or
+ * next line is joined on, or where a line is edited.
+ *   newlp is the line to which characters were moved, oldlp the line
+ *    moved from (if dir == 0, newlp == oldlp)
+ *   pointo is point at which oldlp was split (to make newlp) or
+ *     joined to newlp
+ *   dir is 1 for split, -1 for join or 0 for line edit (newlp == oldlp)
+ *   if dir == 0, delta gives the number of characters inserted (>0) or
+ *     deleted (<0)
+ */
+static void
+adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, int delta)
+{
+  Marker *pt = point_marker (), *m;
+
+  assert (dir >= -1 && dir <= 1);
+
+  for (m = cur_bp->markers; m != NULL; m = m->next)
+    if (m->pt.p == oldlp && (dir == -1 || m->pt.o > pointo))
       {
-	marker->pt.p = newlp;
-	marker->pt.o -= pointo * dir - offset;
-	marker->pt.n += dir;
+        m->pt.p = newlp;
+        m->pt.o += delta - (pointo * dir);
+        m->pt.n += dir;
       }
-    else if (marker->pt.n > cur_bp->pt.n)
-      marker->pt.n += dir;
+    else if (m->pt.n > cur_bp->pt.n)
+      m->pt.n += dir;
 
   cur_bp->pt = pt->pt; /* This marker has been updated to new position */
   free_marker (pt);
@@ -133,25 +154,25 @@ insert_char (int c)
   if (cur_bp->flags & BFLAG_OVERWRITE)
     {
       /* Current character isn't the end of line
-	 && isn't a \t
-	 || tab width isn't correct
-	 || current char is a \t && we are in the tab limit.  */
+         && isn't a \t
+         || tab width isn't correct
+         || current char is a \t && we are in the tab limit.  */
       if ((cur_bp->pt.o < astr_len (cur_bp->pt.p->text))
-	  &&
-	  ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) != '\t')
-	   ||
-	   ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) ==
-	     '\t') && ((get_goalc () % t) == t))))
-	{
-	  /* Replace the character.  */
-	  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
-	  *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) = c;
-	  ++cur_bp->pt.o;
+          &&
+          ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) != '\t')
+           ||
+           ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) ==
+             '\t') && ((get_goalc () % t) == t))))
+        {
+          /* Replace the character.  */
+          undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
+          *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) = c;
+          ++cur_bp->pt.o;
 
-	  cur_bp->flags |= BFLAG_MODIFIED;
+          cur_bp->flags |= BFLAG_MODIFIED;
 
-	  return true;
-	}
+          return true;
+        }
       /*
        * Fall through the "insertion" mode of a character
        * at the end of the line, since it is totally
@@ -160,6 +181,7 @@ insert_char (int c)
     }
 
   intercalate_char (c);
+  forward_char ();
   adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, 1);
 
   return true;
@@ -221,40 +243,25 @@ END_DEFUN
 
 /*
  * Insert a newline at the current position without moving the cursor.
- * Update all other cursors if they point on the splitted line.
+ * Update markers after point in the split line.
  */
 static int
 intercalate_newline (void)
 {
-  Line *lp1, *lp2;
-  size_t lp1len, lp2len;
-  astr as;
-
   if (warn_if_readonly_buffer ())
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
 
-  /* Calculate the two line lengths. */
-  lp1len = cur_bp->pt.o;
-  lp2len = astr_len (cur_bp->pt.p->text) - lp1len;
-
-  lp1 = cur_bp->pt.p;
-
-  /* Update line linked list. */
-  lp2 = line_insert (lp1, astr_new ());
+  /* Move the text after the point into a new line. */
+  line_insert (cur_bp->pt.p,
+               astr_substr (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o,
+                            astr_len (cur_bp->pt.p->text) - cur_bp->pt.o));
   ++cur_bp->num_lines;
-
-  /* Move the text after the point into the new line. */
-  as = astr_substr (lp1->text, (ptrdiff_t) lp1len, lp2len);
-  astr_cpy (lp2->text, as);
-  astr_delete (as);
-  astr_truncate (lp1->text, (ptrdiff_t) lp1len);
-
-  adjust_markers (lp2, lp1, lp1len, 1, 0);
+  astr_truncate (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
+  adjust_markers (cur_bp->pt.p->prev, cur_bp->pt.p, cur_bp->pt.o, 1, 0);
 
   cur_bp->flags |= BFLAG_MODIFIED;
-
   thisflag |= FLAG_NEED_RESYNC;
 
   return true;
@@ -309,30 +316,20 @@ recase (char *str, size_t len, const char *tmpl, size_t tmpl_len)
  */
 void
 line_replace_text (Line ** lp, size_t offset, size_t oldlen,
-		   char *newtext, size_t newlen, int replace_case)
+                   char *newtext, size_t newlen, int replace_case)
 {
-  if (oldlen == 0)
-    return;
+  replace_case = replace_case && get_variable_bool ("case-replace");
 
-  if (replace_case && get_variable_bool ("case-replace"))
+  if (replace_case)
     {
       newtext = xstrdup (newtext);
       recase (newtext, newlen, astr_char ((*lp)->text, (ptrdiff_t) offset),
-	      oldlen);
+              oldlen);
     }
 
-  if (newlen != oldlen)
-    {
-      cur_bp->flags |= BFLAG_MODIFIED;
-      astr_replace_cstr ((*lp)->text, (ptrdiff_t) offset, oldlen, newtext);
-      adjust_markers (*lp, *lp, offset, 0, (int) (newlen - oldlen));
-    }
-  else if (memcmp (astr_char ((*lp)->text, (ptrdiff_t) offset),
-		   newtext, newlen) != 0)
-    {
-      memcpy (astr_char ((*lp)->text, (ptrdiff_t) offset), newtext, newlen);
-      cur_bp->flags |= BFLAG_MODIFIED;
-    }
+  cur_bp->flags |= BFLAG_MODIFIED;
+  astr_replace_cstr ((*lp)->text, (ptrdiff_t) offset, oldlen, newtext);
+  adjust_markers (*lp, *lp, offset, 0, (int) (newlen - oldlen));
 
   if (replace_case)
     free ((char *) newtext);
@@ -367,10 +364,10 @@ fill_break_line (void)
     {
       int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
       if (isspace (c))
-	{
-	  break_col = i;
-	  break;
-	}
+        {
+          break_col = i;
+          break;
+        }
     }
 
   /* If no break point moving left from fill-column, find first
@@ -378,14 +375,14 @@ fill_break_line (void)
   if (break_col == 0)
     {
       for (i = cur_bp->pt.o + 1; i < astr_len (cur_bp->pt.p->text); i++)
-	{
-	  int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
-	  if (isspace (c))
-	    {
-	      break_col = i;
-	      break;
-	    }
-	}
+        {
+          int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
+          if (isspace (c))
+            {
+              break_col = i;
+              break;
+            }
+        }
     }
 
   if (break_col >= 1)
@@ -482,45 +479,27 @@ delete_char (void)
   if (warn_if_readonly_buffer ())
     return false;
 
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
+
   if (eolp ())
     {
-      Line *lp1, *lp2;
-      size_t lp1oldlen;
+      size_t oldlen = astr_len (cur_bp->pt.p->text);
 
-      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
+      /* Join the lines. */
+      astr_cat (cur_bp->pt.p->text, cur_bp->pt.p->next->text);
+      line_remove (cur_bp->pt.p->next);
 
-      lp1 = cur_bp->pt.p;
-      lp1oldlen = astr_len (lp1->text);
-
-      /* Cat the next line's text to the current line. */
-      astr_cat (lp1->text, cur_bp->pt.p->next->text);
-
-      /* Delete old current line, as long as it's not the only one. */
-      lp2 = lp1->next;
-      if (lp2 != lp1)
-        {
-          astr as = lp2->text;
-          lp1->next = lp1->next->next;
-          lp1->next->prev = lp1;
-          free (lp2);
-          astr_delete (as);
-        }
-
+      adjust_markers (cur_bp->pt.p, cur_bp->pt.p->next, oldlen, -1, 0);
       --cur_bp->num_lines;
-
-      adjust_markers (lp1, cur_bp->pt.p->next, lp1oldlen, -1, 0);
-
-      cur_bp->flags |= BFLAG_MODIFIED;
-
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
     {
-      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 0);
       astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
-      cur_bp->flags |= BFLAG_MODIFIED;
     }
+
+  cur_bp->flags |= BFLAG_MODIFIED;
 
   return true;
 }
@@ -617,10 +596,10 @@ Delete all spaces and tabs around point, leaving one space.
 END_DEFUN
 
 /***********************************************************************
-			 Indentation command
+                         Indentation command
 ***********************************************************************/
 /*
- * Go to cur_goalc() in the previous non-blank line.
+ * Go to cur_goalc () in the previous non-blank line.
  */
 static void
 previous_nonblank_goalc (void)
@@ -668,16 +647,16 @@ does nothing.
 
       /* Now find the next blank char. */
       if (!(preceding_char () == '\t' && get_goalc () > cur_goalc))
-	while (!eolp () && (!isspace (following_char ())))
-	  forward_char ();
+        while (!eolp () && (!isspace (following_char ())))
+          forward_char ();
 
       /* Find next non-blank char. */
       while (!eolp () && (isspace (following_char ())))
-	forward_char ();
+        forward_char ();
 
       /* Target column. */
       if (!eolp ())
-	target_goalc = get_goalc ();
+        target_goalc = get_goalc ();
 
       cur_bp->pt = old_point->pt;
       free_marker (old_point);
@@ -688,22 +667,22 @@ does nothing.
   if (target_goalc > 0)
     {
       /* If not at EOL on target line, insert spaces & tabs up to
-	 target_goalc; if already at EOL on target line, insert a tab.
+         target_goalc; if already at EOL on target line, insert a tab.
        */
       cur_goalc = get_goalc ();
       if (cur_goalc < target_goalc)
-	{
-	  do
-	    {
-	      if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
-		ret = insert_tab ();
-	      else
-		ret = insert_char (' ');
-	    }
-	  while (ret && (cur_goalc = get_goalc ()) < target_goalc);
-	}
+        {
+          do
+            {
+              if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
+                ret = insert_tab ();
+              else
+                ret = insert_char (' ');
+            }
+          while (ret && (cur_goalc = get_goalc ()) < target_goalc);
+        }
       else
-	ret = insert_tab ();
+        ret = insert_tab ();
     }
   else
     ret = insert_tab ();
@@ -778,7 +757,7 @@ Indentation is done using the `indent-for-tab-command' function.
       cur_bp->pt = old_point->pt;
       free_marker (old_point);
       /* Only indent if we're in column > 0 or we're in column 0 and
-	 there is a space character there in the last non-blank line. */
+         there is a space character there in the last non-blank line. */
       if (indent)
         FUNCALL (indent_for_tab_command);
       ret = leT;

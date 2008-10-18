@@ -62,17 +62,12 @@ buffer_new (void)
 }
 
 /*
- * Free the buffer allocated memory.
+ * Free the buffer's allocated memory.
  */
 void
 free_buffer (Buffer * bp)
 {
-  Line *lp;
-
-  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
-    astr_delete (lp->text);
   line_delete (bp->lines);
-
   free_undo (bp->last_undop);
 
   while (bp->markers)
@@ -211,7 +206,7 @@ make_buffer_name (const char *filename)
     {
       sprintf (name, "%s<%d>", p, i);
       if (find_buffer (name, false) == NULL)
-	return name;
+        return name;
     }
 
    /* This should never happen. */
@@ -228,15 +223,15 @@ move_buffer_to_head (Buffer * bp)
   for (it = head_bp; it; it = it->next)
     {
       if (bp == it)
-	{
-	  if (prev)
-	    {
-	      prev->next = bp->next;
-	      bp->next = head_bp;
-	      head_bp = bp;
-	    }
-	  break;
-	}
+        {
+          if (prev)
+            {
+              prev->next = bp->next;
+              bp->next = head_bp;
+              head_bp = bp;
+            }
+          break;
+        }
       prev = it;
     }
 }
@@ -337,7 +332,7 @@ set_temporary_buffer (Buffer * bp)
   if (bp == head_bp)
     {
       if (head_bp->next == NULL)
-	return;
+        return;
       head_bp = head_bp->next;
     }
   else if (bp->next == NULL)
@@ -346,8 +341,8 @@ set_temporary_buffer (Buffer * bp)
   for (bp0 = head_bp; bp0 != NULL; bp0 = bp0->next)
     if (bp0->next == bp)
       {
-	bp0->next = bp0->next->next;
-	break;
+        bp0->next = bp0->next->next;
+        break;
       }
 
   for (bp0 = head_bp; bp0->next != NULL; bp0 = bp0->next)
@@ -371,7 +366,7 @@ calculate_buffer_size (Buffer * bp)
       size += astr_len (lp->text);
       lp = lp->next;
       if (lp == bp->lines)
-	break;
+        break;
       ++size;
     }
 
@@ -434,20 +429,20 @@ copy_text_block (size_t startn, size_t starto, size_t size)
   for (i = starto; dp - buf < (int) size;)
     {
       if (dp >= buf + max_size)
-	{
-	  int save_off = dp - buf;
-	  max_size += 10;
-	  buf = (char *) xrealloc (buf, max_size);
-	  dp = buf + save_off;
-	}
+        {
+          int save_off = dp - buf;
+          max_size += 10;
+          buf = (char *) xrealloc (buf, max_size);
+          dp = buf + save_off;
+        }
       if (i < astr_len (lp->text))
-	*dp++ = *astr_char (lp->text, (ptrdiff_t) (i++));
+        *dp++ = *astr_char (lp->text, (ptrdiff_t) (i++));
       else
-	{
-	  *dp++ = '\n';
-	  lp = lp->next;
-	  i = 0;
-	}
+        {
+          *dp++ = '\n';
+          lp = lp->next;
+          i = 0;
+        }
     }
 
   return buf;

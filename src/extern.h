@@ -142,8 +142,9 @@ void free_kill_ring (void);
 Line *line_new (void);
 void line_delete (Line *l);
 Line *line_insert (Line *l, astr i);
+void line_remove (Line *l);
 void line_replace_text (Line ** lp, size_t offset, size_t oldlen,
-			char *newtext, size_t newlen, int replace_case);
+                        char *newtext, size_t newlen, int replace_case);
 int insert_char (int c);
 int insert_char_in_insert_mode (int c);
 void fill_break_line (void);
@@ -191,13 +192,13 @@ char *minibuf_read (const char *fmt, const char *value, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
 int minibuf_read_yesno (const char *fmt, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
-			       History * hp, ...);
+                               History * hp, ...);
 char *vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
                                 History * hp, const char *empty_err,
                                 bool (*test) (const char *s, gl_list_t completions),
                                 const char *invalid_err, va_list ap);
 char *minibuf_read_filename (const char *fmt, const char *value,
-			     const char *file, ...);
+                             const char *file, ...);
 void minibuf_clear (void);
 
 /* point.c ---------------------------------------------------------------- */
@@ -223,7 +224,7 @@ void init_search (void);
 /* term_minibuf.c --------------------------------------------------------- */
 void term_minibuf_write (const char *fmt);
 char *term_minibuf_read (const char *prompt, const char *value, size_t pos,
-			 Completion * cp, History * hp);
+                         Completion * cp, History * hp);
 
 /* term_redisplay.c ------------------------------------------------------- */
 size_t term_width (void);
