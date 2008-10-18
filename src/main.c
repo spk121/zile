@@ -124,7 +124,7 @@ execute_functions (gl_list_t funcs)
   size_t i;
   for (i = 0; i < gl_list_size (funcs); i++)
     {
-      char *func = (char *) gl_list_get_at(funcs, i);
+      char *func = (char *) gl_list_get_at (funcs, i);
       term_redisplay ();
       if (!execute_function (func, 1))
         minibuf_error ("Function `%s' not defined", func);
@@ -162,8 +162,8 @@ setup_main_screen (int argc)
         {
           undo_nosave = true;
 
-	  if (!get_variable_bool ("inhibit-splash-screen"))
-	    insert_string ("\
+          if (!get_variable_bool ("inhibit-splash-screen"))
+            insert_string ("\
 This buffer is for notes you don't want to save.\n\
 If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
@@ -191,7 +191,7 @@ static void
 other_sig_handler (int signo GCC_UNUSED)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
-	   prog_name, signo);
+           prog_name, signo);
   zile_exit (false);
 }
 
@@ -222,7 +222,7 @@ main (int argc, char **argv)
 {
   int c, qflag = false;
   gl_list_t fargs = gl_list_create_empty (GL_LINKED_LIST,
-					  NULL, NULL, NULL, false);
+                                          NULL, NULL, NULL, false);
   size_t line;
 
   /* Set prog_name to executable name, if available */
@@ -260,32 +260,32 @@ main (int argc, char **argv)
                    "You may redistribute copies of " PACKAGE_NAME "\n"
                    "under the terms of the GNU General Public License.\n"
                    "For more information about these matters, see the file named COPYING.\n");
-	  return 0;
+          return 0;
         case 'h':
-	  fprintf (stdout,
-		   "Usage: %s [OPTION-OR-FILENAME]...\n"
-		   "\n"
-		   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
-		   "\n"
-		   "Initialization options:\n"
-		   "\n"
-		   "--help                  display this help message and exit\n"
-		   "--no-init-file, -q      do not load ~/." PACKAGE "\n"
-		   "--version               display version information and exit\n"
-		   "\n" "Action options:\n" "\n"
-		   "FILE                    visit FILE using find-file\n"
-		   "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
-		   "\n"
-		   "Report bugs to " PACKAGE_BUGREPORT ".\n",
-		   prog_name);
-	  return 0;
+          fprintf (stdout,
+                   "Usage: %s [OPTION-OR-FILENAME]...\n"
+                   "\n"
+                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
+                   "\n"
+                   "Initialization options:\n"
+                   "\n"
+                   "--help                  display this help message and exit\n"
+                   "--no-init-file, -q      do not load ~/." PACKAGE "\n"
+                   "--version               display version information and exit\n"
+                   "\n" "Action options:\n" "\n"
+                   "FILE                    visit FILE using find-file\n"
+                   "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
+                   "\n"
+                   "Report bugs to " PACKAGE_BUGREPORT ".\n",
+                   prog_name);
+          return 0;
         case '?':		/* Unknown option */
-	  minibuf_error ("Unknown option `%s'", argv[this_optind]);
-	  break;
+          minibuf_error ("Unknown option `%s'", argv[this_optind]);
+          break;
         case ':':		/* Missing argument */
-	  fprintf (stderr, "%s: Option `%s' requires an argument\n\n",
-		   prog_name, argv[this_optind]);
-	  exit (1);
+          fprintf (stderr, "%s: Option `%s' requires an argument\n\n",
+                   prog_name, argv[this_optind]);
+          exit (1);
         }
     }
 
@@ -312,9 +312,9 @@ main (int argc, char **argv)
       astr as = get_home_dir ();
       if (as)
         {
-	  astr_cat_cstr (as, "/." PACKAGE);
-	  lisp_load (astr_cstr (as));
-	  astr_delete (as);
+          astr_cat_cstr (as, "/." PACKAGE);
+          lisp_load (astr_cstr (as));
+          astr_delete (as);
         }
     }
 
@@ -328,10 +328,10 @@ main (int argc, char **argv)
         line = strtoul (*argv + 1, NULL, 10);
       else
         {
-	  find_file (*argv);
-	  ngotodown (line - 1);
-	  line = 1;
-	  lastflag |= FLAG_NEED_RESYNC;
+          find_file (*argv);
+          ngotodown (line - 1);
+          line = 1;
+          lastflag |= FLAG_NEED_RESYNC;
         }
     }
 

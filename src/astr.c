@@ -107,7 +107,7 @@ astr_cpy_cstr (astr as, const char *s)
 }
 
 astr
-astr_ncat_cstr(astr as, const char *s, size_t csize)
+astr_ncat_cstr (astr as, const char *s, size_t csize)
 {
   astr_resize (as, as->len + csize);
   memcpy (as->text + as->len, s, csize);
@@ -158,7 +158,7 @@ astr_substr (astr as, ptrdiff_t pos, size_t size)
 
 static astr
 astr_replace_x (astr as, ptrdiff_t pos, size_t size, const char *s,
-		size_t csize)
+                size_t csize)
 {
   astr tail;
 
@@ -218,7 +218,7 @@ astr_truncate (astr as, ptrdiff_t pos)
   return as;
 }
 
-astr astr_fread(FILE * fp)
+astr astr_fread (FILE * fp)
 {
   int c;
   astr as = astr_new ();
@@ -270,7 +270,7 @@ astr_afmt (astr as, const char *fmt, ...)
 static void
 assert_eq (astr as, const char *s)
 {
-  if (strcmp(((astr)(as))->text, (s)))
+  if (strcmp (((astr)(as))->text, (s)))
     printf ("test failed: \"%s\" != \"%s\"\n", as->text, s);
 }
 

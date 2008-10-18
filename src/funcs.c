@@ -70,9 +70,9 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
   if (!(lastflag & FLAG_SET_UNIARG))
     {
       if (transient_mark_mode ())
-	set_variable ("transient-mark-mode", "nil");
+        set_variable ("transient-mark-mode", "nil");
       else
-	set_variable ("transient-mark-mode", "t");
+        set_variable ("transient-mark-mode", "t");
     }
   else
     set_variable ("transient-mark-mode", uniarg > 0 ? "t" : "nil");
@@ -138,8 +138,8 @@ print_buf (Buffer * old_bp, Buffer * bp)
     return;
 
   bprintf ("%3s %-16s %6u  %-13s",
-	   make_buffer_flags (bp, old_bp == bp),
-	   bp->name, calculate_buffer_size (bp), astr_cstr (mode));
+           make_buffer_flags (bp, old_bp == bp),
+           bp->name, calculate_buffer_size (bp), astr_cstr (mode));
   astr_delete (mode);
   if (bp->filename != NULL)
     {
@@ -203,10 +203,10 @@ write_buffers_list (va_list ap)
     {
       /* Print all buffer less this one (the *Buffer List*). */
       if (cur_bp != bp)
-	print_buf (old_wp->bp, bp);
+        print_buf (old_wp->bp, bp);
       bp = bp->next;
       if (bp == NULL)
-	bp = head_bp;
+        bp = head_bp;
     }
   while (bp != old_wp->bp);
 }
@@ -279,10 +279,10 @@ Just C-u as argument means to use the current column.
         buf = arglist->next->data;
       else
         {
-	  xasprintf (&buf, "%d", fill_col);
-	  /* Only print message when run interactively. */
-	  minibuf_write ("Fill column set to %s (was %d)", buf,
-			 get_variable_number ("fill-column"));
+          xasprintf (&buf, "%d", fill_col);
+          /* Only print message when run interactively. */
+          minibuf_write ("Fill column set to %s (was %d)", buf,
+                         get_variable_number ("fill-column"));
         }
       branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
       F_set_variable (0, branch);
@@ -440,49 +440,49 @@ universal_argument (int keytype, int xarg)
 
       /* Cancelled. */
       if (key == KBD_CANCEL)
-	return FUNCALL (keyboard_quit);
+        return FUNCALL (keyboard_quit);
       /* Digit pressed. */
       else if (isdigit (key & 0xff))
-	{
-	  digit = (key & 0xff) - '0';
-	  empty_param = false;
+        {
+          digit = (key & 0xff) - '0';
+          empty_param = false;
 
-	  if (key & KBD_META)
-	    astr_cat_cstr (as, " ESC");
+          if (key & KBD_META)
+            astr_cat_cstr (as, " ESC");
 
-	  astr_afmt (as, " %d", digit);
+          astr_afmt (as, " %d", digit);
 
-	  if (i == 0)
-	    arg = digit;
-	  else
-	    arg = arg * 10 + digit;
+          if (i == 0)
+            arg = digit;
+          else
+            arg = arg * 10 + digit;
 
-	  i++;
-	}
+          i++;
+        }
       else if (key == (KBD_CTRL | 'u'))
-	{
-	  astr_cat_cstr (as, " C-u");
-	  if (i == 0)
-	    arg *= 4;
-	  else
-	    break;
-	}
+        {
+          astr_cat_cstr (as, " C-u");
+          if (i == 0)
+            arg *= 4;
+          else
+            break;
+        }
       else if (key == '-' && i == 0)
-	{
-	  if (sgn > 0)
-	    {
-	      sgn = -sgn;
-	      astr_cat_cstr (as, " -");
-	      /* The default negative arg isn't -4, it's -1. */
-	      arg = 1;
-	      empty_param = false;
-	    }
-	}
+        {
+          if (sgn > 0)
+            {
+              sgn = -sgn;
+              astr_cat_cstr (as, " -");
+              /* The default negative arg isn't -4, it's -1. */
+              arg = 1;
+              empty_param = false;
+            }
+        }
       else
-	{
-	  ungetkey (key);
-	  break;
-	}
+        {
+          ungetkey (key);
+          break;
+        }
     }
 
   last_uniarg = arg * sgn;
@@ -520,38 +520,38 @@ tabify_string (char *dest, char *src, size_t scol, size_t tw)
     switch (*sp)
       {
       case ' ':
-	++dcol;
-	break;
+        ++dcol;
+        break;
       case '\t':
-	dcol += tw;
-	dcol -= dcol % tw;
-	break;
+        dcol += tw;
+        dcol -= dcol % tw;
+        break;
       default:
-	while (((ocol + tw) - (ocol + tw) % tw) <= dcol)
-	  {
-	    if (ocol + 1 == dcol)
-	      break;
-	    *dp++ = '\t';
-	    ocol += tw;
-	    ocol -= ocol % tw;
-	  }
-	while (ocol < dcol)
-	  {
-	    *dp++ = ' ';
-	    ocol++;
-	  }
-	*dp++ = *sp;
-	if (*sp == '\0')
-	  return;
-	++ocol;
-	++dcol;
+        while (((ocol + tw) - (ocol + tw) % tw) <= dcol)
+          {
+            if (ocol + 1 == dcol)
+              break;
+            *dp++ = '\t';
+            ocol += tw;
+            ocol -= ocol % tw;
+          }
+        while (ocol < dcol)
+          {
+            *dp++ = ' ';
+            ocol++;
+          }
+        *dp++ = *sp;
+        if (*sp == '\0')
+          return;
+        ++ocol;
+        ++dcol;
       }
 }
 
 /*
  * Expand the tabulations into spaces according to the `tw' tab width.
- * The output buffer should be big enough to contain the expanded string.
- * To be sure, sizeof(dest) should be >= strlen(src)*tw + 1.
+ * The output buffer should be big enough to contain the expanded string,
+ * i.e. strlen (src) * tw + 1.
  */
 static void
 untabify_string (char *dest, char *src, size_t scol, size_t tw)
@@ -562,9 +562,9 @@ untabify_string (char *dest, char *src, size_t scol, size_t tw)
   for (sp = src, dp = dest; *sp != '\0'; ++sp)
     if (*sp == '\t')
       {
-	do
-	  *dp++ = ' ', ++col;
-	while ((col % tw) > 0);
+        do
+          *dp++ = ' ', ++col;
+        while ((col % tw) > 0);
       }
     else
       *dp++ = *sp, ++col;
@@ -575,7 +575,7 @@ untabify_string (char *dest, char *src, size_t scol, size_t tw)
 #define TAB_UNTABIFY	2
 static void
 edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
-	       int action)
+               int action)
 {
   char *src, *dest;
   size_t col, i, t = tab_width (cur_bp);
@@ -593,7 +593,7 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
   for (i = 0; i < offset; i++)
     {
       if (*astr_char ((*lp)->text, (ptrdiff_t) i) == '\t')
-	col |= t - 1;
+        col |= t - 1;
       ++col;
     }
 
@@ -607,7 +607,7 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
     {
       size_t dest_len = strlen (dest);
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
-		 size, dest_len);
+                 size, dest_len);
       line_replace_text (lp, offset, size, dest, dest_len, false);
     }
 
@@ -636,24 +636,24 @@ edit_tab_region (int action)
     {
       /* First line.  */
       if (lineno == r.start.n)
-	{
-	  /* Region on a sole line. */
-	  if (lineno == r.end.n)
-	    edit_tab_line (&lp, lineno, r.start.o, r.size, action);
-	  /* Region is multi-line. */
-	  else
-	    edit_tab_line (&lp, lineno, r.start.o,
-			   astr_len (lp->text) - r.start.o, action);
-	}
+        {
+          /* Region on a sole line. */
+          if (lineno == r.end.n)
+            edit_tab_line (&lp, lineno, r.start.o, r.size, action);
+          /* Region is multi-line. */
+          else
+            edit_tab_line (&lp, lineno, r.start.o,
+                           astr_len (lp->text) - r.start.o, action);
+        }
       /* Last line of multi-line region. */
       else if (lineno == r.end.n)
-	edit_tab_line (&lp, lineno, 0, r.end.o, action);
+        edit_tab_line (&lp, lineno, 0, r.end.o, action);
       /* Middle line of multi-line region. */
       else
-	edit_tab_line (&lp, lineno, 0, astr_len (lp->text), action);
+        edit_tab_line (&lp, lineno, 0, astr_len (lp->text), action);
       /* Done?  */
       if (lineno == r.end.n)
-	break;
+        break;
     }
   cur_bp->pt = marker->pt;
   undo_save (UNDO_END_SEQUENCE, marker->pt, 0, 0);
@@ -694,7 +694,7 @@ Move point to the first non-whitespace character on this line.
   while (!eolp ())
     {
       if (!isspace (following_char ()))
-	break;
+        break;
       forward_char ();
     }
   return leT;
@@ -702,7 +702,7 @@ Move point to the first non-whitespace character on this line.
 END_DEFUN
 
 /***********************************************************************
-			  Transpose functions
+                          Transpose functions
 ***********************************************************************/
 static void
 astr_append_region (astr s)
@@ -716,12 +716,12 @@ astr_append_region (astr s)
     {
       char *t = copy_text_block (r.start.n, r.start.o, r.size);
       if (t)
-	{
-	  size_t i;
-	  for (i = 0; i < r.size; i++)
-	    astr_cat_char (s, t[i]);
-	  free (t);
-	}
+        {
+          size_t i;
+          for (i = 0; i < r.size; i++)
+            astr_cat_char (s, t[i]);
+          free (t);
+        }
     }
 }
 
@@ -739,16 +739,16 @@ transpose_subr (Function f)
   if (f == F_forward_char)
     {
       if (eolp ())
-	f (-1, NULL);
+        f (-1, NULL);
     }
   /* For transpose-lines. */
   else if (f == F_forward_line)
     {
       /* If we are in first line, go to next line. */
       if (cur_bp->pt.p->prev == cur_bp->lines)
-	{
-	  f (1, NULL);
-	}
+        {
+          f (1, NULL);
+        }
     }
 
   /* Backward. */
@@ -772,32 +772,32 @@ transpose_subr (Function f)
     {
       /* For transpose-lines. */
       if (f == F_forward_line)
-	{
-	  if (!seq_started)
-	    {
-	      seq_started = true;
-	      undo_save (UNDO_START_SEQUENCE, p0->pt, 0, 0);
-	    }
+        {
+          if (!seq_started)
+            {
+              seq_started = true;
+              undo_save (UNDO_START_SEQUENCE, p0->pt, 0, 0);
+            }
 
-	  /* When last line has characters. */
-	  if (!is_empty_line ())
-	    /* We must insert the '\n' in the end
-	       of line (not in the beginning). */
-	    FUNCALL (end_of_line);
+          /* When last line has characters. */
+          if (!is_empty_line ())
+            /* We must insert the '\n' in the end
+               of line (not in the beginning). */
+            FUNCALL (end_of_line);
 
-	  /* Insert a newline. */
-	  FUNCALL (newline);
-	}
+          /* Insert a newline. */
+          FUNCALL (newline);
+        }
       else
-	{
-	  pop_mark ();
-	  goto_point (p1->pt);
-	  minibuf_error ("End of buffer");
+        {
+          pop_mark ();
+          goto_point (p1->pt);
+          minibuf_error ("End of buffer");
 
-	  free_marker (p0);
-	  free_marker (p1);
-	  return leNIL;
-	}
+          free_marker (p0);
+          free_marker (p1);
+          return leNIL;
+        }
     }
 
   goto_point (p1->pt);
@@ -843,7 +843,7 @@ transpose_subr (Function f)
     {
       goto_point (p1->pt);
       if (astr_len (s2) > 0)
-	insert_string (astr_cstr (s2));
+        insert_string (astr_cstr (s2));
     }
 
   /* Insert the first string in the second position. */
@@ -851,7 +851,7 @@ transpose_subr (Function f)
     {
       goto_point (p2->pt);
       if (astr_len (s1) > 0)
-	insert_string (astr_cstr (s1));
+        insert_string (astr_cstr (s1));
     }
 
   if (seq_started)
@@ -934,7 +934,7 @@ With argument 0, interchanges line point is in with line mark is in.
 END_DEFUN
 
 /***********************************************************************
-			  Move through words
+                          Move through words
 ***********************************************************************/
 #define ISWORDCHAR(c)	(isalnum (c) || c == '$')
 static int
@@ -944,21 +944,21 @@ move_word (int dir, int (*next_char) (void), int (*move_char) (void), int (*at_e
   for (;;)
     {
       while (!at_extreme ())
-	{
-	  int c = next_char ();
-	  if (!ISWORDCHAR (c))
-	    {
-	      if (gotword)
-		return true;
-	    }
-	  else
-	    gotword = true;
-	  cur_bp->pt.o += dir;
-	}
+        {
+          int c = next_char ();
+          if (!ISWORDCHAR (c))
+            {
+              if (gotword)
+                return true;
+            }
+          else
+            gotword = true;
+          cur_bp->pt.o += dir;
+        }
       if (gotword)
-	return true;
+        return true;
       if (!move_char ())
-	break;
+        break;
     }
   return false;
 }
@@ -997,17 +997,17 @@ With argument, do this that many times.
 END_DEFUN
 
 /***********************************************************************
-	       Move through balanced expressions (sexp)
+               Move through balanced expressions (sexp)
 ***********************************************************************/
-#define ISSEXPCHAR(c)	      (isalnum (c) || c == '$' || c == '_')
+#define ISSEXPCHAR(c)         (isalnum (c) || c == '$' || c == '_')
 #define ISOPENBRACKETCHAR(c)  ((c == '(') || (c == '[') || ( c== '{') ||\
-			       ((c == '\"') && !double_quote) ||	\
-			       ((c == '\'') && !single_quote))
+                               ((c == '\"') && !double_quote) ||	\
+                               ((c == '\'') && !single_quote))
 #define ISCLOSEBRACKETCHAR(c) ((c == ')') || (c == ']') || (c == '}') ||\
-			       ((c == '\"') && double_quote) ||		\
-			       ((c == '\'') && single_quote))
+                               ((c == '\"') && double_quote) ||		\
+                               ((c == '\'') && single_quote))
 #define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
-			       ISCLOSEBRACKETCHAR (c))
+                               ISCLOSEBRACKETCHAR (c))
 #define PRECEDINGQUOTEDQUOTE(c) (c == '\\' \
     && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->text) \
     && ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\"') || \
@@ -1028,70 +1028,70 @@ move_sexp (int dir)
   for (;;)
     {
       while (dir > 0 ? !eolp () : !bolp ())
-	{
-	  int c = dir > 0 ? following_char () : preceding_char ();
+        {
+          int c = dir > 0 ? following_char () : preceding_char ();
 
-	  /* Jump quotes that aren't sexp separators. */
-	  if (dir > 0 ? PRECEDINGQUOTEDQUOTE (c) : FOLLOWINGQUOTEDQUOTE (c))
-	    {
-	      cur_bp->pt.o += dir;
-	      c = 'a';		/* Treat ' and " like word chars. */
-	    }
+          /* Jump quotes that aren't sexp separators. */
+          if (dir > 0 ? PRECEDINGQUOTEDQUOTE (c) : FOLLOWINGQUOTEDQUOTE (c))
+            {
+              cur_bp->pt.o += dir;
+              c = 'a';		/* Treat ' and " like word chars. */
+            }
 
-	  if (dir > 0 ? ISOPENBRACKETCHAR (c) : ISCLOSEBRACKETCHAR (c))
-	    {
-	      if (level == 0 && gotsexp)
+          if (dir > 0 ? ISOPENBRACKETCHAR (c) : ISCLOSEBRACKETCHAR (c))
+            {
+              if (level == 0 && gotsexp)
                 return true;
 
-	      level++;
-	      gotsexp = true;
-	      if (c == '\"')
+              level++;
+              gotsexp = true;
+              if (c == '\"')
                 double_quote ^= 1;
-	      if (c == '\'')
+              if (c == '\'')
                 single_quote ^= 1;
-	    }
-	  else if (dir > 0 ? ISCLOSEBRACKETCHAR (c) : ISOPENBRACKETCHAR (c))
-	    {
-	      if (level == 0 && gotsexp)
+            }
+          else if (dir > 0 ? ISCLOSEBRACKETCHAR (c) : ISOPENBRACKETCHAR (c))
+            {
+              if (level == 0 && gotsexp)
                 return true;
 
-	      level--;
-	      gotsexp = true;
-	      if (c == '\"')
+              level--;
+              gotsexp = true;
+              if (c == '\"')
                 double_quote ^= 1;
-	      if (c == '\'')
+              if (c == '\'')
                 single_quote ^= 1;
 
-	      if (level < 0)
+              if (level < 0)
                 {
-		  minibuf_error ("Scan error: \"Containing "
-				 "expression ends prematurely\"");
-		  return false;
+                  minibuf_error ("Scan error: \"Containing "
+                                 "expression ends prematurely\"");
+                  return false;
                 }
-	    }
+            }
 
-	  cur_bp->pt.o += dir;
+          cur_bp->pt.o += dir;
 
-	  if (!ISSEXPCHAR (c))
-	    {
-	      if (gotsexp && level == 0)
-		{
-		  if (!ISSEXPSEPARATOR (c))
-		    cur_bp->pt.o -= dir;
-		  return true;
-		}
-	    }
-	  else
-	    gotsexp = true;
-	}
+          if (!ISSEXPCHAR (c))
+            {
+              if (gotsexp && level == 0)
+                {
+                  if (!ISSEXPSEPARATOR (c))
+                    cur_bp->pt.o -= dir;
+                  return true;
+                }
+            }
+          else
+            gotsexp = true;
+        }
       if (gotsexp && level == 0)
-	return true;
+        return true;
       if (dir > 0 ? !next_line () : !previous_line ())
-	{
-	  if (level != 0)
-	    minibuf_error ("Scan error: \"Unbalanced parentheses\"");
-	  break;
-	}
+        {
+          if (level != 0)
+            minibuf_error ("Scan error: \"Unbalanced parentheses\"");
+          break;
+        }
       cur_bp->pt.o = dir > 0 ? 0 : astr_len (cur_bp->pt.p->text);
     }
   return false;
@@ -1176,7 +1176,7 @@ END_DEFUN
 
 static le *
 move_paragraph (int uniarg, int (*forward) (void), int (*backward) (void),
-		     Function line_extremum)
+                     Function line_extremum)
 {
   if (uniarg < 0)
     {
@@ -1187,9 +1187,9 @@ move_paragraph (int uniarg, int (*forward) (void), int (*backward) (void),
   while (uniarg-- > 0)
     {
       while (is_empty_line () && forward ())
-	;
+        ;
       while (!is_empty_line () && forward ())
-	;
+        ;
     }
 
   if (is_empty_line ())
@@ -1303,7 +1303,7 @@ setcase_word (int rcase)
 
   for (i = cur_bp->pt.o;
        i < astr_len (cur_bp->pt.p->text) &&
-	 ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i));
+         ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i));
        i++)
     ;
   size = i - cur_bp->pt.o;
@@ -1313,25 +1313,25 @@ setcase_word (int rcase)
   gotword = false;
   for (gotword = false;
        cur_bp->pt.o < astr_len (cur_bp->pt.p->text) &&
-	 ISWORDCHAR ((int) *(p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o)));
+         ISWORDCHAR ((int) *(p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o)));
        cur_bp->pt.o++, gotword = true)
     {
       if (isalpha ((int) *p))
-	{
-	  switch (rcase)
-	    {
-	    case UPPERCASE:
-	      *p = toupper (*p);
-	      break;
-	    case LOWERCASE:
-	      *p = tolower (*p);
-	      break;
-	    case CAPITALIZE:
-	      *p = (gotword ? tolower : toupper) (*p);
-	      break;
-	    default:
-	      break;
-	    }
+        {
+          switch (rcase)
+            {
+            case UPPERCASE:
+              *p = toupper (*p);
+              break;
+            case LOWERCASE:
+              *p = tolower (*p);
+              break;
+            case CAPITALIZE:
+              *p = (gotword ? tolower : toupper) (*p);
+              break;
+            default:
+              break;
+            }
         }
     }
 
@@ -1409,20 +1409,20 @@ setcase_region (int rcase)
   while (size--)
     {
       if (i < astr_len (lp->text))
-	{
-	  if (rcase == UPPERCASE)
-	    *astr_char (lp->text, (ptrdiff_t) i) =
-	      toupper (*astr_char (lp->text, (ptrdiff_t) i));
-	  else
-	    *astr_char (lp->text, (ptrdiff_t) i) =
-	      tolower (*astr_char (lp->text, (ptrdiff_t) i));
-	  ++i;
-	}
+        {
+          if (rcase == UPPERCASE)
+            *astr_char (lp->text, (ptrdiff_t) i) =
+              toupper (*astr_char (lp->text, (ptrdiff_t) i));
+          else
+            *astr_char (lp->text, (ptrdiff_t) i) =
+              tolower (*astr_char (lp->text, (ptrdiff_t) i));
+          ++i;
+        }
       else
-	{
-	  lp = lp->next;
-	  i = 0;
-	}
+        {
+          lp = lp->next;
+          i = 0;
+        }
     }
 
   cur_bp->flags |= BFLAG_MODIFIED;
@@ -1509,15 +1509,15 @@ command to insert any output into the current buffer.
   else
     {				/* lines >= 1 */
       if (lastflag & FLAG_SET_UNIARG)
-	insert_string ((char *) astr_cstr (out));
+        insert_string ((char *) astr_cstr (out));
       else
-	{
-	  if (lines > 1)
-	    write_temp_buffer ("*Shell Command Output*",
-			       write_shell_output, out);
-	  else			/* lines == 1 */
-	    minibuf_write ("%s", astr_cstr (out));
-	}
+        {
+          if (lines > 1)
+            write_temp_buffer ("*Shell Command Output*",
+                               write_shell_output, out);
+          else			/* lines == 1 */
+            minibuf_write ("%s", astr_cstr (out));
+        }
     }
   astr_delete (out);
 
@@ -1575,7 +1575,7 @@ it as the contents of the region.
     {
       if (written == -1)
         minibuf_error ("Error writing to temporary file: %s",
-		       strerror (errno));
+                       strerror (errno));
       else
         minibuf_error ("Error writing to temporary file");
       return leNIL;
@@ -1609,28 +1609,28 @@ it as the contents of the region.
   else
     {				/* lines >= 1 */
       if (lastflag & FLAG_SET_UNIARG)
-	{
-	  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-	  {
-	    if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-	      FUNCALL (exchange_point_and_mark);
-	    undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, r.size, 0);
-	    undo_nosave = true;
-	    while (r.size--)
-	      FUNCALL (delete_char);
-	    undo_nosave = false;
-	  }
-	  insert_string ((char *) astr_cstr (out));
-	  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-	}
+        {
+          undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+          {
+            if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
+              FUNCALL (exchange_point_and_mark);
+            undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, r.size, 0);
+            undo_nosave = true;
+            while (r.size--)
+              FUNCALL (delete_char);
+            undo_nosave = false;
+          }
+          insert_string ((char *) astr_cstr (out));
+          undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+        }
       else
-	{
-	  if (lines > 1)
-	    write_temp_buffer ("*Shell Command Output*",
-			       write_shell_output, out);
-	  else			/* lines == 1 */
-	    minibuf_write ("%s", astr_cstr (out));
-	}
+        {
+          if (lines > 1)
+            write_temp_buffer ("*Shell Command Output*",
+                               write_shell_output, out);
+          else			/* lines == 1 */
+            minibuf_write ("%s", astr_cstr (out));
+        }
     }
   astr_delete (out);
 
@@ -1682,21 +1682,21 @@ On nonblank line, delete any immediately following blank lines.
   if (next_line ())
     {
       if (is_blank_line ())
-	{
-	  push_mark ();
-	  FUNCALL (beginning_of_line);
-	  set_mark ();
-	  activate_mark ();
-	  while (FUNCALL (forward_line) == leT && is_blank_line ())
-	    ;
-	  if (!seq_started)
-	    {
-	      seq_started = true;
-	      undo_save (UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
-	    }
-	  FUNCALL (delete_region);
-	  pop_mark ();
-	}
+        {
+          push_mark ();
+          FUNCALL (beginning_of_line);
+          set_mark ();
+          activate_mark ();
+          while (FUNCALL (forward_line) == leT && is_blank_line ())
+            ;
+          if (!seq_started)
+            {
+              seq_started = true;
+              undo_save (UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
+            }
+          FUNCALL (delete_region);
+          pop_mark ();
+        }
       previous_line ();
     }
 
@@ -1709,25 +1709,25 @@ On nonblank line, delete any immediately following blank lines.
       set_mark ();
       activate_mark ();
       do
-	{
-	  if (!FUNCALL_ARG (forward_line, -1))
-	    {
-	      forward = false;
-	      break;
-	    }
-	}
+        {
+          if (!FUNCALL_ARG (forward_line, -1))
+            {
+              forward = false;
+              break;
+            }
+        }
       while (is_blank_line ());
       if (forward)
-	FUNCALL (forward_line);
+        FUNCALL (forward_line);
       if (cur_bp->pt.p != old_marker->pt.p)
-	{
-	  if (!seq_started)
-	    {
-	      seq_started = true;
-	      undo_save (UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
-	    }
-	  FUNCALL (delete_region);
-	}
+        {
+          if (!seq_started)
+            {
+              seq_started = true;
+              undo_save (UNDO_START_SEQUENCE, old_marker->pt, 0, 0);
+            }
+          FUNCALL (delete_region);
+        }
       pop_mark ();
     }
 
@@ -1740,7 +1740,7 @@ On nonblank line, delete any immediately following blank lines.
       activate_mark ();
       FUNCALL (forward_line);
       FUNCALL (delete_region);	/* Just one action, without a
-				   sequence. */
+                                   sequence. */
       pop_mark ();
     }
 

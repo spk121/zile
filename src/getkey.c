@@ -73,7 +73,7 @@ getkey (void)
 
 /*
  * Wait for timeout 10ths if a second or until a key is pressed.
- * The key is then available with [x]getkey().
+ * The key is then available with [x]getkey.
  */
 void
 waitkey (size_t timeout)

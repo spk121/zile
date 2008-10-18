@@ -103,7 +103,7 @@ Both windows display the same buffer now current.
   if (cur_wp->fheight < 4)
     {
       minibuf_error ("Window height %d too small for splitting",
-		     cur_wp->fheight);
+                     cur_wp->fheight);
       return leNIL;
     }
 
@@ -135,10 +135,10 @@ delete_window (Window * del_wp)
   else
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->next == cur_wp)
-	{
-	  wp->next = wp->next->next;
-	  break;
-	}
+        {
+          wp->next = wp->next->next;
+          break;
+        }
 
   wp->fheight += cur_wp->fheight;
   wp->eheight += cur_wp->eheight + 1;
@@ -178,11 +178,11 @@ Make current window one line bigger.
   if (wp == NULL || wp->fheight < 3)
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->next == cur_wp)
-	{
-	  if (wp->fheight < 3)
-	    return leNIL;
-	  break;
-	}
+        {
+          if (wp->fheight < 3)
+            return leNIL;
+          break;
+        }
 
   if (cur_wp == head_wp && cur_wp->next->fheight < 3)
     return leNIL;
@@ -256,7 +256,7 @@ Make the selected window fill the screen.
     {
       nextwp = wp->next;
       if (wp != cur_wp)
-	free_window (wp);
+        free_window (wp);
     }
 
   cur_wp->fwidth = cur_wp->ewidth = term_width ();
@@ -284,7 +284,7 @@ This command selects the window one step away in that order.
 END_DEFUN
 
 /*
- * This function is called once in main(), for creating
+ * This function is called once in main, for creating
  * the scratch buffer.
  */
 void
@@ -337,8 +337,8 @@ window_pt (Window * wp)
   else
     {
       if (wp->saved_pt != NULL)
-	return wp->saved_pt->pt;
+        return wp->saved_pt->pt;
       else
-	return wp->bp->pt;
+        return wp->bp->pt;
     }
 }
