@@ -227,37 +227,10 @@ minibuf_read_variable_name (char *msg)
 			 xstrdup (p->var));
     }
 
-  for (;;)
-    {
-      ms = minibuf_read_completion (msg, "", cp, NULL);
-
-      if (ms == NULL)
-	{
-	  free_completion (cp);
-	  FUNCALL (keyboard_quit);
-	  return NULL;
-	}
-
-      if (ms[0] == '\0')
-	{
-	  free_completion (cp);
-	  free (ms);
-	  minibuf_error ("No variable name given");
-	  return NULL;
-	}
-      else if (get_variable (ms) == NULL)
-	{
-	  minibuf_error ("Undefined variable name `%s'", ms);
-	  waitkey (WAITKEY_DEFAULT);
-	}
-      else
-	{
-	  minibuf_clear ();
-	  break;
-	}
-    }
-
-  free_completion (cp);
+  ms = vminibuf_read_completion (msg, "", cp, NULL,
+                            "No variable name given",
+                            minibuf_test_in_completions,
+                            "Undefined variable name `%s'", NULL);
 
   return ms;
 }
