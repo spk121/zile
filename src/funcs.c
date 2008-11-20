@@ -1259,7 +1259,7 @@ Fill paragraph at or after point.
   FUNCALL (backward_paragraph);
   start = cur_bp->pt.n;
   if (is_empty_line ())
-    {				/* Move to next line if between two paragraphs. */
+    { /* Move to next line if between two paragraphs. */
       next_line ();
       start++;
     }
@@ -1268,8 +1268,7 @@ Fill paragraph at or after point.
     {
       FUNCALL (end_of_line);
       delete_char ();
-      FUNCALL (delete_horizontal_space);
-      insert_char_in_insert_mode (' ');
+      FUNCALL (just_one_space);
     }
 
   FUNCALL (end_of_line);
