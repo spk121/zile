@@ -22,7 +22,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.2.62, bug-zile@gnu.org)
+AC_INIT(Zile, 2.3.0, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl Checks for programs
@@ -43,20 +43,20 @@ fi
 
 dnl Curses
 AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
-	[AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
-	AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
+        [AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
+        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
 dnl Check if ncurses library is available as libncurses or libcurses
 AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
-	[AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses -ldl"],
-	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-	[AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses -ldl"],
-	AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])])])
+        [AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses -ldl"],
+        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
+        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses -ldl"],
+        AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])])])
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
-		   [The date of compilation.])
+                   [The date of compilation.])
 AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
-		   [The host of compilation.])
+                   [The host of compilation.])
 
 dnl Generate configured files
 AC_CONFIG_HEADER(config.h)
