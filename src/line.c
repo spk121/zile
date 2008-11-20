@@ -61,7 +61,7 @@ line_delete (Line *l)
   free (l);
 }
 
-/* Insert a line into list before the given point, returning the new line */
+/* Insert a line into list after the given point, returning the new line */
 Line *
 line_insert (Line *l, astr i)
 {
@@ -259,7 +259,7 @@ intercalate_newline (void)
                             astr_len (cur_bp->pt.p->text) - cur_bp->pt.o));
   ++cur_bp->num_lines;
   astr_truncate (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
-  adjust_markers (cur_bp->pt.p->prev, cur_bp->pt.p, cur_bp->pt.o, 1, 0);
+  adjust_markers (cur_bp->pt.p->next, cur_bp->pt.p, cur_bp->pt.o, 1, 0);
 
   cur_bp->flags |= BFLAG_MODIFIED;
   thisflag |= FLAG_NEED_RESYNC;
