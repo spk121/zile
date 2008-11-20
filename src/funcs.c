@@ -269,7 +269,7 @@ Use C-u followed by a number to specify a column.
 Just C-u as argument means to use the current column.
 +*/
 {
-  size_t fill_col = empty_param ? cur_bp->pt.o + 1 : (size_t) uniarg;
+  size_t fill_col = empty_param ? cur_bp->pt.o : (size_t) uniarg;
   char *buf;
   le *branch;
 
