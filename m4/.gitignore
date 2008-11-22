@@ -80,3 +80,6 @@ xstrndup.m4
 /strdup.m4
 /unistd-safer.m4
 /xgetcwd.m4
+/close.m4
+/dirent_h.m4
+/fclose.m4

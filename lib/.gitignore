@@ -14,6 +14,7 @@ config.charset
 configmake.h
 creat-safer.c
 dirent.in.h
+dirent.h
 dirfd.c
 dirfd.h
 dirname.c
@@ -138,3 +139,5 @@ stdlib.h
 string.h
 sys
 unistd.h
+/close.c
+/fclose.c
