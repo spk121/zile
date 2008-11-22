@@ -128,3 +128,13 @@ xmalloc.c
 xsize.h
 xstrndup.c
 xstrndup.h
+alloca.h
+charset.alias
+fcntl.h
+ref-add.sed
+ref-del.sed
+stdio.h
+stdlib.h
+string.h
+sys
+unistd.h
