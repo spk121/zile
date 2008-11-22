@@ -37,9 +37,6 @@
 #include "extern.h"
 
 
-/* True if current universal arg is just C-u's with no number. */
-static bool empty_param = false;
-
 DEFUN ("suspend-zile", suspend_zile)
 /*+
 Stop Zile and return to superior process.
@@ -269,7 +266,7 @@ Use C-u followed by a number to specify a column.
 Just C-u as argument means to use the current column.
 +*/
 {
-  size_t fill_col = empty_param ? cur_bp->pt.o : (size_t) uniarg;
+  size_t fill_col = (thisflag & FLAG_UNIARG_EMPTY) ? cur_bp->pt.o : (size_t) uniarg;
   char *buf;
   le *branch;
 
@@ -419,7 +416,7 @@ universal_argument (int keytype, int xarg)
   size_t key;
   astr as = astr_new ();
 
-  empty_param = false;
+  thisflag &= ~FLAG_UNIARG_EMPTY;
 
   if (keytype == KBD_META)
     {
@@ -429,7 +426,7 @@ universal_argument (int keytype, int xarg)
   else
     {
       astr_cpy_cstr (as, "C-u");
-      empty_param = true;
+      thisflag |= FLAG_UNIARG_EMPTY;
     }
 
   for (;;)
@@ -445,7 +442,7 @@ universal_argument (int keytype, int xarg)
       else if (isdigit (key & 0xff))
         {
           digit = (key & 0xff) - '0';
-          empty_param = false;
+          thisflag &= ~FLAG_UNIARG_EMPTY;
 
           if (key & KBD_META)
             astr_cat_cstr (as, " ESC");
@@ -475,7 +472,7 @@ universal_argument (int keytype, int xarg)
               astr_cat_cstr (as, " -");
               /* The default negative arg isn't -4, it's -1. */
               arg = 1;
-              empty_param = false;
+              thisflag &= ~FLAG_UNIARG_EMPTY;
             }
         }
       else

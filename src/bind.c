@@ -97,10 +97,10 @@ add_leaf (leafp tree, leafp p)
   for (i = 0; i < tree->vecnum; i++)
     if (tree->vec[i]->key > p->key)
       {
-	memmove (&tree->vec[i + 1], &tree->vec[i],
-		 sizeof (p) * (tree->vecnum - i));
-	tree->vec[i] = p;
-	break;
+        memmove (&tree->vec[i + 1], &tree->vec[i],
+                 sizeof (p) * (tree->vecnum - i));
+        tree->vec[i] = p;
+        break;
       }
   if (i == tree->vecnum)
     tree->vec[tree->vecnum] = p;
@@ -119,9 +119,9 @@ bind_key_vec (leafp tree, gl_list_t keys, size_t from, Function func)
       p->key = (size_t) gl_list_get_at (keys, from);
       add_leaf (tree, p);
       if (n == 1)
-	p->func = func;
+        p->func = func;
       else if (n > 0)
-	bind_key_vec (p, keys, from + 1, func);
+        bind_key_vec (p, keys, from + 1, func);
     }
   else if (n > 1)
     bind_key_vec (s, keys, from + 1, func);
@@ -154,9 +154,9 @@ search_key (leafp tree, gl_list_t keys, size_t from)
   if (p != NULL)
     {
       if (gl_list_size (keys) - from == 1)
-	return p;
+        return p;
       else
-	return search_key (p, keys, from + 1);
+        return search_key (p, keys, from + 1);
     }
 
   return NULL;
@@ -167,7 +167,9 @@ do_completion (astr as)
 {
   size_t key;
 
-  minibuf_write ("%s", astr_cstr (as));
+  minibuf_write ("%s%s",
+                 lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
+                 astr_cstr (as));
   key = getkey ();
   minibuf_clear ();
 
@@ -183,10 +185,10 @@ make_completion (gl_list_t keys)
   for (i = 0; i < gl_list_size (keys); i++)
     {
       if (i > 0)
-	{
-	  astr_cat_char (as, ' ');
-	  len++;
-	}
+        {
+          astr_cat_char (as, ' ');
+          len++;
+        }
       key = chordtostr ((size_t) gl_list_get_at (keys, i));
       astr_cat (as, key);
       astr_delete (key);
@@ -208,13 +210,13 @@ completion_scan (size_t key, gl_list_t * keys)
     {
       p = search_key (leaf_tree, *keys, 0);
       if (p == NULL)
-	break;
+        break;
       if (p->func == NULL)
-	{
-	  astr as = make_completion (*keys);
-	  gl_list_add_last (*keys, (void *) do_completion (as));
-	  astr_delete (as);
-	}
+        {
+          astr as = make_completion (*keys);
+          gl_list_add_last (*keys, (void *) do_completion (as));
+          astr_delete (as);
+        }
     }
   while (p->func == NULL);
 
@@ -270,16 +272,16 @@ process_key (size_t key)
       gl_list_t keys;
       p = completion_scan (key, &keys);
       if (p != NULL)
-	{
-	  p->func (last_uniarg, NULL);
-	  _last_command = p->func;
-	}
+        {
+          p->func (last_uniarg, NULL);
+          _last_command = p->func;
+        }
       else
-	{
-	  astr as = keyvectostr (keys);
-	  minibuf_error ("%s is undefined", astr_cstr (as));
-	  astr_delete (as);
-	}
+        {
+          astr as = keyvectostr (keys);
+          minibuf_error ("%s is undefined", astr_cstr (as));
+          astr_delete (as);
+        }
       gl_list_free (keys);
     }
 
@@ -309,10 +311,10 @@ init_bindings (void)
   for (i = 0; i <= 0xff; i++)
     {
       if (isprint (i))
-	{
-	  gl_list_set_at (keys, 0, (void *) i);
-	  bind_key_vec (leaf_tree, keys, 0, F_self_insert_command);
-	}
+        {
+          gl_list_set_at (keys, 0, (void *) i);
+          bind_key_vec (leaf_tree, keys, 0, F_self_insert_command);
+        }
     }
   gl_list_free (keys);
 
@@ -365,11 +367,11 @@ sequence.
     {
       keys = keystrtovec (arglist->next->data);
       if (keys == NULL)
-	{
-	  minibuf_error ("Key sequence %s is invalid",
-			 arglist->next->data);
-	  return false;
-	}
+        {
+          minibuf_error ("Key sequence %s is invalid",
+                         arglist->next->data);
+          return false;
+        }
       name = arglist->next->next->data;
     }
   else
@@ -408,7 +410,7 @@ END_DEFUN
 
 static void
 walk_bindings_tree (leafp tree, gl_list_t keys,
-		    void (*process) (astr key, leafp p, void *st), void *st)
+                    void (*process) (astr key, leafp p, void *st), void *st)
 {
   size_t i, j;
   astr as = chordtostr (tree->key);
@@ -419,20 +421,20 @@ walk_bindings_tree (leafp tree, gl_list_t keys,
     {
       leafp p = tree->vec[i];
       if (p->func != NULL)
-	{
-	  astr key = astr_new ();
-	  astr as = chordtostr (p->key);
-	  for (j = 1; j < gl_list_size (keys); j++)
-	    {
-	      astr_cat (key, (astr) gl_list_get_at (keys, j));
-	      astr_cat_char (key, ' ');
-	    }
-	  astr_cat_delete (key, as);
-	  process (key, p, st);
-	  astr_delete (key);
-	}
+        {
+          astr key = astr_new ();
+          astr as = chordtostr (p->key);
+          for (j = 1; j < gl_list_size (keys); j++)
+            {
+              astr_cat (key, (astr) gl_list_get_at (keys, j));
+              astr_cat_char (key, ' ');
+            }
+          astr_cat_delete (key, as);
+          process (key, p, st);
+          astr_delete (key);
+        }
       else
-	walk_bindings_tree (p, keys, process, st);
+        walk_bindings_tree (p, keys, process, st);
     }
 
   astr_delete ((astr) gl_list_get_at (keys, gl_list_size (keys) - 1));
@@ -441,7 +443,7 @@ walk_bindings_tree (leafp tree, gl_list_t keys,
 
 static void
 walk_bindings (leafp tree, void (*process) (astr key, leafp p, void *st),
-	       void *st)
+               void *st)
 {
   gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
                                       NULL, NULL, NULL, true);
@@ -463,7 +465,7 @@ gather_bindings (astr key, leafp p, void *st)
   if (p->func == g->f)
     {
       if (astr_len (g->bindings) > 0)
-	astr_cat_cstr (g->bindings, ", ");
+        astr_cat_cstr (g->bindings, ", ");
       astr_cat (g->bindings, key);
     }
 }
@@ -483,25 +485,25 @@ message in the buffer.
     {
       g.f = get_function (name);
       if (g.f)
-	{
-	  g.bindings = astr_new ();
-	  walk_bindings (leaf_tree, gather_bindings, &g);
+        {
+          g.bindings = astr_new ();
+          walk_bindings (leaf_tree, gather_bindings, &g);
 
-	  if (astr_len (g.bindings) == 0)
-	    minibuf_write ("%s is not on any key", name);
-	  else
-	    {
-	      astr as = astr_new ();
-	      astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
-	      if (lastflag & FLAG_SET_UNIARG)
-		bprintf ("%s", astr_cstr (as));
-	      else
-		minibuf_write ("%s", astr_cstr (as));
-	      astr_delete (as);
-	    }
-	  astr_delete (g.bindings);
-	  ret = true;
-	}
+          if (astr_len (g.bindings) == 0)
+            minibuf_write ("%s is not on any key", name);
+          else
+            {
+              astr as = astr_new ();
+              astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
+              if (lastflag & FLAG_SET_UNIARG)
+                bprintf ("%s", astr_cstr (as));
+              else
+                minibuf_write ("%s", astr_cstr (as));
+              astr_delete (as);
+            }
+          astr_delete (g.bindings);
+          ret = true;
+        }
     }
 
   free ((char *) name);

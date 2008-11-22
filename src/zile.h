@@ -70,20 +70,20 @@ typedef le * (*Function) (int uniarg, le * list);
 
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
-	le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
-	{ \
-	  if (arglist && arglist->data) \
-	    uniarg = atoi (arglist->data);
+        le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
+        { \
+          if (arglist && arglist->data) \
+            uniarg = atoi (arglist->data);
 #define END_DEFUN \
-	}
+        }
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-	F_ ## c_func (1, NULL)
+        F_ ## c_func (1, NULL)
 
 /* Call an interactive function with a universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
-	F_ ## c_func (uniarg, NULL)
+        F_ ## c_func (uniarg, NULL)
 
 /* Line.
  * A line is a list whose items are astrs. The newline at the end of
@@ -138,7 +138,7 @@ struct Region
 #define BFLAG_READONLY  (0000020)	/* The buffer cannot be modified. */
 #define BFLAG_OVERWRITE (0000040)	/* The buffer is in overwrite mode. */
 #define BFLAG_BACKUP    (0000100)	/* The old file has already been
-					   backed up. */
+                                           backed up. */
 #define BFLAG_NOUNDO    (0000200)	/* Do not record undo informations. */
 #define BFLAG_AUTOFILL  (0000400)	/* The buffer is in Auto Fill mode. */
 #define BFLAG_ISEARCH   (0001000)	/* The buffer is in Isearch loop. */
@@ -300,8 +300,10 @@ typedef size_t Font;
 #define FLAG_QUIT_ZILE                  0000010
 /* The last command modified the universal argument variable `uniarg'. */
 #define FLAG_SET_UNIARG                 0000020
+/* True if current universal arg is just C-u's with no number. */
+#define FLAG_UNIARG_EMPTY               0000040
 /* We are defining a macro. */
-#define FLAG_DEFINING_MACRO             0000040
+#define FLAG_DEFINING_MACRO             0000100
 
 /*--------------------------------------------------------------------------
  * Miscellaneous stuff.

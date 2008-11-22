@@ -140,9 +140,9 @@ evaluateNode (le * node)
   if (node->branch != NULL)
     {
       if (node->quoted)
-	value = leDup (node->branch);
+        value = leDup (node->branch);
       else
-	value = evaluateBranch (node->branch);
+        value = evaluateBranch (node->branch);
     }
   else
     {
@@ -168,15 +168,15 @@ The values val are expressions; they are evaluated.
   if (arglist != NULL && argc >= 2)
     {
       for (current = arglist->next; current;
-	   current = current->next->next)
-	{
-	  if (newvalue != leNIL)
-	    leWipe (newvalue);
-	  newvalue = evaluateNode (current->next);
-	  set_variable (current->data, newvalue->data);
-	  if (current->next == NULL)
-	    break; /* Cope with odd-length argument lists. */
-	}
+           current = current->next->next)
+        {
+          if (newvalue != leNIL)
+            leWipe (newvalue);
+          newvalue = evaluateNode (current->next);
+          set_variable (current->data, newvalue->data);
+          if (current->next == NULL)
+            break; /* Cope with odd-length argument lists. */
+        }
     }
 
   return newvalue;
@@ -223,10 +223,10 @@ execute_function (const char *name, int uniarg)
     {
       mp = get_macro (name);
       if (mp)
-	{
-	  call_macro (mp);
-	  return leT;
-	}
+        {
+          call_macro (mp);
+          return leT;
+        }
       return leNIL;
     }
 }
@@ -241,9 +241,13 @@ Read function name, then read its arguments and call it.
   astr msg = astr_new ();
 
   if (lastflag & FLAG_SET_UNIARG)
-    astr_afmt (msg, "%d M-x ", uniarg);
-  else
-    astr_cat_cstr (msg, "M-x ");
+    {
+      if (lastflag & FLAG_UNIARG_EMPTY)
+        astr_afmt (msg, "C-u ");
+      else
+        astr_afmt (msg, "%d ", uniarg);
+    }
+  astr_cat_cstr (msg, "M-x ");
 
   name = minibuf_read_function_name (astr_cstr (msg));
   astr_delete (msg);
@@ -272,14 +276,14 @@ minibuf_read_function_name (const char *fmt, ...)
   for (i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].interactive)
       gl_sortedlist_add (cp->completions, completion_strcmp,
-			 xstrdup (fentry_table[i].name));
+                         xstrdup (fentry_table[i].name));
   add_macros_to_list (cp->completions, completion_strcmp);
 
   va_start (ap, fmt);
   ms = vminibuf_read_completion (fmt, "", cp, functions_history,
-				 "No function name given",
-				 minibuf_test_in_completions,
-				 "Undefined function name `%s'", ap);
+                                 "No function name given",
+                                 minibuf_test_in_completions,
+                                 "Undefined function name `%s'", ap);
   va_end (ap);
   free_completion (cp);
 
