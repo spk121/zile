@@ -122,15 +122,11 @@ revert_action (Undo * up)
   if (up->type == UNDO_REPLACE_BLOCK)
     {
       undo_save (UNDO_REPLACE_BLOCK, up->pt,
-		 up->block.size, up->block.osize);
+                 up->block.size, up->block.osize);
       undo_nosave = true;
       for (i = 0; i < up->block.size; ++i)
-	delete_char ();
-      for (i = 0; i < up->block.osize; ++i)
-	if (up->block.text[i] != '\n')
-          insert_char_in_insert_mode (up->block.text[i]);
-	else
-	  insert_newline ();
+        delete_char ();
+      insert_nstring (up->block.text, up->block.osize);
       undo_nosave = false;
     }
 
@@ -179,7 +175,7 @@ free_undo (Undo *up)
     {
       Undo *next_up = up->next;
       if (up->type == UNDO_REPLACE_BLOCK)
-	free (up->block.text);
+        free (up->block.text);
       free (up);
       up = next_up;
     }
