@@ -759,7 +759,7 @@ static int
 insert_file (char *filename)
 {
   int fd;
-  size_t i, size;
+  size_t size;
   char buf[BUFSIZ];
 
   if (!exist_file (filename))
@@ -786,11 +786,7 @@ insert_file (char *filename)
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = true;
   while ((size = read (fd, buf, BUFSIZ)) > 0)
-    for (i = 0; i < size; i++)
-      if (buf[i] != '\n')
-        insert_char_in_insert_mode (buf[i]);
-      else
-        insert_newline ();
+    insert_nstring (buf, size);
   undo_nosave = false;
   close (fd);
 

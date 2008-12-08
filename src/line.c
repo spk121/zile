@@ -428,33 +428,37 @@ Insert a newline and leave point before it.
 END_DEFUN
 
 void
-insert_astr (astr as)
+insert_nstring (const char *s, size_t len)
 {
-  size_t len = astr_len (as), i;
+  size_t i;
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, len);
   undo_nosave = true;
   for (i = 0; i < len; i++)
     {
-      int c = *astr_char (as, i);
-      if (c == '\n')
+      if (s[i] == '\n')
         insert_newline ();
       else
-        insert_char_in_insert_mode (c);
+        insert_char_in_insert_mode (s[i]);
     }
   undo_nosave = false;
+}
+
+void
+insert_astr (astr as)
+{
+  insert_nstring (astr_cstr (as), astr_len (as));
 }
 
 void
 bprintf (const char *fmt, ...)
 {
   va_list ap;
-  astr as = astr_new ();
+  char *buf;
 
   va_start (ap, fmt);
-  astr_vafmt (as, fmt, ap);
+  xvasprintf (&buf, fmt, ap);
   va_end (ap);
-  insert_astr (as);
-  astr_delete (as);
+  insert_nstring (buf, strlen (buf));
 }
 
 int

@@ -163,16 +163,16 @@ completion_print (gl_list_t l, size_t size)
   bprintf ("Possible completions are:\n");
   for (i = col = 0; i < MIN (size, gl_list_size (l)); i++)
     {
-      astr as = astr_new_cstr ((char *) gl_list_get_at (l, i));
+      char *s = (char *) gl_list_get_at (l, i);
+      size_t len = strlen (s);
       if (col >= numcols)
         {
           col = 0;
           insert_newline ();
         }
-      insert_astr (as);
-      for (j = max - astr_len (as); j > 0; --j)
+      insert_nstring (s, len);
+      for (j = max - len; j > 0; --j)
         insert_char_in_insert_mode (' ');
-      astr_delete (as);
       ++col;
     }
 }
