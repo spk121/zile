@@ -34,6 +34,13 @@
 
 static astr regs[NUM_REGISTERS];
 
+static void
+register_free (size_t n)
+{
+  if (regs[n] != NULL)
+    astr_delete (regs[n]);
+}
+
 DEFUN ("copy-to-register", copy_to_register)
 /*+
 Copy region into the user specified register.
@@ -49,14 +56,16 @@ Copy region into the user specified register.
   if (reg == KBD_CANCEL)
     return FUNCALL (keyboard_quit);
   minibuf_clear ();
+  if (reg < 0)
+    reg = 0;
   reg %= NUM_REGISTERS;
 
   if (!calculate_the_region (&r))
     return leNIL;
 
   p = copy_text_block (r.start.n, r.start.o, r.size);
-  astr_delete (regs[reg]);
-  regs[reg] = astr_cat_cstr (astr_new (), p);
+  register_free ((size_t) reg);
+  regs[reg] = astr_new_cstr (p);
 
   return leT;
 }
@@ -142,7 +151,7 @@ END_DEFUN
 void
 free_registers (void)
 {
-  int i;
+  size_t i;
   for (i = 0; i < NUM_REGISTERS; ++i)
-    astr_delete (regs[i]);
+    register_free (i);
 }
