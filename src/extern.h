@@ -149,7 +149,6 @@ int insert_char (int c);
 int insert_char_in_insert_mode (int c);
 void fill_break_line (void);
 int insert_newline (void);
-void insert_string (const char *s);
 void insert_astr (astr as);
 void bprintf (const char *fmt, ...);
 int delete_char (void);
