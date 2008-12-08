@@ -104,7 +104,7 @@ completion_scroll_up (void)
   wp = find_window ("*Completions*");
   assert (wp != NULL);
   set_current_window (wp);
-  if (cur_bp->pt.n == cur_bp->num_lines || !FUNCALL (scroll_up))
+  if (cur_bp->pt.n == cur_bp->last_line || !FUNCALL (scroll_up))
     gotobob ();
   set_current_window (old_wp);
 

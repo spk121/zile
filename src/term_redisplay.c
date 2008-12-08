@@ -80,7 +80,7 @@ outch (int c, Font font, size_t * x)
 
   if (c == '\t')
     for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < term_width ();
-	 w--)
+         w--)
       term_addch (' '), ++(*x);
   else if (isprint (c))
     term_addch (c), ++(*x);
@@ -88,7 +88,7 @@ outch (int c, Font font, size_t * x)
     {
       j = make_char_printable (&buf, (size_t) c);
       for (w = 0; w < j && *x < term_width (); ++w)
-	term_addch (buf[w]), ++(*x);
+        term_addch (buf[w]), ++(*x);
       free (buf);
     }
 
@@ -101,24 +101,24 @@ in_region (size_t lineno, size_t x, Region * r)
   if (lineno >= r->start.n && lineno <= r->end.n)
     {
       if (r->start.n == r->end.n)
-	{
-	  if (x >= r->start.o && x < r->end.o)
-	    return true;
-	}
+        {
+          if (x >= r->start.o && x < r->end.o)
+            return true;
+        }
       else if (lineno == r->start.n)
-	{
-	  if (x >= r->start.o)
-	    return true;
-	}
+        {
+          if (x >= r->start.o)
+            return true;
+        }
       else if (lineno == r->end.n)
-	{
-	  if (x < r->end.o)
-	    return true;
-	}
+        {
+          if (x < r->end.o)
+            return true;
+        }
       else
-	{
-	  return true;
-	}
+        {
+          return true;
+        }
     }
 
   return false;
@@ -126,7 +126,7 @@ in_region (size_t lineno, size_t x, Region * r)
 
 static void
 draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * r,
-		  int highlight, size_t x, size_t i)
+                  int highlight, size_t x, size_t i)
 {
   if (x >= term_width ())
     {
@@ -136,18 +136,18 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * r,
   else if (highlight)
     {
       for (; x < wp->ewidth; ++i)
-	{
-	  if (in_region (lineno, i, r))
-	    outch (' ', FONT_REVERSE, &x);
-	  else
-	    x++;
-	}
+        {
+          if (in_region (lineno, i, r))
+            outch (' ', FONT_REVERSE, &x);
+          else
+            x++;
+        }
     }
 }
 
 static void
 draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
-	   size_t lineno, Region * r, int highlight)
+           size_t lineno, Region * r, int highlight)
 {
   size_t x, i;
 
@@ -155,9 +155,9 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
   for (x = 0, i = startcol; i < astr_len (lp->text) && x < wp->ewidth; i++)
     {
       if (highlight && in_region (lineno, i, r))
-	outch (*astr_char (lp->text, (ptrdiff_t) i), FONT_REVERSE, &x);
+        outch (*astr_char (lp->text, (ptrdiff_t) i), FONT_REVERSE, &x);
       else
-	outch (*astr_char (lp->text, (ptrdiff_t) i), FONT_NORMAL, &x);
+        outch (*astr_char (lp->text, (ptrdiff_t) i), FONT_NORMAL, &x);
     }
 
   draw_end_of_line (line, wp, lineno, r, highlight, x, i);
@@ -211,17 +211,17 @@ draw_window (size_t topline, Window * wp)
 
       /* If at the end of the buffer, don't write any text. */
       if (lp == wp->bp->lines)
-	continue;
+        continue;
 
       startcol = wp->start_column;
 
       draw_line (i, startcol, wp, lp, lineno, &r, highlight);
 
       if (wp->start_column > 0)
-	{
-	  term_move (i, 0);
-	  term_addch ('$');
-	}
+        {
+          term_move (i, 0);
+          term_addch ('$');
+        }
 
       lp = lp->next;
     }
@@ -264,27 +264,27 @@ calculate_start_column (Window * wp)
   for (lp = rp; lp >= astr_cstr (pt.p->text); --lp)
     {
       for (col = 0, p = lp; p < rp; ++p)
-	if (*p == '\t')
-	  {
-	    col |= t - 1;
-	    ++col;
-	  }
-	else if (isprint ((int) *p))
-	  ++col;
-	else
-	  {
-	    col += make_char_printable (&buf, (size_t) * p);
-	    free (buf);
-	  }
+        if (*p == '\t')
+          {
+            col |= t - 1;
+            ++col;
+          }
+        else if (isprint ((int) *p))
+          ++col;
+        else
+          {
+            col += make_char_printable (&buf, (size_t) * p);
+            free (buf);
+          }
 
       lpfact = (lp - astr_cstr (pt.p->text)) / (wp->ewidth / 3);
 
       if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2))
-	{
-	  wp->start_column = lp + 1 - astr_cstr (pt.p->text);
-	  point_screen_column = lastcol;
-	  return;
-	}
+        {
+          wp->start_column = lp + 1 - astr_cstr (pt.p->text);
+          point_screen_column = lastcol;
+          return;
+        }
 
       lastcol = col;
     }
@@ -298,14 +298,14 @@ make_screen_pos (Window * wp, char **buf)
 {
   Point pt = window_pt (wp);
 
-  if (wp->bp->num_lines <= wp->eheight && wp->topdelta == pt.n)
+  if (wp->bp->last_line <= wp->eheight && wp->topdelta == pt.n)
     xasprintf (buf, "All");
   else if (pt.n == wp->topdelta)
     xasprintf (buf, "Top");
-  else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->num_lines)
+  else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->last_line)
     xasprintf (buf, "Bot");
   else
-    xasprintf (buf, "%2d%%", (int) ((float) pt.n / wp->bp->num_lines * 100));
+    xasprintf (buf, "%2d%%", (int) ((float) pt.n / wp->bp->last_line * 100));
 
   return *buf;
 }
@@ -335,8 +335,8 @@ draw_status_line (size_t line, Window * wp)
   bs = astr_afmt (astr_new (), "(%d,%d)", pt.n + 1,
                   get_goalc_bp (wp->bp, window_pt (wp)));
   as = astr_afmt (astr_new (), "--%s%2s  %-15s   %s %-9s (Text",
-		  eol_type, make_mode_line_flags (wp), wp->bp->name,
-		  make_screen_pos (wp, &buf), astr_cstr (bs));
+                  eol_type, make_mode_line_flags (wp), wp->bp->name,
+                  make_screen_pos (wp, &buf), astr_cstr (bs));
   free (buf);
   astr_delete (bs);
 
@@ -369,14 +369,14 @@ term_redisplay (void)
   for (wp = head_wp; wp != NULL; wp = wp->next)
     {
       if (wp == cur_wp)
-	cur_topline = topline;
+        cur_topline = topline;
 
       draw_window (topline, wp);
 
       /* Draw the status line only if there is available space after the
-	 buffer text space. */
+         buffer text space. */
       if (wp->fheight - wp->eheight > 0)
-	draw_status_line (topline + wp->eheight, wp);
+        draw_status_line (topline + wp->eheight, wp);
 
       topline += wp->fheight;
     }

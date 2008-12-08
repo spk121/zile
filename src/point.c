@@ -65,15 +65,15 @@ point_dist (Point pt1, Point pt2)
       size += astr_len (lp->text);
 
       if (lp == pt1.p)
-	size -= pt1.o;
+        size -= pt1.o;
 
       if (lp == pt2.p)
-	{
-	  size -= astr_len (lp->text) - pt2.o;
-	  break;
-	}
+        {
+          size -= astr_len (lp->text) - pt2.o;
+          break;
+        }
       else
-	size++;
+        size++;
     }
 
   return size;
@@ -111,7 +111,7 @@ point_max (void)
 {
   Point pt;
   pt.p = cur_bp->lines->prev;
-  pt.n = cur_bp->num_lines;
+  pt.n = cur_bp->last_line;
   pt.o = astr_len (cur_bp->lines->prev->text);
   return pt;
 }

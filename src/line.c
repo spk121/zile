@@ -257,7 +257,7 @@ intercalate_newline (void)
   line_insert (cur_bp->pt.p,
                astr_substr (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o,
                             astr_len (cur_bp->pt.p->text) - cur_bp->pt.o));
-  ++cur_bp->num_lines;
+  ++cur_bp->last_line;
   astr_truncate (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
   adjust_markers (cur_bp->pt.p->next, cur_bp->pt.p, cur_bp->pt.o, 1, 0);
 
@@ -486,7 +486,7 @@ delete_char (void)
       line_remove (cur_bp->pt.p->next);
 
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p->next, oldlen, -1, 0);
-      --cur_bp->num_lines;
+      --cur_bp->last_line;
       thisflag |= FLAG_NEED_RESYNC;
     }
   else

@@ -178,8 +178,8 @@ struct Buffer
   /* Buffer-local variables. */
   Hash_table *vars;
 
-  /* The total number of lines in the buffer. */
-  size_t num_lines;
+  /* The number of the last line in the buffer. */
+  size_t last_line;
 
   /* The name of the buffer and the file name. */
   char *name;

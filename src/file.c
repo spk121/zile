@@ -376,7 +376,7 @@ read_from_disk (const char *filename)
               else
                 {
                   lp = line_insert (lp, astr_new ());
-                  ++cur_bp->num_lines;
+                  ++cur_bp->last_line;
                   i += eol_len - 1;
                 }
             }
@@ -690,20 +690,33 @@ Kill the current buffer or the user specified one.
 }
 END_DEFUN
 
+static size_t
+insert_lines (size_t n, size_t end, size_t last, Line *from_lp)
+{
+  for (; n < end; n++, from_lp = from_lp->next)
+    {
+      insert_astr (from_lp->text);
+      if (n < last)
+        insert_newline ();
+    }
+  return n;
+}
+
 static void
 insert_buffer (Buffer * bp)
 {
-  Line *lp;
+  Line *old_next = bp->pt.p->next;
+  astr old_cur_line = astr_cpy (astr_new (), bp->pt.p->text);
+  size_t old_cur_n = bp->pt.n, old_lines = bp->last_line;
   size_t size = calculate_buffer_size (bp);
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = true;
-  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
-    {
-      insert_astr (lp->text);
-      if (lp->next != bp->lines)
-        insert_newline ();
-    }
+  insert_lines (0, old_cur_n, old_lines, bp->lines->next);
+  insert_astr (old_cur_line);
+  if (old_cur_line < old_lines)
+    insert_newline ();
+  insert_lines (old_cur_n + 1, old_lines, old_lines, old_next);
   undo_nosave = false;
 }
 
@@ -739,13 +752,6 @@ Puts mark after the inserted text.
     }
   else
     bp = swbuf;
-
-  if (bp == cur_bp)
-    {
-      minibuf_error ("Cannot insert the current buffer");
-      free ((char *) ms);
-      return leNIL;
-    }
 
   insert_buffer (bp);
   set_mark_interactive ();

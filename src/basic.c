@@ -79,7 +79,7 @@ get_goalc_bp (Buffer * bp, Point pt)
   for (i = 0; i < pt.o; i++)
     {
       if (sp[i] == '\t')
-	col |= t - 1;
+        col |= t - 1;
       ++col;
     }
 
@@ -106,15 +106,15 @@ goto_goalc (int goalc)
   for (i = 0; i < astr_len (cur_bp->pt.p->text); i++)
     {
       if (col == goalc)
-	break;
+        break;
       else if (sp[i] == '\t')
-	{
-	  for (w = t - col % t; w > 0; w--)
-	    if (++col == goalc)
-	      break;
-	}
+        {
+          for (w = t - col % t; w > 0; w--)
+            if (++col == goalc)
+              break;
+        }
       else
-	++col;
+        ++col;
     }
 
   cur_bp->pt.o = i;
@@ -128,7 +128,7 @@ previous_line (void)
       thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
       if (!(lastflag & FLAG_DONE_CPCN))
-	cur_goalc = get_goalc ();
+        cur_goalc = get_goalc ();
 
       cur_bp->pt.p = cur_bp->pt.p->prev;
       cur_bp->pt.n--;
@@ -157,12 +157,12 @@ column, or at the end of the line if it is not long enough.
   if (!bobp ())
     {
       for (i = 0; i < uniarg; i++)
-	if (!previous_line ())
-	  {
-	    thisflag |= FLAG_DONE_CPCN;
-	    FUNCALL (beginning_of_line);
-	    break;
-	  }
+        if (!previous_line ())
+          {
+            thisflag |= FLAG_DONE_CPCN;
+            FUNCALL (beginning_of_line);
+            break;
+          }
     }
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
@@ -179,7 +179,7 @@ next_line (void)
       thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
       if (!(lastflag & FLAG_DONE_CPCN))
-	cur_goalc = get_goalc ();
+        cur_goalc = get_goalc ();
 
       cur_bp->pt.p = cur_bp->pt.p->next;
       cur_bp->pt.n++;
@@ -208,14 +208,14 @@ column, or at the end of the line if it is not long enough.
   if (!eobp ())
     {
       for (i = 0; i < uniarg; i++)
-	if (!next_line ())
-	  {
-	    int old = cur_goalc;
-	    thisflag |= FLAG_DONE_CPCN;
-	    FUNCALL (end_of_line);
-	    cur_goalc = old;
-	    break;
-	  }
+        if (!next_line ())
+          {
+            int old = cur_goalc;
+            thisflag |= FLAG_DONE_CPCN;
+            FUNCALL (end_of_line);
+            cur_goalc = old;
+            break;
+          }
     }
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
@@ -236,11 +236,11 @@ Position 1 is the beginning of the buffer.
     {
       char *ms = minibuf_read ("Goto char: ", "");
       if (ms == NULL)
-	return FUNCALL (keyboard_quit);
+        return FUNCALL (keyboard_quit);
       to_char = atoi (ms);
       free (ms);
       if (to_char < 0)
-	ding ();
+        ding ();
     }
   while (to_char < 0);
 
@@ -265,11 +265,11 @@ Line 1 is the beginning of the buffer.
     {
       char *ms = minibuf_read ("Goto line: ", "");
       if (ms == NULL)
-	return FUNCALL (keyboard_quit);
+        return FUNCALL (keyboard_quit);
       to_line = strtoul (ms, NULL, 10);
       free (ms);
       if (to_line == ULONG_MAX)
-	ding ();
+        ding ();
     }
   while (to_line == ULONG_MAX);
 
@@ -431,7 +431,7 @@ scroll_down (void)
 static int
 scroll_up (void)
 {
-  if (cur_bp->pt.n < cur_bp->num_lines)
+  if (cur_bp->pt.n < cur_bp->last_line)
     return ngotodown (cur_wp->eheight) ? true : false;
   else
     {
