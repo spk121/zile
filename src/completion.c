@@ -165,13 +165,13 @@ completion_print (gl_list_t l, size_t size)
     {
       char *s = (char *) gl_list_get_at (l, i);
       if (col >= numcols)
-	{
-	  col = 0;
-	  insert_newline ();
-	}
+        {
+          col = 0;
+          insert_newline ();
+        }
       insert_string (s);
       for (j = max - strlen (s); j > 0; --j)
-	insert_char (' ');
+        insert_char_in_insert_mode (' ');
       ++col;
     }
 }
@@ -223,8 +223,8 @@ completion_readdir (Completion * cp, astr as)
   gl_list_free (cp->completions);
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
-					  completion_streq, NULL,
-					  list_free, false);
+                                          completion_streq, NULL,
+                                          list_free, false);
 
   if (expand_path (as) == NULL)
     return false;
@@ -239,7 +239,7 @@ completion_readdir (Completion * cp, astr as)
       /* Append `/' to pdir */
       astr_cat_cstr (bs, pdir);
       if (*astr_char (bs, -1) != '/')
-	astr_cat_char (bs, '/');
+        astr_cat_char (bs, '/');
       pdir = astr_cstr (bs);
       base = base_name (s2);
     }
@@ -262,13 +262,13 @@ completion_readdir (Completion * cp, astr as)
       astr_cpy_cstr (buf, pdir);
       astr_cat_cstr (buf, d->d_name);
       if (stat (astr_cstr (buf), &st) != -1)
-	{
-	  astr_cpy_cstr (buf, d->d_name);
-	  if (S_ISDIR (st.st_mode))
-	    astr_cat_char (buf, '/');
-	}
+        {
+          astr_cpy_cstr (buf, d->d_name);
+          if (S_ISDIR (st.st_mode))
+            astr_cat_char (buf, '/');
+        }
       else
-	astr_cpy_cstr (buf, d->d_name);
+        astr_cpy_cstr (buf, d->d_name);
       gl_sortedlist_add (cp->completions, completion_strcmp,
                          xstrdup (astr_cstr (buf)));
     }
@@ -308,16 +308,16 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
     {
       cp->match = (char *) gl_list_get_at (cp->completions, 0);
       if (gl_list_size (cp->completions) > 1)
-	{
-	  cp->matchsize = 0;
-	  popup_completion (cp, true, 0);
-	  return COMPLETION_NONUNIQUE;
-	}
+        {
+          cp->matchsize = 0;
+          popup_completion (cp, true, 0);
+          return COMPLETION_NONUNIQUE;
+        }
       else
-	{
-	  cp->matchsize = strlen (cp->match);
-	  return COMPLETION_MATCHED;
-	}
+        {
+          cp->matchsize = strlen (cp->match);
+          return COMPLETION_MATCHED;
+        }
     }
 
   for (i = 0; i < gl_list_size (cp->completions); i++)
@@ -346,7 +346,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
       cp->match = (char *) gl_list_get_at (cp->matches, 0);
       cp->matchsize = strlen (cp->match);
       if (popup_when_complete)
-	popup_completion (cp, false, partmatches);
+        popup_completion (cp, false, partmatches);
       return COMPLETION_MATCHEDNONUNIQUE;
     }
 
@@ -356,16 +356,16 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 
       c = s[j];
       for (i = 1; i < partmatches; ++i)
-	{
-	  s = gl_list_get_at (cp->matches, i);
-	  if (s[j] != c)
-	    {
-	      cp->match = (char *) gl_list_get_at (cp->matches, 0);
-	      cp->matchsize = j;
-	      popup_completion (cp, false, partmatches);
-	      return COMPLETION_NONUNIQUE;
-	    }
-	}
+        {
+          s = gl_list_get_at (cp->matches, i);
+          if (s[j] != c)
+            {
+              cp->match = (char *) gl_list_get_at (cp->matches, 0);
+              cp->matchsize = j;
+              popup_completion (cp, false, partmatches);
+              return COMPLETION_NONUNIQUE;
+            }
+        }
     }
 
   abort ();

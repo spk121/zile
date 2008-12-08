@@ -694,14 +694,13 @@ static void
 insert_buffer (Buffer * bp)
 {
   Line *lp;
-  size_t size = calculate_buffer_size (bp), i;
+  size_t size = calculate_buffer_size (bp);
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
   undo_nosave = true;
   for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
     {
-      for (i = 0; i < astr_len (lp->text); i++)
-        insert_char (*astr_char (lp->text, (ptrdiff_t) i));
+      insert_astr (lp->text);
       if (lp->next != bp->lines)
         insert_newline ();
     }
@@ -789,7 +788,7 @@ insert_file (char *filename)
   while ((size = read (fd, buf, BUFSIZ)) > 0)
     for (i = 0; i < size; i++)
       if (buf[i] != '\n')
-        insert_char (buf[i]);
+        insert_char_in_insert_mode (buf[i]);
       else
         insert_newline ();
   undo_nosave = false;

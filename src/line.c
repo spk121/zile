@@ -224,7 +224,7 @@ insert_tab (void)
     return false;
 
   if (get_variable_bool ("indent-tabs-mode"))
-    insert_char ('\t');
+    insert_char_in_insert_mode ('\t');
   else
     insert_expanded_tab (insert_char_in_insert_mode);
 
@@ -670,7 +670,7 @@ does nothing.
               if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
                 ret = insert_tab ();
               else
-                ret = insert_char (' ');
+                ret = insert_char_in_insert_mode (' ');
             }
           while (ret && (cur_goalc = get_goalc ()) < target_goalc);
         }
