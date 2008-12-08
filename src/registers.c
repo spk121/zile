@@ -32,11 +32,7 @@
 
 #define NUM_REGISTERS	256
 
-static struct
-{
-  char *text;
-  size_t size;
-} regs[NUM_REGISTERS];
+static astr regs[NUM_REGISTERS];
 
 DEFUN ("copy-to-register", copy_to_register)
 /*+
@@ -59,9 +55,8 @@ Copy region into the user specified register.
     return leNIL;
 
   p = copy_text_block (r.start.n, r.start.o, r.size);
-  free (regs[reg].text);
-  regs[reg].text = p;
-  regs[reg].size = r.size;
+  astr_delete (regs[reg]);
+  regs[reg] = astr_cat_cstr (astr_new (), p);
 
   return leT;
 }
@@ -72,9 +67,9 @@ static int reg;
 static int
 insert_register (void)
 {
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, regs[reg].size);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len (regs[reg]));
   undo_nosave = true;
-  insert_nstring (regs[reg].text, regs[reg].size);
+  insert_astr (regs[reg]);
   undo_nosave = false;
   return true;
 }
@@ -96,7 +91,7 @@ Puts point before and mark after the inserted text.
   minibuf_clear ();
   reg %= NUM_REGISTERS;
 
-  if (regs[reg].text == NULL)
+  if (regs[reg] == NULL)
     {
       minibuf_error ("Register does not contain text");
       return leNIL;
@@ -119,16 +114,16 @@ write_registers_list (va_list ap GCC_UNUSED)
   bprintf ("%-8s %8s\n", "Register", "Size");
   bprintf ("%-8s %8s\n", "--------", "----");
   for (i = count = 0; i < NUM_REGISTERS; ++i)
-    if (regs[i].text != NULL)
+    if (regs[i] != NULL)
       {
-	astr as = astr_new ();
-	++count;
-	if (isprint (i))
-	  astr_afmt (as, "`%c'", i);
-	else
-	  astr_afmt (as, "`\\%o'", i);
-	bprintf ("%-8s %8d\n", astr_cstr (as), regs[i].size);
-	astr_delete (as);
+        astr as = astr_new ();
+        ++count;
+        if (isprint (i))
+          astr_afmt (as, "`%c'", i);
+        else
+          astr_afmt (as, "`\\%o'", i);
+        bprintf ("%-8s %8d\n", astr_cstr (as), astr_len (regs[i]));
+        astr_delete (as);
       }
   if (!count)
     bprintf ("No registers defined\n");
@@ -149,5 +144,5 @@ free_registers (void)
 {
   int i;
   for (i = 0; i < NUM_REGISTERS; ++i)
-    free (regs[i].text);
+    astr_delete (regs[i]);
 }

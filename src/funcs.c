@@ -141,7 +141,7 @@ print_buf (Buffer * old_bp, Buffer * bp)
   if (bp->filename != NULL)
     {
       astr shortname = shorten_string (bp->filename, 40);
-      insert_string (astr_cstr (shortname));
+      insert_astr (shortname);
       astr_delete (shortname);
     }
   insert_newline ();
@@ -840,7 +840,7 @@ transpose_subr (Function f)
     {
       goto_point (p1->pt);
       if (astr_len (s2) > 0)
-        insert_string (astr_cstr (s2));
+        insert_astr (s2);
     }
 
   /* Insert the first string in the second position. */
@@ -848,7 +848,7 @@ transpose_subr (Function f)
     {
       goto_point (p2->pt);
       if (astr_len (s1) > 0)
-        insert_string (astr_cstr (s1));
+        insert_astr (s1);
     }
 
   if (seq_started)
@@ -1449,7 +1449,7 @@ write_shell_output (va_list ap)
 {
   astr out = va_arg (ap, astr);
 
-  insert_string ((char *) astr_cstr (out));
+  insert_astr (out);
 }
 
 DEFUN ("shell-command", shell_command)
@@ -1505,7 +1505,7 @@ command to insert any output into the current buffer.
   else
     {				/* lines >= 1 */
       if (lastflag & FLAG_SET_UNIARG)
-        insert_string ((char *) astr_cstr (out));
+        insert_astr (out);
       else
         {
           if (lines > 1)
@@ -1616,7 +1616,7 @@ it as the contents of the region.
               FUNCALL (delete_char);
             undo_nosave = false;
           }
-          insert_string ((char *) astr_cstr (out));
+          insert_astr (out);
           undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
         }
       else

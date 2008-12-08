@@ -63,28 +63,28 @@ kill_line (int literally)
   if (!eolp ())
     {
       if (warn_if_readonly_buffer ())
-	return false;
+        return false;
 
       undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt,
-		 astr_len (cur_bp->pt.p->text) - cur_bp->pt.o, 0);
+                 astr_len (cur_bp->pt.p->text) - cur_bp->pt.o, 0);
       undo_nosave = true;
       while (!eolp ())
-	{
-	  kill_ring_push (following_char ());
-	  FUNCALL (delete_char);
-	}
+        {
+          kill_ring_push (following_char ());
+          FUNCALL (delete_char);
+        }
       undo_nosave = false;
 
       thisflag |= FLAG_DONE_KILL;
 
       if (!literally)
-	return true;
+        return true;
     }
 
   if (cur_bp->pt.p->next != cur_bp->lines)
     {
       if (!FUNCALL (delete_char))
-	return false;
+        return false;
 
       kill_ring_push ('\n');
 
@@ -165,17 +165,17 @@ to make one entry in the kill ring.
       size_t size = r.size;
 
       if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-	FUNCALL (exchange_point_and_mark);
+        FUNCALL (exchange_point_and_mark);
       undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
       undo_nosave = true;
       while (size--)
-	{
-	  if (!eolp ())
-	    kill_ring_push (following_char ());
-	  else
-	    kill_ring_push ('\n');
-	  FUNCALL (delete_char);
-	}
+        {
+          if (!eolp ())
+            kill_ring_push (following_char ());
+          else
+            kill_ring_push ('\n');
+          FUNCALL (delete_char);
+        }
       undo_nosave = false;
     }
 
@@ -283,7 +283,7 @@ killed OR yanked.  Put point at end, and set mark at beginning.
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len (kill_ring_text));
   undo_nosave = true;
-  insert_nstring (astr_cstr (kill_ring_text), astr_len (kill_ring_text));
+  insert_astr (kill_ring_text);
   undo_nosave = false;
 
   deactivate_mark ();

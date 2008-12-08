@@ -436,21 +436,14 @@ insert_string (const char *s)
     if (*s == '\n')
       insert_newline ();
     else
-      insert_char (*s);
+      insert_char_in_insert_mode (*s);
   undo_nosave = false;
 }
 
 void
-insert_nstring (const char *s, size_t size)
+insert_astr (astr as)
 {
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
-  undo_nosave = true;
-  for (; 0 < size--; ++s)
-    if (*s == '\n')
-      insert_newline ();
-    else
-      insert_char_in_insert_mode (*s);
-  undo_nosave = false;
+  insert_string (astr_cstr (as));
 }
 
 void
