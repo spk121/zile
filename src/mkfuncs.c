@@ -65,7 +65,7 @@ main (int argc, char **argv)
 {
   int i;
 
-  printf("\
+  printf ("\
 /* Zile command to C function bindings and docstrings.\n\
 \n\
    THIS FILE IS AUTO-GENERATED.\n\
