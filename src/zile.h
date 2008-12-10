@@ -41,16 +41,12 @@
  * Main editor structures.
  *--------------------------------------------------------------------------*/
 
-/*
- * Opaque types.
- */
+/* Opaque types. */
 typedef struct History History;
 typedef struct Undo Undo;
 typedef struct Macro Macro;
 
-/*
- * Types which should really be opaque.
- */
+/* Types which should really be opaque. */
 typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
@@ -60,8 +56,8 @@ typedef struct Window Window;
 typedef struct Completion Completion;
 
 /*
- * The type of a Zile exported function.  `uniarg' is the number of
- * times to repeat the function.
+ * The type of a Zile exported function.
+ * `uniarg' is the number of times to repeat the function.
  */
 typedef le * (*Function) (int uniarg, le * list);
 
@@ -85,7 +81,8 @@ typedef le * (*Function) (int uniarg, le * list);
 #define FUNCALL_ARG(c_func, uniarg)             \
         F_ ## c_func (uniarg, NULL)
 
-/* Line.
+/*
+ * Line.
  * A line is a list whose items are astrs. The newline at the end of
  * each line is implicit.
  */
@@ -149,64 +146,33 @@ extern char coding_eol_undecided[3];
 
 struct Buffer
 {
-  /* The next buffer in buffer list. */
-  Buffer *next;
-
-  /* The lines of text. */
-  Line *lines;
-
-  /* The point. */
-  Point pt;
-
-  /* The mark. */
-  Marker *mark;
-
-  /* Markers (points that are updated when text is modified).  */
-  Marker *markers;
-
-  /* The undo deltas recorded for this buffer. */
-  Undo *next_undop;
-  Undo *last_undop;
-
-  /* Buffer flags. */
-  int flags;
-
-  /* Buffer-local variables. */
-  Hash_table *vars;
-
-  /* The number of the last line in the buffer. */
-  size_t last_line;
-
-  /* The name of the buffer and the file name. */
-  char *name;
-  char *filename;
-
-  /* EOL string (up to 2 chars) for this buffer. */
-  char *eol;
+  Buffer *next;		/* Next buffer in buffer list. */
+  char *name;		/* The name of the buffer. */
+  char *filename;	/* The file being edited. */
+  char *eol;		/* EOL string (up to 2 chars). */
+  Line *lines;		/* The lines of text. */
+  size_t last_line;	/* The number of the last line in the buffer. */
+  Point pt;		/* The point. */
+  Marker *mark;		/* The mark. */
+  Marker *markers;	/* Markers list (updated whenever text is changed). */
+  int flags;		/* Buffer flags. */
+  Undo *last_undop;	/* Most recent undo delta. */
+  Undo *next_undop;	/* Next undo delta to apply. */
+  Hash_table *vars;	/* Buffer-local variables. */
 };
 
 struct Window
 {
-  /* The next window in window list. */
-  Window *next;
-
-  /* The buffer displayed in window. */
-  Buffer *bp;
-
-  /* The top line delta and last point line number. */
-  size_t topdelta;
-  int lastpointn;
-
-  /* The start column of the window (>0 if scrolled sideways) */
-  size_t start_column;
-
-  /* The point line pointer, line number and offset (used to
-     hold the point in non-current windows). */
-  Marker *saved_pt;
-
-  /* The formal and effective width and height of window. */
-  size_t fwidth, fheight;
-  size_t ewidth, eheight;
+  Window *next;		/* The next window in window list. */
+  Buffer *bp;		/* The buffer displayed in window. */
+  size_t topdelta;	/* The top line delta. */
+  int lastpointn;	/* The last point line number. */
+  size_t start_column;	/* The start column of the window (>0 if scrolled
+                           sideways). */
+  Marker *saved_pt;	/* The point line pointer, line number and offset
+                           (used to hold the point in non-current windows). */
+  size_t fwidth, fheight; /* The formal width and height of the window. */
+  size_t ewidth, eheight; /* The effective width and height of the window. */
 };
 
 enum
