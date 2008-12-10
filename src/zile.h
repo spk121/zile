@@ -124,9 +124,6 @@ struct Region
   Point start;			/* The region start. */
   Point end;			/* The region end. */
   size_t size;			/* The region size. */
-
-  /* The total number of lines ('\n' newlines) in region. */
-  int num_lines;
 };
 
 /* Buffer flags or minor modes. */

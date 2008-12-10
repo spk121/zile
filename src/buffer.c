@@ -314,7 +314,6 @@ calculate_the_region (Region * rp)
     }
 
   rp->size = point_dist (rp->start, rp->end);
-  rp->num_lines = count_lines (rp->start, rp->end);
   return true;
 }
 
