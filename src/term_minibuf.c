@@ -32,11 +32,13 @@
 #include "zile.h"
 #include "extern.h"
 
-/* Write minibuf prompt, assuming cursor starts at column 0. */
-static void
-xminibuf_write (const char *s)
+void
+term_minibuf_write (const char *s)
 {
   size_t x;
+
+  term_move (term_height () - 1, 0);
+  term_clrtoeol ();
 
   for (x = 0; *s != '\0' && x < term_width (); s++)
     {
@@ -45,23 +47,13 @@ xminibuf_write (const char *s)
     }
 }
 
-void
-term_minibuf_write (const char *s)
-{
-  term_move (term_height () - 1, 0);
-  xminibuf_write (s);
-  term_clrtoeol ();
-}
-
 static void
 draw_minibuf_read (const char *prompt, const char *value,
                    size_t prompt_len, char *match, size_t pointo)
 {
   int margin = 1, n = 0;
 
-  term_move (term_height () - 1, 0);
-  term_clrtoeol ();
-  xminibuf_write (prompt);
+  term_minibuf_write (prompt);
 
   if (prompt_len + pointo + 1 >= term_width ())
     {
