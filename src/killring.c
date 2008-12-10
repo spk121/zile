@@ -125,6 +125,47 @@ With prefix argument, kill that many lines from point.
 }
 END_DEFUN
 
+static bool
+copy_or_kill_region (bool kill)
+{
+  Region r;
+  char *p;
+
+  if (!(lastflag & FLAG_DONE_KILL))
+    free_kill_ring ();
+
+  if (!calculate_the_region (&r))
+    return false;
+
+  p = copy_text_block (r.start.n, r.start.o, r.size);
+  kill_ring_push_nstring (p, r.size);
+  free (p);
+
+  if (kill)
+    {
+      if (cur_bp->flags & BFLAG_READONLY)
+        minibuf_error ("Read only text copied to kill ring");
+      else
+        {
+          size_t size = r.size;
+
+          if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
+            FUNCALL (exchange_point_and_mark);
+
+          undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
+          undo_nosave = true;
+          while (size--)
+            FUNCALL (delete_char);
+          undo_nosave = false;
+        }
+    }
+
+  thisflag |= FLAG_DONE_KILL;
+  deactivate_mark ();
+
+  return true;
+}
+
 DEFUN ("kill-region", kill_region)
 /*+
 Kill between point and mark.
@@ -138,51 +179,7 @@ the text killed this time appends to the text killed last time
 to make one entry in the kill ring.
 +*/
 {
-  Region r;
-
-  if (!(lastflag & FLAG_DONE_KILL))
-    free_kill_ring ();
-
-  if (!calculate_the_region (&r))
-    return leNIL;
-
-  if (cur_bp->flags & BFLAG_READONLY)
-    {
-      /*
-       * The buffer is readonly; save only in the kill buffer
-       * and complain.
-       */
-      char *p;
-
-      p = copy_text_block (r.start.n, r.start.o, r.size);
-      kill_ring_push_nstring (p, r.size);
-      free (p);
-
-      warn_if_readonly_buffer ();
-    }
-  else
-    {
-      size_t size = r.size;
-
-      if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-        FUNCALL (exchange_point_and_mark);
-      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
-      undo_nosave = true;
-      while (size--)
-        {
-          if (!eolp ())
-            kill_ring_push (following_char ());
-          else
-            kill_ring_push ('\n');
-          FUNCALL (delete_char);
-        }
-      undo_nosave = false;
-    }
-
-  thisflag |= FLAG_DONE_KILL;
-  deactivate_mark ();
-
-  return leT;
+  return bool_to_lisp (copy_or_kill_region (true));
 }
 END_DEFUN
 
@@ -191,23 +188,7 @@ DEFUN ("copy-region-as-kill", copy_region_as_kill)
 Save the region as if killed, but don't kill it.
 +*/
 {
-  Region r;
-  char *p;
-
-  if (!(lastflag & FLAG_DONE_KILL))
-    free_kill_ring ();
-
-  if (!calculate_the_region (&r))
-    return leNIL;
-
-  p = copy_text_block (r.start.n, r.start.o, r.size);
-  kill_ring_push_nstring (p, r.size);
-  free (p);
-
-  thisflag |= FLAG_DONE_KILL;
-  deactivate_mark ();
-
-  return leT;
+  return bool_to_lisp (copy_or_kill_region (false));
 }
 END_DEFUN
 
