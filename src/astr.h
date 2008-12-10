@@ -121,7 +121,7 @@ astr astr_replace_cstr (astr as, ptrdiff_t pos, size_t size,
 astr astr_replace_char (astr as, ptrdiff_t pos, int c);
 
 /*
- * Insert the contents of the argument string or character in as.
+ * Insert the contents of the character in as.
  */
 astr astr_insert_char (astr as, ptrdiff_t pos, int c);
 
