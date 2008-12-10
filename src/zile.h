@@ -130,19 +130,18 @@ struct Region
 };
 
 /* Buffer flags or minor modes. */
-
-#define BFLAG_MODIFIED  (0000001)	/* The buffer has been modified. */
-#define BFLAG_NOSAVE    (0000002)	/* The buffer need not to be saved. */
-#define BFLAG_NEEDNAME  (0000004)	/* On save, ask for a file name. */
-#define BFLAG_TEMPORARY (0000010)	/* The buffer is a temporary buffer. */
-#define BFLAG_READONLY  (0000020)	/* The buffer cannot be modified. */
-#define BFLAG_OVERWRITE (0000040)	/* The buffer is in overwrite mode. */
-#define BFLAG_BACKUP    (0000100)	/* The old file has already been
-                                           backed up. */
-#define BFLAG_NOUNDO    (0000200)	/* Do not record undo informations. */
-#define BFLAG_AUTOFILL  (0000400)	/* The buffer is in Auto Fill mode. */
-#define BFLAG_ISEARCH   (0001000)	/* The buffer is in Isearch loop. */
-#define BFLAG_MARK      (0002000)       /* The mark is active. */
+#define BFLAG_MODIFIED  0000001	/* The buffer has been modified. */
+#define BFLAG_NOSAVE    0000002	/* The buffer need not to be saved. */
+#define BFLAG_NEEDNAME  0000004	/* On save, ask for a file name. */
+#define BFLAG_TEMPORARY 0000010	/* The buffer is a temporary buffer. */
+#define BFLAG_READONLY  0000020	/* The buffer cannot be modified. */
+#define BFLAG_OVERWRITE 0000040	/* The buffer is in overwrite mode. */
+#define BFLAG_BACKUP    0000100	/* The old file has already been
+                                   backed up. */
+#define BFLAG_NOUNDO    0000200	/* Do not record undo informations. */
+#define BFLAG_AUTOFILL  0000400	/* The buffer is in Auto Fill mode. */
+#define BFLAG_ISEARCH   0001000	/* The buffer is in Isearch loop. */
+#define BFLAG_MARK      0002000	/* The mark is active. */
 
 /* Formats of end-of-line. */
 extern char coding_eol_lf[3];
@@ -233,14 +232,10 @@ struct Completion
   astr path;			/* Path for a filename completion. */
 };
 
-#define CFLAG_POPPEDUP	1	/* A completion window has been popped up. */
-#define CFLAG_CLOSE	2	/* The completion window should be closed. */
-#define CFLAG_FILENAME	4	/* This is a filename completion. */
-
-/* Zile font codes
- * Designed to fit in an int, leaving room for a char underneath. */
-#define FONT_NORMAL		0x000
-#define FONT_REVERSE		0x100
+/* Completion flags */
+#define CFLAG_POPPEDUP	0000001	/* Completion window has been popped up. */
+#define CFLAG_CLOSE	0000002	/* The completion window should be closed. */
+#define CFLAG_FILENAME	0000004	/* This is a filename completion. */
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
@@ -285,27 +280,27 @@ struct Completion
 #define KBD_F12                         00433
 
 /*--------------------------------------------------------------------------
- * Global flags.
- *--------------------------------------------------------------------------*/
-
-/* The last command was a C-p or a C-n. */
-#define FLAG_DONE_CPCN                  0000001
-/* The last command was a kill. */
-#define FLAG_DONE_KILL                  0000002
-/* Hint for the redisplay engine: a resync is required. */
-#define FLAG_NEED_RESYNC                0000004
-/* Quit the editor as soon as possible. */
-#define FLAG_QUIT_ZILE                  0000010
-/* The last command modified the universal argument variable `uniarg'. */
-#define FLAG_SET_UNIARG                 0000020
-/* True if current universal arg is just C-u's with no number. */
-#define FLAG_UNIARG_EMPTY               0000040
-/* We are defining a macro. */
-#define FLAG_DEFINING_MACRO             0000100
-
-/*--------------------------------------------------------------------------
  * Miscellaneous stuff.
  *--------------------------------------------------------------------------*/
+
+/* Global flags, stored in thisflag and lastflag. */
+#define FLAG_DONE_CPCN		0000001	/* Last command was C-p or C-n. */
+#define FLAG_DONE_KILL		0000002	/* The last command was a kill. */
+#define FLAG_NEED_RESYNC	0000004	/* A resync is required. */
+#define FLAG_QUIT_ZILE		0000010	/* The user has asked to quit. */
+#define FLAG_SET_UNIARG		0000020	/* The last command modified the
+                                           universal arg variable `uniarg'. */
+#define FLAG_UNIARG_EMPTY	0000040	/* Current universal arg is just C-u's
+                                           with no number. */
+#define FLAG_DEFINING_MACRO	0000100	/* We are defining a macro. */
+
+/* Zile font codes
+ * Designed to fit in an int, leaving room for a char underneath. */
+#define FONT_NORMAL		0x000
+#define FONT_REVERSE		0x100
+
+/* Default waitkey pause in ds */
+#define WAITKEY_DEFAULT 20
 
 /* Avoid warnings about unused parameters. */
 #undef GCC_UNUSED
@@ -314,8 +309,5 @@ struct Completion
 #else
 #define GCC_UNUSED
 #endif
-
-/* Default waitkey pause in ds */
-#define WAITKEY_DEFAULT 20
 
 #endif /* !ZILE_H */
