@@ -714,7 +714,7 @@ insert_buffer (Buffer * bp)
   undo_nosave = true;
   insert_lines (0, old_cur_n, old_lines, bp->lines->next);
   insert_astr (old_cur_line);
-  if (old_cur_line < old_lines)
+  if (old_cur_n < old_lines)
     insert_newline ();
   insert_lines (old_cur_n + 1, old_lines, old_lines, old_next);
   undo_nosave = false;
