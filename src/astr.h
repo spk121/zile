@@ -44,9 +44,9 @@
  */
 
 /*
- * The dynamic string type.
+ * The opaque string type.
  */
-typedef struct astr_s *astr;
+typedef struct astr *astr;
 
 /*
  * Allocate a new string with zero length.
@@ -56,7 +56,7 @@ astr astr_new (void);
 /*
  * Make a new string from a C null-terminated string
  */
-#define astr_new_cstr(s)        (astr_cpy_cstr(astr_new(), (s)))
+astr astr_new_cstr (const char *s);
 
 /*
  * Deallocate the previously allocated string as.
@@ -65,14 +65,14 @@ void astr_delete (astr as);
 
 /*
  * Convert as into a C null-terminated string.
- * as[0] to as[astr_size(as) - 1] inclusive may be read.
+ * as[0] to as[astr_len (as) - 1] inclusive may be read.
  */
-#define astr_cstr(as)           ((const char *)(((astr)(as))->text))
+const char *astr_cstr (astr as);
 
 /*
  * Return the length of the argument string as.
  */
-#define astr_len(as)            ((const size_t)(((astr)(as))->len))
+size_t astr_len (astr as);
 
 /*
  * Return the address of the pos'th character of as. If pos is >= 0,
@@ -90,7 +90,7 @@ astr astr_substr (astr as, ptrdiff_t pos, size_t size);
 /*
  * Do strcmp on the contents of s1 and s2
  */
-#define astr_cmp(as1, as2)      (strcmp(((astr)(as1))->text, ((astr)(as2))->text))
+int astr_cmp (astr as1, astr as2);
 
 /*
  * Assign the contents of the argument string to the string as.
@@ -117,7 +117,7 @@ astr astr_cat_delete (astr as, astr src);
  * string or character.
  */
 astr astr_replace_cstr (astr as, ptrdiff_t pos, size_t size,
-			       const char *s);
+                               const char *s);
 astr astr_replace_char (astr as, ptrdiff_t pos, int c);
 
 /*
@@ -138,7 +138,7 @@ astr astr_truncate (astr as, ptrdiff_t pos);
 /*
  * Read the stream fp into a string and return it.
  */
-astr astr_fread(FILE * fp);
+astr astr_fread (FILE * fp);
 
 /*
  * Read a string from the stream fp and return it. The trailing
@@ -152,22 +152,6 @@ astr astr_fgets (FILE * fp);
  */
 astr astr_vafmt (astr as, const char *fmt, va_list ap);
 astr astr_afmt (astr as, const char *fmt, ...);
-
-
-/*
- * Internal data structure
- *
- * Internally, each string has three fields: a buffer that contains
- * the C string, the buffer size and the size of the string.
- *
- * You should never directly access the struct fields.
- */
-struct astr_s
-{
-  char *text;
-  size_t len;
-  size_t maxlen;
-};
 
 
 #endif /* !ASTR_H */

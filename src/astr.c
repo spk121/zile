@@ -34,16 +34,32 @@
 
 #define ALLOCATION_CHUNK_SIZE	16
 
+/*
+ * The implementation of astr.
+ */
+struct astr
+{
+  char *text;		/* The string buffer. */
+  size_t len;		/* The length of the string. */
+  size_t maxlen;	/* The buffer size. */
+};
+
 astr
 astr_new (void)
 {
   astr as;
-  as = (astr) XZALLOC (struct astr_s);
+  as = (astr) XZALLOC (struct astr);
   as->maxlen = ALLOCATION_CHUNK_SIZE;
   as->len = 0;
   as->text = (char *) xzalloc (as->maxlen + 1);
   memset (as->text, 0, as->maxlen + 1);
   return as;
+}
+
+astr
+astr_new_cstr (const char *s)
+{
+  return astr_cpy_cstr (astr_new (), s);
 }
 
 static void
@@ -82,6 +98,18 @@ astr_delete (astr as)
   free (as->text);
   as->text = NULL;
   free (as);
+}
+
+const char *
+astr_cstr (astr as)
+{
+  return (const char *) (as->text);
+}
+
+size_t
+astr_len (astr as)
+{
+  return as->len;
 }
 
 astr
@@ -154,6 +182,12 @@ astr_substr (astr as, ptrdiff_t pos, size_t size)
   pos = astr_pos (as, pos);
   assert (pos + size <= as->len);
   return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
+}
+
+int
+astr_cmp(astr as1, astr as2)
+{
+  return strcmp (as1->text, as2->text);
 }
 
 static astr
