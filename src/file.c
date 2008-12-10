@@ -168,7 +168,7 @@ expand_path (astr path)
              * If /foo on your system is a symlink to /bar/baz, then /foo/../quux
              * is actually /bar/quux, not /quux as a naive ../-removal would give
              * you. If you want to do this kind of processing, you probably want
-             * "Cwd"’s "realpath()" function
+             * "Cwd"'s realpath function
              */
             {
               if (astr_len (epath) >= 1 && *astr_char (epath, -1) == '/')
