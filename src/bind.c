@@ -166,10 +166,30 @@ size_t
 do_completion (astr as)
 {
   size_t key;
+  astr bs = astr_new ();
 
-  minibuf_write ("%s%s",
+  if (lastflag & FLAG_SET_UNIARG)
+    {
+      int arg = last_uniarg;
+
+      if (arg < 0)
+        {
+          astr_cat_cstr (bs, "- ");
+          arg = -arg;
+        }
+
+      do {
+        astr_insert_char (bs, 0, ' ');
+        astr_insert_char (bs, 0, arg % 10 + '0');
+        arg /= 10;
+      } while (arg != 0);
+    }
+
+  minibuf_write ("%s%s%s",
                  lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
+                 astr_cstr (bs),
                  astr_cstr (as));
+  astr_delete (bs);
   key = getkey ();
   minibuf_clear ();
 
