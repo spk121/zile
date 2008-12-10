@@ -56,35 +56,8 @@ typedef struct Window Window;
 typedef struct Completion Completion;
 
 /*
- * The type of a Zile exported function.
- * `uniarg' is the number of times to repeat the function.
- */
-typedef le * (*Function) (int uniarg, le * list);
-
-/* Turn a bool into a Lisp boolean */
-#define bool_to_lisp(b) ((b) ? leT : leNIL)
-
-/* Define an interactive function. */
-#define DEFUN(zile_func, c_func) \
-        le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
-        { \
-          if (arglist && arglist->data) \
-            uniarg = atoi (arglist->data);
-#define END_DEFUN \
-        }
-
-/* Call an interactive function. */
-#define FUNCALL(c_func)                         \
-        F_ ## c_func (1, NULL)
-
-/* Call an interactive function with a universal argument. */
-#define FUNCALL_ARG(c_func, uniarg)             \
-        F_ ## c_func (uniarg, NULL)
-
-/*
- * Line.
- * A line is a list whose items are astrs. The newline at the end of
- * each line is implicit.
+ * A line is a doubly-linked list of astrs.
+ * The newline at the end of each line is implicit.
  */
 struct Line
 {
@@ -93,7 +66,6 @@ struct Line
   astr text;
 };
 
-/* Point and Marker. */
 struct Point
 {
   Line *p;			/* Line pointer. */
@@ -141,7 +113,6 @@ struct Region
 extern char coding_eol_lf[3];
 extern char coding_eol_crlf[3];
 extern char coding_eol_cr[3];
-/* This value is used to signal that the type is not yet decided. */
 extern char coding_eol_undecided[3];
 
 struct Buffer
@@ -199,6 +170,36 @@ struct Completion
 #define CFLAG_POPPEDUP	0000001	/* Completion window has been popped up. */
 #define CFLAG_CLOSE	0000002	/* The completion window should be closed. */
 #define CFLAG_FILENAME	0000004	/* This is a filename completion. */
+
+/*--------------------------------------------------------------------------
+ * Zile commands to C bindings.
+ *--------------------------------------------------------------------------*/
+
+/*
+ * The type of a Zile exported function.
+ * `uniarg' is the number of times to repeat the function.
+ */
+typedef le * (*Function) (int uniarg, le * list);
+
+/* Turn a bool into a Lisp boolean */
+#define bool_to_lisp(b) ((b) ? leT : leNIL)
+
+/* Define an interactive function. */
+#define DEFUN(zile_func, c_func) \
+        le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
+        { \
+          if (arglist && arglist->data) \
+            uniarg = atoi (arglist->data);
+#define END_DEFUN \
+        }
+
+/* Call an interactive function. */
+#define FUNCALL(c_func)                         \
+        F_ ## c_func (1, NULL)
+
+/* Call an interactive function with a universal argument. */
+#define FUNCALL_ARG(c_func, uniarg)             \
+        F_ ## c_func (uniarg, NULL)
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
