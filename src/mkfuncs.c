@@ -46,15 +46,15 @@ do_func (FILE *fp, const char *name)
       if (buf[len - 1] == '\n')
         buf[len - 1] = '\0';
       if (s == 1)
-	{
-	  if (!strncmp (buf, "+*/", (size_t) 3))
-	    break;
+        {
+          if (!strncmp (buf, "+*/", (size_t) 3))
+            break;
           printf ("%s\\n\\\n", buf);
-	}
+        }
       if (!strncmp (buf, "/*+", (size_t) 3))
-	s = 1;
+        s = 1;
       else if (*buf == '{')
-	break;
+        break;
     }
 
   printf ("\")\n");
@@ -64,6 +64,13 @@ int
 main (int argc, char **argv)
 {
   int i;
+
+  printf("\
+/* Zile command to C function bindings and docstrings.\n\
+\n\
+   THIS FILE IS AUTO-GENERATED.\n\
+*/\n\
+\n");
 
   for (i = 0; i < argc; i++) {
     char buf[BUFSIZ], *filename = argv[i];
@@ -83,13 +90,13 @@ main (int argc, char **argv)
           p = buf;
           q = strchr (p, '\"');
           r = strrchr (p, '\"');
-	  if (q == NULL || r == NULL || q == r)
-	    {
-	      fprintf (stderr, "mkdoc: invalid DEFUN () syntax\n");
-	      exit (1);
-	    }
+          if (q == NULL || r == NULL || q == r)
+            {
+              fprintf (stderr, "mkdoc: invalid DEFUN () syntax\n");
+              exit (1);
+            }
           *r = '\0';
-	  do_func (fp, q + 1);
+          do_func (fp, q + 1);
           }
       }
 
