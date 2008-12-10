@@ -166,7 +166,7 @@ setup_main_screen (int argc)
             {
               astr as = astr_new_cstr ("\
 This buffer is for notes you don't want to save.\n\
-If you want to create a file, visit that file with C-x C-f,\n   \
+If you want to create a file, visit that file with C-x C-f,\n\
 then enter the text in that file's own buffer.\n\
 \n");
               insert_astr (as);
