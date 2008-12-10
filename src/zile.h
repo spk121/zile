@@ -142,6 +142,7 @@ struct Region
 #define BFLAG_NOUNDO    (0000200)	/* Do not record undo informations. */
 #define BFLAG_AUTOFILL  (0000400)	/* The buffer is in Auto Fill mode. */
 #define BFLAG_ISEARCH   (0001000)	/* The buffer is in Isearch loop. */
+#define BFLAG_MARK      (0002000)       /* The mark is active. */
 
 /* Formats of end-of-line. */
 extern char coding_eol_lf[3];
@@ -173,7 +174,6 @@ struct Buffer
 
   /* Buffer flags. */
   int flags;
-  int mark_active;
 
   /* Buffer-local variables. */
   Hash_table *vars;

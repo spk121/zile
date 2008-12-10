@@ -170,7 +170,7 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
        && !get_variable_bool ("highlight-nonselected-windows"))
       || (!wp->bp->mark)
       || (!transient_mark_mode ())
-      || (transient_mark_mode () && !(wp->bp->mark_active)))
+      || (transient_mark_mode () && !(wp->bp->flags & BFLAG_MARK)))
     {
       *highlight = false;
       return;

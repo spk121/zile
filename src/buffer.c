@@ -281,7 +281,7 @@ warn_if_no_mark (void)
       minibuf_error ("The mark is not set now");
       return true;
     }
-  else if (!cur_bp->mark_active && transient_mark_mode ())
+  else if (!(cur_bp->flags & BFLAG_MARK) && transient_mark_mode ())
     {
       minibuf_error ("The mark is not active now");
       return true;
@@ -382,13 +382,13 @@ transient_mark_mode (void)
 void
 activate_mark (void)
 {
-  cur_bp->mark_active = true;
+  cur_bp->flags |= BFLAG_MARK;
 }
 
 void
 deactivate_mark (void)
 {
-  cur_bp->mark_active = false;
+  cur_bp->flags &= ~BFLAG_MARK;
 }
 
 /*
