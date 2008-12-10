@@ -54,7 +54,7 @@ typedef struct astr *astr;
 astr astr_new (void);
 
 /*
- * Make a new string from a C null-terminated string
+ * Make a new string from a C null-terminated string.
  */
 astr astr_new_cstr (const char *s);
 
@@ -88,7 +88,7 @@ char *astr_char (astr as, ptrdiff_t pos);
 astr astr_substr (astr as, ptrdiff_t pos, size_t size);
 
 /*
- * Do strcmp on the contents of s1 and s2
+ * Do strcmp on the contents of as1 and as2.
  */
 int astr_cmp (astr as1, astr as2);
 
@@ -148,7 +148,7 @@ astr astr_fread (FILE * fp);
 astr astr_fgets (FILE * fp);
 
 /*
- * Append formatted text to the argument string
+ * Append formatted text to the argument string.
  */
 astr astr_vafmt (astr as, const char *fmt, va_list ap);
 astr astr_afmt (astr as, const char *fmt, ...);
