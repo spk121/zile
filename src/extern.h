@@ -147,7 +147,7 @@ void line_replace_text (Line ** lp, size_t offset, size_t oldlen,
                         char *newtext, size_t newlen, int replace_case);
 int insert_char (int c);
 int insert_char_in_insert_mode (int c);
-void fill_break_line (void);
+bool fill_break_line (void);
 int insert_newline (void);
 void insert_nstring (const char *s, size_t len);
 void insert_astr (astr as);
@@ -189,6 +189,7 @@ void free_minibuf (void);
 void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
+size_t minibuf_read_number (const char *fmt, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
 int minibuf_read_yesno (const char *fmt, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,

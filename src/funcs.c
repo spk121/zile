@@ -266,33 +266,35 @@ Use C-u followed by a number to specify a column.
 Just C-u as argument means to use the current column.
 +*/
 {
-  size_t fill_col = (thisflag & FLAG_UNIARG_EMPTY) ? cur_bp->pt.o : (size_t) uniarg;
+  size_t fill_col = (lastflag & FLAG_UNIARG_EMPTY) ? cur_bp->pt.o : (size_t) uniarg;
   char *buf;
   le *branch;
 
-  if (lastflag & FLAG_SET_UNIARG || arglist != NULL)
+  if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)
     {
-      if (arglist != NULL)
-        buf = arglist->next->data;
-      else
-        {
-          xasprintf (&buf, "%d", fill_col);
-          /* Only print message when run interactively. */
-          minibuf_write ("Fill column set to %s (was %d)", buf,
-                         get_variable_number ("fill-column"));
-        }
-      branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
-      F_set_variable (0, branch);
-      if (arglist == NULL)
-        free (buf);
-      leWipe (branch);
-      return leT;
+      fill_col = minibuf_read_number ("Set fill-column to (default %d): ", cur_bp->pt.o);
+      if (fill_col == SIZE_MAX)
+        return leNIL;
+      else if (fill_col == SIZE_MAX - 1)
+        fill_col = cur_bp->pt.o;
     }
+
+  if (arglist != NULL)
+    buf = arglist->next->data;
   else
     {
-      minibuf_error ("set-fill-column requires an explicit argument");
-      return leNIL;
+      xasprintf (&buf, "%d", fill_col);
+      /* Only print message when run interactively. */
+      minibuf_write ("Fill column set to %s (was %d)", buf,
+                     get_variable_number ("fill-column"));
     }
+  branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
+  F_set_variable (0, branch);
+  if (arglist == NULL)
+    free (buf);
+  leWipe (branch);
+
+  return leT;
 }
 END_DEFUN
 
@@ -1269,8 +1271,9 @@ Fill paragraph at or after point.
     }
 
   FUNCALL (end_of_line);
-  while (get_goalc () > (size_t) get_variable_number ("fill-column") + 1)
-    fill_break_line ();
+  while (get_goalc () > (size_t) get_variable_number ("fill-column") + 1
+         && fill_break_line ())
+    ;
 
   thisflag &= ~FLAG_DONE_CPCN;
 

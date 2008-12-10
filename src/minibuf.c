@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "size_max.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -83,7 +82,7 @@ minibuf_write (const char *fmt, ...)
 }
 
 /*
- * Write the specified error string in the minibuffer and beep.
+ * Write the specified error string in the minibuffer and signal an error.
  */
 void
 minibuf_error (const char *fmt, ...)
@@ -117,11 +116,50 @@ minibuf_read (const char *fmt, const char *value, ...)
 }
 
 /*
+ * Read a non-negative number from the minibuffer.
+ */
+size_t
+minibuf_read_number (const char *fmt, ...)
+{
+  va_list ap;
+  char *buf;
+  size_t n;
+
+  va_start (ap, fmt);
+  xvasprintf (&buf, fmt, ap);
+  va_end (ap);
+
+  do
+    {
+      char *ms = minibuf_read (buf, "");
+      if (ms == NULL)
+        {
+          n = SIZE_MAX;
+          FUNCALL (keyboard_quit);
+          break;
+        }
+      if (strlen (ms) == 0)
+        n = SIZE_MAX - 1;
+      else
+        {
+          unsigned long un = strtoul (ms, NULL, 10);
+          n = un == ULONG_MAX ? SIZE_MAX : (size_t) un;
+        }
+      free (ms);
+      if (n == SIZE_MAX)
+        minibuf_write ("Please enter a number.");
+    }
+  while (n == SIZE_MAX);
+
+  return n;
+}
+
+/*
  * Read a filename from the minibuffer.
  */
 char *
 minibuf_read_filename (const char *fmt, const char *value,
-		       const char *file, ...)
+                       const char *file, ...)
 {
   va_list ap;
   char *buf, *p = NULL;
@@ -149,15 +187,15 @@ minibuf_read_filename (const char *fmt, const char *value,
 
       if (p != NULL)
         {
-	  as = expand_path (astr_new_cstr (p));
-	  if (as)
-	    {
-	      add_history_element (files_history, p);
-	      p = xstrdup (astr_cstr (as));
-	      astr_delete (as);
-	    }
-	  else
-	    p = NULL;
+          as = expand_path (astr_new_cstr (p));
+          if (as)
+            {
+              add_history_element (files_history, p);
+              p = xstrdup (astr_cstr (as));
+              astr_delete (as);
+            }
+          else
+            p = NULL;
         }
     }
 
@@ -184,7 +222,7 @@ minibuf_read_yesno (const char *fmt, ...)
 
   va_start (ap, fmt);
   ms = vminibuf_read_completion (fmt, "", cp, NULL, errmsg,
-				 minibuf_test_in_completions, errmsg, ap);
+                                 minibuf_test_in_completions, errmsg, ap);
   va_end (ap);
 
   if (ms != NULL)
@@ -220,9 +258,9 @@ minibuf_read_completion (const char *fmt, char *value, Completion * cp,
  */
 char *
 vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
-			  History * hp, const char *empty_err,
-			  bool (*test) (const char *s, gl_list_t completions),
-			  const char *invalid_err, va_list ap)
+                          History * hp, const char *empty_err,
+                          bool (*test) (const char *s, gl_list_t completions),
+                          const char *invalid_err, va_list ap)
 {
   char *buf, *ms;
 
@@ -233,42 +271,42 @@ vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
       ms = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
 
       if (ms == NULL) /* Cancelled. */
-	{
-	  FUNCALL (keyboard_quit);
-	  break;
-	}
+        {
+          FUNCALL (keyboard_quit);
+          break;
+        }
       else if (ms[0] == '\0')
-	{
-	  minibuf_error (empty_err);
-	  free ((char *) ms);
-	  ms = NULL;
-	  break;
-	}
+        {
+          minibuf_error (empty_err);
+          free ((char *) ms);
+          ms = NULL;
+          break;
+        }
       else
-	{
-	  astr as = astr_new ();
-	  astr_cpy_cstr (as, ms);
-	  /* Complete partial words if possible. */
-	  if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-	    {
-	      free ((char *) ms);
-	      ms = xstrdup (cp->match);
-	    }
-	  astr_delete (as);
+        {
+          astr as = astr_new ();
+          astr_cpy_cstr (as, ms);
+          /* Complete partial words if possible. */
+          if (completion_try (cp, as, false) == COMPLETION_MATCHED)
+            {
+              free ((char *) ms);
+              ms = xstrdup (cp->match);
+            }
+          astr_delete (as);
 
-	  if (test (ms, cp->completions))
-	    {
-	      if (hp)
+          if (test (ms, cp->completions))
+            {
+              if (hp)
                 add_history_element (hp, ms);
-	      minibuf_clear ();
-	      break;
-	    }
-	  else
-	    {
-	      minibuf_error (invalid_err, ms);
-	      waitkey (WAITKEY_DEFAULT);
-	    }
-	}
+              minibuf_clear ();
+              break;
+            }
+          else
+            {
+              minibuf_error (invalid_err, ms);
+              waitkey (WAITKEY_DEFAULT);
+            }
+        }
     }
 
   free (buf);

@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include "xalloc.h"
+#include "size_max.h"
 #include "minmax.h"
 #include "hash.h"
 #include "gl_list.h"

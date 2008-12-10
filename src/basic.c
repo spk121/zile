@@ -259,19 +259,12 @@ Move cursor to the beginning of the specified line.
 Line 1 is the beginning of the buffer.
 +*/
 {
-  size_t to_line;
+  size_t to_line = minibuf_read_number ("Goto line: ");
 
-  do
-    {
-      char *ms = minibuf_read ("Goto line: ", "");
-      if (ms == NULL)
-        return FUNCALL (keyboard_quit);
-      to_line = strtoul (ms, NULL, 10);
-      free (ms);
-      if (to_line == ULONG_MAX)
-        ding ();
-    }
-  while (to_line == ULONG_MAX);
+  if (to_line == SIZE_MAX)
+    return leNIL;
+  else if (to_line == SIZE_MAX - 1)
+    minibuf_error ("End of file during parsing");
 
   --to_line; /* Re-base to counting from zero */
   if (cur_bp->pt.n > to_line)

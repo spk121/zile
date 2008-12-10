@@ -340,8 +340,10 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
  * right-most space character at or before fill-column, if there is
  * one, or at the left-most at or after fill-column, if not. If the
  * line contains no spaces, no break is made.
+ *
+ * Return flag indicating whether break was made.
  */
-void
+bool
 fill_break_line (void)
 {
   size_t i, break_col = 0, excess = 0, old_col;
@@ -349,7 +351,7 @@ fill_break_line (void)
 
   /* If we're not beyond fill-column, stop now. */
   if (get_goalc () <= fillcol)
-    return;
+    return false;
 
   /* Move cursor back to fill column */
   old_col = cur_bp->pt.o;
@@ -385,18 +387,20 @@ fill_break_line (void)
         }
     }
 
-  if (break_col >= 1)
+  if (break_col >= 1) /* Break line. */
     {
-      /* Break line. */
       size_t last_col = cur_bp->pt.o - break_col;
       cur_bp->pt.o = break_col;
       FUNCALL (delete_horizontal_space);
       insert_newline ();
       cur_bp->pt.o = last_col + excess;
+      return true;
     }
-  else
-    /* Undo fiddling with point. */
-    cur_bp->pt.o = old_col;
+  else /* Undo fiddling with point. */
+    {
+      cur_bp->pt.o = old_col;
+      return false;
+    }
 }
 
 static int
@@ -480,12 +484,13 @@ delete_char (void)
   if (eolp ())
     {
       size_t oldlen = astr_len (cur_bp->pt.p->text);
+      Line *oldlp = cur_bp->pt.p->next;
 
       /* Join the lines. */
-      astr_cat (cur_bp->pt.p->text, cur_bp->pt.p->next->text);
-      line_remove (cur_bp->pt.p->next);
+      astr_cat (cur_bp->pt.p->text, oldlp->text);
+      line_remove (oldlp);
 
-      adjust_markers (cur_bp->pt.p, cur_bp->pt.p->next, oldlen, -1, 0);
+      adjust_markers (cur_bp->pt.p, oldlp, oldlen, -1, 0);
       --cur_bp->last_line;
       thisflag |= FLAG_NEED_RESYNC;
     }

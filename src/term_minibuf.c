@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "size_max.h"
 
 #include "zile.h"
 #include "extern.h"
