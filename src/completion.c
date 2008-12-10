@@ -74,7 +74,7 @@ completion_new (int fileflag)
   if (fileflag)
     {
       cp->path = astr_new ();
-      cp->fl_dir = true;
+      cp->flags |= CFLAG_FILENAME;
     }
 
   return cp;
@@ -88,7 +88,7 @@ free_completion (Completion * cp)
 {
   gl_list_free (cp->completions);
   gl_list_free (cp->matches);
-  if (cp->fl_dir)
+  if (cp->flags & CFLAG_FILENAME)
     astr_delete (cp->path);
   free (cp);
 }
@@ -195,13 +195,13 @@ write_completion (va_list ap)
 static void
 popup_completion (Completion * cp, int allflag, size_t num)
 {
-  cp->fl_poppedup = 1;
+  cp->flags |= CFLAG_POPPEDUP;
   if (head_wp->next == NULL)
-    cp->fl_close = 1;
+    cp->flags |= CFLAG_CLOSE;
 
   write_temp_buffer ("*Completions*", write_completion, cp, allflag, num);
 
-  if (!cp->fl_close)
+  if (!(cp->flags & CFLAG_CLOSE))
     cp->old_bp = cur_bp;
 
   term_redisplay ();
@@ -299,7 +299,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
   gl_list_free (cp->matches);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_streq, NULL, NULL, false);
 
-  if (cp->fl_dir)
+  if (cp->flags & CFLAG_FILENAME)
     if (!completion_readdir (cp, search))
       return COMPLETION_NOTMATCHED;
 

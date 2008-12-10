@@ -223,18 +223,19 @@ enum
 
 struct Completion
 {
-  int fl_poppedup; /* Set when a completion window has been popped up. */
-  int fl_close; /* Set when the completion window should be closed. */
-  Buffer *old_bp;		/* The old buffer. */
-  int fl_dir; /* Set when this is a filename completion. */
-  astr path;
-
+  Buffer *old_bp;		/* The buffer from which the
+                                   completion was invoked. */
   gl_list_t completions;	/* The completions list. */
-
   gl_list_t matches;		/* The matches list. */
   const char *match;		/* The match buffer. */
   size_t matchsize;		/* The match buffer size. */
+  int flags;			/* Completion flags. */
+  astr path;			/* Path for a filename completion. */
 };
+
+#define CFLAG_POPPEDUP	1	/* A completion window has been popped up. */
+#define CFLAG_CLOSE	2	/* The completion window should be closed. */
+#define CFLAG_FILENAME	4	/* This is a filename completion. */
 
 /* Zile font codes
  * Designed to fit in an int, leaving room for a char underneath. */

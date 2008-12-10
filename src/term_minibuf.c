@@ -194,7 +194,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
               break;
             }
 
-          if (cp->fl_poppedup)
+          if (cp->flags & CFLAG_POPPEDUP)
             {
               completion_scroll_down ();
               thistab = lasttab;
@@ -208,7 +208,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
               break;
             }
 
-          if (cp->fl_poppedup)
+          if (cp->flags & CFLAG_POPPEDUP)
             {
               completion_scroll_up ();
               thistab = lasttab;
@@ -252,7 +252,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
             }
 
           if (lasttab != -1 && lasttab != COMPLETION_NOTMATCHED
-              && cp->fl_poppedup)
+              && cp->flags & CFLAG_POPPEDUP)
             {
               completion_scroll_up ();
               thistab = lasttab;
@@ -270,7 +270,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
                 case COMPLETION_NONUNIQUE:
                   {
                     bs = astr_new ();
-                    if (cp->fl_dir)
+                    if (cp->flags & CFLAG_FILENAME)
                       astr_cat (bs, cp->path);
                     astr_ncat_cstr (bs, cp->match, cp->matchsize);
                     if (strncmp (astr_cstr (as), astr_cstr (bs),
@@ -324,11 +324,11 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
       astr_delete (as);
     }
 
-  if (cp != NULL && cp->fl_poppedup
+  if (cp != NULL && (cp->flags & CFLAG_POPPEDUP)
       && (wp = find_window ("*Completions*")) != NULL)
     {
       set_current_window (wp);
-      if (cp->fl_close)
+      if (cp->flags & CFLAG_CLOSE)
         FUNCALL (delete_window);
       else if (cp->old_bp)
         switch_to_buffer (cp->old_bp);
