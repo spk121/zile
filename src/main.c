@@ -241,7 +241,7 @@ main (int argc, char **argv)
   init_eval ();
 
   opterr = 0;			/* Don't display errors for unknown options */
-  while (true)
+  for (;;)
     {
       int this_optind = optind ? optind : 1;
 

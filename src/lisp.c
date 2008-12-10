@@ -76,9 +76,9 @@ read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
 
       /* Munch comments */
       if (c == ';')
-	do
+        do
           c = read_char (as, pos);
-	while (c != EOF && c != '\n');
+        while (c != EOF && c != '\n');
     }
   while (c != EOF && (c == ' ' || c == '\t'));
 
@@ -116,37 +116,37 @@ read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
       c = read_char (as, pos);
     }
 
-  while (1)
+  for (;;)
     {
       astr_cat_char (tok, (char) c);
 
       if (!doublequotes)
-	{
-	  if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n'
-	      || c == '\r' || c == EOF)
-	    {
-	      (*pos)--;
-	      astr_truncate (tok, (ptrdiff_t) - 1);
-	      *tokenid = T_WORD;
-	      return tok;
-	    }
-	}
+        {
+          if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n'
+              || c == '\r' || c == EOF)
+            {
+              (*pos)--;
+              astr_truncate (tok, (ptrdiff_t) - 1);
+              *tokenid = T_WORD;
+              return tok;
+            }
+        }
       else
-	{
-	  switch (c)
-	    {
-	    case '\n':
-	    case '\r':
-	    case EOF:
-	      (*pos)--;
-	      /* Fall through */
+        {
+          switch (c)
+            {
+            case '\n':
+            case '\r':
+            case EOF:
+              (*pos)--;
+              /* Fall through */
 
-	    case '\"':
-	      astr_truncate (tok, (ptrdiff_t) - 1);
-	      *tokenid = T_WORD;
-	      return tok;
-	    }
-	}
+            case '\"':
+              astr_truncate (tok, (ptrdiff_t) - 1);
+              *tokenid = T_WORD;
+              return tok;
+            }
+        }
 
       c = read_char (as, pos);
     }
@@ -161,36 +161,36 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
   enum tokenname tokenid;
   int quoted = 0;
 
-  while (1)
+  for (;;)
     {
       tok = read_token (&tokenid, as, pos);
 
       switch (tokenid)
-	{
-	case T_QUOTE:
-	  quoted = 1;
-	  break;
+        {
+        case T_QUOTE:
+          quoted = 1;
+          break;
 
-	case T_OPENPAREN:
-	  list = leAddBranchElement (list, lisp_read (NULL, as, pos), quoted);
-	  quoted = 0;
-	  break;
+        case T_OPENPAREN:
+          list = leAddBranchElement (list, lisp_read (NULL, as, pos), quoted);
+          quoted = 0;
+          break;
 
-	case T_NEWLINE:
-	  quoted = 0;
-	  break;
+        case T_NEWLINE:
+          quoted = 0;
+          break;
 
-	case T_WORD:
-	  list = leAddDataElement (list, astr_cstr (tok), quoted);
-	  quoted = 0;
-	  break;
+        case T_WORD:
+          list = leAddDataElement (list, astr_cstr (tok), quoted);
+          quoted = 0;
+          break;
 
-	case T_CLOSEPAREN:
-	case T_EOF:
-	  quoted = 0;
-	  astr_delete (tok);
-	  return list;
-	}
+        case T_CLOSEPAREN:
+        case T_EOF:
+          quoted = 0;
+          astr_delete (tok);
+          return list;
+        }
 
       astr_delete (tok);
     }
