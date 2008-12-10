@@ -75,16 +75,16 @@ term_attrset (size_t attrs, ...)
   va_start (ap, attrs);
   for (i = 0; i < attrs; i++)
     {
-      Font f = va_arg (ap, Font);
+      size_t f = va_arg (ap, size_t);
       switch (f)
-	{
-	case FONT_NORMAL:
-	  a = 0;
-	  break;
-	case FONT_REVERSE:
-	  a |= A_REVERSE;
-	  break;
-	}
+        {
+        case FONT_NORMAL:
+          a = 0;
+          break;
+        case FONT_REVERSE:
+          a |= A_REVERSE;
+          break;
+        }
     }
   va_end (ap);
   attrset (a);
@@ -214,7 +214,7 @@ translate_key (int c)
       return KBD_F12;
     default:
       if (c > 0xff || c < 0)
-	return KBD_NOKEY;	/* Undefined behaviour. */
+        return KBD_NOKEY;	/* Undefined behaviour. */
       return c;
     }
 }
@@ -229,28 +229,28 @@ term_xgetkey (int mode, size_t timeout)
       int c;
 
       if (mode & GETKEY_DELAYED)
-	wtimeout (stdscr, (int) timeout * 100);
+        wtimeout (stdscr, (int) timeout * 100);
       c = getch ();
       if (mode & GETKEY_DELAYED)
-	wtimeout (stdscr, -1);
+        wtimeout (stdscr, -1);
 
 #ifdef KEY_RESIZE
       if (c == KEY_RESIZE)
-	{
-	  term_set_size ((size_t) COLS, (size_t) LINES);
-	  resize_windows ();
-	  continue;
-	}
+        {
+          term_set_size ((size_t) COLS, (size_t) LINES);
+          resize_windows ();
+          continue;
+        }
 #endif
 
       if (mode & GETKEY_UNFILTERED)
-	key = (size_t) c;
+        key = (size_t) c;
       else
-	{
-	  key = translate_key (c);
-	  while (key == KBD_META)
-	    key = translate_key (getch ()) | KBD_META;
-	}
+        {
+          key = translate_key (c);
+          while (key == KBD_META)
+            key = translate_key (getch ()) | KBD_META;
+        }
       break;
     }
 

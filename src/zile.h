@@ -236,9 +236,6 @@ struct Completion
   size_t matchsize;		/* The match buffer size. */
 };
 
-/* Type of font attributes */
-typedef size_t Font;
-
 /* Zile font codes
  * Designed to fit in an int, leaving room for a char underneath. */
 #define FONT_NORMAL		0x000

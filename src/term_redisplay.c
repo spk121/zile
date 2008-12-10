@@ -68,7 +68,7 @@ make_char_printable (char **buf, size_t c)
 }
 
 static void
-outch (int c, Font font, size_t * x)
+outch (int c, size_t font, size_t * x)
 {
   int j, w;
   char *buf;
