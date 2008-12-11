@@ -573,7 +573,7 @@ DEFUN ("describe-bindings", describe_bindings)
 Show a list of all defined keys, and their definitions.
 +*/
 {
-  write_temp_buffer ("*Help*", write_bindings_list);
+  write_temp_buffer ("*Help*", true, write_bindings_list);
   return leT;
 }
 END_DEFUN

@@ -148,19 +148,20 @@ print_buf (Buffer * old_bp, Buffer * bp)
 }
 
 void
-write_temp_buffer (const char *name, void (*func) (va_list ap), ...)
+write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
 {
   Window *wp, *old_wp = cur_wp;
-  Buffer *new_bp;
+  Buffer *new_bp, *old_bp = cur_bp;
   va_list ap;
 
   /* Popup a window with the buffer "name". */
   wp = find_window (name);
-  if (wp)
+  if (show && wp)
     set_current_window (wp);
   else
     {
-      set_current_window (popup_window ());
+      if (show)
+        set_current_window (popup_window ());
       switch_to_buffer (find_buffer (name, true));
     }
 
@@ -183,6 +184,10 @@ write_temp_buffer (const char *name, void (*func) (va_list ap), ...)
 
   /* Restore old current window. */
   set_current_window (old_wp);
+
+  /* If we're not showing the new buffer, switch back to the old one. */
+  if (!show)
+    switch_to_buffer (old_bp);
 }
 
 static void
@@ -198,7 +203,7 @@ write_buffers_list (va_list ap)
   bp = old_wp->bp;
   do
     {
-      /* Print all buffer less this one (the *Buffer List*). */
+      /* Print all buffers less this one (the *Buffer List*). */
       if (cur_bp != bp)
         print_buf (old_wp->bp, bp);
       bp = bp->next;
@@ -218,7 +223,7 @@ The M column contains a * for buffers that are modified.
 The R column contains a % for buffers that are read-only.
 +*/
 {
-  write_temp_buffer ("*Buffer List*", write_buffers_list, cur_wp);
+  write_temp_buffer ("*Buffer List*", true, write_buffers_list, cur_wp);
   return leT;
 }
 END_DEFUN
@@ -228,8 +233,8 @@ DEFUN ("overwrite-mode", overwrite_mode)
 In overwrite mode, printing characters typed in replace existing
 text on a one-for-one basis, rather than pushing it to the right.
 At the end of a line, such characters extend the line.
-C-q still inserts characters in overwrite mode; this is supposed
-to make it easier to insert characters when necessary.
+C-q still inserts characters in overwrite mode; this
+is supposed to make it easier to insert characters when necessary.
 +*/
 {
   cur_bp->flags ^= BFLAG_OVERWRITE;
@@ -1455,72 +1460,104 @@ write_shell_output (va_list ap)
   insert_astr (out);
 }
 
-DEFUN ("shell-command", shell_command)
-/*+
-Reads a line of text using the minibuffer and creates an inferior shell
-to execute the line as a command.
-Standard input from the command comes from the null device.  If the
-shell command produces any output, the output goes to a Zile buffer
-named `*Shell Command Output*', which is displayed in another window
-but not selected.
-If the output is one line, it is displayed in the echo area.
-A numeric argument, as in `M-1 M-!' or `C-u M-!', directs this
-command to insert any output into the current buffer.
-+*/
+static bool
+pipe_command (const char *cmd, const char *tempfile, bool replace)
 {
-  FILE *pipe;
-  astr out, s;
-  int lines = 0;
-  astr cmd;
-  char *ms = minibuf_read ("Shell command: ", "");
+  astr out = astr_new (), s;
+  size_t lines = 0;
+  char *cmdline;
+  FILE * pipe;
 
-  if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-  if (ms[0] == '\0')
-    {
-      free (ms);
-      return leNIL;
-    }
-
-  cmd = astr_new ();
-  astr_afmt (cmd, "%s 2>&1 </dev/null", ms);
-  free (ms);
-  pipe = popen (astr_cstr (cmd), "r");
+  xasprintf (&cmdline, "%s 2>&1 <%s", cmd, tempfile);
+  pipe = popen (cmdline, "r");
   if (pipe == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
-      return leNIL;
+      return false;
     }
-  astr_delete (cmd);
+  free (cmdline);
 
-  out = astr_new ();
-  while ((s = astr_fgets (pipe)) != NULL)
+  for (;;)
     {
-      ++lines;
+      s = astr_fgets (pipe);
       astr_cat (out, s);
-      astr_cat_char (out, '\n');
       astr_delete (s);
+      if (feof (pipe))
+        break;
+      ++lines;
+      astr_cat_char (out, '\n');
     }
   pclose (pipe);
 
-  if (lines == 0)
+  if (astr_len (out) == 0)
     minibuf_write ("(Shell command succeeded with no output)");
   else
-    {				/* lines >= 1 */
+    {
       if (lastflag & FLAG_SET_UNIARG)
-        insert_astr (out);
+        {
+          if (replace)
+            {
+              undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+              FUNCALL (delete_region);
+            }
+            insert_astr (out);
+            if (replace)
+              undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+        }
       else
         {
-          if (lines > 1)
-            write_temp_buffer ("*Shell Command Output*",
-                               write_shell_output, out);
-          else			/* lines == 1 */
+          write_temp_buffer ("*Shell Command Output*", lines > 1,
+                             write_shell_output, out);
+          if (lines <= 1)
             minibuf_write ("%s", astr_cstr (out));
         }
     }
   astr_delete (out);
 
-  return leT;
+  return true;
+}
+
+static char *
+minibuf_read_shell_command (void)
+{
+  char *ms = minibuf_read ("Shell command: ", "");
+
+  if (ms == NULL)
+    {
+      FUNCALL (keyboard_quit);
+      return NULL;
+    }
+  if (ms[0] == '\0')
+    {
+      free (ms);
+      return NULL;
+    }
+
+  return ms;
+}
+
+DEFUN ("shell-command", shell_command)
+/*+
+Execute string command in inferior shell; display output, if any.
+With prefix argument, insert the command's output at point.
+
+Command is executed synchronously.  The output appears in the buffer
+`*Shell Command Output*'.  If the output is short enough to display
+in the echo area, it is shown there, but it is nonetheless available
+in buffer `*Shell Command Output*' even though that buffer is not
+automatically displayed.
++*/
+{
+  bool ret;
+  char *cmd = minibuf_read_shell_command ();
+
+  if (cmd == NULL)
+    return leNIL;
+
+  ret = pipe_command (cmd, "/dev/null", false);
+  free (cmd);
+
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -1537,22 +1574,15 @@ there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
 The output is available in that buffer in both cases.
 +*/
 {
-  FILE *pipe;
-  astr out, s;
-  int lines = 0, fd;
+  int fd;
   ssize_t written;
-  astr cmd;
   char tempfile[] = P_tmpdir "/zileXXXXXX";
-  char *ms = minibuf_read ("Shell command: ", ""), *p;
   Region r;
+  bool ret;
+  char *cmd = minibuf_read_shell_command (), *p;
 
-  if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-  if (ms[0] == '\0')
-    {
-      free (ms);
-      return leNIL;
-    }
+  if (cmd == NULL)
+    return leNIL;
 
   if (!calculate_the_region (&r))
     return leNIL;
@@ -1579,60 +1609,11 @@ The output is available in that buffer in both cases.
       return leNIL;
     }
 
-  cmd = astr_new ();
-  astr_afmt (cmd, "%s 2>&1 <%s", ms, tempfile);
-  free (ms);
-  pipe = popen (astr_cstr (cmd), "r");
-  if (pipe == NULL)
-    {
-      minibuf_error ("Cannot open pipe to process");
-      return leNIL;
-    }
-  astr_delete (cmd);
-
-  out = astr_new ();
-  while (astr_len (s = astr_fgets (pipe)) > 0)
-    {
-      ++lines;
-      astr_cat (out, s);
-      astr_cat_char (out, '\n');
-      astr_delete (s);
-    }
-  astr_delete (s);
-  pclose (pipe);
+  ret = pipe_command (cmd, tempfile, true);
+  free (cmd);
   remove (tempfile);
 
-  if (lines == 0)
-    minibuf_write ("(Shell command succeeded with no output)");
-  else
-    {				/* lines >= 1 */
-      if (lastflag & FLAG_SET_UNIARG)
-        {
-          undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
-          {
-            if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-              FUNCALL (exchange_point_and_mark);
-            undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, r.size, 0);
-            undo_nosave = true;
-            while (r.size--)
-              FUNCALL (delete_char);
-            undo_nosave = false;
-          }
-          insert_astr (out);
-          undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-        }
-      else
-        {
-          if (lines > 1)
-            write_temp_buffer ("*Shell Command Output*",
-                               write_shell_output, out);
-          else			/* lines == 1 */
-            minibuf_write ("%s", astr_cstr (out));
-        }
-    }
-  astr_delete (out);
-
-  return leT;
+  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -1642,7 +1623,6 @@ Delete the text between point and mark.
 +*/
 {
   Region r;
-  size_t size;
 
   if (!calculate_the_region (&r))
     return leNIL;
@@ -1650,14 +1630,12 @@ Delete the text between point and mark.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  size = r.size;
-
   if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
     FUNCALL (exchange_point_and_mark);
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, r.size, 0);
   undo_nosave = true;
-  while (size--)
+  while (r.size--)
     FUNCALL (delete_char);
   undo_nosave = false;
 

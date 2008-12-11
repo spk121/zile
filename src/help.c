@@ -100,8 +100,8 @@ Display the full documentation of a function.
 
   bufname = astr_new ();
   astr_afmt (bufname, "*Help: function `%s'*", name);
-  write_temp_buffer (astr_cstr (bufname), write_function_description,
-		     name, doc);
+  write_temp_buffer (astr_cstr (bufname), true,
+                     write_function_description, name, doc);
   astr_delete (bufname);
 
   free ((char *) name);
@@ -117,10 +117,10 @@ write_variable_description (va_list ap)
   char *curval = va_arg (ap, char *);
   char *doc = va_arg (ap, char *);
   bprintf ("Variable: %s\n\n"
-	   "Default value: %s\n"
-	   "Current value: %s\n\n"
-	   "Documentation:\n%s",
-	   name, defval, curval, doc);
+           "Default value: %s\n"
+           "Current value: %s\n\n"
+           "Documentation:\n%s",
+           name, defval, curval, doc);
 }
 
 DEFUN ("describe-variable", describe_variable)
@@ -145,8 +145,9 @@ Display the full documentation of a variable.
 
   bufname = astr_new ();
   astr_afmt (bufname, "*Help: variable `%s'*", name);
-  write_temp_buffer (astr_cstr (bufname), write_variable_description,
-		     name, defval, get_variable (name), doc);
+  write_temp_buffer (astr_cstr (bufname), true,
+                     write_variable_description,
+                     name, defval, get_variable (name), doc);
   free ((char *) name);
   astr_delete (bufname);
 
@@ -184,8 +185,8 @@ Display documentation of the command invoked by a key sequence.
 
   bufname = astr_new ();
   astr_afmt (bufname, "*Help: function `%s'*", name);
-  write_temp_buffer (astr_cstr (bufname), write_function_description,
-		     name, doc);
+  write_temp_buffer (astr_cstr (bufname), true,
+                     write_function_description, name, doc);
   astr_delete (bufname);
 
   return leT;

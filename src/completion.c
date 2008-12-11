@@ -199,7 +199,7 @@ popup_completion (Completion * cp, int allflag, size_t num)
   if (head_wp->next == NULL)
     cp->flags |= CFLAG_CLOSE;
 
-  write_temp_buffer ("*Completions*", write_completion, cp, allflag, num);
+  write_temp_buffer ("*Completions*", true, write_completion, cp, allflag, num);
 
   if (!(cp->flags & CFLAG_CLOSE))
     cp->old_bp = cur_bp;

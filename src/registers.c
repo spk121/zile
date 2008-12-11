@@ -143,7 +143,7 @@ DEFUN ("list-registers", list_registers)
 List defined registers.
 +*/
 {
-  write_temp_buffer ("*Registers List*", write_registers_list);
+  write_temp_buffer ("*Registers List*", true, write_registers_list);
   return leT;
 }
 END_DEFUN
