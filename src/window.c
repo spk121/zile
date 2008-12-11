@@ -64,8 +64,9 @@ free_windows (void)
     }
 }
 
-/* Set the current window and his buffer as the current buffer.  */
-
+/*
+ * Set the current window and his buffer as the current buffer.
+ */
 void
 set_current_window (Window * wp)
 {
