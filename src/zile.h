@@ -187,7 +187,7 @@ typedef le * (*Function) (int uniarg, le * list);
 
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
-        le * F_ ## c_func (int uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
+        le * F_ ## c_func (int uniarg, le *arglist) \
         { \
           if (arglist && arglist->data) \
             uniarg = atoi (arglist->data);
