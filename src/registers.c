@@ -108,7 +108,7 @@ Puts point before and mark after the inserted text.
 
   set_mark_interactive ();
   execute_with_uniarg (true, uniarg, insert_register, NULL);
-  exchange_point_and_mark ();
+  FUNCALL (exchange_point_and_mark);
   deactivate_mark ();
 
   return leT;
