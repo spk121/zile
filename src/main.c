@@ -94,7 +94,7 @@ Type `C-h h' for help; `C-x u; to undo changes.\n\
 Type `C-h C-d' for information on getting the latest version.\n\
 Type `C-h t' for a tutorial on using " PACKAGE_NAME ".\n\
 Type `C-h s' for a sample configuration file.\n\
-Type `C-g' at any time to FUNCALL (keyboard_quit)the current operation.\n\
+Type `C-g' at any time to quit the current operation.\n\
 \n\
 `C-x' means hold the CTRL key while typing the character `x'.\n\
 `M-x' means hold the META or ALT key down while typing `x'.\n\
