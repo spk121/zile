@@ -1526,16 +1526,15 @@ END_DEFUN
 
 DEFUN ("shell-command-on-region", shell_command_on_region)
 /*+
-Reads a line of text using the minibuffer and creates an inferior shell
-to execute the line as a command; passes the contents of the region as
-input to the shell command.
-If the shell command produces any output, the output goes to a Zile buffer
-named `*Shell Command Output*', which is displayed in another window
-but not selected.
-If the output is one line, it is displayed in the echo area.
-A numeric argument, as in `M-1 M-|' or `C-u M-|', directs output to the
-current buffer, then the old region is deleted first and the output replaces
-it as the contents of the region.
+Execute string command in inferior shell with region as input.
+Normally display output (if any) in temp buffer `*Shell Command Output*';
+Prefix arg means replace the region with it.  Return the exit code of
+command.
+If the command generates output, the output may be displayed
+in the echo area or in a buffer.
+If the output is short enough to display in the echo area, it is shown
+there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
+The output is available in that buffer in both cases.
 +*/
 {
   FILE *pipe;
