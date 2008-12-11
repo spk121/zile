@@ -1,0 +1,1 @@
+interactive_test switch_to_buffer "b\rThis is cool!.b\rThis is not."
