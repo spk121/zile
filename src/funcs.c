@@ -1617,6 +1617,26 @@ The output is available in that buffer in both cases.
 }
 END_DEFUN
 
+bool
+delete_region (const Region * r)
+{
+  size_t size = r->size;
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  if (cur_bp->pt.p != r->start.p || r->start.o != cur_bp->pt.o)
+    FUNCALL (exchange_point_and_mark);
+
+  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
+  undo_nosave = true;
+  while (size--)
+    FUNCALL (delete_char);
+  undo_nosave = false;
+
+  return true;
+}
+
 DEFUN ("delete-region", delete_region)
 /*+
 Delete the text between point and mark.
@@ -1626,19 +1646,8 @@ Delete the text between point and mark.
 
   if (!calculate_the_region (&r))
     return leNIL;
-
-  if (warn_if_readonly_buffer ())
+  if (!delete_region (&r))
     return leNIL;
-
-  if (cur_bp->pt.p != r.start.p || r.start.o != cur_bp->pt.o)
-    FUNCALL (exchange_point_and_mark);
-
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, r.size, 0);
-  undo_nosave = true;
-  while (r.size--)
-    FUNCALL (delete_char);
-  undo_nosave = false;
-
   deactivate_mark ();
   return leT;
 }

@@ -23,6 +23,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -60,12 +61,10 @@ kill_ring_push_nstring (char *s, size_t size)
 static bool
 copy_or_kill_region (bool kill, Region * r)
 {
-  char *p;
+  char *p = copy_text_block (r->start.n, r->start.o, r->size);
 
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
-
-  p = copy_text_block (r->start.n, r->start.o, r->size);
   kill_ring_push_nstring (p, r->size);
   free (p);
 
@@ -74,18 +73,7 @@ copy_or_kill_region (bool kill, Region * r)
       if (cur_bp->flags & BFLAG_READONLY)
         minibuf_error ("Read only text copied to kill ring");
       else
-        {
-          size_t size = r->size;
-
-          if (cur_bp->pt.p != r->start.p || r->start.o != cur_bp->pt.o)
-            FUNCALL (exchange_point_and_mark);
-
-          undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
-          undo_nosave = true;
-          while (size--)
-            FUNCALL (delete_char);
-          undo_nosave = false;
-        }
+        assert (delete_region (r));
     }
 
   thisflag |= FLAG_DONE_KILL;

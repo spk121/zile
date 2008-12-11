@@ -114,6 +114,7 @@ void set_mark_interactive (void);
 int exchange_point_and_mark (void);
 le *universal_argument (int keytype, int xarg);
 void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...);
+bool delete_region (const Region * r);
 
 /* getkey.c --------------------------------------------------------------- */
 void ungetkey (size_t key);
