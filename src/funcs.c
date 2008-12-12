@@ -912,34 +912,25 @@ astr_append_region (astr s)
   free (t);
 }
 
-static le *
-transpose_subr (int (*forward_func)(void), int (*backward_func)(void))
+static bool
+transpose_subr (int (*forward_func) (void), int (*backward_func) (void))
 {
-  Marker *p0, *p1, *p2;
-  astr s1 = NULL;
-  astr s2 = NULL;
-  int seq_started = false;
+  Marker *p0 = point_marker (), *p1, *p2;
+  astr as1, as2 = NULL;
 
-  p0 = point_marker ();
-
-  if (forward_func == forward_char)
-    { /* For transpose-chars. */
-      if (eolp ())
-        backward_func ();
-    }
-  else if (forward_func == next_line)
-    { /* For transpose-lines. */
-      /* If we are on the first line, go to next line. */
-      if (cur_bp->pt.p->prev == cur_bp->lines)
-        forward_func ();
-    }
+  /* For transpose-chars. */
+  if (forward_func == forward_char && eolp ())
+    backward_func ();
+  /* For transpose-lines. */
+  if (forward_func == next_line && cur_bp->pt.n == 0)
+    forward_func ();
 
   /* Backward. */
   if (!backward_func ())
     {
       minibuf_error ("Beginning of buffer");
       free_marker (p0);
-      return leNIL;
+      return false;
     }
 
   /* Save mark. */
@@ -949,26 +940,12 @@ transpose_subr (int (*forward_func)(void), int (*backward_func)(void))
   set_mark ();
   p1 = point_marker ();
 
-  /* Check end of buffer (only to check if we could make the
-     operation). */
+  /* Check to make sure we can go forwards twice. */
   if (!forward_func () || !forward_func ())
     {
-      /* For transpose-lines. */
       if (forward_func == next_line)
-        {
-          if (!seq_started)
-            {
-              seq_started = true;
-              undo_save (UNDO_START_SEQUENCE, p0->pt, 0, 0);
-            }
-
-          /* When last line has characters. */
-          if (!is_empty_line ())
-            /* We must insert the '\n' in the end
-               of line (not in the beginning). */
-            FUNCALL (end_of_line);
-
-          /* Insert a newline. */
+        { /* Add an empty line. */
+          FUNCALL (end_of_line);
           FUNCALL (newline);
         }
       else
@@ -979,7 +956,7 @@ transpose_subr (int (*forward_func)(void), int (*backward_func)(void))
 
           free_marker (p0);
           free_marker (p1);
-          return leNIL;
+          return false;
         }
     }
 
@@ -989,11 +966,10 @@ transpose_subr (int (*forward_func)(void), int (*backward_func)(void))
   forward_func ();
 
   /* Save and delete 1st marked region. */
-  s1 = astr_new ();
-  astr_append_region (s1);
+  as1 = astr_new ();
+  astr_append_region (as1);
 
-  if (!seq_started)
-    undo_save (UNDO_START_SEQUENCE, p0->pt, 0, 0);
+  free_marker (p0);
 
   FUNCALL (delete_region);
 
@@ -1013,72 +989,69 @@ transpose_subr (int (*forward_func)(void), int (*backward_func)(void))
       p2 = point_marker ();
 
       /* Save and delete 2nd marked region. */
-      s2 = astr_new ();
-      astr_append_region (s2);
+      as2 = astr_new ();
+      astr_append_region (as2);
       FUNCALL (delete_region);
     }
 
-  /* Insert the second string. */
-  if (s1)
-    {
-      goto_point (p2->pt);
-      insert_astr (s1);
-    }
-
   /* Insert the first string. */
-  if (s2)
+  goto_point (p2->pt);
+  free_marker (p2);
+  insert_astr (as1);
+  astr_delete (as1);
+
+  /* Insert the second string. */
+  if (as2)
     {
       goto_point (p1->pt);
-      insert_astr (s2);
+      insert_astr (as2);
+      astr_delete (as2);
     }
-
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  /* Delete temporary strings. */
-  if (s1)
-    astr_delete (s1);
-  if (s2)
-    astr_delete (s2);
+  free_marker (p1);
 
   /* Restore mark. */
   pop_mark ();
   deactivate_mark ();
 
-  /* Free markers. */
-  free_marker (p0);
-  free_marker (p1);
-  free_marker (p2);
-
   /* Move forward if necessary. */
   if (forward_func != next_line)
     forward_func ();
 
-  return leT;
+  return true;
 }
 
 static le *
-transpose (int (*forward_func)(void), int (*backward_func)(void), const char *name)
+transpose (int uniarg, int (*forward_func) (void), int (*backward_func) (void))
 {
+  int uni, ret = true;
+
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  if (!(lastflag & FLAG_SET_UNIARG))
-    return transpose_subr (forward_func, backward_func);
+  if (uniarg < 0)
+    {
+      int (*tmp_func) (void) = forward_func;
+      forward_func = backward_func;
+      backward_func = tmp_func;
+      uniarg = -uniarg;
+    }
+  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  for (uni = 0; ret && uni < uniarg; ++uni)
+    ret = transpose_subr (forward_func, backward_func);
+  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
 
-  /* FIXME: */
-  minibuf_error ("`%s' doesn't support universal argument", name);
-  return leNIL;
+  return bool_to_lisp (ret);
 }
 
 DEFUN ("transpose-chars", transpose_chars)
 /*+
 Interchange characters around point, moving forward one character.
 With prefix arg ARG, effect is to take character before point
-and drag it forward past ARG other characters.  If no argument and at
-end of line, the previous two chars are exchanged.
+and drag it forward past ARG other characters (backward if ARG negative).
+If no argument and at end of line, the previous two chars are exchanged.
 +*/
 {
-  return transpose (forward_char, backward_char, "transpose-chars");
+  return transpose (uniarg, forward_char, backward_char);
 }
 END_DEFUN
 
@@ -1086,11 +1059,12 @@ DEFUN ("transpose-words", transpose_words)
 /*+
 Interchange words around point, leaving point at end of them.
 With prefix arg ARG, effect is to take word before or around point
-and drag it forward past ARG other words. If ARG is zero, the words
-around or after point and around or after mark are interchanged.
+and drag it forward past ARG other words (backward if ARG negative).
+If ARG is zero, the words around or after point and around or after mark
+are interchanged.
 +*/
 {
-  return transpose (forward_word, backward_word, "transpose-words");
+  return transpose (uniarg, forward_word, backward_word);
 }
 END_DEFUN
 
@@ -1099,7 +1073,7 @@ DEFUN ("transpose-sexps", transpose_sexps)
 Like M-x transpose-words but applies to sexps.
 +*/
 {
-  return transpose (forward_sexp, backward_sexp, "transpose-sexps");
+  return transpose (uniarg, forward_sexp, backward_sexp);
 }
 END_DEFUN
 
@@ -1110,7 +1084,7 @@ With argument ARG, takes previous line and moves it past ARG lines.
 With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
-  return transpose (next_line, previous_line, "transpose-lines");
+  return transpose (uniarg, next_line, previous_line);
 }
 END_DEFUN
 
