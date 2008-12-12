@@ -41,36 +41,36 @@ static Function _last_command;
  * Key binding.
  *--------------------------------------------------------------------------*/
 
-typedef struct leaf *leaf;
+typedef struct node *node;
 
-struct leaf
+struct node
 {
-  /* The key and the function associated with the leaf. */
+  /* The key and the function (the latter is non-NULL only for a leaf). */
   size_t key;
   Function func;
 
-  /* Leaf vector, number of items, max number of items. */
-  leaf *vec;
+  /* Branch vector, number of items, max number of items. */
+  node *vec;
   size_t vecnum, vecmax;
 };
 
-static leaf leaf_tree;
+static node root_bindings;
 
-static leaf
-leaf_new (int vecmax)
+static node
+node_new (int vecmax)
 {
-  leaf p;
+  node p;
 
-  p = (leaf) XZALLOC (struct leaf);
+  p = (node) XZALLOC (struct node);
 
   p->vecmax = vecmax;
-  p->vec = (leaf *) XCALLOC (vecmax, struct leaf);
+  p->vec = (node *) XCALLOC (vecmax, struct node);
 
   return p;
 }
 
-static leaf
-search_leaf (leaf tree, size_t key)
+static node
+search_node (node tree, size_t key)
 {
   size_t i;
 
@@ -82,7 +82,7 @@ search_leaf (leaf tree, size_t key)
 }
 
 static void
-add_leaf (leaf tree, leaf p)
+add_node (node tree, node p)
 {
   size_t i;
 
@@ -90,10 +90,10 @@ add_leaf (leaf tree, leaf p)
   if (tree->vecnum + 1 >= tree->vecmax)
     {
       tree->vecmax += 5;
-      tree->vec = (leaf *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
+      tree->vec = (node *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
     }
 
-  /* Insert the leaf at the sorted position. */
+  /* Insert the node at the sorted position. */
   for (i = 0; i < tree->vecnum; i++)
     if (tree->vec[i]->key > p->key)
       {
@@ -108,16 +108,16 @@ add_leaf (leaf tree, leaf p)
 }
 
 static void
-bind_key_vec (leaf tree, gl_list_t keys, size_t from, Function func)
+bind_key_vec (node tree, gl_list_t keys, size_t from, Function func)
 {
-  leaf p, s = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
+  node p, s = search_node (tree, (size_t) gl_list_get_at (keys, from));
   size_t n = gl_list_size (keys) - from;
 
   if (s == NULL)
     {
-      p = leaf_new (n == 1 ? 1 : 5);
+      p = node_new (n == 1 ? 1 : 5);
       p->key = (size_t) gl_list_get_at (keys, from);
-      add_leaf (tree, p);
+      add_node (tree, p);
       if (n == 1)
         p->func = func;
       else if (n > 0)
@@ -130,12 +130,12 @@ bind_key_vec (leaf tree, gl_list_t keys, size_t from, Function func)
 }
 
 static void
-bind_key_string (char *key, Function func)
+bind_key_string (node bindings, char *key, Function func)
 {
   gl_list_t keys = keystrtovec (key);
 
   if (keys && gl_list_size (keys) > 0)
-    bind_key_vec (leaf_tree, keys, 0, func);
+    bind_key_vec (bindings, keys, 0, func);
   else
     {
       fprintf (stderr,
@@ -146,10 +146,10 @@ bind_key_string (char *key, Function func)
   gl_list_free (keys);
 }
 
-static leaf
-search_key (leaf tree, gl_list_t keys, size_t from)
+static node
+search_key (node tree, gl_list_t keys, size_t from)
 {
-  leaf p = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
+  node p = search_node (tree, (size_t) gl_list_get_at (keys, from));
 
   if (p != NULL)
     {
@@ -217,10 +217,10 @@ make_completion (gl_list_t keys)
   return astr_cat_char (as, '-');
 }
 
-static leaf
-completion_scan (size_t key, gl_list_t * keys)
+static node
+completion_scan (node bindings, size_t key, gl_list_t * keys)
 {
-  leaf p;
+  node p;
   *keys = gl_list_create_empty (GL_ARRAY_LIST,
                                 NULL, NULL, NULL, true);
 
@@ -228,7 +228,7 @@ completion_scan (size_t key, gl_list_t * keys)
 
   do
     {
-      p = search_key (leaf_tree, *keys, 0);
+      p = search_key (bindings, *keys, 0);
       if (p == NULL)
         break;
       if (p->func == NULL)
@@ -279,7 +279,7 @@ END_DEFUN
 void
 process_key (size_t key)
 {
-  leaf p;
+  node p;
 
   if (key == KBD_NOKEY)
     return;
@@ -290,7 +290,7 @@ process_key (size_t key)
   else
     {
       gl_list_t keys;
-      p = completion_scan (key, &keys);
+      p = completion_scan (root_bindings, key, &keys);
       if (p != NULL)
         {
           p->func (last_uniarg, NULL);
@@ -324,7 +324,7 @@ init_bindings (void)
   gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
                                          NULL, NULL, NULL, true);
 
-  leaf_tree = leaf_new (10);
+  root_bindings = node_new (10);
 
   /* Bind all printing keys to self_insert_command */
   gl_list_add_last (keys, NULL);
@@ -333,19 +333,19 @@ init_bindings (void)
       if (isprint (i))
         {
           gl_list_set_at (keys, 0, (void *) i);
-          bind_key_vec (leaf_tree, keys, 0, F_self_insert_command);
+          bind_key_vec (root_bindings, keys, 0, F_self_insert_command);
         }
     }
   gl_list_free (keys);
 
 #define X(c_name, key1)                 \
-  bind_key_string (key1, F_ ## c_name);
+  bind_key_string (root_bindings, key1, F_ ## c_name);
 #include "tbl_bind.h"
 #undef X
 }
 
 static void
-recursive_free_bindings (leaf p)
+recursive_free_bindings (node p)
 {
   size_t i;
   for (i = 0; i < p->vecnum; ++i)
@@ -357,7 +357,7 @@ recursive_free_bindings (leaf p)
 void
 free_bindings (void)
 {
-  recursive_free_bindings (leaf_tree);
+  recursive_free_bindings (root_bindings);
 }
 
 DEFUN ("global-set-key", global_set_key)
@@ -391,7 +391,7 @@ sequence.
 
       minibuf_write ("Set key globally: ");
       key = getkey ();
-      completion_scan (key, &keys);
+      completion_scan (root_bindings, key, &keys);
 
       as = keyvectostr (keys);
       name = minibuf_read_function_name ("Set key %s to command: ",
@@ -406,7 +406,7 @@ sequence.
   if (func)
     {
       ret = true;
-      bind_key_vec (leaf_tree, keys, 0, func);
+      bind_key_vec (root_bindings, keys, 0, func);
     }
   else
     minibuf_error ("No such function `%s'", name);
@@ -420,8 +420,8 @@ sequence.
 END_DEFUN
 
 static void
-walk_bindings_tree (leaf tree, gl_list_t keys,
-                    void (*process) (astr key, leaf p, void *st), void *st)
+walk_bindings_tree (node tree, gl_list_t keys,
+                    void (*process) (astr key, node p, void *st), void *st)
 {
   size_t i, j;
   astr as = chordtostr (tree->key);
@@ -430,7 +430,7 @@ walk_bindings_tree (leaf tree, gl_list_t keys,
 
   for (i = 0; i < tree->vecnum; ++i)
     {
-      leaf p = tree->vec[i];
+      node p = tree->vec[i];
       if (p->func != NULL)
         {
           astr key = astr_new ();
@@ -453,7 +453,7 @@ walk_bindings_tree (leaf tree, gl_list_t keys,
 }
 
 static void
-walk_bindings (leaf tree, void (*process) (astr key, leaf p, void *st),
+walk_bindings (node tree, void (*process) (astr key, node p, void *st),
                void *st)
 {
   gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
@@ -469,7 +469,7 @@ typedef struct
 } gather_bindings_state;
 
 static void
-gather_bindings (astr key, leaf p, void *st)
+gather_bindings (astr key, node p, void *st)
 {
   gather_bindings_state *g = (gather_bindings_state *) st;
 
@@ -498,7 +498,7 @@ message in the buffer.
       if (g.f)
         {
           g.bindings = astr_new ();
-          walk_bindings (leaf_tree, gather_bindings, &g);
+          walk_bindings (root_bindings, gather_bindings, &g);
 
           if (astr_len (g.bindings) == 0)
             minibuf_write ("%s is not on any key", name);
@@ -525,7 +525,7 @@ END_DEFUN
 const char *
 get_function_by_key_sequence (gl_list_t * keys)
 {
-  leaf p;
+  node p;
   size_t c = getkey ();
 
   if (c & KBD_META && isdigit ((int) (c & 0xff)))
@@ -536,7 +536,7 @@ get_function_by_key_sequence (gl_list_t * keys)
       return "universal-argument";
     }
 
-  p = completion_scan (c, keys);
+  p = completion_scan (root_bindings, c, keys);
   if (p == NULL)
     return NULL;
   else
@@ -544,7 +544,7 @@ get_function_by_key_sequence (gl_list_t * keys)
 }
 
 static void
-print_binding (astr key, leaf p, void *st GCC_UNUSED)
+print_binding (astr key, node p, void *st GCC_UNUSED)
 {
   bprintf ("%-15s %s\n", astr_cstr (key), get_function_name (p->func));
 }
@@ -556,7 +556,7 @@ write_bindings_list (va_list ap GCC_UNUSED)
   bprintf ("%-15s %s\n", "key", "binding");
   bprintf ("%-15s %s\n", "---", "-------");
 
-  walk_bindings (leaf_tree, print_binding, NULL);
+  walk_bindings (root_bindings, print_binding, NULL);
 }
 
 DEFUN ("describe-bindings", describe_bindings)
