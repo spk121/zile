@@ -41,7 +41,7 @@ static Function _last_command;
  * Key binding.
  *--------------------------------------------------------------------------*/
 
-typedef struct leaf *leafp;
+typedef struct leaf *leaf;
 
 struct leaf
 {
@@ -50,27 +50,27 @@ struct leaf
   Function func;
 
   /* Leaf vector, number of items, max number of items. */
-  leafp *vec;
+  leaf *vec;
   size_t vecnum, vecmax;
 };
 
-static leafp leaf_tree;
+static leaf leaf_tree;
 
-static leafp
+static leaf
 leaf_new (int vecmax)
 {
-  leafp p;
+  leaf p;
 
-  p = (leafp) XZALLOC (struct leaf);
+  p = (leaf) XZALLOC (struct leaf);
 
   p->vecmax = vecmax;
-  p->vec = (leafp *) XCALLOC (vecmax, struct leaf);
+  p->vec = (leaf *) XCALLOC (vecmax, struct leaf);
 
   return p;
 }
 
-static leafp
-search_leaf (leafp tree, size_t key)
+static leaf
+search_leaf (leaf tree, size_t key)
 {
   size_t i;
 
@@ -82,7 +82,7 @@ search_leaf (leafp tree, size_t key)
 }
 
 static void
-add_leaf (leafp tree, leafp p)
+add_leaf (leaf tree, leaf p)
 {
   size_t i;
 
@@ -90,7 +90,7 @@ add_leaf (leafp tree, leafp p)
   if (tree->vecnum + 1 >= tree->vecmax)
     {
       tree->vecmax += 5;
-      tree->vec = (leafp *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
+      tree->vec = (leaf *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
     }
 
   /* Insert the leaf at the sorted position. */
@@ -108,9 +108,9 @@ add_leaf (leafp tree, leafp p)
 }
 
 static void
-bind_key_vec (leafp tree, gl_list_t keys, size_t from, Function func)
+bind_key_vec (leaf tree, gl_list_t keys, size_t from, Function func)
 {
-  leafp p, s = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
+  leaf p, s = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
   size_t n = gl_list_size (keys) - from;
 
   if (s == NULL)
@@ -146,10 +146,10 @@ bind_key_string (char *key, Function func)
   gl_list_free (keys);
 }
 
-static leafp
-search_key (leafp tree, gl_list_t keys, size_t from)
+static leaf
+search_key (leaf tree, gl_list_t keys, size_t from)
 {
-  leafp p = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
+  leaf p = search_leaf (tree, (size_t) gl_list_get_at (keys, from));
 
   if (p != NULL)
     {
@@ -217,10 +217,10 @@ make_completion (gl_list_t keys)
   return astr_cat_char (as, '-');
 }
 
-static leafp
+static leaf
 completion_scan (size_t key, gl_list_t * keys)
 {
-  leafp p;
+  leaf p;
   *keys = gl_list_create_empty (GL_ARRAY_LIST,
                                 NULL, NULL, NULL, true);
 
@@ -279,7 +279,7 @@ END_DEFUN
 void
 process_key (size_t key)
 {
-  leafp p;
+  leaf p;
 
   if (key == KBD_NOKEY)
     return;
@@ -338,23 +338,14 @@ init_bindings (void)
     }
   gl_list_free (keys);
 
-#define X1(c_name, key1)                 \
+#define X(c_name, key1)                 \
   bind_key_string (key1, F_ ## c_name);
-#define X2(c_name, key1, key2)           \
-  bind_key_string (key1, F_ ## c_name);  \
-  bind_key_string (key2, F_ ## c_name);
-#define X3(c_name, key1, key2, key3)     \
-  bind_key_string (key1, F_ ## c_name);  \
-  bind_key_string (key2, F_ ## c_name);  \
-  bind_key_string (key3, F_ ## c_name);
 #include "tbl_bind.h"
-#undef X1
-#undef X2
-#undef X3
+#undef X
 }
 
 static void
-recursive_free_bindings (leafp p)
+recursive_free_bindings (leaf p)
 {
   size_t i;
   for (i = 0; i < p->vecnum; ++i)
@@ -429,8 +420,8 @@ sequence.
 END_DEFUN
 
 static void
-walk_bindings_tree (leafp tree, gl_list_t keys,
-                    void (*process) (astr key, leafp p, void *st), void *st)
+walk_bindings_tree (leaf tree, gl_list_t keys,
+                    void (*process) (astr key, leaf p, void *st), void *st)
 {
   size_t i, j;
   astr as = chordtostr (tree->key);
@@ -439,7 +430,7 @@ walk_bindings_tree (leafp tree, gl_list_t keys,
 
   for (i = 0; i < tree->vecnum; ++i)
     {
-      leafp p = tree->vec[i];
+      leaf p = tree->vec[i];
       if (p->func != NULL)
         {
           astr key = astr_new ();
@@ -462,7 +453,7 @@ walk_bindings_tree (leafp tree, gl_list_t keys,
 }
 
 static void
-walk_bindings (leafp tree, void (*process) (astr key, leafp p, void *st),
+walk_bindings (leaf tree, void (*process) (astr key, leaf p, void *st),
                void *st)
 {
   gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
@@ -478,7 +469,7 @@ typedef struct
 } gather_bindings_state;
 
 static void
-gather_bindings (astr key, leafp p, void *st)
+gather_bindings (astr key, leaf p, void *st)
 {
   gather_bindings_state *g = (gather_bindings_state *) st;
 
@@ -534,7 +525,7 @@ END_DEFUN
 const char *
 get_function_by_key_sequence (gl_list_t * keys)
 {
-  leafp p;
+  leaf p;
   size_t c = getkey ();
 
   if (c & KBD_META && isdigit ((int) (c & 0xff)))
@@ -553,7 +544,7 @@ get_function_by_key_sequence (gl_list_t * keys)
 }
 
 static void
-print_binding (astr key, leafp p, void *st GCC_UNUSED)
+print_binding (astr key, leaf p, void *st GCC_UNUSED)
 {
   bprintf ("%-15s %s\n", astr_cstr (key), get_function_name (p->func));
 }
