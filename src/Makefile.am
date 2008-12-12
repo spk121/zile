@@ -80,7 +80,7 @@ zile_SOURCES =					\
 	$(top_srcdir)/src/window.c		\
 	$(top_srcdir)/src/term_minibuf.c	\
 	$(top_srcdir)/src/term_redisplay.c	\
-	$(top_srcdir)/src/term_ncurses.c
+	$(top_srcdir)/src/term_curses.c
 
 ALLSOURCES = $(zile_SOURCES) mkfuncs.c
 
