@@ -141,3 +141,4 @@ sys
 unistd.h
 /close.c
 /fclose.c
+/w32sock.h
