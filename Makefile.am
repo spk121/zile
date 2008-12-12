@@ -36,6 +36,6 @@ release: distcheck
 	agrep -d '^Release' $(VERSION) NEWS && \
 	agrep -d '^Release' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
 	git diff --exit-code && \
-	git tag -a rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
+	git tag -a -m "Release tag" rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
 	woger gnu,freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
