@@ -36,21 +36,16 @@ gl_INIT
 AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
 
+dnl Curses
+MP_WITH_CURSES
+if test "$mp_cv_curses" = "no" -a "$mp_cv_ncurses" = "no"; then
+  AC_MSG_FAILURE([cannot find curses])
+fi
+
 dnl Turn on additional compiler warnings
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
-
-dnl Curses
-AC_CHECK_HEADER(ncurses.h,AC_DEFINE(HAVE_NCURSES_H, 1, [We have the ncurses.h header.]),
-        [AC_CHECK_HEADER(curses.h,AC_DEFINE(HAVE_CURSES_H, 1, [We have the curses.h header.]),
-        AC_MSG_FAILURE([cannot find either curses.h or ncurses.h]))])
-dnl Check if ncurses library is available as libncurses or libcurses
-AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses"],
-        [AC_CHECK_LIB(ncurses, getch, [LIBS="$LIBS -lncurses -ldl"],
-        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses"],
-        [AC_CHECK_LIB(curses, getch, [LIBS="$LIBS -lcurses -ldl"],
-        AC_MSG_FAILURE([cannot find either libncurses or libcurses]))])])])
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],

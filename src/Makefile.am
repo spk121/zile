@@ -25,7 +25,7 @@
 SUBDIRS = testsuite
 
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
-LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS) $(LIBINTL)
+LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB)
 
 TESTS = astr
 check_PROGRAMS = astr
