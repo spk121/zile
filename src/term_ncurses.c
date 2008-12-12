@@ -151,7 +151,7 @@ translate_key (int c)
     case '\27':
     case '\30':
     case '\31':
-    case '\32':		/* C-a ... C-z */
+    case '\32':			/* C-a ... C-z */
       return KBD_CTRL | ('a' + c - 1);
     case '\11':
       return KBD_TAB;
@@ -163,7 +163,7 @@ translate_key (int c)
     case 0627:			/* C-z */
       return KBD_CTRL | 'z';
 #endif
-    case '\33':		/* META */
+    case '\33':			/* META */
       return KBD_META;
     case KEY_PPAGE:		/* PGUP */
       return KBD_PGUP;
@@ -175,7 +175,7 @@ translate_key (int c)
       return KBD_END;
     case KEY_DC:		/* DEL */
       return KBD_DEL;
-    case KEY_BACKSPACE:	/* BS */
+    case KEY_BACKSPACE:		/* BS */
     case 0177:			/* BS */
       return KBD_BS;
     case KEY_IC:		/* INSERT */
