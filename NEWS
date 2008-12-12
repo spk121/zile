@@ -1,27 +1,38 @@
-Release 2.2.62:
+Release 2.3.0:
 
-This release fixes some small bugs, but probably introduces many more,
-as it includes considerable code cleanup, including dead code removal
-and refactoring, resulting in the removal of about 1,000 lines of
-code, or about 10% of the code base, and greater use of gnulib,
-leading to improved portability. To help find and fix bugs and help
-prevent their reoccurrence, a DejaGnu-based testsuite has been added,
-which already contains test cases for most Zile commands.
+This release continues the code cleanup and portability fixes started
+in 2.2.60. gnulib is now used extensively, and 2,000 lines of code, or
+about 20% of the code base, has been removed by refactoring,
+simplification, and use of gnulib. The new minor version number
+reflects the magnitude of the change.
+
+To try to limit the number of bugs introduced as a result, and to aid
+future maintenance, a DejaGnu test suite has been added, which tests
+almost all the interactive commands.
+
+Many small bugs have been fixed, including cases where Zile did not
+behave like Emacs; some small limitations of Zile with respect to
+Emacs have been removed.
+
+Users are for the most part encouraged to upgrade, as this release is
+believed to be stable; however, cautious users may want to wait for
+further 2.3.x releases, or for a suitable length of time to elapse.
 
 Release 2.2.61:
 
-This release uses gnulib for regex, getopt, vasprintf, and various other
-features, rather than previous ad hoc solutions, to improve portability.
+This release uses gnulib for regex, getopt, vasprintf, and various
+other features, rather than previous ad hoc solutions, to improve
+portability.
 
 Release 2.2.60:
 
-This release attempts to improve portability by using gnulib for various
-non-standard features instead of idiosyncratic code and making various
-other fixes. Thanks to Nelson Beebe for reporting many build problems on
-a wide range of platforms; unfortunately I've not been able to establish
-how many of them this release fixes. A crash and related bug on
-attempting to kill when mark and point are the same have been fixed.
-Some fatal error messages have been improved.
+This release attempts to improve portability by using gnulib for
+various non-standard features instead of idiosyncratic code and making
+various other fixes. Thanks to Nelson Beebe for reporting many build
+problems on a wide range of platforms; unfortunately I've not been
+able to establish how many of them this release fixes. A crash and
+related bug on attempting to kill when mark and point are the same
+have been fixed. Some fatal error messages have been improved.
 
 Release 2.2.59:
 
