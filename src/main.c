@@ -72,7 +72,7 @@ loop (void)
       minibuf_clear ();
       process_key (root_bindings, key);
 
-      if (thisflag & FLAG_QUIT_ZILE)
+      if (thisflag & FLAG_QUIT)
         break;
       if (!(thisflag & FLAG_SET_UNIARG))
         last_uniarg = 1;
@@ -90,21 +90,17 @@ static char about_splash_str[] = "\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
 Type `C-x C-c' to exit " PACKAGE_NAME ".\n\
-Type `C-h h' for help; `C-x u; to undo changes.\n\
-Type `C-h C-d' for information on getting the latest version.\n\
-Type `C-h t' for a tutorial on using " PACKAGE_NAME ".\n\
-Type `C-h s' for a sample configuration file.\n\
+Type `C-x u; to undo changes.\n\
 Type `C-g' at any time to quit the current operation.\n\
 \n\
 `C-x' means hold the CTRL key while typing the character `x'.\n\
 `M-x' means hold the META or ALT key down while typing `x'.\n\
 If there is no META or ALT key, instead press and release\n\
 the ESC key and then type `x'.\n\
-Combinations like `C-h h' mean first press `C-h', then `h'.\n\
+Combinations like `C-x u' mean first press `C-x', then `u'.\n\
 ";
 
-static char about_minibuf_str[] =
-  "Welcome to " PACKAGE_NAME "!  For help type `C-h h'";
+static char about_minibuf_str[] = "Welcome to " PACKAGE_NAME "!";
 
 static void
 about_screen (void)
