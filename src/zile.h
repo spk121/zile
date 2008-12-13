@@ -46,6 +46,7 @@
 typedef struct History History;
 typedef struct Undo Undo;
 typedef struct Macro Macro;
+typedef struct Binding *Binding;
 
 /* Types which should really be opaque. */
 typedef struct Line Line;
@@ -109,12 +110,6 @@ struct Region
 #define BFLAG_AUTOFILL  0000400	/* The buffer is in Auto Fill mode. */
 #define BFLAG_ISEARCH   0001000	/* The buffer is in Isearch loop. */
 #define BFLAG_MARK      0002000	/* The mark is active. */
-
-/* Formats of end-of-line. */
-extern char coding_eol_lf[3];
-extern char coding_eol_crlf[3];
-extern char coding_eol_cr[3];
-extern char coding_eol_undecided[3];
 
 struct Buffer
 {

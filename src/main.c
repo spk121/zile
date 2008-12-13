@@ -70,7 +70,7 @@ loop (void)
       thisflag = lastflag & FLAG_DEFINING_MACRO;
       key = getkey ();
       minibuf_clear ();
-      process_key (key);
+      process_key (root_bindings, key);
 
       if (thisflag & FLAG_QUIT_ZILE)
         break;

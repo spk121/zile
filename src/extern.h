@@ -37,10 +37,10 @@ int ngotoup (size_t n);
 int previous_line (void);
 
 /* bind.c ----------------------------------------------------------------- */
-int completion_strcmp (const void *p1, const void *p2);
-size_t do_completion (astr as);
+extern Binding root_bindings;
+size_t do_binding_completion (astr as);
 const char *get_function_by_key_sequence (gl_list_t * keys);
-void process_key (size_t key);
+void process_key (Binding bindings, size_t key);
 void init_bindings (void);
 Function last_command (void);
 void free_bindings (void);
@@ -66,6 +66,7 @@ size_t tab_width (Buffer * bp);
 char *copy_text_block (size_t startn, size_t starto, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
+int completion_strcmp (const void *p1, const void *p2);
 Completion *completion_new (int fileflag);
 void free_completion (Completion * cp);
 void completion_scroll_up (void);
@@ -101,6 +102,10 @@ void init_eval (void);
 void free_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
+extern char coding_eol_lf[3];
+extern char coding_eol_crlf[3];
+extern char coding_eol_cr[3];
+extern char coding_eol_undecided[3];
 int exist_file (const char *filename);
 astr get_home_dir (void);
 astr expand_path (astr path);
@@ -290,6 +295,6 @@ void list_free (const void *p);
  * Declare external Zile functions.
  */
 #define X(zile_name, c_name, doc)                \
-  extern le *F_ ## c_name (int uniarg, le * l);
+  le *F_ ## c_name (int uniarg, le * l);
 #include "tbl_funcs.h"
 #undef X

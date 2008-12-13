@@ -431,7 +431,7 @@ universal_argument (int keytype, int xarg)
   for (;;)
     {
       astr_cat_char (as, '-');	/* Add the '-' character. */
-      key = do_completion (as);
+      key = do_binding_completion (as);
       astr_truncate (as, -1);	/* Remove the '-' character. */
 
       /* Cancelled. */

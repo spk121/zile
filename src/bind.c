@@ -35,42 +35,38 @@
 #include "zile.h"
 #include "extern.h"
 
-static Function _last_command;
-
 /*--------------------------------------------------------------------------
  * Key binding.
  *--------------------------------------------------------------------------*/
 
-typedef struct node *node;
-
-struct node
+struct Binding
 {
   /* The key and the function (the latter is non-NULL only for a leaf). */
   size_t key;
   Function func;
 
   /* Branch vector, number of items, max number of items. */
-  node *vec;
+  Binding *vec;
   size_t vecnum, vecmax;
 };
 
-static node root_bindings;
+Binding root_bindings;
 
-static node
+static Binding
 node_new (int vecmax)
 {
-  node p;
+  Binding p;
 
-  p = (node) XZALLOC (struct node);
+  p = (Binding) XZALLOC (struct Binding);
 
   p->vecmax = vecmax;
-  p->vec = (node *) XCALLOC (vecmax, struct node);
+  p->vec = (Binding *) XCALLOC (vecmax, struct Binding);
 
   return p;
 }
 
-static node
-search_node (node tree, size_t key)
+static Binding
+search_node (Binding tree, size_t key)
 {
   size_t i;
 
@@ -82,7 +78,7 @@ search_node (node tree, size_t key)
 }
 
 static void
-add_node (node tree, node p)
+add_node (Binding tree, Binding p)
 {
   size_t i;
 
@@ -90,7 +86,7 @@ add_node (node tree, node p)
   if (tree->vecnum + 1 >= tree->vecmax)
     {
       tree->vecmax += 5;
-      tree->vec = (node *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
+      tree->vec = (Binding *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
     }
 
   /* Insert the node at the sorted position. */
@@ -108,9 +104,9 @@ add_node (node tree, node p)
 }
 
 static void
-bind_key_vec (node tree, gl_list_t keys, size_t from, Function func)
+bind_key_vec (Binding tree, gl_list_t keys, size_t from, Function func)
 {
-  node p, s = search_node (tree, (size_t) gl_list_get_at (keys, from));
+  Binding p, s = search_node (tree, (size_t) gl_list_get_at (keys, from));
   size_t n = gl_list_size (keys) - from;
 
   if (s == NULL)
@@ -130,7 +126,7 @@ bind_key_vec (node tree, gl_list_t keys, size_t from, Function func)
 }
 
 static void
-bind_key_string (node bindings, char *key, Function func)
+bind_key_string (Binding bindings, char *key, Function func)
 {
   gl_list_t keys = keystrtovec (key);
 
@@ -146,10 +142,10 @@ bind_key_string (node bindings, char *key, Function func)
   gl_list_free (keys);
 }
 
-static node
-search_key (node tree, gl_list_t keys, size_t from)
+static Binding
+search_key (Binding tree, gl_list_t keys, size_t from)
 {
-  node p = search_node (tree, (size_t) gl_list_get_at (keys, from));
+  Binding p = search_node (tree, (size_t) gl_list_get_at (keys, from));
 
   if (p != NULL)
     {
@@ -163,7 +159,7 @@ search_key (node tree, gl_list_t keys, size_t from)
 }
 
 size_t
-do_completion (astr as)
+do_binding_completion (astr as)
 {
   size_t key;
   astr bs = astr_new ();
@@ -217,10 +213,10 @@ make_completion (gl_list_t keys)
   return astr_cat_char (as, '-');
 }
 
-static node
-completion_scan (node bindings, size_t key, gl_list_t * keys)
+static Binding
+completion_scan (Binding bindings, size_t key, gl_list_t * keys)
 {
-  node p;
+  Binding p;
   *keys = gl_list_create_empty (GL_ARRAY_LIST,
                                 NULL, NULL, NULL, true);
 
@@ -234,7 +230,7 @@ completion_scan (node bindings, size_t key, gl_list_t * keys)
       if (p->func == NULL)
         {
           astr as = make_completion (*keys);
-          gl_list_add_last (*keys, (void *) do_completion (as));
+          gl_list_add_last (*keys, (void *) do_binding_completion (as));
           astr_delete (as);
         }
     }
@@ -276,10 +272,12 @@ Whichever character you type to run this command is inserted.
 }
 END_DEFUN
 
+static Function _last_command;
+
 void
-process_key (size_t key)
+process_key (Binding bindings, size_t key)
 {
-  node p;
+  Binding p;
 
   if (key == KBD_NOKEY)
     return;
@@ -290,7 +288,7 @@ process_key (size_t key)
   else
     {
       gl_list_t keys;
-      p = completion_scan (root_bindings, key, &keys);
+      p = completion_scan (bindings, key, &keys);
       if (p != NULL)
         {
           p->func (last_uniarg, NULL);
@@ -345,7 +343,7 @@ init_bindings (void)
 }
 
 static void
-recursive_free_bindings (node p)
+recursive_free_bindings (Binding p)
 {
   size_t i;
   for (i = 0; i < p->vecnum; ++i)
@@ -420,8 +418,8 @@ sequence.
 END_DEFUN
 
 static void
-walk_bindings_tree (node tree, gl_list_t keys,
-                    void (*process) (astr key, node p, void *st), void *st)
+walk_bindings_tree (Binding tree, gl_list_t keys,
+                    void (*process) (astr key, Binding p, void *st), void *st)
 {
   size_t i, j;
   astr as = chordtostr (tree->key);
@@ -430,7 +428,7 @@ walk_bindings_tree (node tree, gl_list_t keys,
 
   for (i = 0; i < tree->vecnum; ++i)
     {
-      node p = tree->vec[i];
+      Binding p = tree->vec[i];
       if (p->func != NULL)
         {
           astr key = astr_new ();
@@ -453,7 +451,7 @@ walk_bindings_tree (node tree, gl_list_t keys,
 }
 
 static void
-walk_bindings (node tree, void (*process) (astr key, node p, void *st),
+walk_bindings (Binding tree, void (*process) (astr key, Binding p, void *st),
                void *st)
 {
   gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
@@ -469,7 +467,7 @@ typedef struct
 } gather_bindings_state;
 
 static void
-gather_bindings (astr key, node p, void *st)
+gather_bindings (astr key, Binding p, void *st)
 {
   gather_bindings_state *g = (gather_bindings_state *) st;
 
@@ -525,7 +523,7 @@ END_DEFUN
 const char *
 get_function_by_key_sequence (gl_list_t * keys)
 {
-  node p;
+  Binding p;
   size_t c = getkey ();
 
   if (c & KBD_META && isdigit ((int) (c & 0xff)))
@@ -544,7 +542,7 @@ get_function_by_key_sequence (gl_list_t * keys)
 }
 
 static void
-print_binding (astr key, node p, void *st GCC_UNUSED)
+print_binding (astr key, Binding p, void *st GCC_UNUSED)
 {
   bprintf ("%-15s %s\n", astr_cstr (key), get_function_name (p->func));
 }
