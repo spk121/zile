@@ -1257,7 +1257,7 @@ Offer to save each buffer, then kill this Zile process.
         break;
       }
 
-  thisflag |= FLAG_QUIT_ZILE;
+  thisflag |= FLAG_QUIT;
 
   return leT;
 }
