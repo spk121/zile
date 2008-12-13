@@ -41,6 +41,7 @@ MP_WITH_CURSES
 if test "$mp_cv_curses" = "no" -a "$mp_cv_ncurses" = "no"; then
   AC_MSG_FAILURE([cannot find curses])
 fi
+AC_SUBST([CURSES_LIB])
 
 dnl Turn on additional compiler warnings
 if test "$GCC" = "yes"; then
