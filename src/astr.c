@@ -309,7 +309,7 @@ assert_eq (astr as, const char *s)
 }
 
 /*
- * Stubs to make xmalloc_die happy.
+ * Stubs to make xalloc_die happy.
  */
 char *prog_name = "astr";
 
