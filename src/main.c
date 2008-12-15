@@ -296,7 +296,7 @@ main (int argc, char **argv)
 
   setlocale (LC_ALL, "");
 
-  init_bindings ();
+  init_default_bindings ();
   init_minibuf ();
 
   term_init ();
@@ -362,7 +362,7 @@ main (int argc, char **argv)
   term_tidy ();
   term_close ();
 
-  free_bindings ();
+  free_bindings (root_bindings);
   free_eval ();
 
   /* Free Lisp state. */

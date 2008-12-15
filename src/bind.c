@@ -41,9 +41,9 @@
 
 struct Binding
 {
-  /* The key and the function (the latter is non-NULL only for a leaf). */
-  size_t key;
-  Function func;
+  size_t key; /* The key code (for every level except the root). */
+  Function func; /* The function for this key, or, for a non-leaf
+                    item, the default function for this map. */
 
   /* Branch vector, number of items, max number of items. */
   Binding *vec;
@@ -55,9 +55,7 @@ Binding root_bindings;
 static Binding
 node_new (int vecmax)
 {
-  Binding p;
-
-  p = (Binding) XZALLOC (struct Binding);
+  Binding p = (Binding) XZALLOC (struct Binding);
 
   p->vecmax = vecmax;
   p->vec = (Binding *) XCALLOC (vecmax, struct Binding);
@@ -81,6 +79,12 @@ static void
 add_node (Binding tree, Binding p)
 {
   size_t i;
+
+  /* Erase any previous binding the current key might have had in case
+     it was non-prefix and is now being made prefix, as we don't want
+     to accidentally create a default for the prefix map. */
+  if (tree->vecnum == 0)
+    tree->func = NULL;
 
   /* Reallocate vector if there is not enough space. */
   if (tree->vecnum + 1 >= tree->vecmax)
@@ -142,7 +146,7 @@ bind_key_string (Binding bindings, char *key, Function func)
   gl_list_free (keys);
 }
 
-static Binding
+static Function
 search_key (Binding tree, gl_list_t keys, size_t from)
 {
   Binding p = search_node (tree, (size_t) gl_list_get_at (keys, from));
@@ -150,12 +154,13 @@ search_key (Binding tree, gl_list_t keys, size_t from)
   if (p != NULL)
     {
       if (gl_list_size (keys) - from == 1)
-        return p;
+        return p->func;
       else
         return search_key (p, keys, from + 1);
     }
 
-  return NULL;
+  /* If no binding found, return default, if any, or NULL. */
+  return tree->func;
 }
 
 size_t
@@ -213,30 +218,24 @@ make_completion (gl_list_t keys)
   return astr_cat_char (as, '-');
 }
 
-static Binding
+static Function
 completion_scan (Binding bindings, size_t key, gl_list_t * keys)
 {
-  Binding p;
   *keys = gl_list_create_empty (GL_ARRAY_LIST,
                                 NULL, NULL, NULL, true);
 
   gl_list_add_last (*keys, (void *) key);
 
-  do
+  for (;;)
     {
-      p = search_key (bindings, *keys, 0);
-      if (p == NULL)
-        break;
-      if (p->func == NULL)
-        {
-          astr as = make_completion (*keys);
-          gl_list_add_last (*keys, (void *) do_binding_completion (as));
-          astr_delete (as);
-        }
+      astr as;
+      Function f = search_key (bindings, *keys, 0);
+      if (f != NULL)
+        return f;
+      as = make_completion (*keys);
+      gl_list_add_last (*keys, (void *) do_binding_completion (as));
+      astr_delete (as);
     }
-  while (p->func == NULL);
-
-  return p;
 }
 
 static int
@@ -277,8 +276,6 @@ static Function _last_command;
 void
 process_key (Binding bindings, size_t key)
 {
-  Binding p;
-
   if (key == KBD_NOKEY)
     return;
 
@@ -288,11 +285,11 @@ process_key (Binding bindings, size_t key)
   else
     {
       gl_list_t keys;
-      p = completion_scan (bindings, key, &keys);
-      if (p != NULL)
+      Function f = completion_scan (bindings, key, &keys);
+      if (f != NULL)
         {
-          p->func (last_uniarg, NULL);
-          _last_command = p->func;
+          f (last_uniarg, NULL);
+          _last_command = f;
         }
       else
         {
@@ -315,14 +312,20 @@ last_command (void)
   return _last_command;
 }
 
-void
+Binding
 init_bindings (void)
+{
+  return node_new (10);
+}
+
+void
+init_default_bindings (void)
 {
   size_t i;
   gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
                                          NULL, NULL, NULL, true);
 
-  root_bindings = node_new (10);
+  root_bindings = init_bindings ();
 
   /* Bind all printing keys to self_insert_command */
   gl_list_add_last (keys, NULL);
@@ -342,20 +345,14 @@ init_bindings (void)
 #undef X
 }
 
-static void
-recursive_free_bindings (Binding p)
+void
+free_bindings (Binding binding)
 {
   size_t i;
-  for (i = 0; i < p->vecnum; ++i)
-    recursive_free_bindings (p->vec[i]);
-  free (p->vec);
-  free (p);
-}
-
-void
-free_bindings (void)
-{
-  recursive_free_bindings (root_bindings);
+  for (i = 0; i < binding->vecnum; ++i)
+    free_bindings (binding->vec[i]);
+  free (binding->vec);
+  free (binding);
 }
 
 DEFUN ("global-set-key", global_set_key)
@@ -523,7 +520,7 @@ END_DEFUN
 const char *
 get_function_by_key_sequence (gl_list_t * keys)
 {
-  Binding p;
+  Function f;
   size_t c = getkey ();
 
   if (c & KBD_META && isdigit ((int) (c & 0xff)))
@@ -534,11 +531,8 @@ get_function_by_key_sequence (gl_list_t * keys)
       return "universal-argument";
     }
 
-  p = completion_scan (root_bindings, c, keys);
-  if (p == NULL)
-    return NULL;
-  else
-    return get_function_name (p->func);
+  f = completion_scan (root_bindings, c, keys);
+  return f ? get_function_name (f) : NULL;
 }
 
 static void

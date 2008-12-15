@@ -189,6 +189,13 @@ typedef le * (*Function) (int uniarg, le * list);
 #define END_DEFUN \
         }
 
+/* Define a function that is not user-visible but can be bound to a key. */
+#define DEFUN_BINDONLY(c_func) \
+        le * F_ ## c_func (int uniarg, le *arglist) \
+        { \
+          if (arglist && arglist->data) \
+            uniarg = atoi (arglist->data);
+
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
         F_ ## c_func (1, NULL)

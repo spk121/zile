@@ -41,9 +41,10 @@ extern Binding root_bindings;
 size_t do_binding_completion (astr as);
 const char *get_function_by_key_sequence (gl_list_t * keys);
 void process_key (Binding bindings, size_t key);
-void init_bindings (void);
+Binding init_bindings (void);
+void init_default_bindings (void);
 Function last_command (void);
-void free_bindings (void);
+void free_bindings (Binding p);
 
 /* buffer.c --------------------------------------------------------------- */
 int calculate_the_region (Region * rp);
