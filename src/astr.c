@@ -27,10 +27,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include "xalloc.h"
 
 #include "astr.h"
-#include "zile.h"
-#include "extern.h"
+#include "xalloc_extra.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
 
@@ -314,7 +314,7 @@ assert_eq (astr as, const char *s)
 char *prog_name = "astr";
 
 void
-zile_exit (int doabort GCC_UNUSED)
+zile_exit (int doabort)
 {
   exit (2);
 }

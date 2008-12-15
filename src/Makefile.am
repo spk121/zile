@@ -45,7 +45,14 @@ zile_LDADD = $(LDADD) $(LIBOBJS)
 zile_SOURCES =					\
 	$(top_srcdir)/src/astr.c		\
 	$(top_srcdir)/src/astr.h		\
-	$(top_srcdir)/src/xalloc.c		\
+	$(top_srcdir)/src/rblist.c		\
+	$(top_srcdir)/src/rblist.h		\
+	$(top_srcdir)/src/rbacc.c		\
+	$(top_srcdir)/src/rbacc.h		\
+	$(top_srcdir)/src/rbutil.c		\
+	$(top_srcdir)/src/rbutil.h		\
+	$(top_srcdir)/src/xalloc_extra.c	\
+	$(top_srcdir)/src/xalloc_extra.h	\
 	$(top_srcdir)/src/extern.h		\
 	$(top_srcdir)/src/zile.h		\
 	$(top_srcdir)/src/tbl_bind.h		\

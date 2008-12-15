@@ -74,7 +74,7 @@ var_free (void *v)
 static void
 init_builtin_var (const char *var, const char *defval, bool local, const char *doc)
 {
-  var_entry *p = XMALLOC (var_entry);
+  var_entry *p = XZALLOC (var_entry);
   p->var = xstrdup (var);
   p->defval = p->val = xstrdup (defval);
   p->local = local;
@@ -126,7 +126,7 @@ set_variable_in_list (Hash_table *var_list, const char *var, const char *val)
 void
 set_variable (const char *var, const char *val)
 {
-  struct var_entry *ent, *key = XMALLOC (var_entry);
+  struct var_entry *ent, *key = XZALLOC (var_entry);
   key->var = var;
   ent = hash_lookup (main_vars, key);
   free (key);
@@ -144,7 +144,7 @@ free_variables (void)
 static var_entry *
 get_variable_entry (Buffer * bp, char *var)
 {
-  var_entry *p = NULL, *key = XMALLOC (var_entry);
+  var_entry *p = NULL, *key = XZALLOC (var_entry);
 
   key->var = var;
 
@@ -224,7 +224,7 @@ minibuf_read_variable_name (char *msg)
        p = hash_get_next (main_vars, p))
     {
       gl_sortedlist_add (cp->completions, completion_strcmp,
-			 xstrdup (p->var));
+                         xstrdup (p->var));
     }
 
   ms = vminibuf_read_completion (msg, "", cp, NULL,
@@ -254,8 +254,8 @@ Set a variable value to the user-specified value.
       val = minibuf_read ("Set %s to value: ", "", var);
       if (val == NULL)
         {
-	  free (var);
-	  return FUNCALL (keyboard_quit);
+          free (var);
+          return FUNCALL (keyboard_quit);
         }
 
       set_variable (var, val);

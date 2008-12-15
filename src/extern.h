@@ -24,6 +24,8 @@
 
 #include "gl_list.h"
 
+#include "xalloc_extra.h"
+
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp (Buffer * bp, Point pt);
 size_t get_goalc (void);
@@ -285,11 +287,6 @@ Window *popup_window (void);
 void set_current_window (Window * wp);
 void delete_window (Window * del_wp);
 Point window_pt (Window * wp);
-
-/* xalloc.c --------------------------------------------------------------- */
-int xvasprintf (char **ptr, const char *fmt, va_list vargs);
-int xasprintf (char **ptr, const char *fmt, ...);
-void list_free (const void *p);
 
 
 /*

@@ -25,9 +25,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "xalloc.h"
 
 #include "zile.h"
 #include "extern.h"
+#include "xalloc_extra.h"
 
 /*
  * Routine called by gnulib's xalloc routines on OOM
