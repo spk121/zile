@@ -130,9 +130,9 @@ set_variable (const char *var, const char *val)
   key->var = var;
   ent = hash_lookup (main_vars, key);
   free (key);
-  if (ent->local && cur_bp->vars == NULL)
+  if (ent && ent->local && cur_bp->vars == NULL)
     cur_bp->vars = new_varlist ();
-  set_variable_in_list (ent->local ? cur_bp->vars : main_vars, var, val);
+  set_variable_in_list ((ent && ent->local) ? cur_bp->vars : main_vars, var, val);
 }
 
 void
