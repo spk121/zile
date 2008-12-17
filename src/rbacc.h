@@ -1,30 +1,32 @@
 /* Character buffers optimised for repeated append.
+
+   Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 2007 Alistair Turnbull.
    All rights reserved.
 
-   This file is part of Zee.
+   This file is part of GNU Zile.
 
-   Zee is free software; you can redistribute it and/or modify it under
-   the terms of the GNU General Public License as published by the Free
-   Software Foundation; either version 2, or (at your option) any later
-   version.
+   GNU Zile is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
 
-   Zee is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-   for more details.
+   GNU Zile is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with Zee; see the file COPYING.  If not, write to the Free
-   Software Foundation, Fifth Floor, 51 Franklin Street, Boston, MA
-   02111-1301, USA.  */
+   along with GNU Zile; see the file COPYING.  If not, write to the
+   Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+   MA 02111-1301, USA.  */
 
 #ifndef RBACC_H
 #define RBACC_H
 
 
 #include <stdio.h>
-   
+
 /*
  * The type of character buffers. This is a pointer type. The structure it
  * points to is opaque. The structure is modified in place when characters
