@@ -22,7 +22,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.3.0, bug-zile@gnu.org)
+AC_INIT(Zile, 2.3.1, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl Checks for programs
@@ -35,6 +35,10 @@ dnl Checks for functions and headers
 gl_INIT
 AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
+
+dnl Check for valgrind
+AC_SUBST([VALGRIND])
+AC_PATH_PROG([VALGRIND], [valgrind])
 
 dnl Curses
 MP_WITH_CURSES

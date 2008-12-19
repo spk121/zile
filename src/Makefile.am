@@ -27,11 +27,12 @@ SUBDIRS = testsuite
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\""
 LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB)
 
+TESTS_ENVIRONMENT = $(VALGRIND)
 TESTS = astr
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
-astr_LDADD = xalloc.o $(LDADD)
+astr_LDADD = xalloc_extra.o $(LDADD)
 
 bin_PROGRAMS = zile
 
