@@ -115,15 +115,14 @@ about_screen (void)
 }
 
 static void
-execute_functions (gl_list_t funcs)
+execute_scripts (gl_list_t scripts)
 {
   size_t i;
-  for (i = 0; i < gl_list_size (funcs); i++)
+  for (i = 0; i < gl_list_size (scripts); i++)
     {
-      char *func = (char *) gl_list_get_at (funcs, i);
+      char *func = (char *) gl_list_get_at (scripts, i);
       term_redisplay ();
-      if (!execute_function (func, 1))
-        minibuf_error ("Function `%s' not defined", func);
+      lisp_load (func);
       lastflag |= FLAG_NEED_RESYNC;
     }
 }
@@ -213,6 +212,7 @@ signal_init (void)
 struct option longopts[] = {
   {"help", optional_argument, NULL, 'h'},
   {"no-init-file", optional_argument, NULL, 'q'},
+  {"script", required_argument, NULL, 's'},
   {"version", optional_argument, NULL, 'v'},
   {0, 0, 0, 0}
 };
@@ -221,7 +221,7 @@ int
 main (int argc, char **argv)
 {
   int c, qflag = false;
-  gl_list_t fargs = gl_list_create_empty (GL_LINKED_LIST,
+  gl_list_t sargs = gl_list_create_empty (GL_LINKED_LIST,
                                           NULL, NULL, NULL, false);
   size_t line;
 
@@ -272,6 +272,7 @@ main (int argc, char **argv)
                    "--help                  display this help message and exit\n"
                    "--no-init-file, -q      do not load ~/." PACKAGE "\n"
                    "--version               display version information and exit\n"
+                   "--script FILE           run FILE as an Emacs Lisp script\n"
                    "\n" "Action options:\n" "\n"
                    "FILE                    visit FILE using find-file\n"
                    "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
@@ -279,6 +280,9 @@ main (int argc, char **argv)
                    "Report bugs to " PACKAGE_BUGREPORT ".\n",
                    prog_name);
           return 0;
+        case 's':
+          gl_list_add_last (sargs, (void *) optarg);
+          break;
         case '?':		/* Unknown option */
           minibuf_error ("Unknown option `%s'", argv[this_optind]);
           break;
@@ -337,7 +341,7 @@ main (int argc, char **argv)
 
   /* Show the splash screen only if no files and no Lisp expression
      or load file is specified on the command line. */
-  if (minibuf_contents == NULL && argc == 0 && gl_list_size (fargs) == 0)
+  if (minibuf_contents == NULL && argc == 0 && gl_list_size (sargs) == 0)
     about_screen ();
 
   setup_main_screen (argc);
@@ -352,8 +356,8 @@ main (int argc, char **argv)
       free (buf);
     }
 
-  execute_functions (fargs);
-  gl_list_free (fargs);
+  execute_scripts (sargs);
+  gl_list_free (sargs);
 
   /* Run the main loop. */
   loop ();
