@@ -42,8 +42,7 @@
 struct Binding
 {
   size_t key; /* The key code (for every level except the root). */
-  Function func; /* The function for this key, or, for a non-leaf
-                    item, the default function for this map. */
+  Function func; /* The function for this key (if a leaf node). */
 
   /* Branch vector, number of items, max number of items. */
   Binding *vec;
@@ -146,7 +145,7 @@ bind_key_string (Binding bindings, char *key, Function func)
   gl_list_free (keys);
 }
 
-static Function
+static Binding
 search_key (Binding tree, gl_list_t keys, size_t from)
 {
   Binding p = search_node (tree, (size_t) gl_list_get_at (keys, from));
@@ -154,13 +153,12 @@ search_key (Binding tree, gl_list_t keys, size_t from)
   if (p != NULL)
     {
       if (gl_list_size (keys) - from == 1)
-        return p->func;
+        return p;
       else
         return search_key (p, keys, from + 1);
     }
 
-  /* If no binding found, return default, if any, or NULL. */
-  return tree->func;
+  return NULL;
 }
 
 size_t
@@ -229,9 +227,11 @@ completion_scan (Binding bindings, size_t key, gl_list_t * keys)
   for (;;)
     {
       astr as;
-      Function f = search_key (bindings, *keys, 0);
-      if (f != NULL)
-        return f;
+      Binding p = search_key (bindings, *keys, 0);
+      if (p == NULL)
+        return NULL;
+      if (p->func != NULL)
+        return p->func;
       as = make_completion (*keys);
       gl_list_add_last (*keys, (void *) do_binding_completion (as));
       astr_delete (as);
