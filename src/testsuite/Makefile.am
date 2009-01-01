@@ -207,4 +207,9 @@ EXTRA_DIST =						\
 	zile.test/upcase_word.output			\
 	zile.test/yank.exp				\
 	zile.test/yank.output				\
+	zile.test/bad_argument.exp			\
+	zile.test/bad_argument.output			\
+	zile.test/setq_nonexistent_variable.exp		\
+	zile.test/setq_nonexistent_variable.output	\
+	zile.test/setq_nonexistent_variable.el		\
 	zile.test/zile_test.input
