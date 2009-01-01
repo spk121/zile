@@ -287,7 +287,7 @@ main (int argc, char **argv)
           minibuf_error ("Unknown option `%s'", argv[this_optind]);
           break;
         case ':':		/* Missing argument */
-          fprintf (stderr, "%s: Option `%s' requires an argument\n\n",
+          fprintf (stderr, "%s: Option `%s' requires an argument\n",
                    prog_name, argv[this_optind]);
           exit (1);
         }
