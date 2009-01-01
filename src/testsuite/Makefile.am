@@ -101,6 +101,8 @@ EXTRA_DIST =						\
 	zile.test/indent_relative.output		\
 	zile.test/insert_buffer.exp			\
 	zile.test/insert_buffer.output			\
+	zile.test/insert_char.exp			\
+	zile.test/insert_char.output			\
 	zile.test/insert_file.exp			\
 	zile.test/insert_file.output			\
 	zile.test/isearch_backward.exp			\
