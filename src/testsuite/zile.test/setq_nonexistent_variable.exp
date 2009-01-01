@@ -1,0 +1,1 @@
+interactive_test setq_nonexistent_variable "" --script $test_path/setq_nonexistent_variable.el

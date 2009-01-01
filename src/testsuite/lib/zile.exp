@@ -36,7 +36,7 @@ proc zile_version {} {
 proc zile_start {args} {
     global spawn_id
     global zile_path
-    spawn $zile_path --no-init-file $args
+    eval spawn $zile_path --no-init-file $args
     # Wait for first word of test file (zile_test.input)
     expect "Here"
 }
@@ -44,32 +44,30 @@ proc zile_start {args} {
 proc zile_exit {} {}
 
 # Run an interactive test (called by the test script)
-proc interactive_test {test input} {
+proc interactive_test {test input args} {
     global test_path
     global scratch_path
+    global spawn_id
 
     set edit_file $scratch_path/$test.input
     exec cp $test_path/zile_test.input $edit_file
     exec chmod +w $edit_file
-    zile_start $edit_file
 
+    eval zile_start $args $edit_file
     send -- $input
-
     expect eof
+    set res [wait $spawn_id]
+    set sysret [lindex $res 2]
+    set ret [lindex $res 3]
 
-    if {[catch {exec diff $test_path/$test.output $edit_file} msg]} {
-        puts "Error: $::errorCode"
+    if {$sysret != 0 || $ret != 0} {
+        puts "Zile error: system return $sysret, exit status $ret"
+        fail $test
+    } elseif {[catch {exec diff $test_path/$test.output $edit_file} msg]} {
+        puts "Test failure: $::errorCode"
         fail $test
     } else {
-        exec rm $edit_file $edit_file~
+        exec rm -f $edit_file $edit_file~
         pass $test
     }
-}
-
-# Run a batch test (called by the test script)
-proc batch_test {args} {
-    global test_path
-
-    zile_start $args
-    expect eof
 }
