@@ -120,9 +120,14 @@ execute_scripts (gl_list_t scripts)
   size_t i;
   for (i = 0; i < gl_list_size (scripts); i++)
     {
-      char *func = (char *) gl_list_get_at (scripts, i);
+      char *script = (char *) gl_list_get_at (scripts, i);
       term_redisplay ();
-      lisp_load (func);
+      if (!lisp_load (script))
+        {
+          term_finish ();
+          fprintf (stderr, "Cannot open load file: %s\n", script);
+          exit (255);
+        }
       lastflag |= FLAG_NEED_RESYNC;
     }
 }
@@ -363,8 +368,7 @@ main (int argc, char **argv)
   loop ();
 
   /* Tidy and close the terminal. */
-  term_tidy ();
-  term_close ();
+  term_finish ();
 
   free_bindings (root_bindings);
   free_eval ();

@@ -425,6 +425,16 @@ term_tidy (void)
 }
 
 /*
+ * Tidy and close the terminal ready to leave Zile.
+ */
+void
+term_finish (void)
+{
+  term_tidy ();
+  term_close ();
+}
+
+/*
  * Add a string to the terminal
  */
 void
