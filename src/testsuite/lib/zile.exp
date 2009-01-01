@@ -36,19 +36,15 @@ proc zile_version {} {
 proc zile_start {args} {
     global spawn_id
     global zile_path
-    spawn $zile_path -q $args
+    spawn $zile_path --no-init-file $args
+    # Wait for first word of test file (zile_test.input)
+    expect "Here"
 }
 
 proc zile_exit {} {}
 
-# FIXME: Why is this delay needed? Tom Dickey thinks it shouldn't be.
-set send_slow {1 .01}
-proc send {ignore arg} {
-    sleep .1
-    exp_send -s -- $arg
-}
-
-proc interactive_test { test input } {
+# Run an interactive test (called by the test script)
+proc interactive_test {test input} {
     global test_path
     global scratch_path
 
@@ -61,11 +57,19 @@ proc interactive_test { test input } {
 
     expect eof
 
-    if { [catch { exec diff $test_path/$test.output $edit_file } msg] } {
+    if {[catch {exec diff $test_path/$test.output $edit_file} msg]} {
         puts "Error: $::errorCode"
         fail $test
     } else {
         exec rm $edit_file $edit_file~
         pass $test
     }
+}
+
+# Run a batch test (called by the test script)
+proc batch_test {args} {
+    global test_path
+
+    zile_start $args
+    expect eof
 }
