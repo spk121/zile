@@ -219,7 +219,7 @@ completion_readdir (Completion * cp, astr as)
   const char *pdir, *base;
   struct dirent *d;
   struct stat st;
-  astr bs = astr_new ();
+  astr bs;
 
   gl_list_free (cp->completions);
 
@@ -229,6 +229,8 @@ completion_readdir (Completion * cp, astr as)
 
   if (expand_path (as) == NULL)
     return false;
+
+  bs = astr_new ();
 
   /* Split up path with dirname and basename, unless it ends in `/',
      in which case it's considered to be entirely dirname */
@@ -254,36 +256,36 @@ completion_readdir (Completion * cp, astr as)
   free ((char *) base);
 
   dir = opendir (pdir);
-  if (dir == NULL)
-    return false;
-
-  buf = astr_new ();
-  while ((d = readdir (dir)) != NULL)
+  if (dir != NULL)
     {
-      astr_cpy_cstr (buf, pdir);
-      astr_cat_cstr (buf, d->d_name);
-      if (stat (astr_cstr (buf), &st) != -1)
+      buf = astr_new ();
+      while ((d = readdir (dir)) != NULL)
         {
-          astr_cpy_cstr (buf, d->d_name);
-          if (S_ISDIR (st.st_mode))
-            astr_cat_char (buf, '/');
+          astr_cpy_cstr (buf, pdir);
+          astr_cat_cstr (buf, d->d_name);
+          if (stat (astr_cstr (buf), &st) != -1)
+            {
+              astr_cpy_cstr (buf, d->d_name);
+              if (S_ISDIR (st.st_mode))
+                astr_cat_char (buf, '/');
+            }
+          else
+            astr_cpy_cstr (buf, d->d_name);
+          gl_sortedlist_add (cp->completions, completion_strcmp,
+                             xstrdup (astr_cstr (buf)));
         }
-      else
-        astr_cpy_cstr (buf, d->d_name);
-      gl_sortedlist_add (cp->completions, completion_strcmp,
-                         xstrdup (astr_cstr (buf)));
-    }
-  closedir (dir);
+      closedir (dir);
 
-  astr_delete (cp->path);
-  cp->path = compact_path (astr_new_cstr (pdir));
+      astr_delete (cp->path);
+      cp->path = compact_path (astr_new_cstr (pdir));
+    }
 
   astr_delete (buf);
   astr_delete (bs);
   free (s1);
   free (s2);
 
-  return true;
+  return dir != NULL;
 }
 
 /*

@@ -206,10 +206,8 @@ expand_path (astr path)
   astr_delete (epath);
 
   if (!ret)
-    {
-      astr_delete (path);
-      return NULL;
-    }
+    return NULL;
+
   return path;
 }
 
@@ -220,31 +218,25 @@ expand_path (astr path)
 astr
 compact_path (astr path)
 {
-  astr buf = astr_new ();
-  size_t i;
   struct passwd *pw = getpwuid (getuid ());
 
-  if (pw == NULL)
+  if (pw != NULL)
     {
-      /* User not found in password file. */
-      astr_cpy (buf, path);
-      return buf;
+      /* Replace `/userhome/' (if existent) with `~/'. */
+      size_t i = strlen (pw->pw_dir);
+      if (!strncmp (pw->pw_dir, astr_cstr (path), i))
+        {
+          astr buf = astr_new_cstr ("~/");
+          if (!strcmp (pw->pw_dir, "/"))
+            astr_cat_cstr (buf, astr_char (path, 1));
+          else
+            astr_cat_cstr (buf, astr_char (path, i + 1));
+          astr_cpy (path, buf);
+          astr_delete (buf);
+        }
     }
 
-  /* Replace `/userhome/' (if existent) with `~/'. */
-  i = strlen (pw->pw_dir);
-  if (!strncmp (pw->pw_dir, astr_cstr (path), i))
-    {
-      astr_cpy_cstr (buf, "~/");
-      if (!strcmp (pw->pw_dir, "/"))
-        astr_cat_cstr (buf, astr_char (path, 1));
-      else
-        astr_cat_cstr (buf, astr_char (path, i + 1));
-    }
-  else
-    astr_cpy (buf, path);
-
-  return buf;
+  return path;
 }
 
 /*
@@ -996,7 +988,10 @@ create_backup_filename (const char *filename, const char *backupdir)
         }
 
       if (expand_path (buf) == NULL)
-        return NULL;
+        {
+          astr_delete (buf);
+          buf = NULL;
+        }
       res = buf;
     }
   else

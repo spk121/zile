@@ -131,6 +131,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
           term_clrtoeol ();
           if (saved)
             astr_delete (saved);
+          astr_delete (as);
           return NULL;
         case KBD_CTRL | 'a':
         case KBD_HOME:
