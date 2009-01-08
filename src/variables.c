@@ -213,8 +213,9 @@ get_variable_bool (char *var)
 }
 
 char *
-minibuf_read_variable_name (char *msg)
+minibuf_read_variable_name (char *fmt, ...)
 {
+  va_list ap;
   char *ms;
   Completion *cp = completion_new (false);
   var_entry *p;
@@ -227,10 +228,12 @@ minibuf_read_variable_name (char *msg)
                          xstrdup (p->var));
     }
 
-  ms = vminibuf_read_completion (msg, "", cp, NULL,
-                            "No variable name given",
-                            minibuf_test_in_completions,
-                            "Undefined variable name `%s'", NULL);
+  va_start (ap, fmt);
+  ms = vminibuf_read_completion (fmt, "", cp, NULL,
+                                 "No variable name given",
+                                 minibuf_test_in_completions,
+                                 "Undefined variable name `%s'", ap);
+  va_end (ap);
 
   return ms;
 }
