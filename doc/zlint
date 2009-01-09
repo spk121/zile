@@ -41,7 +41,8 @@ cat >$TMPFILE1 <<EOF
 #define X(z, c, d)	z
 EOF
 
-export LC_COLLATE=C # Ensure byte sorting for sort
+LC_COLLATE=C # Ensure byte sorting for sort
+export LC_COLLATE
 cat $TMPFILE1 $1 | cpp | tr -d " \t\"" \
 	| sed -e "/^#/d" -e "/^$/d" | sort >$TMPFUNCS
 
