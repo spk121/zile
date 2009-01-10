@@ -6,8 +6,7 @@ Emacs user should feel at home with Zile. Zile is aimed at small
 footprint systems (a typical binary is about 100Kb) and quick editing
 sessions (it starts up and shuts down instantly).
 
-Zile is written in ISO C89 using POSIX APIs; its only external
-dependency is ncurses.
+Zile is written in ISO C89 using POSIX APIs.
 
 Zile is free software, licensed under the GNU GPL.
 
