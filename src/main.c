@@ -115,20 +115,21 @@ about_screen (void)
 }
 
 static void
-execute_scripts (gl_list_t scripts)
+load_files (gl_list_t files)
 {
   size_t i;
-  for (i = 0; i < gl_list_size (scripts); i++)
+  for (i = 0; i < gl_list_size (files); i++)
     {
-      char *script = (char *) gl_list_get_at (scripts, i);
+      char *file = (char *) gl_list_get_at (files, i);
       term_redisplay ();
-      if (!lisp_load (script))
-        {
-          term_finish ();
-          fprintf (stderr, "Cannot open load file: %s\n", script);
-          exit (255);
-        }
       lastflag |= FLAG_NEED_RESYNC;
+      if (!lisp_load (file))
+        {
+          minibuf_error (stderr, "Cannot open load file: %s\n", file);
+          break;
+        }
+      if (thisflag & FLAG_QUIT)
+        break;
     }
 }
 
@@ -217,7 +218,7 @@ signal_init (void)
 struct option longopts[] = {
   {"help", optional_argument, NULL, 'h'},
   {"no-init-file", optional_argument, NULL, 'q'},
-  {"script", required_argument, NULL, 's'},
+  {"load", required_argument, NULL, 'l'},
   {"version", optional_argument, NULL, 'v'},
   {0, 0, 0, 0}
 };
@@ -226,7 +227,7 @@ int
 main (int argc, char **argv)
 {
   int c, qflag = false;
-  gl_list_t sargs = gl_list_create_empty (GL_LINKED_LIST,
+  gl_list_t l_args = gl_list_create_empty (GL_LINKED_LIST,
                                           NULL, NULL, NULL, false);
   size_t line;
 
@@ -247,7 +248,7 @@ main (int argc, char **argv)
       int this_optind = optind ? optind : 1;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
-      c = getopt_long_only (argc, argv, ":h:qv", longopts, NULL);
+      c = getopt_long_only (argc, argv, ":h:l:qv", longopts, NULL);
 
       if (c == -1)
         break;
@@ -274,10 +275,10 @@ main (int argc, char **argv)
                    "\n"
                    "Initialization options:\n"
                    "\n"
-                   "--help                  display this help message and exit\n"
                    "--no-init-file, -q      do not load ~/." PACKAGE "\n"
+                   "--load, -l FILE         load Emacs Lisp FILE using the load function\n"
+                   "--help                  display this help message and exit\n"
                    "--version               display version information and exit\n"
-                   "--script FILE           run FILE as an Emacs Lisp script\n"
                    "\n" "Action options:\n" "\n"
                    "FILE                    visit FILE using find-file\n"
                    "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
@@ -285,8 +286,8 @@ main (int argc, char **argv)
                    "Report bugs to " PACKAGE_BUGREPORT ".\n",
                    prog_name);
           return 0;
-        case 's':
-          gl_list_add_last (sargs, (void *) optarg);
+        case 'l':
+          gl_list_add_last (l_args, (void *) optarg);
           break;
         case '?':		/* Unknown option */
           minibuf_error ("Unknown option `%s'", argv[this_optind]);
@@ -346,7 +347,7 @@ main (int argc, char **argv)
 
   /* Show the splash screen only if no files and no Lisp expression
      or load file is specified on the command line. */
-  if (minibuf_contents == NULL && argc == 0 && gl_list_size (sargs) == 0)
+  if (minibuf_contents == NULL && argc == 0 && gl_list_size (l_args) == 0)
     about_screen ();
 
   setup_main_screen (argc);
@@ -361,11 +362,12 @@ main (int argc, char **argv)
       free (buf);
     }
 
-  execute_scripts (sargs);
-  gl_list_free (sargs);
+  load_files (l_args);
+  gl_list_free (l_args);
 
   /* Run the main loop. */
-  loop ();
+  if (!(thisflag & FLAG_QUIT))
+    loop ();
 
   /* Tidy and close the terminal. */
   term_finish ();

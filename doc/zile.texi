@@ -20,13 +20,13 @@
 
 @titlepage
 @title The Zile Manual
-@subtitle for GNU Zile version 2.2
-@subtitle August 2008
+@subtitle for GNU Zile version 2.3
+@subtitle January 2009
 @author Sandro Sigala and Reuben Thomas
 
 @page
 @vskip 0pt plus 1filll
-Copyright @copyright{} 2008 Free Software Foundation, Inc.
+Copyright @copyright{} 2008, 2009 Free Software Foundation, Inc.
 
 Copyright @copyright{} 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala
 
@@ -74,12 +74,10 @@ Zile's home page at @url{http://www.gnu.org/software/zile/}.
 @node Overview, Features, Top, Top
 @chapter Overview
 
-GNU Zile is written entirely in @emph{@w{ISO C89}}. It should run on any
-POSIX system.
-
-Zile should really appear like Emacs, but a lot of good ideas were
-also taken from other editors; in particular, ce for the internal
-structure.
+GNU Zile is a lightweight clone of Emacs, featuring a bare minimum of
+commands and features required for useful editing. It is written
+entirely in @emph{@w{ISO C89}}, and should run on any POSIX system that
+has curses.
 
 @c ---------------------------------------------------------------------------
 @node Features, Invoking Zile, Overview, Top
@@ -122,12 +120,14 @@ The options are as follows:
 @table @samp
 @item FILE
 Edit file @file{FILE}.
-@item +NUMBER
-Go to line @samp{NUMBER} in the next file opened.
-@item --help
-Display a help message and exit.
+@item +LINE
+Go to line @samp{LINE} in the next file opened.
+@item --load ,-l FILE
+Execute a file of Lisp code named FILE.
 @item --no-init-file, -q
 Do not load an init file.
+@item --help
+Display a help message and exit.
 @item --version
 Display version information and exit.
 @end table

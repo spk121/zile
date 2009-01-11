@@ -1,6 +1,6 @@
 /* Lisp parser
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 2001 Scott "Jerry" Lawrence.
    Copyright (c) 2005 Reuben Thomas.
 
@@ -217,3 +217,15 @@ lisp_load (const char *file)
 
     return false;
 }
+
+DEFUN ("load", load)
+/*+
+Execute a file of Lisp code named FILE.
++*/
+{
+  if (arglist && countNodes (arglist) >= 2)
+    return bool_to_lisp (lisp_load (arglist->next->data));
+
+  return leNIL;
+}
+END_DEFUN
