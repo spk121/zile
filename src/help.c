@@ -113,14 +113,12 @@ static void
 write_variable_description (va_list ap)
 {
   char *name = va_arg (ap, char *);
-  char *defval = va_arg (ap, char *);
   char *curval = va_arg (ap, char *);
   char *doc = va_arg (ap, char *);
-  bprintf ("Variable: %s\n\n"
-           "Default value: %s\n"
-           "Current value: %s\n\n"
+  bprintf ("%s is a variable defined in `C source code'.\n\n"
+           "Its value is %s\n\n"
            "Documentation:\n%s",
-           name, defval, curval, doc);
+           name, curval, doc);
 }
 
 DEFUN ("describe-variable", describe_variable)
