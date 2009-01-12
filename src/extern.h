@@ -1,6 +1,6 @@
 /* Global function prototypes
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
    Copyright (c) 2004 David Capello.
@@ -140,7 +140,7 @@ const char *next_history_element (History * hp);
 
 /* keycode.c -------------------------------------------------------------- */
 astr chordtostr (size_t key);
-gl_list_t keystrtovec (char *key);
+gl_list_t keystrtovec (const char *key);
 astr keyvectostr (gl_list_t keys);
 
 /* killring.c ------------------------------------------------------------- */

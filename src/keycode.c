@@ -1,6 +1,6 @@
 /* Key encoding and decoding functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2007 Reuben Thomas.
 
@@ -129,9 +129,9 @@ chordtostr (size_t key)
       break;
     default:
       if (isgraph (key))
-	astr_cat_char (as, (int) (key & 0xff));
+        astr_cat_char (as, (int) (key & 0xff));
       else
-	astr_afmt (as, "<%x>", key);
+        astr_afmt (as, "<%x>", key);
     }
 
   return as;
@@ -215,25 +215,25 @@ static int keycode[] = {
  * Convert a key string to its key code.
  */
 static size_t
-strtokey (char *buf, size_t * len)
+strtokey (const char *buf, size_t * len)
 {
   if (*buf == '\\')
     {
       size_t i;
       char **p = NULL;
       for (i = 0; i < sizeof (keyname) / sizeof (keyname[0]); i++)
-	if (strncmp (keyname[i], buf, strlen (keyname[i])) == 0)
-	  p = (char **) &keyname[i];
+        if (strncmp (keyname[i], buf, strlen (keyname[i])) == 0)
+          p = (char **) &keyname[i];
       if (p == NULL)
-	{
-	  *len = 0;
-	  return KBD_NOKEY;
-	}
+        {
+          *len = 0;
+          return KBD_NOKEY;
+        }
       else
-	{
-	  *len = strlen (*p);
-	  return keycode[p - (char **) keyname];
-	}
+        {
+          *len = strlen (*p);
+          return keycode[p - (char **) keyname];
+        }
     }
   else
     {
@@ -246,7 +246,7 @@ strtokey (char *buf, size_t * len)
  * Convert a key chord string to its key code.
  */
 static size_t
-strtochord (char *buf, size_t * len)
+strtochord (const char *buf, size_t * len)
 {
   size_t key, l;
 
@@ -263,10 +263,10 @@ strtochord (char *buf, size_t * len)
     {
       size_t k = strtochord (buf + l, &l);
       if (k == KBD_NOKEY)
-	{
-	  *len = 0;
-	  return KBD_NOKEY;
-	}
+        {
+          *len = 0;
+          return KBD_NOKEY;
+        }
       *len += l;
       key |= k;
     }
@@ -278,7 +278,7 @@ strtochord (char *buf, size_t * len)
  * Convert a key sequence string into a key code sequence.
  */
 gl_list_t
-keystrtovec (char *key)
+keystrtovec (const char *key)
 {
   gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
                                          NULL, NULL, NULL, true);
@@ -287,10 +287,10 @@ keystrtovec (char *key)
     {
       size_t len, code = strtochord (key, &len);
       if (code == KBD_NOKEY)
-	{
-	  gl_list_free (keys);
-	  return NULL;
-	}
+        {
+          gl_list_free (keys);
+          return NULL;
+        }
       gl_list_add_last (keys, (void *) code);
       key += len;
     }
@@ -313,7 +313,7 @@ keyvectostr (gl_list_t keys)
       astr_cat (as, key);
       astr_delete (key);
       if (i < gl_list_size (keys) - 1)
-	astr_cat_char (as, ' ');
+        astr_cat_char (as, ' ');
     }
 
   return as;
