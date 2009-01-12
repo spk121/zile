@@ -125,7 +125,7 @@ load_files (gl_list_t files)
       lastflag |= FLAG_NEED_RESYNC;
       if (!lisp_load (file))
         {
-          minibuf_error (stderr, "Cannot open load file: %s\n", file);
+          minibuf_error ("Cannot open load file: %s\n", file);
           break;
         }
       if (thisflag & FLAG_QUIT)
