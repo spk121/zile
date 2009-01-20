@@ -1,6 +1,6 @@
 /* Line-oriented editing functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
@@ -237,7 +237,7 @@ Insert a tabulation at the current point position into the current
 buffer.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, insert_tab, NULL);
+  ok = execute_with_uniarg (true, uniarg, insert_tab, NULL);
 }
 END_DEFUN
 
@@ -418,7 +418,7 @@ Insert a newline at the current point position into
 the current buffer.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, newline, NULL);
+  ok = execute_with_uniarg (true, uniarg, newline, NULL);
 }
 END_DEFUN
 
@@ -427,7 +427,7 @@ DEFUN ("open-line", open_line)
 Insert a newline and leave point before it.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, intercalate_newline, NULL);
+  ok = execute_with_uniarg (true, uniarg, intercalate_newline, NULL);
 }
 END_DEFUN
 
@@ -549,7 +549,7 @@ Delete the following character.
 Join lines if the character is a newline.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, delete_char, backward_delete_char);
+  ok = execute_with_uniarg (true, uniarg, delete_char, backward_delete_char);
 }
 END_DEFUN
 
@@ -561,7 +561,7 @@ Join lines if the character is a newline.
 {
   int (*forward) (void) = cur_bp->flags & BFLAG_OVERWRITE ?
     backward_delete_char_overwrite : backward_delete_char;
-  return execute_with_uniarg (true, uniarg, forward, delete_char);
+  ok = execute_with_uniarg (true, uniarg, forward, delete_char);
 }
 END_DEFUN
 
@@ -579,7 +579,6 @@ Delete all spaces and tabs around point.
     backward_delete_char ();
 
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return leT;
 }
 END_DEFUN
 
@@ -592,7 +591,6 @@ Delete all spaces and tabs around point, leaving one space.
   FUNCALL (delete_horizontal_space);
   insert_char_in_insert_mode (' ');
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-  return leT;
 }
 END_DEFUN
 
@@ -629,8 +627,9 @@ does nothing.
 {
   size_t target_goalc = 0, cur_goalc = get_goalc ();
   Marker *old_point;
-  int ret = true;
   size_t t = tab_width (cur_bp);
+
+  ok = leNIL;
 
   if (warn_if_readonly_buffer ())
     return leNIL;
@@ -676,20 +675,18 @@ does nothing.
           do
             {
               if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
-                ret = insert_tab ();
+                ok = bool_to_lisp (insert_tab ());
               else
-                ret = insert_char_in_insert_mode (' ');
+                ok = bool_to_lisp (insert_char_in_insert_mode (' '));
             }
-          while (ret && (cur_goalc = get_goalc ()) < target_goalc);
+          while (ok == leT && (cur_goalc = get_goalc ()) < target_goalc);
         }
       else
-        ret = insert_tab ();
+        ok = bool_to_lisp (insert_tab ());
     }
   else
-    ret = insert_tab ();
+    ok = bool_to_lisp (insert_tab ());
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -727,7 +724,6 @@ the indentation.  Else stay at same point in text.
     return bool_to_lisp (insert_tab ());
   else if (get_goalc () < previous_line_indent ())
     return FUNCALL (indent_relative);
-  return leT;
 }
 END_DEFUN
 
@@ -737,7 +733,7 @@ Insert a newline, then indent.
 Indentation is done using the `indent-for-tab-command' function.
 +*/
 {
-  le *ret = leNIL;
+  ok = leNIL;
 
   if (warn_if_readonly_buffer ())
     return leNIL;
@@ -761,10 +757,8 @@ Indentation is done using the `indent-for-tab-command' function.
          there is a space character there in the last non-blank line. */
       if (indent)
         FUNCALL (indent_for_tab_command);
-      ret = leT;
+      ok = leT;
     }
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN

@@ -1,6 +1,6 @@
 /* Basic movement functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004 Reuben Thomas.
 
@@ -46,8 +46,6 @@ Move point to beginning of current line.
      `prev/next-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
-
-  return leT;
 }
 END_DEFUN
 
@@ -62,8 +60,6 @@ Move point to end of current line.
      `prev/next-line' calls.  */
   thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
-
-  return leT;
 }
 END_DEFUN
 
@@ -149,13 +145,13 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  int i;
-
   if (uniarg < 0)
     return FUNCALL_ARG (next_line, -uniarg);
 
   if (!bobp ())
     {
+      int i;
+
       for (i = 0; i < uniarg; i++)
         if (!previous_line ())
           {
@@ -166,8 +162,6 @@ column, or at the end of the line if it is not long enough.
     }
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
-
-  return leT;
 }
 END_DEFUN
 
@@ -200,13 +194,13 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  int i;
-
   if (uniarg < 0)
     return FUNCALL_ARG (previous_line, -uniarg);
 
   if (!eobp ())
     {
+      int i;
+
       for (i = 0; i < uniarg; i++)
         if (!next_line ())
           {
@@ -219,8 +213,6 @@ column, or at the end of the line if it is not long enough.
     }
   else if (lastflag & FLAG_DONE_CPCN)
     thisflag |= FLAG_DONE_CPCN;
-
-  return leT;
 }
 END_DEFUN
 
@@ -248,8 +240,6 @@ Position 1 is the beginning of the buffer.
   for (count = 1; count < to_char; ++count)
     if (!forward_char ())
       break;
-
-  return leT;
 }
 END_DEFUN
 
@@ -272,8 +262,6 @@ Line 1 is the beginning of the buffer.
   else if (cur_bp->pt.n < to_line)
     ngotodown (to_line -cur_bp->pt.n);
   cur_bp->pt.o = 0;
-
-  return leT;
 }
 END_DEFUN
 
@@ -294,7 +282,6 @@ Move point to the beginning of the buffer; leave mark at previous position.
 {
   set_mark_interactive ();
   gotobob ();
-  return leT;
 }
 END_DEFUN
 
@@ -315,7 +302,6 @@ Move point to the end of the buffer; leave mark at previous position.
 {
   set_mark_interactive ();
   gotoeob ();
-  return leT;
 }
 END_DEFUN
 
@@ -365,10 +351,9 @@ Move point left N characters (right if N is negative).
 On attempt to pass beginning or end of buffer, stop and signal error.
 +*/
 {
-  le * ret = execute_with_uniarg (false, uniarg, backward_char, forward_char);
-  if (ret == leNIL)
+  ok = execute_with_uniarg (false, uniarg, backward_char, forward_char);
+  if (ok == leNIL)
     minibuf_error ("Beginning of buffer");
-  return ret;
 }
 END_DEFUN
 
@@ -378,10 +363,9 @@ Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
 +*/
 {
-  le * ret = execute_with_uniarg (false, uniarg, forward_char, backward_char);
-  if (ret == leNIL)
+  ok = execute_with_uniarg (false, uniarg, forward_char, backward_char);
+  if (ok == leNIL)
     minibuf_error ("End of buffer");
-  return ret;
 }
 END_DEFUN
 
@@ -438,7 +422,7 @@ DEFUN ("scroll-down", scroll_down)
 Scroll text of current window downward near full screen.
 +*/
 {
-  return execute_with_uniarg (false, uniarg, scroll_down, scroll_up);
+  ok = execute_with_uniarg (false, uniarg, scroll_down, scroll_up);
 }
 END_DEFUN
 
@@ -447,6 +431,6 @@ DEFUN ("scroll-up", scroll_up)
 Scroll text of current window upward near full screen.
 +*/
 {
-  return execute_with_uniarg (false, uniarg, scroll_up, scroll_down);
+  ok = execute_with_uniarg (false, uniarg, scroll_up, scroll_down);
 }
 END_DEFUN

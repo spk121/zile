@@ -1,6 +1,6 @@
 /* Registers facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 
    This file is part of GNU Zile.
@@ -66,8 +66,6 @@ Copy region into the user specified register.
   p = copy_text_block (r.start.n, r.start.o, r.size);
   register_free ((size_t) reg);
   regs[reg] = astr_new_cstr (p);
-
-  return leT;
 }
 END_DEFUN
 
@@ -110,8 +108,6 @@ Puts point before and mark after the inserted text.
   execute_with_uniarg (true, uniarg, insert_register, NULL);
   FUNCALL (exchange_point_and_mark);
   deactivate_mark ();
-
-  return leT;
 }
 END_DEFUN
 
@@ -144,7 +140,6 @@ List defined registers.
 +*/
 {
   write_temp_buffer ("*Registers List*", true, write_registers_list);
-  return leT;
 }
 END_DEFUN
 

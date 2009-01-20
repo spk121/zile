@@ -182,19 +182,52 @@ typedef le * (*Function) (int uniarg, le * list);
 
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
+        DEFUN_ARGS(zile_func, c_func, )
+#define DEFUN_ARGS(zile_func, c_func, args) \
         le * F_ ## c_func (int uniarg, le *arglist) \
         { \
+          le * ok = leT; \
+          args \
           if (arglist && arglist->data) \
             uniarg = atoi (arglist->data);
 #define END_DEFUN \
+          return ok; \
         }
 
-/* Define a function that is not user-visible but can be bound to a key. */
-#define DEFUN_BINDONLY(c_func) \
-        le * F_ ## c_func (int uniarg, le *arglist) \
-        { \
-          if (arglist && arglist->data) \
-            uniarg = atoi (arglist->data);
+/* Declare a string argument, with expression for reading interactively. */
+#define STR_ARG(name) \
+        const char *name = NULL;
+#define STR_INIT(name) \
+        if (arglist) \
+          { \
+            name = arglist->next->data; \
+            arglist = arglist->next; \
+          }
+#define STR_FREE(name) \
+        if (!arglist) \
+          free ((char *) name);
+
+/* Declare an unsigned integer argument, with prompt. */
+#define UINT_ARG(name) \
+        size_t name = 0;
+#define UINT_INIT(name, prompt) \
+        if (arglist) \
+          { \
+            const char *s = arglist->next->data; \
+            arglist = arglist->next; \
+            if ((name = strtoul (s, NULL, 10)) == ULONG_MAX) \
+              ok = false; \
+          } \
+        else \
+          do { \
+            const char *ms = minibuf_read (prompt, ""); \
+            if (ms == NULL) \
+              break; \
+            if ((name = strtoul (ms, NULL, 10)) == ULONG_MAX) \
+              ding (); \
+            free ((char *) ms) \
+          } while (name == ULONG_MAX);
+#define UINT_FREE(name)
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \

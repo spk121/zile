@@ -1,6 +1,6 @@
-/* Windows-handling functions
+/* Window handling functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 
    This file is part of GNU Zile.
@@ -121,8 +121,6 @@ Both windows display the same buffer now current.
   newwp->saved_pt = point_marker ();
   newwp->next = cur_wp->next;
   cur_wp->next = newwp;
-
-  return leT;
 }
 END_DEFUN
 
@@ -160,8 +158,6 @@ Remove the current window from the screen.
     }
 
   delete_window (cur_wp);
-
-  return leT;
 }
 END_DEFUN
 
@@ -194,8 +190,6 @@ Make current window one line bigger.
     recenter (wp);
   ++cur_wp->fheight;
   ++cur_wp->eheight;
-
-  return leT;
 }
 END_DEFUN
 
@@ -223,8 +217,6 @@ Make current window one line smaller.
   --cur_wp->eheight;
   if (cur_wp->topdelta >= cur_wp->eheight)
     recenter (cur_wp);
-
-  return leT;
 }
 END_DEFUN
 
@@ -267,8 +259,6 @@ Make the selected window fill the screen.
   cur_wp->eheight = cur_wp->fheight - 1;
   cur_wp->next = NULL;
   head_wp = cur_wp;
-
-  return leT;
 }
 END_DEFUN
 
@@ -280,7 +270,6 @@ This command selects the window one step away in that order.
 +*/
 {
   set_current_window ((cur_wp->next != NULL) ? cur_wp->next : head_wp);
-  return leT;
 }
 END_DEFUN
 

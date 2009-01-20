@@ -1,6 +1,6 @@
 /* Disk file handling
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
 
@@ -383,7 +383,7 @@ read_from_disk (const char *filename)
   fclose (fp);
 }
 
-int
+bool
 find_file (const char *filename)
 {
   Buffer *bp;
@@ -445,17 +445,16 @@ creating one if none already exists.
 {
   astr buf = get_buffer_dir ();
   char *ms = minibuf_read_filename ("Find file: ", astr_cstr (buf), NULL);
-  int ret = false;
+
+  ok = leNIL;
 
   astr_delete (buf);
   if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-
-  if (ms[0] != '\0')
-    ret = find_file (ms);
+    ok = FUNCALL (keyboard_quit);
+  else if (ms[0] != '\0')
+    ok = bool_to_lisp (find_file (ms));
 
   free (ms);
-  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -466,10 +465,9 @@ Like `find-file' but marks buffer as read-only.
 Use M-x toggle-read-only to permit editing.
 +*/
 {
-  le * ret = FUNCALL (find_file);
-  if (ret == leT)
+  ok = FUNCALL (find_file);
+  if (ok == leT)
     cur_bp->flags |= BFLAG_READONLY;
-  return ret;
 }
 END_DEFUN
 
@@ -512,20 +510,19 @@ If the current buffer now contains an empty file that you just visited
   const char *buf = cur_bp->filename;
   char *base = base_name (cur_bp->filename);
   char *ms = minibuf_read_filename ("Find alternate: ", buf, base);
-  int ret = false;
+
+  ok = leNIL;
 
   if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-
-  if (ms[0] != '\0' && check_modified_buffer (cur_bp))
+    ok = FUNCALL (keyboard_quit);
+  else if (ms[0] != '\0' && check_modified_buffer (cur_bp))
     {
       kill_buffer (cur_bp);
-      ret = find_file (ms);
+      ok = bool_to_lisp (find_file (ms));
     }
 
   free (ms);
   free (base);
-  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -545,22 +542,22 @@ Select to the user specified buffer in the current window.
                                 "", cp, NULL, swbuf->name);
   free_completion (cp);
   if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-
-  if (ms[0] != '\0')
+    ok = FUNCALL (keyboard_quit);
+  else
     {
-      swbuf = find_buffer (ms, false);
-      if (swbuf == NULL)
+      if (ms[0] != '\0')
         {
-          swbuf = find_buffer (ms, true);
-          swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+          swbuf = find_buffer (ms, false);
+          if (swbuf == NULL)
+            {
+              swbuf = find_buffer (ms, true);
+              swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+            }
         }
+
+      switch_to_buffer (swbuf);
+      free ((char *) ms);
     }
-
-  switch_to_buffer (swbuf);
-  free ((char *) ms);
-
-  return leT;
 }
 END_DEFUN
 
@@ -655,30 +652,33 @@ Kill the current buffer or the user specified one.
   ms = minibuf_read_completion ("Kill buffer (default %s): ",
                                 "", cp, NULL, cur_bp->name);
   if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-  free_completion (cp);
-  if (ms[0] != '\0')
-    {
-      bp = find_buffer (ms, false);
-      if (bp == NULL)
-        {
-          minibuf_error ("Buffer `%s' not found", ms);
-          free ((char *) ms);
-          return leNIL;
-        }
-    }
+    ok = FUNCALL (keyboard_quit);
   else
-    bp = cur_bp;
-
-  if (check_modified_buffer (bp))
     {
-      kill_buffer (bp);
-      free ((char *) ms);
-      return leT;
-    }
+      free_completion (cp);
+      if (ms[0] != '\0')
+        {
+          bp = find_buffer (ms, false);
+          if (bp == NULL)
+            {
+              minibuf_error ("Buffer `%s' not found", ms);
+              free ((char *) ms);
+              ok = leNIL;
+            }
+        }
+      else
+        bp = cur_bp;
 
-  free ((char *) ms);
-  return leNIL;
+      if (ok)
+        {
+          if (!check_modified_buffer (bp))
+            ok = leNIL;
+          else
+            kill_buffer (bp);
+        }
+
+      free ((char *) ms);
+    }
 }
 END_DEFUN
 
@@ -749,7 +749,6 @@ Puts mark after the inserted text.
   set_mark_interactive ();
 
   free ((char *) ms);
-  return leT;
 }
 END_DEFUN
 
@@ -827,7 +826,6 @@ Set mark after the inserted text.
   set_mark_interactive ();
 
   free (ms);
-  return leT;
 }
 END_DEFUN
 
@@ -1098,7 +1096,7 @@ Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
 +*/
 {
-  return bool_to_lisp (save_buffer (cur_bp));
+  ok = bool_to_lisp (save_buffer (cur_bp));
 }
 END_DEFUN
 
@@ -1120,9 +1118,9 @@ Makes buffer visit that file, and marks it not modified.
       return leNIL;
     }
 
-  //  if (file_exists (ms)
-      //(or (y-or-n-p (format "File `%s' exists; overwrite? " filename))
-// (error "Canceled")))
+  /* FIXME:
+     if (file_exists (ms) && !(y-or-n-p (format "File `%s' exists; overwrite? " filename))
+     (error "Canceled"))) */
 
   set_buffer_filename (cur_bp, ms);
 
@@ -1135,7 +1133,6 @@ Makes buffer visit that file, and marks it not modified.
     }
 
   free (ms);
-  return leT;
 }
 END_DEFUN
 
@@ -1221,7 +1218,7 @@ DEFUN ("save-some-buffers", save_some_buffers)
 Save some modified file-visiting buffers.  Asks user about each one.
 +*/
 {
-  return bool_to_lisp (save_some_buffers ());
+  ok = bool_to_lisp (save_some_buffers ());
 }
 END_DEFUN
 
@@ -1253,8 +1250,6 @@ Offer to save each buffer, then kill this Zile process.
       }
 
   thisflag |= FLAG_QUIT;
-
-  return leT;
 }
 END_DEFUN
 

@@ -1,6 +1,6 @@
 /* Kill ring facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004 Reuben Thomas.
 
@@ -140,7 +140,6 @@ With prefix argument, kill that many lines from point.
     ret = execute_with_uniarg (true, uniarg, kill_line_literally, NULL);
 
   deactivate_mark ();
-  return ret;
 }
 END_DEFUN
 
@@ -168,7 +167,7 @@ the text killed this time appends to the text killed last time
 to make one entry in the kill ring.
 +*/
 {
-  return bool_to_lisp (copy_or_kill_the_region (true));
+  ok = bool_to_lisp (copy_or_kill_the_region (true));
 }
 END_DEFUN
 
@@ -177,7 +176,7 @@ DEFUN ("copy-region-as-kill", copy_region_as_kill)
 Save the region as if killed, but don't kill it.
 +*/
 {
-  return bool_to_lisp (copy_or_kill_the_region (false));
+  ok = bool_to_lisp (copy_or_kill_the_region (false));
 }
 END_DEFUN
 
@@ -208,7 +207,7 @@ Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  return kill (uniarg, F_mark_word);
+  ok = kill (uniarg, F_mark_word);
 }
 END_DEFUN
 
@@ -218,7 +217,7 @@ Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  return kill (-uniarg, F_mark_word);
+  ok = kill (-uniarg, F_mark_word);
 }
 END_DEFUN
 
@@ -229,7 +228,7 @@ With ARG, kill that many sexps after the cursor.
 Negative arg -N means kill N sexps before the cursor.
 +*/
 {
-  return kill (uniarg, F_mark_sexp);
+  ok = kill (uniarg, F_mark_sexp);
 }
 END_DEFUN
 
@@ -257,7 +256,5 @@ killed OR yanked.  Put point at end, and set mark at beginning.
   undo_nosave = false;
 
   deactivate_mark ();
-
-  return leT;
 }
 END_DEFUN

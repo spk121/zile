@@ -1,6 +1,6 @@
 /* Undo facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 
    This file is part of GNU Zile.
@@ -164,7 +164,6 @@ Repeat this command to undo more changes.
 
   cur_bp->next_undop = revert_action (cur_bp->next_undop);
   minibuf_write ("Undo!");
-  return leT;
 }
 END_DEFUN
 

@@ -1,6 +1,6 @@
 /* Macro facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2005 Reuben Thomas.
 
@@ -110,7 +110,6 @@ Use M-x name-last-kbd-macro to give it a permanent name.
 
   thisflag |= FLAG_DEFINING_MACRO;
   cur_mp = XZALLOC (Macro);
-  return leT;
 }
 END_DEFUN
 
@@ -128,7 +127,6 @@ The macro is now available for use via C-x e.
     }
 
   thisflag &= ~FLAG_DEFINING_MACRO;
-  return leT;
 }
 END_DEFUN
 
@@ -174,8 +172,6 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
   size = sizeof (*(mp->keys)) * mp->nkeys;
   mp->keys = xzalloc (size);
   memcpy (mp->keys, cur_mp->keys, size);
-
-  return leT;
 }
 END_DEFUN
 
@@ -198,7 +194,6 @@ defining others, use M-x name-last-kbd-macro.
 +*/
 {
   int uni;
-  le *ret = leT;
 
   if (cur_mp == NULL)
     {
@@ -210,8 +205,6 @@ defining others, use M-x name-last-kbd-macro.
   for (uni = 0; uni < uniarg; ++uni)
     call_macro (cur_mp);
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return ret;
 }
 END_DEFUN
 

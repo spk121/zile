@@ -43,7 +43,6 @@ Stop Zile and return to superior process.
 +*/
 {
   raise (SIGTSTP);
-  return leT;
 }
 END_DEFUN
 
@@ -54,7 +53,7 @@ Cancel current command.
 {
   deactivate_mark ();
   minibuf_error ("Quit");
-  return leNIL;
+  ok = leNIL;
 }
 END_DEFUN
 
@@ -75,7 +74,6 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
     set_variable ("transient-mark-mode", uniarg > 0 ? "t" : "nil");
 
   activate_mark ();
-  return leT;
 }
 END_DEFUN
 
@@ -224,7 +222,6 @@ The R column contains a % for buffers that are read-only.
 +*/
 {
   write_temp_buffer ("*Buffer List*", true, write_buffers_list, cur_wp);
-  return leT;
 }
 END_DEFUN
 
@@ -238,7 +235,6 @@ is supposed to make it easier to insert characters when necessary.
 +*/
 {
   cur_bp->flags ^= BFLAG_OVERWRITE;
-  return leT;
 }
 END_DEFUN
 
@@ -248,7 +244,6 @@ Change whether this buffer is visiting its file read-only.
 +*/
 {
   cur_bp->flags ^= BFLAG_READONLY;
-  return leT;
 }
 END_DEFUN
 
@@ -260,7 +255,6 @@ automatically breaks the line at a previous space.
 +*/
 {
   cur_bp->flags ^= BFLAG_AUTOFILL;
-  return leT;
 }
 END_DEFUN
 
@@ -298,8 +292,6 @@ Just C-u as argument means to use the current column.
   if (arglist == NULL)
     free (buf);
   leWipe (branch);
-
-  return leT;
 }
 END_DEFUN
 
@@ -317,7 +309,6 @@ Set mark at where point is.
 {
   set_mark_interactive ();
   activate_mark ();
-  return leT;
 }
 END_DEFUN
 
@@ -339,8 +330,6 @@ Put the mark where point is now, and point where the mark is now.
     activate_mark ();
 
   thisflag |= FLAG_NEED_RESYNC;
-
-  return leT;
 }
 END_DEFUN
 
@@ -352,7 +341,6 @@ Put point at beginning and mark at end of buffer.
   gotoeob ();
   FUNCALL (set_mark_command);
   gotobob ();
-  return leT;
 }
 END_DEFUN
 
@@ -403,8 +391,6 @@ You may also type up to 3 octal digits, to insert a character with that code.
     insert_char_in_insert_mode (c);
 
   minibuf_clear ();
-
-  return leT;
 }
 END_DEFUN
 
@@ -499,7 +485,7 @@ Repeating C-u without digits or minus sign multiplies the argument
 by 4 each time.
 +*/
 {
-  return universal_argument (KBD_CTRL | 'u', 0);
+  ok = universal_argument (KBD_CTRL | 'u', 0);
 }
 END_DEFUN
 
@@ -667,7 +653,7 @@ when this can be done without changing the column they end at.
 The variable `tab-width' controls the spacing of tab stops.
 +*/
 {
-  return edit_tab_region (TAB_TABIFY);
+  ok = edit_tab_region (TAB_TABIFY);
 }
 END_DEFUN
 
@@ -677,7 +663,7 @@ Convert all tabs in region to multiple spaces, preserving columns.
 The variable `tab-width' controls the spacing of tab stops.
 +*/
 {
-  return edit_tab_region (TAB_UNTABIFY);
+  ok = edit_tab_region (TAB_UNTABIFY);
 }
 END_DEFUN
 
@@ -693,7 +679,6 @@ Move point to the first non-whitespace character on this line.
         break;
       forward_char ();
     }
-  return leT;
 }
 END_DEFUN
 
@@ -745,7 +730,7 @@ Move point forward one word (backward if the argument is negative).
 With argument, do this that many times.
 +*/
 {
-  return execute_with_uniarg (false, uniarg, forward_word, backward_word);
+  ok = execute_with_uniarg (false, uniarg, forward_word, backward_word);
 }
 END_DEFUN
 
@@ -756,7 +741,7 @@ argument is negative).
 With argument, do this that many times.
 +*/
 {
-  return execute_with_uniarg (false, uniarg, backward_word, forward_word);
+  ok = execute_with_uniarg (false, uniarg, backward_word, forward_word);
 }
 END_DEFUN
 
@@ -880,7 +865,7 @@ With argument, do it that many times.  Negative arg -N means
 move backward across N balanced expressions.
 +*/
 {
-  return execute_with_uniarg (false, uniarg, forward_sexp, backward_sexp);
+  ok = execute_with_uniarg (false, uniarg, forward_sexp, backward_sexp);
 }
 END_DEFUN
 
@@ -891,7 +876,7 @@ With argument, do it that many times.  Negative arg -N means
 move forward across N balanced expressions.
 +*/
 {
-  return execute_with_uniarg (false, uniarg, backward_sexp, forward_sexp);
+  ok = execute_with_uniarg (false, uniarg, backward_sexp, forward_sexp);
 }
 END_DEFUN
 
@@ -1051,7 +1036,7 @@ and drag it forward past ARG other characters (backward if ARG negative).
 If no argument and at end of line, the previous two chars are exchanged.
 +*/
 {
-  return transpose (uniarg, forward_char, backward_char);
+  ok = transpose (uniarg, forward_char, backward_char);
 }
 END_DEFUN
 
@@ -1064,7 +1049,7 @@ If ARG is zero, the words around or after point and around or after mark
 are interchanged.
 +*/
 {
-  return transpose (uniarg, forward_word, backward_word);
+  ok = transpose (uniarg, forward_word, backward_word);
 }
 END_DEFUN
 
@@ -1073,7 +1058,7 @@ DEFUN ("transpose-sexps", transpose_sexps)
 Like M-x transpose-words but applies to sexps.
 +*/
 {
-  return transpose (uniarg, forward_sexp, backward_sexp);
+  ok = transpose (uniarg, forward_sexp, backward_sexp);
 }
 END_DEFUN
 
@@ -1084,7 +1069,7 @@ With argument ARG, takes previous line and moves it past ARG lines.
 With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
-  return transpose (uniarg, next_line, previous_line);
+  ok = transpose (uniarg, next_line, previous_line);
 }
 END_DEFUN
 
@@ -1105,7 +1090,7 @@ DEFUN ("mark-word", mark_word)
 Set mark argument words away from point.
 +*/
 {
-  return mark (uniarg, F_forward_word);
+  ok = mark (uniarg, F_forward_word);
 }
 END_DEFUN
 
@@ -1116,7 +1101,7 @@ The place mark goes is the same place C-M-f would
 move to with the same argument.
 +*/
 {
-  return mark (uniarg, F_forward_sexp);
+  ok = mark (uniarg, F_forward_sexp);
 }
 END_DEFUN
 
@@ -1127,8 +1112,7 @@ Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
   FUNCALL (beginning_of_line);
-
-  return execute_with_uniarg (false, uniarg, next_line, previous_line);
+  ok = execute_with_uniarg (false, uniarg, next_line, previous_line);
 }
 END_DEFUN
 
@@ -1163,7 +1147,7 @@ DEFUN ("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.  With argument N, do it N times.
 +*/
 {
-  return move_paragraph (uniarg, previous_line, next_line, F_beginning_of_line);
+  ok = move_paragraph (uniarg, previous_line, next_line, F_beginning_of_line);
 }
 END_DEFUN
 
@@ -1172,7 +1156,7 @@ DEFUN ("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
-  return move_paragraph (uniarg, next_line, previous_line, F_end_of_line);
+  ok = move_paragraph (uniarg, next_line, previous_line, F_end_of_line);
 }
 END_DEFUN
 
@@ -1194,8 +1178,6 @@ The paragraph marked is the one that contains point or follows point.
       FUNCALL (set_mark_command);
       FUNCALL_ARG (backward_paragraph, uniarg);
     }
-
-  return leT;
 }
 END_DEFUN
 
@@ -1240,8 +1222,6 @@ Fill paragraph at or after point.
   free_marker (m);
 
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
-
-  return leT;
 }
 END_DEFUN
 
@@ -1309,7 +1289,7 @@ DEFUN ("downcase-word", downcase_word)
 Convert following word (or argument N words) to lower case, moving over.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, setcase_word_lowercase, NULL);
+  ok = execute_with_uniarg (true, uniarg, setcase_word_lowercase, NULL);
 }
 END_DEFUN
 
@@ -1324,7 +1304,7 @@ DEFUN ("upcase-word", upcase_word)
 Convert following word (or argument N words) to upper case, moving over.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, setcase_word_uppercase, NULL);
+  ok = execute_with_uniarg (true, uniarg, setcase_word_uppercase, NULL);
 }
 END_DEFUN
 
@@ -1341,7 +1321,7 @@ This gives the word(s) a first character in upper case and the rest
 lower case.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, setcase_word_capitalize, NULL);
+  ok = execute_with_uniarg (true, uniarg, setcase_word_capitalize, NULL);
 }
 END_DEFUN
 
@@ -1393,7 +1373,7 @@ DEFUN ("upcase-region", upcase_region)
 Convert the region to upper case.
 +*/
 {
-  return setcase_region (UPPERCASE);
+  ok = setcase_region (UPPERCASE);
 }
 END_DEFUN
 
@@ -1402,7 +1382,7 @@ DEFUN ("downcase-region", downcase_region)
 Convert the region to lower case.
 +*/
 {
-  return setcase_region (LOWERCASE);
+  ok = setcase_region (LOWERCASE);
 }
 END_DEFUN
 
@@ -1502,16 +1482,13 @@ in buffer `*Shell Command Output*' even though that buffer is not
 automatically displayed.
 +*/
 {
-  bool ret;
   char *cmd = minibuf_read_shell_command ();
 
   if (cmd == NULL)
     return leNIL;
 
-  ret = pipe_command (cmd, "/dev/null", false);
+  ok = bool_to_lisp (pipe_command (cmd, "/dev/null", false));
   free (cmd);
-
-  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -1532,7 +1509,6 @@ The output is available in that buffer in both cases.
   ssize_t written;
   char tempfile[] = P_tmpdir "/zileXXXXXX";
   Region r;
-  bool ret;
   char *cmd = minibuf_read_shell_command (), *p;
 
   if (cmd == NULL)
@@ -1563,11 +1539,9 @@ The output is available in that buffer in both cases.
       return leNIL;
     }
 
-  ret = pipe_command (cmd, tempfile, true);
+  ok = bool_to_lisp (pipe_command (cmd, tempfile, true));
   free (cmd);
   remove (tempfile);
-
-  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -1599,11 +1573,11 @@ Delete the text between point and mark.
   Region r;
 
   if (!calculate_the_region (&r))
-    return leNIL;
-  if (!delete_region (&r))
-    return leNIL;
-  deactivate_mark ();
-  return leT;
+    ok = leNIL;
+  else if (!delete_region (&r))
+    ok = leNIL;
+  else
+    deactivate_mark ();
 }
 END_DEFUN
 
@@ -1690,7 +1664,5 @@ On nonblank line, delete any immediately following blank lines.
 
   free_marker (old_marker);
   deactivate_mark ();
-
-  return leT;
 }
 END_DEFUN

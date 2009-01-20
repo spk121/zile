@@ -224,8 +224,8 @@ Execute a file of Lisp code named FILE.
 +*/
 {
   if (arglist && countNodes (arglist) >= 2)
-    return bool_to_lisp (lisp_load (arglist->next->data));
-
-  return leNIL;
+    ok = bool_to_lisp (lisp_load (arglist->next->data));
+  else
+    ok = leNIL;
 }
 END_DEFUN

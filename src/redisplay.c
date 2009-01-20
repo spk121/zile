@@ -1,6 +1,6 @@
 /* Terminal independent redisplay routines
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 
    This file is part of GNU Zile.
@@ -34,12 +34,12 @@ resync_redisplay (void)
   if (delta)
     {
       if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||
-	  (delta < 0 && cur_wp->topdelta >= (size_t) (-delta)))
-	cur_wp->topdelta += delta;
+          (delta < 0 && cur_wp->topdelta >= (size_t) (-delta)))
+        cur_wp->topdelta += delta;
       else if (cur_bp->pt.n > cur_wp->eheight / 2)
-	cur_wp->topdelta = cur_wp->eheight / 2;
+        cur_wp->topdelta = cur_wp->eheight / 2;
       else
-	cur_wp->topdelta = cur_bp->pt.n;
+        cur_wp->topdelta = cur_bp->pt.n;
     }
   cur_wp->lastpointn = cur_bp->pt.n;
 }
@@ -63,38 +63,38 @@ resize_windows (void)
   if (hdelta > 0)
     {				/* Increase windows height. */
       for (wp = head_wp; hdelta > 0; wp = wp->next)
-	{
-	  if (wp == NULL)
-	    wp = head_wp;
-	  ++wp->fheight;
-	  ++wp->eheight;
-	  --hdelta;
-	}
+        {
+          if (wp == NULL)
+            wp = head_wp;
+          ++wp->fheight;
+          ++wp->eheight;
+          --hdelta;
+        }
     }
   else
     {				/* Decrease windows' height, and close windows if necessary. */
       int decreased = true;
       while (decreased)
-	{
-	  decreased = false;
-	  for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
-	    {
-	      if (wp->fheight > 2)
-		{
-		  --wp->fheight;
-		  --wp->eheight;
-		  ++hdelta;
-		  decreased = true;
-		}
-	      else if (cur_wp != head_wp || cur_wp->next != NULL)
-		{
-		  Window *new_wp = wp->next;
-		  delete_window (wp);
-		  wp = new_wp;
-		  decreased = true;
-		}
-	    }
-	}
+        {
+          decreased = false;
+          for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+            {
+              if (wp->fheight > 2)
+                {
+                  --wp->fheight;
+                  --wp->eheight;
+                  ++hdelta;
+                  decreased = true;
+                }
+              else if (cur_wp != head_wp || cur_wp->next != NULL)
+                {
+                  Window *new_wp = wp->next;
+                  delete_window (wp);
+                  wp = new_wp;
+                  decreased = true;
+                }
+            }
+        }
     }
 
   FUNCALL (recenter);
@@ -119,6 +119,5 @@ The desired position of point is always relative to the current window.
 {
   recenter (cur_wp);
   term_full_redisplay ();
-  return leT;
 }
 END_DEFUN

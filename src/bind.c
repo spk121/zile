@@ -1,6 +1,6 @@
 /* Key bindings and extended commands
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
 
@@ -267,7 +267,7 @@ Insert the character you type.
 Whichever character you type to run this command is inserted.
 +*/
 {
-  return execute_with_uniarg (true, uniarg, self_insert_command, NULL);
+  ok = execute_with_uniarg (true, uniarg, self_insert_command, NULL);
 }
 END_DEFUN
 
@@ -355,62 +355,59 @@ free_bindings (Binding binding)
   free (binding);
 }
 
-DEFUN ("global-set-key", global_set_key)
+DEFUN_ARGS ("global-set-key", global_set_key,
+            STR_ARG (keystr)
+            STR_ARG (name))
 /*+
 Bind a command to a key sequence.
 Read key sequence and function name, and bind the function to the key
 sequence.
 +*/
 {
-  int ret = false;
-  size_t key;
   gl_list_t keys;
   Function func;
-  const char *name;
-  size_t argc = countNodes (arglist);
 
-  if (arglist && argc >= 3)
+  STR_INIT (keystr);
+  if (keystr != NULL)
     {
-      keys = keystrtovec (arglist->next->data);
+      keys = keystrtovec (keystr);
       if (keys == NULL)
         {
-          minibuf_error ("Key sequence %s is invalid",
-                         arglist->next->data);
-          return false;
+          minibuf_error ("Key sequence %s is invalid", keystr);
+          return leNIL;
         }
-      name = arglist->next->next->data;
     }
   else
     {
       astr as;
+      size_t key;
 
       minibuf_write ("Set key globally: ");
       key = getkey ();
       completion_scan (root_bindings, key, &keys);
-
       as = keyvectostr (keys);
-      name = minibuf_read_function_name ("Set key %s to command: ",
-                                         astr_cstr (as));
+      keystr = xstrdup (astr_cstr (as));
       astr_delete (as);
     }
 
+  STR_INIT (name)
+  else
+    name = minibuf_read_function_name ("Set key %s to command: ",
+                                       keystr);
   if (name == NULL)
-    return false;
+    return leNIL;
 
   func = get_function (name);
-  if (func)
+  if (func == NULL) /* Possible if called non-interactively */
     {
-      ret = true;
-      bind_key_vec (root_bindings, keys, 0, func);
+      minibuf_error ("No such function `%s'", name);
+      return leNIL;
     }
-  else
-    minibuf_error ("No such function `%s'", name);
+  bind_key_vec (root_bindings, keys, 0, func);
 
-  if (!arglist)
-    free ((char *) name);
   gl_list_free (keys);
-
-  return bool_to_lisp (ret);
+  STR_FREE (keystr);
+  STR_FREE (name);
 }
 END_DEFUN
 
@@ -484,8 +481,9 @@ message in the buffer.
 +*/
 {
   const char *name = minibuf_read_function_name ("Where is command: ");
-  int ret = false;
   gather_bindings_state g;
+
+  ok = leNIL;
 
   if (name)
     {
@@ -508,12 +506,11 @@ message in the buffer.
               astr_delete (as);
             }
           astr_delete (g.bindings);
-          ret = true;
+          ok = leT;
         }
     }
 
   free ((char *) name);
-  return bool_to_lisp (ret);
 }
 END_DEFUN
 
@@ -557,6 +554,5 @@ Show a list of all defined keys, and their definitions.
 +*/
 {
   write_temp_buffer ("*Help*", true, write_bindings_list);
-  return leT;
 }
 END_DEFUN

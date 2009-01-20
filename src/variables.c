@@ -1,6 +1,6 @@
 /* Zile variables handling functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007 Reuben Thomas.
 
@@ -85,8 +85,7 @@ init_builtin_var (const char *var, const char *defval, bool local, const char *d
 static Hash_table *
 new_varlist (void)
 {
-  /* Initial size of 32 is big enough for default variables and some
-     more */
+  /* Initial size is big enough for default variables and some more */
   return hash_initialize (32, NULL, var_hash, var_cmp, var_free);
 }
 
@@ -238,34 +237,31 @@ minibuf_read_variable_name (char *fmt, ...)
   return ms;
 }
 
-DEFUN ("set-variable", set_variable)
+DEFUN_ARGS ("set-variable", set_variable,
+            STR_ARG (var)
+            STR_ARG (val))
 /*+
 Set a variable value to the user-specified value.
 +*/
 {
-  char *var, *val;
-  size_t argc = countNodes (arglist);
-
-  if (arglist && argc >= 3)
-    set_variable (arglist->next->data, arglist->next->next->data);
+  STR_INIT (var)
   else
+    var = minibuf_read_variable_name ("Set variable: ");
+  if (var == NULL)
+    return leNIL;
+  STR_INIT (val)
+  else
+    val = minibuf_read ("Set %s to value: ", "", var);
+  if (val == NULL)
     {
-      var = minibuf_read_variable_name ("Set variable: ");
-      if (var == NULL)
-        return leNIL;
-
-      val = minibuf_read ("Set %s to value: ", "", var);
-      if (val == NULL)
-        {
-          free (var);
-          return FUNCALL (keyboard_quit);
-        }
-
-      set_variable (var, val);
-      free (var);
-      free (val);
+      free ((char *) var);
+      ok = FUNCALL (keyboard_quit);
     }
 
-  return leT;
+  if (ok == leT)
+    set_variable (var, val);
+
+  STR_FREE (var);
+  STR_FREE (val);
 }
 END_DEFUN

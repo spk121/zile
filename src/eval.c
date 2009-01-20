@@ -1,6 +1,6 @@
 /* Lisp eval
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 2001 Scott "Jerry" Lawrence.
    Copyright (c) 2005, 2006, 2007 Reuben Thomas.
 
@@ -236,7 +236,6 @@ DEFUN ("execute-extended-command", execute_extended_command)
 Read function name, then read its arguments and call it.
 +*/
 {
-  le * ret;
   const char *name;
   astr msg = astr_new ();
 
@@ -254,10 +253,8 @@ Read function name, then read its arguments and call it.
   if (name == NULL)
     return false;
 
-  ret = execute_function (name, uniarg);
+  ok = execute_function (name, uniarg);
   free ((char *) name);
-
-  return ret;
 }
 END_DEFUN
 

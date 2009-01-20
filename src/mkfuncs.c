@@ -84,19 +84,18 @@ main (int argc, char **argv)
 
     while (fgets (buf, BUFSIZ, fp) != NULL)
       {
-        if (!strncmp (buf, "DEFUN (", (size_t) 6))
+        if (!strncmp (buf, "DEFUN", (size_t) 5))
           {
-            char *p, *q, *r;
-          p = buf;
-          q = strchr (p, '\"');
-          r = strrchr (p, '\"');
-          if (q == NULL || r == NULL || q == r)
-            {
-              fprintf (stderr, "mkdoc: invalid DEFUN () syntax\n");
-              exit (1);
-            }
-          *r = '\0';
-          do_func (fp, q + 1);
+            char *p = buf;
+            char *q = strchr (p, '\"');
+            char *r = strrchr (p, '\"');
+            if (q == NULL || r == NULL || q == r)
+              {
+                fprintf (stderr, "mkdoc: invalid DEFUN syntax\n");
+                exit (1);
+              }
+            *r = '\0';
+            do_func (fp, q + 1);
           }
       }
 

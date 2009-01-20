@@ -1,6 +1,6 @@
 /* Search and replace functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2004 David A. Capello.
    Copyright (c) 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
@@ -65,9 +65,9 @@ no_upper (const char *s, size_t len, int regex)
   for (i = 0; i < len; i++)
     {
       if (regex && s[i] == '\\')
-	quote_flag = !quote_flag;
+        quote_flag = !quote_flag;
       else if (!quote_flag && isupper ((int) s[i]))
-	return false;
+        return false;
     }
 
   return true;
@@ -85,8 +85,8 @@ fold_table (const char *s, int regex)
 
 static const char *
 find_substr (const char *s1, size_t s1size,
-	     const char *s2, size_t s2size,
-	     const char translate[UCHAR_MAX + 1])
+             const char *s2, size_t s2size,
+             const char translate[UCHAR_MAX + 1])
 {
   const char *e1 = s1 + s1size, *e2 = s2 + s2size;
 
@@ -95,9 +95,9 @@ find_substr (const char *s1, size_t s1size,
       const char *sp1 = s1, *sp2 = s2;
 
       while (translate[(unsigned char) *sp1++] ==
-	     translate[(unsigned char) *sp2++])
-	if (sp2 == e2)
-	  return sp1;
+             translate[(unsigned char) *sp2++])
+        if (sp2 == e2)
+          return sp1;
     }
 
   return NULL;
@@ -105,8 +105,8 @@ find_substr (const char *s1, size_t s1size,
 
 static const char *
 rfind_substr (const char *s1, size_t s1size,
-	      const char *s2, size_t s2size,
-	      const char translate[UCHAR_MAX + 1])
+              const char *s2, size_t s2size,
+              const char translate[UCHAR_MAX + 1])
 {
   const char *e1 = s1 + s1size, *e2 = s2 + s2size;
 
@@ -115,9 +115,9 @@ rfind_substr (const char *s1, size_t s1size,
       const char *sp1 = e1, *sp2 = e2;
 
       while (translate[(unsigned char) *--sp1] ==
-	     translate[(unsigned char) *--sp2])
-	if (sp2 == s2)
-	  return sp1;
+             translate[(unsigned char) *--sp2])
+        if (sp2 == s2)
+          return sp1;
     }
 
   return NULL;
@@ -127,9 +127,9 @@ static const char *re_find_err = NULL;
 
 static char *
 re_find_substr (const char *s1, size_t s1size,
-		const char *s2, size_t s2size,
-		int bol, int eol, int backward,
-		const char translate[UCHAR_MAX + 1])
+                const char *s2, size_t s2size,
+                int bol, int eol, int backward,
+                const char translate[UCHAR_MAX + 1])
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
@@ -156,33 +156,33 @@ re_find_substr (const char *s1, size_t s1size,
       pattern.not_eol = !eol;
 
       if (!backward)
-	index = re_search (&pattern, s1, (int) s1size, 0, (int) s1size,
-			   &search_regs);
+        index = re_search (&pattern, s1, (int) s1size, 0, (int) s1size,
+                           &search_regs);
       else
-	index =
-	  re_search (&pattern, s1, (int) s1size, (int) s1size, -(int) s1size,
-		     &search_regs);
+        index =
+          re_search (&pattern, s1, (int) s1size, (int) s1size, -(int) s1size,
+                     &search_regs);
 
       if (index >= 0)
-	{
-	  if (!backward)
-	    ret = ((char *) s1) + search_regs.end[0];
-	  else
-	    ret = ((char *) s1) + search_regs.start[0];
-	}
+        {
+          if (!backward)
+            ret = ((char *) s1) + search_regs.end[0];
+          else
+            ret = ((char *) s1) + search_regs.start[0];
+        }
       else if (index == -1)
-	{
-	  /* no match */
-	}
+        {
+          /* no match */
+        }
       else
-	{
-	  /* error */
-	}
+        {
+          /* error */
+        }
     }
 
   re_set_syntax (old_syntax);
   pattern.translate = NULL;	/* regfree requires translate to be NULL
-				   or malloced */
+                                   or malloced */
   regfree (&pattern);
 
   free (search_regs.start);
@@ -213,31 +213,31 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
   for (lp = startp; lp != cur_bp->lines; lp = lp->next)
     {
       if (lp == startp)
-	{
-	  sp = astr_char (lp->text, (ptrdiff_t) starto);
-	  s1size = astr_len (lp->text) - starto;
-	}
+        {
+          sp = astr_char (lp->text, (ptrdiff_t) starto);
+          s1size = astr_len (lp->text) - starto;
+        }
       else
-	{
-	  sp = astr_cstr (lp->text);
-	  s1size = astr_len (lp->text);
-	}
+        {
+          sp = astr_cstr (lp->text);
+          s1size = astr_len (lp->text);
+        }
       if (s1size < 1)
-	continue;
+        continue;
 
       if (regexp)
-	sp2 = re_find_substr (sp, s1size, s, s2size,
-			      sp == astr_cstr (lp->text), true, false,
-			      translate);
+        sp2 = re_find_substr (sp, s1size, s, s2size,
+                              sp == astr_cstr (lp->text), true, false,
+                              translate);
       else
-	sp2 = find_substr (sp, s1size, s, s2size, translate);
+        sp2 = find_substr (sp, s1size, s, s2size, translate);
 
       if (sp2 != NULL)
-	{
-	  goto_linep (lp);
-	  cur_bp->pt.o = sp2 - astr_cstr (lp->text);
-	  return true;
-	}
+        {
+          goto_linep (lp);
+          cur_bp->pt.o = sp2 - astr_cstr (lp->text);
+          return true;
+        }
     }
 
   return false;
@@ -257,25 +257,25 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
     {
       sp = astr_cstr (lp->text);
       if (lp == startp)
-	s1size = starto;
+        s1size = starto;
       else
-	s1size = astr_len (lp->text);
+        s1size = astr_len (lp->text);
       if (s1size < 1)
-	continue;
+        continue;
 
       if (regexp)
-	sp2 = re_find_substr (sp, s1size, s, ssize,
-			      true, s1size == astr_len (lp->text), true,
-			      translate);
+        sp2 = re_find_substr (sp, s1size, s, ssize,
+                              true, s1size == astr_len (lp->text), true,
+                              translate);
       else
-	sp2 = rfind_substr (sp, s1size, s, ssize, translate);
+        sp2 = rfind_substr (sp, s1size, s, ssize, translate);
 
       if (sp2 != NULL)
-	{
-	  goto_linep (lp);
-	  cur_bp->pt.o = sp2 - astr_cstr (lp->text);
-	  return true;
-	}
+        {
+          goto_linep (lp);
+          cur_bp->pt.o = sp2 - astr_cstr (lp->text);
+          return true;
+        }
     }
 
   return false;
@@ -317,7 +317,7 @@ DEFUN ("search-forward", search_forward)
 Search forward from point for the user specified text.
 +*/
 {
-  return search (search_forward, false, "Search: ");
+  ok = search (search_forward, false, "Search: ");
 }
 END_DEFUN
 
@@ -326,7 +326,7 @@ DEFUN ("search-backward", search_backward)
 Search backward from point for the user specified text.
 +*/
 {
-  return search (search_backward, false, "Search backward: ");
+  ok = search (search_backward, false, "Search backward: ");
 }
 END_DEFUN
 
@@ -335,7 +335,7 @@ DEFUN ("search-forward-regexp", search_forward_regexp)
 Search forward from point for regular expression REGEXP.
 +*/
 {
-  return search (search_forward, true, "RE search: ");
+  ok = search (search_forward, true, "RE search: ");
 }
 END_DEFUN
 
@@ -344,7 +344,7 @@ DEFUN ("search-backward-regexp", search_backward_regexp)
 Search backward from point for match for regular expression REGEXP.
 +*/
 {
-  return search (search_backward, true, "RE search backward: ");
+  ok = search (search_backward, true, "RE search backward: ");
 }
 END_DEFUN
 
@@ -374,138 +374,138 @@ isearch (int dir, int regexp)
       /* Make the minibuf message. */
       astr_truncate (buf, 0);
       astr_afmt (buf, "%sI-search%s: %s",
-		 (last ?
-		  (regexp ? "Regexp " : "") :
-		  (regexp ? "Failing regexp " : "Failing ")),
-		 (dir == ISEARCH_FORWARD) ? "" : " backward",
-		 astr_cstr (pattern));
+                 (last ?
+                  (regexp ? "Regexp " : "") :
+                  (regexp ? "Failing regexp " : "Failing ")),
+                 (dir == ISEARCH_FORWARD) ? "" : " backward",
+                 astr_cstr (pattern));
 
       /* Regex error. */
       if (re_find_err)
-	{
-	  if ((strncmp (re_find_err, "Premature ", 10) == 0) ||
-	      (strncmp (re_find_err, "Unmatched ", 10) == 0) ||
-	      (strncmp (re_find_err, "Invalid ", 8) == 0))
-	    {
-	      re_find_err = "incomplete input";
-	    }
-	  astr_afmt (buf, " [%s]", re_find_err);
-	  re_find_err = NULL;
-	}
+        {
+          if ((strncmp (re_find_err, "Premature ", 10) == 0) ||
+              (strncmp (re_find_err, "Unmatched ", 10) == 0) ||
+              (strncmp (re_find_err, "Invalid ", 8) == 0))
+            {
+              re_find_err = "incomplete input";
+            }
+          astr_afmt (buf, " [%s]", re_find_err);
+          re_find_err = NULL;
+        }
 
       minibuf_write ("%s", astr_cstr (buf));
 
       c = getkey ();
 
       if (c == KBD_CANCEL)
-	{
-	  cur_bp->pt = start;
-	  thisflag |= FLAG_NEED_RESYNC;
+        {
+          cur_bp->pt = start;
+          thisflag |= FLAG_NEED_RESYNC;
 
-	  /* Quit. */
-	  FUNCALL (keyboard_quit);
+          /* Quit. */
+          FUNCALL (keyboard_quit);
 
-	  /* Restore old mark position. */
-	  if (cur_bp->mark)
-	    free_marker (cur_bp->mark);
+          /* Restore old mark position. */
+          if (cur_bp->mark)
+            free_marker (cur_bp->mark);
 
-	  if (old_mark)
-	    cur_bp->mark = copy_marker (old_mark);
-	  else
-	    cur_bp->mark = old_mark;
-	  break;
-	}
+          if (old_mark)
+            cur_bp->mark = copy_marker (old_mark);
+          else
+            cur_bp->mark = old_mark;
+          break;
+        }
       else if (c == KBD_BS)
-	{
-	  if (astr_len (pattern) > 0)
-	    {
-	      astr_truncate (pattern, -1);
-	      cur = cur_bp->pt = start;
-	      thisflag |= FLAG_NEED_RESYNC;
-	    }
-	  else
-	    ding ();
-	}
+        {
+          if (astr_len (pattern) > 0)
+            {
+              astr_truncate (pattern, -1);
+              cur = cur_bp->pt = start;
+              thisflag |= FLAG_NEED_RESYNC;
+            }
+          else
+            ding ();
+        }
       else if (c & KBD_CTRL && (c & 0xff) == 'q')
-	{
+        {
           minibuf_write ("%s^Q-", astr_cstr (buf));
           astr_cat_char (pattern, xgetkey (GETKEY_UNFILTERED, 0));
           minibuf_write ("%s", astr_cstr (buf));
-	}
+        }
       else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's'))
-	{
-	  /* Invert direction. */
-	  if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)
-	    dir = ISEARCH_BACKWARD;
-	  else if ((c & 0xff) == 's' && dir == ISEARCH_BACKWARD)
-	    dir = ISEARCH_FORWARD;
-	  if (astr_len (pattern) > 0)
-	    {
-	      /* Find next match. */
-	      cur = cur_bp->pt;
-	      /* Save search string. */
+        {
+          /* Invert direction. */
+          if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)
+            dir = ISEARCH_BACKWARD;
+          else if ((c & 0xff) == 's' && dir == ISEARCH_BACKWARD)
+            dir = ISEARCH_FORWARD;
+          if (astr_len (pattern) > 0)
+            {
+              /* Find next match. */
+              cur = cur_bp->pt;
+              /* Save search string. */
               free (last_search);
-	      last_search = xstrdup (astr_cstr (pattern));
-	    }
-	  else if (last_search != NULL)
-	    astr_cpy_cstr (pattern, last_search);
-	}
+              last_search = xstrdup (astr_cstr (pattern));
+            }
+          else if (last_search != NULL)
+            astr_cpy_cstr (pattern, last_search);
+        }
       else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB)
-	{
-	  if (c == KBD_RET && astr_len (pattern) == 0)
-	    {
-	      if (dir == ISEARCH_FORWARD)
-		{
-		  if (regexp)
-		    FUNCALL (search_forward_regexp);
-		  else
-		    FUNCALL (search_forward);
-		}
-	      else
-		{
-		  if (regexp)
-		    FUNCALL (search_backward_regexp);
-		  else
-		    FUNCALL (search_backward);
-		}
-	    }
-	  else
-	    {
-	      if (astr_len (pattern) > 0)
-		{
-		  /* Save mark. */
-		  set_mark ();
-		  cur_bp->mark->pt = start;
+        {
+          if (c == KBD_RET && astr_len (pattern) == 0)
+            {
+              if (dir == ISEARCH_FORWARD)
+                {
+                  if (regexp)
+                    FUNCALL (search_forward_regexp);
+                  else
+                    FUNCALL (search_forward);
+                }
+              else
+                {
+                  if (regexp)
+                    FUNCALL (search_backward_regexp);
+                  else
+                    FUNCALL (search_backward);
+                }
+            }
+          else
+            {
+              if (astr_len (pattern) > 0)
+                {
+                  /* Save mark. */
+                  set_mark ();
+                  cur_bp->mark->pt = start;
 
-		  /* Save search string. */
+                  /* Save search string. */
                   free (last_search);
-		  last_search = xstrdup (astr_cstr (pattern));
+                  last_search = xstrdup (astr_cstr (pattern));
 
-		  minibuf_write ("Mark saved when search started");
-		}
-	      else
-		minibuf_clear ();
-	      if (c != KBD_RET)
-		ungetkey (c);
-	    }
-	  break;
-	}
+                  minibuf_write ("Mark saved when search started");
+                }
+              else
+                minibuf_clear ();
+              if (c != KBD_RET)
+                ungetkey (c);
+            }
+          break;
+        }
       else
-	astr_cat_char (pattern, c);
+        astr_cat_char (pattern, c);
 
       if (astr_len (pattern) > 0)
-	{
-	  if (dir == ISEARCH_FORWARD)
-	    last = search_forward (cur.p, cur.o, astr_cstr (pattern), regexp);
-	  else
-	    last =
-	      search_backward (cur.p, cur.o, astr_cstr (pattern), regexp);
-	}
+        {
+          if (dir == ISEARCH_FORWARD)
+            last = search_forward (cur.p, cur.o, astr_cstr (pattern), regexp);
+          else
+            last =
+              search_backward (cur.p, cur.o, astr_cstr (pattern), regexp);
+        }
       else
-	last = true;
+        last = true;
 
       if (thisflag & FLAG_NEED_RESYNC)
-	resync_redisplay ();
+        resync_redisplay ();
     }
 
   /* done */
@@ -530,7 +530,7 @@ Type C-s to search again forward, C-r to search again backward.
 C-g when search is successful aborts and moves point to starting point.
 +*/
 {
-  return isearch (ISEARCH_FORWARD, (lastflag & FLAG_SET_UNIARG));
+  ok = isearch (ISEARCH_FORWARD, (lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
@@ -544,7 +544,7 @@ Type C-r to search again backward, C-s to search again forward.
 C-g when search is successful aborts and moves point to starting point.
 +*/
 {
-  return isearch (ISEARCH_BACKWARD, (lastflag & FLAG_SET_UNIARG));
+  ok = isearch (ISEARCH_BACKWARD, (lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
@@ -556,7 +556,7 @@ Like ordinary incremental search except that your input
 is treated as a regexp.  See M-x isearch-forward for more info.
 +*/
 {
-  return isearch (ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
+  ok = isearch (ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
@@ -568,7 +568,7 @@ Like ordinary incremental search except that your input
 is treated as a regexp.  See M-x isearch-forward for more info.
 +*/
 {
-  return isearch (ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
+  ok = isearch (ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
@@ -606,58 +606,58 @@ what to do with it.
   while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
     {
       if (!noask)
-	{
-	  int c;
-	  if (thisflag & FLAG_NEED_RESYNC)
-	    resync_redisplay ();
-	  for (;;)
-	    {
-	      minibuf_write
-		("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find,
-		 repl);
-	      c = getkey ();
-	      if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
-		  || c == 'n' || c == 'q' || c == '.' || c == '!')
-		goto exitloop;
-	      minibuf_error ("Please answer y, n, !, . or q.");
-	      waitkey (WAITKEY_DEFAULT);
-	    }
-	exitloop:
-	  minibuf_clear ();
+        {
+          int c;
+          if (thisflag & FLAG_NEED_RESYNC)
+            resync_redisplay ();
+          for (;;)
+            {
+              minibuf_write
+                ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find,
+                 repl);
+              c = getkey ();
+              if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
+                  || c == 'n' || c == 'q' || c == '.' || c == '!')
+                goto exitloop;
+              minibuf_error ("Please answer y, n, !, . or q.");
+              waitkey (WAITKEY_DEFAULT);
+            }
+        exitloop:
+          minibuf_clear ();
 
-	  switch (c)
-	    {
-	    case KBD_CANCEL:	/* C-g */
-	      return FUNCALL (keyboard_quit);
-	    case 'q':		/* Quit immediately. */
-	      goto endoffunc;
-	    case '.':		/* Replace and quit. */
-	      exitloop = true;
-	      goto replblock;
-	    case '!':		/* Replace all without asking. */
-	      noask = true;
-	      goto replblock;
-	    case ' ':		/* Replace. */
-	    case 'y':
-	      goto replblock;
-	      break;
-	    case 'n':		/* Do not replace. */
-	    case KBD_RET:
-	    case KBD_DEL:
-	      goto nextmatch;
-	    }
-	}
+          switch (c)
+            {
+            case KBD_CANCEL:	/* C-g */
+              return FUNCALL (keyboard_quit);
+            case 'q':		/* Quit immediately. */
+              goto endoffunc;
+            case '.':		/* Replace and quit. */
+              exitloop = true;
+              goto replblock;
+            case '!':		/* Replace all without asking. */
+              noask = true;
+              goto replblock;
+            case ' ':		/* Replace. */
+            case 'y':
+              goto replblock;
+              break;
+            case 'n':		/* Do not replace. */
+            case KBD_RET:
+            case KBD_DEL:
+              goto nextmatch;
+            }
+        }
 
     replblock:
       ++count;
       undo_save (UNDO_REPLACE_BLOCK,
-		 make_point (cur_bp->pt.n,
-			     cur_bp->pt.o - find_len), find_len, repl_len);
+                 make_point (cur_bp->pt.n,
+                             cur_bp->pt.o - find_len), find_len, repl_len);
       line_replace_text (&cur_bp->pt.p, cur_bp->pt.o - find_len,
-			 find_len, repl, repl_len, find_no_upper);
+                         find_len, repl, repl_len, find_no_upper);
     nextmatch:
       if (exitloop)
-	break;
+        break;
     }
 
 endoffunc:
@@ -669,7 +669,5 @@ endoffunc:
   term_redisplay ();
 
   minibuf_write ("Replaced %d occurrences", count);
-
-  return leT;
 }
 END_DEFUN

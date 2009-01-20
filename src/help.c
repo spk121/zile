@@ -1,6 +1,6 @@
 /* Self documentation facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004 Reuben Thomas.
 
@@ -40,8 +40,6 @@ Show the version of Zile that is running.
 +*/
 {
   minibuf_write (ZILE_VERSION_STRING " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
-
-  return leT;
 }
 END_DEFUN
 
@@ -66,7 +64,7 @@ DEFUN ("view-zile-FAQ", view_zile_FAQ)
 Show the Zile Frequently Asked Questions (FAQ).
 +*/
 {
-  return show_file (PATH_DATA "/FAQ");
+  ok = show_file (PATH_DATA "/FAQ");
 }
 END_DEFUN
 
@@ -105,7 +103,6 @@ Display the full documentation of a function.
   astr_delete (bufname);
 
   free ((char *) name);
-  return leT;
 }
 END_DEFUN
 
@@ -148,8 +145,6 @@ Display the full documentation of a variable.
                      name, defval, get_variable (name), doc);
   free ((char *) name);
   astr_delete (bufname);
-
-  return leT;
 }
 END_DEFUN
 
@@ -186,7 +181,5 @@ Display documentation of the command invoked by a key sequence.
   write_temp_buffer (astr_cstr (bufname), true,
                      write_function_description, name, doc);
   astr_delete (bufname);
-
-  return leT;
 }
 END_DEFUN
