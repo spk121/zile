@@ -1,0 +1,49 @@
+#! /bin/sh
+#
+# run-interactive-test
+# Run an interactive Zile test
+#
+# Copyright (c) 2009 Free Software Foundation, Inc.
+#
+# This file is part of GNU Zile.
+#
+# GNU Zile is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# GNU Zile is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Zile; see the file COPYING.  If not, write to the
+# Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+# MA 02111-1301, USA.
+
+# srcdir and builddir are defined in the environment
+
+err=0
+
+for test in $srcdir/tests/*.el; do
+  test=`echo $test | sed -e 's/\.el$//'`
+
+  edit_file=$builddir/$test.input
+  cp $srcdir/tests/zile_test.input $edit_file
+  chmod +w $edit_file
+
+  if ! $builddir/zile --no-init-file --load $test.el --load $srcdir/save_and_quit.el $edit_file; then
+    echo $test failed to run with error code $?
+    err=1
+  fi
+
+  if ! diff $srcdir/$test.output $edit_file; then
+    echo $test failed to produce correct output
+    err=1
+  fi
+
+  rm -f $edit_file $edit_file~
+done
+
+exit $err

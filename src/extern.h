@@ -41,7 +41,7 @@ int previous_line (void);
 /* bind.c ----------------------------------------------------------------- */
 extern Binding root_bindings;
 size_t do_binding_completion (astr as);
-const char *get_function_by_key_sequence (gl_list_t * keys);
+const char *get_function_by_key (size_t key);
 void process_key (Binding bindings, size_t key);
 Binding init_bindings (void);
 void init_default_bindings (void);
@@ -140,6 +140,7 @@ const char *next_history_element (History * hp);
 
 /* keycode.c -------------------------------------------------------------- */
 astr chordtostr (size_t key);
+size_t strtochord (const char *buf, size_t * len);
 gl_list_t keystrtovec (const char *key);
 astr keyvectostr (gl_list_t keys);
 
@@ -197,7 +198,7 @@ void free_minibuf (void);
 void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
-size_t minibuf_read_number (const char *fmt, ...);
+unsigned long minibuf_read_number (const char *fmt, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
 int minibuf_read_yesno (const char *fmt, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
@@ -271,14 +272,14 @@ void undo_set_unchanged (Undo *up);
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
 void free_variables (void);
-bool get_variable_bool (char *var);
 char *minibuf_read_variable_name (char *fmt, ...);
 void set_variable (const char *var, const char *val);
-const char *get_variable_doc (Buffer * bp, char *var, char **defval);
-const char *get_variable_bp (Buffer * bp, char *var);
-const char *get_variable (char *var);
-int get_variable_number_bp (Buffer * bp, char *var);
-int get_variable_number (char *var);
+const char *get_variable_doc (Buffer * bp, const char *var, char **defval);
+const char *get_variable_bp (Buffer * bp, const char *var);
+const char *get_variable (const char *var);
+long get_variable_number_bp (Buffer * bp, const char *var);
+long get_variable_number (const char *var);
+bool get_variable_bool (const char *var);
 
 /* window.c --------------------------------------------------------------- */
 void create_first_window (void);
@@ -293,7 +294,7 @@ Point window_pt (Window * wp);
 /*
  * Declare external Zile functions.
  */
-#define X(zile_name, c_name, doc)                \
-  le *F_ ## c_name (int uniarg, le * l);
+#define X(zile_name, c_name, interactive, doc)   \
+  le *F_ ## c_name (long uniarg, le * l);
 #include "tbl_funcs.h"
 #undef X

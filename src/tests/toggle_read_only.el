@@ -1,0 +1,6 @@
+(toggle-read-only)
+(insert-char "a")
+(insert-char "a")
+(insert-char "a")
+(toggle-read-only)
+(insert-char "a")

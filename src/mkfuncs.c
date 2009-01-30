@@ -1,6 +1,6 @@
 /* Produce tbl_funcs.h
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
 
@@ -26,10 +26,11 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 static void
-do_func (FILE *fp, const char *name)
+do_func (FILE *fp, const char *name, bool interactive)
 {
   char buf[BUFSIZ], cname[BUFSIZ], *p = cname;
   unsigned s = 0;
@@ -38,7 +39,8 @@ do_func (FILE *fp, const char *name)
   while ((p = strchr (p, '-')) != NULL)
     *p = '_';
 
-  printf ("X(\"%s\", %s, \"\\\n", name, cname);
+  printf ("X(\"%s\", %s, %s, \"\\\n", name, cname,
+          interactive ? "true" : "false");
 
   while (fgets (buf, BUFSIZ, fp) != NULL)
     {
@@ -95,7 +97,8 @@ main (int argc, char **argv)
                 exit (1);
               }
             *r = '\0';
-            do_func (fp, q + 1);
+            do_func (fp, q + 1,
+                     strncmp (buf, "DEFUN_HIDDEN", (size_t) 12) != 0);
           }
       }
 

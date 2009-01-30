@@ -1,1 +1,0 @@
-interactive_test insert_buffer "xinsert-buffer\rinsert_buffer.input\r"

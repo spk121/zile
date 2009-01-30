@@ -187,6 +187,21 @@ insert_char (int c)
   return true;
 }
 
+DEFUN_HIDDEN_ARGS ("insert-char", insert_char,
+                   STR_ARG (c))
+/*+
+Insert CHARACTER.
++*/
+{
+  STR_INIT (c);
+  if (strlen (c) > 0)
+    ok = bool_to_lisp (insert_char (*c));
+  else
+    ok = leNIL;
+  STR_FREE (c);
+}
+END_DEFUN
+
 /*
  * Insert a character at the current position in insert mode
  * whatever the current insert mode is.

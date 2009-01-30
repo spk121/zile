@@ -1,0 +1,5 @@
+(overwrite-mode)
+(insert-char "a")
+(insert-char "b")
+(insert-char "c")
+(insert-char "d")

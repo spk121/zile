@@ -216,52 +216,73 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-DEFUN ("goto-char", goto_char)
+DEFUN_ARGS ("goto-char", goto_char,
+            INT_ARG (n))
 /*+
 Read a number N and move the cursor to character number N.
 Position 1 is the beginning of the buffer.
 +*/
 {
-  int to_char, count;
+  INT_INIT (n)
+  else
+    do
+      {
+        char *ms = minibuf_read ("Goto char: ", "");
+        if (ms == NULL)
+          {
+            ok = FUNCALL (keyboard_quit);
+            break;
+          }
+        n = strtoul (ms, NULL, 10);
+        if (n == LONG_MAX)
+          ding ();
+        free (ms);
+      }
+    while (n == LONG_MAX);
 
-  do
+  if (ok == leT && n != LONG_MAX)
     {
-      char *ms = minibuf_read ("Goto char: ", "");
-      if (ms == NULL)
-        return FUNCALL (keyboard_quit);
-      to_char = atoi (ms);
-      free (ms);
-      if (to_char < 0)
-        ding ();
-    }
-  while (to_char < 0);
+      long count;
 
-  gotobob ();
-  for (count = 1; count < to_char; ++count)
-    if (!forward_char ())
-      break;
+      gotobob ();
+      for (count = 1; count < n; count++)
+        if (!forward_char ())
+          break;
+    }
+
+  INT_FREE (n);
 }
 END_DEFUN
 
-DEFUN ("goto-line", goto_line)
+DEFUN_ARGS ("goto-line", goto_line,
+            INT_ARG (n))
 /*+
-Move cursor to the beginning of the specified line.
-Line 1 is the beginning of the buffer.
+Goto line arg, counting from line 1 at beginning of buffer.
 +*/
 {
-  size_t to_line = minibuf_read_number ("Goto line: ");
+  INT_INIT (n)
+  else
+    {
+      n = minibuf_read_number ("Goto line: ");
+      if (n == LONG_MAX - 1)
+        minibuf_error ("End of file during parsing");
+    }
 
-  if (to_line == SIZE_MAX)
-    return leNIL;
-  else if (to_line == SIZE_MAX - 1)
-    minibuf_error ("End of file during parsing");
+  if (n >= LONG_MAX - 1)
+    ok = leNIL;
+  else
+    {
+      if (n <= 0)
+        n = 1;
+      n--; /* Re-base to counting from zero */
+      if (cur_bp->pt.n > (size_t) n)
+        ngotoup (cur_bp->pt.n - (size_t) n);
+      else if (cur_bp->pt.n < (size_t) n)
+        ngotodown ((size_t) n - cur_bp->pt.n);
+      cur_bp->pt.o = 0;
+    }
 
-  --to_line; /* Re-base to counting from zero */
-  if (cur_bp->pt.n > to_line)
-    ngotoup (cur_bp->pt.n - to_line);
-  else if (cur_bp->pt.n < to_line)
-    ngotodown (to_line -cur_bp->pt.n);
-  cur_bp->pt.o = 0;
+  INT_FREE (n);
 }
 END_DEFUN
 

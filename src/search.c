@@ -286,65 +286,78 @@ static char *last_search = NULL;
 typedef int (*Searcher) (Line * startp, size_t starto, const char *s, int regexp);
 
 static le *
-search (Searcher searcher, bool regexp, const char *search_msg)
+search (Searcher searcher, bool regexp, const char *pattern, const char *search_msg)
 {
-  char *ms = minibuf_read (search_msg, last_search);
+  if (pattern == NULL)
+    pattern = minibuf_read (search_msg, last_search);
 
-  if (ms == NULL)
+  if (pattern == NULL)
     return FUNCALL (keyboard_quit);
-  if (ms[0] == '\0')
+  if (pattern[0] == '\0')
     {
-      free (ms);
+      free ((char *) pattern);
       return leNIL;
     }
 
   free (last_search);
-  last_search = xstrdup (ms);
+  last_search = xstrdup (pattern);
 
-  if (!searcher (cur_bp->pt.p, cur_bp->pt.o, ms, regexp))
+  if (!searcher (cur_bp->pt.p, cur_bp->pt.o, pattern, regexp))
     {
-      minibuf_error ("Search failed: \"%s\"", ms);
-      free (ms);
+      minibuf_error ("Search failed: \"%s\"", pattern);
+      free ((char *) pattern);
       return leNIL;
     }
 
-  free (ms);
+  free ((char *) pattern);
   return leT;
 }
 
-DEFUN ("search-forward", search_forward)
+DEFUN_ARGS ("search-forward", search_forward,
+            STR_ARG (pattern))
 /*+
 Search forward from point for the user specified text.
 +*/
 {
-  ok = search (search_forward, false, "Search: ");
+  STR_INIT (pattern);
+  ok = search (search_forward, false, pattern, "Search: ");
+  STR_FREE (pattern);
 }
 END_DEFUN
 
-DEFUN ("search-backward", search_backward)
+DEFUN_ARGS ("search-backward", search_backward,
+            STR_ARG (pattern))
 /*+
 Search backward from point for the user specified text.
 +*/
 {
-  ok = search (search_backward, false, "Search backward: ");
+  STR_INIT (pattern);
+  ok = search (search_backward, false, pattern, "Search backward: ");
+  STR_FREE (pattern);
 }
 END_DEFUN
 
-DEFUN ("search-forward-regexp", search_forward_regexp)
+DEFUN_ARGS ("search-forward-regexp", search_forward_regexp,
+            STR_ARG (pattern))
 /*+
 Search forward from point for regular expression REGEXP.
 +*/
 {
-  ok = search (search_forward, true, "RE search: ");
+  STR_INIT (pattern);
+  ok = search (search_forward, true, pattern, "RE search: ");
+  STR_FREE (pattern);
 }
 END_DEFUN
 
-DEFUN ("search-backward-regexp", search_backward_regexp)
+DEFUN_ARGS ("search-backward-regexp", search_backward_regexp,
+            STR_ARG (pattern))
 /*+
 Search backward from point for match for regular expression REGEXP.
 +*/
 {
-  ok = search (search_backward, true, "RE search backward: ");
+  STR_INIT (pattern);
+  ok = search (search_backward, true, pattern, "RE search backward: ");
+  STR_FREE (pattern);
 }
 END_DEFUN
 
@@ -530,7 +543,7 @@ Type C-s to search again forward, C-r to search again backward.
 C-g when search is successful aborts and moves point to starting point.
 +*/
 {
-  ok = isearch (ISEARCH_FORWARD, (lastflag & FLAG_SET_UNIARG));
+  ok = isearch (ISEARCH_FORWARD, lastflag & FLAG_SET_UNIARG);
 }
 END_DEFUN
 
@@ -544,7 +557,7 @@ Type C-r to search again backward, C-s to search again forward.
 C-g when search is successful aborts and moves point to starting point.
 +*/
 {
-  ok = isearch (ISEARCH_BACKWARD, (lastflag & FLAG_SET_UNIARG));
+  ok = isearch (ISEARCH_BACKWARD, lastflag & FLAG_SET_UNIARG);
 }
 END_DEFUN
 

@@ -1,0 +1,5 @@
+(isearch-forward)
+(insert-char "a")
+(insert-char "m")
+(newline)
+(insert-char "f")

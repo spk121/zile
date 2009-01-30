@@ -77,32 +77,39 @@ write_function_description (va_list ap)
   bprintf ("Function: %s\n\n" "Documentation:\n%s", name, doc);
 }
 
-DEFUN ("describe-function", describe_function)
+DEFUN_ARGS ("describe-function", describe_function,
+            STR_ARG (func))
 /*+
 Display the full documentation of a function.
 +*/
 {
-  const char *name, *doc;
+  const char *doc;
   astr bufname;
 
-  name = minibuf_read_function_name ("Describe function: ");
-  if (name == NULL)
-    return leNIL;
-
-  doc = get_function_doc (name);
-  if (doc == NULL)
+  STR_INIT (func)
+  else
     {
-      free ((char *) name);
-      return leNIL;
+      func = minibuf_read_function_name ("Describe function: ");
+      if (func == NULL)
+        ok = leNIL;
     }
 
-  bufname = astr_new ();
-  astr_afmt (bufname, "*Help: function `%s'*", name);
-  write_temp_buffer (astr_cstr (bufname), true,
-                     write_function_description, name, doc);
-  astr_delete (bufname);
+  if (ok == leT)
+    {
+      doc = get_function_doc (func);
+      if (doc == NULL)
+        ok = leNIL;
+      else
+        {
+          bufname = astr_new ();
+          astr_afmt (bufname, "*Help: function `%s'*", func);
+          write_temp_buffer (astr_cstr (bufname), true,
+                             write_function_description, func, doc);
+          astr_delete (bufname);
+        }
+    }
 
-  free ((char *) name);
+  STR_FREE (func);
 }
 END_DEFUN
 
@@ -118,68 +125,97 @@ write_variable_description (va_list ap)
            name, curval, doc);
 }
 
-DEFUN ("describe-variable", describe_variable)
+DEFUN_ARGS ("describe-variable", describe_variable,
+            STR_ARG (name))
 /*+
 Display the full documentation of a variable.
 +*/
 {
-  char *name, *defval;
-  const char *doc;
-  astr bufname;
+  STR_INIT (name)
+  else
+    name = minibuf_read_variable_name ("Describe variable: ");
 
-  name = minibuf_read_variable_name ("Describe variable: ");
   if (name == NULL)
-    return leNIL;
-
-  doc = get_variable_doc (cur_bp, name, &defval);
-  if (doc == NULL)
+    ok = leNIL;
+  else
     {
-      free (name);
-      return leNIL;
+      char *defval;
+      const char *doc = get_variable_doc (cur_bp, name, &defval);
+      if (doc == NULL)
+        ok = leNIL;
+      else
+        {
+          astr bufname = astr_new ();
+
+          astr_afmt (bufname, "*Help: variable `%s'*", name);
+          write_temp_buffer (astr_cstr (bufname), true,
+                             write_variable_description,
+                             name, defval, get_variable (name), doc);
+          astr_delete (bufname);
+        }
     }
 
-  bufname = astr_new ();
-  astr_afmt (bufname, "*Help: variable `%s'*", name);
-  write_temp_buffer (astr_cstr (bufname), true,
-                     write_variable_description,
-                     name, defval, get_variable (name), doc);
-  free ((char *) name);
-  astr_delete (bufname);
+  STR_FREE (name);
 }
 END_DEFUN
 
-DEFUN ("describe-key", describe_key)
+DEFUN_ARGS ("describe-key", describe_key,
+            STR_ARG (keystr))
 /*+
 Display documentation of the command invoked by a key sequence.
 +*/
 {
-  const char *name, *doc;
-  astr bufname, binding;
-  gl_list_t keys;
+  const char *name = NULL, *doc;
+  astr binding = NULL;
+  size_t key;
 
-  minibuf_write ("Describe key:");
-  name = get_function_by_key_sequence (&keys);
-  binding = keyvectostr (keys);
-  gl_list_free (keys);
-
-  if (name == NULL)
+  STR_INIT (keystr);
+  if (keystr != NULL)
     {
-      minibuf_error ("%s is undefined", astr_cstr (binding));
-      astr_delete (binding);
-      return leNIL;
+      size_t len;
+
+      key = strtochord (keystr, &len);
+      if (len == strlen (keystr))
+        {
+          name = get_function_by_key (key);
+          binding = chordtostr (key);
+        }
+      else
+        ok = leNIL;
+    }
+  else
+    {
+      minibuf_write ("Describe key:");
+      key = getkey ();
+      name = get_function_by_key (key);
+      binding = chordtostr (key);
+      if (name == NULL)
+        {
+          minibuf_error ("%s is undefined", astr_cstr (binding));
+          ok = leNIL;
+        }
     }
 
-  minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
-  astr_delete (binding);
+  if (ok == leT)
+    {
+      minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
 
-  doc = get_function_doc (name);
-  if (doc == NULL)
-    return leNIL;
+      doc = get_function_doc (name);
+      if (doc == NULL)
+        ok = leNIL;
+      else
+        {
+          astr bufname = astr_new ();
+          astr_afmt (bufname, "*Help: function `%s'*", name);
+          write_temp_buffer (astr_cstr (bufname), true,
+                             write_function_description, name, doc);
+          astr_delete (bufname);
+        }
+    }
 
-  bufname = astr_new ();
-  astr_afmt (bufname, "*Help: function `%s'*", name);
-  write_temp_buffer (astr_cstr (bufname), true,
-                     write_function_description, name, doc);
-  astr_delete (bufname);
+  if (binding)
+    astr_delete (binding);
+
+  STR_FREE (keystr);
 }
 END_DEFUN

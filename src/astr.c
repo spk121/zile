@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005 Reuben Thomas.
 
@@ -185,7 +185,7 @@ astr_substr (astr as, ptrdiff_t pos, size_t size)
 }
 
 int
-astr_cmp(astr as1, astr as2)
+astr_cmp (astr as1, astr as2)
 {
   return strcmp (as1->text, as2->text);
 }

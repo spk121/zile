@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
 
@@ -40,7 +40,7 @@
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 2008 Free Software Foundation, Inc."
+  "Copyright (C) 2008, 2009 Free Software Foundation, Inc."
 
 /* The executable name */
 char *prog_name = PACKAGE;
@@ -259,32 +259,30 @@ main (int argc, char **argv)
           qflag = true;
           break;
         case 'v':
-          fprintf (stdout,
-                   ZILE_VERSION_STRING "\n"
-                   ZILE_COPYRIGHT_STRING "\n"
-                   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-                   "You may redistribute copies of " PACKAGE_NAME "\n"
-                   "under the terms of the GNU General Public License.\n"
-                   "For more information about these matters, see the file named COPYING.\n");
+          printf (ZILE_VERSION_STRING "\n"
+                  ZILE_COPYRIGHT_STRING "\n"
+                  "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+                  "You may redistribute copies of " PACKAGE_NAME "\n"
+                  "under the terms of the GNU General Public License.\n"
+                  "For more information about these matters, see the file named COPYING.\n");
           return 0;
         case 'h':
-          fprintf (stdout,
-                   "Usage: %s [OPTION-OR-FILENAME]...\n"
-                   "\n"
-                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
-                   "\n"
-                   "Initialization options:\n"
-                   "\n"
-                   "--no-init-file, -q      do not load ~/." PACKAGE "\n"
-                   "--load, -l FILE         load Emacs Lisp FILE using the load function\n"
-                   "--help                  display this help message and exit\n"
-                   "--version               display version information and exit\n"
-                   "\n" "Action options:\n" "\n"
-                   "FILE                    visit FILE using find-file\n"
-                   "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
-                   "\n"
-                   "Report bugs to " PACKAGE_BUGREPORT ".\n",
-                   prog_name);
+          printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
+                  "\n"
+                  "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
+                  "\n"
+                  "Initialization options:\n"
+                  "\n"
+                  "--no-init-file, -q      do not load ~/." PACKAGE "\n"
+                  "--load, -l FILE         load Emacs Lisp FILE using the load function\n"
+                  "--help                  display this help message and exit\n"
+                  "--version               display version information and exit\n"
+                  "\n" "Action options:\n" "\n"
+                  "FILE                    visit FILE using find-file\n"
+                  "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
+                  "\n"
+                  "Report bugs to " PACKAGE_BUGREPORT ".\n",
+                  prog_name);
           return 0;
         case 'l':
           gl_list_add_last (l_args, (void *) optarg);

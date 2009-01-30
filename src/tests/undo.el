@@ -1,0 +1,7 @@
+(delete-char)
+(delete-char)
+(delete-char)
+(delete-char)
+(undo)
+(undo)
+(undo)

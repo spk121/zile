@@ -1,6 +1,6 @@
 /* Miscellaneous Emacs functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007 Reuben Thomas.
    Copyright (c) 2004 David A. Capello.
@@ -265,33 +265,46 @@ Use C-u followed by a number to specify a column.
 Just C-u as argument means to use the current column.
 +*/
 {
-  size_t fill_col = (lastflag & FLAG_UNIARG_EMPTY) ? cur_bp->pt.o : (size_t) uniarg;
+  long fill_col = (lastflag & FLAG_UNIARG_EMPTY) ?
+    cur_bp->pt.o : (unsigned long) uniarg;
   char *buf;
-  le *branch;
 
   if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)
     {
       fill_col = minibuf_read_number ("Set fill-column to (default %d): ", cur_bp->pt.o);
-      if (fill_col == SIZE_MAX)
+      if (fill_col == LONG_MAX)
         return leNIL;
-      else if (fill_col == SIZE_MAX - 1)
+      else if (fill_col == LONG_MAX - 1)
         fill_col = cur_bp->pt.o;
     }
 
-  if (arglist != NULL)
-    buf = arglist->next->data;
+  if (arglist)
+    {
+      if (arglist->next)
+        buf = arglist->next->data;
+      else
+        {
+          minibuf_error ("set-fill-column requires an explicit argument");
+          ok = leNIL;
+        }
+    }
   else
     {
-      xasprintf (&buf, "%d", fill_col);
+      xasprintf (&buf, "%ld", fill_col);
       /* Only print message when run interactively. */
       minibuf_write ("Fill column set to %s (was %d)", buf,
                      get_variable_number ("fill-column"));
     }
-  branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
-  F_set_variable (0, branch);
+
+  if (ok == leT)
+    {
+      le *branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
+      F_set_variable (0, branch);
+      leWipe (branch);
+    }
+
   if (arglist == NULL)
     free (buf);
-  leWipe (branch);
 }
 END_DEFUN
 
@@ -1105,14 +1118,22 @@ move to with the same argument.
 }
 END_DEFUN
 
-DEFUN ("forward-line", forward_line)
+DEFUN_ARGS ("forward-line", forward_line,
+            INT_ARG (n))
 /*+
 Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
-  FUNCALL (beginning_of_line);
-  ok = execute_with_uniarg (false, uniarg, next_line, previous_line);
+  INT_INIT (n)
+  else
+    n = uniarg;
+  if (ok == leT)
+    {
+      FUNCALL (beginning_of_line);
+      ok = execute_with_uniarg (false, n, next_line, previous_line);
+    }
+  INT_FREE (n);
 }
 END_DEFUN
 
@@ -1395,7 +1416,7 @@ write_shell_output (va_list ap)
 }
 
 static bool
-pipe_command (const char *cmd, const char *tempfile, bool replace)
+pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
 {
   astr out = astr_new (), s;
   size_t lines = 0;
@@ -1427,7 +1448,7 @@ pipe_command (const char *cmd, const char *tempfile, bool replace)
     minibuf_write ("(Shell command succeeded with no output)");
   else
     {
-      if (lastflag & FLAG_SET_UNIARG)
+      if (insert)
         {
           if (replace)
             {
@@ -1470,9 +1491,11 @@ minibuf_read_shell_command (void)
   return ms;
 }
 
-DEFUN ("shell-command", shell_command)
+DEFUN_ARGS ("shell-command", shell_command,
+            STR_ARG (cmd)
+            BOOL_ARG (insert))
 /*+
-Execute string command in inferior shell; display output, if any.
+Execute string COMMAND in inferior shell; display output, if any.
 With prefix argument, insert the command's output at point.
 
 Command is executed synchronously.  The output appears in the buffer
@@ -1480,19 +1503,29 @@ Command is executed synchronously.  The output appears in the buffer
 in the echo area, it is shown there, but it is nonetheless available
 in buffer `*Shell Command Output*' even though that buffer is not
 automatically displayed.
+
+The optional second argument OUTPUT-BUFFER, if non-nil,
+says to insert the output in the current buffer.
 +*/
 {
-  char *cmd = minibuf_read_shell_command ();
+  STR_INIT (cmd)
+  else
+    cmd = minibuf_read_shell_command ();
+  BOOL_INIT (insert)
+  else
+    insert = lastflag & FLAG_SET_UNIARG;
 
-  if (cmd == NULL)
-    return leNIL;
+  if (cmd != NULL)
+    ok = bool_to_lisp (pipe_command (cmd, "/dev/null", insert, false));
 
-  ok = bool_to_lisp (pipe_command (cmd, "/dev/null", false));
-  free (cmd);
+  STR_FREE (cmd);
+  BOOL_FREE (insert);
 }
 END_DEFUN
 
-DEFUN ("shell-command-on-region", shell_command_on_region)
+DEFUN_ARGS ("shell-command-on-region", shell_command_on_region,
+            STR_ARG (cmd)
+            BOOL_ARG (insert))
 /*+
 Execute string command in inferior shell with region as input.
 Normally display output (if any) in temp buffer `*Shell Command Output*';
@@ -1505,43 +1538,56 @@ there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
 The output is available in that buffer in both cases.
 +*/
 {
-  int fd;
-  ssize_t written;
-  char tempfile[] = P_tmpdir "/zileXXXXXX";
-  Region r;
-  char *cmd = minibuf_read_shell_command (), *p;
+  STR_INIT (cmd)
+  else
+    cmd = minibuf_read_shell_command ();
+  BOOL_INIT (insert)
+  else
+    insert = lastflag & FLAG_SET_UNIARG;
 
-  if (cmd == NULL)
-    return leNIL;
-
-  if (!calculate_the_region (&r))
-    return leNIL;
-
-  fd = mkstemp (tempfile);
-  if (fd == -1)
+  if (cmd != NULL)
     {
-      minibuf_error ("Cannot open temporary file");
-      return leNIL;
-    }
+      Region r;
 
-  p = copy_text_block (r.start.n, r.start.o, r.size);
-  written = write (fd, p, r.size);
-  free (p);
-  close (fd);
-
-  if (written != (ssize_t) r.size)
-    {
-      if (written == -1)
-        minibuf_error ("Error writing to temporary file: %s",
-                       strerror (errno));
+      if (!calculate_the_region (&r))
+        ok = leNIL;
       else
-        minibuf_error ("Error writing to temporary file");
-      return leNIL;
+        {
+          char tempfile[] = P_tmpdir "/zileXXXXXX";
+          int fd = mkstemp (tempfile);
+
+          if (fd == -1)
+            {
+              minibuf_error ("Cannot open temporary file");
+              ok = leNIL;
+            }
+          else
+            {
+              char *p = copy_text_block (r.start.n, r.start.o, r.size);
+              ssize_t written = write (fd, p, r.size);
+
+              free (p);
+              close (fd);
+
+              if (written != (ssize_t) r.size)
+                {
+                  if (written == -1)
+                    minibuf_error ("Error writing to temporary file: %s",
+                                   strerror (errno));
+                  else
+                    minibuf_error ("Error writing to temporary file");
+                  ok = leNIL;
+                }
+            }
+
+          if (ok == leT)
+            ok = bool_to_lisp (pipe_command (cmd, tempfile, insert, true));
+
+          remove (tempfile);
+        }
     }
 
-  ok = bool_to_lisp (pipe_command (cmd, tempfile, true));
-  free (cmd);
-  remove (tempfile);
+  STR_FREE (cmd);
 }
 END_DEFUN
 

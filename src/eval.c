@@ -46,8 +46,8 @@ struct fentry
 typedef struct fentry fentry;
 
 static fentry fentry_table[] = {
-#define X(zile_name, c_name, doc)               \
-  {zile_name, F_ ## c_name, true, doc},
+#define X(zile_name, c_name, interactive, doc)   \
+  {zile_name, F_ ## c_name, interactive, doc},
 #include "tbl_funcs.h"
 #undef X
 };
@@ -124,7 +124,7 @@ evaluateBranch (le * trybranch)
   func = get_fentry (keyword->data);
   leWipe (keyword);
   if (func)
-    return func->func (0, trybranch);
+    return func->func (1, trybranch);
 
   return NULL;
 }
@@ -153,7 +153,7 @@ evaluateNode (le * node)
   return value;
 }
 
-DEFUN ("setq", setq)
+DEFUN_HIDDEN ("setq", setq)
 /*+
 (setq [sym val]...)
 
@@ -291,7 +291,6 @@ void
 init_eval (void)
 {
   functions_history = history_new ();
-  get_fentry ("setq")->interactive = false;
 }
 
 void

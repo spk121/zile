@@ -41,31 +41,46 @@ register_free (size_t n)
     astr_delete (regs[n]);
 }
 
-DEFUN ("copy-to-register", copy_to_register)
+DEFUN_ARGS ("copy-to-register", copy_to_register,
+            STR_ARG (regchar))
 /*+
 Copy region into the user specified register.
 +*/
 {
-  Region r;
-  char *p;
-  int reg;
+  int reg = 0;
 
-  minibuf_write ("Copy to register: ");
-  term_refresh ();
-  reg = getkey ();
+  STR_INIT (regchar)
+  else
+    {
+      minibuf_write ("Copy to register: ");
+      term_refresh ();
+      reg = getkey ();
+    }
+  if (regchar != NULL)
+    reg = *regchar;
+
   if (reg == KBD_CANCEL)
-    return FUNCALL (keyboard_quit);
-  minibuf_clear ();
-  if (reg < 0)
-    reg = 0;
-  reg %= NUM_REGISTERS;
+    ok = FUNCALL (keyboard_quit);
+  else
+    {
+      Region r;
 
-  if (!calculate_the_region (&r))
-    return leNIL;
+      minibuf_clear ();
+      if (reg < 0)
+        reg = 0;
+      reg %= NUM_REGISTERS;
 
-  p = copy_text_block (r.start.n, r.start.o, r.size);
-  register_free ((size_t) reg);
-  regs[reg] = astr_new_cstr (p);
+      if (!calculate_the_region (&r))
+        ok = leNIL;
+      else
+        {
+          char *p = copy_text_block (r.start.n, r.start.o, r.size);
+          register_free ((size_t) reg);
+          regs[reg] = astr_new_cstr (p);
+        }
+    }
+
+  STR_FREE (regchar);
 }
 END_DEFUN
 
@@ -81,7 +96,8 @@ insert_register (void)
   return true;
 }
 
-DEFUN ("insert-register", insert_register)
+DEFUN_ARGS ("insert-register", insert_register,
+            STR_ARG (regchar))
 /*+
 Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
@@ -90,24 +106,38 @@ Puts point before and mark after the inserted text.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  minibuf_write ("Insert register: ");
-  term_refresh ();
-  reg = getkey ();
-  if (reg == KBD_CANCEL)
-    return FUNCALL (keyboard_quit);
-  minibuf_clear ();
-  reg %= NUM_REGISTERS;
-
-  if (regs[reg] == NULL)
+  STR_INIT (regchar)
+  else
     {
-      minibuf_error ("Register does not contain text");
-      return leNIL;
+      minibuf_write ("Insert register: ");
+      term_refresh ();
+      reg = getkey ();
+    }
+  if (regchar != NULL)
+    reg = *regchar;
+
+  if (reg == KBD_CANCEL)
+    ok = FUNCALL (keyboard_quit);
+  else
+    {
+      minibuf_clear ();
+      reg %= NUM_REGISTERS;
+
+      if (regs[reg] == NULL)
+        {
+          minibuf_error ("Register does not contain text");
+          ok = leNIL;
+        }
+      else
+        {
+          set_mark_interactive ();
+          execute_with_uniarg (true, uniarg, insert_register, NULL);
+          FUNCALL (exchange_point_and_mark);
+          deactivate_mark ();
+        }
     }
 
-  set_mark_interactive ();
-  execute_with_uniarg (true, uniarg, insert_register, NULL);
-  FUNCALL (exchange_point_and_mark);
-  deactivate_mark ();
+  STR_FREE (regchar);
 }
 END_DEFUN
 

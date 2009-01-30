@@ -515,20 +515,16 @@ message in the buffer.
 END_DEFUN
 
 const char *
-get_function_by_key_sequence (gl_list_t * keys)
+get_function_by_key (size_t key)
 {
   Function f;
-  size_t c = getkey ();
+  gl_list_t keys;
 
-  if (c & KBD_META && isdigit ((int) (c & 0xff)))
-    {
-      *keys = gl_list_create_empty (GL_ARRAY_LIST,
-                                    NULL, NULL, NULL, true);
-      gl_list_add_last (*keys, (void *) c);
-      return "universal-argument";
-    }
+  if (key & KBD_META && isdigit ((int) (key & 0xff)))
+    return "universal-argument";
 
-  f = completion_scan (root_bindings, c, keys);
+  f = completion_scan (root_bindings, key, &keys);
+  gl_list_free (keys);
   return f ? get_function_name (f) : NULL;
 }
 

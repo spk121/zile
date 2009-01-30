@@ -245,7 +245,7 @@ strtokey (const char *buf, size_t * len)
 /*
  * Convert a key chord string to its key code.
  */
-static size_t
+size_t
 strtochord (const char *buf, size_t * len)
 {
   size_t key, l;

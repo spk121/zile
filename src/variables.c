@@ -141,7 +141,7 @@ free_variables (void)
 }
 
 static var_entry *
-get_variable_entry (Buffer * bp, char *var)
+get_variable_entry (Buffer * bp, const char *var)
 {
   var_entry *p = NULL, *key = XZALLOC (var_entry);
 
@@ -159,7 +159,7 @@ get_variable_entry (Buffer * bp, char *var)
 }
 
 const char *
-get_variable_doc (Buffer * bp, char *var, char **defval)
+get_variable_doc (Buffer * bp, const char *var, char **defval)
 {
   var_entry *p = get_variable_entry (bp, var);
   if (p != NULL)
@@ -171,38 +171,39 @@ get_variable_doc (Buffer * bp, char *var, char **defval)
 }
 
 const char *
-get_variable_bp (Buffer * bp, char *var)
+get_variable_bp (Buffer * bp, const char *var)
 {
   var_entry *p = get_variable_entry (bp, var);
   return p ? p->val : NULL;
 }
 
 const char *
-get_variable (char *var)
+get_variable (const char *var)
 {
   return get_variable_bp (cur_bp, var);
 }
 
-int
-get_variable_number_bp (Buffer * bp, char *var)
+long
+get_variable_number_bp (Buffer * bp, const char *var)
 {
-  int t = 0;
+  long t = 0;
   const char *s = get_variable_bp (bp, var);
 
   if (s)
-    t = atoi (s);
+    t = strtol (s, NULL, 10);
+  /* FIXME: Check result */
 
   return t;
 }
 
-int
-get_variable_number (char *var)
+long
+get_variable_number (const char *var)
 {
   return get_variable_number_bp (cur_bp, var);
 }
 
 bool
-get_variable_bool (char *var)
+get_variable_bool (const char *var)
 {
   const char *p = get_variable (var);
   if (p != NULL)
@@ -253,10 +254,7 @@ Set a variable value to the user-specified value.
   else
     val = minibuf_read ("Set %s to value: ", "", var);
   if (val == NULL)
-    {
-      free ((char *) var);
-      ok = FUNCALL (keyboard_quit);
-    }
+    ok = FUNCALL (keyboard_quit);
 
   if (ok == leT)
     set_variable (var, val);

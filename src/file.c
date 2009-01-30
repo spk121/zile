@@ -526,38 +526,42 @@ If the current buffer now contains an empty file that you just visited
 }
 END_DEFUN
 
-DEFUN ("switch-to-buffer", switch_to_buffer)
+DEFUN_ARGS ("switch-to-buffer", switch_to_buffer,
+            STR_ARG (buffer))
 /*+
 Select to the user specified buffer in the current window.
 +*/
 {
-  char *ms;
-  Buffer *swbuf;
-  Completion *cp;
+  Buffer *bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
 
-  swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
-
-  cp = make_buffer_completion ();
-  ms = minibuf_read_completion ("Switch to buffer (default %s): ",
-                                "", cp, NULL, swbuf->name);
-  free_completion (cp);
-  if (ms == NULL)
-    ok = FUNCALL (keyboard_quit);
+  STR_INIT (buffer)
   else
     {
-      if (ms[0] != '\0')
+      Completion *cp = make_buffer_completion ();
+      buffer = minibuf_read_completion ("Switch to buffer (default %s): ",
+                                        "", cp, NULL, bp->name);
+      free_completion (cp);
+
+      if (buffer == NULL)
+        ok = FUNCALL (keyboard_quit);
+    }
+
+  if (ok == leT)
+    {
+      if (buffer && buffer[0] != '\0')
         {
-          swbuf = find_buffer (ms, false);
-          if (swbuf == NULL)
+          bp = find_buffer (buffer, false);
+          if (bp == NULL)
             {
-              swbuf = find_buffer (ms, true);
-              swbuf->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+              bp = find_buffer (buffer, true);
+              bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
             }
         }
 
-      switch_to_buffer (swbuf);
-      free ((char *) ms);
+      switch_to_buffer (bp);
     }
+
+  STR_FREE (buffer);
 }
 END_DEFUN
 
@@ -639,46 +643,48 @@ kill_buffer (Buffer * kill_bp)
     }
 }
 
-DEFUN ("kill-buffer", kill_buffer)
+DEFUN_ARGS ("kill-buffer", kill_buffer,
+            STR_ARG (buffer))
 /*+
-Kill the current buffer or the user specified one.
+Kill buffer BUFFER.
+With a nil argument, kill the current buffer.
 +*/
 {
   Buffer *bp;
-  char *ms;
-  Completion *cp;
 
-  cp = make_buffer_completion ();
-  ms = minibuf_read_completion ("Kill buffer (default %s): ",
-                                "", cp, NULL, cur_bp->name);
-  if (ms == NULL)
-    ok = FUNCALL (keyboard_quit);
+  STR_INIT (buffer)
   else
     {
+      Completion *cp = make_buffer_completion ();
+      buffer = minibuf_read_completion ("Kill buffer (default %s): ",
+                                        "", cp, NULL, cur_bp->name);
       free_completion (cp);
-      if (ms[0] != '\0')
-        {
-          bp = find_buffer (ms, false);
-          if (bp == NULL)
-            {
-              minibuf_error ("Buffer `%s' not found", ms);
-              free ((char *) ms);
-              ok = leNIL;
-            }
-        }
-      else
-        bp = cur_bp;
-
-      if (ok)
-        {
-          if (!check_modified_buffer (bp))
-            ok = leNIL;
-          else
-            kill_buffer (bp);
-        }
-
-      free ((char *) ms);
+      if (buffer == NULL)
+        ok = FUNCALL (keyboard_quit);
     }
+
+  if (buffer && buffer[0] != '\0')
+    {
+      bp = find_buffer (buffer, false);
+      if (bp == NULL)
+        {
+          minibuf_error ("Buffer `%s' not found", buffer);
+          free ((char *) buffer);
+          ok = leNIL;
+        }
+    }
+  else
+    bp = cur_bp;
+
+  if (ok == leT)
+    {
+      if (!check_modified_buffer (bp))
+        ok = leNIL;
+      else
+        kill_buffer (bp);
+    }
+
+  STR_FREE (buffer);
 }
 END_DEFUN
 
@@ -712,48 +718,56 @@ insert_buffer (Buffer * bp)
   undo_nosave = false;
 }
 
-DEFUN ("insert-buffer", insert_buffer)
+DEFUN_ARGS ("insert-buffer", insert_buffer,
+            STR_ARG (buffer))
 /*+
-Insert after point the contents of the user specified buffer.
+Insert after point the contents of BUFFER.
 Puts mark after the inserted text.
 +*/
 {
-  Buffer *bp, *swbuf;
-  char *ms;
+  Buffer *def_bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
   Completion *cp;
 
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  swbuf = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
-  cp = make_buffer_completion ();
-  ms = minibuf_read_completion ("Insert buffer (default %s): ",
-                                "", cp, NULL, swbuf->name);
-  if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-  free_completion (cp);
-  if (ms[0] != '\0')
-    {
-      bp = find_buffer (ms, false);
-      if (bp == NULL)
-        {
-          minibuf_error ("Buffer `%s' not found", ms);
-          free ((char *) ms);
-          return leNIL;
-        }
-    }
+  STR_INIT (buffer)
   else
-    bp = swbuf;
+    {
+      cp = make_buffer_completion ();
+      buffer = minibuf_read_completion ("Insert buffer (default %s): ",
+                                        "", cp, NULL, def_bp->name);
+      if (buffer == NULL)
+        ok = FUNCALL (keyboard_quit);
+      free_completion (cp);
+    }
 
-  insert_buffer (bp);
-  set_mark_interactive ();
+  if (ok == leT)
+    {
+      Buffer *bp;
 
-  free ((char *) ms);
+      if (buffer && buffer[0] != '\0')
+        {
+          bp = find_buffer (buffer, false);
+          if (bp == NULL)
+            {
+              minibuf_error ("Buffer `%s' not found", buffer);
+              ok = leNIL;
+            }
+        }
+      else
+        bp = def_bp;
+
+      insert_buffer (bp);
+      set_mark_interactive ();
+    }
+
+  STR_FREE (buffer);
 }
 END_DEFUN
 
 static int
-insert_file (char *filename)
+insert_file (const char *filename)
 {
   int fd;
   size_t size;
@@ -790,42 +804,31 @@ insert_file (char *filename)
   return true;
 }
 
-DEFUN ("insert-file", insert_file)
+DEFUN_ARGS ("insert-file", insert_file,
+       STR_ARG (file))
 /*+
-Insert contents of the user specified file into buffer after point.
+Insert contents of file FILENAME into buffer after point.
 Set mark after the inserted text.
 +*/
 {
-  char *ms;
-  astr buf;
-
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  buf = get_buffer_dir ();
-  ms = minibuf_read_filename ("Insert file: ", astr_cstr (buf), NULL);
-  if (ms == NULL)
+  STR_INIT (file)
+  else
     {
-      astr_delete (buf);
-      return FUNCALL (keyboard_quit);
-    }
-  astr_delete (buf);
-
-  if (ms[0] == '\0')
-    {
-      free (ms);
-      return leNIL;
+      astr buf = get_buffer_dir ();
+      file = minibuf_read_filename ("Insert file: ", astr_cstr (buf), NULL);
+      if (file == NULL)
+        ok = FUNCALL (keyboard_quit);
     }
 
-  if (!insert_file (ms))
-    {
-      free (ms);
-      return leNIL;
-    }
+  if (file == NULL || file[0] == '\0' || !insert_file (file))
+    ok = leNIL;
+  else
+    set_mark_interactive ();
 
-  set_mark_interactive ();
-
-  free (ms);
+  STR_FREE (file);
 }
 END_DEFUN
 

@@ -1,6 +1,6 @@
 /* Useful editing functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009x Free Software Foundation, Inc.
    Copyright (c) 2004 David A. Capello.
 
    This file is part of GNU Zile.
@@ -132,7 +132,7 @@ int
 eobp (void)
 {
   return (cur_bp->pt.p->next == cur_bp->lines &&
-	  cur_bp->pt.o == astr_len (cur_bp->pt.p->text));
+          cur_bp->pt.o == astr_len (cur_bp->pt.p->text));
 }
 
 /* Return true if point is at the beginning of a line. */

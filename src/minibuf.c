@@ -1,6 +1,6 @@
 /* Minibuffer facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 
    This file is part of GNU Zile.
@@ -118,12 +118,12 @@ minibuf_read (const char *fmt, const char *value, ...)
 /*
  * Read a non-negative number from the minibuffer.
  */
-size_t
+unsigned long
 minibuf_read_number (const char *fmt, ...)
 {
   va_list ap;
   char *buf;
-  size_t n;
+  unsigned long n;
 
   va_start (ap, fmt);
   xvasprintf (&buf, fmt, ap);
@@ -139,17 +139,14 @@ minibuf_read_number (const char *fmt, ...)
           break;
         }
       if (strlen (ms) == 0)
-        n = SIZE_MAX - 1;
+        n = ULONG_MAX - 1;
       else
-        {
-          unsigned long un = strtoul (ms, NULL, 10);
-          n = un == ULONG_MAX ? SIZE_MAX : (size_t) un;
-        }
+        n = strtoul (ms, NULL, 10);
       free (ms);
-      if (n == SIZE_MAX)
+      if (n == ULONG_MAX)
         minibuf_write ("Please enter a number.");
     }
-  while (n == SIZE_MAX);
+  while (n == ULONG_MAX);
 
   return n;
 }

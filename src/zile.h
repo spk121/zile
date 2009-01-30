@@ -1,6 +1,6 @@
 /* Main types and definitions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007 Reuben Thomas.
 
@@ -175,7 +175,7 @@ struct Completion
  * The type of a Zile exported function.
  * `uniarg' is the number of times to repeat the function.
  */
-typedef le * (*Function) (int uniarg, le * list);
+typedef le * (*Function) (long uniarg, le * list);
 
 /* Turn a bool into a Lisp boolean */
 #define bool_to_lisp(b) ((b) ? leT : leNIL)
@@ -184,50 +184,61 @@ typedef le * (*Function) (int uniarg, le * list);
 #define DEFUN(zile_func, c_func) \
         DEFUN_ARGS(zile_func, c_func, )
 #define DEFUN_ARGS(zile_func, c_func, args) \
-        le * F_ ## c_func (int uniarg, le *arglist) \
+        le * F_ ## c_func (long uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
         { \
           le * ok = leT; \
-          args \
-          if (arglist && arglist->data) \
-            uniarg = atoi (arglist->data);
+          args
 #define END_DEFUN \
           return ok; \
         }
 
-/* Declare a string argument, with expression for reading interactively. */
+/* Define a non-user-visible function. */
+#define DEFUN_HIDDEN(zile_func, c_func) \
+        DEFUN(zile_func, c_func)
+#define DEFUN_HIDDEN_ARGS(zile_func, c_func, args) \
+        DEFUN_ARGS(zile_func, c_func, args)
+
+/* String argument. */
 #define STR_ARG(name) \
-        const char *name = NULL;
+        const char *name = NULL; \
+        bool free_ ## name = true;
 #define STR_INIT(name) \
-        if (arglist) \
+        if (arglist && arglist->next) \
           { \
             name = arglist->next->data; \
             arglist = arglist->next; \
+            free_ ## name = false; \
           }
 #define STR_FREE(name) \
-        if (!arglist) \
+        if (free_ ## name) \
           free ((char *) name);
 
-/* Declare an unsigned integer argument, with prompt. */
-#define UINT_ARG(name) \
-        size_t name = 0;
-#define UINT_INIT(name, prompt) \
-        if (arglist) \
+/* Integer argument. */
+#define INT_ARG(name) \
+        long name = 1;
+#define INT_INIT(name) \
+        if (arglist && arglist->next) \
           { \
             const char *s = arglist->next->data; \
             arglist = arglist->next; \
-            if ((name = strtoul (s, NULL, 10)) == ULONG_MAX) \
-              ok = false; \
-          } \
-        else \
-          do { \
-            const char *ms = minibuf_read (prompt, ""); \
-            if (ms == NULL) \
-              break; \
-            if ((name = strtoul (ms, NULL, 10)) == ULONG_MAX) \
-              ding (); \
-            free ((char *) ms) \
-          } while (name == ULONG_MAX);
-#define UINT_FREE(name)
+            name = strtol (s, NULL, 10); \
+            if (name == LONG_MAX) \
+              ok = leNIL; \
+          }
+#define INT_FREE(name)
+
+/* Boolean argument. */
+#define BOOL_ARG(name) \
+        bool name = true;
+#define BOOL_INIT(name) \
+        if (arglist && arglist->next) \
+          { \
+            const char *s = arglist->next->data; \
+            arglist = arglist->next; \
+            if (strcmp (s, "nil") == 0) \
+              name = false; \
+          }
+#define BOOL_FREE(name)
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
