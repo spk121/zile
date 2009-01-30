@@ -191,7 +191,7 @@ get_variable_number_bp (Buffer * bp, const char *var)
 
   if (s)
     t = strtol (s, NULL, 10);
-  /* FIXME: Check result */
+  /* FIXME: Check result and signal error. */
 
   return t;
 }
