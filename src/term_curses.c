@@ -1,6 +1,6 @@
 /* Curses terminal
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007 Reuben Thomas.
 
@@ -159,8 +159,8 @@ translate_key (int c)
       return KBD_RET;
     case '\37':
       return KBD_CTRL | (c ^ 0x40);
-#ifdef __linux__
-    case 0627:			/* C-z */
+#ifdef KEY_SUSPEND
+    case KEY_SUSPEND:		/* C-z */
       return KBD_CTRL | 'z';
 #endif
     case '\33':			/* META */
