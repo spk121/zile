@@ -23,6 +23,9 @@
 
 # srcdir and builddir are defined in the environment
 
+# N.B. Tests that use execute-kbd-macro must note that keyboard input
+# is only evaluated once the script has finished running.
+
 pass=0
 fail=0
 
