@@ -1,0 +1,8 @@
+(forward-word)
+(transpose-words)
+(transpose-words)
+(transpose-words)
+(transpose-words)
+(transpose-words)
+(save-buffer)
+(save-buffers-kill-zile)

@@ -1,0 +1,5 @@
+(end-of-buffer)
+(scroll-down)
+(insert-char "a")
+(save-buffer)
+(save-buffers-kill-zile)

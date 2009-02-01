@@ -1,0 +1,8 @@
+(next-line)
+(forward-word)
+(forward-word)
+(forward-word)
+(beginning-of-line)
+(insert-char "a")
+(save-buffer)
+(save-buffers-kill-zile)

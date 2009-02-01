@@ -1,6 +1,0 @@
-(forward-word)
-(insert-char " ")
-(insert-char " ")
-(insert-char " ")
-(just-one-space)
-(insert-char "a")

@@ -1,5 +1,0 @@
-(forward-word)
-(forward-word)
-(forward-word)
-(forward-word)
-(insert-char "a")

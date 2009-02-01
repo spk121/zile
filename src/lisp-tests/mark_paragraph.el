@@ -1,0 +1,7 @@
+(mark-paragraph)
+(kill-region)
+(insert-char "a")
+(insert-char "a")
+(insert-char "a")
+(save-buffer)
+(save-buffers-kill-zile)

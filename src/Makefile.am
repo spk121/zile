@@ -86,10 +86,11 @@ loc:
 	sloccount $(ALLSOURCES)
 
 TESTS_ENVIRONMENT = builddir=$(builddir)
+# FIXME: Run tests under valgrind
 #TESTS_ENVIRONMENT = $(VALGRIND)
 
 TESTS = $(check_PROGRAMS)				\
-	run-interactive-test				\
+	run-lisp-tests					\
 	test-bad-argument
 
 check_PROGRAMS = astr
@@ -97,7 +98,7 @@ check_PROGRAMS = astr
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
 astr_LDADD = xalloc_extra.o $(LDADD)
 
-INTERACTIVE_TESTS =
+LISP_TESTS =						\
 	tests/backward_char.el				\
 	tests/backward_delete_char.el			\
 	tests/backward_kill_word.el			\
@@ -135,6 +136,10 @@ INTERACTIVE_TESTS =
 	tests/insert_buffer.el				\
 	tests/insert_char.el				\
 	tests/insert_file.el				\
+	tests/isearch_backward.el			\
+	tests/isearch_backward_regexp.el		\
+	tests/isearch_forward.el			\
+	tests/isearch_forward_regexp.el			\
 	tests/just_one_space.el				\
 	tests/kill_buffer.el				\
 	tests/kill_line.el				\
@@ -153,6 +158,7 @@ INTERACTIVE_TESTS =
 	tests/open_line.el				\
 	tests/overwrite_mode.el				\
 	tests/previous_line.el				\
+	tests/save_some_buffers.el			\
 	tests/scroll_down.el				\
 	tests/scroll_up.el				\
 	tests/search_backward.el			\
@@ -182,19 +188,14 @@ INTERACTIVE_TESTS =
 #	tests/call_last_kbd_macro.el			\
 #	tests/execute_extended_command.el		\
 #	tests/global_set_key.el				\
-# 	tests/isearch_backward.el			\
-# 	tests/isearch_backward_regexp.el		\
-# 	tests/isearch_forward.el			\
-# 	tests/isearch_forward_regexp.el			\
 #	tests/keyboard_quit.el				\
 # 	tests/name_last_kbd_macro.el			\
 # 	tests/query_replace.el				\
 #	tests/quoted_insert.el				\
-# 	tests/save_some_buffers.el			\
 # 	tests/universal_argument.el			\
 #
 
-EXTRA_DIST = $(INTERACTIVE_TESTS)			\
+EXTRA_DIST = $(LISP_TESTS)				\
 	tests/backward_char.output			\
 	tests/backward_delete_char.output		\
 	tests/backward_kill_word.output			\

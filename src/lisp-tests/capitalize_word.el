@@ -1,0 +1,5 @@
+(capitalize-word)
+(capitalize-word)
+(capitalize-word)
+(save-buffer)
+(save-buffers-kill-zile)

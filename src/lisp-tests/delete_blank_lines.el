@@ -1,0 +1,5 @@
+(next-line)
+(next-line)
+(delete-blank-lines)
+(save-buffer)
+(save-buffers-kill-zile)

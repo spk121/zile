@@ -1,0 +1,7 @@
+(end-of-buffer)
+(previous-line)
+(previous-line)
+(previous-line)
+(insert-char "a")
+(save-buffer)
+(save-buffers-kill-zile)

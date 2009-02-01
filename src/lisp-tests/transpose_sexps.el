@@ -1,0 +1,8 @@
+(forward-sexp)
+(transpose-sexps)
+(transpose-sexps)
+(transpose-sexps)
+(transpose-sexps)
+(transpose-sexps)
+(save-buffer)
+(save-buffers-kill-zile)

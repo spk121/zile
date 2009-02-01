@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gl_array_list.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -35,20 +36,28 @@
 
 struct Macro
 {
-  size_t nkeys;		/* The number of keystrokes. */
-  size_t *keys;		/* Vector of keystrokes. */
+  gl_list_t keys;	/* List of keystrokes. */
   char *name;		/* Name of the macro. */
   Macro *next;		/* Next macro in the list. */
 };
 
 static Macro *cur_mp, *cmd_mp = NULL, *head_mp = NULL;
 
+static Macro *
+macro_new (void)
+{
+  Macro * mp = XZALLOC (Macro);
+  mp->keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                   NULL, NULL, NULL, true);
+  return mp;
+}
+
 static void
 macro_delete (Macro * mp)
 {
   if (mp)
     {
-      free (mp->keys);
+      gl_list_free (mp->keys);
       free (mp);
     }
 }
@@ -56,17 +65,23 @@ macro_delete (Macro * mp)
 static void
 add_macro_key (Macro * mp, size_t key)
 {
-  mp->keys = xrealloc (mp->keys, sizeof (size_t) * ++mp->nkeys);
-  mp->keys[mp->nkeys - 1] = key;
+  gl_list_add_last (mp->keys, (void *) key);
+}
+
+static void
+append_key_list (Macro *to, Macro *from)
+{
+  size_t i;
+
+  for (i = 0; i < gl_list_size (from->keys); i++)
+    add_macro_key (to, (size_t) gl_list_get_at (from->keys, i));
 }
 
 void
 add_cmd_to_macro (void)
 {
-  size_t i;
   assert (cmd_mp);
-  for (i = 0; i < cmd_mp->nkeys; i++)
-    add_macro_key (cur_mp, cmd_mp->keys[i]);
+  append_key_list (cur_mp, cmd_mp);
   macro_delete (cmd_mp);
   cmd_mp = NULL;
 }
@@ -75,7 +90,7 @@ void
 add_key_to_cmd (size_t key)
 {
   if (cmd_mp == NULL)
-    cmd_mp = XZALLOC (Macro);
+    cmd_mp = macro_new ();
 
   add_macro_key (cmd_mp, key);
 }
@@ -109,7 +124,7 @@ Use M-x name-last-kbd-macro to give it a permanent name.
   minibuf_write ("Defining keyboard macro...");
 
   thisflag |= FLAG_DEFINING_MACRO;
-  cur_mp = XZALLOC (Macro);
+  cur_mp = macro_new ();
 }
 END_DEFUN
 
@@ -139,7 +154,6 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
 +*/
 {
   Macro *mp;
-  size_t size;
   char *ms = minibuf_read ("Name for last kbd macro: ", "");
 
   if (ms == NULL)
@@ -161,27 +175,31 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
   else
     {
       /* Add a new macro to the list */
-      mp = XZALLOC (Macro);
+      mp = macro_new ();
       mp->next = head_mp;
       mp->name = xstrdup (ms);
       head_mp = mp;
     }
 
   /* Copy the keystrokes from cur_mp. */
-  mp->nkeys = cur_mp->nkeys;
-  size = sizeof (*(mp->keys)) * mp->nkeys;
-  mp->keys = xzalloc (size);
-  memcpy (mp->keys, cur_mp->keys, size);
+  append_key_list (mp, cur_mp);
 }
 END_DEFUN
+
+static void
+call_keys (gl_list_t keys)
+{
+  size_t i;
+
+  for (i = gl_list_size (keys) - 1; i != SIZE_MAX; i--)
+    ungetkey ((size_t) gl_list_get_at (keys, i));
+}
 
 void
 call_macro (Macro * mp)
 {
-  size_t i;
-
-  for (i = mp->nkeys - 1; i != SIZE_MAX; i--)
-    ungetkey (mp->keys[i]);
+  assert (mp);
+  call_keys (mp->keys);
 }
 
 DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
@@ -205,6 +223,27 @@ defining others, use M-x name-last-kbd-macro.
   for (uni = 0; uni < uniarg; ++uni)
     call_macro (cur_mp);
   undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+}
+END_DEFUN
+
+DEFUN_HIDDEN_ARGS ("execute-kbd-macro", execute_kbd_macro,
+                   STR_ARG (keystr))
+/*+
+Execute macro as string of editor command characters.
++*/
+{
+  gl_list_t keys;
+
+  STR_INIT (keystr);
+  keys = keystrtovec (keystr);
+  if (keys)
+    {
+      call_keys (keys);
+      gl_list_free (keys);
+    }
+  else
+    ok = leNIL;
+  STR_FREE (keystr);
 }
 END_DEFUN
 

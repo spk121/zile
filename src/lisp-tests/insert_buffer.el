@@ -1,0 +1,5 @@
+(next-line)
+(next-line)
+(insert-buffer "insert_buffer.input")
+(save-buffer)
+(save-buffers-kill-zile)

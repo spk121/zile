@@ -1,0 +1,6 @@
+(upcase-word)
+(upcase-word)
+(upcase-word)
+(upcase-word)
+(save-buffer)
+(save-buffers-kill-zile)

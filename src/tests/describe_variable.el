@@ -1,7 +1,0 @@
-(describe-variable "tab-width")
-(other-window)
-(set-mark-command)
-(next-line)
-(kill-region)
-(other-window)
-(yank)

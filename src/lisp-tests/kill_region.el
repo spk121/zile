@@ -1,0 +1,6 @@
+(set-mark-command)
+(next-line)
+(next-line)
+(kill-region)
+(save-buffer)
+(save-buffers-kill-zile)

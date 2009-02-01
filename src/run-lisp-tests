@@ -1,0 +1,50 @@
+#! /bin/sh
+#
+# run-lisp-tests
+#
+# Copyright (c) 2009 Free Software Foundation, Inc.
+#
+# This file is part of GNU Zile.
+#
+# GNU Zile is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# GNU Zile is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Zile; see the file COPYING.  If not, write to the
+# Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
+# MA 02111-1301, USA.
+
+# srcdir and builddir are defined in the environment
+
+pass=0
+fail=0
+
+for test in $srcdir/lisp-tests/*.el; do
+    test=`echo $test | sed -e 's/\.el$//'`
+
+    edit_file=$builddir/$test.input
+    cp $srcdir/lisp-tests/zile_test.input $edit_file
+    chmod +w $edit_file
+
+    if ! $builddir/zile --no-init-file --load $test.el $edit_file; then
+        echo $test failed to run with error code $?
+        fail=`expr $fail + 1`
+    elif ! diff $srcdir/$test.output $edit_file; then
+        echo $test failed to produce correct output
+        fail=`expr $fail + 1`
+    else
+        pass=`expr $pass + 1`
+        rm -f $edit_file $edit_file~
+    fi
+done
+
+echo "$pass pass(es) and $fail failure(s)"
+
+exit $fail

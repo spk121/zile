@@ -1,6 +1,0 @@
-(next-line)
-(next-line)
-(isearch-backward)
-(insert-char "l")
-(newline)
-(insert-char "f")

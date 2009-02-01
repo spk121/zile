@@ -1,5 +1,0 @@
-(forward-char)
-(forward-char)
-(forward-char)
-(forward-char)
-(delete-horizontal-space)

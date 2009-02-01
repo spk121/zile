@@ -1,0 +1,7 @@
+(overwrite-mode)
+(insert-char "a")
+(insert-char "b")
+(insert-char "c")
+(insert-char "d")
+(save-buffer)
+(save-buffers-kill-zile)

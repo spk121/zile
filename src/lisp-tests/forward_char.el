@@ -1,0 +1,5 @@
+(forward-char)
+(forward-char)
+(delete-char)
+(save-buffer)
+(save-buffers-kill-zile)

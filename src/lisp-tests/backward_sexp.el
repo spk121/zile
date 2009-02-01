@@ -1,0 +1,7 @@
+(insert-char "(")
+(end-of-line)
+(insert-char ")")
+(backward-sexp)
+(delete-char)
+(save-buffer)
+(save-buffers-kill-zile)

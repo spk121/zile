@@ -1,5 +1,0 @@
-(end-of-buffer)
-(previous-line)
-(previous-line)
-(previous-line)
-(insert-char "a")

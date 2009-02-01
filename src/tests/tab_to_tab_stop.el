@@ -1,7 +1,0 @@
-(next-line)
-(next-line)
-(tab-to-tab-stop)
-(tab-to-tab-stop)
-(insert-char "t")
-(insert-char "a")
-(insert-char "b")

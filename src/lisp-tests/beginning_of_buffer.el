@@ -1,0 +1,6 @@
+(end-of-buffer)
+(insert-char "a")
+(beginning-of-buffer)
+(insert-char "b")
+(save-buffer)
+(save-buffers-kill-zile)

@@ -1,0 +1,6 @@
+(end-of-line)
+(backward-char)
+(backward-char)
+(backward-delete-char)
+(save-buffer)
+(save-buffers-kill-zile)

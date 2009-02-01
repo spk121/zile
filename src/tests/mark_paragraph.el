@@ -1,5 +1,0 @@
-(mark-paragraph)
-(kill-region)
-(insert-char "a")
-(insert-char "a")
-(insert-char "a")

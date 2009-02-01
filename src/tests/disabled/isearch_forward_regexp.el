@@ -1,7 +1,0 @@
-(insert-char "")
-(isearch-forward)
-(insert-char "a")
-(insert-char ".")
-(insert-char "p")
-(newline)
-(insert-char "f")

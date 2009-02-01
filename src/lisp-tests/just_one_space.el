@@ -1,0 +1,8 @@
+(forward-word)
+(insert-char " ")
+(insert-char " ")
+(insert-char " ")
+(just-one-space)
+(insert-char "a")
+(save-buffer)
+(save-buffers-kill-zile)

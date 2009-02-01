@@ -1,7 +1,0 @@
-(forward-word)
-(forward-word)
-(insert-char ")")
-(beginning-of-line)
-(insert-char "(")
-(beginning-of-line)
-(kill-sexp)

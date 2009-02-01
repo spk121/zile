@@ -1,0 +1,6 @@
+(goto-char 40)
+(insert-char "f")
+(insert-char "f")
+(insert-char "f")
+(save-buffer)
+(save-buffers-kill-zile)
