@@ -22,6 +22,8 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
+/* FIXME: Convert to Lisp. */
+
 X (back_to_indentation, "\\M-m")
 X (backward_char, "\\C-b")
 X (backward_char, "\\LEFT")
