@@ -21,7 +21,7 @@
 @titlepage
 @title The Zile Manual
 @subtitle for GNU Zile version 2.3
-@subtitle January 2009
+@subtitle February 2009
 @author Sandro Sigala and Reuben Thomas
 
 @page
@@ -230,6 +230,7 @@ typing @kbd{x}.
 This table contains the full list of available functions, that can be
 called with the @kbd{M-x} key (most functions also have a key binding).
 
+@c FIXME: Generate the following section.
 @c LINT FUNC
 @table @code
 @item auto-fill-mode
@@ -316,6 +317,8 @@ Make current window one line bigger.
 Put the mark where point is now, and point where the mark is now.
 @item execute-extended-command
 Read function name, then read its arguments and call it.
+@item execute-kbd-macro
+Execute macro as string of editor command characters.
 @item fill-paragraph
 Fill paragraph at or after point.
 @item find-alternate-file
@@ -370,6 +373,8 @@ does nothing.
 @item insert-buffer
 Insert after point the contents of the user specified buffer.
 Puts mark after the inserted text.
+@item insert-char
+Insert CHARACTER.
 @item insert-file
 Insert contents of the user specified file into buffer after point.
 Set mark after the inserted text.
@@ -440,6 +445,8 @@ Note that buffers with names starting with spaces are omitted.
 @c LINT END IGNORE
 @item list-registers
 List defined registers.
+@item load
+Execute a file of Lisp code named FILE.
 @item mark-paragraph
 Put point at beginning of this paragraph, mark at end.
 The paragraph marked is the one that contains point or follows point.
@@ -634,6 +641,7 @@ This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
 in the @file{.zile} initialization file.
 
+@c FIXME: Generate the following.
 @c LINT VAR
 @table @code
 @item auto-fill-mode
