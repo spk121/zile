@@ -922,15 +922,15 @@ copy_file (const char *source, const char *dest)
 }
 
 /*
- * Write buffer to given file name with given umask.
+ * Write buffer to given file name with given mode.
  */
 static int
-raw_write_to_disk (Buffer * bp, const char *filename, int umask)
+raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 {
   ssize_t eol_len = (ssize_t) strlen (bp->eol), written;
   Line *lp;
   int ret = 0;
-  int fd = open (filename, O_WRONLY | O_CREAT | O_TRUNC, umask);
+  int fd = creat (filename, mode);
 
   if (fd < 0)
     return -1;
@@ -1031,7 +1031,8 @@ write_to_disk (Buffer * bp, char *filename)
       astr_delete (bfilename);
     }
 
-  ret = raw_write_to_disk (bp, filename, 0666);
+  ret = raw_write_to_disk (bp, filename, S_IRUSR | S_IWUSR |
+                           S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
   if (ret != 0)
     {
       if (ret == -1)
@@ -1279,7 +1280,7 @@ zile_exit (int doabort)
           astr_cpy_cstr (buf, bp->name);
         astr_cat_cstr (buf, ".ZILESAVE");
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
-        raw_write_to_disk (bp, astr_cstr (buf), 0600);
+        raw_write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
         astr_delete (buf);
       }
 
