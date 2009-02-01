@@ -1,26 +1,10 @@
                         Reporting bugs in Zile
                         ----------------------
 
-Bug reports should be sent to <bug-zile@gnu.org>. Savannah users are
-welcome to file bug reports, feature requests and patches directly in
-the relevant tracker at http://savannah.gnu.org/projects/zile/
+Bug reports, feature requests and patches should be sent to
+<bug-zile@gnu.org>, or, preferably, filed directly in the relevant
+tracker at http://savannah.gnu.org/projects/zile/
 
-Zile has a testsuite (built using DejaGnu) of interactive tests. If
-you can create a test that shows the problem, the maintainers will be
-most grateful. To do this, you need to build Zile from source (it's
-best to check out the git master branch if you can; otherwise, use the
-latest release; see INSTALL for building instructions). You must also
-install expect, and, in particular, the autoexpect script. Then, from
-the top-level directory execute the commands:
-
-    cd src/testsuite/zile.test
-    ./make-interactive-test TEST_NAME
-
-This will start Zile under expect's control on a sample file. Perform
-the steps needed to reproduce the bug, then quit. This will write two
-files, TEST_NAME.output and TEST_NAME.exp. You will then need to
-produce a file containing the expected output; the easy way should be
-to perform the same actions in Emacs. Attaching those files to the bug
-report should help to locate and fix the bug faster. If the supplied
-input file, zile_test.input, cannot easily be used to demonstrate the
-bug, information on why not would also be appreciated.
+Zile has a suite of Lisp tests in the lisp-tests directory of the
+source distribution. If when you report a bug you can create a similar
+test that triggers it, the maintainers will be most grateful.

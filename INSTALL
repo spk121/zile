@@ -20,25 +20,23 @@ sure you have the GNU autotools installed (automake >= 1.9, autoconf
 
 1) Run configure:
 
-	./configure
+        ./configure
 
 2) Compile the sources:
 
-	make
+        make
 
 3) To install Zile, run
 
-	make install
+        make install
 
    By default, Zile is installed under /usr/local; this can be changed
    by using the --prefix argument to configure, e.g.
 
-	./configure --prefix=$HOME/zile
+        ./configure --prefix=$HOME/zile
 
    You can also run it in place (src/zile), but if you do that the
    built-in documentation won't be available.
-
-To run the test suite, you will need DejaGnu.
 
 
 Automated releases
