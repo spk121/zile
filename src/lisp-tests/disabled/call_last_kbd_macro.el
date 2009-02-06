@@ -1,5 +1,0 @@
-(start-kbd-macro)
-(forward-word)
-(insert-char "a")
-(end-kbd-macro)
-(call-last-kbd-macro)

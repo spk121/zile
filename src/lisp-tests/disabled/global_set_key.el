@@ -1,6 +1,0 @@
-(global-set-key "d" 'delete-char)
-(insert-char "d")
-(insert-char "d")
-(insert-char "d")
-(insert-char "d")
-(insert-char "d")

@@ -107,6 +107,7 @@ LISP_TESTS =						\
 	lisp-tests/backward_word.el			\
 	lisp-tests/beginning_of_buffer.el		\
 	lisp-tests/beginning_of_line.el			\
+	lisp-tests/call_last_kbd_macro.el		\
 	lisp-tests/capitalize_word.el			\
 	lisp-tests/copy_region_as_kill.el		\
 	lisp-tests/copy_to_register.el			\
@@ -123,12 +124,14 @@ LISP_TESTS =						\
 	lisp-tests/end_of_buffer.el			\
 	lisp-tests/end_of_line.el			\
 	lisp-tests/exchange_point_and_mark.el		\
+	lisp-tests/execute_extended_command.el		\
 	lisp-tests/fill_paragraph.el			\
 	lisp-tests/forward_char.el			\
 	lisp-tests/forward_line.el			\
 	lisp-tests/forward_paragraph.el			\
 	lisp-tests/forward_sexp.el			\
 	lisp-tests/forward_word.el			\
+	lisp-tests/global_set_key.el			\
 	lisp-tests/goto_char.el				\
 	lisp-tests/goto_line.el				\
 	lisp-tests/indent_for_tab_command.el		\
@@ -141,6 +144,7 @@ LISP_TESTS =						\
 	lisp-tests/isearch_forward.el			\
 	lisp-tests/isearch_forward_regexp.el		\
 	lisp-tests/just_one_space.el			\
+	lisp-tests/keyboard_quit.el			\
 	lisp-tests/kill_buffer.el			\
 	lisp-tests/kill_line.el				\
 	lisp-tests/kill_region.el			\
@@ -152,6 +156,7 @@ LISP_TESTS =						\
 	lisp-tests/mark_sexp.el				\
 	lisp-tests/mark_whole_buffer.el			\
 	lisp-tests/mark_word.el				\
+	lisp-tests/name_last_kbd_macro.el		\
 	lisp-tests/newline.el				\
 	lisp-tests/newline_and_indent.el		\
 	lisp-tests/next_line.el				\
@@ -187,13 +192,6 @@ LISP_TESTS =						\
 	lisp-tests/upcase_word.el			\
 	lisp-tests/yank.el				\
 	lisp-tests/setq_nonexistent_variable.el
-
-#	lisp-tests/call_last_kbd_macro.el		\
-#	lisp-tests/execute_extended_command.el		\
-#	lisp-tests/global_set_key.el			\
-#	lisp-tests/keyboard_quit.el			\
-# 	lisp-tests/name_last_kbd_macro.el		\
-#
 
 EXTRA_DIST = $(LISP_TESTS)				\
 	lisp-tests/backward_char.output			\
