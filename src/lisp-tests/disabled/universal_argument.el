@@ -1,5 +1,0 @@
-(universal-argument)
-(insert-char "1")
-(insert-char "0")
-(forward-char)
-(insert-char "a")
