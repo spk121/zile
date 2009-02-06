@@ -1,6 +1,6 @@
-/* Miscellaneous functions
+/* Getting and ungetting key strokes
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
+   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 
    This file is part of GNU Zile.
@@ -30,9 +30,6 @@
 #include "zile.h"
 #include "extern.h"
 
-#define MAX_KEY_BUF	16
-static int key_buf[MAX_KEY_BUF];
-static int *keyp = key_buf;
 static size_t _last_key;
 
 /* Return last key pressed */
@@ -50,10 +47,7 @@ lastkey (void)
 size_t
 xgetkey (int mode, size_t timeout)
 {
-  if (keyp > key_buf)
-    _last_key = *--keyp;
-  else
-    _last_key = term_xgetkey (mode, timeout);
+  _last_key = term_xgetkey (mode, timeout);
 
   if (thisflag & FLAG_DEFINING_MACRO)
     add_key_to_cmd (_last_key);
@@ -84,6 +78,7 @@ waitkey (size_t timeout)
 void
 ungetkey (size_t key)
 {
-  if (keyp < key_buf + MAX_KEY_BUF && key != KBD_NOKEY)
-    *keyp++ = key;
+  term_ungetkey (key);
+
+  /* FIXME: Remove key from macro if defining one. */
 }

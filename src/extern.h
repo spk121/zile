@@ -247,7 +247,7 @@ void term_tidy (void);
 void term_finish (void);
 void term_addnstr (const char *s, size_t len);
 
-/* term_ncurses.c --------------------------------------------------------- */
+/* term_curses.c ---------------------------------------------------------- */
 void term_init (void);
 void term_close (void);
 void term_suspend (void);
@@ -260,6 +260,7 @@ void term_addch (int c);
 void term_attrset (size_t attrs, ...);
 void term_beep (void);
 size_t term_xgetkey (int mode, size_t timeout);
+void term_ungetkey (size_t key);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;
