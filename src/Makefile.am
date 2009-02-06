@@ -286,6 +286,5 @@ EXTRA_DIST = $(LISP_TESTS)				\
 	lisp-tests/upcase_region.output			\
 	lisp-tests/upcase_word.output			\
 	lisp-tests/yank.output				\
-	lisp-tests/bad_argument.output			\
 	lisp-tests/setq_nonexistent_variable.output	\
 	lisp-tests/zile_test.input
