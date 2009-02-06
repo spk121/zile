@@ -243,7 +243,7 @@ self_insert_command (void)
 {
   int ret = true;
   /* Mask out ~KBD_CTRL to allow control sequences to be themselves. */
-  int key = lastkey () & ~KBD_CTRL;
+  int key = (int) (lastkey () & ~KBD_CTRL);
   deactivate_mark ();
   if (key <= 0xff)
     {
@@ -339,8 +339,8 @@ init_default_bindings (void)
     }
   gl_list_free (keys);
 
-#define X(c_name, key1)                 \
-  bind_key_string (root_bindings, key1, F_ ## c_name);
+#define X(c_name, key)                 \
+  bind_key_string (root_bindings, key, F_ ## c_name);
 #include "tbl_bind.h"
 #undef X
 }
