@@ -248,20 +248,14 @@ strtokey (const char *buf, size_t * len)
 size_t
 strtochord (const char *buf, size_t * len)
 {
-  size_t key, l;
+  size_t key = 0, k;
 
-  key = strtokey (buf, &l);
-  if (key == KBD_NOKEY)
+  *len = 0;
+  do
     {
-      *len = 0;
-      return KBD_NOKEY;
-    }
+      size_t l;
 
-  *len = l;
-
-  if (key == KBD_CTRL || key == KBD_META)
-    {
-      size_t k = strtochord (buf + l, &l);
+      k = strtokey (buf + *len, &l);
       if (k == KBD_NOKEY)
         {
           *len = 0;
@@ -270,6 +264,7 @@ strtochord (const char *buf, size_t * len)
       *len += l;
       key |= k;
     }
+  while (k == KBD_CTRL || k == KBD_META);
 
   return key;
 }
