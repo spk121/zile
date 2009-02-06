@@ -1,3 +1,13 @@
+Release 2.3.1:
+
+This release contains arewrite of the test suite which drives Zile
+directly, as DejaGnu proved to be insufficiently portable, and too
+flaky. Two commands have been added to make it possible to write all
+the tests in Lisp, namely execute-kbd-macro and insert-char. The
+--script flag is now --load, which is what it really does. Various
+commands have been made to work non-interactively. Other small fixes
+and improvements have been made.
+
 Release 2.3.0:
 
 This release continues the code cleanup and portability fixes started

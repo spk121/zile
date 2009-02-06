@@ -142,3 +142,9 @@ unistd.h
 /close.c
 /fclose.c
 /w32sock.h
+/btowc.c
+/mbrtowc.c
+/mbsinit.c
+/streq.h
+/verify.h
+/wcrtomb.c

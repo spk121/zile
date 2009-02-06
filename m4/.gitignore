@@ -83,3 +83,12 @@ xstrndup.m4
 /close.m4
 /dirent_h.m4
 /fclose.m4
+/00gnulib.m4
+/btowc.m4
+/locale-fr.m4
+/locale-ja.m4
+/locale-zh.m4
+/mbrtowc.m4
+/mbsinit.m4
+/multiarch.m4
+/wcrtomb.m4
