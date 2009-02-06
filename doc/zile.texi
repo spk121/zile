@@ -76,7 +76,7 @@ Zile's home page at @url{http://www.gnu.org/software/zile/}.
 
 GNU Zile is a lightweight clone of Emacs, featuring a bare minimum of
 commands and features required for useful editing. It is written
-entirely in @emph{@w{ISO C89}}, and should run on any POSIX system that
+entirely in @emph{@w{ISO C90}}, and should run on any POSIX system that
 has curses.
 
 @c ---------------------------------------------------------------------------
