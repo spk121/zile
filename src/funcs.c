@@ -419,7 +419,7 @@ universal_argument (int keytype, int xarg)
   if (keytype == KBD_META)
     {
       astr_cpy_cstr (as, "ESC");
-      ungetkey ((size_t) (xarg + '0'));
+      pushkey ((size_t) (xarg + '0'));
     }
   else
     {

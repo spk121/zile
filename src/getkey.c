@@ -75,10 +75,22 @@ waitkey (size_t timeout)
   ungetkey (xgetkey (GETKEY_DELAYED, timeout));
 }
 
+/*
+ * Push a key into the input buffer.
+ */
 void
-ungetkey (size_t key)
+pushkey (size_t key)
 {
   term_ungetkey (key);
+}
 
-  /* FIXME: Remove key from macro if defining one. */
+/*
+ * Unget a key as if it had not been fetched.
+ */
+void ungetkey (size_t key)
+{
+  pushkey (key);
+
+  if (thisflag & FLAG_DEFINING_MACRO)
+    remove_key_from_cmd (key);
 }

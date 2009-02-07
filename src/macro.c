@@ -69,6 +69,12 @@ add_macro_key (Macro * mp, size_t key)
 }
 
 static void
+remove_macro_key (Macro * mp)
+{
+  gl_list_remove_at (mp->keys, gl_list_size (mp->keys) - 1);
+}
+
+static void
 append_key_list (Macro *to, Macro *from)
 {
   size_t i;
@@ -93,6 +99,13 @@ add_key_to_cmd (size_t key)
     cmd_mp = macro_new ();
 
   add_macro_key (cmd_mp, key);
+}
+
+void
+remove_key_from_cmd (size_t key)
+{
+  assert (cmd_mp);
+  remove_macro_key (cmd_mp);
 }
 
 void
@@ -192,7 +205,7 @@ call_keys (gl_list_t keys)
   size_t i;
 
   for (i = gl_list_size (keys) - 1; i != SIZE_MAX; i--)
-    ungetkey ((size_t) gl_list_get_at (keys, i));
+    pushkey ((size_t) gl_list_get_at (keys, i));
 }
 
 void

@@ -124,6 +124,7 @@ void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), 
 bool delete_region (const Region * r);
 
 /* getkey.c --------------------------------------------------------------- */
+void pushkey (size_t key);
 void ungetkey (size_t key);
 size_t lastkey (void);
 size_t xgetkey (int mode, size_t timeout);
