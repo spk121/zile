@@ -277,7 +277,7 @@ minibuf_read_function_name (const char *fmt, ...)
   add_macros_to_list (cp->completions, completion_strcmp);
 
   va_start (ap, fmt);
-  ms = vminibuf_read_completion (fmt, "", cp, functions_history,
+  ms = minibuf_vread_completion (fmt, "", cp, functions_history,
                                  "No function name given",
                                  minibuf_test_in_completions,
                                  "Undefined function name `%s'", ap);

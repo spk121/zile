@@ -479,15 +479,12 @@ END_DEFUN
 static int
 check_modified_buffer (Buffer * bp)
 {
-  int ans;
-
   if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
     for (;;)
       {
-        if ((ans =
-             minibuf_read_yesno
-             ("Buffer %s modified; kill anyway? (yes or no) ",
-              bp->name)) == -1)
+        int ans = minibuf_read_yesno
+          ("Buffer %s modified; kill anyway? (yes or no) ", bp->name);
+        if (ans == -1)
           {
             FUNCALL (keyboard_quit);
             return false;
@@ -1112,7 +1109,7 @@ Makes buffer visit that file, and marks it not modified.
 {
   char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
   char *ms = minibuf_read_filename ("Write file: ", fname, NULL);
-
+  int ans = true;
 
   if (ms == NULL)
     return FUNCALL (keyboard_quit);
@@ -1122,18 +1119,28 @@ Makes buffer visit that file, and marks it not modified.
       return leNIL;
     }
 
-  /* FIXME:
-     if (file_exists (ms) && !(y-or-n-p (format "File `%s' exists; overwrite? " filename))
-     (error "Canceled"))) */
-
-  set_buffer_filename (cur_bp, ms);
-
-  cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
-
-  if (write_to_disk (cur_bp, ms))
+  if (exist_file (ms))
     {
-      minibuf_write ("Wrote %s", ms);
-      cur_bp->flags &= ~BFLAG_MODIFIED;
+      ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", ms);
+      if (ans == -1)
+        FUNCALL (keyboard_quit);
+      if (ans == false)
+        minibuf_error ("Canceled");
+      if (ans != true)
+        ok = leNIL;
+    }
+
+  if (ans == true)
+    {
+      set_buffer_filename (cur_bp, ms);
+      cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
+      if (write_to_disk (cur_bp, ms))
+        {
+          minibuf_write ("Wrote %s", ms);
+          cur_bp->flags &= ~BFLAG_MODIFIED;
+        }
+      else
+        ok = leNIL;
     }
 
   free (ms);
@@ -1232,7 +1239,7 @@ Offer to save each buffer, then kill this Zile process.
 +*/
 {
   Buffer *bp;
-  int ans, i = 0;
+  int i = 0;
 
   if (!save_some_buffers ())
     return leNIL;
@@ -1244,9 +1251,9 @@ Offer to save each buffer, then kill this Zile process.
   if (i > 0)
     for (;;)
       {
-        if ((ans =
-             minibuf_read_yesno
-             ("Modified buffers exist; exit anyway? (yes or no) ", "")) == -1)
+        int ans = minibuf_read_yesno
+          ("Modified buffers exist; exit anyway? (yes or no) ");
+        if (ans == -1)
           return FUNCALL (keyboard_quit);
         else if (!ans)
           return leNIL;

@@ -202,10 +202,11 @@ void minibuf_write (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
 unsigned long minibuf_read_number (const char *fmt, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
+int minibuf_read_yn (const char *fmt, ...);
 int minibuf_read_yesno (const char *fmt, ...);
 char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
                                History * hp, ...);
-char *vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
+char *minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
                                 History * hp, const char *empty_err,
                                 bool (*test) (const char *s, gl_list_t completions),
                                 const char *invalid_err, va_list ap);

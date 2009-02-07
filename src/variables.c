@@ -229,7 +229,7 @@ minibuf_read_variable_name (char *fmt, ...)
     }
 
   va_start (ap, fmt);
-  ms = vminibuf_read_completion (fmt, "", cp, NULL,
+  ms = minibuf_vread_completion (fmt, "", cp, NULL,
                                  "No variable name given",
                                  minibuf_test_in_completions,
                                  "Undefined variable name `%s'", ap);

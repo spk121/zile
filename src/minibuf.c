@@ -206,31 +206,62 @@ minibuf_test_in_completions (const char *ms, gl_list_t completions)
 }
 
 int
+minibuf_read_yn (const char *fmt, ...)
+{
+  va_list ap;
+  char *buf, *errmsg = "";
+
+  va_start (ap, fmt);
+  xvasprintf (&buf, fmt, ap);
+  va_end (ap);
+
+  for (;;) {
+    size_t key;
+
+    minibuf_write ("%s%s", errmsg, buf);
+    key = getkey ();
+    switch (key)
+      {
+      case 'y':
+        return true;
+      case 'n':
+        return false;
+      case KBD_CTRL | 'g':
+        return -1;
+      default:
+        errmsg = "Please answer y or n.  ";
+      }
+  }
+}
+
+int
 minibuf_read_yesno (const char *fmt, ...)
 {
   va_list ap;
   char *ms;
   const char *errmsg = "Please answer yes or no.";
   Completion *cp = completion_new (false);
-  int retvalue = -1;
+  int ret = -1;
 
   gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("yes"));
   gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("no"));
 
   va_start (ap, fmt);
-  ms = vminibuf_read_completion (fmt, "", cp, NULL, errmsg,
+  ms = minibuf_vread_completion (fmt, "", cp, NULL, errmsg,
                                  minibuf_test_in_completions, errmsg, ap);
   va_end (ap);
 
   if (ms != NULL)
     {
-      gl_list_node_t n = gl_sortedlist_search (cp->completions, completion_strcmp, ms);
+      gl_list_node_t n = gl_sortedlist_search (cp->completions,
+                                               completion_strcmp, ms);
       assert (n);
-      retvalue = !strcmp ((char *) gl_list_node_value (cp->completions, n), "yes");
+      ret = !strcmp ((char *) gl_list_node_value (cp->completions, n),
+                     "yes");
     }
   free_completion (cp);
 
-  return retvalue;
+  return ret;
 }
 
 char *
@@ -254,7 +285,7 @@ minibuf_read_completion (const char *fmt, char *value, Completion * cp,
  * Read a string from the minibuffer using a completion.
  */
 char *
-vminibuf_read_completion (const char *fmt, char *value, Completion * cp,
+minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
                           History * hp, const char *empty_err,
                           bool (*test) (const char *s, gl_list_t completions),
                           const char *invalid_err, va_list ap)
