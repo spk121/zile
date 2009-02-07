@@ -52,6 +52,103 @@ if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
 
+dnl ==================================================================
+dnl Lua
+dnl ==================================================================
+dnl FIXME: Farm out to a separate file
+
+AC_SUBST([LUA])
+AC_SUBST([LUAC])
+AC_SUBST([LUA_INCLUDES])
+AC_SUBST([LUA_LIBS])
+
+dnl Arguments
+AC_ARG_WITH([lua-prefix],
+            [AS_HELP_STRING([--with-lua-prefix=DIR],
+                            [Lua files are in DIR])])
+AC_ARG_WITH([lua-includes],
+            [AS_HELP_STRING([--with-lua-includes=DIR],
+                            [Lua include files are in DIR])])
+AC_ARG_WITH([lua-libraries],
+            [AS_HELP_STRING([--with-lua-libraries=DIR],
+                            [Lua library files are in DIR])])
+AC_ARG_WITH([lua-suffix],
+            [AS_HELP_STRING([--with-lua-suffix=ARG],
+                            [Lua binary and library files are suffixed with
+                             ARG])])
+
+dnl LUA
+if test "x$with_lua_prefix" = x; then
+    lua_search_path="$PATH"
+else
+    lua_search_path="$with_lua_prefix/bin"
+fi
+if test "x$LUA" = x; then
+    AC_PATH_PROG([LUA], [lua$with_lua_suffix], [], [$lua_search_path])
+    test "x$LUA" = x && AC_MSG_FAILURE([*** Can't build Zee without Lua 5.1])
+fi
+
+dnl lua_version
+AC_MSG_CHECKING([for Lua version = 5.1.x])
+lua_version=$($LUA -v 2>&1 | head -n 1 | cut -d' ' -f2)
+case $lua_version in
+5.1*)
+    AC_MSG_RESULT([yes (found $lua_version)])
+    ;;
+*)
+    AC_MSG_RESULT([no (found $lua_version)])
+    AC_MSG_FAILURE([*** can't build Zee with this version of Lua])
+    ;;
+esac
+
+dnl LUA_INCLUDES
+if test "x$with_lua_includes" != x; then
+    LUA_INCLUDES="-I$with_lua_includes"
+elif test "x$with_lua_prefix" != x; then
+    LUA_INCLUDES="-I$with_lua_prefix/include"
+fi
+CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+AC_CHECK_HEADERS([lua.h lualib.h], [],
+                 [AC_MSG_FAILURE([*** missing headers lua.h or lualib.h.
+                  *** install the Lua dev package or check --with-lua-includes option.])], [])
+
+dnl LUA_LIBS
+if test "x$with_lua_libraries" != x; then
+    LUA_LIBS="-L$with_lua_libraries"
+elif test "x$with_lua_prefix" != x; then
+    LUA_LIBS="-L$with_lua_prefix/lib"
+fi
+AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
+AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
+AC_CHECK_LIB([lua$with_lua_suffix],
+             [lua_call],
+             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
+             [AC_MSG_FAILURE([*** Can't find lua_call in lua$with_lua_suffix.
+                  *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])],
+             [$LUA_LIBS $lua_extra_libs])
+
+dnl liblua_version
+AC_MSG_CHECKING([for liblua version 5.1.x])
+LIBS="$LIBS $LUA_LIBS"
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <lua.h>
+#include <stdlib.h>
+#include <stdio.h>
+int main()
+{
+    printf("(found %s, %d)... ", LUA_VERSION, LUA_VERSION_NUM);
+    if (LUA_VERSION_NUM == 501)
+        exit(EXIT_SUCCESS);
+    exit(EXIT_FAILURE);
+}
+
+]])],
+              [AC_MSG_RESULT([yes])],
+              [AC_MSG_RESULT([no])
+               AC_MSG_FAILURE([*** liblua is not version 5.1.
+                  *** Check for liblua installation or --with-lua-libraries or --with-lua-suffix options])])
+
+
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
                    [The date of compilation.])
