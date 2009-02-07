@@ -26,6 +26,7 @@
 
 @page
 @vskip 0pt plus 1filll
+@c FIXME: Generate the copyright notice as copyright.texi
 Copyright @copyright{} 2008, 2009 Free Software Foundation, Inc.
 
 Copyright @copyright{} 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala
@@ -117,6 +118,7 @@ as if they had LF line endings.  If a CR line ending is detected,
 
 The options are as follows:
 
+@c FIXME: Make this an include of opts.texi
 @table @samp
 @item FILE
 Edit file @file{FILE}.
@@ -195,6 +197,7 @@ Show the key or keys to which a command is bound.
 
 This table contains the names of the keys that are used in Zile.
 
+@c FIXME: Generate as keys.texi
 @table @key
 @item SPC
 Space
@@ -230,7 +233,7 @@ typing @kbd{x}.
 This table contains the full list of available functions, that can be
 called with the @kbd{M-x} key (most functions also have a key binding).
 
-@c FIXME: Generate the following section.
+@c FIXME: Generate the following section as funcs.texi
 @c LINT FUNC
 @table @code
 @item auto-fill-mode
@@ -641,7 +644,7 @@ This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
 in the @file{.zile} initialization file.
 
-@c FIXME: Generate the following.
+@c FIXME: Generate the following as vars.texi
 @c LINT VAR
 @table @code
 @item auto-fill-mode
@@ -706,6 +709,7 @@ Default value is @samp{t}.
 @node Help and bug reports, GNU Free Documentation License, Variables, Top
 @chapter Help and bug reports
 
+@c FIXME: Get the URIs from PACKAGE_BUFREPORT, &c.
 Questions, comments and requests should be sent to
 @email{help-zile@@gnu.org}. Bug reports should be sent to
 @email{bug-zile@@gnu.org}. Savannah users are welcome to file bug reports,
@@ -713,6 +717,7 @@ feature requests and patches directly in the relevant tracker at
 @uref{http://savannah.gnu.org/projects/zile/}.
 
 @c ---------------------------------------------------------------------------
+@c FIXME: Include the following from a separate file.
 @node GNU Free Documentation License,  , Help and bug reports, Top
 @chapter The GNU Free Documentation License
 
