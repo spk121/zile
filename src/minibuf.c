@@ -212,7 +212,7 @@ minibuf_read_yesno (const char *fmt, ...)
   char *ms;
   const char *errmsg = "Please answer yes or no.";
   Completion *cp = completion_new (false);
-  int retvalue = false;
+  int retvalue = -1;
 
   gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("yes"));
   gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("no"));
