@@ -156,7 +156,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
             ding ();
           break;
         case KBD_CTRL | 'k':
-          /* FIXME: no kill-register save is done yet. */
+          /* FIXME: do kill-register save. */
           if (pos < astr_len (as))
             astr_truncate (as, pos);
           else
