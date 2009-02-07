@@ -174,6 +174,7 @@ bool lisp_load (const char *file);
 void cancel_kbd_macro (void);
 void add_cmd_to_macro (void);
 void add_key_to_cmd (size_t key);
+void remove_key_from_cmd (void);
 void call_macro (Macro * mp);
 void free_macros (void);
 Macro *get_macro (const char *name);

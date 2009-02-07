@@ -92,5 +92,5 @@ void ungetkey (size_t key)
   pushkey (key);
 
   if (thisflag & FLAG_DEFINING_MACRO)
-    remove_key_from_cmd (key);
+    remove_key_from_cmd ();
 }

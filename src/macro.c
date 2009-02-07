@@ -102,7 +102,7 @@ add_key_to_cmd (size_t key)
 }
 
 void
-remove_key_from_cmd (size_t key)
+remove_key_from_cmd (void)
 {
   assert (cmd_mp);
   remove_macro_key (cmd_mp);
