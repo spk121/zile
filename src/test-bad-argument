@@ -24,4 +24,4 @@
 
 # srcdir and builddir are defined in the environment
 
-$builddir/zile --unknown-flag --load $srcdir/save_and_quit.el
+$builddir/zile --unknown-flag --load $srcdir/quit.el

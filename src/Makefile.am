@@ -89,9 +89,11 @@ TESTS_ENVIRONMENT = builddir=$(builddir)
 # FIXME: Run tests under valgrind
 #TESTS_ENVIRONMENT = $(VALGRIND)
 
-TESTS = $(check_PROGRAMS)				\
+SCRIPT_TESTS =						\
 	run-lisp-tests					\
 	test-bad-argument
+
+TESTS = $(check_PROGRAMS) $(SCRIPT_TESTS)
 
 check_PROGRAMS = astr
 
@@ -193,7 +195,8 @@ LISP_TESTS =						\
 	lisp-tests/yank.el				\
 	lisp-tests/setq_nonexistent_variable.el
 
-EXTRA_DIST = $(LISP_TESTS)				\
+EXTRA_DIST = $(LISP_TESTS) $(SCRIPT_TESTS)		\
+	quit.el						\
 	lisp-tests/backward_char.output			\
 	lisp-tests/backward_delete_char.output		\
 	lisp-tests/backward_kill_word.output		\

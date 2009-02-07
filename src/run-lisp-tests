@@ -30,16 +30,17 @@ pass=0
 fail=0
 
 for test in $srcdir/lisp-tests/*.el; do
+    test=`basename $test`
     test=`echo $test | sed -e 's/\.el$//'`
 
     edit_file=$builddir/$test.input
     cp $srcdir/lisp-tests/zile_test.input $edit_file
     chmod +w $edit_file
 
-    if ! $builddir/zile --no-init-file --load $test.el $edit_file; then
+    if ! $builddir/zile --no-init-file --load $srcdir/lisp-tests/$test.el $edit_file; then
         echo $test failed to run with error code $?
         fail=`expr $fail + 1`
-    elif ! diff $srcdir/$test.output $edit_file; then
+    elif ! diff $srcdir/lisp-tests/$test.output $edit_file; then
         echo $test failed to produce correct output
         fail=`expr $fail + 1`
     else
