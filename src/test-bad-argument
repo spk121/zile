@@ -24,4 +24,9 @@
 
 # srcdir and builddir are defined in the environment
 
+# Only run if TERM is set
+if test -z "$TERM"; then
+    exit 0
+fi
+
 $builddir/zile --unknown-flag --load $srcdir/quit.el
