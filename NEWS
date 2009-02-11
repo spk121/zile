@@ -1,6 +1,6 @@
 Release 2.3.1:
 
-This release contains arewrite of the test suite which drives Zile
+This release contains a rewrite of the test suite which drives Zile
 directly, as DejaGnu proved to be insufficiently portable, and too
 flaky. Two commands have been added to make it possible to write all
 the tests in Lisp, namely execute-kbd-macro and insert-char. The
