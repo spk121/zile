@@ -8,10 +8,11 @@
 #
 # DESCRIPTION
 #
-#   Detect SysV compatible curses, such as ncurses.
+#   Detect SysV-compatible curses.
 #
-#   Defines HAVE_CURSES_H or HAVE_NCURSES_H if curses is found. CURSES_LIB
-#   is also set with the required libary, but is not appended to LIBS
+#   Searches for ncurses and defines HAVE_NCURSES_H if found; otherwise,
+#   searches for curses and defines HAVE_CURSES_H if curses is found.
+#   CURSES_LIB is set to the relevant libary, but is not appended to LIBS
 #   automatically. If no working curses libary is found CURSES_LIB will be
 #   left blank.
 #
@@ -20,11 +21,11 @@
 #
 # LAST MODIFICATION
 #
-#   2008-08-25
+#   2009-02-11
 #
 # COPYLEFT
 #
-#   Copyright (c) 2008 Mark Pulford <mark@kyne.com.au>
+#   Copyright (c) 2008, 2009 Mark Pulford <mark@kyne.com.au>
 #
 #   This program is free software: you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
@@ -56,7 +57,18 @@ AC_DEFUN([MP_WITH_CURSES],
   [AC_ARG_WITH(ncurses, [  --with-ncurses          Force the use of ncurses over curses],,)
    mp_save_LIBS="$LIBS"
    CURSES_LIB=""
-   if test "$with_ncurses" != yes
+   AC_CACHE_CHECK([for working ncurses], mp_cv_ncurses,
+     [LIBS="$mp_save_LIBS -lncurses"
+      AC_TRY_LINK(
+        [#include <ncurses.h>],
+        [chtype a; int b=A_STANDOUT, c=KEY_LEFT; initscr(); ],
+        mp_cv_ncurses=yes, mp_cv_ncurses=no)])
+   if test "$mp_cv_ncurses" = yes
+   then
+     AC_DEFINE([HAVE_NCURSES_H],[1],[Define if you have ncurses.h])
+     CURSES_LIB="-lncurses"
+   fi
+   if test ! "$CURSES_LIB" -a "$with_ncurses" != yes
    then
      AC_CACHE_CHECK([for working curses], mp_cv_curses,
        [LIBS="$LIBS -lcurses"
@@ -68,20 +80,6 @@ AC_DEFUN([MP_WITH_CURSES],
      then
        AC_DEFINE([HAVE_CURSES_H],[1],[Define if you have curses.h])
        CURSES_LIB="-lcurses"
-     fi
-   fi
-   if test ! "$CURSES_LIB"
-   then
-     AC_CACHE_CHECK([for working ncurses], mp_cv_ncurses,
-       [LIBS="$mp_save_LIBS -lncurses"
-        AC_TRY_LINK(
-          [#include <ncurses.h>],
-          [chtype a; int b=A_STANDOUT, c=KEY_LEFT; initscr(); ],
-          mp_cv_ncurses=yes, mp_cv_ncurses=no)])
-     if test "$mp_cv_ncurses" = yes
-     then
-       AC_DEFINE([HAVE_NCURSES_H],[1],[Define if you have ncurses.h])
-       CURSES_LIB="-lncurses"
      fi
    fi
    LIBS="$mp_save_LIBS"
