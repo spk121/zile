@@ -3,7 +3,7 @@
 # Check the consistency of the keys and functions definitions between
 # the Zile sources and the Texinfo documentation.
 #
-# Usage: zlint TBL_FUNCS.H TBL_VARS.H ZILE.TEXI
+# Usage: zlint TBL_FUNCS.H ZILE.TEXI
 #
 # This script is a big hack.
 
@@ -35,9 +35,7 @@ name=`basename $0`
 
 TMPFILE1=`mktemp /tmp/${name}_temp.XXXXXX` || exit 1
 TMPFUNCS=`mktemp /tmp/${name}_funcs.XXXXXX` || exit 1
-TMPVARS=`mktemp /tmp/${name}_vars.XXXXXX` || exit 1
 TMPFUNCST=`mktemp /tmp/${name}_funcst.XXXXXX` || exit 1
-TMPVARST=`mktemp /tmp/${name}_varst.XXXXXX` || exit 1
 
 cat >$TMPFILE1 <<EOF
 #define X(z, c, i, d)	z
@@ -52,10 +50,7 @@ cat >$TMPFILE1 <<EOF
 #define X(v, d, l, c)	v
 EOF
 
-cat $TMPFILE1 $2 | cpp | tr -d " \t\"" \
-        | sed -e "/^#/d" -e "/^$/d" >$TMPVARS
-
-cat $3 | awk '
+cat $2 | awk '
 BEGIN { v=0;i=0 }
 /^@c LINT FUNC/ { v=1 }
 /^@c LINT END FUNC/ { v=0 }
@@ -63,15 +58,6 @@ BEGIN { v=0;i=0 }
 /^@c LINT END IGNORE/ { i=0 }
 { if (v && !i) print }
 ' | grep "@item" | sed "s/@item //" >$TMPFUNCST
-
-cat $3 | awk '
-BEGIN { v=0;i=0 }
-/^@c LINT VAR/ { v=1 }
-/^@c LINT END VAR/ { v=0 }
-/^@c LINT IGNORE/ { i=1 }
-/^@c LINT END IGNORE/ { i=0 }
-{ if (v && !i) print }
-' | grep "@item" | sed "s/@item //" >$TMPVARST
 
 echo "Checking functions..."
 for f in `comm -13 $TMPFUNCS $TMPFUNCST`; do
@@ -83,15 +69,5 @@ for f in `comm -23 $TMPFUNCS $TMPFUNCST`; do
         ret=1
 done
 
-echo "Checking variables..."
-for f in `comm -13 $TMPVARS $TMPVARST`; do
-        echo "variable $f defined in zile.texi but not in tbl_vars.h."
-        ret=1
-done
-for f in `comm -23 $TMPVARS $TMPVARST`; do
-        echo "variable $f defined in tbl_vars.h but not in Texinfo."
-        ret=1
-done
-
-rm -f $TMPFILE1 $TMPFUNCS $TMPVARS $TMPFUNCST $TMPVARST
+rm -f $TMPFILE1 $TMPFUNCS $TMPFUNCST
 exit $ret

@@ -1,6 +1,6 @@
 # Documentation Makefile.am
 #
-# Copyright (c) 2008 Free Software Foundation, Inc.
+# Copyright (c) 2008, 2009 Free Software Foundation, Inc.
 # Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
 # Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
 # Copyright (c) 2004 David Capello.
@@ -37,12 +37,26 @@ dist_man_MANS = zile.1
 
 $(srcdir)/zile.info: dotzile.texi
 
+BUILT_TEXI = vars.texi
+
+$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
+
 dotzile.texi: dotzile.sample
-	@echo "@c Automatically generated file: NO DOT EDIT!" >$@
+	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
 	@echo "@setfilename dotzile.info" >>$@
 	@echo "@example" >>$@
 	expand $? >>$@
 	@echo "@end example" >>$@
 
+LUA_BUILDTIME = mkvars.lua
+
+LUA_RUNTIME =				\
+		lib.lua			\
+		texinfo.lua		\
+		std.lua
+
+dotzile.sample vars.texi: $(top_srcdir)/src/tbl_vars.h mkvars.lua $(LUA_RUNTIME)
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(top_srcdir)/src/tbl_vars.h
+
 check-local:
-	$(top_srcdir)/doc/zlint $(top_builddir)/src/tbl_funcs.h $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/doc/zile.texi
+	$(top_srcdir)/doc/zlint $(top_builddir)/src/tbl_funcs.h $(top_srcdir)/doc/zile.texi

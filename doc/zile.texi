@@ -644,66 +644,7 @@ This table contains the full list of available variables, that can be
 modified at run-time with the @samp{set-variable} function or set at start-up
 in the @file{.zile} initialization file.
 
-@c FIXME: Generate the following as vars.texi
-@c LINT VAR
-@table @code
-@item auto-fill-mode
-If non-nil, @i{Auto Fill Mode} is automatically enabled.  Default
-value is @samp{nil}.
-@item backup-directory
-The directory for backup files, which must exist.  If this variable is
-@samp{nil}, the backup is made in the original file's directory.
-Default value is @samp{nil}.
-@item case-fold-search
-Non-nil means searches ignore case.
-@item case-replace
-Non-nil means `query-replace' should preserve case in replacements.
-@item fill-column
-Column beyond which automatic line-wrapping should happen.
-Automatically becomes buffer-local when set in any fashion.
-Default value is @samp{70}.
-@item highlight-nonselected-windows
-If non-nil, highlight region even in nonselected windows.  Default
-value is @samp{nil}.
-@item indent-tabs-mode
-If non-nil, insert-tab inserts `real' tabs; otherwise, it always inserts spaces.
-Default value is @samp{nil}.
-@item inhibit-splash-screen
-Non-nil inhibits the startup screen.
-It also inhibits display of the initial message in the `*scratch*' buffer.
-Default value is @samp{nil}.
-@item kill-whole-line
-If non-nil, `kill-line' with no arg at the beginning of a line kills the whole line.
-Default value is @samp{nil}.
-@item make-backup-files
-Non-nil means make a backup of a file the first time it is saved.
-This is done by appending `@samp{~}' to the file name.
-Default value is @samp{t}.
-@item ring-bell
-Non-nil means ring the terminal bell on any error.
-Default value is @samp{t}.
-@item standard-indent
-Default number of columns for margin-changing functions to indent.
-Default values is @samp{4}.
-@item tab-always-indent
-Controls the operation of the @kbd{TAB} key.
-If @samp{t}, hitting @kbd{TAB} always just indents the current line.
-If @samp{nil}, hitting @kbd{TAB} indents the current line if point is at the
-left margin or in the line's indentation, otherwise it inserts a
-"real" TAB character.
-Default value is @samp{t}.
-@item tab-width
-Distance between tab stops (for display of tab characters), in columns.
-Automatically becomes buffer-local when set in any fashion.
-Default value is @samp{8}.
-@item transient-mark-mode
-If non-nil, deactivates the mark when the buffer contents change.
-Also enables highlighting of the region whenever the mark is active.
-The variable `highlight-nonselected-windows' controls whether to
-highlight all windows or just the selected window.
-Default value is @samp{t}.
-@end table
-@c LINT END VAR
+@include vars.texi
 
 @c ---------------------------------------------------------------------------
 @node Help and bug reports, GNU Free Documentation License, Variables, Top
