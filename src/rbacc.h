@@ -2,7 +2,6 @@
 
    Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 2007 Alistair Turnbull.
-   All rights reserved.
 
    This file is part of GNU Zile.
 

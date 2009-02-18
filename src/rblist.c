@@ -3,7 +3,6 @@
    Copyright (c) 2008 Free Software Foundation, Inc.
    Copyright (c) 2006-2007 Alistair Turnbull.
    Copyright (c) 2006-2007 Reuben Thomas.
-   All rights reserved.
 
    This file is part of GNU Zile.
 
