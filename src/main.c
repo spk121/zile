@@ -274,7 +274,7 @@ main (int argc, char **argv)
                   "Initialization options:\n"
                   "\n"
                   "--no-init-file, -q      do not load ~/." PACKAGE "\n"
-                  "--load, -l FILE         load Emacs Lisp FILE using the load function\n"
+                  "--load, -l FILE         load " PACKAGE_NAME " Lisp FILE using the load function\n"
                   "--help                  display this help message and exit\n"
                   "--version               display version information and exit\n"
                   "\n" "Action options:\n" "\n"
