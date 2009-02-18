@@ -1,8 +1,8 @@
                         Reporting bugs in Zile
                         ----------------------
 
-Bug reports, feature requests and patches should be sent to
-<bug-zile@gnu.org>, or, preferably, filed directly in the relevant
+Please send bug reports, feature requests and patches to
+<bug-zile@gnu.org>, or, preferably, file them directly in the relevant
 tracker at http://savannah.gnu.org/projects/zile/
 
 Zile has a suite of Lisp tests in the lisp-tests directory of the
