@@ -58,7 +58,7 @@ for i in ipairs (arg) do
           die ("invalid DEFUN syntax `" .. l .. "'")
         end
 
-        local interactive = string.sub (l, 1, 12) == "DEFUN_HIDDEN"
+        local interactive = string.sub (l, 1, 12) ~= "DEFUN_HIDDEN"
 
         local state = 0
         local doc = ""
