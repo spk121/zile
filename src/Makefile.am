@@ -84,8 +84,12 @@ ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME)
 
 BUILT_SOURCES = tbl_funcs.h
 
+# FIXME: Rewrite the following rules according to "Multiple Outputs" in automake manual (second block of code from the bottom)
 funcs.texi tbl_funcs.h: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
+
+dotzile.sample vars.texi: $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/mkvars.lua $(LUA_RUNTIME)
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(top_srcdir)/src/tbl_vars.h
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -299,6 +303,8 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/zile_test.input
 
 EXTRA_DIST =						\
+	$(LUA_RUNTIME)					\
+	$(LUA_BUILDTIME)				\
 	$(BUILT_TEXI)					\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_OUTPUTS)				\
@@ -323,6 +329,3 @@ dotzile.texi: dotzile.sample
 	@echo "@example" >>$@
 	expand $? >>$@
 	@echo "@end example" >>$@
-
-dotzile.sample vars.texi: $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/mkvars.lua $(LUA_RUNTIME)
-	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(top_srcdir)/src/tbl_vars.h
