@@ -5,8 +5,9 @@ directly, as DejaGnu proved to be insufficiently portable, and too
 flaky. Two commands have been added to make it possible to write all
 the tests in Lisp, namely execute-kbd-macro and insert-char. The
 --script flag is now --load, which is what it really does. Various
-commands have been made to work non-interactively. Other small fixes
-and improvements have been made.
+commands have been made to work non-interactively. Duplication has
+been reduced by generating much of the documentation from the code.
+Other small fixes and improvements have been made.
 
 Release 2.3.0:
 
@@ -230,9 +231,9 @@ Changes between Zile 1.4 - Zile 1.5
 * Reorganized partially the `F1'..`F12' keys.
 * Added a reference card (see `etc/refcard.tex' and `etc/refcard.ps').
 * User-invisible changes: introduced three new general-purpose libraries:
-	- lib/alist.c	Doubly-linked lists
-	- lib/astr.c	Dynamically allocated strings
-	- lib/htable.c	Hash table functions (was hash.c)
+        - lib/alist.c	Doubly-linked lists
+        - lib/astr.c	Dynamically allocated strings
+        - lib/htable.c	Hash table functions (was hash.c)
   The new libraries are documented in their man pages (see lib/*.3).
   Starting from this version, the internal structures will be rewritten
   using these libraries.  This will make the code easier to maintain,
@@ -243,9 +244,9 @@ Changes between Zile 1.3 - Zile 1.4
 
 * Added support for `F1'..`F12' keys.
 * Implemented the following functions:
-	tabify
-	untabify
-	copy-region-as-kill (bound to `M-w')
+        tabify
+        untabify
+        copy-region-as-kill (bound to `M-w')
 * Added support for xterm resizing (SIGWINCH signal).
 * Added `text-mode-auto-fill' variable that automatically turns on the
   Auto Fill Mode in Text Mode.
