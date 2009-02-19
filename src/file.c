@@ -462,7 +462,7 @@ DEFUN ("find-file-read-only", find_file_read_only)
 /*+
 Edit the specified file but don't allow changes.
 Like `find-file' but marks buffer as read-only.
-Use M-x toggle-read-only to permit editing.
+Use @kbd{M-x toggle-read-only} to permit editing.
 +*/
 {
   ok = FUNCALL (find_file);

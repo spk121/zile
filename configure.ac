@@ -157,5 +157,5 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
 
 dnl Generate configured files
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_FILES(Makefile doc/Makefile lib/Makefile src/Makefile)
+AC_CONFIG_FILES(Makefile lib/Makefile src/Makefile)
 AC_OUTPUT

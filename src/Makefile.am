@@ -27,11 +27,6 @@ LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB)
 
 bin_PROGRAMS = zile
 
-noinst_PROGRAMS = mkfuncs
-
-tbl_funcs.h: $(zile_SOURCES) mkfuncs$(EXEEXT_FOR_BUILD)
-	./mkfuncs $(zile_SOURCES) > tbl_funcs.h
-
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
 # Use absolute paths in list below for mkfuncs
@@ -76,9 +71,21 @@ zile_SOURCES =					\
 	$(top_srcdir)/src/term_redisplay.c	\
 	$(top_srcdir)/src/term_curses.c
 
-ALLSOURCES = $(zile_SOURCES) mkfuncs.c
+LUA_RUNTIME =				\
+		lib.lua			\
+		texinfo.lua		\
+		std.lua
+
+LUA_BUILDTIME = 			\
+		mkfuncs.lua		\
+		mkvars.lua
+
+ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME)
 
 BUILT_SOURCES = tbl_funcs.h
+
+funcs.texi tbl_funcs.h: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -195,8 +202,7 @@ LISP_TESTS =						\
 	lisp-tests/yank.el				\
 	lisp-tests/setq_nonexistent_variable.el
 
-EXTRA_DIST = $(LISP_TESTS) $(SCRIPT_TESTS)		\
-	quit.el						\
+LISP_TESTS_OUTPUTS =					\
 	lisp-tests/backward_char.output			\
 	lisp-tests/backward_delete_char.output		\
 	lisp-tests/backward_kill_word.output		\
@@ -291,3 +297,32 @@ EXTRA_DIST = $(LISP_TESTS) $(SCRIPT_TESTS)		\
 	lisp-tests/yank.output				\
 	lisp-tests/setq_nonexistent_variable.output	\
 	lisp-tests/zile_test.input
+
+EXTRA_DIST =						\
+	$(BUILT_TEXI)					\
+	$(LISP_TESTS)					\
+	$(LISP_TESTS_OUTPUTS)				\
+	$(SCRIPT_TESTS)					\
+	quit.el
+
+info_TEXINFOS = zile.texi
+
+dist_pkgdata_DATA = dotzile.sample
+
+dist_man_MANS = zile.1
+
+zile.info: dotzile.texi
+
+BUILT_TEXI = funcs.texi vars.texi dotzile.texi
+
+$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
+
+dotzile.texi: dotzile.sample
+	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
+	@echo "@setfilename dotzile.info" >>$@
+	@echo "@example" >>$@
+	expand $? >>$@
+	@echo "@end example" >>$@
+
+dotzile.sample vars.texi: $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/mkvars.lua $(LUA_RUNTIME)
+	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(top_srcdir)/src/tbl_vars.h

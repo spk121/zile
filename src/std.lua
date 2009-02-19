@@ -1,4 +1,4 @@
-function require (f)
+local function require (f)
   package.loaded[f] = true
 end
 -- @module base
@@ -1201,7 +1201,7 @@ _G.Object = {
   _init = {},
 }
 setmetatable (Object, Object)
-  
+
 -- @func Object:_clone: Object constructor
 --   @param values: initial values for fields in
 --   _init
@@ -1211,7 +1211,7 @@ function Object:_clone (values)
   local object = table.merge (self, table.rearrange (self._init, values))
   return setmetatable (object, object)
 end
-  
+
 -- @func Object:__call: Sugar instance creation
 function Object.__call (...)
   -- First (...) gets first element of list
@@ -1284,12 +1284,12 @@ module ("string", package.seeall)
 --   (Use in getopt)
 --
 --   John Hughes's and Simon Peyton Jones's Pretty Printer Combinators
---   
+--
 --   Based on The Design of a Pretty-printing Library in Advanced
 --   Functional Programming, Johan Jeuring and Erik Meijer (eds), LNCS 925
 --   http://www.cs.chalmers.se/~rjmh/Papers/pretty.ps
 --   Heavily modified by Simon Peyton Jones, Dec 96
---   
+--
 --   Haskell types:
 --   data Doc     list of lines
 --   quote :: Char -> Char -> Doc -> Doc    Wrap document in ...
@@ -2133,7 +2133,7 @@ end
 
 -- A small and hopefully enlightening example:
 if type (_DEBUG) == "table" and _DEBUG.std then
-  
+
   function out (o)
     return o or io.stdout
   end
@@ -2450,7 +2450,7 @@ function Parser:parse (start, token, from)
 
   local grammar = self.grammar -- for consistency and brevity
   local rule, symbol -- functions called before they are defined
-  
+
   -- @func Parser:optional: Try to parse an optional symbol
   --   @param sym: the symbol being tried
   --   @param from: the index of the token to start from

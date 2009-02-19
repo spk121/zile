@@ -1,7 +1,7 @@
--- Zee-specific library functions
+-- Turn texinfo markup into plain text
 --
 -- Copyright (c) 2009 Free Software Foundation, Inc.
--- Copyright (c) 2006, 2007, 2008 Reuben Thomas.
+-- Copyright (c) 2007 Reuben Thomas.
 --
 -- This file is part of GNU Zile.
 --
@@ -21,33 +21,11 @@
 -- MA 02111-1301, USA.
 
 
--- Parse re-usable C headers
-function X(...)
-  xarg = {...}
-end
-
--- Extract the docstrings from tbl_funcs.lua
-docstring = {}
-function def(t)
-  local name, s
-  for i, v in pairs(t) do
-    if type(i) == "string" then
-      name = i
-      _G[name] = v
-    elseif type(i) == "number" and i == 1 then
-      s = v
-    end
-  end
-  if name then
-    docstring[name] = s
-  end
-end
-
--- Load a file of Lua, aborting if not found.
-function require(f)
-  local ok, err = pcall(dofile, f .. ".lua")
-  if not ok then
-    io.stderr:write(string.format(PACKAGE_NAME .. " is not properly installed: could not load file `%s'\n%s\n", f, err))
-    die(1)
-  end
+function texi (s)
+  s = string.gsub (s, "@i{([^}]+)}", function (s) return string.upper (s) end)
+  s = string.gsub (s, "@kbd{([^}]+)}", "%1")
+  s = string.gsub (s, "@samp{([^}]+)}", "%1")
+  s = string.gsub (s, "@itemize%s[^\n]*\n", "")
+  s = string.gsub (s, "@end%s[^\n]*\n", "")
+  return s
 end

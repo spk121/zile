@@ -539,8 +539,8 @@ Do incremental search forward.
 With a prefix argument, do an incremental regular expression search instead.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
-Type C-s to search again forward, C-r to search again backward.
-C-g when search is successful aborts and moves point to starting point.
+Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
+@kbd{C-g} when search is successful aborts and moves point to starting point.
 +*/
 {
   ok = isearch (ISEARCH_FORWARD, lastflag & FLAG_SET_UNIARG);
@@ -553,8 +553,8 @@ Do incremental search backward.
 With a prefix argument, do a regular expression search instead.
 As you type characters, they add to the search string and are found.
 Type return to exit, leaving point at location found.
-Type C-r to search again backward, C-s to search again forward.
-C-g when search is successful aborts and moves point to starting point.
+Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
+@kbd{C-g} when search is successful aborts and moves point to starting point.
 +*/
 {
   ok = isearch (ISEARCH_BACKWARD, lastflag & FLAG_SET_UNIARG);
@@ -566,7 +566,7 @@ DEFUN ("isearch-forward-regexp", isearch_forward_regexp)
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
 Like ordinary incremental search except that your input
-is treated as a regexp.  See M-x isearch-forward for more info.
+is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
 +*/
 {
   ok = isearch (ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
@@ -578,7 +578,7 @@ DEFUN ("isearch-backward-regexp", isearch_backward_regexp)
 Do incremental search forward for regular expression.
 With a prefix argument, do a regular string search instead.
 Like ordinary incremental search except that your input
-is treated as a regexp.  See M-x isearch-forward for more info.
+is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
 +*/
 {
   ok = isearch (ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));

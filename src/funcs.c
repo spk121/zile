@@ -217,8 +217,10 @@ Display a list of names of existing buffers.
 The list is displayed in a buffer named `*Buffer List*'.
 Note that buffers with names starting with spaces are omitted.
 
-The M column contains a * for buffers that are modified.
-The R column contains a % for buffers that are read-only.
+@itemize -
+The @samp{M} column contains a @samp{*} for buffers that are modified.
+The @samp{R} column contains a @samp{%} for buffers that are read-only.
+@end itemize
 +*/
 {
   write_temp_buffer ("*Buffer List*", true, write_buffers_list, cur_wp);
@@ -230,7 +232,7 @@ DEFUN ("overwrite-mode", overwrite_mode)
 In overwrite mode, printing characters typed in replace existing
 text on a one-for-one basis, rather than pushing it to the right.
 At the end of a line, such characters extend the line.
-C-q still inserts characters in overwrite mode; this
+@kbd{C-q} still inserts characters in overwrite mode; this
 is supposed to make it easier to insert characters when necessary.
 +*/
 {
@@ -491,10 +493,10 @@ universal_argument (int keytype, int xarg)
 DEFUN ("universal-argument", universal_argument)
 /*+
 Begin a numeric argument for the following command.
-Digits or minus sign following C-u make up the numeric argument.
-C-u following the digits or minus sign ends the argument.
-C-u without digits or minus sign provides 4 as argument.
-Repeating C-u without digits or minus sign multiplies the argument
+Digits or minus sign following @kbd{C-u} make up the numeric argument.
+@kbd{C-u} following the digits or minus sign ends the argument.
+@kbd{C-u} without digits or minus sign provides 4 as argument.
+Repeating @kbd{C-u} without digits or minus sign multiplies the argument
 by 4 each time.
 +*/
 {
@@ -673,7 +675,7 @@ END_DEFUN
 DEFUN ("untabify", untabify)
 /*+
 Convert all tabs in region to multiple spaces, preserving columns.
-The variable `tab-width' controls the spacing of tab stops.
+The variable @samp{tab-width} controls the spacing of tab stops.
 +*/
 {
   ok = edit_tab_region (TAB_UNTABIFY);
@@ -1068,7 +1070,7 @@ END_DEFUN
 
 DEFUN ("transpose-sexps", transpose_sexps)
 /*+
-Like M-x transpose-words but applies to sexps.
+Like @kbd{M-x transpose-words} but applies to sexps.
 +*/
 {
   ok = transpose (uniarg, forward_sexp, backward_sexp);
@@ -1109,8 +1111,8 @@ END_DEFUN
 
 DEFUN ("mark-sexp", mark_sexp)
 /*+
-Set mark argument sexps from point.
-The place mark goes is the same place C-M-f would
+Set mark @i{arg} sexps from point.
+The place mark goes is the same place @kbd{C-M-f} would
 move to with the same argument.
 +*/
 {
@@ -1495,7 +1497,7 @@ DEFUN_ARGS ("shell-command", shell_command,
             STR_ARG (cmd)
             BOOL_ARG (insert))
 /*+
-Execute string COMMAND in inferior shell; display output, if any.
+Execute string @i{command} in inferior shell; display output, if any.
 With prefix argument, insert the command's output at point.
 
 Command is executed synchronously.  The output appears in the buffer
@@ -1504,7 +1506,7 @@ in the echo area, it is shown there, but it is nonetheless available
 in buffer `*Shell Command Output*' even though that buffer is not
 automatically displayed.
 
-The optional second argument OUTPUT-BUFFER, if non-nil,
+The optional second argument @i{output-buffer}, if non-nil,
 says to insert the output in the current buffer.
 +*/
 {

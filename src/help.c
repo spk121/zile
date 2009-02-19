@@ -61,7 +61,7 @@ show_file (char *filename)
 
 DEFUN ("view-zile-FAQ", view_zile_FAQ)
 /*+
-Show the Zile Frequently Asked Questions (FAQ).
+Display the Zile Frequently Asked Questions (FAQ) file.
 +*/
 {
   ok = show_file (PATH_DATA "/FAQ");

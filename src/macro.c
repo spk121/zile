@@ -121,8 +121,8 @@ DEFUN ("start-kbd-macro", start_kbd_macro)
 /*+
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
-Use C-x ) to finish recording and make the macro available.
-Use M-x name-last-kbd-macro to give it a permanent name.
+Use @kbd{C-x )} to finish recording and make the macro available.
+Use @kbd{M-x name-last-kbd-macro} to give it a permanent name.
 +*/
 {
   if (thisflag & FLAG_DEFINING_MACRO)
@@ -144,8 +144,8 @@ END_DEFUN
 DEFUN ("end-kbd-macro", end_kbd_macro)
 /*+
 Finish defining a keyboard macro.
-The definition was started by C-x (.
-The macro is now available for use via C-x e.
+The definition was started by @kbd{C-x (}.
+The macro is now available for use via @kbd{C-x e}.
 +*/
 {
   if (!(thisflag & FLAG_DEFINING_MACRO))
@@ -217,11 +217,11 @@ call_macro (Macro * mp)
 
 DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
 /*+
-Call the last keyboard macro that you defined with C-x (.
+Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.
 
 To make a macro permanent so you can call it even after
-defining others, use M-x name-last-kbd-macro.
+defining others, use @kbd{M-x name-last-kbd-macro}.
 +*/
 {
   int uni;
