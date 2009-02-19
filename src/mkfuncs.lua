@@ -46,6 +46,8 @@ h2:write (" * " .. PACKAGE_NAME .. " command to C function bindings and docstrin
 h2:write (" */\n")
 h2:write ("\n")
 
+local funcs = {}
+
 for i in ipairs (arg) do
   if arg[i] then
     lines = io.lines (dir .. "/" .. arg[i])
@@ -55,6 +57,8 @@ for i in ipairs (arg) do
         if name == nil or name == "" then
           die ("invalid DEFUN syntax `" .. l .. "'")
         end
+
+        local interactive = string.sub (l, 1, 12) == "DEFUN_HIDDEN"
 
         local state = 0
         local doc = ""
@@ -76,19 +80,29 @@ for i in ipairs (arg) do
           die ("unterminated docstring for " .. name)
         end
 
-        local cdoc = string.gsub (doc, "\n", "\\n\\\n")
-        cdoc = texi (cdoc)
-        h1:write ("@item " .. name .. "\n" .. doc)
-
-        local cname = string.gsub (name, "-", "_")
-        local interactive = string.sub (l, 1, 12) == "DEFUN_HIDDEN"
-        h2:write ("X(\"" .. name .. "\", " .. cname .. ", " ..
-                  (interactive and "true" or "false") .. ", \"\\\n")
-        h2:write (cdoc)
-        h2:write ("\")\n")
+        table.insert (funcs, {name = name,
+                              doc = doc,
+                              interactive = interactive})
       end
     end
   end
+end
+
+table.sort (funcs,
+            function (a, b)
+              return a.name < b.name
+            end)
+
+for _, f in pairs (funcs) do
+  local cdoc = string.gsub (f.doc, "\n", "\\n\\\n")
+  cdoc = texi (cdoc)
+  h1:write ("@item " .. f.name .. "\n" .. f.doc)
+
+  local cname = string.gsub (f.name, "-", "_")
+  h2:write ("X(\"" .. f.name .. "\", " .. cname .. ", " ..
+            (f.interactive and "true" or "false") .. ", \"\\\n")
+  h2:write (cdoc)
+  h2:write ("\")\n")
 end
 
 h1:write ("@end table\n")
