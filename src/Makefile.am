@@ -82,14 +82,24 @@ LUA_BUILDTIME = 			\
 
 ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME)
 
-BUILT_SOURCES = tbl_funcs.h
+BUILT_SOURCES = tbl_funcs.h $(BUILT_TEXI)
 
 # FIXME: Rewrite the following rules according to "Multiple Outputs" in automake manual (second block of code from the bottom)
 funcs.texi tbl_funcs.h: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
 
-dotzile.sample vars.texi: $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/mkvars.lua $(LUA_RUNTIME)
+dotzile.texi dotzile.sample vars.texi: $(top_srcdir)/src/tbl_vars.h $(top_srcdir)/src/mkvars.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(top_srcdir)/src/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(top_srcdir)/src/tbl_vars.h
+
+info_TEXINFOS = zile.texi
+
+dist_pkgdata_DATA = dotzile.sample
+
+dist_man_MANS = zile.1
+
+BUILT_TEXI = funcs.texi vars.texi dotzile.texi
+
+$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
 CLEANFILES = $(BUILT_SOURCES)
 
@@ -310,22 +320,3 @@ EXTRA_DIST =						\
 	$(LISP_TESTS_OUTPUTS)				\
 	$(SCRIPT_TESTS)					\
 	quit.el
-
-info_TEXINFOS = zile.texi
-
-dist_pkgdata_DATA = dotzile.sample
-
-dist_man_MANS = zile.1
-
-zile.info: dotzile.texi
-
-BUILT_TEXI = funcs.texi vars.texi dotzile.texi
-
-$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
-
-dotzile.texi: dotzile.sample
-	@echo "@c Automatically generated file: DO NOT EDIT!" >$@
-	@echo "@setfilename dotzile.info" >>$@
-	@echo "@example" >>$@
-	expand $? >>$@
-	@echo "@end example" >>$@
