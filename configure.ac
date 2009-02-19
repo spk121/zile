@@ -37,8 +37,8 @@ AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
 
 dnl Check for valgrind
-AC_SUBST([VALGRIND])
 AC_PATH_PROG([VALGRIND], [valgrind])
+AC_SUBST([VALGRIND])
 
 dnl Curses
 MP_WITH_CURSES
@@ -118,7 +118,7 @@ AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
 AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
 AC_CHECK_LIB([lua$with_lua_suffix],
              [lua_call],
-             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"]
+             [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
              [],
              [$LUA_LIBS $lua_extra_libs])
 
