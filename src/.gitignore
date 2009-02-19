@@ -8,7 +8,6 @@ vars.texi
 funcs.texi
 dotzile.sample
 dotzile.texi
-zile.1
 texinfo.tex
 zile.aux
 zile.cp
@@ -19,3 +18,4 @@ zile.pg
 zile.toc
 zile.tp
 zile.vr
+*.stamp
