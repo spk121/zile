@@ -127,9 +127,7 @@ CLEANFILES = 						\
 loc:
 	cloc --no3 $(ALLSOURCES) Makefile.am ../Makefile.am ../configure.ac
 
-TESTS_ENVIRONMENT = builddir=$(builddir)
-# FIXME: Run tests under valgrind
-#TESTS_ENVIRONMENT = $(VALGRIND)
+TESTS_ENVIRONMENT = builddir=$(builddir) $(VALGRIND)
 
 SCRIPT_TESTS =						\
 	run-lisp-tests					\
