@@ -3,6 +3,7 @@
    Copyright (c) 2008, 2009 Free Software Foundation, Inc.
    Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
    Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
+   Copyright (c) 2004 David Capello.
 
    This file is part of GNU Zile.
 
@@ -126,23 +127,6 @@ bind_key_vec (Binding tree, gl_list_t keys, size_t from, Function func)
     bind_key_vec (s, keys, from + 1, func);
   else
     s->func = func;
-}
-
-static void
-bind_key_string (Binding bindings, char *key, Function func)
-{
-  gl_list_t keys = keystrtovec (key);
-
-  if (keys && gl_list_size (keys) > 0)
-    bind_key_vec (bindings, keys, 0, func);
-  else
-    {
-      fprintf (stderr,
-               "%s: Key sequence %s is invalid in default bindings\n\n",
-               prog_name, key);
-      exit (1);
-    }
-  gl_list_free (keys);
 }
 
 static Binding
@@ -324,6 +308,7 @@ init_default_bindings (void)
   size_t i;
   gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
                                          NULL, NULL, NULL, true);
+  astr as;
 
   root_bindings = init_bindings ();
 
@@ -339,10 +324,125 @@ init_default_bindings (void)
     }
   gl_list_free (keys);
 
-#define X(c_name, key)                 \
-  bind_key_string (root_bindings, key, F_ ## c_name);
-#include "tbl_bind.h"
-#undef X
+  as = astr_new_cstr ("\
+(global-set-key \"\\M-m\" 'back-to-indentation)\
+(global-set-key \"\\C-b\" 'backward-char)\
+(global-set-key \"\\LEFT\" 'backward-char)\
+(global-set-key \"\\BACKSPACE\" 'backward-delete-char)\
+(global-set-key \"\\M-\\BACKSPACE\" 'backward-kill-word)\
+(global-set-key \"\\M-{\" 'backward-paragraph)\
+(global-set-key \"\\C-\\M-b\" 'backward-sexp)\
+(global-set-key \"\\M-b\" 'backward-word)\
+(global-set-key \"\\M-<\" 'beginning-of-buffer)\
+(global-set-key \"\\C-a\" 'beginning-of-line)\
+(global-set-key \"\\HOME\" 'beginning-of-line)\
+(global-set-key \"\\C-xe\" 'call-last-kbd-macro)\
+(global-set-key \"\\M-c\" 'capitalize-word)\
+(global-set-key \"\\M-w\" 'copy-region-as-kill)\
+(global-set-key \"\\C-xrx\" 'copy-to-register)\
+(global-set-key \"\\C-xrs\" 'copy-to-register)\
+(global-set-key \"\\C-x\\C-o\" 'delete-blank-lines)\
+(global-set-key \"\\C-d\" 'delete-char)\
+(global-set-key \"\\DELETE\" 'delete-char)\
+(global-set-key \"\\M-\\\\\" 'delete-horizontal-space)\
+(global-set-key \"\\C-x1\" 'delete-other-windows)\
+(global-set-key \"\\C-x0\" 'delete-window)\
+(global-set-key \"\\C-hb\" 'describe-bindings)\
+(global-set-key \"\\F1b\" 'describe-bindings)\
+(global-set-key \"\\C-hf\" 'describe-function)\
+(global-set-key \"\\F1f\" 'describe-function)\
+(global-set-key \"\\C-hk\" 'describe-key)\
+(global-set-key \"\\F1k\" 'describe-key)\
+(global-set-key \"\\C-hv\" 'describe-variable)\
+(global-set-key \"\\F1v\" 'describe-variable)\
+(global-set-key \"\\C-x\\C-l\" 'downcase-region)\
+(global-set-key \"\\M-l\" 'downcase-word)\
+(global-set-key \"\\C-x)\" 'end-kbd-macro)\
+(global-set-key \"\\M->\" 'end-of-buffer)\
+(global-set-key \"\\C-e\" 'end-of-line)\
+(global-set-key \"\\END\" 'end-of-line)\
+(global-set-key \"\\C-x^\" 'enlarge-window)\
+(global-set-key \"\\C-x\\C-x\" 'exchange-point-and-mark)\
+(global-set-key \"\\M-x\" 'execute-extended-command)\
+(global-set-key \"\\M-q\" 'fill-paragraph)\
+(global-set-key \"\\C-x\\C-v\" 'find-alternate-file)\
+(global-set-key \"\\C-x\\C-f\" 'find-file)\
+(global-set-key \"\\C-x\\C-r\" 'find-file-read-only)\
+(global-set-key \"\\RIGHT\" 'forward-char)\
+(global-set-key \"\\C-f\" 'forward-char)\
+(global-set-key \"\\M-}\" 'forward-paragraph)\
+(global-set-key \"\\C-\\M-f\" 'forward-sexp)\
+(global-set-key \"\\M-f\" 'forward-word)\
+(global-set-key \"\\M-gg\" 'goto-line)\
+(global-set-key \"\\M-g\\M-g\" 'goto-line)\
+(global-set-key \"\\TAB\" 'indent-for-tab-command)\
+(global-set-key \"\\C-xi\" 'insert-file)\
+(global-set-key \"\\C-xrg\" 'insert-register)\
+(global-set-key \"\\C-xri\" 'insert-register)\
+(global-set-key \"\\C-r\" 'isearch-backward)\
+(global-set-key \"\\C-\\M-r\" 'isearch-backward-regexp)\
+(global-set-key \"\\C-s\" 'isearch-forward)\
+(global-set-key \"\\C-\\M-s\" 'isearch-forward-regexp)\
+(global-set-key \"\\M-\\SPC\" 'just-one-space)\
+(global-set-key \"\\C-g\" 'keyboard-quit)\
+(global-set-key \"\\C-xk\" 'kill-buffer)\
+(global-set-key \"\\C-k\" 'kill-line)\
+(global-set-key \"\\C-w\" 'kill-region)\
+(global-set-key \"\\C-\\M-k\" 'kill-sexp)\
+(global-set-key \"\\M-d\" 'kill-word)\
+(global-set-key \"\\C-x\\C-b\" 'list-buffers)\
+(global-set-key \"\\M-h\" 'mark-paragraph)\
+(global-set-key \"\\C-\\M-@\" 'mark-sexp)\
+(global-set-key \"\\C-xh\" 'mark-whole-buffer)\
+(global-set-key \"\\M-@\" 'mark-word)\
+(global-set-key \"\\RET\" 'newline)\
+(global-set-key \"\\C-j\" 'newline-and-indent)\
+(global-set-key \"\\C-n\" 'next-line)\
+(global-set-key \"\\DOWN\" 'next-line)\
+(global-set-key \"\\C-o\" 'open-line)\
+(global-set-key \"\\C-xo\" 'other-window)\
+(global-set-key \"\\INSERT\" 'overwrite-mode)\
+(global-set-key \"\\C-p\" 'previous-line)\
+(global-set-key \"\\UP\" 'previous-line)\
+(global-set-key \"\\M-%\" 'query-replace)\
+(global-set-key \"\\C-q\" 'quoted-insert)\
+(global-set-key \"\\C-l\" 'recenter)\
+(global-set-key \"\\C-x\\C-s\" 'save-buffer)\
+(global-set-key \"\\C-x\\C-c\" 'save-buffers-kill-zile)\
+(global-set-key \"\\C-xs\" 'save-some-buffers)\
+(global-set-key \"\\M-v\" 'scroll-down)\
+(global-set-key \"\\PRIOR\" 'scroll-down)\
+(global-set-key \"\\C-v\" 'scroll-up)\
+(global-set-key \"\\NEXT\" 'scroll-up)\
+(global-set-key \"\\C-xf\" 'set-fill-column)\
+(global-set-key \"\\C-@\" 'set-mark-command)\
+(global-set-key \"\\M-!\" 'shell-command)\
+(global-set-key \"\\M-|\" 'shell-command-on-region)\
+(global-set-key \"\\C-x2\" 'split-window)\
+(global-set-key \"\\C-x(\" 'start-kbd-macro)\
+(global-set-key \"\\C-x\\C-z\" 'suspend-zile)\
+(global-set-key \"\\C-z\" 'suspend-zile)\
+(global-set-key \"\\C-xb\" 'switch-to-buffer)\
+(global-set-key \"\\M-i\" 'tab-to-tab-stop)\
+(global-set-key \"\\C-x\\C-q\" 'toggle-read-only)\
+(global-set-key \"\\C-t\" 'transpose-chars)\
+(global-set-key \"\\C-x\\C-t\" 'transpose-lines)\
+(global-set-key \"\\C-\\M-t\" 'transpose-sexps)\
+(global-set-key \"\\M-t\" 'transpose-words)\
+(global-set-key \"\\C-xu\" 'undo)\
+(global-set-key \"\\C-_\" 'undo)\
+(global-set-key \"\\C-u\" 'universal-argument)\
+(global-set-key \"\\C-x\\C-u\" 'upcase-region)\
+(global-set-key \"\\M-u\" 'upcase-word)\
+(global-set-key \"\\C-h\\C-f\" 'view-zile-FAQ)\
+(global-set-key \"\\F1\\C-f\" 'view-zile-FAQ)\
+(global-set-key \"\\C-hw\" 'where-is)\
+(global-set-key \"\\F1w\" 'where-is)\
+(global-set-key \"\\C-x\\C-w\" 'write-file)\
+(global-set-key \"\\C-y\" 'yank)\
+");
+  lisp_loadstring (as);
+  astr_delete (as);
 }
 
 void

@@ -196,21 +196,26 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
     }
 }
 
-bool
-lisp_load (const char *file)
+void
+lisp_loadstring (astr as)
 {
-  FILE *fp;
-  le *list;
+  ptrdiff_t pos = 0;
+  le * list = lisp_read (NULL, as, &pos);
 
-  fp = fopen (file, "r");
+  leEval (list);
+  leWipe (list);
+}
+
+bool
+lisp_loadfile (const char *file)
+{
+  FILE *fp = fopen (file, "r");
+
   if (fp != NULL)
     {
       astr bs = astr_fread (fp);
-      ptrdiff_t pos = 0;
-      list = lisp_read (NULL, bs, &pos);
-      leEval (list);
+      lisp_loadstring (bs);
       astr_delete (bs);
-      leWipe (list);
       fclose (fp);
       return true;
     }
@@ -224,7 +229,7 @@ Execute a file of Lisp code named FILE.
 +*/
 {
   if (arglist && countNodes (arglist) >= 2)
-    ok = bool_to_lisp (lisp_load (arglist->next->data));
+    ok = bool_to_lisp (lisp_loadfile (arglist->next->data));
   else
     ok = leNIL;
 }

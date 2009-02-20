@@ -123,7 +123,7 @@ load_files (gl_list_t files)
       char *file = (char *) gl_list_get_at (files, i);
       term_redisplay ();
       lastflag |= FLAG_NEED_RESYNC;
-      if (!lisp_load (file))
+      if (!lisp_loadfile (file))
         {
           minibuf_error ("Cannot open load file: %s\n", file);
           break;
@@ -321,7 +321,7 @@ main (int argc, char **argv)
       if (as)
         {
           astr_cat_cstr (as, "/." PACKAGE);
-          lisp_load (astr_cstr (as));
+          lisp_loadfile (astr_cstr (as));
           astr_delete (as);
         }
     }

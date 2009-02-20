@@ -168,7 +168,8 @@ void free_registers (void);
 /* lisp.c ----------------------------------------------------------------- */
 void init_lisp (void);
 void free_lisp (void);
-bool lisp_load (const char *file);
+void lisp_loadstring (astr as);
+bool lisp_loadfile (const char *file);
 
 /* macro.c ---------------------------------------------------------------- */
 void cancel_kbd_macro (void);
