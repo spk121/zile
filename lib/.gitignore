@@ -148,3 +148,16 @@ unistd.h
 /streq.h
 /verify.h
 /wcrtomb.c
+/areadlink-with-size.c
+/areadlink.h
+/canonicalize.c
+/file-set.c
+/file-set.h
+/filenamecat.c
+/filenamecat.h
+/hash-pjw.c
+/hash-pjw.h
+/hash-triple.c
+/hash-triple.h
+/same.c
+/same.h

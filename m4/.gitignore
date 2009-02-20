@@ -92,3 +92,6 @@ xstrndup.m4
 /mbsinit.m4
 /multiarch.m4
 /wcrtomb.m4
+/canonicalize.m4
+/filenamecat.m4
+/same.m4

@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include "dirname.h"
+#include "canonicalize.h"
 
 #include "zile.h"
 #include "extern.h"
@@ -85,8 +86,8 @@ agetcwd (void)
  * the passed path:
  *
  * - expands `~/' and `~name/' expressions;
- * - replaces `//' with `/' (restarting from the root directory);
- * - removes `..' and `.' entries.
+ * - calls canonicalize_file_name on the result (a GNU function
+ *   that works like realpath but mallocs its result).
  *
  * The return value indicates success or failure.
  */
@@ -95,36 +96,20 @@ expand_path (astr path)
 {
   int ok = true;
   struct passwd *pw;
-  const char *sp = astr_cstr (path);
+  const char *sp = astr_cstr (path), *p;
   astr epath = astr_new ();
 
-  if (*sp != '/')
+  for (p = sp; *p != '\0';)
     {
-      astr_cat_delete (epath, agetcwd ());
-      if (astr_len (epath) == 0 || *astr_char (epath, -1) != '/')
-        astr_cat_char (epath, '/');
-    }
+      if (*p == '~' && (p == sp || p[-1] == '/'))
+        {
+          /* Got `/~' or leading `~'.  Restart from this point. */
+          astr_truncate (epath, 0);
+          ++p;
 
-  while (*sp != '\0')
-    {
-      if (*sp == '/')
-        {
-          if (*++sp == '/')
+          if (*p == '/')
             {
-              /* Got `//'.  Restart from this point. */
-              while (*sp == '/')
-                sp++;
-              astr_truncate (epath, 0);
-            }
-          astr_cat_char (epath, '/');
-        }
-      else if (*sp == '~')
-        {
-          if (*(sp + 1) == '/')
-            {
-              /* Got `~/'. Restart from this point and insert the user's
-                 home directory. */
-              astr_truncate (epath, 0);
+              /* Got `~/'.  Insert the user's home directory. */
               pw = getpwuid (getuid ());
               if (pw == NULL)
                 {
@@ -133,17 +118,13 @@ expand_path (astr path)
                 }
               if (strcmp (pw->pw_dir, "/") != 0)
                 astr_cat_cstr (epath, pw->pw_dir);
-              ++sp;
             }
           else
             {
-              /* Got `~something'.  Restart from this point and insert that
-                 user's home directory. */
+              /* Got `~something'.  Insert that user's home directory. */
               astr as = astr_new ();
-              astr_truncate (epath, 0);
-              ++sp;
-              while (*sp != '\0' && *sp != '/')
-                astr_cat_char (as, *sp++);
+              while (*p != '\0' && *p != '/')
+                astr_cat_char (as, *p++);
               pw = getpwnam (astr_cstr (as));
               astr_delete (as);
               if (pw == NULL)
@@ -154,56 +135,33 @@ expand_path (astr path)
               astr_cat_cstr (epath, pw->pw_dir);
             }
         }
-      else if (*sp == '.')
-        {
-          if (*(sp + 1) == '/' || *(sp + 1) == '\0')
-            {
-              ++sp;
-              if (*sp == '/' && *(sp + 1) != '/')
-                ++sp;
-            }
-          else if (*(sp + 1) == '.' &&
-                   (*(sp + 2) == '/' || *(sp + 2) == '\0'))
-            /* FIXME:
-             *
-             * If /foo on your system is a symlink to /bar/baz, then /foo/../quux
-             * is actually /bar/quux, not /quux as a naive ../-removal would give
-             * you. If you want to do this kind of processing, you probably want
-             * "Cwd"'s realpath function
-             */
-            {
-              if (astr_len (epath) >= 1 && *astr_char (epath, -1) == '/')
-                astr_truncate (epath, -1);
-              while (*astr_char (epath, -1) != '/' && astr_len (epath) >= 1)
-                astr_truncate (epath, -1);
-              sp += 2;
-              if (*sp == '/' && *(sp + 1) != '/')
-                ++sp;
-            }
-          else
-            goto got_component;
-        }
       else
-        {
-          const char *p;
-        got_component:
-          p = sp;
-          while (*p != '\0' && *p != '/')
-            p++;
-          if (*p == '\0')
-            {			/* Final filename */
-              astr_cat_cstr (epath, sp);
-              break;
-            }
-          else
-            {			/* Non-final directory */
-              while (*sp != '/')
-                astr_cat_char (epath, *sp++);
-            }
-        }
+        while (*p != '\0' && *p != '/')
+          astr_cat_char (epath, *p++);
+
+      if (*p == '/')
+        astr_cat_char (epath, *p++);
     }
 
-  astr_cpy (path, epath);
+  if (ok)
+    {
+      char *s = canonicalize_file_name (astr_cstr (epath));
+      if (s != NULL)
+        {
+          astr_cpy_cstr (epath, s);
+          free (s);
+
+          /* Restore trailing slash, removed by
+             canonicalize_file_name, if any. */
+          if (p[-1] == '/')
+            astr_cat_char (epath, '/');
+
+          astr_cpy (path, epath);
+        }
+      else
+        ok = false;
+    }
+
   astr_delete (epath);
 
   return ok;
@@ -220,7 +178,7 @@ compact_path (astr path)
 
   if (pw != NULL)
     {
-      /* Replace `/userhome/' (if existent) with `~/'. */
+      /* Replace `/userhome/' (if found) with `~/'. */
       size_t i = strlen (pw->pw_dir);
       if (!strncmp (pw->pw_dir, astr_cstr (path), i))
         {
