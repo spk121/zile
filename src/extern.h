@@ -111,7 +111,7 @@ extern char coding_eol_cr[3];
 extern char coding_eol_undecided[3];
 int exist_file (const char *filename);
 astr get_home_dir (void);
-astr expand_path (astr path);
+bool expand_path (astr path);
 astr compact_path (astr path);
 bool find_file (const char *filename);
 void kill_buffer (Buffer * kill_bp);

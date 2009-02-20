@@ -227,7 +227,7 @@ completion_readdir (Completion * cp, astr as)
                                           completion_streq, NULL,
                                           list_free, false);
 
-  if (expand_path (as) == NULL)
+  if (!expand_path (as))
     return false;
 
   bs = astr_new ();

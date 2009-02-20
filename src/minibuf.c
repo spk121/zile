@@ -168,8 +168,8 @@ minibuf_read_filename (const char *fmt, const char *value,
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  as = expand_path (astr_new_cstr (value));
-  if (as)
+  as = astr_new_cstr (value);
+  if (expand_path (as))
     {
       as = compact_path (as);
 
@@ -179,22 +179,22 @@ minibuf_read_filename (const char *fmt, const char *value,
         pos -= strlen (file);
       p = term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history);
       free_completion (cp);
-      astr_delete (as);
       free (buf);
 
       if (p != NULL)
         {
-          as = expand_path (astr_new_cstr (p));
-          if (as)
+          astr as = astr_new_cstr (p);
+          if (expand_path (as))
             {
               add_history_element (files_history, p);
               p = xstrdup (astr_cstr (as));
-              astr_delete (as);
             }
           else
             p = NULL;
+          astr_delete (as);
         }
     }
+  astr_delete (as);
 
   return p;
 }

@@ -83,16 +83,17 @@ agetcwd (void)
 /*
  * This functions does some corrections and expansions to
  * the passed path:
+ *
  * - expands `~/' and `~name/' expressions;
  * - replaces `//' with `/' (restarting from the root directory);
  * - removes `..' and `.' entries.
  *
- * If something goes wrong, the string is deleted and NULL returned.
+ * The return value indicates success or failure.
  */
-astr
+bool
 expand_path (astr path)
 {
-  int ret = true;
+  int ok = true;
   struct passwd *pw;
   const char *sp = astr_cstr (path);
   astr epath = astr_new ();
@@ -127,7 +128,7 @@ expand_path (astr path)
               pw = getpwuid (getuid ());
               if (pw == NULL)
                 {
-                  ret = false;
+                  ok = false;
                   break;
                 }
               if (strcmp (pw->pw_dir, "/") != 0)
@@ -147,7 +148,7 @@ expand_path (astr path)
               astr_delete (as);
               if (pw == NULL)
                 {
-                  ret = false;
+                  ok = false;
                   break;
                 }
               astr_cat_cstr (epath, pw->pw_dir);
@@ -205,10 +206,7 @@ expand_path (astr path)
   astr_cpy (path, epath);
   astr_delete (epath);
 
-  if (!ret)
-    return NULL;
-
-  return path;
+  return ok;
 }
 
 /*
@@ -985,7 +983,7 @@ create_backup_filename (const char *filename, const char *backupdir)
           ++filename;
         }
 
-      if (expand_path (buf) == NULL)
+      if (!expand_path (buf))
         {
           astr_delete (buf);
           buf = NULL;
