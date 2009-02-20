@@ -40,7 +40,7 @@
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 2008, 2009 Free Software Foundation, Inc."
+  "Copyright (C) 2009 Free Software Foundation, Inc."
 
 /* The executable name */
 char *prog_name = PACKAGE;
