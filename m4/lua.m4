@@ -47,7 +47,6 @@
 # COPYLEFT
 #
 #   Copyright (c) 2008, 2009 Reuben Thomas <rrt@sc3d.org>
-#   Copyright (c) 2003 Tuomo Valkonen <tuomov@iki.fi>
 #
 #   This program is free software: you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
@@ -114,7 +113,7 @@ AC_DEFUN([_AX_LUA_VERSIONS],
 
 AC_DEFUN([AX_LUA_VERSION],
   [_AX_LUA_OPTS
-  AC_MSG_CHECKING([Lua version is in range @<:@$1, $2)])
+  AC_MSG_CHECKING([Lua version is in range $1 <= v < $2])
   _AX_LUA_VERSIONS($1, $2)
   lua_text_version=$($LUA -v 2>&1 | head -n 1 | cut -d' ' -f2)
   case $lua_text_version in
@@ -166,7 +165,7 @@ AC_DEFUN([AX_LUA_LIBS],
 
 AC_DEFUN([AX_LUA_LIB_VERSION],
   [_AX_LUA_OPTS
-  AC_MSG_CHECKING([liblua version is in range @<:@$1, $2)])
+  AC_MSG_CHECKING([liblua version is in range $1 <= v < $2])
   _AX_LUA_VERSIONS($1, $2)
   LUA_OLD_LIBS="$LIBS"
   LIBS="$LIBS $LUA_LIBS"
