@@ -47,6 +47,8 @@
 # COPYLEFT
 #
 #   Copyright (c) 2008, 2009 Reuben Thomas <rrt@sc3d.org>
+#   Copyright (c) 2005, 2006 Matthieu Moy <Matthieu.Moy@imag.fr>
+#   Copyright (c) 2003 Tom Payne <twpayne@gmail.com>
 #
 #   This program is free software: you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
