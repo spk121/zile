@@ -270,7 +270,7 @@ main (int argc, char **argv)
                   "\n"
                   "Initialization options:\n"
                   "\n",
-                  prog_name);
+                  argv[0]);
 #define X(longname, shortname, arg, argstring, docstring) \
           xasprintf (&buf, "--%s, -%c %s", longname, shortname, argstring); \
           printf ("%-24s%s\n", buf, docstring);                          \
