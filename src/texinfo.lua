@@ -1,7 +1,6 @@
 -- Turn texinfo markup into plain text
 --
--- Copyright (c) 2009 Free Software Foundation, Inc.
--- Copyright (c) 2007 Reuben Thomas.
+-- Copyright (c) 2007, 2009 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --

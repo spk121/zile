@@ -1,8 +1,6 @@
 /* Lisp lists
 
    Copyright (c) 2008 Free Software Foundation, Inc.
-   Copyright (c) 2001 Scott "Jerry" Lawrence.
-   Copyright (c) 2005 Reuben Thomas.
 
    This file is part of GNU Zile.
 

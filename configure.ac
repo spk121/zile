@@ -1,8 +1,6 @@
 dnl configure.ac
 dnl
-dnl Copyright (c) 2008, 2009 Free Software Foundation, Inc.
-dnl Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Sandro Sigala.
-dnl Copyright (c) 2003, 2004, 2005, 2006, 2007, 2008 Reuben Thomas.
+dnl Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 dnl
 dnl This file is part of GNU Zile.
 dnl

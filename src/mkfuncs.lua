@@ -1,7 +1,6 @@
 -- Produce funcs.texi and tbl_funcs.lua
 --
--- Copyright (c) 2009 Free Software Foundation, Inc.
--- Copyright (c) 2006, 2007 Reuben Thomas.
+-- Copyright (c) 2006, 2007, 2009 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --

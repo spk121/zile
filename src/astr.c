@@ -1,8 +1,6 @@
 /* Dynamically allocated strings
 
-   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
-   Copyright (c) 2001, 2002, 2003, 2004 Sandro Sigala.
-   Copyright (c) 2003, 2004, 2005 Reuben Thomas.
+   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 

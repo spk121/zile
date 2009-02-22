@@ -1,7 +1,6 @@
 /* History facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
-   Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2004, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 

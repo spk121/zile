@@ -1,8 +1,6 @@
 /* Lisp parser
 
-   Copyright (c) 2008, 2009 Free Software Foundation, Inc.
-   Copyright (c) 2001 Scott "Jerry" Lawrence.
-   Copyright (c) 2005 Reuben Thomas.
+   Copyright (c) 2001, 2005, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 

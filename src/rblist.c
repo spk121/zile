@@ -1,8 +1,6 @@
 /* Randomly balanced lists of characters.
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
-   Copyright (c) 2006-2007 Alistair Turnbull.
-   Copyright (c) 2006-2007 Reuben Thomas.
+   Copyright (c) 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 

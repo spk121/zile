@@ -1,7 +1,6 @@
 /* Marker facility functions
 
-   Copyright (c) 2008 Free Software Foundation, Inc.
-   Copyright (c) 2004 David A. Capello.
+   Copyright (c) 2004, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -47,15 +46,15 @@ unchain_marker (Marker * marker)
     {
       next = m->next;
       if (m == marker)
-	{
-	  if (prev)
-	    prev->next = next;
-	  else
-	    m->bp->markers = next;
+        {
+          if (prev)
+            prev->next = next;
+          else
+            m->bp->markers = next;
 
-	  m->bp = NULL;
-	  break;
-	}
+          m->bp = NULL;
+          break;
+        }
       prev = m;
     }
 }
