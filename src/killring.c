@@ -27,7 +27,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 static astr kill_ring_text;

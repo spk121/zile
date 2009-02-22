@@ -35,7 +35,7 @@
 #include "dirname.h"
 #include "canonicalize.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 int

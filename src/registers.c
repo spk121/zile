@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 #define NUM_REGISTERS	256

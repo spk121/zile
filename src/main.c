@@ -34,7 +34,7 @@
 #include "dirname.h"
 #include "gl_linked_list.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \

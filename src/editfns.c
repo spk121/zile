@@ -26,7 +26,7 @@
 #include <ctype.h>
 #include "gl_linked_list.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 static gl_list_t mark_ring = NULL;	/* Mark ring. */

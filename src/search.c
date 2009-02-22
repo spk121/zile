@@ -32,7 +32,7 @@
 #endif
 #include "regex.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 /* Downcasing table for case-folding search */

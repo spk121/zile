@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include "xalloc.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 #include "xalloc_extra.h"
 

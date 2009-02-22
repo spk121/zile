@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 static Window *

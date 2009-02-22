@@ -28,7 +28,7 @@
 #include <ctype.h>
 #include "gl_array_list.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 /*

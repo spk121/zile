@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 /* Goal-column to arrive when `prev/next-line' functions are used.  */

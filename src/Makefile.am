@@ -32,7 +32,7 @@ zile_SOURCES =						\
 	xalloc_extra.c					\
 	xalloc_extra.h					\
 	extern.h					\
-	zile.h						\
+	main.h						\
 	tbl_vars.h					\
 	tbl_opts.h					\
 	eval.c						\
