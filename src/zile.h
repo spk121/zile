@@ -46,7 +46,7 @@ typedef struct Undo Undo;
 typedef struct Macro Macro;
 typedef struct Binding *Binding;
 
-/* Types which should really be opaque. */
+/* FIXME: Types which should really be opaque. */
 typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
