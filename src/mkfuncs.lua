@@ -1,4 +1,4 @@
--- Produce funcs.texi and tbl_funcs.lua
+-- Generate tbl_funcs.lua
 --
 -- Copyright (c) 2006, 2007, 2009 Free Software Foundation, Inc.
 --
@@ -30,20 +30,14 @@ require "std"
 dir = arg[1]
 table.remove (arg, 1)
 
-h1 = io.open ("funcs.texi", "w")
-assert (h1)
+h = io.open ("tbl_funcs.h", "w")
+assert (h)
 
-h2 = io.open ("tbl_funcs.h", "w")
-assert (h2)
-
-h1:write ("@c Automatically generated file: DO NOT EDIT!\n")
-h1:write ("@table @code\n")
-
-h2:write ("/*\n")
-h2:write (" * Automatically generated file: DO NOT EDIT!\n")
-h2:write (" * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n")
-h2:write (" */\n")
-h2:write ("\n")
+h:write ("/*\n")
+h:write (" * Automatically generated file: DO NOT EDIT!\n")
+h:write (" * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n")
+h:write (" */\n")
+h:write ("\n")
 
 local funcs = {}
 
@@ -95,16 +89,12 @@ table.sort (funcs,
 for _, f in pairs (funcs) do
   local cdoc = string.gsub (f.doc, "\n", "\\n\\\n")
   cdoc = texi (cdoc)
-  h1:write ("@item " .. f.name .. "\n" .. f.doc)
 
   local cname = string.gsub (f.name, "-", "_")
-  h2:write ("X(\"" .. f.name .. "\", " .. cname .. ", " ..
+  h:write ("X(\"" .. f.name .. "\", " .. cname .. ", " ..
             (f.interactive and "true" or "false") .. ", \"\\\n")
-  h2:write (cdoc)
-  h2:write ("\")\n")
+  h:write (cdoc)
+  h:write ("\")\n")
 end
 
-h1:write ("@end table\n")
-h1:close ()
-
-h2:close ()
+h:close ()

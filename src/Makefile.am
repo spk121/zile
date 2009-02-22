@@ -80,8 +80,7 @@ ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
 BUILT_SOURCES = 					\
 	tbl_funcs.h					\
-	dotzile.sample					\
-	$(BUILT_TEXI)
+	dotzile.sample
 
 # The next two stanzas are based on code from the automake manual for
 # handling tools that produce multiple outputs.
@@ -90,7 +89,7 @@ mkfuncs.stamp: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	@touch mkfuncs.tmp
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
 	@mv -f mkfuncs.tmp $@
-funcs.texi tbl_funcs.h: mkfuncs.stamp
+tbl_funcs.h: mkfuncs.stamp
 	@if test -f $@; then :; else \
 	  rm -f mkfuncs.stamp; \
 	  $(MAKE) $(AM_MAKEFLAGS) mkfuncs.stamp; \
@@ -101,21 +100,15 @@ mkvars.stamp: tbl_vars.h mkvars.lua $(LUA_RUNTIME)
 	@touch mkvars.tmp
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h
 	@mv -f mkvars.tmp $@
-dotzile.texi dotzile.sample vars.texi: mkvars.stamp
+dotzile.sample: mkvars.stamp
 	@if test -f $@; then :; else \
 	  rm -f mkvars.stamp; \
 	  $(MAKE) $(AM_MAKEFLAGS) mkvars.stamp; \
 	fi
 
-info_TEXINFOS = zile.texi
-
 dist_pkgdata_DATA = dotzile.sample
 
 dist_man_MANS = zile.1
-
-BUILT_TEXI = funcs.texi vars.texi dotzile.texi
-
-$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
 
 CLEANFILES = 						\
 	$(BUILT_SOURCES)				\
@@ -331,7 +324,6 @@ LISP_TESTS_OUTPUTS =					\
 EXTRA_DIST =						\
 	$(LUA_RUNTIME)					\
 	$(LUA_BUILDTIME)				\
-	$(BUILT_TEXI)					\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_OUTPUTS)				\
 	$(SCRIPT_TESTS)					\

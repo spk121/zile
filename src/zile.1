@@ -3,7 +3,6 @@
 .\" Copying and distribution of this file, with or without
 .\" modification, are permitted in any medium without royalty
 .\" provided the copyright notice and this notice are preserved.
-.\" FIXME: Generate most of the contents of this page automatically.
 .Dd Feb, 2009
 .Os
 .Dt ZILE 1
@@ -16,10 +15,9 @@
 .Sh DESCRIPTION
 .Nm Zile
 is a lightweight Emacs clone that provides a subset of Emacs's
-functionality suitable for basic editing. It should run on any POSIX
-system with ncurses. For more complete documentation, see the Info
-manual (`info zile').
+functionality suitable for basic editing.
 .Sh OPTIONS
+.\" FIXME: Generate automatically.
 .Bl -tag -width indent
 .It Ar +NUMBER
 Go to line \fINUMBER\fR in the next file opened.
@@ -33,23 +31,22 @@ Display a help message and exit.
 Display version information and exit.
 .El
 .Sh DIAGNOSTICS
-Zile returns 0 on successful termination, 1 if it cannot start up, for
-example because of an invalid command-line argument, and 2 if it
-crashes or runs out of memory.
+Zile exits with status 0 on successful termination, 1 if it cannot
+start up, for example because of an invalid command-line argument, and
+2 if it crashes or runs out of memory.
 .Sh FILES
 .Bl -tag -width Fl
 .It Pa ~/.zile
 user's Zile init file
+.\" FIXME: Generate correct path.
+.It Pa /usr/local/share/doc/dotzile.sample
+sample init file which also documents the default settings and
+contains some useful tips.
 .El
 .Sh BUGS
 Please report bugs to \fBbug-zile@gnu.org\fR.
 .Sh SEE ALSO
 .Xr emacs 1
 .Sh AUTHORS
-Sandro Sigala <sandro@sigala.it>
-.br
-Reuben Thomas <rrt@sc3d.org>
-.br
-David A. Capello <dacap@users.sourceforge.net>
-.br
-Scott Lawrence <yorgle@gmail.com>
+Zile was written by Sandro Sigala, David A. Capello and Reuben Thomas.
+The Lisp interpreter is based on code by Scott Lawrence.
