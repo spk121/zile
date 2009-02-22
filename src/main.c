@@ -211,13 +211,11 @@ signal_init (void)
 }
 
 /* Options table */
-/* Options which take no argument have optional_argument, so that no
-   arguments are signalled as extraneous, to mimic Emacs */
 struct option longopts[] = {
-  {"help", optional_argument, NULL, 'h'},
-  {"no-init-file", optional_argument, NULL, 'q'},
-  {"load", required_argument, NULL, 'l'},
-  {"version", optional_argument, NULL, 'v'},
+#define X(longname, shortname, arg, argstring, docstring) \
+  {longname, arg, NULL, shortname},
+#include "tbl_opts.h"
+#undef X
   {0, 0, 0, 0}
 };
 
@@ -244,9 +242,10 @@ main (int argc, char **argv)
   for (;;)
     {
       int this_optind = optind ? optind : 1;
+      char *buf;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
-      c = getopt_long_only (argc, argv, ":h:l:qv", longopts, NULL);
+      c = getopt_long (argc, argv, ":l:q", longopts, NULL);
 
       if (c == -1)
         break;
@@ -270,17 +269,21 @@ main (int argc, char **argv)
                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
                   "\n"
                   "Initialization options:\n"
+                  "\n",
+                  prog_name);
+#define X(longname, shortname, arg, argstring, docstring) \
+          xasprintf (&buf, "--%s, -%c %s", longname, shortname, argstring); \
+          printf ("%-24s%s\n", buf, docstring);                          \
+          free (buf);
+#include "tbl_opts.h"
+#undef X
+          printf ("\n"
+                  "Action options:\n"
                   "\n"
-                  "--no-init-file, -q      do not load ~/." PACKAGE "\n"
-                  "--load, -l FILE         load " PACKAGE_NAME " Lisp FILE using the load function\n"
-                  "--help                  display this help message and exit\n"
-                  "--version               display version information and exit\n"
-                  "\n" "Action options:\n" "\n"
                   "FILE                    visit FILE using find-file\n"
                   "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
                   "\n"
-                  "Report bugs to " PACKAGE_BUGREPORT ".\n",
-                  prog_name);
+                  "Report bugs to " PACKAGE_BUGREPORT ".\n");
           return 0;
         case 'l':
           gl_list_add_last (l_args, (void *) optarg);
