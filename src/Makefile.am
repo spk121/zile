@@ -82,29 +82,11 @@ BUILT_SOURCES = 					\
 	tbl_funcs.h					\
 	dotzile.sample
 
-# The next two stanzas are based on code from the automake manual for
-# handling tools that produce multiple outputs.
-mkfuncs.stamp: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
-	@rm -f mkfuncs.tmp
-	@touch mkfuncs.tmp
+tbl_funcs.h: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
-	@mv -f mkfuncs.tmp $@
-tbl_funcs.h: mkfuncs.stamp
-	@if test -f $@; then :; else \
-	  rm -f mkfuncs.stamp; \
-	  $(MAKE) $(AM_MAKEFLAGS) mkfuncs.stamp; \
-	fi
 
-mkvars.stamp: tbl_vars.h mkvars.lua $(LUA_RUNTIME)
-	@rm -f mkvars.tmp
-	@touch mkvars.tmp
+dotzile.sample: tbl_vars.h mkvars.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h
-	@mv -f mkvars.tmp $@
-dotzile.sample: mkvars.stamp
-	@if test -f $@; then :; else \
-	  rm -f mkvars.stamp; \
-	  $(MAKE) $(AM_MAKEFLAGS) mkvars.stamp; \
-	fi
 
 dist_pkgdata_DATA = dotzile.sample
 
