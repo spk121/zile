@@ -4,7 +4,7 @@
 
 @dircategory Editors
 @direntry
-* Zile: (zile).                 A very small Emacs-subset editor.
+* Zile: (zile).                 A lightweight Emacs clone.
 @end direntry
 
 @c If "finalout" is commented out, the printed output will show
