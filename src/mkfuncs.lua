@@ -52,7 +52,6 @@ for i in ipairs (arg) do
         end
 
         local interactive = string.sub (l, 1, 12) ~= "DEFUN_HIDDEN"
-
         local state = 0
         local doc = ""
         for l in lines do
@@ -87,13 +86,9 @@ table.sort (funcs,
             end)
 
 for _, f in pairs (funcs) do
-  local cdoc = string.gsub (f.doc, "\n", "\\n\\\n")
-  cdoc = texi (cdoc)
-
-  local cname = string.gsub (f.name, "-", "_")
-  h:write ("X(\"" .. f.name .. "\", " .. cname .. ", " ..
-            (f.interactive and "true" or "false") .. ", \"\\\n")
-  h:write (cdoc)
+  h:write ("X(\"" .. f.name .. "\", " .. string.gsub (f.name, "-", "_") .. ", " ..
+           (f.interactive and "true" or "false") .. ", \"\\\n")
+  h:write (string.gsub (texi (f.doc), "\n", "\\n\\\n"))
   h:write ("\")\n")
 end
 
