@@ -212,10 +212,14 @@ signal_init (void)
 
 /* Options table */
 struct option longopts[] = {
-#define X(longname, shortname, arg, argstring, docstring) \
+#define D(text)
+#define O(longname, shortname, arg, argstring, docstring) \
   {longname, arg, NULL, shortname},
+#define A(argstring, docstring)
 #include "tbl_opts.h"
-#undef X
+#undef D
+#undef O
+#undef A
   {0, 0, 0, 0}
 };
 
@@ -267,22 +271,21 @@ main (int argc, char **argv)
           printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
                   "\n"
                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
-                  "\n"
-                  "Initialization options:\n"
                   "\n",
                   argv[0]);
-#define X(longname, shortname, arg, argstring, docstring) \
+#define D(text) \
+          printf (text "\n");
+#define O(longname, shortname, arg, argstring, docstring) \
           xasprintf (&buf, "--%s, -%c %s", longname, shortname, argstring); \
           printf ("%-24s%s\n", buf, docstring);                          \
           free (buf);
+#define A(argstring, docstring) \
+          printf ("%-24s%s\n", argstring, docstring);
 #include "tbl_opts.h"
-#undef X
+#undef D
+#undef O
+#undef A
           printf ("\n"
-                  "Action options:\n"
-                  "\n"
-                  "FILE                    visit FILE using find-file\n"
-                  "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
-                  "\n"
                   "Report bugs to " PACKAGE_BUGREPORT ".\n");
           return 0;
         case 'l':
