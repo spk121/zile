@@ -26,7 +26,7 @@ bin_PROGRAMS = zile
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
-zile_SOURCES =						\
+zile_base_SOURCES =					\
 	astr.c						\
 	astr.h						\
 	xalloc_extra.c					\
@@ -34,8 +34,6 @@ zile_SOURCES =						\
 	extern.h					\
 	main.h						\
 	tbl_vars.h					\
-	tbl_funcs.h					\
-	tbl_opts.h					\
 	eval.c						\
 	lists.c						\
 	lists.h						\
@@ -68,6 +66,11 @@ zile_SOURCES =						\
 	term_redisplay.c				\
 	term_curses.c
 
+zile_SOURCES =						\
+	$(zile_base_SOURCES)				\
+	tbl_funcs.h					\
+	tbl_opts.h
+
 LUA_RUNTIME =						\
 	lib.lua						\
 	texinfo.lua
@@ -76,7 +79,7 @@ LUA_BUILDTIME = 					\
 	mkfuncs.lua					\
 	mkdotzile.lua
 
-ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
+ALLSOURCES = $(zile_base_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
 BUILT_FILES =	 					\
 	tbl_funcs.h					\
@@ -85,8 +88,8 @@ BUILT_FILES =	 					\
 	dotzile.sample					\
 	man-extras
 
-tbl_funcs.h: $(zile_SOURCES) $(srcdir)/mkfuncs.lua $(LUA_RUNTIME)
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
+tbl_funcs.h: $(zile_base_SOURCES) $(srcdir)/mkfuncs.lua $(LUA_RUNTIME)
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_base_SOURCES)
 
 dotzile.sample: $(srcdir)/tbl_vars.h $(srcdir)/mkdotzile.lua $(LUA_RUNTIME) $(srcdir)/dotzile-extra.el
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkdotzile.lua $(srcdir)/tbl_vars.h
