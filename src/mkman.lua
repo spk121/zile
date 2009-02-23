@@ -33,6 +33,7 @@ assert (h)
 -- FIXME: Put the following in a file
 h:write (".\\\" Automatically generated file: DO NOT EDIT!\n" ..
          ".\\\" Generated from tbl_opts.h.\n" ..
+         -- FIXME: Generate "ZILE", "Zile" and 2.3.1 in next line
          ".TH ZILE \"1\" \"February 2009\" \"Zile 2.3.1\" \"User Commands\"\n" ..
          ".SH NAME\n" ..
          "zile \\- Zile Is Lossy Emacs\n" ..
