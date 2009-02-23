@@ -28,6 +28,7 @@ AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
+AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
 
 dnl Checks for functions and headers
 gl_INIT
@@ -63,5 +64,8 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["${ac_hostname}"],
 
 dnl Generate output
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_FILES(Makefile lib/Makefile src/Makefile)
+AC_CONFIG_FILES(
+        Makefile lib/Makefile src/Makefile
+        src/tbl_opts.h
+        )
 AC_OUTPUT
