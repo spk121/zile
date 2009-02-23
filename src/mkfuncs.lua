@@ -36,7 +36,7 @@ assert (h)
 h:write ("/*\n" ..
          " * Automatically generated file: DO NOT EDIT!\n" ..
          " * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n" ..
-         " * Generated from tbl_funcs.h.\n" ..
+         " * Generated from C sources.\n" ..
          " */\n" ..
          "\n")
 
