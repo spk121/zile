@@ -54,12 +54,12 @@ rblist rblist_fmt(const char *format, ...)
   int x;
   size_t i;
   while (1) {
-    // Skip to next `%' or to end of string.
+    /* Skip to next `%' or to end of string. */
     for (i = 0; format[i] && format[i] != '%'; i++);
     rbacc_add_array(ret, format, i);
     if (!format[i++])
       break;
-    // We've found a `%'.
+    /* We've found a `%'. */
     switch (format[i++]) {
       case 'c':
         rbacc_add_char(ret, (char)va_arg(ap, int));
@@ -115,7 +115,7 @@ rblist rblist_fmt(const char *format, ...)
  * Newline characters must not occur in `rbl'. Other characters are
  * replaced with a backslash followed by their octal character code.
  */
-// FIXME: The length of the returned string can exceed size_t.
+/* FIXME: The length of the returned string can exceed size_t. */
 rblist make_string_printable(rblist rbl, size_t col, size_t tab, size_t goal, size_t *pos)
 {
   static const char ctrls[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -139,8 +139,8 @@ rblist make_string_printable(rblist rbl, size_t col, size_t tab, size_t goal, si
       rbacc_add_char(ret, ctrls[c]);
     } else if (isprint(c)) {
       rbacc_add_char(ret, c);
-      // FIXME: For double-width characters add a '\0' too so the length of
-      // 'ret' matches the display width.
+      /* FIXME: For double-width characters add a '\0' too so the
+         length of 'ret' matches the display width. */
     } else {
       rbacc_add_char(ret, '\\');
       rbacc_add_number(ret, (unsigned)c, 8);

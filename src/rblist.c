@@ -30,20 +30,20 @@
 #include "rblist.h"
 
 
-// For debugging: incremented every time random_double is called.
+/* For debugging: incremented every time random_double is called. */
 static size_t random_counter = 0;
 
-// Returns a random double in the range 0.0 (inclusive) to 1.0 (exclusive).
+/* Returns a random double in the range 0.0 (inclusive) to 1.0 (exclusive). */
 static inline double random_double(void)
 {
-  static uint32_t seed = 483568341; // Arbitrary.
+  static uint32_t seed = 483568341; /* Arbitrary. */
 
   random_counter++;
-  seed = (2 * seed - 1) * seed + 1; // Maximal period mod any power of two.
+  seed = (2 * seed - 1) * seed + 1; /* Maximal period mod any power of two. */
   return seed * (1.0 / (1.0 + (double)UINT32_MAX));
 }
 
-// Returns a random size_t in the range from 1 to `n'.
+/* Returns a random size_t in the range from 1 to `n'. */
 static inline size_t random_one_to_n(size_t n)
 {
   return 1 + (size_t)(n * random_double());
@@ -99,7 +99,7 @@ struct node {
   rblist right;
 };
 
-// This is the opaque public type.
+/* This is the opaque public type. */
 union rblist {
   struct {
     size_t length;
@@ -124,7 +124,7 @@ struct link {
   const struct link *next;
 };
 
-// This is the opaque public type.
+/* This is the opaque public type. */
 struct rblist_iterator {
   const struct leaf *leaf;
   size_t pos;
@@ -132,12 +132,12 @@ struct rblist_iterator {
 };
 
 /*****************************/
-// Static utility functions.
+/* Static utility functions. */
 
-// The struct leaf to which rblist_empty points.
+/* The struct leaf to which rblist_empty points. */
 static const struct leaf empty = {0, 0};
 
-// Allocates and initialises a struct leaf.
+/* Allocates and initialises a struct leaf. */
 static inline rblist leaf_from_array(const char *s, size_t length)
 {
   assert(length < MINIMUM_NODE_LENGTH);
@@ -151,7 +151,7 @@ static inline rblist leaf_from_array(const char *s, size_t length)
   return (rblist)ret;
 }
 
-// Tests whether an rblist is a leaf or a node.
+/* Tests whether an rblist is a leaf or a node. */
 static inline bool is_leaf(rblist rbl)
 {
   return rbl->stats.length < MINIMUM_NODE_LENGTH;
@@ -208,8 +208,8 @@ static rblist make_rblist(rblist left, rblist right)
   }
 }
 
-// The recursive part of rblist_split.
-// Not easy to make iterative because of the `if' in make_rblist.
+/* The recursive part of rblist_split. */
+/* Not easy to make iterative because of the `if' in make_rblist. */
 static void recursive_split(rblist rbl, size_t pos, rblist *left, rblist *right)
 {
   if (is_leaf(rbl)) {
@@ -253,7 +253,7 @@ static rblist_iterator make_iterator(rblist rbl, const struct link *next)
 }
 
 /***************************/
-// Primitive constructors.
+/* Primitive constructors. */
 
 /*
  * This operation is unique in picking the entire node/leaf structure
@@ -326,7 +326,7 @@ rblist rblist_concat(rblist left, rblist right)
     } else if (pos > mid) {
       random_split(right, pos - mid, &right, &ret->right);
       ret->left = rblist_concat(left, right);
-    } else { // pos == mid
+    } else { /* pos == mid */
       ret->left = left;
       ret->right = right;
     }
@@ -339,7 +339,7 @@ rblist rblist_concat(rblist left, rblist right)
 }
 
 /*************************/
-// Derived constructors.
+/* Derived constructors. */
 
 rblist rblist_from_string(const char *s)
 {
@@ -347,7 +347,7 @@ rblist rblist_from_string(const char *s)
 }
 
 /**************************/
-// Primitive destructors.
+/* Primitive destructors. */
 
 size_t rblist_length(rblist rbl)
 {
@@ -459,13 +459,13 @@ size_t rblist_line_to_start_pos(rblist rbl, size_t line)
 size_t rblist_line_to_end_pos(rblist rbl, size_t line)
 {
   if (line == rbl->stats.nl_count)
-    return rbl->stats.length; // EOF
+    return rbl->stats.length; /* EOF */
   else
     return rblist_line_to_start_pos(rbl, line + 1) - 1;
 }
 
 /************************/
-// Derived destructors.
+/* Derived destructors. */
 
 size_t rblist_line_length(rblist rbl, size_t line)
 {
@@ -516,7 +516,7 @@ int rblist_ncompare(rblist left, rblist right, size_t n)
 
 
 /*************/
-// Test code
+/* Test code */
 
 #ifdef TEST
 
@@ -528,7 +528,7 @@ int rblist_ncompare(rblist left, rblist right, size_t n)
 
 #include "rbutil.h"
 
-// Stub to make xalloc_die happy
+/* Stub to make xalloc_die happy */
 char *prog_name = "rblist";
 
 void
@@ -549,7 +549,7 @@ static rblist rbl_structure(rblist rbl)
     return rblist_fmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
 }
 
-// Checks all structural invariants that are supposed to hold for `rbl'.
+/* Checks all structural invariants that are supposed to hold for `rbl'. */
 static void assert_invariants(rblist rbl) {
   if (is_leaf(rbl)) {
     assert((rbl->leaf.length == 0) == (rbl == rblist_empty));
@@ -612,17 +612,17 @@ int main(void)
   rblist rbl1, rbl2, rbl3, rbl4;
 
   const char *s1 = "Hello, I'm longer than 32 characters!\nWhooppeee!!!\n\nYes, really, really long. You won't believe how incredibly enormously long I am!\n";
-  // Check that we'll have a whole number of steps in the loop below.
+  /* Check that we'll have a whole number of steps in the loop below. */
   assert(strlen(s1) == 19 * 7);
 
-  // Test loads of things for empty, short and long strings.
+  /* Test loads of things for empty, short and long strings. */
 
   test(rblist_empty, "", 0);
   test(rblist_from_char('a'), "a", 1);
   test(rblist_concat(rblist_from_char('a'), rblist_from_char('b')), "ab", 2);
   test(rblist_from_array(s1, strlen(s1)), s1, strlen(s1));
 
-  // Test computational complexity, and test concat for long strings.
+  /* Test computational complexity, and test concat for long strings. */
 
   rbl1 = rblist_empty;
   rbl2 = rblist_from_char('x');
@@ -657,7 +657,7 @@ int main(void)
 #endif
   }
 
-  // Test compare.
+  /* Test compare. */
 
   char *t[] = {"", "a", "b", "aa", "ab", "ba", "bb", NULL};
   for (int i = 0; t[i]; i++) for (int j = 0; t[j]; j++) {
@@ -675,4 +675,4 @@ int main(void)
   return EXIT_SUCCESS;
 }
 
-#endif // TEST
+#endif /* TEST */

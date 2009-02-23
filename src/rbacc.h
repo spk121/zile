@@ -35,8 +35,8 @@
 typedef struct rbacc *rbacc;
 
 
-/**************************/
-// Constructor.
+/****************/
+/* Constructor. */
 
 /*
  * Makes a new, empty rbacc.
@@ -44,8 +44,8 @@ typedef struct rbacc *rbacc;
 rbacc rbacc_new(void);
 
 
-/*************/
-// Methods.
+/************/
+/* Methods. */
 
 /*
  * Appends a character to `rba', returning `rba'.
@@ -89,4 +89,4 @@ size_t rbacc_length(rbacc rba);
  */
 rblist rbacc_to_rblist(rbacc rba);
 
-#endif // !RBACC_H
+#endif /* !RBACC_H */

@@ -54,7 +54,7 @@ typedef struct rblist_iterator *rblist_iterator;
 
 
 /***************************/
-// Primitive constructors.
+/* Primitive constructors. */
 
 /*
  * Make an rblist from an array. This can be achieved using
@@ -87,7 +87,7 @@ rblist rblist_concat(rblist left, rblist right);
 
 
 /*************************/
-// Derived constructors.
+/* Derived constructors. */
 
 /*
  * Makes an rblist from a 0-terminated string.
@@ -98,7 +98,7 @@ rblist rblist_from_string(const char *s);
 
 
 /**************************/
-// Primitive destructors.
+/* Primitive destructors. */
 
 /*
  * Read the length of an rblist.
@@ -197,7 +197,7 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
 
 
 /************************/
-// Derived destructors.
+/* Derived destructors. */
 
 /*
  * Calculates the length of line `line'.
@@ -274,4 +274,4 @@ int rblist_compare(rblist left, rblist right);
  */
 int rblist_ncompare(rblist left, rblist right, size_t n);
 
-#endif // !RBLIST_H
+#endif /* !RBLIST_H */

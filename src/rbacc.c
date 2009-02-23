@@ -37,7 +37,7 @@
  */
 #define ACCUMULATOR_LENGTH 32
 
-// This is the opaque public type.
+/* This is the opaque public type. */
 struct rbacc {
   rblist head;
   size_t used;
@@ -46,7 +46,7 @@ struct rbacc {
 
 
 /*****************************/
-// Static utility functions.
+/* Static utility functions. */
 
 /*
  * Flushes the characters buffered in rbacc.tail into rbacc.head.
@@ -60,8 +60,8 @@ static void flush(rbacc rba)
 }
 
 
-/**************************/
-// Constructor.
+/****************/
+/* Constructor. */
 
 rbacc rbacc_new(void)
 {
@@ -72,8 +72,8 @@ rbacc rbacc_new(void)
 }
 
 
-/*************/
-// Methods.
+/************/
+/* Methods. */
 
 rbacc rbacc_add_char(rbacc rba, int c)
 {
@@ -141,7 +141,7 @@ rbacc rbacc_add_file(rbacc rba, FILE *fp)
 {
   int c;
 
-  // FIXME: Read BUFSIZ bytes at a time
+  /* FIXME: Read BUFSIZ bytes at a time */
   while ((c = getc(fp)) != EOF) {
     rbacc_add_char(rba, c);
   }
@@ -165,7 +165,7 @@ rblist rbacc_to_rblist(rbacc rba)
 
 
 /*************/
-// Test code
+/* Test code */
 
 #ifdef TEST
 
@@ -175,7 +175,7 @@ rblist rbacc_to_rblist(rbacc rba)
 #include <stdlib.h>
 #include <stdio.h>
 
-// Stub to make xalloc_die happy
+/* Stub to make xalloc_die happy */
 char *prog_name = "rbacc";
 
 void
@@ -210,7 +210,7 @@ int main(void)
   const rblist rbl1 = rblist_from_string(s1), rbl2 = rblist_from_string(s2);
   FILE *fp;
 
-  // Basic functionality tests.
+  /* Basic functionality tests. */
   rba = rbacc_new();
   test(rba, "", 0);
   rbacc_add_char(rba, 'x');
@@ -229,7 +229,7 @@ int main(void)
   assert(rba->used==0);
   assert(!rblist_compare(rbacc_to_rblist(rba), rblist_from_string("xyfoo064")));
 
-  // Test various ways of appending `s1'.
+  /* Test various ways of appending `s1'. */
   rba = rbacc_new();
   rbacc_add_string(rba, s1);
   test(rba, s1, strlen(s1));
@@ -252,7 +252,7 @@ int main(void)
     assert(rbacc_length(rba) == i * strlen(s1));
   }
 
-  // Test various ways of appending `s2'.
+  /* Test various ways of appending `s2'. */
   rba = rbacc_new();
   rbacc_add_string(rba, s2);
   test(rba, s2, strlen(s2));
@@ -278,4 +278,4 @@ int main(void)
   return EXIT_SUCCESS;
 }
 
-#endif // TEST
+#endif /* TEST */
