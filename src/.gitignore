@@ -18,5 +18,6 @@ zile.pg
 zile.toc
 zile.tp
 zile.vr
+zile.1
 *.stamp
 core
