@@ -58,7 +58,7 @@ AC_SUBST(LUA)
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
                    [The date of compilation.])
-AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
+AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["${ac_hostname}"],
                    [The host of compilation.])
 
 dnl Generate output
