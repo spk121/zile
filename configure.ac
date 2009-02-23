@@ -67,6 +67,5 @@ AC_CONFIG_HEADER(config.h)
 AC_CONFIG_FILES(
         Makefile lib/Makefile src/Makefile
         src/tbl_opts.h
-        src/man-extras
         )
 AC_OUTPUT
