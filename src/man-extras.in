@@ -10,7 +10,7 @@ of memory.
 [files]
 ~/.zile \(em user's Zile init file
 
-pkgdatadir/dotzile.sample \(em sample init file which also
+@pkgdatadir@/dotzile.sample \(em sample init file which also
 documents the default settings and contains some useful tips.
 
 [author]

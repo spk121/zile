@@ -28,7 +28,7 @@ AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
-AM_MISSING_PROG(HELP2MAN, help2man, $missing_dir)
+AC_PATH_PROG(HELP2MAN, help2man, false)
 
 dnl Checks for functions and headers
 gl_INIT
@@ -67,5 +67,6 @@ AC_CONFIG_HEADER(config.h)
 AC_CONFIG_FILES(
         Makefile lib/Makefile src/Makefile
         src/tbl_opts.h
+        src/man-extras
         )
 AC_OUTPUT
