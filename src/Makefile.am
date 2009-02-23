@@ -73,7 +73,7 @@ LUA_RUNTIME =						\
 
 LUA_BUILDTIME = 					\
 	mkfuncs.lua					\
-	mkvars.lua
+	mkdotzile.lua
 
 ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
@@ -85,8 +85,8 @@ BUILT_SOURCES = 					\
 tbl_funcs.h: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
 
-dotzile.sample: tbl_vars.h mkvars.lua $(LUA_RUNTIME) dotzile-extra.el
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h
+dotzile.sample: tbl_vars.h mkdotzile.lua $(LUA_RUNTIME) dotzile-extra.el
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkdotzile.lua $(srcdir)/tbl_vars.h
 	cat $(srcdir)/dotzile-extra.el >> $@
 
 zile.1: zile man-extras zile-help2man-wrapper
