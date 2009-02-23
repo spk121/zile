@@ -63,7 +63,7 @@ typedef struct rblist_iterator *rblist_iterator;
  *
  * Takes time O(n) where `n' is the length of the list.
  */
-rblist rblist_from_array(const char *s, size_t length);
+rblist rblist_from_array (const char *s, size_t length);
 
 /*
  * The empty list. There is only one empty list, so this is a constant,
@@ -76,14 +76,14 @@ const rblist rblist_empty;
  *
  * Takes time O(1).
  */
-rblist rblist_from_char(int c);
+rblist rblist_from_char (int c);
 
 /*
  * Concatenate two lists. The originals are not modified.
  *
  * Takes time O(log(n)) where `n' is the length of the result.
  */
-rblist rblist_concat(rblist left, rblist right);
+rblist rblist_concat (rblist left, rblist right);
 
 
 /*************************/
@@ -94,7 +94,7 @@ rblist rblist_concat(rblist left, rblist right);
  *
  * Uses rblist_from_array, so takes time O(n).
  */
-rblist rblist_from_string(const char *s);
+rblist rblist_from_string (const char *s);
 
 
 /**************************/
@@ -105,14 +105,14 @@ rblist rblist_from_string(const char *s);
  *
  * Takes time O(1).
  */
-size_t rblist_length(rblist rbl);
+size_t rblist_length (rblist rbl);
 
 /*
  * Count the newline characters in an rblist.
  *
  * Take time O(1).
  */
-size_t rblist_nl_count(rblist rbl);
+size_t rblist_nl_count (rblist rbl);
 
 /*
  * Break an rblist into two at the specified position, and store the
@@ -122,21 +122,21 @@ size_t rblist_nl_count(rblist rbl);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right);
+void rblist_split (rblist rbl, size_t pos, rblist * left, rblist * right);
 
 /*
  * Constructs an iterator over the specified rblist.
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-rblist_iterator rblist_iterate(rblist rbl);
+rblist_iterator rblist_iterate (rblist rbl);
 
 /*
  * Returns thelist element currently addressed by `it'.
  *
  * Takes time O(1).
  */
-char rblist_iterator_value(rblist_iterator it);
+char rblist_iterator_value (rblist_iterator it);
 
 /*
  * Advances the rblist_iterator one place down its list and returns
@@ -145,7 +145,7 @@ char rblist_iterator_value(rblist_iterator it);
  *
  * Takes time O(1) amortized.
  */
-rblist_iterator rblist_iterator_next(rblist_iterator it);
+rblist_iterator rblist_iterator_next (rblist_iterator it);
 
 /*
  * Returns the specified element of the specified rblist. `pos' must be
@@ -158,7 +158,7 @@ rblist_iterator rblist_iterator_next(rblist_iterator it);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-char rblist_get(rblist rbl, size_t pos);
+char rblist_get (rblist rbl, size_t pos);
 
 /*
  * Converts a character position into a line number. More precisely,
@@ -169,7 +169,7 @@ char rblist_get(rblist rbl, size_t pos);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-size_t rblist_pos_to_line(rblist rbl, size_t pos);
+size_t rblist_pos_to_line (rblist rbl, size_t pos);
 
 /*
  * Converts a line number to the character position of the start of
@@ -181,7 +181,7 @@ size_t rblist_pos_to_line(rblist rbl, size_t pos);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-size_t rblist_line_to_start_pos(rblist rbl, size_t line);
+size_t rblist_line_to_start_pos (rblist rbl, size_t line);
 
 /*
  * Converts a line number to the character position of the end of that
@@ -193,7 +193,7 @@ size_t rblist_line_to_start_pos(rblist rbl, size_t line);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-size_t rblist_line_to_end_pos(rblist rbl, size_t line);
+size_t rblist_line_to_end_pos (rblist rbl, size_t line);
 
 
 /************************/
@@ -206,7 +206,7 @@ size_t rblist_line_to_end_pos(rblist rbl, size_t line);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-size_t rblist_line_length(rblist rbl, size_t line);
+size_t rblist_line_length (rblist rbl, size_t line);
 
 /*
  * Returns the line `line'.
@@ -215,7 +215,7 @@ size_t rblist_line_length(rblist rbl, size_t line);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-rblist rblist_line(rblist rbl, size_t line);
+rblist rblist_line (rblist rbl, size_t line);
 
 /*
  * Syntactic sugar for looping through the elements of an rblist.
@@ -242,7 +242,7 @@ rblist rblist_line(rblist rbl, size_t line);
  *
  * Takes time O(n) where `n' is the length of the list.
  */
-char *rblist_to_string(rblist rbl);
+char *rblist_to_string (rblist rbl);
 
 /*
  * Returns the portion of `rbl' from `from' to `to'. If `to' is too
@@ -255,7 +255,7 @@ char *rblist_to_string(rblist rbl);
  *
  * Takes time O(log(n)) where `n' is the length of the list.
  */
-rblist rblist_sub(rblist rbl, size_t from, size_t to);
+rblist rblist_sub (rblist rbl, size_t from, size_t to);
 
 /*
  * Compares the lists `left' and `right' lexicographically. Returns a
@@ -264,7 +264,7 @@ rblist rblist_sub(rblist rbl, size_t from, size_t to);
  *
  * Takes time O(n) where `n' is the length of the common prefix.
  */
-int rblist_compare(rblist left, rblist right);
+int rblist_compare (rblist left, rblist right);
 
 /*
  * Compares prefixes of the lists `left' and `right' lexographically.
@@ -272,6 +272,6 @@ int rblist_compare(rblist left, rblist right);
  *
  *   rblist_compare(rblist_sub(left, 0, n), rblist_sub(right, 0, n))
  */
-int rblist_ncompare(rblist left, rblist right, size_t n);
+int rblist_ncompare (rblist left, rblist right, size_t n);
 
 #endif /* !RBLIST_H */

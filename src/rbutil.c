@@ -46,55 +46,61 @@
  *
  * Width and precision specifiers are not supported.
  */
-rblist rblist_fmt(const char *format, ...)
+rblist
+rblist_fmt (const char *format, ...)
 {
   va_list ap;
-  va_start(ap, format);
-  rbacc ret = rbacc_new();
+  va_start (ap, format);
+  rbacc ret = rbacc_new ();
   int x;
   size_t i;
-  while (1) {
-    /* Skip to next `%' or to end of string. */
-    for (i = 0; format[i] && format[i] != '%'; i++);
-    rbacc_add_array(ret, format, i);
-    if (!format[i++])
-      break;
-    /* We've found a `%'. */
-    switch (format[i++]) {
-      case 'c':
-        rbacc_add_char(ret, (char)va_arg(ap, int));
-        break;
-      case 'd': {
-        x = va_arg(ap, int);
-        if (x < 0) {
-          rbacc_add_char(ret, '-');
-          rbacc_add_number(ret, (unsigned)-x, 10);
-        } else
-          rbacc_add_number(ret, (unsigned)x, 10);
-        break;
-      }
-      case 'o':
-        ret = rbacc_add_number(ret, va_arg(ap, unsigned int), 8);
-        break;
-      case 'r':
-        ret = rbacc_add_rblist(ret, va_arg(ap, rblist));
-        break;
-      case 's':
-        ret = rbacc_add_string(ret, va_arg(ap, const char *));
-        break;
-      case 'x':
-        ret = rbacc_add_number(ret, va_arg(ap, unsigned int), 16);
-        break;
-      case '%':
-        ret = rbacc_add_char(ret, '%');
-        break;
-      default:
-        assert(0);
+  while (1)
+    {
+      /* Skip to next `%' or to end of string. */
+      for (i = 0; format[i] && format[i] != '%'; i++);
+      rbacc_add_array (ret, format, i);
+      if (!format[i++])
+	break;
+      /* We've found a `%'. */
+      switch (format[i++])
+	{
+	case 'c':
+	  rbacc_add_char (ret, (char) va_arg (ap, int));
+	  break;
+	case 'd':
+	  {
+	    x = va_arg (ap, int);
+	    if (x < 0)
+	      {
+		rbacc_add_char (ret, '-');
+		rbacc_add_number (ret, (unsigned) -x, 10);
+	      }
+	    else
+	      rbacc_add_number (ret, (unsigned) x, 10);
+	    break;
+	  }
+	case 'o':
+	  ret = rbacc_add_number (ret, va_arg (ap, unsigned int), 8);
+	  break;
+	case 'r':
+	  ret = rbacc_add_rblist (ret, va_arg (ap, rblist));
+	  break;
+	case 's':
+	  ret = rbacc_add_string (ret, va_arg (ap, const char *));
+	  break;
+	case 'x':
+	  ret = rbacc_add_number (ret, va_arg (ap, unsigned int), 16);
+	  break;
+	case '%':
+	  ret = rbacc_add_char (ret, '%');
+	  break;
+	default:
+	  assert (0);
+	}
+      format = &format[i];
     }
-    format = &format[i];
-  }
-  va_end(ap);
-  return rbacc_to_rblist(ret);
+  va_end (ap);
+  return rbacc_to_rblist (ret);
 }
 
 /*
@@ -116,41 +122,47 @@ rblist rblist_fmt(const char *format, ...)
  * replaced with a backslash followed by their octal character code.
  */
 /* FIXME: The length of the returned string can exceed size_t. */
-rblist make_string_printable(rblist rbl, size_t col, size_t tab, size_t goal, size_t *pos)
+rblist
+make_string_printable (rblist rbl, size_t col, size_t tab, size_t goal,
+		       size_t * pos)
 {
   static const char ctrls[] = "@ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-  rbacc ret = rbacc_new();
+  rbacc ret = rbacc_new ();
   if (pos)
     *pos = 0;
 
-  RBLIST_FOR(c, rbl)
-    assert(c != '\n');
+  RBLIST_FOR (c, rbl) assert (c != '\n');
 
-    size_t x = col + rbacc_length(ret);
-    if (x >= goal)
-      break;
+  size_t x = col + rbacc_length (ret);
+  if (x >= goal)
+    break;
 
-    if (c == '\t') {
+  if (c == '\t')
+    {
       for (size_t w = tab - (x % tab); w > 0; w--)
-        rbacc_add_char(ret, ' ');
-    } else if ((size_t)c < sizeof(ctrls)) {
-      rbacc_add_char(ret, '^');
-      rbacc_add_char(ret, ctrls[c]);
-    } else if (isprint(c)) {
-      rbacc_add_char(ret, c);
+	rbacc_add_char (ret, ' ');
+    }
+  else if ((size_t) c < sizeof (ctrls))
+    {
+      rbacc_add_char (ret, '^');
+      rbacc_add_char (ret, ctrls[c]);
+    }
+  else if (isprint (c))
+    {
+      rbacc_add_char (ret, c);
       /* FIXME: For double-width characters add a '\0' too so the
          length of 'ret' matches the display width. */
-    } else {
-      rbacc_add_char(ret, '\\');
-      rbacc_add_number(ret, (unsigned)c, 8);
+    }
+  else
+    {
+      rbacc_add_char (ret, '\\');
+      rbacc_add_number (ret, (unsigned) c, 8);
     }
 
-    if (pos)
-      (*pos)++;
-  RBLIST_END
-
-  return rbacc_to_rblist(ret);
+  if (pos)
+    (*pos)++;
+  RBLIST_END return rbacc_to_rblist (ret);
 }
 
 /*
@@ -159,7 +171,9 @@ rblist make_string_printable(rblist rbl, size_t col, size_t tab, size_t goal, si
  * sugar for:
  *   make_string_printable(rblist_from_char(c), col, tab, SIZE_MAX, NULL);
  */
-rblist make_char_printable(int c, size_t col, size_t tab)
+rblist
+make_char_printable (int c, size_t col, size_t tab)
 {
-  return make_string_printable(rblist_from_char(c), col, tab, SIZE_MAX, NULL);
+  return make_string_printable (rblist_from_char (c), col, tab, SIZE_MAX,
+				NULL);
 }
