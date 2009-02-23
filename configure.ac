@@ -34,7 +34,7 @@ gl_INIT
 AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
 
-dnl Turn on additional compiler warnings for GCC
+dnl Turn on additional compiler warnings for gcc
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
