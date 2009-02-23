@@ -34,7 +34,8 @@ zile_SOURCES =						\
 	extern.h					\
 	main.h						\
 	tbl_vars.h					\
-	tbl_opts.h.in					\
+	tbl_funcs.h					\
+	tbl_opts.h					\
 	eval.c						\
 	lists.c						\
 	lists.h						\
@@ -77,15 +78,17 @@ LUA_BUILDTIME = 					\
 
 ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
-BUILT_SOURCES = 					\
+BUILT_FILES =	 					\
 	tbl_funcs.h					\
 	tbl_opts.h					\
-	dotzile.sample
+	zile.1						\
+	dotzile.sample					\
+	man-extras
 
 tbl_funcs.h: $(zile_SOURCES) $(srcdir)/mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
 
-dotzile.sample: $(srcdir)/tbl_vars.h $(srcdir)/mkdotzile.lua $(LUA_RUNTIME) dotzile-extra.el
+dotzile.sample: $(srcdir)/tbl_vars.h $(srcdir)/mkdotzile.lua $(LUA_RUNTIME) $(srcdir)/dotzile-extra.el
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkdotzile.lua $(srcdir)/tbl_vars.h
 	cat $(srcdir)/dotzile-extra.el >> $@
 
@@ -101,15 +104,15 @@ man-extras: Makefile
 
 man-extras: $(srcdir)/man-extras.in
 
-zile.1: $(builddir)/zile $(srcdir)/man-extras $(srcdir)/zile-help2man-wrapper
-	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include man-extras $(srcdir)/zile-help2man-wrapper
+zile.1: $(builddir)/zile $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
+	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample
 
 dist_man_MANS = zile.1
 
 CLEANFILES = 						\
-	$(BUILT_SOURCES)				\
+	$(BUILT_FILES)					\
 	*.stamp
 
 loc:
@@ -325,4 +328,8 @@ EXTRA_DIST =						\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_OUTPUTS)				\
 	$(SCRIPT_TESTS)					\
-	quit.el
+	quit.el						\
+	dotzile-extra.el				\
+	man-extras.in					\
+	tbl_opts.h.in					\
+	zile-help2man-wrapper
