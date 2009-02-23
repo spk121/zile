@@ -34,26 +34,26 @@ gl_INIT
 AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
 
-dnl Turn on additional compiler warnings
+dnl Turn on additional compiler warnings for GCC
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
 
 dnl Valgrind
-AC_PATH_PROG([VALGRIND], [valgrind])
-AC_SUBST([VALGRIND])
+AC_PATH_PROG(VALGRIND, valgrind)
+AC_SUBST(VALGRIND)
 
 dnl Curses
 MP_WITH_CURSES
 if test "$mp_cv_curses" = "no" -a "$mp_cv_ncurses" = "no"; then
   AC_MSG_FAILURE([cannot find curses])
 fi
-AC_SUBST([CURSES_LIB])
+AC_SUBST(CURSES_LIB)
 
 dnl Lua
 AX_WITH_LUA
 AX_LUA_VERSION(501, 502)
-AC_SUBST([LUA])
+AC_SUBST(LUA)
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
