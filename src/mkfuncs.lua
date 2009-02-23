@@ -73,24 +73,13 @@ for i in ipairs (arg) do
           die ("unterminated docstring for " .. name)
         end
 
-        table.insert (funcs, {name = name,
-                              doc = doc,
-                              interactive = interactive})
+        h:write ("X(\"" .. name .. "\", " .. string.gsub (name, "-", "_") .. ", " ..
+               (interactive and "true" or "false") .. ", \"\\\n")
+        h:write (string.gsub (texi (doc), "\n", "\\n\\\n"))
+        h:write ("\")\n")
       end
     end
   end
-end
-
-table.sort (funcs,
-            function (a, b)
-              return a.name < b.name
-            end)
-
-for _, f in pairs (funcs) do
-  h:write ("X(\"" .. f.name .. "\", " .. string.gsub (f.name, "-", "_") .. ", " ..
-           (f.interactive and "true" or "false") .. ", \"\\\n")
-  h:write (string.gsub (texi (f.doc), "\n", "\\n\\\n"))
-  h:write ("\")\n")
 end
 
 h:close ()
