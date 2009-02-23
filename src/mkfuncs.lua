@@ -25,7 +25,6 @@ prog = {
 
 require "lib"
 require "texinfo"
-require "std"
 
 dir = arg[1]
 table.remove (arg, 1)

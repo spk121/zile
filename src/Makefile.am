@@ -69,8 +69,7 @@ zile_SOURCES =						\
 
 LUA_RUNTIME =						\
 	lib.lua						\
-	texinfo.lua					\
-	std.lua
+	texinfo.lua
 
 LUA_BUILDTIME = 					\
 	mkfuncs.lua					\
@@ -86,10 +85,11 @@ BUILT_SOURCES = 					\
 tbl_funcs.h: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
 
-dotzile.sample: tbl_vars.h mkvars.lua $(LUA_RUNTIME)
+dotzile.sample: tbl_vars.h mkvars.lua $(LUA_RUNTIME) dotzile-extra.el
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h
+	cat $(srcdir)/dotzile-extra.el >> $@
 
-zile.1: tbl_opts.h man-extras zile-help2man-wrapper
+zile.1: zile man-extras zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample

@@ -25,7 +25,6 @@ prog = {
 
 require "lib"
 require "texinfo"
-require "std"
 
 h = io.open ("dotzile.sample", "w")
 assert (h)
@@ -47,23 +46,4 @@ for l in io.lines (arg[1]) do
   end
 end
 
--- Add extra key rebindings
--- FIXME: Put the following in a file
-h:write ("; Rebind keys\n" ..
-         "; (global-set-key \"key\" 'func)\n" ..
-         "\n" ..
-         "; Better bindings for when backspace generates C-h\n" ..
-         ";(global-set-key \"\\BACKSPACE\"  'backward-delete-char)\n" ..
-         ";(global-set-key \"\\C-h\"        'backward-delete-char)\n" ..
-         ";(global-set-key \"\\M-:\"        'mark-paragraph)\n" ..
-         ";(global-set-key \"\\M-hb\"       'list-bindings)\n" ..
-         ";(global-set-key \"\\M-hd\"       'describe-function)\n" ..
-         ";(global-set-key \"\\M-hf\"       'describe-function)\n" ..
-         ";(global-set-key \"\\M-hF\"       'view-zile-FAQ)\n" ..
-         ";(global-set-key \"\\M-hk\"       'describe-key)\n" ..
-         ";(global-set-key \"\\M-hlr\"      'list-registers)\n" ..
-         ";(global-set-key \"\\M-hs\"       'help-config-sample)\n" ..
-         ";(global-set-key \"\\M-ht\"       'help-with-tutorial)\n" ..
-         ";(global-set-key \"\\M-hw\"       'where-is)\n" ..
-         ";(global-set-key \"\\M-hv\"       'describe-variable)\n")
 h:close ()
