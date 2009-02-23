@@ -33,11 +33,12 @@ table.remove (arg, 1)
 h = io.open ("tbl_funcs.h", "w")
 assert (h)
 
-h:write ("/*\n")
-h:write (" * Automatically generated file: DO NOT EDIT!\n")
-h:write (" * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n")
-h:write (" */\n")
-h:write ("\n")
+h:write ("/*\n" ..
+         " * Automatically generated file: DO NOT EDIT!\n" ..
+         " * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n" ..
+         " * Generated from tbl_funcs.h.\n" ..
+         " */\n" ..
+         "\n")
 
 local funcs = {}
 
