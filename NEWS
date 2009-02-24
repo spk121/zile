@@ -3,7 +3,10 @@ Release 2.3.2:
 This release fixes a bug in filename completion introduced in the
 previous release that had serious results, and some minor problems in
 the build system, and improves the installation instructions. help2man
-is now needed to build Zile (and has been since 2.3.1).
+is now needed to build Zile (and has been since 2.3.1). I'm sorry I
+described DejaGnu as "flaky" in my previous release announcement; the
+faults I encountered were those of the underlying expect/Tcl
+combination, and not DejaGnu's.
 
 Release 2.3.1:
 
