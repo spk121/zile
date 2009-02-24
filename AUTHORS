@@ -10,6 +10,3 @@ The authors of Zile:
   search.
 * Scott Lawrence <yorgle@gmail.com> wrote the "lithp" interpreter
   which was used as the basis for the tiny Lisp interpreter.
-
-For each source file, the original author is listed first and other
-contributors are listed afterwards.
