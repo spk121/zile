@@ -246,7 +246,7 @@ main (int argc, char **argv)
   for (;;)
     {
       int this_optind = optind ? optind : 1, longindex, c;
-      char *buf;
+      char *buf, *shortopt;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
       c = getopt_long (argc, argv, ":l:q", longopts, &longindex);
@@ -279,12 +279,15 @@ main (int argc, char **argv)
                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
                   "\n",
                   argv[0]);
-#define D(text) \
+#define D(text)                                 \
           printf (text "\n");
-#define O(longname, shortname, arg, argstring, docstring) \
-          xasprintf (&buf, "--%s%s %s", longname, shortname ? ", -" # shortname : "", argstring); \
-          printf ("%-24s%s\n", buf, docstring);                          \
-          free (buf);
+          /* FIXME: Fix display of shortname */
+#define O(longname, shortname, arg, argstring, docstring)               \
+          xasprintf (&shortopt, ", -%c", shortname);                    \
+          xasprintf (&buf, "--%s%s %s", longname, shortname ? shortopt : "", argstring); \
+          printf ("%-24s%s\n", buf, docstring);                         \
+          free (buf);                                                   \
+          free (shortopt);
 #define A(argstring, docstring) \
           printf ("%-24s%s\n", argstring, docstring);
 #include "tbl_opts.h"
