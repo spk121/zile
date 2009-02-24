@@ -33,7 +33,6 @@
 #include <unistd.h>
 #include <utime.h>
 #include "dirname.h"
-#include "canonicalize.h"
 
 #include "main.h"
 #include "extern.h"
@@ -84,8 +83,8 @@ agetcwd (void)
  * the passed path:
  *
  * - expands `~/' and `~name/' expressions;
- * - calls canonicalize_file_name on the result (a GNU function
- *   that works like realpath but mallocs its result).
+ * - replaces `//' with `/' (restarting from the root directory);
+ * - removes `..' and `.' entries.
  *
  * The return value indicates success or failure.
  */
@@ -99,15 +98,24 @@ expand_path (astr path)
 
   for (p = sp; *p != '\0';)
     {
-      if (*p == '~' && (p == sp || p[-1] == '/'))
+      if (*p == '/')
         {
-          /* Got `/~' or leading `~'.  Restart from this point. */
+          if (*++p == '/')
+            { /* Got `//'.  Restart from this point. */
+              while (*p == '/')
+                p++;
+              astr_truncate (epath, 0);
+            }
+          if (astr_len (epath) == 0 || *astr_char (epath, -1) != '/')
+            astr_cat_char (epath, '/');
+        }
+      else if (*p == '~' && (p == sp || p[-1] == '/'))
+        { /* Got `/~' or leading `~'.  Restart from this point. */
           astr_truncate (epath, 0);
           ++p;
 
           if (*p == '/')
-            {
-              /* Got `~/'.  Insert the user's home directory. */
+            { /* Got `~/'.  Insert the user's home directory. */
               pw = getpwuid (getuid ());
               if (pw == NULL)
                 {
@@ -118,8 +126,7 @@ expand_path (astr path)
                 astr_cat_cstr (epath, pw->pw_dir);
             }
           else
-            {
-              /* Got `~something'.  Insert that user's home directory. */
+            { /* Got `~something'.  Insert that user's home directory. */
               astr as = astr_new ();
               while (*p != '\0' && *p != '/')
                 astr_cat_char (as, *p++);
@@ -133,33 +140,24 @@ expand_path (astr path)
               astr_cat_cstr (epath, pw->pw_dir);
             }
         }
-      else
-        while (*p != '\0' && *p != '/')
-          astr_cat_char (epath, *p++);
+      else if (*p == '.' && (p[1] == '/' || p[1] == '\0'))
+        { /* Got `.'. */
+          ++p;
+        }
+      else if (*p == '.' && p[1] == '.' && (p[2] == '/' || p[2] == '\0'))
+        { /* Got `..'. */
+          if (astr_len (epath) >= 1 && *astr_char (epath, -1) == '/')
+            astr_truncate (epath, -1);
+          while (*astr_char (epath, -1) != '/' && astr_len (epath) >= 1)
+            astr_truncate (epath, -1);
+          p += 2;
+        }
 
-      if (*p == '/')
+      while (*p != '\0' && *p != '/')
         astr_cat_char (epath, *p++);
     }
 
-  if (ok)
-    {
-      char *s = canonicalize_file_name (astr_cstr (epath));
-      if (s != NULL)
-        {
-          astr_cpy_cstr (epath, s);
-          free (s);
-
-          /* Restore trailing slash, removed by
-             canonicalize_file_name, if any. */
-          if (p[-1] == '/')
-            astr_cat_char (epath, '/');
-
-          astr_cpy (path, epath);
-        }
-      else
-        ok = false;
-    }
-
+  astr_cpy (path, epath);
   astr_delete (epath);
 
   return ok;
