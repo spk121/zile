@@ -98,7 +98,7 @@ man-extras: Makefile $(srcdir)/man-extras.in
 	chmod a-w $@.tmp
 	mv $@.tmp $@
 
-zile.1: $(builddir)/tbl_opts.h $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
+zile.1: $(builddir)/zile $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample
