@@ -254,10 +254,7 @@ main (int argc, char **argv)
       if (c == -1)
         break;
       else if (c == '?') /* Unknown option */
-        {
-          minibuf_error ("Unknown option `%s'", argv[this_optind]);
-          break;
-        }
+        minibuf_error ("Unknown option `%s'", argv[this_optind]);
       else if (c == ':') /* Missing argument */
         {
           fprintf (stderr, "%s: Option `%s' requires an argument\n",
