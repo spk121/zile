@@ -226,7 +226,7 @@ struct option longopts[] = {
 int
 main (int argc, char **argv)
 {
-  int c, qflag = false;
+  int qflag = false;
   gl_list_t l_args = gl_list_create_empty (GL_LINKED_LIST,
                                           NULL, NULL, NULL, false);
   size_t line;
@@ -242,32 +242,38 @@ main (int argc, char **argv)
   init_variables ();
   init_eval ();
 
-  opterr = 0;			/* Don't display errors for unknown options */
+  opterr = 0; /* Don't display errors for unknown options */
   for (;;)
     {
-      int this_optind = optind ? optind : 1;
+      int this_optind = optind ? optind : 1, longindex, c;
       char *buf;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
-      c = getopt_long (argc, argv, ":l:q", longopts, NULL);
-
+      c = getopt_long (argc, argv, ":l:q", longopts, &longindex);
+      
       if (c == -1)
         break;
-
-      switch (c)
+      else if (c == '?') /* Unknown option */
         {
-        case 'q':
+          minibuf_error ("Unknown option `%s'", argv[this_optind]);
+          break;
+        }
+      else if (c == ':') /* Missing argument */
+        {
+          fprintf (stderr, "%s: Option `%s' requires an argument\n",
+                   prog_name, argv[this_optind]);
+          exit (1);
+        }
+
+      switch (longindex)
+        {
+        case 0:
           qflag = true;
           break;
-        case 'v':
-          printf (ZILE_VERSION_STRING "\n"
-                  ZILE_COPYRIGHT_STRING "\n"
-                  "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
-                  "You may redistribute copies of " PACKAGE_NAME "\n"
-                  "under the terms of the GNU General Public License.\n"
-                  "For more information about these matters, see the file named COPYING.\n");
-          return 0;
-        case 'h':
+        case 1:
+          gl_list_add_last (l_args, (void *) optarg);
+          break;
+        case 2:
           printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
                   "\n"
                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
@@ -276,7 +282,7 @@ main (int argc, char **argv)
 #define D(text) \
           printf (text "\n");
 #define O(longname, shortname, arg, argstring, docstring) \
-          xasprintf (&buf, "--%s, -%c %s", longname, shortname, argstring); \
+          xasprintf (&buf, "--%s%s %s", longname, shortname ? ", -" # shortname : "", argstring); \
           printf ("%-24s%s\n", buf, docstring);                          \
           free (buf);
 #define A(argstring, docstring) \
@@ -287,17 +293,15 @@ main (int argc, char **argv)
 #undef A
           printf ("\n"
                   "Report bugs to " PACKAGE_BUGREPORT ".\n");
-          return 0;
-        case 'l':
-          gl_list_add_last (l_args, (void *) optarg);
-          break;
-        case '?':		/* Unknown option */
-          minibuf_error ("Unknown option `%s'", argv[this_optind]);
-          break;
-        case ':':		/* Missing argument */
-          fprintf (stderr, "%s: Option `%s' requires an argument\n",
-                   prog_name, argv[this_optind]);
-          exit (1);
+          exit (0);
+        case 3:
+          printf (ZILE_VERSION_STRING "\n"
+                  ZILE_COPYRIGHT_STRING "\n"
+                  "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
+                  "You may redistribute copies of " PACKAGE_NAME "\n"
+                  "under the terms of the GNU General Public License.\n"
+                  "For more information about these matters, see the file named COPYING.\n");
+          exit (0);
         }
     }
 

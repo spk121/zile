@@ -25,7 +25,7 @@
  * A: Action
  *
  * D(text)
- * I(long name, short name, argument, argument docstring, docstring)
+ * I(long name, short name ('\0' for none), argument, argument docstring, docstring)
  * A(argument, docstring)
  */
 
@@ -36,8 +36,8 @@ D ("Initialization options:")
 D ("")
 O ("no-init-file", 'q', optional_argument, "", "do not load ~/.@PACKAGE@")
 O ("load", 'l', required_argument, "FILE", "load @PACKAGE_NAME@ Lisp FILE using the load function")
-O ("help", 'h', optional_argument, "", "display this help message and exit")
-O ("version", 'v', optional_argument, "", "display version information and exit")
+O ("help", '\0', optional_argument, "", "display this help message and exit")
+O ("version", '\0', optional_argument, "", "display version information and exit")
 D ("")
 D ("Action options:")
 D ("")
