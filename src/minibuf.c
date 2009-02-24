@@ -163,13 +163,13 @@ minibuf_read_filename (const char *fmt, const char *value,
   astr as;
   ptrdiff_t pos;
 
-  va_start (ap, file);
-  xvasprintf (&buf, fmt, ap);
-  va_end (ap);
-
   as = astr_new_cstr (value);
   if (expand_path (as))
     {
+      va_start (ap, file);
+      xvasprintf (&buf, fmt, ap);
+      va_end (ap);
+
       as = compact_path (as);
 
       cp = completion_new (true);
