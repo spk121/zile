@@ -24,7 +24,7 @@ link-warning.h
 gendocs.sh
 Makefile
 Makefile.in
-zile-*
+zile-*.gz
 *.[oa]
 *~
 .deps
