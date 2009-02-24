@@ -20,7 +20,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.3.1, bug-zile@gnu.org)
+AC_INIT(Zile, 2.3.2, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl Checks for programs
@@ -28,7 +28,11 @@ AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
-AC_PATH_PROG(HELP2MAN, help2man, false)
+AC_PATH_PROG(HELP2MAN, help2man)
+if test "$ac_cv_path_HELP2MAN" = ""; then
+  AC_MSG_FAILURE([cannot find help2man])
+fi
+AC_PATH_PROG(VALGRIND, valgrind)
 
 dnl Checks for functions and headers
 gl_INIT
@@ -39,10 +43,6 @@ dnl Turn on additional compiler warnings for gcc
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
-
-dnl Valgrind
-AC_PATH_PROG(VALGRIND, valgrind)
-AC_SUBST(VALGRIND)
 
 dnl Curses
 MP_WITH_CURSES
