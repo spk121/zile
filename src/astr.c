@@ -244,20 +244,6 @@ astr astr_fread (FILE * fp)
 }
 
 astr
-astr_fgets (FILE * fp)
-{
-  int c;
-  astr as;
-
-  if (feof (fp))
-    return NULL;
-  as = astr_new ();
-  while ((c = fgetc (fp)) != EOF && c != '\n')
-    astr_cat_char (as, c);
-  return as;
-}
-
-astr
 astr_vafmt (astr as, const char *fmt, va_list ap)
 {
   char *buf;
@@ -304,7 +290,6 @@ int
 main (void)
 {
   astr as1, as2, as3;
-  FILE *fp;
 
   as1 = astr_new ();
   astr_cpy_cstr (as1, "hello world");
@@ -376,12 +361,6 @@ main (void)
   assert_eq (as1, "5 * 3 = 15");
   astr_delete (as1);
 
-  assert (fp = fopen (SRCPATH "/astr.c", "r"));
-  as1 = astr_fgets (fp);
-  printf ("The first line of astr.c is: \"%s\"\n", astr_cstr (as1));
-  assert (fclose (fp) == 0);
-
-  astr_delete (as1);
   astr_delete (as2);
   astr_delete (as3);
   printf ("astr test successful.\n");

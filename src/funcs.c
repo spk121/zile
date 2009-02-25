@@ -1417,9 +1417,9 @@ write_shell_output (va_list ap)
 static bool
 pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
 {
-  astr out = astr_new (), s;
-  size_t lines = 0;
-  char *cmdline;
+  astr out = astr_new ();
+  bool more_than_one_line = false;
+  char *cmdline, *eol;
   FILE * pipe;
 
   xasprintf (&cmdline, "%s 2>&1 <%s", cmd, tempfile);
@@ -1431,17 +1431,11 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
     }
   free (cmdline);
 
-  for (;;)
-    {
-      s = astr_fgets (pipe);
-      astr_cat (out, s);
-      astr_delete (s);
-      if (feof (pipe))
-        break;
-      ++lines;
-      astr_cat_char (out, '\n');
-    }
+  out = astr_fread (pipe);
   pclose (pipe);
+  eol = strchr (astr_cstr (out), '\n');
+  if (eol && eol != astr_cstr (out) + astr_len (out) - 1)
+    more_than_one_line = true;
 
   if (astr_len (out) == 0)
     minibuf_write ("(Shell command succeeded with no output)");
@@ -1460,9 +1454,9 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
         }
       else
         {
-          write_temp_buffer ("*Shell Command Output*", lines > 1,
+          write_temp_buffer ("*Shell Command Output*", more_than_one_line,
                              write_shell_output, out);
-          if (lines <= 1)
+          if (!more_than_one_line)
             minibuf_write ("%s", astr_cstr (out));
         }
     }

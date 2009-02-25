@@ -138,13 +138,6 @@ astr astr_truncate (astr as, size_t pos);
 astr astr_fread (FILE * fp);
 
 /*
- * Read a string from the stream fp and return it. The trailing
- * newline is removed from the string. If the stream is at EOF when
- * astr_fgets is called, it returns NULL.
- */
-astr astr_fgets (FILE * fp);
-
-/*
  * Append formatted text to the argument string.
  */
 astr astr_vafmt (astr as, const char *fmt, va_list ap);
