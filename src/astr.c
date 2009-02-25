@@ -71,19 +71,11 @@ astr_resize (astr as, size_t reqsize)
     }
 }
 
-static int
-astr_pos (astr as, size_t pos)
-{
-  assert (as != NULL);
-  assert (pos <= as->len);
-  return pos;
-}
-
 char *
 astr_char (astr as, size_t pos)
 {
   assert (as != NULL);
-  pos = astr_pos (as, pos);
+  assert (pos <= as->len);
   return as->text + pos;
 }
 
@@ -175,7 +167,7 @@ astr
 astr_substr (astr as, size_t pos, size_t size)
 {
   assert (as != NULL);
-  pos = astr_pos (as, pos);
+  assert (pos <= as->len);
   assert (pos + size <= as->len);
   return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
 }
@@ -193,8 +185,7 @@ astr_replace_x (astr as, size_t pos, size_t size, const char *s,
   astr tail;
 
   assert (as != NULL);
-
-  pos = astr_pos (as, pos);
+  assert (pos <= as->len);
   if (as->len - pos < size)
     size = as->len - pos;
   tail =
@@ -239,7 +230,7 @@ astr
 astr_truncate (astr as, size_t pos)
 {
   assert (as != NULL);
-  pos = astr_pos (as, pos);
+  assert (pos <= as->len);
   if ((size_t) pos < as->len)
     {
       as->len = pos;
