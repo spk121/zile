@@ -1237,6 +1237,7 @@ zile_exit (int doabort)
           astr_cpy_cstr (buf, bp->filename);
         else
           astr_cpy_cstr (buf, bp->name);
+        /* FIXME: Generate ZILE in next line */
         astr_cat_cstr (buf, ".ZILESAVE");
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
         raw_write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
