@@ -100,7 +100,7 @@ astr_len (astr as)
   return as->len;
 }
 
-astr
+static astr
 astr_ncpy_cstr (astr as, const char *s, size_t len)
 {
   astr_resize (as, len);
