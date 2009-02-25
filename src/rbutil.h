@@ -43,7 +43,7 @@
  *
  * Width and precision specifiers are not supported.
  */
-rblist rblist_fmt(const char *format, ...);
+rblist rblist_fmt (const char *format, ...);
 
 /*
  * Scans `rbl' and replaces each character with a string of one or
@@ -63,7 +63,8 @@ rblist rblist_fmt(const char *format, ...);
  * Newline characters must not occur in `rbl'. Other characters are
  * replaced with a backslash followed by their octal character code.
  */
-rblist make_string_printable(rblist rbl, size_t col, size_t tab, size_t goal, size_t *pos);
+rblist make_string_printable (rblist rbl, size_t col, size_t tab, size_t goal,
+			      size_t * pos);
 
 /*
  * Returns a printable representation of a single character `c'
@@ -71,4 +72,4 @@ rblist make_string_printable(rblist rbl, size_t col, size_t tab, size_t goal, si
  * sugar for:
  *   make_string_printable(rblist_from_char(c), col, tab, SIZE_MAX, NULL);
  */
-rblist make_char_printable(int c, size_t col, size_t tab);
+rblist make_char_printable (int c, size_t col, size_t tab);

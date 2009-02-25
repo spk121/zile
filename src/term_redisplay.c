@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "main.h"
 #include "config.h"
 #include "extern.h"
 
@@ -153,9 +153,9 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
   for (x = 0, i = startcol; i < astr_len (lp->text) && x < wp->ewidth; i++)
     {
       if (highlight && in_region (lineno, i, r))
-        outch (*astr_char (lp->text, (ptrdiff_t) i), FONT_REVERSE, &x);
+        outch (*astr_char (lp->text, i), FONT_REVERSE, &x);
       else
-        outch (*astr_char (lp->text, (ptrdiff_t) i), FONT_NORMAL, &x);
+        outch (*astr_char (lp->text, i), FONT_NORMAL, &x);
     }
 
   draw_end_of_line (line, wp, lineno, r, highlight, x, i);
@@ -256,7 +256,7 @@ calculate_start_column (Window * wp)
   char *buf, *rp, *lp, *p;
   Point pt = window_pt (wp);
 
-  rp = astr_char (pt.p->text, (ptrdiff_t) pt.o);
+  rp = astr_char (pt.p->text, pt.o);
   rpfact = pt.o / (wp->ewidth / 3);
 
   for (lp = rp; lp >= astr_cstr (pt.p->text); --lp)

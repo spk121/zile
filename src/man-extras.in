@@ -1,0 +1,21 @@
+[description]
+Zile is a lightweight Emacs clone that provides a subset of Emacs's
+functionality suitable for basic editing.
+
+/then go to/
+Exit status is 0 if OK, 1 if it cannot start up, for example because
+of an invalid command-line argument, and 2 if it crashes or runs out
+of memory.
+
+[files]
+~/.zile \(em user's Zile init file
+
+@pkgdatadir@/dotzile.sample \(em sample init file which also
+documents the default settings and contains some useful tips.
+
+[author]
+Zile was written by Sandro Sigala, David A. Capello and Reuben Thomas.
+The Lisp interpreter is based on code by Scott Lawrence.
+
+[see also]
+.BR emacs (1)

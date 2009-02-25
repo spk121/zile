@@ -2,13 +2,15 @@
 astr
 zile
 tbl_funcs.h
+tbl_opts.h
 gendocs_template
 zile.info
 vars.texi
 funcs.texi
 dotzile.sample
 dotzile.texi
-texinfo.tex
+zile.1
+man-extras
 zile.aux
 zile.cp
 zile.fn
@@ -18,5 +20,4 @@ zile.pg
 zile.toc
 zile.tp
 zile.vr
-*.stamp
 core

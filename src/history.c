@@ -25,7 +25,7 @@
 #include <string.h>
 #include "gl_linked_list.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 struct History

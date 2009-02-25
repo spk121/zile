@@ -1,4 +1,4 @@
--- Produce funcs.texi and tbl_funcs.lua
+-- Generate tbl_funcs.lua
 --
 -- Copyright (c) 2006, 2007, 2009 Free Software Foundation, Inc.
 --
@@ -25,25 +25,19 @@ prog = {
 
 require "lib"
 require "texinfo"
-require "std"
 
 dir = arg[1]
 table.remove (arg, 1)
 
-h1 = io.open ("funcs.texi", "w")
-assert (h1)
+h = io.open ("tbl_funcs.h", "w")
+assert (h)
 
-h2 = io.open ("tbl_funcs.h", "w")
-assert (h2)
-
-h1:write ("@c Automatically generated file: DO NOT EDIT!\n")
-h1:write ("@table @code\n")
-
-h2:write ("/*\n")
-h2:write (" * Automatically generated file: DO NOT EDIT!\n")
-h2:write (" * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n")
-h2:write (" */\n")
-h2:write ("\n")
+h:write ("/*\n" ..
+         " * Automatically generated file: DO NOT EDIT!\n" ..
+         " * " .. PACKAGE_NAME .. " command to C function bindings and docstrings.\n" ..
+         " * Generated from C sources.\n" ..
+         " */\n" ..
+         "\n")
 
 local funcs = {}
 
@@ -58,7 +52,6 @@ for i in ipairs (arg) do
         end
 
         local interactive = string.sub (l, 1, 12) ~= "DEFUN_HIDDEN"
-
         local state = 0
         local doc = ""
         for l in lines do
@@ -79,32 +72,13 @@ for i in ipairs (arg) do
           die ("unterminated docstring for " .. name)
         end
 
-        table.insert (funcs, {name = name,
-                              doc = doc,
-                              interactive = interactive})
+        h:write ("X(\"" .. name .. "\", " .. string.gsub (name, "-", "_") .. ", " ..
+               (interactive and "true" or "false") .. ", \"\\\n")
+        h:write (string.gsub (texi (doc), "\n", "\\n\\\n"))
+        h:write ("\")\n")
       end
     end
   end
 end
 
-table.sort (funcs,
-            function (a, b)
-              return a.name < b.name
-            end)
-
-for _, f in pairs (funcs) do
-  local cdoc = string.gsub (f.doc, "\n", "\\n\\\n")
-  cdoc = texi (cdoc)
-  h1:write ("@item " .. f.name .. "\n" .. f.doc)
-
-  local cname = string.gsub (f.name, "-", "_")
-  h2:write ("X(\"" .. f.name .. "\", " .. cname .. ", " ..
-            (f.interactive and "true" or "false") .. ", \"\\\n")
-  h2:write (cdoc)
-  h2:write ("\")\n")
-end
-
-h1:write ("@end table\n")
-h1:close ()
-
-h2:close ()
+h:close ()

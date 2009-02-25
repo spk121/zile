@@ -54,41 +54,6 @@ astr_new (void)
   return as;
 }
 
-astr
-astr_new_cstr (const char *s)
-{
-  return astr_cpy_cstr (astr_new (), s);
-}
-
-static void
-astr_resize (astr as, size_t reqsize)
-{
-  assert (as != NULL);
-  if (reqsize > as->maxlen)
-    {
-      as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-      as->text = (char *) xrealloc (as->text, as->maxlen + 1);
-    }
-}
-
-static int
-astr_pos (astr as, ptrdiff_t pos)
-{
-  assert (as != NULL);
-  if (pos < 0)
-    pos = as->len + pos;
-  assert (pos >= 0 && pos <= (int) as->len);
-  return pos;
-}
-
-char *
-astr_char (astr as, ptrdiff_t pos)
-{
-  assert (as != NULL);
-  pos = astr_pos (as, pos);
-  return as->text + pos;
-}
-
 void
 astr_delete (astr as)
 {
@@ -111,19 +76,83 @@ astr_len (astr as)
 }
 
 astr
+astr_ncat_cstr (astr as, const char *s, size_t csize)
+{
+  assert (as != NULL);
+  if (as->len + csize > as->maxlen)
+    {
+      as->maxlen = as->len + csize + ALLOCATION_CHUNK_SIZE;
+      as->text = (char *) xrealloc (as->text, as->maxlen + 1);
+    }
+  memcpy (as->text + as->len, s, csize);
+  as->len += csize;
+  as->text[as->len] = '\0';
+  return as;
+}
+
+static astr
+astr_replace_x (astr as, size_t pos, size_t size, const char *s,
+                size_t csize)
+{
+  astr tail;
+
+  assert (as != NULL);
+  assert (pos <= as->len);
+  if (as->len - pos < size)
+    size = as->len - pos;
+  tail =
+    astr_substr (as, pos + (size_t) size, astr_len (as) - (pos + size));
+  astr_truncate (as, pos);
+  astr_ncat_cstr (as, s, csize);
+  astr_cat (as, tail);
+  astr_delete (tail);
+
+  return as;
+}
+
+/* Don't define in terms of astr_remove, to avoid endless recursion */
+astr
+astr_truncate (astr as, size_t pos)
+{
+  assert (as != NULL);
+  assert (pos <= as->len);
+  if ((size_t) pos < as->len)
+    {
+      as->len = pos;
+      as->text[pos] = '\0';
+    }
+  return as;
+}
+
+
+/*
+ * Derived functions.
+ */
+
+char *
+astr_char (astr as, size_t pos)
+{
+  assert (pos <= astr_len (as));
+  return (char *) (astr_cstr (as) + pos);
+}
+
+static astr
 astr_ncpy_cstr (astr as, const char *s, size_t len)
 {
-  astr_resize (as, len);
-  memcpy (as->text, s, len);
-  as->len = len;
-  as->text[len] = '\0';
-  return as;
+  astr_truncate (as, 0);
+  return astr_ncat_cstr (as, s, len);
+}
+
+astr
+astr_new_cstr (const char *s)
+{
+  return astr_cpy_cstr (astr_new (), s);
 }
 
 astr
 astr_cpy (astr as, astr src)
 {
-  return astr_ncpy_cstr (as, src->text, src->len);
+  return astr_ncpy_cstr (as, astr_cstr (src), astr_len (src));
 }
 
 astr
@@ -133,19 +162,9 @@ astr_cpy_cstr (astr as, const char *s)
 }
 
 astr
-astr_ncat_cstr (astr as, const char *s, size_t csize)
-{
-  astr_resize (as, as->len + csize);
-  memcpy (as->text + as->len, s, csize);
-  as->len += csize;
-  as->text[as->len] = '\0';
-  return as;
-}
-
-astr
 astr_cat (astr as, astr src)
 {
-  return astr_ncat_cstr (as, src->text, src->len);
+  return astr_ncat_cstr (as, astr_cstr (src), astr_len (src));
 }
 
 astr
@@ -157,97 +176,34 @@ astr_cat_cstr (astr as, const char *s)
 astr
 astr_cat_char (astr as, int c)
 {
-  assert (as != NULL);
-  astr_resize (as, as->len + 1);
-  as->text[as->len] = (char) c;
-  as->text[++as->len] = '\0';
-  return as;
+  return astr_insert_char (as, astr_len (as), c);
 }
 
 astr
-astr_cat_delete (astr as, astr src)
+astr_substr (astr as, size_t pos, size_t size)
 {
-  assert (src != NULL);
-  astr_cat (as, src);
-  astr_delete (src);
-  return as;
-}
-
-astr
-astr_substr (astr as, ptrdiff_t pos, size_t size)
-{
-  assert (as != NULL);
-  pos = astr_pos (as, pos);
-  assert (pos + size <= as->len);
+  assert (pos + size <= astr_len (as));
   return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
 }
 
-int
-astr_cmp (astr as1, astr as2)
-{
-  return strcmp (as1->text, as2->text);
-}
-
-static astr
-astr_replace_x (astr as, ptrdiff_t pos, size_t size, const char *s,
-                size_t csize)
-{
-  astr tail;
-
-  assert (as != NULL);
-
-  pos = astr_pos (as, pos);
-  if (as->len - pos < size)
-    size = as->len - pos;
-  tail =
-    astr_substr (as, pos + (ptrdiff_t) size, astr_len (as) - (pos + size));
-  astr_truncate (as, pos);
-  astr_ncat_cstr (as, s, csize);
-  astr_cat (as, tail);
-  astr_delete (tail);
-
-  return as;
-}
-
 astr
-astr_replace_cstr (astr as, ptrdiff_t pos, size_t size, const char *s)
+astr_replace_cstr (astr as, size_t pos, size_t size, const char *s)
 {
   assert (s != NULL);
   return astr_replace_x (as, pos, size, s, strlen (s));
 }
 
 astr
-astr_replace_char (astr as, ptrdiff_t pos, int c)
-{
-  char ch = (char) c;
-  return astr_replace_x (as, pos, (size_t) 1, &ch, (size_t) 1);
-}
-
-astr
-astr_insert_char (astr as, ptrdiff_t pos, int c)
+astr_insert_char (astr as, size_t pos, int c)
 {
   char ch = (char) c;
   return astr_replace_x (as, pos, (size_t) 0, &ch, (size_t) 1);
 }
 
 astr
-astr_remove (astr as, ptrdiff_t pos, size_t size)
+astr_remove (astr as, size_t pos, size_t size)
 {
   return astr_replace_x (as, pos, size, "", (size_t) 0);
-}
-
-/* Don't define in terms of astr_remove, to avoid endless recursion */
-astr
-astr_truncate (astr as, ptrdiff_t pos)
-{
-  assert (as != NULL);
-  pos = astr_pos (as, pos);
-  if ((size_t) pos < as->len)
-    {
-      as->len = pos;
-      as->text[pos] = '\0';
-    }
-  return as;
 }
 
 astr astr_fread (FILE * fp)
@@ -258,20 +214,6 @@ astr astr_fread (FILE * fp)
   while ((c = getc (fp)) != EOF)
     astr_cat_char (as, c);
 
-  return as;
-}
-
-astr
-astr_fgets (FILE * fp)
-{
-  int c;
-  astr as;
-
-  if (feof (fp))
-    return NULL;
-  as = astr_new ();
-  while ((c = fgetc (fp)) != EOF && c != '\n')
-    astr_cat_char (as, c);
   return as;
 }
 
@@ -302,7 +244,7 @@ astr_afmt (astr as, const char *fmt, ...)
 static void
 assert_eq (astr as, const char *s)
 {
-  if (strcmp (((astr)(as))->text, (s)))
+  if (strcmp (astr_cstr (as), s))
     printf ("test failed: \"%s\" != \"%s\"\n", as->text, s);
 }
 
@@ -322,7 +264,6 @@ int
 main (void)
 {
   astr as1, as2, as3;
-  FILE *fp;
 
   as1 = astr_new ();
   astr_cpy_cstr (as1, "hello world");
@@ -339,20 +280,20 @@ main (void)
   assert_eq (as2, "The world.");
 
   astr_delete (as3);
-  as3 = astr_substr (as1, -6, 5);
+  as3 = astr_substr (as1, astr_len (as1) - 6, 5);
   assert_eq (as3, "world");
 
   astr_cpy_cstr (as1, "12345");
   astr_delete (as2);
 
   astr_cpy_cstr (as1, "12345");
-  astr_insert_char (as1, -2, 'x');
-  astr_insert_char (as1, -6, 'y');
+  astr_insert_char (as1, astr_len (as1) - 2, 'x');
+  astr_insert_char (as1, astr_len (as1) - 6, 'y');
   astr_insert_char (as1, 7, 'z');
   assert_eq (as1, "y123x45z");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -4, 2, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 4, 2, "foo");
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
@@ -360,7 +301,7 @@ main (void)
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -1, 5, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 1, 5, "foo");
   assert_eq (as1, "123456foo");
 
   astr_cpy_cstr (as1, "1234567");
@@ -368,16 +309,16 @@ main (void)
   assert_eq (as1, "1234");
 
   astr_cpy_cstr (as1, "12345");
-  as2 = astr_substr (as1, -2, 2);
+  as2 = astr_substr (as1, astr_len (as1) - 2, 2);
   assert_eq (as2, "45");
 
   astr_cpy_cstr (as1, "12345");
   astr_delete (as2);
-  as2 = astr_substr (as1, -5, 5);
+  as2 = astr_substr (as1, astr_len (as1) - 5, 5);
   assert_eq (as2, "12345");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -4, 2, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 4, 2, "foo");
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
@@ -385,7 +326,7 @@ main (void)
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -1, 5, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 1, 5, "foo");
   assert_eq (as1, "123456foo");
 
   astr_cpy_cstr (as1, "");
@@ -394,12 +335,6 @@ main (void)
   assert_eq (as1, "5 * 3 = 15");
   astr_delete (as1);
 
-  assert (fp = fopen (SRCPATH "/astr.c", "r"));
-  as1 = astr_fgets (fp);
-  printf ("The first line of astr.c is: \"%s\"\n", astr_cstr (as1));
-  assert (fclose (fp) == 0);
-
-  astr_delete (as1);
   astr_delete (as2);
   astr_delete (as3);
   printf ("astr test successful.\n");

@@ -20,7 +20,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.3.1, bug-zile@gnu.org)
+AC_INIT(Zile, 2.3.2, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl Checks for programs
@@ -28,40 +28,44 @@ AC_GNU_SOURCE
 AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
+AC_PATH_PROG(HELP2MAN, help2man)
+if test "$ac_cv_path_HELP2MAN" = ""; then
+  AC_MSG_FAILURE([cannot find help2man])
+fi
+AC_PATH_PROG(VALGRIND, valgrind)
 
 dnl Checks for functions and headers
 gl_INIT
 AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
 
-dnl Turn on additional compiler warnings
+dnl Turn on additional compiler warnings for gcc
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
-
-dnl Valgrind
-AC_PATH_PROG([VALGRIND], [valgrind])
-AC_SUBST([VALGRIND])
 
 dnl Curses
 MP_WITH_CURSES
 if test "$mp_cv_curses" = "no" -a "$mp_cv_ncurses" = "no"; then
   AC_MSG_FAILURE([cannot find curses])
 fi
-AC_SUBST([CURSES_LIB])
+AC_SUBST(CURSES_LIB)
 
 dnl Lua
 AX_WITH_LUA
 AX_LUA_VERSION(501, 502)
-AC_SUBST([LUA])
+AC_SUBST(LUA)
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
                    [The date of compilation.])
-AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["`hostname`"],
+AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["${ac_hostname}"],
                    [The host of compilation.])
 
 dnl Generate output
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_FILES(Makefile lib/Makefile src/Makefile)
+AC_CONFIG_FILES(
+        Makefile lib/Makefile src/Makefile
+        src/tbl_opts.h
+        )
 AC_OUTPUT

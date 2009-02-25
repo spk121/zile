@@ -34,7 +34,7 @@
 #include "dirname.h"
 #include "gl_linked_list.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \
@@ -211,20 +211,22 @@ signal_init (void)
 }
 
 /* Options table */
-/* Options which take no argument have optional_argument, so that no
-   arguments are signalled as extraneous, to mimic Emacs */
 struct option longopts[] = {
-  {"help", optional_argument, NULL, 'h'},
-  {"no-init-file", optional_argument, NULL, 'q'},
-  {"load", required_argument, NULL, 'l'},
-  {"version", optional_argument, NULL, 'v'},
+#define D(text)
+#define O(longname, shortname, arg, argstring, docstring) \
+  {longname, arg, NULL, shortname},
+#define A(argstring, docstring)
+#include "tbl_opts.h"
+#undef D
+#undef O
+#undef A
   {0, 0, 0, 0}
 };
 
 int
 main (int argc, char **argv)
 {
-  int c, qflag = false;
+  int qflag = false;
   gl_list_t l_args = gl_list_create_empty (GL_LINKED_LIST,
                                           NULL, NULL, NULL, false);
   size_t line;
@@ -240,58 +242,66 @@ main (int argc, char **argv)
   init_variables ();
   init_eval ();
 
-  opterr = 0;			/* Don't display errors for unknown options */
+  opterr = 0; /* Don't display errors for unknown options */
   for (;;)
     {
-      int this_optind = optind ? optind : 1;
+      int this_optind = optind ? optind : 1, longindex, c;
+      char *buf, *shortopt;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
-      c = getopt_long_only (argc, argv, ":h:l:qv", longopts, NULL);
-
+      c = getopt_long (argc, argv, ":l:q", longopts, &longindex);
+      
       if (c == -1)
         break;
-
-      switch (c)
+      else if (c == '?') /* Unknown option */
+        minibuf_error ("Unknown option `%s'", argv[this_optind]);
+      else if (c == ':') /* Missing argument */
         {
-        case 'q':
+          fprintf (stderr, "%s: Option `%s' requires an argument\n",
+                   prog_name, argv[this_optind]);
+          exit (1);
+        }
+
+      switch (longindex)
+        {
+        case 0:
           qflag = true;
           break;
-        case 'v':
+        case 1:
+          gl_list_add_last (l_args, (void *) optarg);
+          break;
+        case 2:
+          printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
+                  "\n"
+                  "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
+                  "\n",
+                  argv[0]);
+#define D(text)                                 \
+          printf (text "\n");
+          /* FIXME: Fix display of shortname */
+#define O(longname, shortname, arg, argstring, docstring)               \
+          xasprintf (&shortopt, ", -%c", shortname);                    \
+          xasprintf (&buf, "--%s%s %s", longname, shortname ? shortopt : "", argstring); \
+          printf ("%-24s%s\n", buf, docstring);                         \
+          free (buf);                                                   \
+          free (shortopt);
+#define A(argstring, docstring) \
+          printf ("%-24s%s\n", argstring, docstring);
+#include "tbl_opts.h"
+#undef D
+#undef O
+#undef A
+          printf ("\n"
+                  "Report bugs to " PACKAGE_BUGREPORT ".\n");
+          exit (0);
+        case 3:
           printf (ZILE_VERSION_STRING "\n"
                   ZILE_COPYRIGHT_STRING "\n"
                   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
                   "You may redistribute copies of " PACKAGE_NAME "\n"
                   "under the terms of the GNU General Public License.\n"
                   "For more information about these matters, see the file named COPYING.\n");
-          return 0;
-        case 'h':
-          printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
-                  "\n"
-                  "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
-                  "\n"
-                  "Initialization options:\n"
-                  "\n"
-                  "--no-init-file, -q      do not load ~/." PACKAGE "\n"
-                  "--load, -l FILE         load " PACKAGE_NAME " Lisp FILE using the load function\n"
-                  "--help                  display this help message and exit\n"
-                  "--version               display version information and exit\n"
-                  "\n" "Action options:\n" "\n"
-                  "FILE                    visit FILE using find-file\n"
-                  "+LINE FILE              visit FILE using find-file, then go to line LINE\n"
-                  "\n"
-                  "Report bugs to " PACKAGE_BUGREPORT ".\n",
-                  prog_name);
-          return 0;
-        case 'l':
-          gl_list_add_last (l_args, (void *) optarg);
-          break;
-        case '?':		/* Unknown option */
-          minibuf_error ("Unknown option `%s'", argv[this_optind]);
-          break;
-        case ':':		/* Missing argument */
-          fprintf (stderr, "%s: Option `%s' requires an argument\n",
-                   prog_name, argv[this_optind]);
-          exit (1);
+          exit (0);
         }
     }
 

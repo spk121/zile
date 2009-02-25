@@ -77,24 +77,18 @@ size_t astr_len (astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-char *astr_char (astr as, ptrdiff_t pos);
+char *astr_char (astr as, size_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-astr astr_substr (astr as, ptrdiff_t pos, size_t size);
-
-/*
- * Do strcmp on the contents of as1 and as2.
- */
-int astr_cmp (astr as1, astr as2);
+astr astr_substr (astr as, size_t pos, size_t size);
 
 /*
  * Assign the contents of the argument string to the string as.
  */
 astr astr_cpy (astr as, astr src);
-astr astr_ncpy_cstr (astr as, const char *s, size_t len);
 astr astr_cpy_cstr (astr as, const char *s);
 
 /*
@@ -106,44 +100,31 @@ astr astr_ncat_cstr (astr as, const char *s, size_t len);
 astr astr_cat_char (astr as, int c);
 
 /*
- * Append the contents of src to as and free src.
- */
-astr astr_cat_delete (astr as, astr src);
-
-/*
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */
-astr astr_replace_cstr (astr as, ptrdiff_t pos, size_t size,
+astr astr_replace_cstr (astr as, size_t pos, size_t size,
                                const char *s);
-astr astr_replace_char (astr as, ptrdiff_t pos, int c);
 
 /*
  * Insert the contents of the character in as.
  */
-astr astr_insert_char (astr as, ptrdiff_t pos, int c);
+astr astr_insert_char (astr as, size_t pos, int c);
 
 /*
  * Remove size chars from as at position pos.
  */
-astr astr_remove (astr as, ptrdiff_t pos, size_t size);
+astr astr_remove (astr as, size_t pos, size_t size);
 
 /*
  * Truncate as to given position.
  */
-astr astr_truncate (astr as, ptrdiff_t pos);
+astr astr_truncate (astr as, size_t pos);
 
 /*
  * Read the stream fp into a string and return it.
  */
 astr astr_fread (FILE * fp);
-
-/*
- * Read a string from the stream fp and return it. The trailing
- * newline is removed from the string. If the stream is at EOF when
- * astr_fgets is called, it returns NULL.
- */
-astr astr_fgets (FILE * fp);
 
 /*
  * Append formatted text to the argument string.

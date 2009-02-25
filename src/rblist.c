@@ -30,23 +30,25 @@
 #include "rblist.h"
 
 
-// For debugging: incremented every time random_double is called.
+/* For debugging: incremented every time random_double is called. */
 static size_t random_counter = 0;
 
-// Returns a random double in the range 0.0 (inclusive) to 1.0 (exclusive).
-static inline double random_double(void)
+/* Returns a random double in the range 0.0 (inclusive) to 1.0 (exclusive). */
+static inline double
+random_double (void)
 {
-  static uint32_t seed = 483568341; // Arbitrary.
+  static uint32_t seed = 483568341;	/* Arbitrary. */
 
   random_counter++;
-  seed = (2 * seed - 1) * seed + 1; // Maximal period mod any power of two.
-  return seed * (1.0 / (1.0 + (double)UINT32_MAX));
+  seed = (2 * seed - 1) * seed + 1;	/* Maximal period mod any power of two. */
+  return seed * (1.0 / (1.0 + (double) UINT32_MAX));
 }
 
-// Returns a random size_t in the range from 1 to `n'.
-static inline size_t random_one_to_n(size_t n)
+/* Returns a random size_t in the range from 1 to `n'. */
+static inline size_t
+random_one_to_n (size_t n)
 {
-  return 1 + (size_t)(n * random_double());
+  return 1 + (size_t) (n * random_double ());
 }
 
 /*
@@ -86,22 +88,26 @@ static inline size_t random_one_to_n(size_t n)
  * operands have the correct probability distribution and are independent.
  */
 
-struct leaf {
+struct leaf
+{
   size_t length;
   size_t nl_count;
   char data[];
 };
 
-struct node {
+struct node
+{
   size_t length;
   size_t nl_count;
   rblist left;
   rblist right;
 };
 
-// This is the opaque public type.
-union rblist {
-  struct {
+/* This is the opaque public type. */
+union rblist
+{
+  struct
+  {
     size_t length;
     size_t nl_count;
   } stats;
@@ -119,40 +125,44 @@ union rblist {
  * list is terminated by a NULL next pointer.
  */
 
-struct link {
+struct link
+{
   rblist item;
   const struct link *next;
 };
 
-// This is the opaque public type.
-struct rblist_iterator {
+/* This is the opaque public type. */
+struct rblist_iterator
+{
   const struct leaf *leaf;
   size_t pos;
   const struct link *next;
 };
 
 /*****************************/
-// Static utility functions.
+/* Static utility functions. */
 
-// The struct leaf to which rblist_empty points.
-static const struct leaf empty = {0, 0};
+/* The struct leaf to which rblist_empty points. */
+static const struct leaf empty = { 0, 0 };
 
-// Allocates and initialises a struct leaf.
-static inline rblist leaf_from_array(const char *s, size_t length)
+/* Allocates and initialises a struct leaf. */
+static inline rblist
+leaf_from_array (const char *s, size_t length)
 {
-  assert(length < MINIMUM_NODE_LENGTH);
-  struct leaf *ret = xzalloc(sizeof(struct leaf) + length * sizeof(char));
+  assert (length < MINIMUM_NODE_LENGTH);
+  struct leaf *ret = xzalloc (sizeof (struct leaf) + length * sizeof (char));
   ret->length = length;
   ret->nl_count = 0;
-  for (size_t i=0; i<length; i++)
+  for (size_t i = 0; i < length; i++)
     if (s[i] == '\n')
       ret->nl_count++;
-  memcpy(&ret->data[0], s, length);
-  return (rblist)ret;
+  memcpy (&ret->data[0], s, length);
+  return (rblist) ret;
 }
 
-// Tests whether an rblist is a leaf or a node.
-static inline bool is_leaf(rblist rbl)
+/* Tests whether an rblist is a leaf or a node. */
+static inline bool
+is_leaf (rblist rbl)
 {
   return rbl->stats.length < MINIMUM_NODE_LENGTH;
 }
@@ -170,15 +180,19 @@ static inline bool is_leaf(rblist rbl)
  * Either way, the split happens at a random position chosen from a
  * uniform probability distribution.
  */
-static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *right)
+static inline void
+random_split (rblist rbl, size_t pos, rblist * left, rblist * right)
 {
-  if (is_leaf(rbl)) {
-    *left = leaf_from_array(&rbl->leaf.data[0], pos);
-    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->leaf.length - pos);
-  } else {
-    *left = rbl->node.left;
-    *right = rbl->node.right;
-  }
+  if (is_leaf (rbl))
+    {
+      *left = leaf_from_array (&rbl->leaf.data[0], pos);
+      *right = leaf_from_array (&rbl->leaf.data[pos], rbl->leaf.length - pos);
+    }
+  else
+    {
+      *left = rbl->node.left;
+      *right = rbl->node.right;
+    }
 }
 
 /*
@@ -188,64 +202,79 @@ static inline void random_split(rblist rbl, size_t pos, rblist *left, rblist *ri
  * concatenation of `left' and `right'. In the node case, `left' and
  * `right' become the children.
  */
-static rblist make_rblist(rblist left, rblist right)
+static rblist
+make_rblist (rblist left, rblist right)
 {
   size_t new_len = left->stats.length + right->stats.length;
-  if (new_len < MINIMUM_NODE_LENGTH) {
-    struct leaf *ret = xzalloc(sizeof(struct leaf) + sizeof(char) * new_len);
-    ret->length = new_len;
-    ret->nl_count = left->leaf.nl_count + right->leaf.nl_count;
-    memcpy(&ret->data[0], &left->leaf.data[0], left->leaf.length);
-    memcpy(&ret->data[left->leaf.length], &right->leaf.data[0], right->leaf.length);
-    return (rblist)ret;
-  } else {
-    struct node *ret = XZALLOC(struct node);
-    ret->length = new_len;
-    ret->nl_count = left->stats.nl_count + right->stats.nl_count;
-    ret->left = left;
-    ret->right = right;
-    return (rblist)ret;
-  }
+  if (new_len < MINIMUM_NODE_LENGTH)
+    {
+      struct leaf *ret =
+	xzalloc (sizeof (struct leaf) + sizeof (char) * new_len);
+      ret->length = new_len;
+      ret->nl_count = left->leaf.nl_count + right->leaf.nl_count;
+      memcpy (&ret->data[0], &left->leaf.data[0], left->leaf.length);
+      memcpy (&ret->data[left->leaf.length], &right->leaf.data[0],
+	      right->leaf.length);
+      return (rblist) ret;
+    }
+  else
+    {
+      struct node *ret = XZALLOC (struct node);
+      ret->length = new_len;
+      ret->nl_count = left->stats.nl_count + right->stats.nl_count;
+      ret->left = left;
+      ret->right = right;
+      return (rblist) ret;
+    }
 }
 
-// The recursive part of rblist_split.
-// Not easy to make iterative because of the `if' in make_rblist.
-static void recursive_split(rblist rbl, size_t pos, rblist *left, rblist *right)
+/* The recursive part of rblist_split. */
+/* Not easy to make iterative because of the `if' in make_rblist. */
+static void
+recursive_split (rblist rbl, size_t pos, rblist * left, rblist * right)
 {
-  if (is_leaf(rbl)) {
-    *left = leaf_from_array(&rbl->leaf.data[0], pos);
-    *right = leaf_from_array(&rbl->leaf.data[pos], rbl->leaf.length - pos);
-    return;
-  }
+  if (is_leaf (rbl))
+    {
+      *left = leaf_from_array (&rbl->leaf.data[0], pos);
+      *right = leaf_from_array (&rbl->leaf.data[pos], rbl->leaf.length - pos);
+      return;
+    }
   size_t mid = rbl->node.left->stats.length;
-  if (pos < mid) {
-    rblist left_right;
-    rblist_split(rbl->node.left, pos, left, &left_right);
-    *right = make_rblist(left_right, rbl->node.right);
-  } else if (pos > mid) {
-    rblist right_left;
-    rblist_split(rbl->node.right, pos - mid, &right_left, right);
-    *left = make_rblist(rbl->node.left, right_left);
-  } else {
-    *left = rbl->node.left;
-    *right = rbl->node.right;
-  }
+  if (pos < mid)
+    {
+      rblist left_right;
+      rblist_split (rbl->node.left, pos, left, &left_right);
+      *right = make_rblist (left_right, rbl->node.right);
+    }
+  else if (pos > mid)
+    {
+      rblist right_left;
+      rblist_split (rbl->node.right, pos - mid, &right_left, right);
+      *left = make_rblist (rbl->node.left, right_left);
+    }
+  else
+    {
+      *left = rbl->node.left;
+      *right = rbl->node.right;
+    }
 }
 
 /*
  * Constructs an iterator that iterates over `rbl' and then over all the
  * rblists in `next'.
  */
-static rblist_iterator make_iterator(rblist rbl, const struct link *next)
+static rblist_iterator
+make_iterator (rblist rbl, const struct link *next)
 {
-  while (!is_leaf(rbl)) {
-    struct link *link = XZALLOC(struct link);
-    link->item = rbl->node.right;
-    link->next = next;
-    next = link;
-    rbl = rbl->node.left;
-  }
-  rblist_iterator ret = XZALLOC(struct rblist_iterator);
+  while (!is_leaf (rbl))
+    {
+      struct link *link = XZALLOC (struct link);
+      link->item = rbl->node.right;
+      link->next = next;
+      next = link;
+      rbl = rbl->node.left;
+    }
+  rblist_iterator ret = XZALLOC (struct rblist_iterator);
   ret->leaf = &rbl->leaf;
   ret->pos = 0;
   ret->next = next;
@@ -253,7 +282,7 @@ static rblist_iterator make_iterator(rblist rbl, const struct link *next)
 }
 
 /***************************/
-// Primitive constructors.
+/* Primitive constructors. */
 
 /*
  * This operation is unique in picking the entire node/leaf structure
@@ -263,27 +292,29 @@ static rblist_iterator make_iterator(rblist rbl, const struct link *next)
  * It's not really a necessary primitive constructor, but the above
  * property argues for implementing it as a primitive.
  */
-rblist rblist_from_array(const char *s, size_t length)
+rblist
+rblist_from_array (const char *s, size_t length)
 {
   if (length == 0)
     return rblist_empty;
   if (length < MINIMUM_NODE_LENGTH)
-    return leaf_from_array(s, length);
-  struct node *ret = XZALLOC(struct node);
+    return leaf_from_array (s, length);
+  struct node *ret = XZALLOC (struct node);
   ret->length = length;
-  size_t pos = random_one_to_n(length - 1);
-  ret->left = rblist_from_array(&s[0], pos);
-  ret->right = rblist_from_array(&s[pos], length - pos);
+  size_t pos = random_one_to_n (length - 1);
+  ret->left = rblist_from_array (&s[0], pos);
+  ret->right = rblist_from_array (&s[pos], length - pos);
   ret->nl_count = ret->left->stats.nl_count + ret->right->stats.nl_count;
-  return (rblist)ret;
+  return (rblist) ret;
 }
 
-const rblist rblist_empty = (rblist)&empty;
+const rblist rblist_empty = (rblist) & empty;
 
-rblist rblist_from_char(int c)
+rblist
+rblist_from_char (int c)
 {
   char cc = c;
-  return leaf_from_array(&cc, 1);
+  return leaf_from_array (&cc, 1);
 }
 
 /*
@@ -299,7 +330,8 @@ rblist rblist_from_char(int c)
  * condition to hold, but in practice concatenating a list with itself
  * (for example) does not have disastrous consequences.
  */
-rblist rblist_concat(rblist left, rblist right)
+rblist
+rblist_concat (rblist left, rblist right)
 {
 #define llen (left->stats.length)
 #define rlen (right->stats.length)
@@ -308,30 +340,39 @@ rblist rblist_concat(rblist left, rblist right)
 
   if (new_len == 0)
     return rblist_empty;
-  else if (new_len < MINIMUM_NODE_LENGTH) {
-    struct leaf *ret = xzalloc(sizeof(struct leaf) + sizeof(char) * new_len);
-    ret->length = new_len;
-    ret->nl_count = left->leaf.nl_count + right->leaf.nl_count;
-    memcpy(&ret->data[0], &left->leaf.data[0], llen);
-    memcpy(&ret->data[mid], &right->leaf.data[0], rlen);
-    return (rblist)ret;
-  } else {
-    struct node *ret = XZALLOC(struct node);
-    ret->length = new_len;
-    ret->nl_count = left->stats.nl_count + right->stats.nl_count;
-    size_t pos = random_one_to_n(new_len - 1);
-    if (pos < mid) {
-      random_split(left, pos, &ret->left, &left);
-      ret->right = rblist_concat(left, right);
-    } else if (pos > mid) {
-      random_split(right, pos - mid, &right, &ret->right);
-      ret->left = rblist_concat(left, right);
-    } else { // pos == mid
-      ret->left = left;
-      ret->right = right;
+  else if (new_len < MINIMUM_NODE_LENGTH)
+    {
+      struct leaf *ret =
+	xzalloc (sizeof (struct leaf) + sizeof (char) * new_len);
+      ret->length = new_len;
+      ret->nl_count = left->leaf.nl_count + right->leaf.nl_count;
+      memcpy (&ret->data[0], &left->leaf.data[0], llen);
+      memcpy (&ret->data[mid], &right->leaf.data[0], rlen);
+      return (rblist) ret;
     }
-    return (rblist)ret;
-  }
+  else
+    {
+      struct node *ret = XZALLOC (struct node);
+      ret->length = new_len;
+      ret->nl_count = left->stats.nl_count + right->stats.nl_count;
+      size_t pos = random_one_to_n (new_len - 1);
+      if (pos < mid)
+	{
+	  random_split (left, pos, &ret->left, &left);
+	  ret->right = rblist_concat (left, right);
+	}
+      else if (pos > mid)
+	{
+	  random_split (right, pos - mid, &right, &ret->right);
+	  ret->left = rblist_concat (left, right);
+	}
+      else
+	{			/* pos == mid */
+	  ret->left = left;
+	  ret->right = right;
+	}
+      return (rblist) ret;
+    }
 
 #undef llen
 #undef rlen
@@ -339,72 +380,86 @@ rblist rblist_concat(rblist left, rblist right)
 }
 
 /*************************/
-// Derived constructors.
+/* Derived constructors. */
 
-rblist rblist_from_string(const char *s)
+rblist
+rblist_from_string (const char *s)
 {
-  return rblist_from_array(s, strlen(s));
+  return rblist_from_array (s, strlen (s));
 }
 
 /**************************/
-// Primitive destructors.
+/* Primitive destructors. */
 
-size_t rblist_length(rblist rbl)
+size_t
+rblist_length (rblist rbl)
 {
   return rbl->stats.length;
 }
 
-size_t rblist_nl_count(rblist rbl)
+size_t
+rblist_nl_count (rblist rbl)
 {
   return rbl->stats.nl_count;
 }
 
-void rblist_split(rblist rbl, size_t pos, rblist *left, rblist *right)
+void
+rblist_split (rblist rbl, size_t pos, rblist * left, rblist * right)
 {
-  if (pos == 0) {
-    *left = rblist_empty;
-    *right = rbl;
-  } else if (pos >= rbl->stats.length) {
-    *left = rbl;
-    *right = rblist_empty;
-  } else
-    recursive_split(rbl, pos, left, right);
+  if (pos == 0)
+    {
+      *left = rblist_empty;
+      *right = rbl;
+    }
+  else if (pos >= rbl->stats.length)
+    {
+      *left = rbl;
+      *right = rblist_empty;
+    }
+  else
+    recursive_split (rbl, pos, left, right);
 }
 
-rblist_iterator rblist_iterate(rblist rbl)
+rblist_iterator
+rblist_iterate (rblist rbl)
 {
-  return rbl->stats.length ? make_iterator(rbl, NULL) : NULL;
+  return rbl->stats.length ? make_iterator (rbl, NULL) : NULL;
 }
 
-char rblist_iterator_value(rblist_iterator it)
+char
+rblist_iterator_value (rblist_iterator it)
 {
   return it->leaf->data[it->pos];
 }
 
-rblist_iterator rblist_iterator_next(rblist_iterator it)
+rblist_iterator
+rblist_iterator_next (rblist_iterator it)
 {
   if (++it->pos < it->leaf->length)
     return it;
-  return it->next ? make_iterator(it->next->item, it->next->next) : NULL;
+  return it->next ? make_iterator (it->next->item, it->next->next) : NULL;
 }
 
 /*
  * This doesn't need to be primitive, but it's short and efficient
  * so why not?
  */
-char rblist_get(rblist rbl, size_t pos)
+char
+rblist_get (rblist rbl, size_t pos)
 {
-  assert(pos < rblist_length(rbl));
+  assert (pos < rblist_length (rbl));
 
-  while (!is_leaf(rbl)) {
-    size_t mid = rbl->node.left->stats.length;
-    if (pos < mid)
-      rbl = rbl->node.left;
-    else {
-      rbl = rbl->node.right;
-      pos -= mid;
+  while (!is_leaf (rbl))
+    {
+      size_t mid = rbl->node.left->stats.length;
+      if (pos < mid)
+	rbl = rbl->node.left;
+      else
+	{
+	  rbl = rbl->node.right;
+	  pos -= mid;
+	}
     }
-  }
   return rbl->leaf.data[pos];
 }
 
@@ -412,21 +467,24 @@ char rblist_get(rblist rbl, size_t pos)
  * This doesn't need to be primitive, but it's short and efficient
  * so why not?
  */
-size_t rblist_pos_to_line(rblist rbl, size_t pos)
+size_t
+rblist_pos_to_line (rblist rbl, size_t pos)
 {
-  assert(pos <= rbl->stats.length);
+  assert (pos <= rbl->stats.length);
 
   size_t ret = 0;
-  while (!is_leaf(rbl)) {
-    size_t mid = rbl->node.left->stats.length;
-    if (pos <= mid)
-      rbl = rbl->node.left;
-    else {
-      ret += rbl->node.left->stats.nl_count;
-      pos -= mid;
-      rbl = rbl->node.right;
+  while (!is_leaf (rbl))
+    {
+      size_t mid = rbl->node.left->stats.length;
+      if (pos <= mid)
+	rbl = rbl->node.left;
+      else
+	{
+	  ret += rbl->node.left->stats.nl_count;
+	  pos -= mid;
+	  rbl = rbl->node.right;
+	}
     }
-  }
   size_t i = 0;
   while (i < pos)
     if (rbl->leaf.data[i++] == '\n')
@@ -434,21 +492,26 @@ size_t rblist_pos_to_line(rblist rbl, size_t pos)
   return ret;
 }
 
-size_t rblist_line_to_start_pos(rblist rbl, size_t line)
+size_t
+rblist_line_to_start_pos (rblist rbl, size_t line)
 {
-  assert(line <= rbl->stats.nl_count);
+  assert (line <= rbl->stats.nl_count);
 
   size_t ret = 0;
-  while (!is_leaf(rbl)) {
-    size_t mid = rbl->node.left->stats.nl_count;
-    if (line <= mid) {
-      rbl = rbl->node.left;
-    } else {
-      ret += rbl->node.left->stats.length;
-      line -= mid;
-      rbl = rbl->node.right;
+  while (!is_leaf (rbl))
+    {
+      size_t mid = rbl->node.left->stats.nl_count;
+      if (line <= mid)
+	{
+	  rbl = rbl->node.left;
+	}
+      else
+	{
+	  ret += rbl->node.left->stats.length;
+	  line -= mid;
+	  rbl = rbl->node.right;
+	}
     }
-  }
   size_t i = 0;
   while (line)
     if (rbl->leaf.data[i++] == '\n')
@@ -456,67 +519,76 @@ size_t rblist_line_to_start_pos(rblist rbl, size_t line)
   return ret + i;
 }
 
-size_t rblist_line_to_end_pos(rblist rbl, size_t line)
+size_t
+rblist_line_to_end_pos (rblist rbl, size_t line)
 {
   if (line == rbl->stats.nl_count)
-    return rbl->stats.length; // EOF
+    return rbl->stats.length;	/* EOF */
   else
-    return rblist_line_to_start_pos(rbl, line + 1) - 1;
+    return rblist_line_to_start_pos (rbl, line + 1) - 1;
 }
 
 /************************/
-// Derived destructors.
+/* Derived destructors. */
 
-size_t rblist_line_length(rblist rbl, size_t line)
+size_t
+rblist_line_length (rblist rbl, size_t line)
 {
-  return rblist_line_to_end_pos(rbl, line) - rblist_line_to_start_pos(rbl, line);
+  return rblist_line_to_end_pos (rbl, line) - rblist_line_to_start_pos (rbl,
+									line);
 }
 
-rblist rblist_line(rblist rbl, size_t line)
+rblist
+rblist_line (rblist rbl, size_t line)
 {
-  return rblist_sub(rbl, rblist_line_to_start_pos(rbl, line), rblist_line_to_end_pos(rbl, line));
+  return rblist_sub (rbl, rblist_line_to_start_pos (rbl, line),
+		     rblist_line_to_end_pos (rbl, line));
 }
 
-char *rblist_to_string(rblist rbl)
+char *
+rblist_to_string (rblist rbl)
 {
-  char *const ans = xzalloc(sizeof(char) * (rblist_length(rbl)+1));
+  char *const ans = xzalloc (sizeof (char) * (rblist_length (rbl) + 1));
   char *s = ans;
-  RBLIST_FOR(c, rbl)
-    *(s++) = c;
-  RBLIST_END
-  *s = 0;
+  RBLIST_FOR (c, rbl) * (s++) = c;
+  RBLIST_END * s = 0;
   return ans;
 }
 
-rblist rblist_sub(rblist rbl, size_t from, size_t to)
+rblist
+rblist_sub (rblist rbl, size_t from, size_t to)
 {
   rblist dummy;
-  rblist_split(rbl, to, &rbl, &dummy);
-  rblist_split(rbl, from, &dummy, &rbl);
+  rblist_split (rbl, to, &rbl, &dummy);
+  rblist_split (rbl, from, &dummy, &rbl);
   return rbl;
 }
 
-int rblist_compare(rblist left, rblist right)
+int
+rblist_compare (rblist left, rblist right)
 {
-  rblist_iterator it_left = rblist_iterate(left);
-  rblist_iterator it_right = rblist_iterate(right);
-  while (it_left && it_right) {
-    if (rblist_iterator_value(it_left) != rblist_iterator_value(it_right))
-      return  rblist_iterator_value(it_left) - rblist_iterator_value(it_right);
-    it_left = rblist_iterator_next(it_left);
-    it_right = rblist_iterator_next(it_right);
-  }
+  rblist_iterator it_left = rblist_iterate (left);
+  rblist_iterator it_right = rblist_iterate (right);
+  while (it_left && it_right)
+    {
+      if (rblist_iterator_value (it_left) != rblist_iterator_value (it_right))
+	return rblist_iterator_value (it_left) -
+	  rblist_iterator_value (it_right);
+      it_left = rblist_iterator_next (it_left);
+      it_right = rblist_iterator_next (it_right);
+    }
   return it_left ? 1 : it_right ? -1 : 0;
 }
 
-int rblist_ncompare(rblist left, rblist right, size_t n)
+int
+rblist_ncompare (rblist left, rblist right, size_t n)
 {
-  return rblist_compare(rblist_sub(left, 0, n), rblist_sub(right, 0, n));
+  return rblist_compare (rblist_sub (left, 0, n), rblist_sub (right, 0, n));
 }
 
 
 /*************/
-// Test code
+/* Test code */
 
 #ifdef TEST
 
@@ -528,42 +600,52 @@ int rblist_ncompare(rblist left, rblist right, size_t n)
 
 #include "rbutil.h"
 
-// Stub to make xalloc_die happy
+/* Stub to make xalloc_die happy */
 char *prog_name = "rblist";
 
 void
 zile_exit (int doabort GCC_UNUSED)
 {
-  exit(2);
+  exit (2);
 }
 
 /*
  * Describes the internal structure of an rblist in a slightly
  * human-readable form.
  */
-static rblist rbl_structure(rblist rbl)
+static rblist
+rbl_structure (rblist rbl)
 {
-  if (is_leaf(rbl))
-    return rblist_fmt("%d", rbl->leaf.length);
+  if (is_leaf (rbl))
+    return rblist_fmt ("%d", rbl->leaf.length);
   else
-    return rblist_fmt("(%r,%r)", rbl_structure(rbl->node.left), rbl_structure(rbl->node.right));
+    return rblist_fmt ("(%r,%r)", rbl_structure (rbl->node.left),
+		       rbl_structure (rbl->node.right));
 }
 
-// Checks all structural invariants that are supposed to hold for `rbl'.
-static void assert_invariants(rblist rbl) {
-  if (is_leaf(rbl)) {
-    assert((rbl->leaf.length == 0) == (rbl == rblist_empty));
-    size_t nl_count = 0;
-    for (size_t i = 0; i < rbl->leaf.length; i++)
-      if (rbl->leaf.data[i] == '\n')
-        nl_count++;
-    assert(nl_count == rbl->leaf.nl_count);
-  } else {
-    assert_invariants(rbl->node.left);
-    assert_invariants(rbl->node.right);
-    assert(rbl->node.length == rbl->node.left->stats.length + rbl->node.right->stats.length);
-    assert(rbl->node.nl_count == rbl->node.left->stats.nl_count + rbl->node.right->stats.nl_count);
-  }
+/* Checks all structural invariants that are supposed to hold for `rbl'. */
+static void
+assert_invariants (rblist rbl)
+{
+  if (is_leaf (rbl))
+    {
+      assert ((rbl->leaf.length == 0) == (rbl == rblist_empty));
+      size_t nl_count = 0;
+      for (size_t i = 0; i < rbl->leaf.length; i++)
+	if (rbl->leaf.data[i] == '\n')
+	  nl_count++;
+      assert (nl_count == rbl->leaf.nl_count);
+    }
+  else
+    {
+      assert_invariants (rbl->node.left);
+      assert_invariants (rbl->node.right);
+      assert (rbl->node.length ==
+	      rbl->node.left->stats.length + rbl->node.right->stats.length);
+      assert (rbl->node.nl_count ==
+	      rbl->node.left->stats.nl_count +
+	      rbl->node.right->stats.nl_count);
+    }
 }
 
 /*
@@ -578,101 +660,117 @@ static void assert_invariants(rblist rbl) {
  * positions. Finally, checks that rblist_line_to_start_pos and
  * rblist_line_to_end_pos return the correct values for all line numbers.
  */
-static void test(rblist rbl, const char *s, size_t length)
+static void
+test (rblist rbl, const char *s, size_t length)
 {
-  assert(rblist_length(rbl) == length);
+  assert (rblist_length (rbl) == length);
   if (s)
-    assert(!memcmp(rblist_to_string(rbl), s, length));
+    assert (!memcmp (rblist_to_string (rbl), s, length));
 
-  size_t nl_count = rblist_nl_count(rbl);
+  size_t nl_count = rblist_nl_count (rbl);
   size_t pos = 0, line = 0;
-  size_t nl_pos[rblist_nl_count(rbl)];
+  size_t nl_pos[rblist_nl_count (rbl)];
 
-  RBLIST_FOR(c, rbl)
-    if (s)
-      assert(c == s[pos]);
-    assert(rblist_get(rbl, pos) == c);
-    assert(rblist_pos_to_line(rbl, pos) == line);
-    if (c=='\n')
-      nl_pos[line++] = pos;
-    pos++;
+  RBLIST_FOR (c, rbl) if (s)
+    assert (c == s[pos]);
+  assert (rblist_get (rbl, pos) == c);
+  assert (rblist_pos_to_line (rbl, pos) == line);
+  if (c == '\n')
+    nl_pos[line++] = pos;
+  pos++;
   RBLIST_END;
 
-  assert(pos == length);
-  assert(line == nl_count);
+  assert (pos == length);
+  assert (line == nl_count);
 
-  for (line = 0; line <= nl_count; line++) {
-    assert(rblist_line_to_start_pos(rbl, line) == (line ? nl_pos[line - 1] + 1 : 0));
-    assert(rblist_line_to_end_pos(rbl, line) == (line < nl_count ? nl_pos[line] : length));
-  }
+  for (line = 0; line <= nl_count; line++)
+    {
+      assert (rblist_line_to_start_pos (rbl, line) ==
+	      (line ? nl_pos[line - 1] + 1 : 0));
+      assert (rblist_line_to_end_pos (rbl, line) ==
+	      (line < nl_count ? nl_pos[line] : length));
+    }
 }
 
-int main(void)
+int
+main (void)
 {
   rblist rbl1, rbl2, rbl3, rbl4;
 
-  const char *s1 = "Hello, I'm longer than 32 characters!\nWhooppeee!!!\n\nYes, really, really long. You won't believe how incredibly enormously long I am!\n";
-  // Check that we'll have a whole number of steps in the loop below.
-  assert(strlen(s1) == 19 * 7);
+  const char *s1 =
+    "Hello, I'm longer than 32 characters!\nWhooppeee!!!\n\nYes, really, really long. You won't believe how incredibly enormously long I am!\n";
+  /* Check that we'll have a whole number of steps in the loop below. */
+  assert (strlen (s1) == 19 * 7);
 
-  // Test loads of things for empty, short and long strings.
+  /* Test loads of things for empty, short and long strings. */
 
-  test(rblist_empty, "", 0);
-  test(rblist_from_char('a'), "a", 1);
-  test(rblist_concat(rblist_from_char('a'), rblist_from_char('b')), "ab", 2);
-  test(rblist_from_array(s1, strlen(s1)), s1, strlen(s1));
+  test (rblist_empty, "", 0);
+  test (rblist_from_char ('a'), "a", 1);
+  test (rblist_concat (rblist_from_char ('a'), rblist_from_char ('b')), "ab",
+	2);
+  test (rblist_from_array (s1, strlen (s1)), s1, strlen (s1));
 
-  // Test computational complexity, and test concat for long strings.
+  /* Test computational complexity, and test concat for long strings. */
 
   rbl1 = rblist_empty;
-  rbl2 = rblist_from_char('x');
+  rbl2 = rblist_from_char ('x');
 #define TEST_SIZE 1000
   random_counter = 0;
   for (size_t i = 0; i < TEST_SIZE; i++)
-    rbl1 = rblist_concat(rbl1, rbl2);
-  assert(rblist_length(rbl1) == TEST_SIZE);
+    rbl1 = rblist_concat (rbl1, rbl2);
+  assert (rblist_length (rbl1) == TEST_SIZE);
 #ifdef DEBUG
-  printf("Making a list of length %d by appending one element at a time required\n"
-         "%d random numbers. Resulting structure is:\n", TEST_SIZE, random_counter);
-  printf("%s\n", rblist_to_string(rbl_structure(rbl1)));
+  printf
+    ("Making a list of length %d by appending one element at a time required\n"
+     "%d random numbers. Resulting structure is:\n", TEST_SIZE,
+     random_counter);
+  printf ("%s\n", rblist_to_string (rbl_structure (rbl1)));
 #endif
 
   /* Test split and stress concat some more. Break `s1' at positions
    * 0, 19, 19*2, ..., 19*7 and for each position check that we can
    * put it back together again. */
 
-  rbl1 = rblist_from_array(s1, strlen(s1));
+  rbl1 = rblist_from_array (s1, strlen (s1));
 #ifdef DEBUG
-  printf("%s\n", rblist_to_string(rbl_structure(rbl1)));
+  printf ("%s\n", rblist_to_string (rbl_structure (rbl1)));
 #endif
-  for (size_t i = 0; i <= rblist_length(rbl1); i += 19) {
-    rblist_split(rbl1, i, &rbl2, &rbl3);
-    test(rbl2, &s1[0], i);
-    test(rbl3, &s1[i], 19 * 7 - i);
-    rbl4 = rblist_concat(rbl2, rbl3);
-    test(rbl4, s1, 19 * 7);
+  for (size_t i = 0; i <= rblist_length (rbl1); i += 19)
+    {
+      rblist_split (rbl1, i, &rbl2, &rbl3);
+      test (rbl2, &s1[0], i);
+      test (rbl3, &s1[i], 19 * 7 - i);
+      rbl4 = rblist_concat (rbl2, rbl3);
+      test (rbl4, s1, 19 * 7);
 #ifdef DEBUG
-    printf("rbl2 = %s\nrbl3 = %s\n", rblist_to_string(rbl2), rblist_to_string(rbl3));
-    printf("%s plus %s makes %s\n", rblist_to_string(rbl_structure(rbl2)), rblist_to_string(rbl_structure(rbl3)), rblist_to_string(rbl_structure(rbl4)));
+      printf ("rbl2 = %s\nrbl3 = %s\n", rblist_to_string (rbl2),
+	      rblist_to_string (rbl3));
+      printf ("%s plus %s makes %s\n",
+	      rblist_to_string (rbl_structure (rbl2)),
+	      rblist_to_string (rbl_structure (rbl3)),
+	      rblist_to_string (rbl_structure (rbl4)));
 #endif
-  }
+    }
 
-  // Test compare.
+  /* Test compare. */
 
-  char *t[] = {"", "a", "b", "aa", "ab", "ba", "bb", NULL};
-  for (int i = 0; t[i]; i++) for (int j = 0; t[j]; j++) {
-    rbl1 = rblist_from_string(t[i]);
-    rbl2 = rblist_from_string(t[j]);
-    int cmp1 = rblist_compare(rbl1, rbl2);
-    int cmp2 = strcmp(t[i], t[j]);
+  char *t[] = { "", "a", "b", "aa", "ab", "ba", "bb", NULL };
+  for (int i = 0; t[i]; i++)
+    for (int j = 0; t[j]; j++)
+      {
+	rbl1 = rblist_from_string (t[i]);
+	rbl2 = rblist_from_string (t[j]);
+	int cmp1 = rblist_compare (rbl1, rbl2);
+	int cmp2 = strcmp (t[i], t[j]);
 #ifdef DEBUG
-    printf("rblist_compare(\"%s\", \"%s\") returns %d\n", t[i], t[j], cmp1);
+	printf ("rblist_compare(\"%s\", \"%s\") returns %d\n", t[i], t[j],
+		cmp1);
 #endif
-    assert((cmp1 < 0) == (cmp2 < 0));
-    assert((cmp1 > 0) == (cmp2 > 0));
-  }
+	assert ((cmp1 < 0) == (cmp2 < 0));
+	assert ((cmp1 > 0) == (cmp2 > 0));
+      }
 
   return EXIT_SUCCESS;
 }
 
-#endif // TEST
+#endif /* TEST */

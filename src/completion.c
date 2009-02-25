@@ -33,7 +33,7 @@
 #include "dirname.h"
 #include "gl_linked_list.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 /*----------------------------------------------------------------------
@@ -235,12 +235,12 @@ completion_readdir (Completion * cp, astr as)
      in which case it's considered to be entirely dirname */
   s1 = xstrdup (astr_cstr (as));
   s2 = xstrdup (astr_cstr (as));
-  if (*astr_char (as, -1) != '/')
+  if (*astr_char (as, astr_len (as)) != '/')
     {
       pdir = dirname (s1);
       /* Append `/' to pdir */
       astr_cat_cstr (bs, pdir);
-      if (*astr_char (bs, -1) != '/')
+      if (*astr_char (bs, astr_len (bs)) != '/')
         astr_cat_char (bs, '/');
       pdir = astr_cstr (bs);
       base = base_name (s2);

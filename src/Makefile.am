@@ -26,13 +26,13 @@ bin_PROGRAMS = zile
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
-zile_SOURCES =						\
+zile_base_SOURCES =					\
 	astr.c						\
 	astr.h						\
 	xalloc_extra.c					\
 	xalloc_extra.h					\
 	extern.h					\
-	zile.h						\
+	main.h						\
 	tbl_vars.h					\
 	eval.c						\
 	lists.c						\
@@ -66,59 +66,51 @@ zile_SOURCES =						\
 	term_redisplay.c				\
 	term_curses.c
 
+zile_SOURCES =						\
+	$(zile_base_SOURCES)				\
+	tbl_funcs.h					\
+	tbl_opts.h.in
+
 LUA_RUNTIME =						\
 	lib.lua						\
-	texinfo.lua					\
-	std.lua
+	texinfo.lua
 
 LUA_BUILDTIME = 					\
 	mkfuncs.lua					\
-	mkvars.lua
+	mkdotzile.lua
 
-ALLSOURCES = $(zile_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
+ALLSOURCES = $(zile_base_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
-BUILT_SOURCES = 					\
-	tbl_funcs.h					\
-	dotzile.sample					\
-	$(BUILT_TEXI)
+tbl_funcs.h: $(zile_base_SOURCES) $(srcdir)/mkfuncs.lua $(LUA_RUNTIME)
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_base_SOURCES)
 
-# The next two stanzas are based on code from the automake manual for
-# handling tools that produce multiple outputs.
-mkfuncs.stamp: $(zile_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
-	@rm -f mkfuncs.tmp
-	@touch mkfuncs.tmp
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_SOURCES)
-	@mv -f mkfuncs.tmp $@
-funcs.texi tbl_funcs.h: mkfuncs.stamp
-	@if test -f $@; then :; else \
-	  rm -f mkfuncs.stamp; \
-	  $(MAKE) $(AM_MAKEFLAGS) mkfuncs.stamp; \
-	fi
+dotzile.sample: $(srcdir)/tbl_vars.h $(srcdir)/mkdotzile.lua $(LUA_RUNTIME) $(srcdir)/dotzile-extra.el
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkdotzile.lua $(srcdir)/tbl_vars.h
+	cat $(srcdir)/dotzile-extra.el >> $@
 
-mkvars.stamp: tbl_vars.h mkvars.lua $(LUA_RUNTIME)
-	@rm -f mkvars.tmp
-	@touch mkvars.tmp
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h
-	@mv -f mkvars.tmp $@
-dotzile.texi dotzile.sample vars.texi: mkvars.stamp
-	@if test -f $@; then :; else \
-	  rm -f mkvars.stamp; \
-	  $(MAKE) $(AM_MAKEFLAGS) mkvars.stamp; \
-	fi
+edit = sed \
+	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
 
-info_TEXINFOS = zile.texi
+man-extras: Makefile $(srcdir)/man-extras.in
+	rm -f $@ $@.tmp
+	$(edit) '$(srcdir)/$@.in' >$@.tmp
+	chmod +x $@.tmp
+	chmod a-w $@.tmp
+	mv $@.tmp $@
+
+zile.1: $(builddir)/zile $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
+	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample
 
 dist_man_MANS = zile.1
 
-BUILT_TEXI = funcs.texi vars.texi dotzile.texi
-
-$(PACKAGE).info $(PACKAGE).dvi: $(BUILT_TEXI)
-
 CLEANFILES = 						\
-	$(BUILT_SOURCES)				\
-	*.stamp
+	tbl_opts.h					\
+	tbl_funcs.h					\
+	zile.1						\
+	dotzile.sample					\
+	man-extras
 
 loc:
 	cloc --no3 $(ALLSOURCES) Makefile.am ../Makefile.am ../configure.ac
@@ -330,8 +322,11 @@ LISP_TESTS_OUTPUTS =					\
 EXTRA_DIST =						\
 	$(LUA_RUNTIME)					\
 	$(LUA_BUILDTIME)				\
-	$(BUILT_TEXI)					\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_OUTPUTS)				\
 	$(SCRIPT_TESTS)					\
-	quit.el
+	quit.el						\
+	dotzile-extra.el				\
+	man-extras.in					\
+	tbl_opts.h.in					\
+	zile-help2man-wrapper

@@ -32,7 +32,7 @@
 #endif
 #include "regex.h"
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 /* Downcasing table for case-folding search */
@@ -211,7 +211,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
     {
       if (lp == startp)
         {
-          sp = astr_char (lp->text, (ptrdiff_t) starto);
+          sp = astr_char (lp->text, starto);
           s1size = astr_len (lp->text) - starto;
         }
       else
@@ -429,7 +429,7 @@ isearch (int dir, int regexp)
         {
           if (astr_len (pattern) > 0)
             {
-              astr_truncate (pattern, -1);
+              astr_truncate (pattern, astr_len (pattern) - 1);
               cur = cur_bp->pt = start;
               thisflag |= FLAG_NEED_RESYNC;
             }

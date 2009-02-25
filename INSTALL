@@ -8,14 +8,10 @@
      provided the copyright notice and this notice are preserved.
 
 
-To build and install Zile:
+Building from a release tarball
+-------------------------------
 
-[Only if you're compiling the sources checked out from git, first make
-sure you have the GNU autotools installed (automake >= 1.9, autoconf
->= 2.59), and a version of gnulib from 2008 or later, and run
-
-        ./autogen.sh
-]
+Prerequisites: (n)curses, help2man.
 
 1) Run configure:
 
@@ -34,8 +30,19 @@ sure you have the GNU autotools installed (automake >= 1.9, autoconf
 
         ./configure --prefix=$HOME/zile
 
-   You can also run it in place (src/zile), but if you do that the
-   built-in documentation won't be available.
+
+Building from the repository
+----------------------------
+
+Prerequisites: automake >= 1.9, autoconf >= 2.59, gnulib from 2008 or
+later.
+
+Check out Zile and bootstrap the build system:
+
+        git clone git://git.sv.gnu.org/zile.git
+        ./autogen.sh
+
+Then follow the instructions for building from a release tarball.
 
 
 Automated releases

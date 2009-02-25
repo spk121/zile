@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 /*
@@ -433,7 +433,7 @@ copy_text_block (size_t startn, size_t starto, size_t size)
           dp = buf + save_off;
         }
       if (i < astr_len (lp->text))
-        *dp++ = *astr_char (lp->text, (ptrdiff_t) (i++));
+        *dp++ = *astr_char (lp->text, i++);
       else
         {
           *dp++ = '\n';

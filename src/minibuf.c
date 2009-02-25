@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 static History *files_history = NULL;
@@ -161,15 +161,15 @@ minibuf_read_filename (const char *fmt, const char *value,
   char *buf, *p = NULL;
   Completion *cp;
   astr as;
-  ptrdiff_t pos;
-
-  va_start (ap, file);
-  xvasprintf (&buf, fmt, ap);
-  va_end (ap);
+  size_t pos;
 
   as = astr_new_cstr (value);
   if (expand_path (as))
     {
+      va_start (ap, file);
+      xvasprintf (&buf, fmt, ap);
+      va_end (ap);
+
       as = compact_path (as);
 
       cp = completion_new (true);

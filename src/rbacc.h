@@ -35,58 +35,58 @@
 typedef struct rbacc *rbacc;
 
 
-/**************************/
-// Constructor.
+/****************/
+/* Constructor. */
 
 /*
  * Makes a new, empty rbacc.
  */
-rbacc rbacc_new(void);
+rbacc rbacc_new (void);
 
 
-/*************/
-// Methods.
+/************/
+/* Methods. */
 
 /*
  * Appends a character to `rba', returning `rba'.
  */
-rbacc rbacc_add_char(rbacc rba, int c);
+rbacc rbacc_add_char (rbacc rba, int c);
 
 /*
  * Appends an rblist to `rba', returning `rba'.
  */
-rbacc rbacc_add_rblist(rbacc rba, rblist rbl);
+rbacc rbacc_add_rblist (rbacc rba, rblist rbl);
 
 /*
  * Appends an array of characters to `rba', returning `rba'.
  */
-rbacc rbacc_add_array(rbacc rba, const char *cs, size_t length);
+rbacc rbacc_add_array (rbacc rba, const char *cs, size_t length);
 
 /*
  * Appends a 0-terminated C string to `rba', returning `rba'.
  */
-rbacc rbacc_add_string(rbacc rba, const char *s);
+rbacc rbacc_add_string (rbacc rba, const char *s);
 
 /*
  * Formats an unsigned number in any base up to 16.
  *
  * Takes time O(1) (numbers are fixed size).
  */
-rbacc rbacc_add_number(rbacc rba, size_t x, unsigned base);
+rbacc rbacc_add_number (rbacc rba, size_t x, unsigned base);
 
 /*
  * Appends the contents of a file to `rba' and returns `rba'.
  */
-rbacc rbacc_add_file(rbacc rba, FILE *fp);
+rbacc rbacc_add_file (rbacc rba, FILE * fp);
 
 /*
  * Returns the number of characters in `rba'.
  */
-size_t rbacc_length(rbacc rba);
+size_t rbacc_length (rbacc rba);
 
 /*
  * Returns the contents of `rba' as an rblist.
  */
-rblist rbacc_to_rblist(rbacc rba);
+rblist rbacc_to_rblist (rbacc rba);
 
-#endif // !RBACC_H
+#endif /* !RBACC_H */

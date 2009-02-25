@@ -31,7 +31,7 @@
 #include <curses.h>
 #endif
 
-#include "zile.h"
+#include "main.h"
 #include "extern.h"
 
 void
