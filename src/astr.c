@@ -147,11 +147,7 @@ astr_cat_cstr (astr as, const char *s)
 astr
 astr_cat_char (astr as, int c)
 {
-  assert (as != NULL);
-  astr_resize (as, as->len + 1);
-  as->text[as->len] = (char) c;
-  as->text[++as->len] = '\0';
-  return as;
+  return astr_insert_char (as, astr_len (as), c);
 }
 
 astr
