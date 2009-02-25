@@ -286,10 +286,9 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
               ding ();
               break;
             }
-          if (!overwrite_mode || pos == astr_len (as))
-            astr_insert_char (as, pos++, c);
-          else
-            astr_replace_char (as, pos, c);
+          astr_insert_char (as, pos++, c);
+          if (overwrite_mode && pos != astr_len (as))
+            astr_remove (as, pos, 1);
         }
 
       lasttab = thistab;

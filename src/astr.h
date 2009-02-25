@@ -116,7 +116,6 @@ astr astr_cat_delete (astr as, astr src);
  */
 astr astr_replace_cstr (astr as, size_t pos, size_t size,
                                const char *s);
-astr astr_replace_char (astr as, size_t pos, int c);
 
 /*
  * Insert the contents of the character in as.
