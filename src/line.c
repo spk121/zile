@@ -99,7 +99,7 @@ line_remove (Line *l)
  *     deleted (<0)
  */
 static void
-adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, int delta)
+adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
 {
   Marker *pt = point_marker (), *m;
 
@@ -130,7 +130,7 @@ intercalate_char (int c)
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
-  astr_insert_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, c);
+  astr_insert_char (cur_bp->pt.p->text, cur_bp->pt.o, c);
   cur_bp->flags |= BFLAG_MODIFIED;
 
   return true;
@@ -156,14 +156,14 @@ insert_char (int c)
          || current char is a \t && we are in the tab limit.  */
       if ((cur_bp->pt.o < astr_len (cur_bp->pt.p->text))
           &&
-          ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) != '\t')
+          ((*astr_char (cur_bp->pt.p->text, cur_bp->pt.o) != '\t')
            ||
-           ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) ==
+           ((*astr_char (cur_bp->pt.p->text, cur_bp->pt.o) ==
              '\t') && ((get_goalc () % t) == t))))
         {
           /* Replace the character.  */
           undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
-          *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o) = c;
+          *astr_char (cur_bp->pt.p->text, cur_bp->pt.o) = c;
           ++cur_bp->pt.o;
 
           cur_bp->flags |= BFLAG_MODIFIED;
@@ -267,10 +267,10 @@ intercalate_newline (void)
 
   /* Move the text after the point into a new line. */
   line_insert (cur_bp->pt.p,
-               astr_substr (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o,
+               astr_substr (cur_bp->pt.p->text, cur_bp->pt.o,
                             astr_len (cur_bp->pt.p->text) - cur_bp->pt.o));
   ++cur_bp->last_line;
-  astr_truncate (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
+  astr_truncate (cur_bp->pt.p->text, cur_bp->pt.o);
   adjust_markers (cur_bp->pt.p->next, cur_bp->pt.p, cur_bp->pt.o, 1, 0);
 
   cur_bp->flags |= BFLAG_MODIFIED;
@@ -335,13 +335,13 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
   if (replace_case)
     {
       newtext = xstrdup (newtext);
-      recase (newtext, newlen, astr_char ((*lp)->text, (ptrdiff_t) offset),
+      recase (newtext, newlen, astr_char ((*lp)->text, offset),
               oldlen);
     }
 
   cur_bp->flags |= BFLAG_MODIFIED;
-  astr_replace_cstr ((*lp)->text, (ptrdiff_t) offset, oldlen, newtext);
-  adjust_markers (*lp, *lp, offset, 0, (int) (newlen - oldlen));
+  astr_replace_cstr ((*lp)->text, offset, oldlen, newtext);
+  adjust_markers (*lp, *lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
 
   if (replace_case)
     free ((char *) newtext);
@@ -376,7 +376,7 @@ fill_break_line (void)
   /* Find break point moving left from fill-column. */
   for (i = cur_bp->pt.o; i > 0; i--)
     {
-      int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
+      int c = *astr_char (cur_bp->pt.p->text, i - 1);
       if (isspace (c))
         {
           break_col = i;
@@ -390,7 +390,7 @@ fill_break_line (void)
     {
       for (i = cur_bp->pt.o + 1; i < astr_len (cur_bp->pt.p->text); i++)
         {
-          int c = *astr_char (cur_bp->pt.p->text, (ptrdiff_t) (i - 1));
+          int c = *astr_char (cur_bp->pt.p->text, i - 1);
           if (isspace (c))
             {
               break_col = i;
@@ -508,7 +508,7 @@ delete_char (void)
     }
   else
     {
-      astr_remove (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o, 1);
+      astr_remove (cur_bp->pt.p->text, cur_bp->pt.o, 1);
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
     }
 

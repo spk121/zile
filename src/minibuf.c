@@ -161,7 +161,7 @@ minibuf_read_filename (const char *fmt, const char *value,
   char *buf, *p = NULL;
   Completion *cp;
   astr as;
-  ptrdiff_t pos;
+  size_t pos;
 
   as = astr_new_cstr (value);
   if (expand_path (as))

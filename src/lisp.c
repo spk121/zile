@@ -51,7 +51,7 @@ enum tokenname
 };
 
 static int
-read_char (astr as, ptrdiff_t * pos)
+read_char (astr as, size_t * pos)
 {
   if ((size_t) *pos < astr_len (as))
     return *astr_char (as, (*pos)++);
@@ -59,7 +59,7 @@ read_char (astr as, ptrdiff_t * pos)
 }
 
 static astr
-read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
+read_token (enum tokenname *tokenid, astr as, size_t * pos)
 {
   int c;
   int doublequotes = 0;
@@ -153,7 +153,7 @@ read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
 }
 
 static le *
-lisp_read (le * list, astr as, ptrdiff_t * pos)
+lisp_read (le * list, astr as, size_t * pos)
 {
   astr tok;
   enum tokenname tokenid;
@@ -197,7 +197,7 @@ lisp_read (le * list, astr as, ptrdiff_t * pos)
 void
 lisp_loadstring (astr as)
 {
-  ptrdiff_t pos = 0;
+  size_t pos = 0;
   le * list = lisp_read (NULL, as, &pos);
 
   leEval (list);

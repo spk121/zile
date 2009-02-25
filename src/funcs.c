@@ -586,7 +586,7 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
   col = 0;
   for (i = 0; i < offset; i++)
     {
-      if (*astr_char ((*lp)->text, (ptrdiff_t) i) == '\t')
+      if (*astr_char ((*lp)->text, i) == '\t')
         col |= t - 1;
       ++col;
     }
@@ -771,12 +771,12 @@ END_DEFUN
                                ISCLOSEBRACKETCHAR (c))
 #define PRECEDINGQUOTEDQUOTE(c) (c == '\\' \
     && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->text) \
-    && ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\"') || \
-        (*astr_char (cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\'')))
+    && ((*astr_char (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\"') || \
+        (*astr_char (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\'')))
 #define FOLLOWINGQUOTEDQUOTE(c) (c == '\\' \
     && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->text) \
-    && ((*astr_char (cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\"') || \
-        (*astr_char (cur_bp->pt.p->text, (ptrdiff_t) (cur_bp->pt.o + 1)) == '\'')))
+    && ((*astr_char (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\"') || \
+        (*astr_char (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\'')))
 
 static int
 move_sexp (int dir)
@@ -1261,7 +1261,7 @@ setcase_word (int rcase)
 
   for (i = cur_bp->pt.o;
        i < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) i));
+         ISWORDCHAR ((int) *astr_char (cur_bp->pt.p->text, i));
        i++)
     ;
   size = i - cur_bp->pt.o;
@@ -1271,7 +1271,7 @@ setcase_word (int rcase)
   gotword = false;
   for (gotword = false;
        cur_bp->pt.o < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((int) *(p = astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o)));
+         ISWORDCHAR ((int) *(p = astr_char (cur_bp->pt.p->text, cur_bp->pt.o)));
        cur_bp->pt.o++, gotword = true)
     {
       if (isalpha ((int) *p))
@@ -1369,11 +1369,11 @@ setcase_region (int rcase)
       if (i < astr_len (lp->text))
         {
           if (rcase == UPPERCASE)
-            *astr_char (lp->text, (ptrdiff_t) i) =
-              toupper (*astr_char (lp->text, (ptrdiff_t) i));
+            *astr_char (lp->text, i) =
+              toupper (*astr_char (lp->text, i));
           else
-            *astr_char (lp->text, (ptrdiff_t) i) =
-              tolower (*astr_char (lp->text, (ptrdiff_t) i));
+            *astr_char (lp->text, i) =
+              tolower (*astr_char (lp->text, i));
           ++i;
         }
       else

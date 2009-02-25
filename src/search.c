@@ -211,7 +211,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
     {
       if (lp == startp)
         {
-          sp = astr_char (lp->text, (ptrdiff_t) starto);
+          sp = astr_char (lp->text, starto);
           s1size = astr_len (lp->text) - starto;
         }
       else

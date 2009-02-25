@@ -89,7 +89,7 @@ is_blank_line (void)
 {
   size_t c;
   for (c = 0; c < astr_len (cur_bp->pt.p->text); c++)
-    if (!isspace ((int) *astr_char (cur_bp->pt.p->text, (ptrdiff_t) c)))
+    if (!isspace ((int) *astr_char (cur_bp->pt.p->text, c)))
       return false;
   return true;
 }
@@ -103,7 +103,7 @@ following_char (void)
   else if (eolp ())
     return '\n';
   else
-    return *astr_char (cur_bp->pt.p->text, (ptrdiff_t) cur_bp->pt.o);
+    return *astr_char (cur_bp->pt.p->text, cur_bp->pt.o);
 }
 
 /* Return the character preceding point in the current buffer. */
@@ -115,8 +115,7 @@ preceding_char (void)
   else if (bolp ())
     return '\n';
   else
-    return *astr_char (cur_bp->pt.p->text,
-                       (ptrdiff_t) (cur_bp->pt.o - 1));
+    return *astr_char (cur_bp->pt.p->text, cur_bp->pt.o - 1);
 }
 
 /* Return true if point is at the beginning of the buffer. */
