@@ -72,17 +72,15 @@ astr_resize (astr as, size_t reqsize)
 }
 
 static int
-astr_pos (astr as, ptrdiff_t pos)
+astr_pos (astr as, size_t pos)
 {
   assert (as != NULL);
-  if (pos < 0)
-    pos = as->len + pos;
-  assert (pos >= 0 && pos <= (int) as->len);
+  assert (pos <= as->len);
   return pos;
 }
 
 char *
-astr_char (astr as, ptrdiff_t pos)
+astr_char (astr as, size_t pos)
 {
   assert (as != NULL);
   pos = astr_pos (as, pos);
@@ -174,7 +172,7 @@ astr_cat_delete (astr as, astr src)
 }
 
 astr
-astr_substr (astr as, ptrdiff_t pos, size_t size)
+astr_substr (astr as, size_t pos, size_t size)
 {
   assert (as != NULL);
   pos = astr_pos (as, pos);
@@ -189,7 +187,7 @@ astr_cmp (astr as1, astr as2)
 }
 
 static astr
-astr_replace_x (astr as, ptrdiff_t pos, size_t size, const char *s,
+astr_replace_x (astr as, size_t pos, size_t size, const char *s,
                 size_t csize)
 {
   astr tail;
@@ -200,7 +198,7 @@ astr_replace_x (astr as, ptrdiff_t pos, size_t size, const char *s,
   if (as->len - pos < size)
     size = as->len - pos;
   tail =
-    astr_substr (as, pos + (ptrdiff_t) size, astr_len (as) - (pos + size));
+    astr_substr (as, pos + (size_t) size, astr_len (as) - (pos + size));
   astr_truncate (as, pos);
   astr_ncat_cstr (as, s, csize);
   astr_cat (as, tail);
@@ -210,35 +208,35 @@ astr_replace_x (astr as, ptrdiff_t pos, size_t size, const char *s,
 }
 
 astr
-astr_replace_cstr (astr as, ptrdiff_t pos, size_t size, const char *s)
+astr_replace_cstr (astr as, size_t pos, size_t size, const char *s)
 {
   assert (s != NULL);
   return astr_replace_x (as, pos, size, s, strlen (s));
 }
 
 astr
-astr_replace_char (astr as, ptrdiff_t pos, int c)
+astr_replace_char (astr as, size_t pos, int c)
 {
   char ch = (char) c;
   return astr_replace_x (as, pos, (size_t) 1, &ch, (size_t) 1);
 }
 
 astr
-astr_insert_char (astr as, ptrdiff_t pos, int c)
+astr_insert_char (astr as, size_t pos, int c)
 {
   char ch = (char) c;
   return astr_replace_x (as, pos, (size_t) 0, &ch, (size_t) 1);
 }
 
 astr
-astr_remove (astr as, ptrdiff_t pos, size_t size)
+astr_remove (astr as, size_t pos, size_t size)
 {
   return astr_replace_x (as, pos, size, "", (size_t) 0);
 }
 
 /* Don't define in terms of astr_remove, to avoid endless recursion */
 astr
-astr_truncate (astr as, ptrdiff_t pos)
+astr_truncate (astr as, size_t pos)
 {
   assert (as != NULL);
   pos = astr_pos (as, pos);
@@ -339,20 +337,20 @@ main (void)
   assert_eq (as2, "The world.");
 
   astr_delete (as3);
-  as3 = astr_substr (as1, -6, 5);
+  as3 = astr_substr (as1, astr_len (as1) - 6, 5);
   assert_eq (as3, "world");
 
   astr_cpy_cstr (as1, "12345");
   astr_delete (as2);
 
   astr_cpy_cstr (as1, "12345");
-  astr_insert_char (as1, -2, 'x');
-  astr_insert_char (as1, -6, 'y');
+  astr_insert_char (as1, astr_len (as1) - 2, 'x');
+  astr_insert_char (as1, astr_len (as1) - 6, 'y');
   astr_insert_char (as1, 7, 'z');
   assert_eq (as1, "y123x45z");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -4, 2, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 4, 2, "foo");
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
@@ -360,7 +358,7 @@ main (void)
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -1, 5, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 1, 5, "foo");
   assert_eq (as1, "123456foo");
 
   astr_cpy_cstr (as1, "1234567");
@@ -368,16 +366,16 @@ main (void)
   assert_eq (as1, "1234");
 
   astr_cpy_cstr (as1, "12345");
-  as2 = astr_substr (as1, -2, 2);
+  as2 = astr_substr (as1, astr_len (as1) - 2, 2);
   assert_eq (as2, "45");
 
   astr_cpy_cstr (as1, "12345");
   astr_delete (as2);
-  as2 = astr_substr (as1, -5, 5);
+  as2 = astr_substr (as1, astr_len (as1) - 5, 5);
   assert_eq (as2, "12345");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -4, 2, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 4, 2, "foo");
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
@@ -385,7 +383,7 @@ main (void)
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, -1, 5, "foo");
+  astr_replace_cstr (as1, astr_len (as1) - 1, 5, "foo");
   assert_eq (as1, "123456foo");
 
   astr_cpy_cstr (as1, "");

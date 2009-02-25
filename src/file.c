@@ -106,7 +106,7 @@ expand_path (astr path)
                 p++;
               astr_truncate (epath, 0);
             }
-          if (astr_len (epath) == 0 || *astr_char (epath, -1) != '/')
+          if (astr_len (epath) == 0 || *astr_char (epath, astr_len (epath) - 1) != '/')
             astr_cat_char (epath, '/');
         }
       else if (*p == '~' && (p == sp || p[-1] == '/'))
@@ -146,10 +146,10 @@ expand_path (astr path)
         }
       else if (*p == '.' && p[1] == '.' && (p[2] == '/' || p[2] == '\0'))
         { /* Got `..'. */
-          if (astr_len (epath) >= 1 && *astr_char (epath, -1) == '/')
-            astr_truncate (epath, -1);
-          while (*astr_char (epath, -1) != '/' && astr_len (epath) >= 1)
-            astr_truncate (epath, -1);
+          if (astr_len (epath) >= 1 && *astr_char (epath, astr_len (epath) - 1) == '/')
+            astr_truncate (epath, astr_len (epath) - 1);
+          while (*astr_char (epath, astr_len (epath) - 1) != '/' && astr_len (epath) >= 1)
+            astr_truncate (epath, astr_len (epath) - 1);
           p += 2;
         }
 
@@ -207,7 +207,7 @@ get_buffer_dir (void)
   else
     { /* Get the current directory name from the system. */
       buf = agetcwd ();
-      if (astr_len (buf) != 0 && *astr_char (buf, -1) != '/')
+      if (astr_len (buf) != 0 && *astr_char (buf, astr_len (buf) - 1) != '/')
         astr_cat_char (buf, '/');
     }
 
@@ -926,7 +926,7 @@ create_backup_filename (const char *filename, const char *backupdir)
       astr buf = astr_new ();
 
       astr_cpy_cstr (buf, backupdir);
-      if (*astr_char (buf, -1) != '/')
+      if (*astr_char (buf, astr_len (buf) - 1) != '/')
         astr_cat_char (buf, '/');
       while (*filename)
         {

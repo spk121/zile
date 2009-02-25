@@ -124,7 +124,7 @@ read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
               || c == '\r' || c == EOF)
             {
               (*pos)--;
-              astr_truncate (tok, (ptrdiff_t) - 1);
+              astr_truncate (tok, astr_len (tok) - 1);
               *tokenid = T_WORD;
               return tok;
             }
@@ -140,7 +140,7 @@ read_token (enum tokenname *tokenid, astr as, ptrdiff_t * pos)
               /* Fall through */
 
             case '\"':
-              astr_truncate (tok, (ptrdiff_t) - 1);
+              astr_truncate (tok, astr_len (tok) -1);
               *tokenid = T_WORD;
               return tok;
             }

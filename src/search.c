@@ -429,7 +429,7 @@ isearch (int dir, int regexp)
         {
           if (astr_len (pattern) > 0)
             {
-              astr_truncate (pattern, -1);
+              astr_truncate (pattern, astr_len (pattern) - 1);
               cur = cur_bp->pt = start;
               thisflag |= FLAG_NEED_RESYNC;
             }

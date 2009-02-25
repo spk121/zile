@@ -77,13 +77,13 @@ size_t astr_len (astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-char *astr_char (astr as, ptrdiff_t pos);
+char *astr_char (astr as, size_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-astr astr_substr (astr as, ptrdiff_t pos, size_t size);
+astr astr_substr (astr as, size_t pos, size_t size);
 
 /*
  * Do strcmp on the contents of as1 and as2.
@@ -114,24 +114,24 @@ astr astr_cat_delete (astr as, astr src);
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */
-astr astr_replace_cstr (astr as, ptrdiff_t pos, size_t size,
+astr astr_replace_cstr (astr as, size_t pos, size_t size,
                                const char *s);
-astr astr_replace_char (astr as, ptrdiff_t pos, int c);
+astr astr_replace_char (astr as, size_t pos, int c);
 
 /*
  * Insert the contents of the character in as.
  */
-astr astr_insert_char (astr as, ptrdiff_t pos, int c);
+astr astr_insert_char (astr as, size_t pos, int c);
 
 /*
  * Remove size chars from as at position pos.
  */
-astr astr_remove (astr as, ptrdiff_t pos, size_t size);
+astr astr_remove (astr as, size_t pos, size_t size);
 
 /*
  * Truncate as to given position.
  */
-astr astr_truncate (astr as, ptrdiff_t pos);
+astr astr_truncate (astr as, size_t pos);
 
 /*
  * Read the stream fp into a string and return it.
