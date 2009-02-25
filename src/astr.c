@@ -163,12 +163,6 @@ astr_substr (astr as, size_t pos, size_t size)
   return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
 }
 
-int
-astr_cmp (astr as1, astr as2)
-{
-  return strcmp (as1->text, as2->text);
-}
-
 static astr
 astr_replace_x (astr as, size_t pos, size_t size, const char *s,
                 size_t csize)
