@@ -90,9 +90,9 @@ astr_ncat_cstr (astr as, const char *s, size_t csize)
   return as;
 }
 
-static astr
-astr_replace_x (astr as, size_t pos, size_t size, const char *s,
-                size_t csize)
+astr
+astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
+                    size_t csize)
 {
   astr tail;
 
@@ -129,11 +129,11 @@ astr_truncate (astr as, size_t pos)
  * Derived functions.
  */
 
-char *
+const char *
 astr_char (astr as, size_t pos)
 {
   assert (pos <= astr_len (as));
-  return (char *) (astr_cstr (as) + pos);
+  return astr_cstr (as) + pos;
 }
 
 static astr
@@ -190,20 +190,20 @@ astr
 astr_replace_cstr (astr as, size_t pos, size_t size, const char *s)
 {
   assert (s != NULL);
-  return astr_replace_x (as, pos, size, s, strlen (s));
+  return astr_nreplace_cstr (as, pos, size, s, strlen (s));
 }
 
 astr
 astr_insert_char (astr as, size_t pos, int c)
 {
   char ch = (char) c;
-  return astr_replace_x (as, pos, (size_t) 0, &ch, (size_t) 1);
+  return astr_nreplace_cstr (as, pos, (size_t) 0, &ch, (size_t) 1);
 }
 
 astr
 astr_remove (astr as, size_t pos, size_t size)
 {
-  return astr_replace_x (as, pos, size, "", (size_t) 0);
+  return astr_nreplace_cstr (as, pos, size, "", (size_t) 0);
 }
 
 astr astr_fread (FILE * fp)

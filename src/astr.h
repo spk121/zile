@@ -77,7 +77,7 @@ size_t astr_len (astr as);
  * than 0, count from the left; if less than zero count from the
  * right.
  */
-char *astr_char (astr as, size_t pos);
+const char *astr_char (astr as, size_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
@@ -101,10 +101,12 @@ astr astr_cat_char (astr as, int c);
 
 /*
  * Replace size characters of as, starting at pos, with the argument
- * string or character.
+ * string.
  */
 astr astr_replace_cstr (astr as, size_t pos, size_t size,
                                const char *s);
+astr astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
+                         size_t csize);
 
 /*
  * Insert the contents of the character in as.
