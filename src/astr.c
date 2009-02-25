@@ -54,31 +54,6 @@ astr_new (void)
   return as;
 }
 
-astr
-astr_new_cstr (const char *s)
-{
-  return astr_cpy_cstr (astr_new (), s);
-}
-
-static void
-astr_resize (astr as, size_t reqsize)
-{
-  assert (as != NULL);
-  if (reqsize > as->maxlen)
-    {
-      as->maxlen = reqsize + ALLOCATION_CHUNK_SIZE;
-      as->text = (char *) xrealloc (as->text, as->maxlen + 1);
-    }
-}
-
-char *
-astr_char (astr as, size_t pos)
-{
-  assert (as != NULL);
-  assert (pos <= as->len);
-  return as->text + pos;
-}
-
 void
 astr_delete (astr as)
 {
@@ -100,63 +75,19 @@ astr_len (astr as)
   return as->len;
 }
 
-static astr
-astr_ncpy_cstr (astr as, const char *s, size_t len)
-{
-  astr_resize (as, len);
-  memcpy (as->text, s, len);
-  as->len = len;
-  as->text[len] = '\0';
-  return as;
-}
-
-astr
-astr_cpy (astr as, astr src)
-{
-  return astr_ncpy_cstr (as, src->text, src->len);
-}
-
-astr
-astr_cpy_cstr (astr as, const char *s)
-{
-  return astr_ncpy_cstr (as, s, strlen (s));
-}
-
 astr
 astr_ncat_cstr (astr as, const char *s, size_t csize)
 {
-  astr_resize (as, as->len + csize);
+  assert (as != NULL);
+  if (as->len + csize > as->maxlen)
+    {
+      as->maxlen = as->len + csize + ALLOCATION_CHUNK_SIZE;
+      as->text = (char *) xrealloc (as->text, as->maxlen + 1);
+    }
   memcpy (as->text + as->len, s, csize);
   as->len += csize;
   as->text[as->len] = '\0';
   return as;
-}
-
-astr
-astr_cat (astr as, astr src)
-{
-  return astr_ncat_cstr (as, src->text, src->len);
-}
-
-astr
-astr_cat_cstr (astr as, const char *s)
-{
-  return astr_ncat_cstr (as, s, strlen (s));
-}
-
-astr
-astr_cat_char (astr as, int c)
-{
-  return astr_insert_char (as, astr_len (as), c);
-}
-
-astr
-astr_substr (astr as, size_t pos, size_t size)
-{
-  assert (as != NULL);
-  assert (pos <= as->len);
-  assert (pos + size <= as->len);
-  return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
 }
 
 static astr
@@ -179,6 +110,82 @@ astr_replace_x (astr as, size_t pos, size_t size, const char *s,
   return as;
 }
 
+/* Don't define in terms of astr_remove, to avoid endless recursion */
+astr
+astr_truncate (astr as, size_t pos)
+{
+  assert (as != NULL);
+  assert (pos <= as->len);
+  if ((size_t) pos < as->len)
+    {
+      as->len = pos;
+      as->text[pos] = '\0';
+    }
+  return as;
+}
+
+
+/*
+ * Derived functions.
+ */
+
+char *
+astr_char (astr as, size_t pos)
+{
+  assert (pos <= astr_len (as));
+  return (char *) (astr_cstr (as) + pos);
+}
+
+static astr
+astr_ncpy_cstr (astr as, const char *s, size_t len)
+{
+  astr_truncate (as, 0);
+  return astr_ncat_cstr (as, s, len);
+}
+
+astr
+astr_new_cstr (const char *s)
+{
+  return astr_cpy_cstr (astr_new (), s);
+}
+
+astr
+astr_cpy (astr as, astr src)
+{
+  return astr_ncpy_cstr (as, astr_cstr (src), astr_len (src));
+}
+
+astr
+astr_cpy_cstr (astr as, const char *s)
+{
+  return astr_ncpy_cstr (as, s, strlen (s));
+}
+
+astr
+astr_cat (astr as, astr src)
+{
+  return astr_ncat_cstr (as, astr_cstr (src), astr_len (src));
+}
+
+astr
+astr_cat_cstr (astr as, const char *s)
+{
+  return astr_ncat_cstr (as, s, strlen (s));
+}
+
+astr
+astr_cat_char (astr as, int c)
+{
+  return astr_insert_char (as, astr_len (as), c);
+}
+
+astr
+astr_substr (astr as, size_t pos, size_t size)
+{
+  assert (pos + size <= astr_len (as));
+  return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
+}
+
 astr
 astr_replace_cstr (astr as, size_t pos, size_t size, const char *s)
 {
@@ -197,20 +204,6 @@ astr
 astr_remove (astr as, size_t pos, size_t size)
 {
   return astr_replace_x (as, pos, size, "", (size_t) 0);
-}
-
-/* Don't define in terms of astr_remove, to avoid endless recursion */
-astr
-astr_truncate (astr as, size_t pos)
-{
-  assert (as != NULL);
-  assert (pos <= as->len);
-  if ((size_t) pos < as->len)
-    {
-      as->len = pos;
-      as->text[pos] = '\0';
-    }
-  return as;
 }
 
 astr astr_fread (FILE * fp)
@@ -251,7 +244,7 @@ astr_afmt (astr as, const char *fmt, ...)
 static void
 assert_eq (astr as, const char *s)
 {
-  if (strcmp (((astr)(as))->text, (s)))
+  if (strcmp (astr_cstr (as), s))
     printf ("test failed: \"%s\" != \"%s\"\n", as->text, s);
 }
 
