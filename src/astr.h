@@ -106,11 +106,6 @@ astr astr_ncat_cstr (astr as, const char *s, size_t len);
 astr astr_cat_char (astr as, int c);
 
 /*
- * Append the contents of src to as and free src.
- */
-astr astr_cat_delete (astr as, astr src);
-
-/*
  * Replace size characters of as, starting at pos, with the argument
  * string or character.
  */

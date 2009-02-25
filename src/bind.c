@@ -529,7 +529,8 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
               astr_cat (key, (astr) gl_list_get_at (keys, j));
               astr_cat_char (key, ' ');
             }
-          astr_cat_delete (key, as);
+          astr_cat (key, as);
+          astr_delete (as);
           process (key, p, st);
           astr_delete (key);
         }

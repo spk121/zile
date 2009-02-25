@@ -155,15 +155,6 @@ astr_cat_char (astr as, int c)
 }
 
 astr
-astr_cat_delete (astr as, astr src)
-{
-  assert (src != NULL);
-  astr_cat (as, src);
-  astr_delete (src);
-  return as;
-}
-
-astr
 astr_substr (astr as, size_t pos, size_t size)
 {
   assert (as != NULL);
