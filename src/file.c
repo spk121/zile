@@ -96,6 +96,16 @@ expand_path (astr path)
   const char *sp = astr_cstr (path), *p;
   astr epath = astr_new ();
 
+  if (*sp != '/')
+    {
+      astr cwd = agetcwd ();
+      astr_cat (epath, cwd);
+      astr_delete (cwd);
+      if (astr_len (epath) == 0 ||
+          *astr_char (epath, astr_len (epath) - 1) != '/')
+        astr_cat_char (epath, '/');
+    }
+
   for (p = sp; *p != '\0';)
     {
       if (*p == '/')
@@ -106,7 +116,8 @@ expand_path (astr path)
                 p++;
               astr_truncate (epath, 0);
             }
-          if (astr_len (epath) == 0 || *astr_char (epath, astr_len (epath) - 1) != '/')
+          if (astr_len (epath) == 0 ||
+              *astr_char (epath, astr_len (epath) - 1) != '/')
             astr_cat_char (epath, '/');
         }
       else if (*p == '~' && (p == sp || p[-1] == '/'))
