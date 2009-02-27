@@ -235,12 +235,12 @@ completion_readdir (Completion * cp, astr as)
      in which case it's considered to be entirely dirname */
   s1 = xstrdup (astr_cstr (as));
   s2 = xstrdup (astr_cstr (as));
-  if (*astr_char (as, astr_len (as)) != '/')
+  if (*astr_char (as, astr_len (as) - 1) != '/')
     {
       pdir = dirname (s1);
       /* Append `/' to pdir */
       astr_cat_cstr (bs, pdir);
-      if (*astr_char (bs, astr_len (bs)) != '/')
+      if (*astr_char (bs, astr_len (bs) - 1) != '/')
         astr_cat_char (bs, '/');
       pdir = astr_cstr (bs);
       base = base_name (s2);
