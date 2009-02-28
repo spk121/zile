@@ -100,27 +100,14 @@ astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
   assert (pos <= as->len);
   if (as->len - pos < size)
     size = as->len - pos;
-  tail =
-    astr_substr (as, pos + (size_t) size, astr_len (as) - (pos + size));
-  astr_truncate (as, pos);
+  tail = astr_substr (as, pos + (size_t) size,
+                      astr_len (as) - (pos + size));
+  as->len = pos;
+  as->text[pos] = '\0';
   astr_ncat_cstr (as, s, csize);
   astr_cat (as, tail);
   astr_delete (tail);
 
-  return as;
-}
-
-/* Don't define in terms of astr_remove, to avoid endless recursion */
-astr
-astr_truncate (astr as, size_t pos)
-{
-  assert (as != NULL);
-  assert (pos <= as->len);
-  if ((size_t) pos < as->len)
-    {
-      as->len = pos;
-      as->text[pos] = '\0';
-    }
   return as;
 }
 
@@ -204,6 +191,12 @@ astr
 astr_remove (astr as, size_t pos, size_t size)
 {
   return astr_nreplace_cstr (as, pos, size, "", (size_t) 0);
+}
+
+astr
+astr_truncate (astr as, size_t pos)
+{
+  return astr_remove (as, pos, astr_len (as) - pos);
 }
 
 astr astr_fread (FILE * fp)
