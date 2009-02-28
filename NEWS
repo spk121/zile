@@ -1,3 +1,9 @@
+Release 2.3.3:
+
+This release fixes two more bugs in filename completion introduced in
+2.3.1. Users of 2.3.1 and 2.3.2 should upgrade. Some minor code
+cleanup was also performed.
+
 Release 2.3.2:
 
 This release fixes a bug in filename completion introduced in the
