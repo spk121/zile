@@ -1253,7 +1253,7 @@ setcase_word (int rcase)
 {
   int gotword;
   size_t i, size;
-  char *p;
+  char c;
 
   if (!ISWORDCHAR (following_char ()))
     if (!forward_word () || !backward_word ())
@@ -1271,25 +1271,26 @@ setcase_word (int rcase)
   gotword = false;
   for (gotword = false;
        cur_bp->pt.o < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((int) *(p = astr_char (cur_bp->pt.p->text, cur_bp->pt.o)));
+         ISWORDCHAR ((c = *astr_char (cur_bp->pt.p->text, cur_bp->pt.o)));
        cur_bp->pt.o++, gotword = true)
     {
-      if (isalpha ((int) *p))
+      if (isalpha ((int) c))
         {
           switch (rcase)
             {
             case UPPERCASE:
-              *p = toupper (*p);
+              c = toupper (c);
               break;
             case LOWERCASE:
-              *p = tolower (*p);
+              c = tolower (c);
               break;
             case CAPITALIZE:
-              *p = (gotword ? tolower : toupper) (*p);
+              c = (gotword ? tolower : toupper) (c);
               break;
             default:
               break;
             }
+          astr_nreplace_cstr (cur_bp->pt.p->text, cur_bp->pt.o, 1, &c, 1);
         }
     }
 
@@ -1368,12 +1369,8 @@ setcase_region (int rcase)
     {
       if (i < astr_len (lp->text))
         {
-          if (rcase == UPPERCASE)
-            *astr_char (lp->text, i) =
-              toupper (*astr_char (lp->text, i));
-          else
-            *astr_char (lp->text, i) =
-              tolower (*astr_char (lp->text, i));
+          char c = (rcase == UPPERCASE ? toupper : tolower) (*astr_char (lp->text, i));
+          astr_nreplace_cstr (lp->text, i, 1, &c, 1);
           ++i;
         }
       else

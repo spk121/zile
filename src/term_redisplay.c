@@ -253,7 +253,8 @@ calculate_start_column (Window * wp)
 {
   size_t col = 0, lastcol = 0, t = tab_width (wp->bp);
   int rpfact, lpfact;
-  char *buf, *rp, *lp, *p;
+  char *buf;
+  const char *rp, *lp, *p;
   Point pt = window_pt (wp);
 
   rp = astr_char (pt.p->text, pt.o);

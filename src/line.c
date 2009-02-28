@@ -162,8 +162,9 @@ insert_char (int c)
              '\t') && ((get_goalc () % t) == t))))
         {
           /* Replace the character.  */
+          char ch = (char) c;
           undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 1, 1);
-          *astr_char (cur_bp->pt.p->text, cur_bp->pt.o) = c;
+          astr_nreplace_cstr (cur_bp->pt.p->text, cur_bp->pt.o, 1, &ch, 1);
           ++cur_bp->pt.o;
 
           cur_bp->flags |= BFLAG_MODIFIED;
