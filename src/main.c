@@ -228,7 +228,7 @@ main (int argc, char **argv)
 {
   int qflag = false;
   gl_list_t l_args = gl_list_create_empty (GL_LINKED_LIST,
-                                          NULL, NULL, NULL, false);
+                                           NULL, NULL, NULL, false);
   size_t line;
 
   /* Set prog_name to executable name, if available */
@@ -250,7 +250,7 @@ main (int argc, char **argv)
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
       c = getopt_long (argc, argv, ":l:q", longopts, &longindex);
-      
+
       if (c == -1)
         break;
       else if (c == '?') /* Unknown option */
@@ -278,7 +278,6 @@ main (int argc, char **argv)
                   argv[0]);
 #define D(text)                                 \
           printf (text "\n");
-          /* FIXME: Fix display of shortname */
 #define O(longname, shortname, arg, argstring, docstring)               \
           xasprintf (&shortopt, ", -%c", shortname);                    \
           xasprintf (&buf, "--%s%s %s", longname, shortname ? shortopt : "", argstring); \
