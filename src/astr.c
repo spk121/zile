@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "xalloc.h"
 
 #include "astr.h"
@@ -229,6 +230,50 @@ astr_afmt (astr as, const char *fmt, ...)
   va_end (ap);
   return as;
 }
+
+static int
+tosame (int c)
+{
+  return c;
+}
+
+/*
+ * Recase str according to case of tmpl.
+ * FIXME: Add tests.
+ */
+astr
+astr_recase (astr as, int newcase)
+{
+  astr bs = astr_new ();
+  int (*func) (int);
+  size_t i, len;
+
+  if (newcase == CAPITALIZED || newcase == UPPERCASE)
+    astr_cat_char (bs, toupper (*astr_char (as, 0)));
+  else
+    astr_cat_char (bs, tolower (*astr_char (as, 0)));
+
+  switch (newcase)
+    {
+    case UPPERCASE:
+      func = toupper;
+      break;
+    case LOWERCASE:
+      func = tolower;
+      break;
+    default:
+      func = tosame;
+    }
+
+  for (i = 1, len = astr_len (as); i < len; i++)
+    astr_cat_char (bs, func (*astr_char (as, i)));
+
+  astr_cpy (as, bs);
+  astr_delete (bs);
+
+  return as;
+}
+
 
 #ifdef TEST
 

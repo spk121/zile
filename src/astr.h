@@ -134,5 +134,15 @@ astr astr_fread (FILE * fp);
 astr astr_vafmt (astr as, const char *fmt, va_list ap);
 astr astr_afmt (astr as, const char *fmt, ...);
 
+/* Enumeration for casing. */
+/* FIXME: Make an enumeration. */
+#define UPPERCASE		1
+#define LOWERCASE		2
+#define CAPITALIZED		3
+
+/*
+ * Recase as according to newcase.
+ */
+astr astr_recase (astr as, int newcase);
 
 #endif /* !ASTR_H */

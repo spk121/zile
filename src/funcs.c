@@ -599,10 +599,9 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
 
   if (strcmp (src, dest) != 0)
     {
-      size_t dest_len = strlen (dest);
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
-                 size, dest_len);
-      line_replace_text (lp, offset, size, dest, dest_len, false);
+                 size, strlen (dest));
+      line_replace_text (lp, offset, size, dest, false);
     }
 
   free (src);
@@ -1245,9 +1244,7 @@ Fill paragraph at or after point.
 }
 END_DEFUN
 
-#define UPPERCASE		1
-#define LOWERCASE		2
-#define CAPITALIZE		3
+/* FIXME: Use astr_recase. */
 static int
 setcase_word (int rcase)
 {
@@ -1284,7 +1281,7 @@ setcase_word (int rcase)
             case LOWERCASE:
               c = tolower (c);
               break;
-            case CAPITALIZE:
+            case CAPITALIZED:
               c = (gotword ? tolower : toupper) (c);
               break;
             default:
@@ -1332,7 +1329,7 @@ END_DEFUN
 static int
 setcase_word_capitalize (void)
 {
-  return setcase_word (CAPITALIZE);
+  return setcase_word (CAPITALIZED);
 }
 
 DEFUN ("capitalize-word", capitalize_word)
@@ -1348,28 +1345,28 @@ END_DEFUN
 
 /*
  * Set the region case.
+ * FIXME: Once regions are just strings, use astr_recase.
  */
 static le *
 setcase_region (int rcase)
 {
   Region r;
   Line *lp;
-  size_t size, i;
+  size_t i;
+  int (*func) (int) = rcase == UPPERCASE ? toupper : tolower;
 
   if (warn_if_readonly_buffer () || !calculate_the_region (&r))
     return leNIL;
 
-  size = r.size;
-
-  undo_save (UNDO_REPLACE_BLOCK, r.start, size, size);
+  undo_save (UNDO_REPLACE_BLOCK, r.start, r.size, r.size);
 
   lp = r.start.p;
   i = r.start.o;
-  while (size--)
+  while (r.size--)
     {
       if (i < astr_len (lp->text))
         {
-          char c = (rcase == UPPERCASE ? toupper : tolower) (*astr_char (lp->text, i));
+          char c = func (*astr_char (lp->text, i));
           astr_nreplace_cstr (lp->text, i, 1, &c, 1);
           ++i;
         }

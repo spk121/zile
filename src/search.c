@@ -590,7 +590,7 @@ what to do with it.
 +*/
 {
   int count = 0, noask = false, exitloop = false, find_no_upper;
-  size_t find_len, repl_len;
+  size_t find_len;
   char *find = minibuf_read ("Query replace string: ", "");
   char *repl;
 
@@ -610,7 +610,6 @@ what to do with it.
       free (find);
       return FUNCALL (keyboard_quit);
     }
-  repl_len = strlen (repl);
 
   /* Spaghetti code follows... :-( */
   while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
@@ -662,9 +661,9 @@ what to do with it.
       ++count;
       undo_save (UNDO_REPLACE_BLOCK,
                  make_point (cur_bp->pt.n,
-                             cur_bp->pt.o - find_len), find_len, repl_len);
+                             cur_bp->pt.o - find_len), find_len, strlen (repl));
       line_replace_text (&cur_bp->pt.p, cur_bp->pt.o - find_len,
-                         find_len, repl, repl_len, find_no_upper);
+                         find_len, repl, find_no_upper);
     nextmatch:
       if (exitloop)
         break;

@@ -1242,14 +1242,15 @@ zile_exit (int doabort)
   for (bp = head_bp; bp != NULL; bp = bp->next)
     if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
       {
-        astr buf;
-        buf = astr_new ();
+        astr buf = astr_new (), as;
         if (bp->filename != NULL)
           astr_cpy_cstr (buf, bp->filename);
         else
           astr_cpy_cstr (buf, bp->name);
-        /* FIXME: Generate ZILE in next line */
-        astr_cat_cstr (buf, ".ZILESAVE");
+        as = astr_new_cstr (PACKAGE);
+        astr_recase (as, UPPERCASE);
+        astr_afmt (buf, ".%sSAVE", astr_cstr (as));
+        astr_delete (as);
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
         raw_write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
         astr_delete (buf);

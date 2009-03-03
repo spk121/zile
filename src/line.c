@@ -307,45 +307,36 @@ check_case (const char *s, size_t len)
 }
 
 /*
- * Recase str according to case of tmpl.
- */
-static void
-recase (char *str, size_t len, const char *tmpl, size_t tmpl_len)
-{
-  size_t i;
-  int tmpl_case = check_case (tmpl, tmpl_len);
-
-  if (tmpl_case >= 1)
-    *str = toupper (*str);
-
-  if (tmpl_case == 2)
-    for (i = 1; i < len; i++)
-      str[i] = toupper (str[i]);
-}
-
-/*
  * Replace text in the line "lp" with "newtext". If "replace_case" is
  * true then the new characters will be the same case as the old.
  */
 void
 line_replace_text (Line ** lp, size_t offset, size_t oldlen,
-                   char *newtext, size_t newlen, int replace_case)
+                   char *newtext, int replace_case)
 {
+  int case_type = 0;
+  size_t newlen = strlen (newtext);
+  astr as;
+
   replace_case = replace_case && get_variable_bool ("case-replace");
 
   if (replace_case)
     {
-      newtext = xstrdup (newtext);
-      recase (newtext, newlen, astr_char ((*lp)->text, offset),
-              oldlen);
+      int case_type = check_case (astr_char ((*lp)->text, offset),
+                                  oldlen);
+      if (case_type != 0)
+        {
+          as = astr_new_cstr (newtext);
+          astr_recase (as, case_type == 1 ? CAPITALIZED : UPPERCASE);
+        }
     }
 
   cur_bp->flags |= BFLAG_MODIFIED;
   astr_replace_cstr ((*lp)->text, offset, oldlen, newtext);
   adjust_markers (*lp, *lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
 
-  if (replace_case)
-    free ((char *) newtext);
+  if (case_type != 0)
+    astr_delete (as);
 }
 
 /*
