@@ -212,7 +212,6 @@ popup_completion (Completion * cp, int allflag, size_t num)
 static int
 completion_readdir (Completion * cp, astr as)
 {
-  astr buf;
   DIR *dir;
   char *s1, *s2;
   const char *pdir, *base;
@@ -257,7 +256,7 @@ completion_readdir (Completion * cp, astr as)
   dir = opendir (pdir);
   if (dir != NULL)
     {
-      buf = astr_new ();
+      astr buf = astr_new ();
       while ((d = readdir (dir)) != NULL)
         {
           astr_cpy_cstr (buf, pdir);
@@ -277,9 +276,9 @@ completion_readdir (Completion * cp, astr as)
 
       astr_delete (cp->path);
       cp->path = compact_path (astr_new_cstr (pdir));
+      astr_delete (buf);
     }
 
-  astr_delete (buf);
   astr_delete (bs);
   free (s1);
   free (s2);
