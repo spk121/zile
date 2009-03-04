@@ -96,7 +96,7 @@ expand_path (astr path)
   const char *sp = astr_cstr (path), *p;
   astr epath = astr_new ();
 
-  if (*sp != '/')
+  if (*sp != '/' && *sp != '~')
     {
       astr cwd = agetcwd ();
       astr_cat (epath, cwd);
@@ -164,8 +164,9 @@ expand_path (astr path)
           p += 2;
         }
 
-      while (*p != '\0' && *p != '/')
-        astr_cat_char (epath, *p++);
+      if (*p != '~')
+        while (*p != '\0' && *p != '/')
+          astr_cat_char (epath, *p++);
     }
 
   astr_cpy (path, epath);
