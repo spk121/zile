@@ -92,7 +92,6 @@ bool
 expand_path (astr path)
 {
   int ok = true;
-  struct passwd *pw;
   const char *sp = astr_cstr (path), *p;
   astr epath = astr_new ();
 
@@ -122,6 +121,8 @@ expand_path (astr path)
         }
       else if (*p == '~' && (p == sp || p[-1] == '/'))
         { /* Got `/~' or leading `~'.  Restart from this point. */
+          struct passwd *pw;
+
           astr_truncate (epath, 0);
           ++p;
 
