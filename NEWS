@@ -1,3 +1,8 @@
+Release 2.3.4:
+
+This release fixes yet another bug in filename completion, and a
+potential crash that the bug exposed.
+
 Release 2.3.3:
 
 This release fixes two more bugs in filename completion introduced in
