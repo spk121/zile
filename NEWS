@@ -1,7 +1,8 @@
 Release 2.3.4:
 
 This release fixes yet another bug in filename completion, and a
-potential crash that the bug exposed.
+potential crash that the bug exposed. Some minor code cleanup was
+performed.
 
 Release 2.3.3:
 
