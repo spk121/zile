@@ -26,6 +26,9 @@ AM_INIT_AUTOMAKE(std-options)
 dnl Checks for programs
 AC_GNU_SOURCE
 AC_PROG_CC
+if test "$GCC" = "yes"; then
+  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2 -std=c89"
+fi
 gl_EARLY
 AM_PROG_CC_C_O
 AC_PATH_PROG(HELP2MAN, help2man)
@@ -38,11 +41,6 @@ dnl Checks for functions and headers
 gl_INIT
 AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
-
-dnl Turn on additional compiler warnings for gcc
-if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
-fi
 
 dnl Curses
 MP_WITH_CURSES
