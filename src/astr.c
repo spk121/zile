@@ -283,7 +283,10 @@ static void
 assert_eq (astr as, const char *s)
 {
   if (strcmp (astr_cstr (as), s))
-    printf ("test failed: \"%s\" != \"%s\"\n", as->text, s);
+    {
+      printf ("test failed: \"%s\" != \"%s\"\n", astr_cstr (as), s);
+      exit (1);
+    }
 }
 
 /*
