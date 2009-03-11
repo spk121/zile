@@ -73,9 +73,7 @@ const char *astr_cstr (astr as);
 size_t astr_len (astr as);
 
 /*
- * Return the address of the pos'th character of as. If pos is >= 0,
- * than 0, count from the left; if less than zero count from the
- * right.
+ * Return the address of the pos'th character of as.
  */
 const char *astr_char (astr as, size_t pos);
 
