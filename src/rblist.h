@@ -101,6 +101,12 @@ rblist rblist_from_string (const char *s);
 /* Primitive destructors. */
 
 /*
+ * Destroy an rblist.
+ */
+void
+rblist_delete (rblist rbl);
+
+/*
  * Read the length of an rblist.
  *
  * Takes time O(1).
@@ -222,7 +228,7 @@ rblist rblist_line (rblist rbl, size_t line);
  * RBLIST_FOR is much faster than calling rblist_get in a loop. It
  * should be used thus:
  *
- *   RBLIST_FOR(c, rblist)
+ *   RBLIST_FOR (c, rblist)
  *     ... Do something with c ...
  *   RBLIST_END
  *
@@ -230,12 +236,14 @@ rblist rblist_line (rblist rbl, size_t line);
  * through any part of an rblist.
  */
 #define RBLIST_FOR(c, rbl) \
-  for (rblist_iterator _it_##c = rblist_iterate(rbl); \
+  { \
+    rblist_iterator _it_##c; \
+    for (_it_##c = rblist_iterate (rbl); \
        _it_##c; \
-       _it_##c = rblist_iterator_next(_it_##c)) { \
-    int c = rblist_iterator_value(_it_##c);
+       _it_##c = rblist_iterator_next (_it_##c)) { \
+    int c = rblist_iterator_value (_it_##c);
 
-#define RBLIST_END }
+#define RBLIST_END }}
 
 /*
  * Returns 'rbl' as a newly allocated 0-terminated C string.
