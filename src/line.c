@@ -156,9 +156,9 @@ insert_char (int c)
          || current char is a \t && we are in the tab limit.  */
       if ((cur_bp->pt.o < astr_len (cur_bp->pt.p->text))
           &&
-          ((*astr_char (cur_bp->pt.p->text, cur_bp->pt.o) != '\t')
+          ((astr_get (cur_bp->pt.p->text, cur_bp->pt.o) != '\t')
            ||
-           ((*astr_char (cur_bp->pt.p->text, cur_bp->pt.o) ==
+           ((astr_get (cur_bp->pt.p->text, cur_bp->pt.o) ==
              '\t') && ((get_goalc () % t) == t))))
         {
           /* Replace the character.  */
@@ -322,8 +322,8 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
 
   if (replace_case)
     {
-      int case_type = check_case (astr_char ((*lp)->text, offset),
-                                  oldlen);
+      case_type = check_case (astr_cstr ((*lp)->text) + offset, oldlen);
+
       if (case_type != 0)
         {
           as = astr_new_cstr (newtext);
@@ -368,7 +368,7 @@ fill_break_line (void)
   /* Find break point moving left from fill-column. */
   for (i = cur_bp->pt.o; i > 0; i--)
     {
-      int c = *astr_char (cur_bp->pt.p->text, i - 1);
+      int c = astr_get (cur_bp->pt.p->text, i - 1);
       if (isspace (c))
         {
           break_col = i;
@@ -382,7 +382,7 @@ fill_break_line (void)
     {
       for (i = cur_bp->pt.o + 1; i < astr_len (cur_bp->pt.p->text); i++)
         {
-          int c = *astr_char (cur_bp->pt.p->text, i - 1);
+          int c = astr_get (cur_bp->pt.p->text, i - 1);
           if (isspace (c))
             {
               break_col = i;

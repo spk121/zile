@@ -433,7 +433,7 @@ copy_text_block (size_t startn, size_t starto, size_t size)
           dp = buf + save_off;
         }
       if (i < astr_len (lp->text))
-        *dp++ = *astr_char (lp->text, i++);
+        *dp++ = astr_get (lp->text, i++);
       else
         {
           *dp++ = '\n';

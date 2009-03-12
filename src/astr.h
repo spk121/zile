@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
 
-   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -33,9 +33,6 @@
  * The string type, astr, is a pointer type.
  *
  * String positions start at zero, as with ordinary C strings.
- * Negative values are also allowed, and count from the end of the
- * string. In particular, -1 refers to the last character of the
- * string.
  *
  * Where not otherwise specified, the functions return the first
  * argument string, usually named as in the function prototype.
@@ -73,9 +70,9 @@ const char *astr_cstr (astr as);
 size_t astr_len (astr as);
 
 /*
- * Return the address of the pos'th character of as.
+ * Return the pos'th character of as.
  */
-const char *astr_char (astr as, size_t pos);
+char astr_get (astr as, size_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as

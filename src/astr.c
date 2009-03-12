@@ -117,11 +117,11 @@ astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
  * Derived functions.
  */
 
-const char *
-astr_char (astr as, size_t pos)
+char
+astr_get (astr as, size_t pos)
 {
   assert (pos <= astr_len (as));
-  return astr_cstr (as) + pos;
+  return (astr_cstr (as))[pos];
 }
 
 static astr
@@ -171,7 +171,7 @@ astr
 astr_substr (astr as, size_t pos, size_t size)
 {
   assert (pos + size <= astr_len (as));
-  return astr_ncat_cstr (astr_new (), astr_char (as, pos), size);
+  return astr_ncat_cstr (astr_new (), astr_cstr (as) + pos, size);
 }
 
 astr
@@ -249,9 +249,9 @@ astr_recase (astr as, int newcase)
   size_t i, len;
 
   if (newcase == CAPITALIZED || newcase == UPPERCASE)
-    astr_cat_char (bs, toupper (*astr_char (as, 0)));
+    astr_cat_char (bs, toupper (astr_get (as, 0)));
   else
-    astr_cat_char (bs, tolower (*astr_char (as, 0)));
+    astr_cat_char (bs, tolower (astr_get (as, 0)));
 
   switch (newcase)
     {
@@ -266,7 +266,7 @@ astr_recase (astr as, int newcase)
     }
 
   for (i = 1, len = astr_len (as); i < len; i++)
-    astr_cat_char (bs, func (*astr_char (as, i)));
+    astr_cat_char (bs, func (astr_get (as, i)));
 
   astr_cpy (as, bs);
   astr_delete (bs);

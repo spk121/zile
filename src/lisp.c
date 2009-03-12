@@ -54,7 +54,7 @@ static int
 read_char (astr as, size_t * pos)
 {
   if ((size_t) *pos < astr_len (as))
-    return *astr_char (as, (*pos)++);
+    return astr_get (as, (*pos)++);
   return EOF;
 }
 

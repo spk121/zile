@@ -55,11 +55,11 @@ term_set_size (size_t cols, size_t rows)
 }
 
 static int
-make_char_printable (char **buf, size_t c)
+make_char_printable (char **buf, int c)
 {
   if (c == '\0')
     return xasprintf (buf, "^@");
-  else if (c <= '\32')
+  else if (c > 0 && c <= '\32')
     return xasprintf (buf, "^%c", 'A' + c - 1);
   else
     return xasprintf (buf, "\\%o", c & 0xff);
@@ -84,7 +84,7 @@ outch (int c, size_t font, size_t * x)
     term_addch (c), ++(*x);
   else
     {
-      j = make_char_printable (&buf, (size_t) c);
+      j = make_char_printable (&buf, c);
       for (w = 0; w < j && *x < term_width (); ++w)
         term_addch (buf[w]), ++(*x);
       free (buf);
@@ -153,9 +153,9 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
   for (x = 0, i = startcol; i < astr_len (lp->text) && x < wp->ewidth; i++)
     {
       if (highlight && in_region (lineno, i, r))
-        outch (*astr_char (lp->text, i), FONT_REVERSE, &x);
+        outch (astr_get (lp->text, i), FONT_REVERSE, &x);
       else
-        outch (*astr_char (lp->text, i), FONT_NORMAL, &x);
+        outch (astr_get (lp->text, i), FONT_NORMAL, &x);
     }
 
   draw_end_of_line (line, wp, lineno, r, highlight, x, i);
@@ -254,33 +254,33 @@ calculate_start_column (Window * wp)
   size_t col = 0, lastcol = 0, t = tab_width (wp->bp);
   int rpfact, lpfact;
   char *buf;
-  const char *rp, *lp, *p;
+  size_t rp, lp, p;
   Point pt = window_pt (wp);
 
-  rp = astr_char (pt.p->text, pt.o);
+  rp = pt.o;
   rpfact = pt.o / (wp->ewidth / 3);
 
-  for (lp = rp; lp >= astr_cstr (pt.p->text); --lp)
+  for (lp = rp; lp != SIZE_MAX; --lp)
     {
       for (col = 0, p = lp; p < rp; ++p)
-        if (*p == '\t')
+        if (astr_get (pt.p->text, p) == '\t')
           {
             col |= t - 1;
             ++col;
           }
-        else if (isprint ((int) *p))
+        else if (isprint ((int) astr_get (pt.p->text, p)))
           ++col;
         else
           {
-            col += make_char_printable (&buf, (size_t) * p);
+            col += make_char_printable (&buf, astr_get (pt.p->text, p));
             free (buf);
           }
 
-      lpfact = (lp - astr_cstr (pt.p->text)) / (wp->ewidth / 3);
+      lpfact = lp / (wp->ewidth / 3);
 
       if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2))
         {
-          wp->start_column = lp + 1 - astr_cstr (pt.p->text);
+          wp->start_column = lp + 1;
           point_screen_column = lastcol;
           return;
         }

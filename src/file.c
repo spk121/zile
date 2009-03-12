@@ -101,7 +101,7 @@ expand_path (astr path)
       astr_cat (epath, cwd);
       astr_delete (cwd);
       if (astr_len (epath) == 0 ||
-          *astr_char (epath, astr_len (epath) - 1) != '/')
+          astr_get (epath, astr_len (epath) - 1) != '/')
         astr_cat_char (epath, '/');
     }
 
@@ -116,7 +116,7 @@ expand_path (astr path)
               astr_truncate (epath, 0);
             }
           if (astr_len (epath) == 0 ||
-              *astr_char (epath, astr_len (epath) - 1) != '/')
+              astr_get (epath, astr_len (epath) - 1) != '/')
             astr_cat_char (epath, '/');
         }
       else if (*p == '~' && (p == sp || p[-1] == '/'))
@@ -158,9 +158,9 @@ expand_path (astr path)
         }
       else if (*p == '.' && p[1] == '.' && (p[2] == '/' || p[2] == '\0'))
         { /* Got `..'. */
-          if (astr_len (epath) >= 1 && *astr_char (epath, astr_len (epath) - 1) == '/')
+          if (astr_len (epath) >= 1 && astr_get (epath, astr_len (epath) - 1) == '/')
             astr_truncate (epath, astr_len (epath) - 1);
-          while (*astr_char (epath, astr_len (epath) - 1) != '/' && astr_len (epath) >= 1)
+          while (astr_get (epath, astr_len (epath) - 1) != '/' && astr_len (epath) >= 1)
             astr_truncate (epath, astr_len (epath) - 1);
           p += 2;
         }
@@ -188,14 +188,14 @@ compact_path (astr path)
   if (pw != NULL)
     {
       /* Replace `/userhome/' (if found) with `~/'. */
-      size_t i = strlen (pw->pw_dir);
-      if (!strncmp (pw->pw_dir, astr_cstr (path), i))
+      size_t homelen = strlen (pw->pw_dir);
+      if (!strncmp (pw->pw_dir, astr_cstr (path), homelen))
         {
           astr buf = astr_new_cstr ("~/");
           if (!strcmp (pw->pw_dir, "/"))
-            astr_cat_cstr (buf, astr_char (path, 1));
+            astr_cat_cstr (buf, astr_cstr (path) + 1);
           else
-            astr_cat_cstr (buf, astr_char (path, i + 1));
+            astr_cat_cstr (buf, astr_cstr (path) + homelen + 1);
           astr_cpy (path, buf);
           astr_delete (buf);
         }
@@ -220,7 +220,7 @@ get_buffer_dir (void)
   else
     { /* Get the current directory name from the system. */
       buf = agetcwd ();
-      if (astr_len (buf) != 0 && *astr_char (buf, astr_len (buf) - 1) != '/')
+      if (astr_len (buf) != 0 && astr_get (buf, astr_len (buf) - 1) != '/')
         astr_cat_char (buf, '/');
     }
 
@@ -939,7 +939,7 @@ create_backup_filename (const char *filename, const char *backupdir)
       astr buf = astr_new ();
 
       astr_cpy_cstr (buf, backupdir);
-      if (*astr_char (buf, astr_len (buf) - 1) != '/')
+      if (astr_get (buf, astr_len (buf) - 1) != '/')
         astr_cat_char (buf, '/');
       while (*filename)
         {
