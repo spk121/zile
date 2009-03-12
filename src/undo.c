@@ -187,7 +187,9 @@ void
 undo_set_unchanged (Undo *up)
 {
   if (up)
+    {
     up->unchanged = true;
-  for (up = up->next; up; up = up->next)
-    up->unchanged = false;
+    for (up = up->next; up; up = up->next)
+      up->unchanged = false;
+    }
 }
