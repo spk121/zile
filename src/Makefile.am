@@ -117,11 +117,10 @@ loc:
 
 TESTS_ENVIRONMENT = builddir=$(builddir) $(VALGRIND)
 
-SCRIPT_TESTS =						\
-	run-lisp-tests					\
-	test-bad-argument
+TESTS = $(check_PROGRAMS)
 
-TESTS = $(check_PROGRAMS) $(SCRIPT_TESTS)
+check-local:
+	$(srcdir)/run-lisp-tests $(srcdir)/lisp-tests/*.el
 
 check_PROGRAMS = astr
 
@@ -324,7 +323,8 @@ EXTRA_DIST =						\
 	$(LUA_BUILDTIME)				\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_OUTPUTS)				\
-	$(SCRIPT_TESTS)					\
+	run-lisp-tests					\
+	test-bad-argument				\
 	quit.el						\
 	dotzile-extra.el				\
 	man-extras.in					\

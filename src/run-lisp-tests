@@ -34,7 +34,7 @@ if test -z "$TERM"; then
     exit 0
 fi
 
-for test in $srcdir/lisp-tests/*.el; do
+for test; do
     test=`basename $test`
     test=`echo $test | sed -e 's/\.el$//'`
 
