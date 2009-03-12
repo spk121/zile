@@ -42,15 +42,17 @@ for test in $srcdir/lisp-tests/*.el; do
     cp $srcdir/lisp-tests/zile_test.input $edit_file
     chmod +w $edit_file
 
-    if ! $builddir/zile --no-init-file --load $srcdir/lisp-tests/$test.el $edit_file; then
+    if $builddir/zile --no-init-file --load $srcdir/lisp-tests/$test.el $edit_file; then
+        if diff $srcdir/lisp-tests/$test.output $edit_file; then
+            pass=`expr $pass + 1`
+            rm -f $edit_file $edit_file~
+        else
+            echo $test failed to produce correct output
+            fail=`expr $fail + 1`
+        fi
+    else
         echo $test failed to run with error code $?
         fail=`expr $fail + 1`
-    elif ! diff $srcdir/lisp-tests/$test.output $edit_file; then
-        echo $test failed to produce correct output
-        fail=`expr $fail + 1`
-    else
-        pass=`expr $pass + 1`
-        rm -f $edit_file $edit_file~
     fi
 done
 
