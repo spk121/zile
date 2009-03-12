@@ -191,6 +191,7 @@ typedef le * (*Function) (long uniarg, le * list);
         }
 
 /* Define a non-user-visible function. */
+/* FIXME: Bad name: should be _INTERACTIVE. */
 #define DEFUN_HIDDEN(zile_func, c_func) \
         DEFUN(zile_func, c_func)
 #define DEFUN_HIDDEN_ARGS(zile_func, c_func, args) \
