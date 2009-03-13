@@ -120,7 +120,7 @@ TESTS_ENVIRONMENT = builddir=$(builddir) $(VALGRIND)
 TESTS = $(check_PROGRAMS)
 
 check-local:
-	$(srcdir)/run-lisp-tests $(srcdir)/lisp-tests/*.el
+	$(VALGRIND) $(srcdir)/run-lisp-tests $(srcdir)/lisp-tests/*.el
 
 check_PROGRAMS = astr
 
