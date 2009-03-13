@@ -46,7 +46,7 @@ struct Undo
 
   /* Flag indicating that reverting this undo leaves the buffer
      in an unchanged state. */
-  int unchanged;
+  bool unchanged;
 
   /* The block to insert. */
   struct
@@ -180,16 +180,11 @@ free_undo (Undo *up)
 }
 
 /*
- * Set unchanged flags to false except for the last undo action (the
- * argument), which is set to true.
+ * Set unchanged flags to false.
  */
 void
 undo_set_unchanged (Undo *up)
 {
-  if (up)
-    {
-      up->unchanged = true;
-      for (up = up->next; up; up = up->next)
-        up->unchanged = false;
-    }
+  for (; up; up = up->next)
+    up->unchanged = false;
 }
