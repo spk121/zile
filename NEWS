@@ -1,3 +1,8 @@
+Release 2.3.5:
+
+This release fixes a bug write-file, where the undo state was not
+properly updated, resulting in dirty states being marked clean.
+
 Release 2.3.4:
 
 This release fixes yet another bug in filename completion, and a
