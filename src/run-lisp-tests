@@ -21,10 +21,16 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-# srcdir and builddir are defined in the environment
-
 # N.B. Tests that use execute-kbd-macro must note that keyboard input
 # is only evaluated once the script has finished running.
+
+# srcdir and builddir are defined in the environment for a build
+if test -z "$srcdir"; then
+    srcdir=.
+fi
+if test -z "$builddir"; then
+    builddir=.
+fi
 
 pass=0
 fail=0
