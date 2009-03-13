@@ -1007,51 +1007,69 @@ write_to_disk (Buffer * bp, char *filename)
   return true;
 }
 
-static int
+static le *
+write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
+{
+  bool ans = true;
+  bool name_from_minibuffer = false;
+  le * ok = leT;
+
+  if (needname)
+    {
+      char *fname = bp->filename != NULL ? bp->filename : bp->name;
+
+      name = minibuf_read_filename (prompt, fname, NULL);
+      name_from_minibuffer = true;
+      if (name == NULL)
+        return FUNCALL (keyboard_quit);
+      if (name[0] == '\0')
+        {
+          free (name);
+          return leNIL;
+        }
+      confirm = true;
+    }
+
+  if (confirm && exist_file (name))
+    {
+      ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", name);
+      if (ans == -1)
+        FUNCALL (keyboard_quit);
+      if (ans == false)
+        minibuf_error ("Canceled");
+      if (ans != true)
+        ok = leNIL;
+    }
+
+  if (ans == true)
+    {
+      if (name != bp->filename)
+        set_buffer_filename (bp, name);
+      bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
+      if (write_to_disk (bp, name))
+        {
+          minibuf_write ("Wrote %s", name);
+          bp->flags &= ~BFLAG_MODIFIED;
+          undo_set_unchanged (bp->last_undop);
+        }
+      else
+        ok = leNIL;
+    }
+
+  if (name_from_minibuffer)
+    free (name);
+
+  return ok;
+}
+
+static bool
 save_buffer (Buffer * bp)
 {
-  char *ms, *fname = bp->filename != NULL ? bp->filename : bp->name;
-  int ms_is_from_minibuffer = 0;
-
   if (!(bp->flags & BFLAG_MODIFIED))
     minibuf_write ("(No changes need to be saved)");
   else
-    {
-      if (bp->flags & BFLAG_NEEDNAME)
-        {
-          ms = minibuf_read_filename ("File to save in: ", fname, NULL);
-          if (ms == NULL)
-            {
-              FUNCALL (keyboard_quit);
-              return false;
-            }
-          ms_is_from_minibuffer = 1;
-          if (ms[0] == '\0')
-            {
-              free (ms);
-              return false;
-            }
-
-          set_buffer_filename (bp, ms);
-
-          bp->flags &= ~BFLAG_NEEDNAME;
-        }
-      else
-        ms = bp->filename;
-
-      if (write_to_disk (bp, ms))
-        {
-          minibuf_write ("Wrote %s", ms);
-          bp->flags &= ~BFLAG_MODIFIED;
-
-          undo_set_unchanged (bp->last_undop);
-        }
-
-      bp->flags &= ~BFLAG_TEMPORARY;
-
-      if (ms_is_from_minibuffer)
-        free (ms);
-    }
+    write_buffer (bp, (bp->flags & BFLAG_NEEDNAME) != 0, false, bp->filename,
+                  "File to save in: ");
 
   return true;
 }
@@ -1068,47 +1086,15 @@ END_DEFUN
 
 DEFUN ("write-file", write_file)
 /*+
-Write current buffer into the user specified file.
-Makes buffer visit that file, and marks it not modified.
+Write current buffer into file @i{filename}.
+This makes the buffer visit that file, and marks it as not modified.
+
+Interactively, confirmation is required unless you supply a prefix argument.
 +*/
 {
-  char *fname = cur_bp->filename != NULL ? cur_bp->filename : cur_bp->name;
-  char *ms = minibuf_read_filename ("Write file: ", fname, NULL);
-  int ans = true;
-
-  if (ms == NULL)
-    return FUNCALL (keyboard_quit);
-  if (ms[0] == '\0')
-    {
-      free (ms);
-      return leNIL;
-    }
-
-  if (exist_file (ms))
-    {
-      ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", ms);
-      if (ans == -1)
-        FUNCALL (keyboard_quit);
-      if (ans == false)
-        minibuf_error ("Canceled");
-      if (ans != true)
-        ok = leNIL;
-    }
-
-  if (ans == true)
-    {
-      set_buffer_filename (cur_bp, ms);
-      cur_bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
-      if (write_to_disk (cur_bp, ms))
-        {
-          minibuf_write ("Wrote %s", ms);
-          cur_bp->flags &= ~BFLAG_MODIFIED;
-        }
-      else
-        ok = leNIL;
-    }
-
-  free (ms);
+  ok = write_buffer (cur_bp, true,
+                     arglist && !(lastflag & FLAG_SET_UNIARG),
+                     NULL, "Write file: ");
 }
 END_DEFUN
 
