@@ -144,7 +144,6 @@ set_buffer_filename (Buffer * bp, const char *filename)
   bp->filename = xstrdup (filename);
 
   free (bp->name);
-  bp->name = "";
   bp->name = make_buffer_name (filename);
 }
 
