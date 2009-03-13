@@ -1,7 +1,9 @@
 Release 2.3.5:
 
 This release fixes a bug write-file, where the undo state was not
-properly updated, resulting in dirty states being marked clean.
+properly updated, resulting in dirty states being marked clean. A bug
+in the build system which caused builds to fail on some systems was
+also fixed. Some code cleanup was done.
 
 Release 2.3.4:
 
