@@ -35,8 +35,8 @@ fi
 pass=0
 fail=0
 
-# Only run if TERM is set
-if test -z "$TERM"; then
+# Only run if TERM is set to a terminal type
+if test -z "$TERM" -o "$TERM" = "unknown"; then
     exit 0
 fi
 
