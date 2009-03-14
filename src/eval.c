@@ -177,7 +177,7 @@ The values val are expressions; they are evaluated.
         }
     }
 
-  return newvalue;
+  ok = newvalue;
 }
 END_DEFUN
 
