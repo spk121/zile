@@ -36,6 +36,9 @@ if test "$ac_cv_path_HELP2MAN" = ""; then
   AC_MSG_FAILURE([cannot find help2man])
 fi
 AC_PATH_PROG(VALGRIND, valgrind)
+if test -n "$VALGRIND"; then
+  VALGRIND="$VALGRIND --error-exitcode=1"
+fi
 
 dnl Checks for functions and headers
 gl_INIT
