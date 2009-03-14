@@ -1190,27 +1190,24 @@ Offer to save each buffer, then kill this Zile process.
 +*/
 {
   Buffer *bp;
-  bool modified;
 
   if (!save_some_buffers ())
     return leNIL;
 
-  for (bp = head_bp, modified = false;
-       bp != NULL && !modified;
-       bp = bp->next)
+  for (bp = head_bp; bp != NULL; bp = bp->next)
     if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
-      modified = true;
-
-  if (modified)
-    for (;;)
       {
-        int ans = minibuf_read_yesno
-          ("Modified buffers exist; exit anyway? (yes or no) ");
-        if (ans == -1)
-          return FUNCALL (keyboard_quit);
-        else if (!ans)
-          return leNIL;
-        break;
+        for (;;)
+          {
+            int ans = minibuf_read_yesno
+              ("Modified buffers exist; exit anyway? (yes or no) ");
+            if (ans == -1)
+              return FUNCALL (keyboard_quit);
+            else if (!ans)
+              return leNIL;
+            break;
+          }
+        break; /* We have found a modified buffer, so stop. */
       }
 
   thisflag |= FLAG_QUIT;
