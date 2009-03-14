@@ -1190,16 +1190,18 @@ Offer to save each buffer, then kill this Zile process.
 +*/
 {
   Buffer *bp;
-  int i = 0;
+  bool modified;
 
   if (!save_some_buffers ())
     return leNIL;
 
-  for (bp = head_bp; bp != NULL; bp = bp->next)
+  for (bp = head_bp, modified = false;
+       bp != NULL && !modified;
+       bp = bp->next)
     if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
-      ++i;
+      modified = true;
 
-  if (i > 0)
+  if (modified)
     for (;;)
       {
         int ans = minibuf_read_yesno
