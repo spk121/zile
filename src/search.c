@@ -285,29 +285,30 @@ typedef int (*Searcher) (Line * startp, size_t starto, const char *s, int regexp
 static le *
 search (Searcher searcher, bool regexp, const char *pattern, const char *search_msg)
 {
+  le * ok = leT;
+  const char *ms = NULL;
+
   if (pattern == NULL)
-    pattern = minibuf_read (search_msg, last_search);
+    pattern = ms = minibuf_read (search_msg, last_search);
 
   if (pattern == NULL)
     return FUNCALL (keyboard_quit);
   if (pattern[0] == '\0')
+    ok = leNIL;
+  else
     {
-      free ((char *) pattern);
-      return leNIL;
+      free (last_search);
+      last_search = xstrdup (pattern);
+
+      if (!searcher (cur_bp->pt.p, cur_bp->pt.o, pattern, regexp))
+        {
+          minibuf_error ("Search failed: \"%s\"", pattern);
+          ok = leNIL;
+        }
     }
 
-  free (last_search);
-  last_search = xstrdup (pattern);
-
-  if (!searcher (cur_bp->pt.p, cur_bp->pt.o, pattern, regexp))
-    {
-      minibuf_error ("Search failed: \"%s\"", pattern);
-      free ((char *) pattern);
-      return leNIL;
-    }
-
-  free ((char *) pattern);
-  return leT;
+  free ((char *) ms);
+  return ok;
 }
 
 DEFUN_ARGS ("search-forward", search_forward,
