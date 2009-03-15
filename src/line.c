@@ -467,6 +467,7 @@ bprintf (const char *fmt, ...)
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
   insert_nstring (buf, strlen (buf));
+  free (buf);
 }
 
 int
