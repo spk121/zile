@@ -680,3 +680,8 @@ endoffunc:
   minibuf_write ("Replaced %d occurrences", count);
 }
 END_DEFUN
+
+void free_search (void)
+{
+  free (last_search);
+}

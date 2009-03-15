@@ -231,6 +231,7 @@ void recenter (Window * wp);
 
 /* search.c --------------------------------------------------------------- */
 void init_search (void);
+void free_search (void);
 
 /* term_minibuf.c --------------------------------------------------------- */
 void term_minibuf_write (const char *fmt);

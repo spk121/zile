@@ -385,6 +385,7 @@ main (int argc, char **argv)
   free_lisp ();
 
   /* Free all the memory allocated. */
+  free_search ();
   free_kill_ring ();
   free_registers ();
   free_macros ();
