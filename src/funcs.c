@@ -1411,7 +1411,7 @@ write_shell_output (va_list ap)
 static bool
 pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
 {
-  astr out = astr_new ();
+  astr out;
   bool more_than_one_line = false;
   char *cmdline, *eol;
   FILE * pipe;
