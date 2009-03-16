@@ -194,6 +194,8 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
 
   /* Copy the keystrokes from cur_mp. */
   append_key_list (mp, cur_mp);
+
+  free(ms);
 }
 END_DEFUN
 

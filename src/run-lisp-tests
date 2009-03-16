@@ -48,7 +48,7 @@ for test; do
     cp $srcdir/lisp-tests/zile_test.input $edit_file
     chmod +w $edit_file
 
-    if $builddir/zile --no-init-file --load $srcdir/lisp-tests/$test.el $edit_file; then
+    if $valgrind $builddir/zile --no-init-file --load $srcdir/lisp-tests/$test.el $edit_file; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
             pass=`expr $pass + 1`
             rm -f $edit_file $edit_file~

@@ -63,8 +63,6 @@ var_free (void *v)
 {
   var_entry *p = (var_entry *) v;
   free ((char *) p->var);
-  if (p->defval != p->val)
-    free ((char *) p->defval);
   free ((char *) p->val);
   free (p);
 }
@@ -74,7 +72,8 @@ init_builtin_var (const char *var, const char *defval, bool local, const char *d
 {
   var_entry *p = XZALLOC (var_entry);
   p->var = xstrdup (var);
-  p->defval = p->val = xstrdup (defval);
+  p->defval = defval;
+  p->val = xstrdup (defval);
   p->local = local;
   p->doc = doc;
   hash_insert (main_vars, p);
@@ -107,6 +106,7 @@ set_variable_in_list (Hash_table *var_list, const char *var, const char *val)
   q = hash_insert (var_list, p);
 
   /* Update value */
+  free ((char *) q->val);
   q->val = xstrdup (val);
 
   /* If variable is new, initialise other fields */

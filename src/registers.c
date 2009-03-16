@@ -76,6 +76,7 @@ Copy region into the user specified register.
           char *p = copy_text_block (r.start.n, r.start.o, r.size);
           register_free ((size_t) reg);
           regs[reg] = astr_new_cstr (p);
+          free (p);
         }
     }
 

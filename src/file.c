@@ -677,6 +677,7 @@ insert_buffer (Buffer * bp)
   if (old_cur_n < old_lines)
     insert_newline ();
   insert_lines (old_cur_n + 1, old_lines, old_lines, old_next);
+  astr_delete (old_cur_line);
   undo_nosave = false;
 }
 
