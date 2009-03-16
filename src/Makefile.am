@@ -115,12 +115,13 @@ CLEANFILES = 						\
 loc:
 	cloc --no3 $(ALLSOURCES) Makefile.am ../Makefile.am ../configure.ac
 
-TESTS_ENVIRONMENT = srcdir=$(srcdir) builddir=$(builddir) valgrind="$(VALGRIND)"
+TESTS_VARS = srcdir=$(srcdir) builddir=$(builddir)
+TESTS_ENVIRONMENT = $(TESTS_VARS) $(VALGRIND)
 
 TESTS = $(check_PROGRAMS)
 
 check-local:
-	echo $(srcdir)/lisp-tests/*.el | $(TESTS_ENVIRONMENT) xargs $(srcdir)/run-lisp-tests
+	echo $(srcdir)/lisp-tests/*.el | $(TESTS_VARS) valgrind="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
 
 check_PROGRAMS = astr
 
