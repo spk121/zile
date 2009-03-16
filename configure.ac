@@ -37,7 +37,7 @@ if test "$ac_cv_path_HELP2MAN" = ""; then
 fi
 AC_PATH_PROG(VALGRIND, valgrind)
 if test -n "$VALGRIND"; then
-  VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=yes"
+  VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=full"
 fi
 
 dnl Checks for functions and headers
