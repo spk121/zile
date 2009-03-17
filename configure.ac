@@ -31,14 +31,24 @@ if test "$GCC" = "yes"; then
 fi
 gl_EARLY
 AM_PROG_CC_C_O
+
+dnl help2man
 AC_PATH_PROG(HELP2MAN, help2man)
 if test "$ac_cv_path_HELP2MAN" = ""; then
   AC_MSG_FAILURE([cannot find help2man])
 fi
-AC_PATH_PROG(VALGRIND, valgrind)
-if test -n "$VALGRIND"; then
-  VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=full"
-fi
+
+dnl Valgrind
+AC_ARG_ENABLE(valgrind,
+  [AS_HELP_STRING([--disable-valgrind],
+    [do not run tests with Valgrind])],
+  [],
+  [enable_valgrind=yes])
+AS_IF([test "$enable_valgrind" != "no"],
+  [AC_PATH_PROG(VALGRIND, valgrind)
+  if test -n "$VALGRIND"; then
+    VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=full"
+  fi])
 
 dnl Checks for functions and headers
 gl_INIT
@@ -65,8 +75,5 @@ AC_DEFINE_UNQUOTED(CONFIGURE_HOST, ["${ac_hostname}"],
 
 dnl Generate output
 AC_CONFIG_HEADER(config.h)
-AC_CONFIG_FILES(
-        Makefile lib/Makefile src/Makefile
-        src/tbl_opts.h
-        )
+AC_CONFIG_FILES(Makefile lib/Makefile src/Makefile src/tbl_opts.h)
 AC_OUTPUT
