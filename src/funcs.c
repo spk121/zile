@@ -1345,7 +1345,6 @@ END_DEFUN
 
 /*
  * Set the region case.
- * FIXME: Once regions are just strings, use astr_recase.
  */
 static le *
 setcase_region (int rcase)
