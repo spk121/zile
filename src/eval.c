@@ -151,7 +151,7 @@ evaluateNode (le * node)
   return value;
 }
 
-DEFUN_HIDDEN ("setq", setq)
+DEFUN_NONINTERACTIVE ("setq", setq)
 /*+
 (setq [sym val]...)
 

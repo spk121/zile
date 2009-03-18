@@ -185,7 +185,7 @@ insert_char (int c)
   return true;
 }
 
-DEFUN_HIDDEN_ARGS ("insert-char", insert_char,
+DEFUN_NONINTERACTIVE_ARGS ("insert-char", insert_char,
                    STR_ARG (c))
 /*+
 Insert CHARACTER.

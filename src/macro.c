@@ -239,7 +239,7 @@ defining others, use @kbd{M-x name-last-kbd-macro}.
 }
 END_DEFUN
 
-DEFUN_HIDDEN_ARGS ("execute-kbd-macro", execute_kbd_macro,
+DEFUN_NONINTERACTIVE_ARGS ("execute-kbd-macro", execute_kbd_macro,
                    STR_ARG (keystr))
 /*+
 Execute macro as string of editor command characters.
