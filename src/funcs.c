@@ -1244,53 +1244,34 @@ Fill paragraph at or after point.
 }
 END_DEFUN
 
-/* FIXME: Use astr_recase. */
 static int
 setcase_word (int rcase)
 {
-  int gotword;
-  size_t i, size;
+  size_t i;
   char c;
+  astr as;
 
   if (!ISWORDCHAR (following_char ()))
     if (!forward_word () || !backward_word ())
       return false;
 
+  as = astr_new ();
   for (i = cur_bp->pt.o;
        i < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((int) astr_get (cur_bp->pt.p->text, i));
+         ISWORDCHAR ((int) (c = astr_get (cur_bp->pt.p->text, i)));
        i++)
-    ;
-  size = i - cur_bp->pt.o;
-  if (size > 0)
-    undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, size);
+    astr_cat_char (as, c);
 
-  gotword = false;
-  for (gotword = false;
-       cur_bp->pt.o < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((c = astr_get (cur_bp->pt.p->text, cur_bp->pt.o)));
-       cur_bp->pt.o++, gotword = true)
+  if (astr_len (as) > 0)
     {
-      if (isalpha ((int) c))
-        {
-          switch (rcase)
-            {
-            case UPPERCASE:
-              c = toupper (c);
-              break;
-            case LOWERCASE:
-              c = tolower (c);
-              break;
-            case CAPITALIZED:
-              c = (gotword ? tolower : toupper) (c);
-              break;
-            default:
-              break;
-            }
-          astr_nreplace_cstr (cur_bp->pt.p->text, cur_bp->pt.o, 1, &c, 1);
-        }
+      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, astr_len (as), astr_len (as));
+      astr_recase (as, rcase);
+      astr_nreplace_cstr (cur_bp->pt.p->text, cur_bp->pt.o, astr_len (as),
+                          astr_cstr (as), astr_len (as));
     }
+  astr_delete (as);
 
+  forward_word ();
   cur_bp->flags |= BFLAG_MODIFIED;
 
   return true;
