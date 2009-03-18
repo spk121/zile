@@ -231,42 +231,35 @@ astr_afmt (astr as, const char *fmt, ...)
   return as;
 }
 
-static int
-tosame (int c)
-{
-  return c;
-}
-
 /*
- * Recase str according to case of tmpl.
- * FIXME: Add tests.
+ * Recase str according to newcase.
  */
 astr
-astr_recase (astr as, int newcase)
+astr_recase (astr as, enum casing newcase)
 {
   astr bs = astr_new ();
-  int (*func) (int);
+  int (*func) (int) = NULL;
   size_t i, len;
 
-  if (newcase == CAPITALIZED || newcase == UPPERCASE)
+  if (newcase == case_capitalized || newcase == case_upper)
     astr_cat_char (bs, toupper (astr_get (as, 0)));
   else
     astr_cat_char (bs, tolower (astr_get (as, 0)));
 
   switch (newcase)
     {
-    case UPPERCASE:
+    case case_upper:
       func = toupper;
       break;
-    case LOWERCASE:
+    case case_lower:
       func = tolower;
       break;
     default:
-      func = tosame;
+      break;
     }
 
   for (i = 1, len = astr_len (as); i < len; i++)
-    astr_cat_char (bs, func (astr_get (as, i)));
+    astr_cat_char (bs, func ? func (astr_get (as, i)) : astr_get (as, i));
 
   astr_cpy (as, bs);
   astr_delete (bs);
@@ -374,8 +367,16 @@ main (void)
   astr_afmt (as1, "%s * %d = ", "5", 3);
   astr_afmt (as1, "%d", 15);
   assert_eq (as1, "5 * 3 = 15");
-  astr_delete (as1);
 
+  astr_cpy_cstr (as1, "some text");
+  astr_recase (as1, case_capitalized);
+  assert_eq (as1, "Some text");
+  astr_recase (as1, case_upper);
+  assert_eq (as1, "SOME TEXT");
+  astr_recase (as1, case_lower);
+  assert_eq (as1, "some text");
+
+  astr_delete (as1);
   astr_delete (as2);
   astr_delete (as3);
   printf ("astr test successful.\n");

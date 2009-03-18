@@ -130,14 +130,15 @@ astr astr_vafmt (astr as, const char *fmt, va_list ap);
 astr astr_afmt (astr as, const char *fmt, ...);
 
 /* Enumeration for casing. */
-/* FIXME: Make an enumeration. */
-#define UPPERCASE		1
-#define LOWERCASE		2
-#define CAPITALIZED		3
+enum casing {
+  case_upper = 1,
+  case_lower,
+  case_capitalized
+};
 
 /*
  * Recase as according to newcase.
  */
-astr astr_recase (astr as, int newcase);
+astr astr_recase (astr as, enum casing newcase);
 
 #endif /* !ASTR_H */

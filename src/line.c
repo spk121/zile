@@ -327,7 +327,7 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
       if (case_type != 0)
         {
           as = astr_new_cstr (newtext);
-          astr_recase (as, case_type == 1 ? CAPITALIZED : UPPERCASE);
+          astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
         }
     }
 

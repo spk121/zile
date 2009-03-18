@@ -1280,7 +1280,7 @@ setcase_word (int rcase)
 static int
 setcase_word_lowercase (void)
 {
-  return setcase_word (LOWERCASE);
+  return setcase_word (case_lower);
 }
 
 DEFUN ("downcase-word", downcase_word)
@@ -1295,7 +1295,7 @@ END_DEFUN
 static int
 setcase_word_uppercase (void)
 {
-  return setcase_word (UPPERCASE);
+  return setcase_word (case_upper);
 }
 
 DEFUN ("upcase-word", upcase_word)
@@ -1310,7 +1310,7 @@ END_DEFUN
 static int
 setcase_word_capitalize (void)
 {
-  return setcase_word (CAPITALIZED);
+  return setcase_word (case_capitalized);
 }
 
 DEFUN ("capitalize-word", capitalize_word)
@@ -1328,12 +1328,12 @@ END_DEFUN
  * Set the region case.
  */
 static le *
-setcase_region (int rcase)
+setcase_region (enum casing rcase)
 {
   Region r;
   Line *lp;
   size_t i;
-  int (*func) (int) = rcase == UPPERCASE ? toupper : tolower;
+  int (*func) (int) = rcase == case_upper ? toupper : tolower;
 
   if (warn_if_readonly_buffer () || !calculate_the_region (&r))
     return leNIL;
@@ -1367,7 +1367,7 @@ DEFUN ("upcase-region", upcase_region)
 Convert the region to upper case.
 +*/
 {
-  ok = setcase_region (UPPERCASE);
+  ok = setcase_region (case_upper);
 }
 END_DEFUN
 
@@ -1376,7 +1376,7 @@ DEFUN ("downcase-region", downcase_region)
 Convert the region to lower case.
 +*/
 {
-  ok = setcase_region (LOWERCASE);
+  ok = setcase_region (case_lower);
 }
 END_DEFUN
 

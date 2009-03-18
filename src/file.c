@@ -1236,7 +1236,7 @@ zile_exit (int doabort)
         else
           astr_cpy_cstr (buf, bp->name);
         as = astr_new_cstr (PACKAGE);
-        astr_recase (as, UPPERCASE);
+        astr_recase (as, case_upper);
         astr_afmt (buf, ".%sSAVE", astr_cstr (as));
         astr_delete (as);
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
