@@ -160,19 +160,10 @@ find_buffer (const char *name, int cflag)
     if (!strcmp (bp->name, name))
       return bp;
 
-  /*
-   * Create flag not specified, return NULL.
-   */
   if (!cflag)
     return NULL;
 
-  /*
-   * No buffer found with the specified name, then
-   * create one.
-   */
-  bp = create_buffer (name);
-
-  return bp;
+  return create_buffer (name);
 }
 
 /*
