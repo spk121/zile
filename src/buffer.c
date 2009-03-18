@@ -174,7 +174,7 @@ make_buffer_name (const char *filename)
 {
   const char *p = strrchr (filename, '/');
   char *name;
-  int i;
+  size_t i;
 
   if (p == NULL)
     p = filename;
@@ -183,22 +183,15 @@ make_buffer_name (const char *filename)
 
   if (find_buffer (p, false) == NULL)
     return xstrdup (p);
-
-  /*
-   * The limit of 999 buffers with the same name should
-   * be enough; if it is too much restrictive for you,
-   * just change 999 to your preferred value :-)
-   */
-  name = (char *) xzalloc (strlen (p) + 6);	/* name + "<nnn>\0" */
-  for (i = 2; i <= 999; i++)
-    {
-      sprintf (name, "%s<%d>", p, i);
-      if (find_buffer (name, false) == NULL)
-        return name;
-    }
-
-   /* This should never happen. */
-  abort ();
+  else
+    /* Note: there can't be more than SIZE_MAX buffers. */
+    for (i = 2; true; i++)
+      {
+        xasprintf (&name, "%s<%ld>", p, i);
+        if (find_buffer (name, false) == NULL)
+          return name;
+        free (name);
+      }
 }
 
 /* Move the selected buffer to head.  */
