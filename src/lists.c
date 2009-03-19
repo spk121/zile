@@ -19,6 +19,8 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <string.h>
 
