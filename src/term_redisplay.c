@@ -168,7 +168,7 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
        && !get_variable_bool ("highlight-nonselected-windows"))
       || (!wp->bp->mark)
       || (!transient_mark_mode ())
-      || (transient_mark_mode () && !(wp->bp->flags & BFLAG_MARK)))
+      || (transient_mark_mode () && !get_buffer_mark_active (wp->bp)))
     {
       *highlight = false;
       return;
@@ -230,12 +230,11 @@ make_mode_line_flags (Window * wp)
 {
   static char buf[3];
 
-  if ((wp->bp->flags & (BFLAG_MODIFIED | BFLAG_READONLY)) ==
-      (BFLAG_MODIFIED | BFLAG_READONLY))
+  if (get_buffer_modified (wp->bp) && get_buffer_readonly (wp->bp))
     buf[0] = '%', buf[1] = '*';
-  else if (wp->bp->flags & BFLAG_MODIFIED)
+  else if (get_buffer_modified (wp->bp))
     buf[0] = buf[1] = '*';
-  else if (wp->bp->flags & BFLAG_READONLY)
+  else if (get_buffer_readonly (wp->bp))
     buf[0] = buf[1] = '%';
   else
     buf[0] = buf[1] = '-';
@@ -339,13 +338,13 @@ draw_status_line (size_t line, Window * wp)
   free (buf);
   astr_delete (bs);
 
-  if (wp->bp->flags & BFLAG_AUTOFILL)
+  if (get_buffer_autofill (wp->bp))
     astr_cat_cstr (as, " Fill");
-  if (wp->bp->flags & BFLAG_OVERWRITE)
+  if (get_buffer_overwrite (wp->bp))
     astr_cat_cstr (as, " Ovwrt");
   if (thisflag & FLAG_DEFINING_MACRO)
     astr_cat_cstr (as, " Def");
-  if (wp->bp->flags & BFLAG_ISEARCH)
+  if (get_buffer_isearch (wp->bp))
     astr_cat_cstr (as, " Isearch");
 
   astr_cat_char (as, ')');

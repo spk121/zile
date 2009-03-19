@@ -173,7 +173,7 @@ then enter the text in that file's own buffer.\n\
             }
 
           undo_nosave = false;
-          cur_bp->flags &= ~BFLAG_MODIFIED;
+          set_buffer_modified (cur_bp, false);
           lastflag |= FLAG_NEED_RESYNC;
         }
     }

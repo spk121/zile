@@ -228,7 +228,7 @@ self_insert_command (void)
   deactivate_mark ();
   if (key <= 0xff)
     {
-      if (isspace (key) && cur_bp->flags & BFLAG_AUTOFILL &&
+      if (isspace (key) && get_buffer_autofill (cur_bp) &&
           get_goalc () > (size_t) get_variable_number ("fill-column"))
         fill_break_line ();
       insert_char (key);

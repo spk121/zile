@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "config.h"
 #include "xalloc.h"
 #include "size_max.h"
 #include "minmax.h"
@@ -95,20 +96,6 @@ struct Region
   size_t size;			/* The region size. */
 };
 
-/* Buffer flags or minor modes. */
-#define BFLAG_MODIFIED  0000001	/* The buffer has been modified. */
-#define BFLAG_NOSAVE    0000002	/* The buffer need not to be saved. */
-#define BFLAG_NEEDNAME  0000004	/* On save, ask for a file name. */
-#define BFLAG_TEMPORARY 0000010	/* The buffer is a temporary buffer. */
-#define BFLAG_READONLY  0000020	/* The buffer cannot be modified. */
-#define BFLAG_OVERWRITE 0000040	/* The buffer is in overwrite mode. */
-#define BFLAG_BACKUP    0000100	/* The old file has already been
-                                   backed up. */
-#define BFLAG_NOUNDO    0000200	/* Do not record undo informations. */
-#define BFLAG_AUTOFILL  0000400	/* The buffer is in Auto Fill mode. */
-#define BFLAG_ISEARCH   0001000	/* The buffer is in Isearch loop. */
-#define BFLAG_MARK      0002000	/* The mark is active. */
-
 struct Buffer
 {
   Buffer *next;		/* Next buffer in buffer list. */
@@ -120,10 +107,21 @@ struct Buffer
   Point pt;		/* The point. */
   Marker *mark;		/* The mark. */
   Marker *markers;	/* Markers list (updated whenever text is changed). */
-  int flags;		/* Buffer flags. */
   Undo *last_undop;	/* Most recent undo delta. */
   Undo *next_undop;	/* Next undo delta to apply. */
   Hash_table *vars;	/* Buffer-local variables. */
+  /* Buffer flags and minor modes (with setter and getter methods). */
+  bool modified;        /* Modified flag. */
+  bool nosave;          /* The buffer need not be saved. */
+  bool needname;        /* On save, ask for a file name. */
+  bool temporary;       /* The buffer is a temporary buffer. */
+  bool readonly;        /* The buffer cannot be modified. */
+  bool overwrite;       /* The buffer is in overwrite mode. */
+  bool backup;          /* The old file has already been backed up. */
+  bool noundo;          /* Do not record undo informations. */
+  bool autofill;        /* The buffer is in Auto Fill mode. */
+  bool isearch;         /* The buffer is in Isearch loop. */
+  bool mark_active;     /* The mark is active. */
 };
 
 struct Window

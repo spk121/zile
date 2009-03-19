@@ -277,13 +277,13 @@ read_from_disk (const char *filename)
       if (errno != ENOENT)
         {
           minibuf_write ("%s: %s", filename, strerror (errno));
-          cur_bp->flags |= BFLAG_READONLY;
+          set_buffer_readonly (cur_bp, true);
         }
       return;
     }
 
   if (!check_writable (filename))
-    cur_bp->flags |= BFLAG_READONLY;
+    set_buffer_readonly (cur_bp, true);
 
   lp = cur_bp->pt.p;
 
@@ -432,7 +432,7 @@ Use @kbd{M-x toggle-read-only} to permit editing.
 {
   ok = FUNCALL (find_file);
   if (ok == leT)
-    cur_bp->flags |= BFLAG_READONLY;
+    set_buffer_readonly (cur_bp, true);
 }
 END_DEFUN
 
@@ -444,7 +444,7 @@ END_DEFUN
 static int
 check_modified_buffer (Buffer * bp)
 {
-  if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
+  if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
     for (;;)
       {
         int ans = minibuf_read_yesno
@@ -491,7 +491,7 @@ END_DEFUN
 DEFUN_ARGS ("switch-to-buffer", switch_to_buffer,
             STR_ARG (buffer))
 /*+
-Select to the user specified buffer in the current window.
+Select buffer @i{buffer} in the current window.
 +*/
 {
   Buffer *bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
@@ -516,7 +516,8 @@ Select to the user specified buffer in the current window.
           if (bp == NULL)
             {
               bp = find_buffer (buffer, true);
-              bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE;
+              set_buffer_needname (bp, true);
+              set_buffer_nosave (bp, true);
             }
         }
 
@@ -531,6 +532,7 @@ END_DEFUN
  * Remove the specified buffer from the buffer list and deallocate
  * its space.  Avoid killing the sole buffers and creates the scratch
  * buffer when required.
+ * FIXME: Why is this not in buffer.c?
  */
 void
 kill_buffer (Buffer * kill_bp)
@@ -563,7 +565,10 @@ kill_buffer (Buffer * kill_bp)
 
       head_bp = cur_bp = new_bp;
       head_bp->next = NULL;
-      cur_bp->flags = BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
+      /* FIXME: Don't reset the buffer, recreate it. */
+      set_buffer_needname (cur_bp, true);
+      set_buffer_temporary (cur_bp, true);
+      set_buffer_nosave (cur_bp, true);
       if (strcmp (cur_bp->name, "*scratch*") != 0)
         {
           set_buffer_name (cur_bp, "*scratch*");
@@ -605,6 +610,7 @@ kill_buffer (Buffer * kill_bp)
     }
 }
 
+/* FIXME: Why is this not in buffer.c? */
 DEFUN_ARGS ("kill-buffer", kill_buffer,
             STR_ARG (buffer))
 /*+
@@ -965,8 +971,8 @@ create_backup_filename (const char *filename, const char *backupdir)
 }
 
 /*
- * Write the buffer contents to a file.  Create a backup file if specified
- * by the user variables.
+ * Write the buffer contents to a file.
+ * Create a backup file if specified by the user variables.
  */
 static int
 write_to_disk (Buffer * bp, char *filename)
@@ -975,17 +981,15 @@ write_to_disk (Buffer * bp, char *filename)
   const char *backupdir = get_variable_bool ("backup-directory") ?
     get_variable ("backup-directory") : NULL;
 
-  /*
-   * Make backup of original file.
-   */
-  if (!(bp->flags & BFLAG_BACKUP) && backup
+  /* Make backup of original file. */
+  if (!get_buffer_backup (bp) && backup
       && (fd = open (filename, O_RDWR, 0)) != -1)
     {
       astr bfilename;
       close (fd);
       bfilename = create_backup_filename (filename, backupdir);
       if (bfilename && copy_file (filename, astr_cstr (bfilename)))
-        bp->flags |= BFLAG_BACKUP;
+        set_buffer_backup (bp, true);
       else
         {
           minibuf_error ("Cannot make backup file: %s", strerror (errno));
@@ -1046,11 +1050,12 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
     {
       if (name != bp->filename)
         set_buffer_filename (bp, name);
-      bp->flags &= ~(BFLAG_NEEDNAME | BFLAG_TEMPORARY);
+      set_buffer_needname (bp, false);
+      set_buffer_temporary (bp, false);
       if (write_to_disk (bp, name))
         {
           minibuf_write ("Wrote %s", name);
-          bp->flags &= ~BFLAG_MODIFIED;
+          set_buffer_modified (bp, !get_buffer_modified (bp));
           undo_set_unchanged (bp->last_undop);
         }
       else
@@ -1066,10 +1071,10 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
 static bool
 save_buffer (Buffer * bp)
 {
-  if (!(bp->flags & BFLAG_MODIFIED))
+  if (!get_buffer_modified (bp))
     minibuf_write ("(No changes need to be saved)");
   else
-    write_buffer (bp, (bp->flags & BFLAG_NEEDNAME) != 0, false, bp->filename,
+    write_buffer (bp, get_buffer_needname (bp), false, bp->filename,
                   "File to save in: ");
 
   return true;
@@ -1103,70 +1108,61 @@ static int
 save_some_buffers (void)
 {
   Buffer *bp;
-  int i = 0, noask = false, c;
+  size_t i = 0;
+  bool noask = false;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
-      {
-        char *fname = bp->filename != NULL ? bp->filename : bp->name;
+    {
+      if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
+        {
+          char *fname = bp->filename != NULL ? bp->filename : bp->name;
 
-        ++i;
+          ++i;
 
-        if (noask)
-          save_buffer (bp);
-        else
-          {
+          if (noask)
+            save_buffer (bp);
+          else
             for (;;)
               {
-                minibuf_write ("Save file %s? (y, n, !, ., q) ", fname);
+                int c;
 
+                minibuf_write ("Save file %s? (y, n, !, ., q) ", fname);
                 c = getkey ();
+                minibuf_clear ();
+
                 switch (c)
                   {
-                  case KBD_CANCEL:
-                  case KBD_RET:
+                  case KBD_CANCEL:	/* C-g */
+                    FUNCALL (keyboard_quit);
+                    return false;
+                  case 'q':
+                    goto endoffunc;
+                  case '.':
+                    save_buffer (bp);
+                    ++i;
+                    return true;
+                  case '!':
+                    noask = true;
+                    /* FALLTHROUGH */
                   case ' ':
                   case 'y':
+                    save_buffer (bp);
+                    ++i;
+                    /* FALLTHROUGH */
                   case 'n':
-                  case 'q':
-                  case '.':
-                  case '!':
+                  case KBD_RET:
+                  case KBD_DEL:
                     goto exitloop;
+                  default:
+                    minibuf_error ("Please answer y, n, !, . or q.");
+                    waitkey (WAITKEY_DEFAULT);
+                    break;
                   }
-
-                minibuf_error ("Please answer y, n, !, . or q.");
-                waitkey (WAITKEY_DEFAULT);
               }
-
-          exitloop:
-            minibuf_clear ();
-
-            switch (c)
-              {
-              case KBD_CANCEL:	/* C-g */
-                FUNCALL (keyboard_quit);
-                return false;
-              case 'q':
-                goto endoffunc;
-              case '.':
-                save_buffer (bp);
-                ++i;
-                return true;
-              case '!':
-                noask = true;
-                /* FALLTHROUGH */
-              case ' ':
-              case 'y':
-                save_buffer (bp);
-                ++i;
-                break;
-              case 'n':
-              case KBD_RET:
-              case KBD_DEL:
-                break;
-              }
-          }
-      }
+        }
+    exitloop:
+      (void)0; /* Label not allowed at end of compound statement. */
+    }
 
 endoffunc:
   if (i == 0)
@@ -1196,7 +1192,7 @@ Offer to save each buffer, then kill this Zile process.
     return leNIL;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NEEDNAME))
+    if (get_buffer_modified (bp) && !get_buffer_needname (bp))
       {
         for (;;)
           {
@@ -1228,7 +1224,7 @@ zile_exit (int doabort)
 
   fprintf (stderr, "Trying to save modified buffers (if any)...\r\n");
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->flags & BFLAG_MODIFIED && !(bp->flags & BFLAG_NOSAVE))
+    if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
       {
         astr buf = astr_new (), as;
         if (bp->filename != NULL)

@@ -102,7 +102,7 @@ void
 init_buffer (Buffer * bp)
 {
   if (get_variable_bool ("auto-fill-mode"))
-    bp->flags ^= BFLAG_AUTOFILL;
+    set_buffer_autofill (bp, true);
 }
 
 /*
@@ -123,6 +123,32 @@ create_buffer (const char *name)
 
   return bp;
 }
+
+#define BUFFER_FLAG_GETTER_AND_SETTER(flag)     \
+  bool                                          \
+  get_buffer_ ## flag (Buffer *bp)              \
+  {                                             \
+    return bp->flag;                            \
+  }                                             \
+                                                \
+  void                                          \
+  set_buffer_ ## flag (Buffer *bp, bool flag)   \
+  {                                             \
+    bp->flag = flag;                            \
+  }
+
+BUFFER_FLAG_GETTER_AND_SETTER(modified)
+BUFFER_FLAG_GETTER_AND_SETTER(nosave)
+BUFFER_FLAG_GETTER_AND_SETTER(needname)
+BUFFER_FLAG_GETTER_AND_SETTER(temporary)
+BUFFER_FLAG_GETTER_AND_SETTER(readonly)
+BUFFER_FLAG_GETTER_AND_SETTER(overwrite)
+BUFFER_FLAG_GETTER_AND_SETTER(backup)
+BUFFER_FLAG_GETTER_AND_SETTER(noundo)
+BUFFER_FLAG_GETTER_AND_SETTER(autofill)
+BUFFER_FLAG_GETTER_AND_SETTER(isearch)
+BUFFER_FLAG_GETTER_AND_SETTER(mark_active)
+#undef BUFFER_FLAG_GETTER_AND_SETTER
 
 /*
  * Set a new name for the buffer.
@@ -201,7 +227,7 @@ move_buffer_to_head (Buffer * bp)
 {
   Buffer *it, *prev = NULL;
 
-  for (it = head_bp; it; it = it->next)
+  for (it = head_bp; it; prev = it, it = it->next)
     {
       if (bp == it)
         {
@@ -213,7 +239,6 @@ move_buffer_to_head (Buffer * bp)
             }
           break;
         }
-      prev = it;
     }
 }
 
@@ -245,7 +270,7 @@ switch_to_buffer (Buffer * bp)
 int
 warn_if_readonly_buffer (void)
 {
-  if (cur_bp->flags & BFLAG_READONLY)
+  if (get_buffer_readonly (cur_bp))
     {
       minibuf_error ("Buffer is readonly: %s", cur_bp->name);
       return true;
@@ -262,7 +287,7 @@ warn_if_no_mark (void)
       minibuf_error ("The mark is not set now");
       return true;
     }
-  else if (!(cur_bp->flags & BFLAG_MARK) && transient_mark_mode ())
+  else if (!get_buffer_mark_active (cur_bp) && transient_mark_mode ())
     {
       minibuf_error ("The mark is not active now");
       return true;
@@ -307,7 +332,7 @@ set_temporary_buffer (Buffer * bp)
 {
   Buffer *bp0;
 
-  bp->flags |= BFLAG_TEMPORARY;
+  set_buffer_temporary (bp, true);
 
   if (bp == head_bp)
     {
@@ -362,13 +387,13 @@ transient_mark_mode (void)
 void
 activate_mark (void)
 {
-  cur_bp->flags |= BFLAG_MARK;
+  set_buffer_mark_active (cur_bp, true);
 }
 
 void
 deactivate_mark (void)
 {
-  cur_bp->flags &= ~BFLAG_MARK;
+  set_buffer_mark_active (cur_bp, false);
 }
 
 /*

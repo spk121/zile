@@ -131,7 +131,7 @@ intercalate_char (int c)
 
   undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, 1);
   astr_insert_char (cur_bp->pt.p->text, cur_bp->pt.o, c);
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
 
   return true;
 }
@@ -148,7 +148,7 @@ insert_char (int c)
   if (warn_if_readonly_buffer ())
     return false;
 
-  if (cur_bp->flags & BFLAG_OVERWRITE)
+  if (get_buffer_overwrite (cur_bp))
     {
       /* Current character isn't the end of line
          && isn't a \t
@@ -167,7 +167,7 @@ insert_char (int c)
           astr_nreplace_cstr (cur_bp->pt.p->text, cur_bp->pt.o, 1, &ch, 1);
           ++cur_bp->pt.o;
 
-          cur_bp->flags |= BFLAG_MODIFIED;
+          set_buffer_modified (cur_bp, true);
 
           return true;
         }
@@ -207,11 +207,12 @@ END_DEFUN
 int
 insert_char_in_insert_mode (int c)
 {
-  int old_overwrite = cur_bp->flags & BFLAG_OVERWRITE, ret;
+  int ret;
+  bool old_overwrite = get_buffer_overwrite (cur_bp);
 
-  cur_bp->flags &= ~BFLAG_OVERWRITE;
+  set_buffer_overwrite (cur_bp, false);
   ret = insert_char (c);
-  cur_bp->flags |= old_overwrite;
+  set_buffer_overwrite (cur_bp, old_overwrite);
 
   return ret;
 }
@@ -274,7 +275,7 @@ intercalate_newline (void)
   astr_truncate (cur_bp->pt.p->text, cur_bp->pt.o);
   adjust_markers (cur_bp->pt.p->next, cur_bp->pt.p, cur_bp->pt.o, 1, 0);
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
 
   return true;
@@ -331,7 +332,7 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
         }
     }
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
   astr_replace_cstr ((*lp)->text, offset, oldlen, newtext);
   adjust_markers (*lp, *lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
 
@@ -410,7 +411,7 @@ fill_break_line (void)
 static int
 newline (void)
 {
-  if (cur_bp->flags & BFLAG_AUTOFILL &&
+  if (get_buffer_autofill (cur_bp) &&
       get_goalc () > (size_t) get_variable_number ("fill-column"))
     fill_break_line ();
   return insert_newline ();
@@ -505,7 +506,7 @@ delete_char (void)
       adjust_markers (cur_bp->pt.p, cur_bp->pt.p, cur_bp->pt.o, 0, -1);
     }
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
 
   return true;
 }
@@ -543,7 +544,7 @@ backward_delete_char_overwrite (void)
     insert_char (' ');
   backward_char ();
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
 
   return true;
 }
@@ -564,7 +565,7 @@ Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-  int (*forward) (void) = cur_bp->flags & BFLAG_OVERWRITE ?
+  int (*forward) (void) = get_buffer_overwrite (cur_bp) ?
     backward_delete_char_overwrite : backward_delete_char;
   ok = execute_with_uniarg (true, uniarg, forward, delete_char);
 }

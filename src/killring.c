@@ -68,7 +68,7 @@ copy_or_kill_region (bool kill, Region * r)
 
   if (kill)
     {
-      if (cur_bp->flags & BFLAG_READONLY)
+      if (get_buffer_readonly (cur_bp))
         minibuf_error ("Read only text copied to kill ring");
       else
         assert (delete_region (r));

@@ -72,13 +72,13 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 {
   Undo *up;
 
-  if (cur_bp->flags & BFLAG_NOUNDO || undo_nosave)
+  if (get_buffer_noundo (cur_bp) || undo_nosave)
     return;
 
   up = (Undo *) XZALLOC (Undo);
   up->type = type;
   up->pt = pt;
-  if (!(cur_bp->flags & BFLAG_MODIFIED))
+  if (!get_buffer_modified (cur_bp))
     up->unchanged = true;
 
   if (type == UNDO_REPLACE_BLOCK)
@@ -131,10 +131,8 @@ revert_action (Undo * up)
 
   doing_undo = false;
 
-  /* If reverting this undo action leaves the buffer unchanged,
-     unset the modified flag. */
   if (up->unchanged)
-    cur_bp->flags &= ~BFLAG_MODIFIED;
+    set_buffer_modified (cur_bp, false);
 
   return up->next;
 }
@@ -145,7 +143,7 @@ Undo some previous changes.
 Repeat this command to undo more changes.
 +*/
 {
-  if (cur_bp->flags & BFLAG_NOUNDO)
+  if (get_buffer_noundo (cur_bp))
     {
       minibuf_error ("Undo disabled in this buffer");
       return leNIL;

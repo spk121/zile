@@ -80,10 +80,14 @@ make_buffer_flags (Buffer * bp, int iscurrent)
   static char buf[4];
 
   buf[0] = iscurrent ? '.' : ' ';
-  buf[1] = (bp->flags & BFLAG_MODIFIED) ? '*' : ' ';
-  /* Display the readonly flag if it is set or the buffer is
-     the current buffer, i.e. the `*Buffer List*' buffer. */
-  buf[2] = (bp->flags & BFLAG_READONLY || bp == cur_bp) ? '%' : ' ';
+  buf[1] = get_buffer_modified (bp) ? '*' : ' ';
+  /*
+   * Display the readonly flag if it is set or the buffer is the
+   * `*Buffer List*' buffer.  (The readonly flag is not set when we are
+   * called, as otherwise we wouldn't be able to write to the
+   * buffer!)
+   */
+  buf[2] = (get_buffer_readonly (bp) || bp == cur_bp) ? '%' : ' ';
   buf[3] = '\0';
 
   return buf;
@@ -94,7 +98,7 @@ make_buffer_modeline (Buffer * bp)
 {
   astr as = astr_new ();
 
-  if (bp->flags & BFLAG_AUTOFILL)
+  if (get_buffer_autofill (bp))
     astr_cat_cstr (as, " Fill");
 
   return as;
@@ -160,13 +164,15 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
       switch_to_buffer (find_buffer (name, true));
     }
 
-  /* Remove all the content of that buffer. */
+  /* Remove the contents of that buffer. */
   new_bp = create_buffer (cur_bp->name);
   kill_buffer (cur_bp);
   cur_bp = cur_wp->bp = new_bp;
 
-  /* Make the buffer like a temporary one. */
-  cur_bp->flags = BFLAG_NEEDNAME | BFLAG_NOSAVE | BFLAG_NOUNDO;
+  /* Make the buffer a temporary one. */
+  set_buffer_needname (cur_bp, true);
+  set_buffer_noundo (cur_bp, true);
+  set_buffer_nosave (cur_bp, true);
   set_temporary_buffer (cur_bp);
 
   /* Use the "callback" routine. */
@@ -175,7 +181,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
   va_end (ap);
 
   gotobob ();
-  cur_bp->flags |= BFLAG_READONLY;
+  set_buffer_readonly (cur_bp, true);
 
   /* Restore old current window. */
   set_current_window (old_wp);
@@ -198,7 +204,7 @@ write_buffers_list (va_list ap)
   bp = old_wp->bp;
   do
     {
-      /* Print all buffers less this one (the *Buffer List*). */
+      /* Print all buffers except this one (the *Buffer List*). */
       if (cur_bp != bp)
         print_buf (old_wp->bp, bp);
       bp = bp->next;
@@ -233,7 +239,7 @@ At the end of a line, such characters extend the line.
 is supposed to make it easier to insert characters when necessary.
 +*/
 {
-  cur_bp->flags ^= BFLAG_OVERWRITE;
+  set_buffer_overwrite (cur_bp, !get_buffer_overwrite (cur_bp));
 }
 END_DEFUN
 
@@ -242,7 +248,7 @@ DEFUN ("toggle-read-only", toggle_read_only)
 Change whether this buffer is visiting its file read-only.
 +*/
 {
-  cur_bp->flags ^= BFLAG_READONLY;
+  set_buffer_readonly (cur_bp, !get_buffer_readonly (cur_bp));
 }
 END_DEFUN
 
@@ -253,7 +259,7 @@ In Auto Fill mode, inserting a space at a column beyond `fill-column'
 automatically breaks the line at a previous space.
 +*/
 {
-  cur_bp->flags ^= BFLAG_AUTOFILL;
+  set_buffer_autofill (cur_bp, !get_buffer_autofill (cur_bp));
 }
 END_DEFUN
 
@@ -1272,7 +1278,7 @@ setcase_word (int rcase)
   astr_delete (as);
 
   forward_word ();
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
 
   return true;
 }
@@ -1357,7 +1363,7 @@ setcase_region (enum casing rcase)
         }
     }
 
-  cur_bp->flags |= BFLAG_MODIFIED;
+  set_buffer_modified (cur_bp, true);
 
   return leT;
 }

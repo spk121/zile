@@ -371,7 +371,7 @@ isearch (int dir, int regexp)
   cur = cur_bp->pt;
 
   /* I-search mode. */
-  cur_wp->bp->flags |= BFLAG_ISEARCH;
+  set_buffer_isearch (cur_wp->bp, true);
 
   for (;;)
     {
@@ -513,7 +513,7 @@ isearch (int dir, int regexp)
     }
 
   /* done */
-  cur_wp->bp->flags &= ~BFLAG_ISEARCH;
+  set_buffer_isearch (cur_wp->bp, false);
 
   astr_delete (buf);
   astr_delete (pattern);

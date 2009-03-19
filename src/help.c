@@ -51,8 +51,10 @@ show_file (char *filename)
     }
 
   find_file (filename);
-  cur_bp->flags = BFLAG_READONLY | BFLAG_NOSAVE | BFLAG_NEEDNAME
-    | BFLAG_NOUNDO;
+  set_buffer_readonly (cur_bp, true);
+  set_buffer_noundo (cur_bp, true);
+  set_buffer_needname (cur_bp, true);
+  set_buffer_nosave (cur_bp, true);
 
   return leT;
 }

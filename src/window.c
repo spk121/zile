@@ -284,7 +284,9 @@ create_first_window (void)
 
   /* Create the scratch buffer. */
   bp = create_buffer ("*scratch*");
-  bp->flags |= BFLAG_NOSAVE | BFLAG_NEEDNAME | BFLAG_TEMPORARY;
+  set_buffer_needname (bp, true);
+  set_buffer_temporary (bp, true);
+  set_buffer_nosave (bp, true);
   cur_bp = bp;
 
   wp = window_new ();
