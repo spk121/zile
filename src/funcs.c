@@ -130,12 +130,12 @@ print_buf (Buffer * old_bp, Buffer * bp)
 {
   astr mode = make_buffer_modeline (bp);
 
-  if (bp->name[0] == ' ')
+  if (get_buffer_name (bp)[0] == ' ')
     return;
 
   bprintf ("%3s %-16s %6u  %-13s",
            make_buffer_flags (bp, old_bp == bp),
-           bp->name, calculate_buffer_size (bp), astr_cstr (mode));
+           get_buffer_name (bp), calculate_buffer_size (bp), astr_cstr (mode));
   astr_delete (mode);
   if (bp->filename != NULL)
     {
@@ -165,7 +165,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
     }
 
   /* Remove the contents of that buffer. */
-  new_bp = create_buffer (cur_bp->name);
+  new_bp = create_buffer (get_buffer_name (cur_bp));
   kill_buffer (cur_bp);
   cur_bp = cur_wp->bp = new_bp;
 

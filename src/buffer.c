@@ -124,34 +124,33 @@ create_buffer (const char *name)
   return bp;
 }
 
-#define BUFFER_FLAG_GETTER_AND_SETTER(flag)     \
-  bool                                          \
-  get_buffer_ ## flag (Buffer *bp)              \
+#define BUFFER_GETTER_AND_SETTER(ty, field)     \
+  ty                                            \
+  get_buffer_ ## field (Buffer *bp)             \
   {                                             \
-    return bp->flag;                            \
+    return bp->field;                           \
   }                                             \
                                                 \
   void                                          \
-  set_buffer_ ## flag (Buffer *bp, bool flag)   \
+  set_buffer_ ## field (Buffer *bp, ty field)   \
   {                                             \
-    bp->flag = flag;                            \
+    bp->field = field;                          \
   }
 
-BUFFER_FLAG_GETTER_AND_SETTER(modified)
-BUFFER_FLAG_GETTER_AND_SETTER(nosave)
-BUFFER_FLAG_GETTER_AND_SETTER(needname)
-BUFFER_FLAG_GETTER_AND_SETTER(temporary)
-BUFFER_FLAG_GETTER_AND_SETTER(readonly)
-BUFFER_FLAG_GETTER_AND_SETTER(overwrite)
-BUFFER_FLAG_GETTER_AND_SETTER(backup)
-BUFFER_FLAG_GETTER_AND_SETTER(noundo)
-BUFFER_FLAG_GETTER_AND_SETTER(autofill)
-BUFFER_FLAG_GETTER_AND_SETTER(isearch)
-BUFFER_FLAG_GETTER_AND_SETTER(mark_active)
-#undef BUFFER_FLAG_GETTER_AND_SETTER
+#include "buffer.h"
+#undef BUFFER_GETTER_AND_SETTER
 
 /*
- * Set a new name for the buffer.
+ * Get buffer name.
+ */
+const char *
+get_buffer_name (Buffer * bp)
+{
+  return bp->name;
+}
+
+/*
+ * Set buffer name.
  */
 void
 set_buffer_name (Buffer * bp, const char *name)
@@ -183,7 +182,7 @@ find_buffer (const char *name, int cflag)
   Buffer *bp;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (!strcmp (bp->name, name))
+    if (!strcmp (get_buffer_name (bp), name))
       return bp;
 
   if (!cflag)
@@ -272,7 +271,7 @@ warn_if_readonly_buffer (void)
 {
   if (get_buffer_readonly (cur_bp))
     {
-      minibuf_error ("Buffer is readonly: %s", cur_bp->name);
+      minibuf_error ("Buffer is readonly: %s", get_buffer_name (cur_bp));
       return true;
     }
 

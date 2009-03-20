@@ -305,7 +305,7 @@ find_window (const char *name)
   Window *wp;
 
   for (wp = head_wp; wp != NULL; wp = wp->next)
-    if (!strcmp (wp->bp->name, name))
+    if (!strcmp (get_buffer_name (wp->bp), name))
       return wp;
 
   return NULL;

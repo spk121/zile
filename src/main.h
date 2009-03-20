@@ -99,7 +99,6 @@ struct Region
 struct Buffer
 {
   Buffer *next;		/* Next buffer in buffer list. */
-  char *name;		/* The name of the buffer. */
   char *filename;	/* The file being edited. */
   char *eol;		/* EOL string (up to 2 chars). */
   Line *lines;		/* The lines of text. */
@@ -110,7 +109,8 @@ struct Buffer
   Undo *last_undop;	/* Most recent undo delta. */
   Undo *next_undop;	/* Next undo delta to apply. */
   Hash_table *vars;	/* Buffer-local variables. */
-  /* Buffer flags and minor modes (with setter and getter methods). */
+  /* Fields with setter and getter methods. */
+  char *name;		/* The name of the buffer. */
   bool modified;        /* Modified flag. */
   bool nosave;          /* The buffer need not be saved. */
   bool needname;        /* On save, ask for a file name. */

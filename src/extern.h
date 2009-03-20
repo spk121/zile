@@ -51,23 +51,14 @@ void free_buffer (Buffer * bp);
 void free_buffers (void);
 void init_buffer (Buffer * bp);
 Buffer *create_buffer (const char *name);
-void set_buffer_name (Buffer * bp, const char *name);
 void set_buffer_filename (Buffer * bp, const char *filename);
-#define BUFFER_FLAG_GETTER_AND_SETTER(flag)             \
-  bool get_buffer_ ## flag (Buffer *bp);                \
-  void set_buffer_ ## flag (Buffer *bp, bool flag);
-BUFFER_FLAG_GETTER_AND_SETTER(modified)
-BUFFER_FLAG_GETTER_AND_SETTER(nosave)
-BUFFER_FLAG_GETTER_AND_SETTER(needname)
-BUFFER_FLAG_GETTER_AND_SETTER(temporary)
-BUFFER_FLAG_GETTER_AND_SETTER(readonly)
-BUFFER_FLAG_GETTER_AND_SETTER(overwrite)
-BUFFER_FLAG_GETTER_AND_SETTER(backup)
-BUFFER_FLAG_GETTER_AND_SETTER(noundo)
-BUFFER_FLAG_GETTER_AND_SETTER(autofill)
-BUFFER_FLAG_GETTER_AND_SETTER(isearch)
-BUFFER_FLAG_GETTER_AND_SETTER(mark_active)
-#undef BUFFER_FLAG_GETTER_AND_SETTER
+#define BUFFER_GETTER_AND_SETTER(ty, field)             \
+  ty get_buffer_ ## field (Buffer *bp);                 \
+  void set_buffer_ ## field (Buffer *bp, ty field);
+#include "buffer.h"
+#undef BUFFER_GETTER_AND_SETTER
+const char *get_buffer_name (Buffer * bp);
+void set_buffer_name (Buffer * bp, const char *name);
 Buffer *find_buffer (const char *name, int cflag);
 char *make_buffer_name (const char *filename);
 void switch_to_buffer (Buffer * bp);

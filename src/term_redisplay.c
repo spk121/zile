@@ -333,7 +333,7 @@ draw_status_line (size_t line, Window * wp)
   bs = astr_afmt (astr_new (), "(%d,%d)", pt.n + 1,
                   get_goalc_bp (wp->bp, window_pt (wp)));
   as = astr_afmt (astr_new (), "--%s%2s  %-15s   %s %-9s (Text",
-                  eol_type, make_mode_line_flags (wp), wp->bp->name,
+                  eol_type, make_mode_line_flags (wp), get_buffer_name (wp->bp),
                   make_screen_pos (wp, &buf), astr_cstr (bs));
   free (buf);
   astr_delete (bs);

@@ -40,6 +40,7 @@ zile_base_SOURCES =					\
 	lisp.c						\
 	basic.c						\
 	bind.c						\
+	buffer.h					\
 	buffer.c					\
 	completion.c					\
 	editfns.c					\

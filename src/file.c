@@ -396,7 +396,7 @@ make_buffer_completion (void)
   cp = completion_new (false);
   for (bp = head_bp; bp != NULL; bp = bp->next)
     gl_sortedlist_add (cp->completions, completion_strcmp,
-                       xstrdup (bp->name));
+                       xstrdup (get_buffer_name (bp)));
 
   return cp;
 }
@@ -448,7 +448,7 @@ check_modified_buffer (Buffer * bp)
     for (;;)
       {
         int ans = minibuf_read_yesno
-          ("Buffer %s modified; kill anyway? (yes or no) ", bp->name);
+          ("Buffer %s modified; kill anyway? (yes or no) ", get_buffer_name (bp));
         if (ans == -1)
           {
             FUNCALL (keyboard_quit);
@@ -501,7 +501,7 @@ Select buffer @i{buffer} in the current window.
     {
       Completion *cp = make_buffer_completion ();
       buffer = minibuf_read_completion ("Switch to buffer (default %s): ",
-                                        "", cp, NULL, bp->name);
+                                        "", cp, NULL, get_buffer_name (bp));
       free_completion (cp);
 
       if (buffer == NULL)
@@ -547,7 +547,7 @@ kill_buffer (Buffer * kill_bp)
   if (next_bp == kill_bp)
     {
       Window *wp;
-      Buffer *new_bp = create_buffer (cur_bp->name);
+      Buffer *new_bp = create_buffer (get_buffer_name (cur_bp));
       /* If this is the sole buffer available, then remove the contents
          and set the name to `*scratch*' if it is not already set. */
       assert (cur_bp == kill_bp);
@@ -569,7 +569,7 @@ kill_buffer (Buffer * kill_bp)
       set_buffer_needname (cur_bp, true);
       set_buffer_temporary (cur_bp, true);
       set_buffer_nosave (cur_bp, true);
-      if (strcmp (cur_bp->name, "*scratch*") != 0)
+      if (strcmp (get_buffer_name (cur_bp), "*scratch*") != 0)
         {
           set_buffer_name (cur_bp, "*scratch*");
           if (cur_bp->filename != NULL)
@@ -625,7 +625,7 @@ With a nil argument, kill the current buffer.
     {
       Completion *cp = make_buffer_completion ();
       buffer = minibuf_read_completion ("Kill buffer (default %s): ",
-                                        "", cp, NULL, cur_bp->name);
+                                        "", cp, NULL, get_buffer_name (cur_bp));
       free_completion (cp);
       if (buffer == NULL)
         ok = FUNCALL (keyboard_quit);
@@ -705,7 +705,7 @@ Puts mark after the inserted text.
     {
       cp = make_buffer_completion ();
       buffer = minibuf_read_completion ("Insert buffer (default %s): ",
-                                        "", cp, NULL, def_bp->name);
+                                        "", cp, NULL, get_buffer_name (def_bp));
       if (buffer == NULL)
         ok = FUNCALL (keyboard_quit);
       free_completion (cp);
@@ -1021,7 +1021,8 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
 
   if (needname)
     {
-      char *fname = bp->filename != NULL ? bp->filename : bp->name;
+      const char *fname = bp->filename != NULL ? bp->filename :
+        get_buffer_name (bp);
 
       name = minibuf_read_filename (prompt, fname, NULL);
       name_from_minibuffer = true;
@@ -1115,7 +1116,8 @@ save_some_buffers (void)
     {
       if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
         {
-          char *fname = bp->filename != NULL ? bp->filename : bp->name;
+          const char *fname = bp->filename != NULL ? bp->filename :
+            get_buffer_name (bp);
 
           ++i;
 
@@ -1230,7 +1232,7 @@ zile_exit (int doabort)
         if (bp->filename != NULL)
           astr_cpy_cstr (buf, bp->filename);
         else
-          astr_cpy_cstr (buf, bp->name);
+          astr_cpy_cstr (buf, get_buffer_name (bp));
         as = astr_new_cstr (PACKAGE);
         astr_recase (as, case_upper);
         astr_afmt (buf, ".%sSAVE", astr_cstr (as));
