@@ -96,10 +96,12 @@ struct Region
   size_t size;			/* The region size. */
 };
 
+/* Work around bad #define in some system headers. */
+#undef lines
+
 struct Buffer
 {
   Buffer *next;		/* Next buffer in buffer list. */
-  char *filename;	/* The file being edited. */
   char *eol;		/* EOL string (up to 2 chars). */
   Line *lines;		/* The lines of text. */
   size_t last_line;	/* The number of the last line in the buffer. */
@@ -110,18 +112,11 @@ struct Buffer
   Undo *next_undop;	/* Next undo delta to apply. */
   Hash_table *vars;	/* Buffer-local variables. */
   /* Fields with setter and getter methods. */
-  char *name;		/* The name of the buffer. */
-  bool modified;        /* Modified flag. */
-  bool nosave;          /* The buffer need not be saved. */
-  bool needname;        /* On save, ask for a file name. */
-  bool temporary;       /* The buffer is a temporary buffer. */
-  bool readonly;        /* The buffer cannot be modified. */
-  bool overwrite;       /* The buffer is in overwrite mode. */
-  bool backup;          /* The old file has already been backed up. */
-  bool noundo;          /* Do not record undo informations. */
-  bool autofill;        /* The buffer is in Auto Fill mode. */
-  bool isearch;         /* The buffer is in Isearch loop. */
-  bool mark_active;     /* The mark is active. */
+#define FIELD(ty, name) ty name;
+#define FIELD_STR(name) const char *name;
+#include "buffer.h"
+#undef FIELD
+#undef FIELD_STR
 };
 
 struct Window
