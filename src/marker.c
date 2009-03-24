@@ -42,7 +42,7 @@ unchain_marker (Marker * marker)
   if (!marker->bp)
     return;
 
-  for (m = marker->bp->markers; m; m = next)
+  for (m = get_buffer_markers (marker->bp); m; m = next)
     {
       next = m->next;
       if (m == marker)
@@ -50,7 +50,7 @@ unchain_marker (Marker * marker)
           if (prev)
             prev->next = next;
           else
-            m->bp->markers = next;
+            set_buffer_markers (m->bp, next);
 
           m->bp = NULL;
           break;
@@ -78,8 +78,8 @@ move_marker (Marker * marker, Buffer * bp, Point pt)
       marker->bp = bp;
 
       /* Chain with the new buffer.  */
-      marker->next = bp->markers;
-      bp->markers = marker;
+      marker->next = get_buffer_markers (bp);
+      set_buffer_markers (bp, marker);
     }
 
   /* Change the point.  */

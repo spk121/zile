@@ -88,11 +88,11 @@ undo_save (int type, Point pt, size_t osize, size_t size)
       up->block.text = copy_text_block (pt.n, pt.o, osize);
     }
 
-  up->next = cur_bp->last_undop;
-  cur_bp->last_undop = up;
+  up->next = get_buffer_last_undop (cur_bp);
+  set_buffer_last_undop (cur_bp, up);
 
   if (!doing_undo)
-    cur_bp->next_undop = up;
+    set_buffer_next_undop (cur_bp, up);
 }
 
 /*
@@ -152,14 +152,14 @@ Repeat this command to undo more changes.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  if (cur_bp->next_undop == NULL)
+  if (get_buffer_next_undop (cur_bp) == NULL)
     {
       minibuf_error ("No further undo information");
-      cur_bp->next_undop = cur_bp->last_undop;
+      set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
       return leNIL;
     }
 
-  cur_bp->next_undop = revert_action (cur_bp->next_undop);
+  set_buffer_next_undop (cur_bp, revert_action (get_buffer_next_undop (cur_bp)));
   minibuf_write ("Undo!");
 }
 END_DEFUN

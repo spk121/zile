@@ -1060,7 +1060,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
         {
           minibuf_write ("Wrote %s", name);
           set_buffer_modified (bp, !get_buffer_modified (bp));
-          undo_set_unchanged (bp->last_undop);
+          undo_set_unchanged (get_buffer_last_undop (bp));
         }
       else
         ok = leNIL;

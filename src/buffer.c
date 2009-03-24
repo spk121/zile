@@ -30,6 +30,15 @@
 #include "main.h"
 #include "extern.h"
 
+struct Buffer
+{
+#define FIELD(ty, name) ty name;
+#define FIELD_STR(name) const char *name;
+#include "buffer.h"
+#undef FIELD
+#undef FIELD_STR
+};
+
 /*
  * Allocate a new buffer structure and set the default local
  * variable values.

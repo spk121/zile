@@ -76,7 +76,7 @@ loop (void)
         last_uniarg = 1;
 
       if (last_command () != F_undo)
-        cur_bp->next_undop = cur_bp->last_undop;
+        set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
 
       lastflag = thisflag;
     }

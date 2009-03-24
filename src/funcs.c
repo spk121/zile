@@ -337,15 +337,15 @@ Put the mark where point is now, and point where the mark is now.
 {
   Point tmp;
 
-  if (!cur_bp->mark)
+  if (get_buffer_mark (cur_bp) == NULL)
     {
       minibuf_error ("No mark set in this buffer");
       return leNIL;
     }
 
   tmp = get_buffer_pt (cur_bp);
-  set_buffer_pt (cur_bp, cur_bp->mark->pt);
-  cur_bp->mark->pt = tmp;
+  set_buffer_pt (cur_bp, get_buffer_mark (cur_bp)->pt);
+  get_buffer_mark (cur_bp)->pt = tmp;
 
   /* In transient-mark-mode we must reactivate the mark.  */
   if (transient_mark_mode ())

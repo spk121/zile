@@ -105,7 +105,7 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t de
 
   assert (dir >= -1 && dir <= 1);
 
-  for (m = cur_bp->markers; m != NULL; m = m->next)
+  for (m = get_buffer_markers (cur_bp); m != NULL; m = m->next)
     if (m->pt.p == oldlp && (dir == -1 || m->pt.o > pointo))
       {
         m->pt.p = newlp;

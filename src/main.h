@@ -46,13 +46,13 @@ typedef struct History History;
 typedef struct Undo Undo;
 typedef struct Macro Macro;
 typedef struct Binding *Binding;
+typedef struct Buffer Buffer;
 
 /* FIXME: Types which should really be opaque. */
 typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
 typedef struct Region Region;
-typedef struct Buffer Buffer;
 typedef struct Window Window;
 typedef struct Completion Completion;
 
@@ -98,20 +98,6 @@ struct Region
 
 /* Work around bad #define in some system headers. */
 #undef lines
-
-struct Buffer
-{
-  Marker *mark;		/* The mark. */
-  Marker *markers;	/* Markers list (updated whenever text is changed). */
-  Undo *last_undop;	/* Most recent undo delta. */
-  Undo *next_undop;	/* Next undo delta to apply. */
-  Hash_table *vars;	/* Buffer-local variables. */
-#define FIELD(ty, name) ty name;
-#define FIELD_STR(name) const char *name;
-#include "buffer.h"
-#undef FIELD
-#undef FIELD_STR
-};
 
 struct Window
 {

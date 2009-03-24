@@ -372,7 +372,7 @@ isearch (int dir, int regexp)
   astr buf = astr_new ();
   astr pattern = astr_new ();
   Point start, cur;
-  Marker *old_mark = cur_wp->bp->mark ? copy_marker (cur_wp->bp->mark) : NULL;
+  Marker *old_mark = get_buffer_mark (cur_wp->bp) ? copy_marker (get_buffer_mark (cur_wp->bp)) : NULL;
 
   start = get_buffer_pt (cur_bp);
   cur = get_buffer_pt (cur_bp);
@@ -417,13 +417,10 @@ isearch (int dir, int regexp)
           FUNCALL (keyboard_quit);
 
           /* Restore old mark position. */
-          if (cur_bp->mark)
-            free_marker (cur_bp->mark);
+          if (get_buffer_mark (cur_bp))
+            free_marker (get_buffer_mark (cur_bp));
 
-          if (old_mark)
-            cur_bp->mark = copy_marker (old_mark);
-          else
-            cur_bp->mark = old_mark;
+          set_buffer_mark (cur_bp, old_mark ? copy_marker (old_mark) : NULL);
           break;
         }
       else if (c == KBD_BS)
@@ -487,7 +484,7 @@ isearch (int dir, int regexp)
                 {
                   /* Save mark. */
                   set_mark ();
-                  cur_bp->mark->pt = start;
+                  get_buffer_mark (cur_bp)->pt = start;
 
                   /* Save search string. */
                   free (last_search);

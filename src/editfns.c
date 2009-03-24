@@ -40,8 +40,8 @@ push_mark (void)
                                       NULL, NULL, NULL, true);
 
   /* Save the mark.  */
-  if (cur_bp->mark)
-    gl_list_add_last (mark_ring, copy_marker (cur_bp->mark));
+  if (get_buffer_mark (cur_bp))
+    gl_list_add_last (mark_ring, copy_marker (get_buffer_mark (cur_bp)));
   /* Save an invalid mark.  */
   else
     {
@@ -59,10 +59,10 @@ pop_mark (void)
                                          gl_list_size (mark_ring) - 1);
 
   /* Replace the mark. */
-  if (m->bp->mark)
-    free_marker (m->bp->mark);
+  if (get_buffer_mark (m->bp))
+    free_marker (get_buffer_mark (m->bp));
 
-  m->bp->mark = (m->pt.p) ? copy_marker (m) : NULL;
+  set_buffer_mark (m->bp, (m->pt.p) ? copy_marker (m) : NULL);
 
   assert (gl_list_remove_at (mark_ring, gl_list_size (mark_ring) - 1));
   free_marker (m);
@@ -72,10 +72,10 @@ pop_mark (void)
 void
 set_mark (void)
 {
-  if (!cur_bp->mark)
-    cur_bp->mark = point_marker ();
+  if (!get_buffer_mark (cur_bp))
+    set_buffer_mark (cur_bp, point_marker ());
   else
-    move_marker (cur_bp->mark, cur_bp, get_buffer_pt (cur_bp));
+    move_marker (get_buffer_mark (cur_bp), cur_bp, get_buffer_pt (cur_bp));
 }
 
 int

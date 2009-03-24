@@ -127,9 +127,9 @@ set_variable (const char *var, const char *val)
   key->var = var;
   ent = hash_lookup (main_vars, key);
   free (key);
-  if (ent && ent->local && cur_bp->vars == NULL)
-    cur_bp->vars = new_varlist ();
-  set_variable_in_list ((ent && ent->local) ? cur_bp->vars : main_vars, var, val);
+  if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
+    set_buffer_vars (cur_bp, new_varlist ());
+  set_variable_in_list ((ent && ent->local) ? get_buffer_vars (cur_bp) : main_vars, var, val);
 }
 
 void
@@ -145,8 +145,8 @@ get_variable_entry (Buffer * bp, const char *var)
 
   key->var = var;
 
-  if (bp && bp->vars)
-    p = hash_lookup (bp->vars, key);
+  if (bp && get_buffer_vars (bp))
+    p = hash_lookup (get_buffer_vars (bp), key);
 
   if (p == NULL)
     p = hash_lookup (main_vars, key);

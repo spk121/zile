@@ -166,7 +166,7 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
 {
   if ((wp != cur_wp
        && !get_variable_bool ("highlight-nonselected-windows"))
-      || (!wp->bp->mark)
+      || (get_buffer_mark (wp->bp) == NULL)
       || (!transient_mark_mode ())
       || (transient_mark_mode () && !get_buffer_mark_active (wp->bp)))
     {
@@ -176,7 +176,7 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
 
   *highlight = true;
   r->start = window_pt (wp);
-  r->end = wp->bp->mark->pt;
+  r->end = get_buffer_mark (wp->bp)->pt;
   if (cmp_point (r->end, r->start) < 0)
     swap_point (&r->end, &r->start);
 }
@@ -323,9 +323,9 @@ draw_status_line (size_t line, Window * wp)
   for (i = 0; i < wp->ewidth; ++i)
     term_addch ('-');
 
-  if (cur_bp->eol == coding_eol_cr)
+  if (get_buffer_eol (cur_bp) == coding_eol_cr)
     eol_type = "(Mac)";
-  else if (cur_bp->eol == coding_eol_crlf)
+  else if (get_buffer_eol (cur_bp) == coding_eol_crlf)
     eol_type = "(DOS)";
   else
     eol_type = ":";
