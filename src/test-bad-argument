@@ -26,7 +26,8 @@
 
 # If TERM is not set to a terminal type, choose a default
 if test -z "$TERM" -o "$TERM" = "unknown"; then
-    export TERM=vt100
+    TERM=vt100
+    export TERM
 fi
 
 $builddir/zile --unknown-flag --load $srcdir/quit.el
