@@ -24,9 +24,9 @@
 
 # srcdir and builddir are defined in the environment
 
-# Only run if TERM is set to a terminal type
+# If TERM is not set to a terminal type, choose a default
 if test -z "$TERM" -o "$TERM" = "unknown"; then
-    exit 0
+    export TERM=vt100
 fi
 
 $builddir/zile --unknown-flag --load $srcdir/quit.el
