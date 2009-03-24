@@ -277,15 +277,15 @@ typedef le * (*Function) (long uniarg, le * list);
  *--------------------------------------------------------------------------*/
 
 /* Global flags, stored in thisflag and lastflag. */
-#define FLAG_DONE_CPCN		0000001	/* Last command was C-p or C-n. */
-#define FLAG_DONE_KILL		0000002	/* The last command was a kill. */
-#define FLAG_NEED_RESYNC	0000004	/* A resync is required. */
-#define FLAG_QUIT		0000010	/* The user has asked to quit. */
-#define FLAG_SET_UNIARG		0000020	/* The last command modified the
+#define FLAG_DONE_CPCN		0001	/* Last command was C-p or C-n. */
+#define FLAG_DONE_KILL		0002	/* The last command was a kill. */
+#define FLAG_NEED_RESYNC	0004	/* A resync is required. */
+#define FLAG_QUIT		0010	/* The user has asked to quit. */
+#define FLAG_SET_UNIARG		0020	/* The last command modified the
                                            universal arg variable `uniarg'. */
-#define FLAG_UNIARG_EMPTY	0000040	/* Current universal arg is just C-u's
+#define FLAG_UNIARG_EMPTY	0040	/* Current universal arg is just C-u's
                                            with no number. */
-#define FLAG_DEFINING_MACRO	0000100	/* We are defining a macro. */
+#define FLAG_DEFINING_MACRO	0100	/* We are defining a macro. */
 
 /*
  * Zile font codes
