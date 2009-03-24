@@ -402,7 +402,7 @@ make_buffer_completion (void)
 
   cp = completion_new (false);
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
-    gl_sortedlist_add (cp->completions, completion_strcmp,
+    gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
                        xstrdup (get_buffer_name (bp)));
 
   return cp;

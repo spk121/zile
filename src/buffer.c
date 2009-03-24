@@ -30,6 +30,11 @@
 #include "main.h"
 #include "extern.h"
 
+
+/*
+ * Structure
+ */
+
 struct Buffer
 {
 #define FIELD(ty, name) ty name;
@@ -38,6 +43,18 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 };
+
+#define FIELD(ty, field)                         \
+  GETTER (Buffer, buffer, ty, field)             \
+  SETTER (Buffer, buffer, ty, field)
+
+#define FIELD_STR(field)                         \
+  GETTER (Buffer, buffer, const char *, field)   \
+  STR_SETTER (Buffer, buffer, field)
+
+#include "buffer.h"
+#undef FIELD
+#undef FIELD_STR
 
 /*
  * Allocate a new buffer structure and set the default local
@@ -132,38 +149,6 @@ create_buffer (const char *name)
 
   return bp;
 }
-
-#define BUFFER_GETTER(ty, field)                \
-  ty                                            \
-  get_buffer_ ## field (Buffer *bp)             \
-  {                                             \
-    return bp->field;                           \
-  }                                             \
-
-#define BUFFER_SETTER(ty, field)                \
-  void                                          \
-  set_buffer_ ## field (Buffer *bp, ty field)   \
-  {                                             \
-    bp->field = field;                          \
-  }
-
-#define FIELD(ty, field)     \
-  BUFFER_GETTER (ty, field)  \
-  BUFFER_SETTER (ty, field)
-
-#define FIELD_STR(field)                                \
-  BUFFER_GETTER (const char *, field)                   \
-                                                        \
-  void                                                  \
-  set_buffer_ ## field (Buffer *bp, const char *field)  \
-  {                                                     \
-    free ((char *) bp->field);                          \
-    bp->field = field ? xstrdup (field) : NULL;         \
-  }
-
-#include "buffer.h"
-#undef FIELD
-#undef FIELD_STR
 
 /*
  * Get filename, or buffer name if NULL.

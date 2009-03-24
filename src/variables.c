@@ -222,7 +222,7 @@ minibuf_read_variable_name (char *fmt, ...)
        p != NULL;
        p = hash_get_next (main_vars, p))
     {
-      gl_sortedlist_add (cp->completions, completion_strcmp,
+      gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
                          xstrdup (p->var));
     }
 

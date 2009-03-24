@@ -47,6 +47,7 @@ typedef struct Undo Undo;
 typedef struct Macro Macro;
 typedef struct Binding *Binding;
 typedef struct Buffer Buffer;
+typedef struct Completion Completion;
 
 /* FIXME: Types which should really be opaque. */
 typedef struct Line Line;
@@ -54,7 +55,6 @@ typedef struct Point Point;
 typedef struct Marker Marker;
 typedef struct Region Region;
 typedef struct Window Window;
-typedef struct Completion Completion;
 
 /*
  * A line is a doubly-linked list of astrs.
@@ -121,22 +121,36 @@ enum
   COMPLETION_NONUNIQUE
 };
 
-struct Completion
-{
-  Buffer *old_bp;		/* The buffer from which the
-                                   completion was invoked. */
-  gl_list_t completions;	/* The completions list. */
-  gl_list_t matches;		/* The matches list. */
-  const char *match;		/* The match buffer. */
-  size_t matchsize;		/* The match buffer size. */
-  int flags;			/* Completion flags. */
-  astr path;			/* Path for a filename completion. */
-};
-
 /* Completion flags */
 #define CFLAG_POPPEDUP	0000001	/* Completion window has been popped up. */
 #define CFLAG_CLOSE	0000002	/* The completion window should be closed. */
 #define CFLAG_FILENAME	0000004	/* This is a filename completion. */
+
+/*--------------------------------------------------------------------------
+ * Object field getter and setter generators.
+ *--------------------------------------------------------------------------*/
+
+#define GETTER(Obj, name, ty, field)            \
+  ty                                            \
+  get_ ## name ## _ ## field (Obj *p)           \
+  {                                             \
+    return p->field;                            \
+  }                                             \
+
+#define SETTER(Obj, name, ty, field)            \
+  void                                          \
+  set_ ## name ## _ ## field (Obj *p, ty field) \
+  {                                             \
+    p->field = field;                           \
+  }
+
+#define STR_SETTER(Obj, name, field)                            \
+  void                                                          \
+  set_ ## name ## _ ## field (Obj *p, const char *field)        \
+  {                                                             \
+    free ((char *) p->field);                                   \
+    p->field = field ? xstrdup (field) : NULL;                  \
+  }
 
 /*--------------------------------------------------------------------------
  * Zile commands to C bindings.

@@ -270,9 +270,9 @@ minibuf_read_function_name (const char *fmt, ...)
 
   for (i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].interactive)
-      gl_sortedlist_add (cp->completions, completion_strcmp,
+      gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
                          xstrdup (fentry_table[i].name));
-  add_macros_to_list (cp->completions, completion_strcmp);
+  add_macros_to_list (get_completion_completions (cp), completion_strcmp);
 
   va_start (ap, fmt);
   ms = minibuf_vread_completion (fmt, "", cp, functions_history,

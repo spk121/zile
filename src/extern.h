@@ -77,6 +77,14 @@ char *copy_text_block (size_t startn, size_t starto, size_t size);
 int completion_strcmp (const void *p1, const void *p2);
 Completion *completion_new (int fileflag);
 void free_completion (Completion * cp);
+#define FIELD(ty, field)                                \
+  ty get_completion_ ## field (Completion *cp);         \
+  void set_completion_ ## field (Completion *cp, ty field);
+#define FIELD_STR(field)                                \
+  FIELD(const char *, field)
+#include "completion.h"
+#undef FIELD
+#undef FIELD_STR
 void completion_scroll_up (void);
 void completion_scroll_down (void);
 int completion_try (Completion * cp, astr search, int popup_when_complete);

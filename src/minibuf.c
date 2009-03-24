@@ -242,8 +242,8 @@ minibuf_read_yesno (const char *fmt, ...)
   Completion *cp = completion_new (false);
   int ret = -1;
 
-  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("yes"));
-  gl_sortedlist_add (cp->completions, completion_strcmp, xstrdup ("no"));
+  gl_sortedlist_add (get_completion_completions (cp), completion_strcmp, xstrdup ("yes"));
+  gl_sortedlist_add (get_completion_completions (cp), completion_strcmp, xstrdup ("no"));
 
   va_start (ap, fmt);
   ms = minibuf_vread_completion (fmt, "", cp, NULL, errmsg,
@@ -252,10 +252,10 @@ minibuf_read_yesno (const char *fmt, ...)
 
   if (ms != NULL)
     {
-      gl_list_node_t n = gl_sortedlist_search (cp->completions,
+      gl_list_node_t n = gl_sortedlist_search (get_completion_completions (cp),
                                                completion_strcmp, ms);
       assert (n);
-      ret = !strcmp ((char *) gl_list_node_value (cp->completions, n),
+      ret = !strcmp ((char *) gl_list_node_value (get_completion_completions (cp), n),
                      "yes");
     }
   free_completion (cp);
@@ -317,11 +317,11 @@ minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
           if (completion_try (cp, as, false) == COMPLETION_MATCHED)
             {
               free ((char *) ms);
-              ms = xstrdup (cp->match);
+              ms = xstrdup (get_completion_match (cp));
             }
           astr_delete (as);
 
-          if (test (ms, cp->completions))
+          if (test (ms, get_completion_completions (cp)))
             {
               if (hp)
                 add_history_element (hp, ms);

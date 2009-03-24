@@ -36,9 +36,30 @@
 #include "main.h"
 #include "extern.h"
 
-/*----------------------------------------------------------------------
- *                       Completion functions
- *----------------------------------------------------------------------*/
+
+/*
+ * Structure
+ */
+struct Completion
+{
+#define FIELD(ty, name) ty name;
+#define FIELD_STR(name) const char *name;
+#include "completion.h"
+#undef FIELD
+#undef FIELD_STR
+};
+
+#define FIELD(ty, field)                        \
+  GETTER (Completion, completion, ty, field)    \
+  SETTER (Completion, completion, ty, field)
+
+#define FIELD_STR(field)                                        \
+  GETTER (const char *, field)                                  \
+  STR_SETTER (Completion, completion, field)
+
+#include "completion.h"
+#undef FIELD
+#undef FIELD_STR
 
 /*
  * List methods for completions and matches
