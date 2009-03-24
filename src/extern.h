@@ -51,15 +51,17 @@ void free_buffer (Buffer * bp);
 void free_buffers (void);
 void init_buffer (Buffer * bp);
 Buffer *create_buffer (const char *name);
-void set_buffer_filename (Buffer * bp, const char *filename);
-#define BUFFER_GETTER_AND_SETTER(ty, field)             \
+#define FIELD(ty, field)                                \
   ty get_buffer_ ## field (Buffer *bp);                 \
   void set_buffer_ ## field (Buffer *bp, ty field);
+#define FIELD_STR(field)                                \
+  FIELD(const char *, field)
 #include "buffer.h"
-#undef BUFFER_GETTER_AND_SETTER
-const char *get_buffer_name (Buffer * bp);
-void set_buffer_name (Buffer * bp, const char *name);
-Buffer *find_buffer (const char *name, int cflag);
+#undef FIELD
+#undef FIELD_STR
+const char *get_buffer_filename_or_name (Buffer * bp);
+void set_buffer_names (Buffer * bp, const char *filename);
+Buffer * find_buffer (const char *name, int cflag);
 char *make_buffer_name (const char *filename);
 void switch_to_buffer (Buffer * bp);
 int warn_if_readonly_buffer (void);

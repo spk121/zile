@@ -109,7 +109,7 @@ make_buffer_modeline (Buffer * bp)
  * if a cut is needed.
  */
 static astr
-shorten_string (char *s, int maxlen)
+shorten_string (const char *s, int maxlen)
 {
   astr as = astr_new ();
   int len = strlen (s);
@@ -137,9 +137,9 @@ print_buf (Buffer * old_bp, Buffer * bp)
            make_buffer_flags (bp, old_bp == bp),
            get_buffer_name (bp), calculate_buffer_size (bp), astr_cstr (mode));
   astr_delete (mode);
-  if (bp->filename != NULL)
+  if (get_buffer_filename (bp) != NULL)
     {
-      astr shortname = shorten_string (bp->filename, 40);
+      astr shortname = shorten_string (get_buffer_filename (bp), 40);
       insert_astr (shortname);
       astr_delete (shortname);
     }
@@ -207,7 +207,7 @@ write_buffers_list (va_list ap)
       /* Print all buffers except this one (the *Buffer List*). */
       if (cur_bp != bp)
         print_buf (old_wp->bp, bp);
-      bp = bp->next;
+      bp = get_buffer_next (bp);
       if (bp == NULL)
         bp = head_bp;
     }
@@ -271,16 +271,16 @@ Just C-u as argument means to use the current column.
 +*/
 {
   long fill_col = (lastflag & FLAG_UNIARG_EMPTY) ?
-    cur_bp->pt.o : (unsigned long) uniarg;
+    get_buffer_pt (cur_bp).o : (unsigned long) uniarg;
   char *buf;
 
   if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)
     {
-      fill_col = minibuf_read_number ("Set fill-column to (default %d): ", cur_bp->pt.o);
+      fill_col = minibuf_read_number ("Set fill-column to (default %d): ", get_buffer_pt (cur_bp).o);
       if (fill_col == LONG_MAX)
         return leNIL;
       else if (fill_col == LONG_MAX - 1)
-        fill_col = cur_bp->pt.o;
+        fill_col = get_buffer_pt (cur_bp).o;
     }
 
   if (arglist)
@@ -335,13 +335,17 @@ DEFUN ("exchange-point-and-mark", exchange_point_and_mark)
 Put the mark where point is now, and point where the mark is now.
 +*/
 {
+  Point tmp;
+
   if (!cur_bp->mark)
     {
       minibuf_error ("No mark set in this buffer");
       return leNIL;
     }
 
-  swap_point (&cur_bp->pt, &cur_bp->mark->pt);
+  tmp = get_buffer_pt (cur_bp);
+  set_buffer_pt (cur_bp, cur_bp->mark->pt);
+  cur_bp->mark->pt = tmp;
 
   /* In transient-mark-mode we must reactivate the mark.  */
   if (transient_mark_mode ())
@@ -654,7 +658,7 @@ edit_tab_region (int action)
       if (lineno == r.end.n)
         break;
     }
-  cur_bp->pt = marker->pt;
+  set_buffer_pt (cur_bp, marker->pt);
   undo_save (UNDO_END_SEQUENCE, marker->pt, 0, 0);
   free_marker (marker);
   deactivate_mark ();
@@ -689,7 +693,7 @@ DEFUN ("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  cur_bp->pt = line_beginning_position (1);
+  set_buffer_pt (cur_bp, line_beginning_position (1));
   while (!eolp ())
     {
       if (!isspace (following_char ()))
@@ -712,6 +716,8 @@ move_word (int dir, int (*next_char) (void), int (*move_char) (void), int (*at_e
       while (!at_extreme ())
         {
           int c = next_char ();
+          Point pt;
+
           if (!ISWORDCHAR (c))
             {
               if (gotword)
@@ -719,7 +725,9 @@ move_word (int dir, int (*next_char) (void), int (*move_char) (void), int (*at_e
             }
           else
             gotword = true;
-          cur_bp->pt.o += dir;
+          pt = get_buffer_pt (cur_bp);
+          pt.o += dir;
+          set_buffer_pt (cur_bp, pt);
         }
       if (gotword)
         return true;
@@ -775,13 +783,13 @@ END_DEFUN
 #define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
                                ISCLOSEBRACKETCHAR (c))
 #define PRECEDINGQUOTEDQUOTE(c) (c == '\\' \
-    && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->text) \
-    && ((astr_get (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\"') || \
-        (astr_get (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\'')))
+    && get_buffer_pt (cur_bp).o + 1 < astr_len (get_buffer_pt (cur_bp).p->text) \
+    && ((astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\"') || \
+        (astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\'')))
 #define FOLLOWINGQUOTEDQUOTE(c) (c == '\\' \
-    && cur_bp->pt.o + 1 < astr_len (cur_bp->pt.p->text) \
-    && ((astr_get (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\"') || \
-        (astr_get (cur_bp->pt.p->text, cur_bp->pt.o + 1) == '\'')))
+    && get_buffer_pt (cur_bp).o + 1 < astr_len (get_buffer_pt (cur_bp).p->text) \
+    && ((astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\"') || \
+        (astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\'')))
 
 static int
 move_sexp (int dir)
@@ -793,6 +801,8 @@ move_sexp (int dir)
 
   for (;;)
     {
+      Point pt;
+
       while (dir > 0 ? !eolp () : !bolp ())
         {
           int c = dir > 0 ? following_char () : preceding_char ();
@@ -800,7 +810,9 @@ move_sexp (int dir)
           /* Jump quotes that aren't sexp separators. */
           if (dir > 0 ? PRECEDINGQUOTEDQUOTE (c) : FOLLOWINGQUOTEDQUOTE (c))
             {
-              cur_bp->pt.o += dir;
+              pt = get_buffer_pt (cur_bp);
+              pt.o += dir;
+              set_buffer_pt (cur_bp, pt);
               c = 'a';		/* Treat ' and " like word chars. */
             }
 
@@ -836,14 +848,20 @@ move_sexp (int dir)
                 }
             }
 
-          cur_bp->pt.o += dir;
+          pt = get_buffer_pt (cur_bp);
+          pt.o += dir;
+          set_buffer_pt (cur_bp, pt);
 
           if (!ISSEXPCHAR (c))
             {
               if (gotsexp && level == 0)
                 {
                   if (!ISSEXPSEPARATOR (c))
-                    cur_bp->pt.o -= dir;
+                    {
+                      pt = get_buffer_pt (cur_bp);
+                      pt.o -= dir;
+                      set_buffer_pt (cur_bp, pt);
+                    }
                   return true;
                 }
             }
@@ -858,7 +876,9 @@ move_sexp (int dir)
             minibuf_error ("Scan error: \"Unbalanced parentheses\"");
           break;
         }
-      cur_bp->pt.o = dir > 0 ? 0 : astr_len (cur_bp->pt.p->text);
+      pt = get_buffer_pt (cur_bp);
+      pt.o = dir > 0 ? 0 : astr_len (pt.p->text);
+      set_buffer_pt (cur_bp, pt);
     }
   return false;
 }
@@ -924,7 +944,7 @@ transpose_subr (int (*forward_func) (void), int (*backward_func) (void))
   if (forward_func == forward_char && eolp ())
     backward_func ();
   /* For transpose-lines. */
-  if (forward_func == next_line && cur_bp->pt.n == 0)
+  if (forward_func == next_line && get_buffer_pt (cur_bp).n == 0)
     forward_func ();
 
   /* Backward. */
@@ -1037,10 +1057,10 @@ transpose (int uniarg, int (*forward_func) (void), int (*backward_func) (void))
       backward_func = tmp_func;
       uniarg = -uniarg;
     }
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   for (uni = 0; ret && uni < uniarg; ++uni)
     ret = transpose_subr (forward_func, backward_func);
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
   return bool_to_lisp (ret);
 }
@@ -1214,15 +1234,15 @@ Fill paragraph at or after point.
   int i, start, end;
   Marker *m = point_marker ();
 
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
   FUNCALL (forward_paragraph);
-  end = cur_bp->pt.n;
+  end = get_buffer_pt (cur_bp).n;
   if (is_empty_line ())
     end--;
 
   FUNCALL (backward_paragraph);
-  start = cur_bp->pt.n;
+  start = get_buffer_pt (cur_bp).n;
   if (is_empty_line ())
     { /* Move to next line if between two paragraphs. */
       next_line ();
@@ -1243,10 +1263,10 @@ Fill paragraph at or after point.
 
   thisflag &= ~FLAG_DONE_CPCN;
 
-  cur_bp->pt = m->pt;
+  set_buffer_pt (cur_bp, m->pt);
   free_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 END_DEFUN
 
@@ -1262,17 +1282,17 @@ setcase_word (int rcase)
       return false;
 
   as = astr_new ();
-  for (i = cur_bp->pt.o;
-       i < astr_len (cur_bp->pt.p->text) &&
-         ISWORDCHAR ((int) (c = astr_get (cur_bp->pt.p->text, i)));
+  for (i = get_buffer_pt (cur_bp).o;
+       i < astr_len (get_buffer_pt (cur_bp).p->text) &&
+         ISWORDCHAR ((int) (c = astr_get (get_buffer_pt (cur_bp).p->text, i)));
        i++)
     astr_cat_char (as, c);
 
   if (astr_len (as) > 0)
     {
-      undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, astr_len (as), astr_len (as));
+      undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), astr_len (as), astr_len (as));
       astr_recase (as, rcase);
-      astr_nreplace_cstr (cur_bp->pt.p->text, cur_bp->pt.o, astr_len (as),
+      astr_nreplace_cstr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, astr_len (as),
                           astr_cstr (as), astr_len (as));
     }
   astr_delete (as);
@@ -1425,12 +1445,12 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
         {
           if (replace)
             {
-              undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+              undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
               FUNCALL (delete_region);
             }
             insert_astr (out);
             if (replace)
-              undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+              undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
         }
       else
         {
@@ -1572,10 +1592,10 @@ delete_region (const Region * r)
   if (warn_if_readonly_buffer ())
     return false;
 
-  if (cur_bp->pt.p != r->start.p || r->start.o != cur_bp->pt.o)
+  if (get_buffer_pt (cur_bp).p != r->start.p || r->start.o != get_buffer_pt (cur_bp).o)
     FUNCALL (exchange_point_and_mark);
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), size, 0);
   undo_nosave = true;
   while (size--)
     FUNCALL (delete_char);
@@ -1651,7 +1671,7 @@ On nonblank line, delete any immediately following blank lines.
       while (is_blank_line ());
       if (forward)
         FUNCALL (forward_line);
-      if (cur_bp->pt.p != old_marker->pt.p)
+      if (get_buffer_pt (cur_bp).p != old_marker->pt.p)
         {
           if (!seq_started)
             {
@@ -1676,10 +1696,10 @@ On nonblank line, delete any immediately following blank lines.
       pop_mark ();
     }
 
-  cur_bp->pt = old_marker->pt;
+  set_buffer_pt (cur_bp, old_marker->pt);
 
   if (seq_started)
-    undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
   free_marker (old_marker);
   deactivate_mark ();

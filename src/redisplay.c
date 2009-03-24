@@ -28,19 +28,19 @@
 void
 resync_redisplay (void)
 {
-  int delta = cur_bp->pt.n - cur_wp->lastpointn;
+  int delta = get_buffer_pt (cur_bp).n - cur_wp->lastpointn;
 
   if (delta)
     {
       if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||
           (delta < 0 && cur_wp->topdelta >= (size_t) (-delta)))
         cur_wp->topdelta += delta;
-      else if (cur_bp->pt.n > cur_wp->eheight / 2)
+      else if (get_buffer_pt (cur_bp).n > cur_wp->eheight / 2)
         cur_wp->topdelta = cur_wp->eheight / 2;
       else
-        cur_wp->topdelta = cur_bp->pt.n;
+        cur_wp->topdelta = get_buffer_pt (cur_bp).n;
     }
-  cur_wp->lastpointn = cur_bp->pt.n;
+  cur_wp->lastpointn = get_buffer_pt (cur_bp).n;
 }
 
 void

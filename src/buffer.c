@@ -71,8 +71,8 @@ free_buffer (Buffer * bp)
   while (bp->markers)
     free_marker (bp->markers);
 
-  free (bp->name);
-  free (bp->filename);
+  free ((char *) bp->name);
+  free ((char *) bp->filename);
 
   if (bp->vars != NULL)
     hash_free (bp->vars);
@@ -124,51 +124,58 @@ create_buffer (const char *name)
   return bp;
 }
 
-#define BUFFER_GETTER_AND_SETTER(ty, field)     \
+#define BUFFER_GETTER(ty, field)                \
   ty                                            \
   get_buffer_ ## field (Buffer *bp)             \
   {                                             \
     return bp->field;                           \
   }                                             \
-                                                \
+
+#define BUFFER_SETTER(ty, field)                \
   void                                          \
   set_buffer_ ## field (Buffer *bp, ty field)   \
   {                                             \
     bp->field = field;                          \
   }
 
+#define FIELD(ty, field)     \
+  BUFFER_GETTER (ty, field)  \
+  BUFFER_SETTER (ty, field)
+
+#define FIELD_STR(field)                                \
+  BUFFER_GETTER (const char *, field)                   \
+                                                        \
+  void                                                  \
+  set_buffer_ ## field (Buffer *bp, const char *field)  \
+  {                                                     \
+    free ((char *) bp->field);                          \
+    bp->field = field ? xstrdup (field) : NULL;         \
+  }
+
 #include "buffer.h"
-#undef BUFFER_GETTER_AND_SETTER
+#undef FIELD
+#undef FIELD_STR
 
 /*
- * Get buffer name.
+ * Get filename, or buffer name if NULL.
  */
-const char *
-get_buffer_name (Buffer * bp)
+const char *get_buffer_filename_or_name (Buffer * bp)
 {
-  return bp->name;
+  const char *fname = get_buffer_filename (bp);
+  if (fname == NULL)
+    fname = get_buffer_name (bp);
+  return fname;
 }
 
 /*
- * Set buffer name.
+ * Set a new filename, and from it a name, for the buffer.
  */
 void
-set_buffer_name (Buffer * bp, const char *name)
+set_buffer_names (Buffer * bp, const char *filename)
 {
-  free (bp->name);
-  bp->name = xstrdup (name);
-}
+  set_buffer_filename (bp, filename);
 
-/*
- * Set a new filename (and a name) for the buffer.
- */
-void
-set_buffer_filename (Buffer * bp, const char *filename)
-{
-  free (bp->filename);
-  bp->filename = xstrdup (filename);
-
-  free (bp->name);
+  free ((char *) bp->name);
   bp->name = make_buffer_name (filename);
 }
 

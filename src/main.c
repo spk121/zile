@@ -137,10 +137,10 @@ setup_main_screen (int argc)
   Buffer *bp, *last_bp = NULL;
   int c = 0;
 
-  for (bp = head_bp; bp; bp = bp->next)
+  for (bp = head_bp; bp; bp = get_buffer_next (bp))
     {
       /* Last buffer that isn't *scratch*. */
-      if (bp->next && !bp->next->next)
+      if (get_buffer_next (bp) && !get_buffer_next (get_buffer_next (bp)))
         last_bp = bp;
       c++;
     }

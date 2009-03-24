@@ -19,16 +19,24 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-/* type, name */
+/* Dynamically allocated string fields of Buffer. */
+FIELD_STR(name)          /* The name of the buffer. */
+FIELD_STR(filename)      /* The file being edited. */
 
-BUFFER_GETTER_AND_SETTER(bool, modified)
-BUFFER_GETTER_AND_SETTER(bool, nosave)
-BUFFER_GETTER_AND_SETTER(bool, needname)
-BUFFER_GETTER_AND_SETTER(bool, temporary)
-BUFFER_GETTER_AND_SETTER(bool, readonly)
-BUFFER_GETTER_AND_SETTER(bool, overwrite)
-BUFFER_GETTER_AND_SETTER(bool, backup)
-BUFFER_GETTER_AND_SETTER(bool, noundo)
-BUFFER_GETTER_AND_SETTER(bool, autofill)
-BUFFER_GETTER_AND_SETTER(bool, isearch)
-BUFFER_GETTER_AND_SETTER(bool, mark_active)
+/* Other fields of Buffer. */
+FIELD(Buffer *, next)    /* Next buffer in buffer list. */
+FIELD(char *, eol)       /* EOL string (up to 2 chars). */
+FIELD(Line *, lines)     /* The lines of text. */
+FIELD(size_t, last_line) /* The number of the last line in the buffer. */
+FIELD(Point, pt)         /* The point. */
+FIELD(bool, modified)    /* Modified flag. */
+FIELD(bool, nosave)      /* The buffer need not be saved. */
+FIELD(bool, needname)    /* On save, ask for a file name. */
+FIELD(bool, temporary)   /* The buffer is a temporary buffer. */
+FIELD(bool, readonly)    /* The buffer cannot be modified. */
+FIELD(bool, overwrite)   /* The buffer is in overwrite mode. */
+FIELD(bool, backup)      /* The old file has already been backed up. */
+FIELD(bool, noundo)      /* Do not record undo informations. */
+FIELD(bool, autofill)    /* The buffer is in Auto Fill mode. */
+FIELD(bool, isearch)     /* The buffer is in Isearch loop. */
+FIELD(bool, mark_active) /* The mark is active. */

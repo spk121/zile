@@ -89,7 +89,7 @@ static int reg;
 static int
 insert_register (void)
 {
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len (regs[reg]));
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, astr_len (regs[reg]));
   undo_nosave = true;
   insert_astr (regs[reg]);
   undo_nosave = false;

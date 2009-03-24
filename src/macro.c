@@ -232,10 +232,10 @@ defining others, use @kbd{M-x name-last-kbd-macro}.
       return leNIL;
     }
 
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   for (uni = 0; uni < uniarg; ++uni)
     call_macro (cur_mp);
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 END_DEFUN
 

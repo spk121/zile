@@ -98,7 +98,7 @@ Marker *
 point_marker (void)
 {
   Marker *marker = marker_new ();
-  move_marker (marker, cur_bp, cur_bp->pt);
+  move_marker (marker, cur_bp, get_buffer_pt (cur_bp));
   return marker;
 }
 

@@ -85,7 +85,7 @@ set_current_window (Window * wp)
      marker.  */
   if (cur_wp->saved_pt)
     {
-      cur_bp->pt = cur_wp->saved_pt->pt;
+      set_buffer_pt (cur_bp, cur_wp->saved_pt->pt);
       free_marker (cur_wp->saved_pt);
       cur_wp->saved_pt = NULL;
     }
@@ -323,13 +323,13 @@ window_pt (Window * wp)
       assert (wp->bp == cur_bp);
       assert (wp->saved_pt == NULL);
       assert (cur_bp);
-      return cur_bp->pt;
+      return get_buffer_pt (cur_bp);
     }
   else
     {
       if (wp->saved_pt != NULL)
         return wp->saved_pt->pt;
       else
-        return wp->bp->pt;
+        return get_buffer_pt (wp->bp);
     }
 }

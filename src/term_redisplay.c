@@ -194,7 +194,7 @@ draw_window (size_t topline, Window * wp)
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && lp->prev != wp->bp->lines;
+       i > 0 && lp->prev != get_buffer_lines (wp->bp);
        lp = lp->prev, --i, --lineno)
     ;
 
@@ -208,7 +208,7 @@ draw_window (size_t topline, Window * wp)
       term_clrtoeol ();
 
       /* If at the end of the buffer, don't write any text. */
-      if (lp == wp->bp->lines)
+      if (lp == get_buffer_lines (wp->bp))
         continue;
 
       startcol = wp->start_column;
@@ -296,14 +296,15 @@ make_screen_pos (Window * wp, char **buf)
 {
   Point pt = window_pt (wp);
 
-  if (wp->bp->last_line <= wp->eheight && wp->topdelta == pt.n)
+  if (get_buffer_last_line (wp->bp) <= wp->eheight && wp->topdelta == pt.n)
     xasprintf (buf, "All");
   else if (pt.n == wp->topdelta)
     xasprintf (buf, "Top");
-  else if (pt.n + (wp->eheight - wp->topdelta) > wp->bp->last_line)
+  else if (pt.n + (wp->eheight - wp->topdelta) > get_buffer_last_line (wp->bp))
     xasprintf (buf, "Bot");
   else
-    xasprintf (buf, "%2d%%", (int) ((float) pt.n / wp->bp->last_line * 100));
+    xasprintf (buf, "%2d%%",
+               (int) ((float) pt.n / get_buffer_last_line (wp->bp) * 100));
 
   return *buf;
 }

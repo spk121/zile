@@ -1,6 +1,6 @@
 /* Point facility functions
 
-   Copyright (c) 2004, 2008 Free Software Foundation, Inc.
+   Copyright (c) 2004, 2008, 2009 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -28,7 +28,7 @@ Point
 make_point (size_t lineno, size_t offset)
 {
   Point pt;
-  pt.p = cur_bp->lines->next;
+  pt.p = get_buffer_lines (cur_bp)->next;
   pt.n = lineno;
   pt.o = offset;
   while (lineno > 0)
@@ -99,7 +99,7 @@ Point
 point_min (void)
 {
   Point pt;
-  pt.p = cur_bp->lines->next;
+  pt.p = get_buffer_lines (cur_bp)->next;
   pt.n = 0;
   pt.o = 0;
   return pt;
@@ -109,9 +109,9 @@ Point
 point_max (void)
 {
   Point pt;
-  pt.p = cur_bp->lines->prev;
-  pt.n = cur_bp->last_line;
-  pt.o = astr_len (cur_bp->lines->prev->text);
+  pt.p = get_buffer_lines (cur_bp)->prev;
+  pt.n = get_buffer_last_line (cur_bp);
+  pt.o = astr_len (get_buffer_lines (cur_bp)->prev->text);
   return pt;
 }
 
@@ -122,13 +122,13 @@ line_beginning_position (int count)
 
   /* Copy current point position without offset (beginning of
    * line). */
-  pt = cur_bp->pt;
+  pt = get_buffer_pt (cur_bp);
   pt.o = 0;
 
   count--;
-  for (; count < 0 && pt.p->prev != cur_bp->lines; pt.n--, count++)
+  for (; count < 0 && pt.p->prev != get_buffer_lines (cur_bp); pt.n--, count++)
     pt.p = pt.p->prev;
-  for (; count > 0 && pt.p->next != cur_bp->lines; pt.n++, count--)
+  for (; count > 0 && pt.p->next != get_buffer_lines (cur_bp); pt.n++, count--)
     pt.p = pt.p->next;
 
   return pt;
@@ -145,21 +145,21 @@ line_end_position (int count)
 void
 goto_point (Point pt)
 {
-  if (cur_bp->pt.n > pt.n)
+  if (get_buffer_pt (cur_bp).n > pt.n)
     do
       FUNCALL (previous_line);
-    while (cur_bp->pt.n > pt.n);
-  else if (cur_bp->pt.n < pt.n)
+    while (get_buffer_pt (cur_bp).n > pt.n);
+  else if (get_buffer_pt (cur_bp).n < pt.n)
     do
       FUNCALL (next_line);
-    while (cur_bp->pt.n < pt.n);
+    while (get_buffer_pt (cur_bp).n < pt.n);
 
-  if (cur_bp->pt.o > pt.o)
+  if (get_buffer_pt (cur_bp).o > pt.o)
     do
       FUNCALL (backward_char);
-    while (cur_bp->pt.o > pt.o);
-  else if (cur_bp->pt.o < pt.o)
+    while (get_buffer_pt (cur_bp).o > pt.o);
+  else if (get_buffer_pt (cur_bp).o < pt.o)
     do
       FUNCALL (forward_char);
-    while (cur_bp->pt.o < pt.o);
+    while (get_buffer_pt (cur_bp).o < pt.o);
 }

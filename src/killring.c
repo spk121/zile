@@ -93,8 +93,8 @@ kill_line (int literally)
     {
       Region r;
 
-      r.start = cur_bp->pt;
-      r.size = astr_len (cur_bp->pt.p->text) - cur_bp->pt.o;
+      r.start = get_buffer_pt (cur_bp);
+      r.size = astr_len (get_buffer_pt (cur_bp).p->text) - get_buffer_pt (cur_bp).o;
 
       if (!copy_or_kill_region (true, &r))
         return false;
@@ -188,10 +188,10 @@ kill (int uniarg, Function mark_func)
     return leNIL;
 
   push_mark ();
-  undo_save (UNDO_START_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   mark_func (uniarg, NULL);
   FUNCALL (kill_region);
-  undo_save (UNDO_END_SEQUENCE, cur_bp->pt, 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   pop_mark ();
 
   thisflag |= FLAG_DONE_KILL;
@@ -248,7 +248,8 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
 
   set_mark_interactive ();
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, astr_len (kill_ring_text));
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0,
+             astr_len (kill_ring_text));
   undo_nosave = true;
   insert_astr (kill_ring_text);
   undo_nosave = false;

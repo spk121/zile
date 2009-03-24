@@ -213,10 +213,10 @@ get_buffer_dir (void)
   astr buf;
   const char *p, *q;
 
-  if (cur_bp->filename != NULL)
+  if (get_buffer_filename (cur_bp) != NULL)
     /* If the current buffer has a filename, get the current directory
        name from it. */
-    buf = astr_new_cstr (cur_bp->filename);
+    buf = astr_new_cstr (get_buffer_filename (cur_bp));
   else
     { /* Get the current directory name from the system. */
       buf = agetcwd ();
@@ -266,11 +266,13 @@ static void
 read_from_disk (const char *filename)
 {
   Line *lp;
-  int i, size, first_eol = true;
+  int i, size;
+  bool first_eol = true;
   char *this_eol_type;
   size_t eol_len = 0, total_eols = 0;
   char buf[BUFSIZ];
   FILE *fp = fopen (filename, "r");
+  Point pt;
 
   if (fp == NULL)
     {
@@ -285,7 +287,8 @@ read_from_disk (const char *filename)
   if (!check_writable (filename))
     set_buffer_readonly (cur_bp, true);
 
-  lp = cur_bp->pt.p;
+  pt = get_buffer_pt (cur_bp);
+  lp = pt.p;
 
   /* Read first chunk and determine EOL type. */
   size = fread (buf, 1, BUFSIZ, fp);
@@ -309,31 +312,32 @@ read_from_disk (const char *filename)
               if (first_eol)
                 {
                   /* This is the first end-of-line. */
-                  cur_bp->eol = this_eol_type;
+                  set_buffer_eol (cur_bp, this_eol_type);
                   first_eol = false;
                 }
-              else if (cur_bp->eol != this_eol_type)
+              else if (get_buffer_eol (cur_bp) != this_eol_type)
                 {
                   /* This EOL is different from the last; arbitrarily choose
                      LF. */
-                  cur_bp->eol = coding_eol_lf;
+                  set_buffer_eol (cur_bp, coding_eol_lf);
                   break;
                 }
             }
         }
 
       /* Process this and subsequent chunks into lines. */
-      eol_len = strlen (cur_bp->eol);
+      eol_len = strlen (get_buffer_eol (cur_bp));
       do
         {
           for (i = 0; i < size; i++)
             {
-              if (strncmp (cur_bp->eol, buf + i, eol_len) != 0)
+              if (strncmp (get_buffer_eol (cur_bp), buf + i, eol_len) != 0)
                 astr_cat_char (lp->text, buf[i]);
               else
                 {
                   lp = line_insert (lp, astr_new ());
-                  ++cur_bp->last_line;
+                  set_buffer_last_line (cur_bp,
+                                        get_buffer_last_line (cur_bp) + 1);
                   i += eol_len - 1;
                 }
             }
@@ -341,9 +345,11 @@ read_from_disk (const char *filename)
       while ((size = fread (buf, 1, BUFSIZ, fp)) > 0);
     }
 
-  lp->next = cur_bp->lines;
-  cur_bp->lines->prev = lp;
-  cur_bp->pt.p = cur_bp->lines->next;
+  lp->next = get_buffer_lines (cur_bp);
+  get_buffer_lines (cur_bp)->prev = lp;
+  pt = get_buffer_pt (cur_bp);
+  pt.p = get_buffer_lines (cur_bp)->next;
+  set_buffer_pt (cur_bp, pt);
 
   fclose (fp);
 }
@@ -354,8 +360,9 @@ find_file (const char *filename)
   Buffer *bp;
   char *s;
 
-  for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (bp->filename != NULL && !strcmp (bp->filename, filename))
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+    if (get_buffer_filename (bp) != NULL &&
+        !strcmp (get_buffer_filename (bp), filename))
       {
         switch_to_buffer (bp);
         return true;
@@ -377,7 +384,7 @@ find_file (const char *filename)
 
   bp = create_buffer (s);
   free (s);
-  bp->filename = xstrdup (filename);
+  set_buffer_filename (bp, filename);
 
   switch_to_buffer (bp);
   read_from_disk (filename);
@@ -394,7 +401,7 @@ make_buffer_completion (void)
   Completion *cp;
 
   cp = completion_new (false);
-  for (bp = head_bp; bp != NULL; bp = bp->next)
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     gl_sortedlist_add (cp->completions, completion_strcmp,
                        xstrdup (get_buffer_name (bp)));
 
@@ -469,8 +476,8 @@ If the current buffer now contains an empty file that you just visited
 (presumably by mistake), use this command to visit the file you really want.
 +*/
 {
-  const char *buf = cur_bp->filename;
-  char *base = base_name (cur_bp->filename);
+  const char *buf = get_buffer_filename (cur_bp);
+  char *base = base_name (buf);
   char *ms = minibuf_read_filename ("Find alternate: ", buf, base);
 
   ok = leNIL;
@@ -494,7 +501,7 @@ DEFUN_ARGS ("switch-to-buffer", switch_to_buffer,
 Select buffer @i{buffer} in the current window.
 +*/
 {
-  Buffer *bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
+  Buffer *bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
 
   STR_INIT (buffer)
   else
@@ -539,8 +546,8 @@ kill_buffer (Buffer * kill_bp)
 {
   Buffer *next_bp;
 
-  if (kill_bp->next != NULL)
-    next_bp = kill_bp->next;
+  if (get_buffer_next (kill_bp) != NULL)
+    next_bp = get_buffer_next (kill_bp);
   else
     next_bp = head_bp;
 
@@ -564,7 +571,7 @@ kill_buffer (Buffer * kill_bp)
           }
 
       head_bp = cur_bp = new_bp;
-      head_bp->next = NULL;
+      set_buffer_next (head_bp, NULL);
       /* FIXME: Don't reset the buffer, recreate it. */
       set_buffer_needname (cur_bp, true);
       set_buffer_temporary (cur_bp, true);
@@ -572,11 +579,7 @@ kill_buffer (Buffer * kill_bp)
       if (strcmp (get_buffer_name (cur_bp), "*scratch*") != 0)
         {
           set_buffer_name (cur_bp, "*scratch*");
-          if (cur_bp->filename != NULL)
-            {
-              free (cur_bp->filename);
-              cur_bp->filename = NULL;
-            }
+          set_buffer_filename (cur_bp, NULL);
         }
     }
   else
@@ -596,11 +599,11 @@ kill_buffer (Buffer * kill_bp)
       /* Remove the buffer from the buffer list. */
       cur_bp = next_bp;
       if (head_bp == kill_bp)
-        head_bp = head_bp->next;
-      for (bp = head_bp; bp->next != NULL; bp = bp->next)
-        if (bp->next == kill_bp)
+        head_bp = get_buffer_next (head_bp);
+      for (bp = head_bp; get_buffer_next (bp) != NULL; bp = get_buffer_next (bp))
+        if (get_buffer_next (bp) == kill_bp)
           {
-            bp->next = bp->next->next;
+            set_buffer_next (bp, get_buffer_next (get_buffer_next (bp)));
             break;
           }
 
@@ -671,14 +674,14 @@ insert_lines (size_t n, size_t end, size_t last, Line *from_lp)
 static void
 insert_buffer (Buffer * bp)
 {
-  Line *old_next = bp->pt.p->next;
-  astr old_cur_line = astr_cpy (astr_new (), bp->pt.p->text);
-  size_t old_cur_n = bp->pt.n, old_lines = bp->last_line;
+  Line *old_next = get_buffer_pt (bp).p->next;
+  astr old_cur_line = astr_cpy (astr_new (), get_buffer_pt (bp).p->text);
+  size_t old_cur_n = get_buffer_pt (bp).n, old_lines = get_buffer_last_line (bp);
   size_t size = calculate_buffer_size (bp);
 
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
   undo_nosave = true;
-  insert_lines (0, old_cur_n, old_lines, bp->lines->next);
+  insert_lines (0, old_cur_n, old_lines, get_buffer_lines (bp)->next);
   insert_astr (old_cur_line);
   if (old_cur_n < old_lines)
     insert_newline ();
@@ -694,7 +697,7 @@ Insert after point the contents of BUFFER.
 Puts mark after the inserted text.
 +*/
 {
-  Buffer *def_bp = ((cur_bp->next != NULL) ? cur_bp->next : head_bp);
+  Buffer *def_bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
   Completion *cp;
 
   if (warn_if_readonly_buffer ())
@@ -763,7 +766,7 @@ insert_file (const char *filename)
     }
 
   lseek (fd, 0, SEEK_SET);
-  undo_save (UNDO_REPLACE_BLOCK, cur_bp->pt, 0, size);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
   undo_nosave = true;
   while ((size = read (fd, buf, BUFSIZ)) > 0)
     insert_nstring (buf, size);
@@ -896,7 +899,7 @@ copy_file (const char *source, const char *dest)
 static int
 raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 {
-  ssize_t eol_len = (ssize_t) strlen (bp->eol), written;
+  ssize_t eol_len = (ssize_t) strlen (get_buffer_eol (bp)), written;
   Line *lp;
   int ret = 0;
   int fd = creat (filename, mode);
@@ -905,7 +908,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
     return -1;
 
   /* Save the lines. */
-  for (lp = bp->lines->next; lp != bp->lines; lp = lp->next)
+  for (lp = get_buffer_lines (bp)->next; lp != get_buffer_lines (bp); lp = lp->next)
     {
       ssize_t len = (ssize_t) astr_len (lp->text);
 
@@ -915,9 +918,9 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
           ret = written;
           break;
         }
-      if (lp->next != bp->lines)
+      if (lp->next != get_buffer_lines (bp))
         {
-          written = write (fd, bp->eol, eol_len);
+          written = write (fd, get_buffer_eol (bp), eol_len);
           if (written != eol_len)
             {
               ret = written;
@@ -975,7 +978,7 @@ create_backup_filename (const char *filename, const char *backupdir)
  * Create a backup file if specified by the user variables.
  */
 static int
-write_to_disk (Buffer * bp, char *filename)
+write_to_disk (Buffer * bp, const char *filename)
 {
   int fd, backup = get_variable_bool ("make-backup-files"), ret;
   const char *backupdir = get_variable_bool ("backup-directory") ?
@@ -1013,7 +1016,8 @@ write_to_disk (Buffer * bp, char *filename)
 }
 
 static le *
-write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
+write_buffer (Buffer *bp, bool needname, bool confirm,
+              const char *name, const char *prompt)
 {
   bool ans = true;
   bool name_from_minibuffer = false;
@@ -1021,8 +1025,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
 
   if (needname)
     {
-      const char *fname = bp->filename != NULL ? bp->filename :
-        get_buffer_name (bp);
+      const char *fname = get_buffer_filename_or_name (bp);
 
       name = minibuf_read_filename (prompt, fname, NULL);
       name_from_minibuffer = true;
@@ -1030,7 +1033,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
         return FUNCALL (keyboard_quit);
       if (name[0] == '\0')
         {
-          free (name);
+          free ((char *) name);
           return leNIL;
         }
       confirm = true;
@@ -1049,8 +1052,8 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
 
   if (ans == true)
     {
-      if (name != bp->filename)
-        set_buffer_filename (bp, name);
+      if (name != get_buffer_filename (bp))
+        set_buffer_names (bp, name);
       set_buffer_needname (bp, false);
       set_buffer_temporary (bp, false);
       if (write_to_disk (bp, name))
@@ -1064,7 +1067,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm, char *name, char *prompt)
     }
 
   if (name_from_minibuffer)
-    free (name);
+    free ((char *) name);
 
   return ok;
 }
@@ -1075,7 +1078,7 @@ save_buffer (Buffer * bp)
   if (!get_buffer_modified (bp))
     minibuf_write ("(No changes need to be saved)");
   else
-    write_buffer (bp, get_buffer_needname (bp), false, bp->filename,
+    write_buffer (bp, get_buffer_needname (bp), false, get_buffer_filename (bp),
                   "File to save in: ");
 
   return true;
@@ -1112,12 +1115,11 @@ save_some_buffers (void)
   size_t i = 0;
   bool noask = false;
 
-  for (bp = head_bp; bp != NULL; bp = bp->next)
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     {
       if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
         {
-          const char *fname = bp->filename != NULL ? bp->filename :
-            get_buffer_name (bp);
+          const char *fname = get_buffer_filename_or_name (bp);
 
           ++i;
 
@@ -1193,7 +1195,7 @@ Offer to save each buffer, then kill this Zile process.
   if (!save_some_buffers ())
     return leNIL;
 
-  for (bp = head_bp; bp != NULL; bp = bp->next)
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_modified (bp) && !get_buffer_needname (bp))
       {
         for (;;)
@@ -1225,14 +1227,12 @@ zile_exit (int doabort)
   Buffer *bp;
 
   fprintf (stderr, "Trying to save modified buffers (if any)...\r\n");
-  for (bp = head_bp; bp != NULL; bp = bp->next)
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
       {
         astr buf = astr_new (), as;
-        if (bp->filename != NULL)
-          astr_cpy_cstr (buf, bp->filename);
-        else
-          astr_cpy_cstr (buf, get_buffer_name (bp));
+        const char *fname = get_buffer_filename_or_name (bp);
+        astr_cpy_cstr (buf, fname);
         as = astr_new_cstr (PACKAGE);
         astr_recase (as, case_upper);
         astr_afmt (buf, ".%sSAVE", astr_cstr (as));

@@ -101,17 +101,11 @@ struct Region
 
 struct Buffer
 {
-  Buffer *next;		/* Next buffer in buffer list. */
-  char *eol;		/* EOL string (up to 2 chars). */
-  Line *lines;		/* The lines of text. */
-  size_t last_line;	/* The number of the last line in the buffer. */
-  Point pt;		/* The point. */
   Marker *mark;		/* The mark. */
   Marker *markers;	/* Markers list (updated whenever text is changed). */
   Undo *last_undop;	/* Most recent undo delta. */
   Undo *next_undop;	/* Next undo delta to apply. */
   Hash_table *vars;	/* Buffer-local variables. */
-  /* Fields with setter and getter methods. */
 #define FIELD(ty, name) ty name;
 #define FIELD_STR(name) const char *name;
 #include "buffer.h"

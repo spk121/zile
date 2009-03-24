@@ -184,9 +184,10 @@ re_find_substr (const char *s1, size_t s1size,
 static void
 goto_linep (Line * lp)
 {
-  cur_bp->pt = point_min ();
+  Point pt;
+  set_buffer_pt (cur_bp, point_min ());
   resync_redisplay ();
-  while (cur_bp->pt.p != lp)
+  for (pt = get_buffer_pt (cur_bp); pt.p != lp; pt = get_buffer_pt (cur_bp))
     next_line ();
 }
 
@@ -200,7 +201,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
   if (s2size < 1)
     return false;
 
-  for (lp = startp; lp != cur_bp->lines; lp = lp->next)
+  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = lp->next)
     {
       if (lp == startp)
         {
@@ -224,8 +225,11 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
 
       if (sp2 != NULL)
         {
+          Point pt;
           goto_linep (lp);
-          cur_bp->pt.o = sp2 - astr_cstr (lp->text);
+          pt = get_buffer_pt (cur_bp);
+          pt.o = sp2 - astr_cstr (lp->text);
+          set_buffer_pt (cur_bp, pt);
           return true;
         }
     }
@@ -243,7 +247,7 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
   if (ssize < 1)
     return false;
 
-  for (lp = startp; lp != cur_bp->lines; lp = lp->prev)
+  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = lp->prev)
     {
       sp = astr_cstr (lp->text);
       if (lp == startp)
@@ -262,8 +266,11 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
 
       if (sp2 != NULL)
         {
+          Point pt;
           goto_linep (lp);
-          cur_bp->pt.o = sp2 - astr_cstr (lp->text);
+          pt = get_buffer_pt (cur_bp);
+          pt.o = sp2 - astr_cstr (lp->text);
+          set_buffer_pt (cur_bp, pt);
           return true;
         }
     }
@@ -293,7 +300,7 @@ search (Searcher searcher, bool regexp, const char *pattern, const char *search_
       free (last_search);
       last_search = xstrdup (pattern);
 
-      if (!searcher (cur_bp->pt.p, cur_bp->pt.o, pattern, regexp))
+      if (!searcher (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, pattern, regexp))
         {
           minibuf_error ("Search failed: \"%s\"", pattern);
           ok = leNIL;
@@ -367,8 +374,8 @@ isearch (int dir, int regexp)
   Point start, cur;
   Marker *old_mark = cur_wp->bp->mark ? copy_marker (cur_wp->bp->mark) : NULL;
 
-  start = cur_bp->pt;
-  cur = cur_bp->pt;
+  start = get_buffer_pt (cur_bp);
+  cur = get_buffer_pt (cur_bp);
 
   /* I-search mode. */
   set_buffer_isearch (cur_wp->bp, true);
@@ -403,7 +410,7 @@ isearch (int dir, int regexp)
 
       if (c == KBD_CANCEL)
         {
-          cur_bp->pt = start;
+          set_buffer_pt (cur_bp, start);
           thisflag |= FLAG_NEED_RESYNC;
 
           /* Quit. */
@@ -424,7 +431,8 @@ isearch (int dir, int regexp)
           if (astr_len (pattern) > 0)
             {
               astr_truncate (pattern, astr_len (pattern) - 1);
-              cur = cur_bp->pt = start;
+              cur = start;
+              set_buffer_pt (cur_bp, start);
               thisflag |= FLAG_NEED_RESYNC;
             }
           else
@@ -446,7 +454,7 @@ isearch (int dir, int regexp)
           if (astr_len (pattern) > 0)
             {
               /* Find next match. */
-              cur = cur_bp->pt;
+              cur = get_buffer_pt (cur_bp);
               /* Save search string. */
               free (last_search);
               last_search = xstrdup (astr_cstr (pattern));
@@ -606,7 +614,7 @@ what to do with it.
     }
 
   /* Spaghetti code follows... :-( */
-  while (search_forward (cur_bp->pt.p, cur_bp->pt.o, find, false))
+  while (search_forward (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, find, false))
     {
       if (!noask)
         {
@@ -652,12 +660,14 @@ what to do with it.
         }
 
     replblock:
-      ++count;
-      undo_save (UNDO_REPLACE_BLOCK,
-                 make_point (cur_bp->pt.n,
-                             cur_bp->pt.o - find_len), find_len, strlen (repl));
-      line_replace_text (&cur_bp->pt.p, cur_bp->pt.o - find_len,
-                         find_len, repl, find_no_upper);
+      {
+        Point pt = get_buffer_pt (cur_bp);
+        ++count;
+        undo_save (UNDO_REPLACE_BLOCK,
+                   make_point (pt.n, pt.o - find_len), find_len, strlen (repl));
+        line_replace_text (&pt.p, pt.o - find_len, find_len, repl, find_no_upper);
+        set_buffer_pt (cur_bp, pt);
+      }
     nextmatch:
       if (exitloop)
         break;
