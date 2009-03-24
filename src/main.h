@@ -287,8 +287,10 @@ typedef le * (*Function) (long uniarg, le * list);
                                            with no number. */
 #define FLAG_DEFINING_MACRO	0000100	/* We are defining a macro. */
 
-/* Zile font codes
- * Designed to fit in an int, leaving room for a char underneath. */
+/*
+ * Zile font codes
+ * Designed to fit in an int, leaving room for a char underneath.
+ */
 #define FONT_NORMAL		0x000
 #define FONT_REVERSE		0x100
 
