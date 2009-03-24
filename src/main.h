@@ -96,9 +96,6 @@ struct Region
   size_t size;			/* The region size. */
 };
 
-/* Work around bad #define in some system headers. */
-#undef lines
-
 struct Window
 {
   Window *next;		/* The next window in window list. */
