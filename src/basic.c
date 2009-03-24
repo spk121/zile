@@ -256,8 +256,6 @@ Position 1 is the beginning of the buffer.
         if (!forward_char ())
           break;
     }
-
-  INT_FREE (n);
 }
 END_DEFUN
 
@@ -293,8 +291,6 @@ Goto line arg, counting from line 1 at beginning of buffer.
       pt.o = 0;
       set_buffer_pt (cur_bp, pt);
     }
-
-  INT_FREE (n);
 }
 END_DEFUN
 

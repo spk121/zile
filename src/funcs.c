@@ -1157,7 +1157,6 @@ Precisely, if point is on line I, move to the start of line I + N.
       FUNCALL (beginning_of_line);
       ok = execute_with_uniarg (false, n, next_line, previous_line);
     }
-  INT_FREE (n);
 }
 END_DEFUN
 
@@ -1512,7 +1511,6 @@ says to insert the output in the current buffer.
     ok = bool_to_lisp (pipe_command (cmd, "/dev/null", insert, false));
 
   STR_FREE (cmd);
-  BOOL_FREE (insert);
 }
 END_DEFUN
 

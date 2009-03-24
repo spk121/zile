@@ -207,7 +207,6 @@ typedef le * (*Function) (long uniarg, le * list);
             if (name == LONG_MAX) \
               ok = leNIL; \
           }
-#define INT_FREE(name)
 
 /* Boolean argument. */
 #define BOOL_ARG(name) \
@@ -220,7 +219,6 @@ typedef le * (*Function) (long uniarg, le * list);
             if (strcmp (s, "nil") == 0) \
               name = false; \
           }
-#define BOOL_FREE(name)
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
