@@ -20,7 +20,7 @@
    MA 02111-1301, USA.  */
 
 /* Dynamically allocated string fields of Completion. */
-FIELD(const char *, match)	/* The match buffer. */
+FIELD_STR(match)		/* The match buffer. */
 
 /* Other fields of Completion. */
 FIELD(Buffer *, old_bp)		/* The buffer from which the completion was invoked. */

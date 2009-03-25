@@ -54,7 +54,7 @@ struct Completion
   SETTER (Completion, completion, ty, field)
 
 #define FIELD_STR(field)                                        \
-  GETTER (const char *, field)                                  \
+  GETTER (Completion, completion, const char *, field)          \
   STR_SETTER (Completion, completion, field)
 
 #include "completion.h"
