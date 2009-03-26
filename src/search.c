@@ -372,13 +372,12 @@ isearch (int dir, int regexp)
   astr buf = astr_new ();
   astr pattern = astr_new ();
   Point start, cur;
-  Marker *old_mark = get_buffer_mark (cur_wp->bp) ? copy_marker (get_buffer_mark (cur_wp->bp)) : NULL;
+  Marker *old_mark = copy_marker (get_buffer_mark (get_window_bp (cur_wp)));
 
-  start = get_buffer_pt (cur_bp);
-  cur = get_buffer_pt (cur_bp);
+  start = cur = get_buffer_pt (cur_bp);
 
   /* I-search mode. */
-  set_buffer_isearch (cur_wp->bp, true);
+  set_buffer_isearch (get_window_bp (cur_wp), true);
 
   for (;;)
     {
@@ -420,7 +419,7 @@ isearch (int dir, int regexp)
           if (get_buffer_mark (cur_bp))
             free_marker (get_buffer_mark (cur_bp));
 
-          set_buffer_mark (cur_bp, old_mark ? copy_marker (old_mark) : NULL);
+          set_buffer_mark (cur_bp, copy_marker (old_mark));
           break;
         }
       else if (c == KBD_BS)
@@ -518,7 +517,7 @@ isearch (int dir, int regexp)
     }
 
   /* done */
-  set_buffer_isearch (cur_wp->bp, false);
+  set_buffer_isearch (get_window_bp (cur_wp), false);
 
   astr_delete (buf);
   astr_delete (pattern);

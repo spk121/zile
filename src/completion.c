@@ -182,7 +182,7 @@ completion_print (gl_list_t l, size_t size)
   size_t i, j, col, max, numcols;
 
   max = calculate_max_length (l, size) + 5;
-  numcols = (cur_wp->ewidth - 1) / max;
+  numcols = (get_window_ewidth (cur_wp) - 1) / max;
 
   bprintf ("Possible completions are:\n");
   for (i = col = 0; i < MIN (size, gl_list_size (l)); i++)
@@ -220,7 +220,7 @@ static void
 popup_completion (Completion * cp, int allflag, size_t num)
 {
   cp->flags |= CFLAG_POPPEDUP;
-  if (head_wp->next == NULL)
+  if (get_window_next (head_wp) == NULL)
     cp->flags |= CFLAG_CLOSE;
 
   write_temp_buffer ("*Completions*", true, write_completion, cp, allflag, num);

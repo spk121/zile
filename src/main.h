@@ -47,6 +47,7 @@ typedef struct Undo Undo;
 typedef struct Macro Macro;
 typedef struct Binding *Binding;
 typedef struct Buffer Buffer;
+typedef struct Window Window;
 typedef struct Completion Completion;
 
 /* FIXME: Types which should really be opaque. */
@@ -54,7 +55,6 @@ typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
 typedef struct Region Region;
-typedef struct Window Window;
 
 /*
  * A line is a doubly-linked list of astrs.
@@ -94,20 +94,6 @@ struct Region
   Point start;			/* The region start. */
   Point end;			/* The region end. */
   size_t size;			/* The region size. */
-};
-
-struct Window
-{
-  Window *next;		/* The next window in window list. */
-  Buffer *bp;		/* The buffer displayed in window. */
-  size_t topdelta;	/* The top line delta. */
-  int lastpointn;	/* The last point line number. */
-  size_t start_column;	/* The start column of the window (>0 if scrolled
-                           sideways). */
-  Marker *saved_pt;	/* The point line pointer, line number and offset
-                           (used to hold the point in non-current windows). */
-  size_t fwidth, fheight; /* The formal width and height of the window. */
-  size_t ewidth, eheight; /* The effective width and height of the window. */
 };
 
 enum

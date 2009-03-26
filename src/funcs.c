@@ -167,7 +167,8 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
   /* Remove the contents of that buffer. */
   new_bp = create_buffer (get_buffer_name (cur_bp));
   kill_buffer (cur_bp);
-  cur_bp = cur_wp->bp = new_bp;
+  cur_bp = new_bp;
+  set_window_bp (cur_wp, cur_bp);
 
   /* Make the buffer a temporary one. */
   set_buffer_needname (cur_bp, true);
@@ -201,17 +202,17 @@ write_buffers_list (va_list ap)
   bprintf (" -- ------           ----    ----         ----\n");
 
   /* Print buffers. */
-  bp = old_wp->bp;
+  bp = get_window_bp (old_wp);
   do
     {
       /* Print all buffers except this one (the *Buffer List*). */
       if (cur_bp != bp)
-        print_buf (old_wp->bp, bp);
+        print_buf (get_window_bp (old_wp), bp);
       bp = get_buffer_next (bp);
       if (bp == NULL)
         bp = head_bp;
     }
-  while (bp != old_wp->bp);
+  while (bp != get_window_bp (old_wp));
 }
 
 DEFUN ("list-buffers", list_buffers)

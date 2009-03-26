@@ -63,6 +63,7 @@ zile_base_SOURCES =					\
 	search.c					\
 	undo.c						\
 	variables.c					\
+	window.h					\
 	window.c					\
 	term_minibuf.c					\
 	term_redisplay.c				\

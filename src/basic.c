@@ -434,7 +434,7 @@ static int
 scroll_down (void)
 {
   if (get_buffer_pt (cur_bp).n > 0)
-    return ngotoup (cur_wp->eheight) ? true : false;
+    return ngotoup (get_window_eheight (cur_wp)) ? true : false;
   else
     {
       minibuf_error ("Beginning of buffer");
@@ -446,7 +446,7 @@ static int
 scroll_up (void)
 {
   if (get_buffer_pt (cur_bp).n < get_buffer_last_line (cur_bp))
-    return ngotodown (cur_wp->eheight) ? true : false;
+    return ngotodown (get_window_eheight (cur_wp)) ? true : false;
   else
     {
       minibuf_error ("End of buffer");

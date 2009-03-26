@@ -28,19 +28,19 @@
 void
 resync_redisplay (void)
 {
-  int delta = get_buffer_pt (cur_bp).n - cur_wp->lastpointn;
+  int delta = get_buffer_pt (cur_bp).n - get_window_lastpointn (cur_wp);
 
   if (delta)
     {
-      if ((delta > 0 && cur_wp->topdelta + delta < cur_wp->eheight) ||
-          (delta < 0 && cur_wp->topdelta >= (size_t) (-delta)))
-        cur_wp->topdelta += delta;
-      else if (get_buffer_pt (cur_bp).n > cur_wp->eheight / 2)
-        cur_wp->topdelta = cur_wp->eheight / 2;
+      if ((delta > 0 && get_window_topdelta (cur_wp) + delta < get_window_eheight (cur_wp)) ||
+          (delta < 0 && get_window_topdelta (cur_wp) >= (size_t) (-delta)))
+        set_window_topdelta (cur_wp, get_window_topdelta (cur_wp) + delta);
+      else if (get_buffer_pt (cur_bp).n > get_window_eheight (cur_wp) / 2)
+        set_window_topdelta (cur_wp, get_window_eheight (cur_wp) / 2);
       else
-        cur_wp->topdelta = get_buffer_pt (cur_bp).n;
+        set_window_topdelta (cur_wp, get_buffer_pt (cur_bp).n);
     }
-  cur_wp->lastpointn = get_buffer_pt (cur_bp).n;
+  set_window_lastpointn (cur_wp, get_buffer_pt (cur_bp).n);
 }
 
 void
@@ -50,23 +50,26 @@ resize_windows (void)
   int hdelta;
 
   /* Resize windows horizontally. */
-  for (wp = head_wp; wp != NULL; wp = wp->next)
-    wp->fwidth = wp->ewidth = term_width ();
+  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+    {
+      set_window_fwidth (wp, term_width ());
+      set_window_ewidth (wp, get_window_fwidth (wp));
+    }
 
   /* Work out difference in window height; windows may be taller than
      terminal if the terminal was very short. */
   for (hdelta = term_height () - 1, wp = head_wp;
-       wp != NULL; hdelta -= wp->fheight, wp = wp->next);
+       wp != NULL; hdelta -= get_window_fheight (wp), wp = get_window_next (wp));
 
   /* Resize windows vertically. */
   if (hdelta > 0)
     {				/* Increase windows height. */
-      for (wp = head_wp; hdelta > 0; wp = wp->next)
+      for (wp = head_wp; hdelta > 0; wp = get_window_next (wp))
         {
           if (wp == NULL)
             wp = head_wp;
-          ++wp->fheight;
-          ++wp->eheight;
+          set_window_fheight (wp, get_window_fheight (wp) + 1);
+          set_window_eheight (wp, get_window_eheight (wp) + 1);
           --hdelta;
         }
     }
@@ -76,18 +79,18 @@ resize_windows (void)
       while (decreased)
         {
           decreased = false;
-          for (wp = head_wp; wp != NULL && hdelta < 0; wp = wp->next)
+          for (wp = head_wp; wp != NULL && hdelta < 0; wp = get_window_next (wp))
             {
-              if (wp->fheight > 2)
+              if (get_window_fheight (wp) > 2)
                 {
-                  --wp->fheight;
-                  --wp->eheight;
+                  set_window_fheight (wp, get_window_fheight (wp) - 1);
+                  set_window_eheight (wp, get_window_eheight (wp) - 1);
                   ++hdelta;
                   decreased = true;
                 }
-              else if (cur_wp != head_wp || cur_wp->next != NULL)
+              else if (cur_wp != head_wp || get_window_next (cur_wp) != NULL)
                 {
-                  Window *new_wp = wp->next;
+                  Window *new_wp = get_window_next (wp);
                   delete_window (wp);
                   wp = new_wp;
                   decreased = true;
@@ -104,10 +107,10 @@ recenter (Window * wp)
 {
   Point pt = window_pt (wp);
 
-  if (pt.n > wp->eheight / 2)
-    wp->topdelta = wp->eheight / 2;
+  if (pt.n > get_window_eheight (wp) / 2)
+    set_window_topdelta (wp, get_window_eheight (wp) / 2);
   else
-    wp->topdelta = pt.n;
+    set_window_topdelta (wp, pt.n);
 }
 
 DEFUN ("recenter", recenter)

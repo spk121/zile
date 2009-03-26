@@ -89,8 +89,12 @@ move_marker (Marker * marker, Buffer * bp, Point pt)
 Marker *
 copy_marker (Marker * m)
 {
-  Marker *marker = marker_new ();
-  move_marker (marker, m->bp, m->pt);
+  Marker *marker = NULL;
+  if (m)
+    {
+      marker = marker_new ();
+      move_marker (marker, m->bp, m->pt);
+    }
   return marker;
 }
 

@@ -46,11 +46,6 @@ Function last_command (void);
 void free_bindings (Binding p);
 
 /* buffer.c --------------------------------------------------------------- */
-int calculate_the_region (Region * rp);
-void free_buffer (Buffer * bp);
-void free_buffers (void);
-void init_buffer (Buffer * bp);
-Buffer *create_buffer (const char *name);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (Buffer *bp);                 \
   void set_buffer_ ## field (Buffer *bp, ty field);
@@ -59,6 +54,11 @@ Buffer *create_buffer (const char *name);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
+int calculate_the_region (Region * rp);
+void free_buffer (Buffer * bp);
+void free_buffers (void);
+void init_buffer (Buffer * bp);
+Buffer *create_buffer (const char *name);
 const char *get_buffer_filename_or_name (Buffer * bp);
 void set_buffer_names (Buffer * bp, const char *filename);
 Buffer * find_buffer (const char *name, int cflag);
@@ -74,9 +74,6 @@ size_t tab_width (Buffer * bp);
 char *copy_text_block (size_t startn, size_t starto, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
-int completion_strcmp (const void *p1, const void *p2);
-Completion *completion_new (int fileflag);
-void free_completion (Completion * cp);
 #define FIELD(ty, field)                                \
   ty get_completion_ ## field (Completion *cp);         \
   void set_completion_ ## field (Completion *cp, ty field);
@@ -85,6 +82,9 @@ void free_completion (Completion * cp);
 #include "completion.h"
 #undef FIELD
 #undef FIELD_STR
+int completion_strcmp (const void *p1, const void *p2);
+Completion *completion_new (int fileflag);
+void free_completion (Completion * cp);
 void completion_scroll_up (void);
 void completion_scroll_down (void);
 int completion_try (Completion * cp, astr search, int popup_when_complete);
@@ -301,6 +301,12 @@ long get_variable_number (const char *var);
 bool get_variable_bool (const char *var);
 
 /* window.c --------------------------------------------------------------- */
+#define FIELD(ty, field)                                \
+  ty get_window_ ## field (Window *wp);                 \
+  void set_window_ ## field (Window *wp, ty field);
+  FIELD(const char *, field)
+#include "window.h"
+#undef FIELD
 void create_first_window (void);
 Window *find_window (const char *name);
 void free_windows (void);

@@ -133,7 +133,7 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * r,
     }
   else if (highlight)
     {
-      for (; x < wp->ewidth; ++i)
+      for (; x < get_window_ewidth (wp); ++i)
         {
           if (in_region (lineno, i, r))
             outch (' ', FONT_REVERSE, &x);
@@ -150,7 +150,7 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
   size_t x, i;
 
   term_move (line, 0);
-  for (x = 0, i = startcol; i < astr_len (lp->text) && x < wp->ewidth; i++)
+  for (x = 0, i = startcol; i < astr_len (lp->text) && x < get_window_ewidth (wp); i++)
     {
       if (highlight && in_region (lineno, i, r))
         outch (astr_get (lp->text, i), FONT_REVERSE, &x);
@@ -166,9 +166,9 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
 {
   if ((wp != cur_wp
        && !get_variable_bool ("highlight-nonselected-windows"))
-      || (get_buffer_mark (wp->bp) == NULL)
+      || (get_buffer_mark (get_window_bp (wp)) == NULL)
       || (!transient_mark_mode ())
-      || (transient_mark_mode () && !get_buffer_mark_active (wp->bp)))
+      || (transient_mark_mode () && !get_buffer_mark_active (get_window_bp (wp))))
     {
       *highlight = false;
       return;
@@ -176,7 +176,7 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
 
   *highlight = true;
   r->start = window_pt (wp);
-  r->end = get_buffer_mark (wp->bp)->pt;
+  r->end = get_buffer_mark (get_window_bp (wp))->pt;
   if (cmp_point (r->end, r->start) < 0)
     swap_point (&r->end, &r->start);
 }
@@ -193,29 +193,29 @@ draw_window (size_t topline, Window * wp)
   calculate_highlight_region (wp, &r, &highlight);
 
   /* Find the first line to display on the first screen line. */
-  for (lp = pt.p, lineno = pt.n, i = wp->topdelta;
-       i > 0 && lp->prev != get_buffer_lines (wp->bp);
+  for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
+       i > 0 && lp->prev != get_buffer_lines (get_window_bp (wp));
        lp = lp->prev, --i, --lineno)
     ;
 
-  cur_tab_width = tab_width (wp->bp);
+  cur_tab_width = tab_width (get_window_bp (wp));
 
   /* Draw the window lines. */
-  for (i = topline; i < wp->eheight + topline; ++i, ++lineno)
+  for (i = topline; i < get_window_eheight (wp) + topline; ++i, ++lineno)
     {
       /* Clear the line. */
       term_move (i, 0);
       term_clrtoeol ();
 
       /* If at the end of the buffer, don't write any text. */
-      if (lp == get_buffer_lines (wp->bp))
+      if (lp == get_buffer_lines (get_window_bp (wp)))
         continue;
 
-      startcol = wp->start_column;
+      startcol = get_window_start_column (wp);
 
       draw_line (i, startcol, wp, lp, lineno, &r, highlight);
 
-      if (wp->start_column > 0)
+      if (get_window_start_column (wp) > 0)
         {
           term_move (i, 0);
           term_addch ('$');
@@ -230,11 +230,11 @@ make_mode_line_flags (Window * wp)
 {
   static char buf[3];
 
-  if (get_buffer_modified (wp->bp) && get_buffer_readonly (wp->bp))
+  if (get_buffer_modified (get_window_bp (wp)) && get_buffer_readonly (get_window_bp (wp)))
     buf[0] = '%', buf[1] = '*';
-  else if (get_buffer_modified (wp->bp))
+  else if (get_buffer_modified (get_window_bp (wp)))
     buf[0] = buf[1] = '*';
-  else if (get_buffer_readonly (wp->bp))
+  else if (get_buffer_readonly (get_window_bp (wp)))
     buf[0] = buf[1] = '%';
   else
     buf[0] = buf[1] = '-';
@@ -250,14 +250,14 @@ make_mode_line_flags (Window * wp)
 static void
 calculate_start_column (Window * wp)
 {
-  size_t col = 0, lastcol = 0, t = tab_width (wp->bp);
+  size_t col = 0, lastcol = 0, t = tab_width (get_window_bp (wp));
   int rpfact, lpfact;
   char *buf;
   size_t rp, lp, p;
   Point pt = window_pt (wp);
 
   rp = pt.o;
-  rpfact = pt.o / (wp->ewidth / 3);
+  rpfact = pt.o / (get_window_ewidth (wp) / 3);
 
   for (lp = rp; lp != SIZE_MAX; --lp)
     {
@@ -275,11 +275,11 @@ calculate_start_column (Window * wp)
             free (buf);
           }
 
-      lpfact = lp / (wp->ewidth / 3);
+      lpfact = lp / (get_window_ewidth (wp) / 3);
 
-      if (col >= wp->ewidth - 1 || lpfact < (rpfact - 2))
+      if (col >= get_window_ewidth (wp) - 1 || lpfact < (rpfact - 2))
         {
-          wp->start_column = lp + 1;
+          set_window_start_column (wp, lp + 1);
           point_screen_column = lastcol;
           return;
         }
@@ -287,7 +287,7 @@ calculate_start_column (Window * wp)
       lastcol = col;
     }
 
-  wp->start_column = 0;
+  set_window_start_column (wp, 0);
   point_screen_column = col;
 }
 
@@ -296,15 +296,15 @@ make_screen_pos (Window * wp, char **buf)
 {
   Point pt = window_pt (wp);
 
-  if (get_buffer_last_line (wp->bp) <= wp->eheight && wp->topdelta == pt.n)
+  if (get_buffer_last_line (get_window_bp (wp)) <= get_window_eheight (wp) && get_window_topdelta (wp) == pt.n)
     xasprintf (buf, "All");
-  else if (pt.n == wp->topdelta)
+  else if (pt.n == get_window_topdelta (wp))
     xasprintf (buf, "Top");
-  else if (pt.n + (wp->eheight - wp->topdelta) > get_buffer_last_line (wp->bp))
+  else if (pt.n + (get_window_eheight (wp) - get_window_topdelta (wp)) > get_buffer_last_line (get_window_bp (wp)))
     xasprintf (buf, "Bot");
   else
     xasprintf (buf, "%2d%%",
-               (int) ((float) pt.n / get_buffer_last_line (wp->bp) * 100));
+               (int) ((float) pt.n / get_buffer_last_line (get_window_bp (wp)) * 100));
 
   return *buf;
 }
@@ -320,7 +320,7 @@ draw_status_line (size_t line, Window * wp)
   term_attrset (1, FONT_REVERSE);
 
   term_move (line, 0);
-  for (i = 0; i < wp->ewidth; ++i)
+  for (i = 0; i < get_window_ewidth (wp); ++i)
     term_addch ('-');
 
   if (get_buffer_eol (cur_bp) == coding_eol_cr)
@@ -332,20 +332,20 @@ draw_status_line (size_t line, Window * wp)
 
   term_move (line, 0);
   bs = astr_afmt (astr_new (), "(%d,%d)", pt.n + 1,
-                  get_goalc_bp (wp->bp, window_pt (wp)));
+                  get_goalc_bp (get_window_bp (wp), window_pt (wp)));
   as = astr_afmt (astr_new (), "--%s%2s  %-15s   %s %-9s (Text",
-                  eol_type, make_mode_line_flags (wp), get_buffer_name (wp->bp),
+                  eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
                   make_screen_pos (wp, &buf), astr_cstr (bs));
   free (buf);
   astr_delete (bs);
 
-  if (get_buffer_autofill (wp->bp))
+  if (get_buffer_autofill (get_window_bp (wp)))
     astr_cat_cstr (as, " Fill");
-  if (get_buffer_overwrite (wp->bp))
+  if (get_buffer_overwrite (get_window_bp (wp)))
     astr_cat_cstr (as, " Ovwrt");
   if (thisflag & FLAG_DEFINING_MACRO)
     astr_cat_cstr (as, " Def");
-  if (get_buffer_isearch (wp->bp))
+  if (get_buffer_isearch (get_window_bp (wp)))
     astr_cat_cstr (as, " Isearch");
 
   astr_cat_char (as, ')');
@@ -365,7 +365,7 @@ term_redisplay (void)
 
   calculate_start_column (cur_wp);
 
-  for (wp = head_wp; wp != NULL; wp = wp->next)
+  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
     {
       if (wp == cur_wp)
         cur_topline = topline;
@@ -374,14 +374,14 @@ term_redisplay (void)
 
       /* Draw the status line only if there is available space after the
          buffer text space. */
-      if (wp->fheight - wp->eheight > 0)
-        draw_status_line (topline + wp->eheight, wp);
+      if (get_window_fheight (wp) - get_window_eheight (wp) > 0)
+        draw_status_line (topline + get_window_eheight (wp), wp);
 
-      topline += wp->fheight;
+      topline += get_window_fheight (wp);
     }
 
   /* Redraw cursor. */
-  term_move (cur_topline + cur_wp->topdelta, point_screen_column);
+  term_move (cur_topline + get_window_topdelta (cur_wp), point_screen_column);
 }
 
 void

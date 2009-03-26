@@ -562,12 +562,12 @@ kill_buffer (Buffer * kill_bp)
       free_buffer (cur_bp);
 
       /* Scan all the windows that display this buffer. */
-      for (wp = head_wp; wp != NULL; wp = wp->next)
-        if (wp->bp == cur_bp)
+      for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+        if (get_window_bp (wp) == cur_bp)
           {
-            wp->bp = new_bp;
-            wp->topdelta = 0;
-            wp->saved_pt = NULL;	/* It was freed. */
+            set_window_bp (wp, new_bp);
+            set_window_topdelta (wp, 0);
+            set_window_saved_pt (wp, NULL);	/* It was freed. */
           }
 
       head_bp = cur_bp = new_bp;
@@ -588,12 +588,12 @@ kill_buffer (Buffer * kill_bp)
       Window *wp;
 
       /* Search for windows displaying the buffer to kill. */
-      for (wp = head_wp; wp != NULL; wp = wp->next)
-        if (wp->bp == kill_bp)
+      for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+        if (get_window_bp (wp) == kill_bp)
           {
-            wp->bp = next_bp;
-            wp->topdelta = 0;
-            wp->saved_pt = NULL;	/* The marker will be freed. */
+            set_window_bp (wp, next_bp);
+            set_window_topdelta (wp, 0);
+            set_window_saved_pt (wp, NULL);	/* The marker will be freed. */
           }
 
       /* Remove the buffer from the buffer list. */

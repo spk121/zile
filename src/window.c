@@ -30,6 +30,23 @@
 #include "main.h"
 #include "extern.h"
 
+/*
+ * Structure
+ */
+struct Window
+{
+#define FIELD(ty, name) ty name;
+#include "window.h"
+#undef FIELD
+};
+
+#define FIELD(ty, field)                        \
+  GETTER (Window, window, ty, field)            \
+  SETTER (Window, window, ty, field)
+
+#include "window.h"
+#undef FIELD
+
 static Window *
 window_new (void)
 {
