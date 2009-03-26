@@ -590,14 +590,14 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
 
   src = (char *) xzalloc (size + 1);
   dest = (char *) xzalloc (size * t + 1);
-  strncpy (src, astr_cstr ((*lp)->text) + offset, size);
+  strncpy (src, astr_cstr (get_line_text (*lp)) + offset, size);
   src[size] = '\0';
 
   /* Get offset's column.  */
   col = 0;
   for (i = 0; i < offset; i++)
     {
-      if (astr_get ((*lp)->text, i) == '\t')
+      if (astr_get (get_line_text (*lp), i) == '\t')
         col |= t - 1;
       ++col;
     }
@@ -636,7 +636,7 @@ edit_tab_region (int action)
   marker = point_marker ();
 
   undo_save (UNDO_START_SEQUENCE, marker->pt, 0, 0);
-  for (lp = r.start.p, lineno = r.start.n;; lp = lp->next, ++lineno)
+  for (lp = r.start.p, lineno = r.start.n;; lp = get_line_next (lp), ++lineno)
     {
       /* First line.  */
       if (lineno == r.start.n)
@@ -647,14 +647,14 @@ edit_tab_region (int action)
           /* Region is multi-line. */
           else
             edit_tab_line (&lp, lineno, r.start.o,
-                           astr_len (lp->text) - r.start.o, action);
+                           astr_len (get_line_text (lp)) - r.start.o, action);
         }
       /* Last line of multi-line region. */
       else if (lineno == r.end.n)
         edit_tab_line (&lp, lineno, 0, r.end.o, action);
       /* Middle line of multi-line region. */
       else
-        edit_tab_line (&lp, lineno, 0, astr_len (lp->text), action);
+        edit_tab_line (&lp, lineno, 0, astr_len (get_line_text (lp)), action);
       /* Done?  */
       if (lineno == r.end.n)
         break;
@@ -783,14 +783,16 @@ END_DEFUN
                                ((c == '\'') && single_quote))
 #define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
                                ISCLOSEBRACKETCHAR (c))
-#define PRECEDINGQUOTEDQUOTE(c) (c == '\\' \
-    && get_buffer_pt (cur_bp).o + 1 < astr_len (get_buffer_pt (cur_bp).p->text) \
-    && ((astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\"') || \
-        (astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\'')))
-#define FOLLOWINGQUOTEDQUOTE(c) (c == '\\' \
-    && get_buffer_pt (cur_bp).o + 1 < astr_len (get_buffer_pt (cur_bp).p->text) \
-    && ((astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\"') || \
-        (astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o + 1) == '\'')))
+#define PRECEDINGQUOTEDQUOTE(c)                                         \
+  (c == '\\'                                                            \
+   && get_buffer_pt (cur_bp).o + 1 < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) \
+   && ((astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\"') || \
+       (astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\'')))
+#define FOLLOWINGQUOTEDQUOTE(c)                                         \
+  (c == '\\'                                                            \
+   && get_buffer_pt (cur_bp).o + 1 < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) \
+   && ((astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\"') || \
+       (astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\'')))
 
 static int
 move_sexp (int dir)
@@ -878,7 +880,7 @@ move_sexp (int dir)
           break;
         }
       pt = get_buffer_pt (cur_bp);
-      pt.o = dir > 0 ? 0 : astr_len (pt.p->text);
+      pt.o = dir > 0 ? 0 : astr_len (get_line_text (pt.p));
       set_buffer_pt (cur_bp, pt);
     }
   return false;
@@ -1283,8 +1285,8 @@ setcase_word (int rcase)
 
   as = astr_new ();
   for (i = get_buffer_pt (cur_bp).o;
-       i < astr_len (get_buffer_pt (cur_bp).p->text) &&
-         ISWORDCHAR ((int) (c = astr_get (get_buffer_pt (cur_bp).p->text, i)));
+       i < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) &&
+         ISWORDCHAR ((int) (c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i)));
        i++)
     astr_cat_char (as, c);
 
@@ -1292,7 +1294,7 @@ setcase_word (int rcase)
     {
       undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), astr_len (as), astr_len (as));
       astr_recase (as, rcase);
-      astr_nreplace_cstr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, astr_len (as),
+      astr_nreplace_cstr (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o, astr_len (as),
                           astr_cstr (as), astr_len (as));
     }
   astr_delete (as);
@@ -1370,15 +1372,15 @@ setcase_region (enum casing rcase)
   i = r.start.o;
   while (r.size--)
     {
-      if (i < astr_len (lp->text))
+      if (i < astr_len (get_line_text (lp)))
         {
-          char c = func (astr_get (lp->text, i));
-          astr_nreplace_cstr (lp->text, i, 1, &c, 1);
+          char c = func (astr_get (get_line_text (lp), i));
+          astr_nreplace_cstr (get_line_text (lp), i, 1, &c, 1);
           ++i;
         }
       else
         {
-          lp = lp->next;
+          lp = get_line_next (lp);
           i = 0;
         }
     }

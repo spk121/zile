@@ -150,12 +150,12 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
   size_t x, i;
 
   term_move (line, 0);
-  for (x = 0, i = startcol; i < astr_len (lp->text) && x < get_window_ewidth (wp); i++)
+  for (x = 0, i = startcol; i < astr_len (get_line_text (lp)) && x < get_window_ewidth (wp); i++)
     {
       if (highlight && in_region (lineno, i, r))
-        outch (astr_get (lp->text, i), FONT_REVERSE, &x);
+        outch (astr_get (get_line_text (lp), i), FONT_REVERSE, &x);
       else
-        outch (astr_get (lp->text, i), FONT_NORMAL, &x);
+        outch (astr_get (get_line_text (lp), i), FONT_NORMAL, &x);
     }
 
   draw_end_of_line (line, wp, lineno, r, highlight, x, i);
@@ -194,8 +194,8 @@ draw_window (size_t topline, Window * wp)
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
-       i > 0 && lp->prev != get_buffer_lines (get_window_bp (wp));
-       lp = lp->prev, --i, --lineno)
+       i > 0 && get_line_prev (lp) != get_buffer_lines (get_window_bp (wp));
+       lp = get_line_prev (lp), --i, --lineno)
     ;
 
   cur_tab_width = tab_width (get_window_bp (wp));
@@ -221,7 +221,7 @@ draw_window (size_t topline, Window * wp)
           term_addch ('$');
         }
 
-      lp = lp->next;
+      lp = get_line_next (lp);
     }
 }
 
@@ -262,16 +262,16 @@ calculate_start_column (Window * wp)
   for (lp = rp; lp != SIZE_MAX; --lp)
     {
       for (col = 0, p = lp; p < rp; ++p)
-        if (astr_get (pt.p->text, p) == '\t')
+        if (astr_get (get_line_text (pt.p), p) == '\t')
           {
             col |= t - 1;
             ++col;
           }
-        else if (isprint ((int) astr_get (pt.p->text, p)))
+        else if (isprint ((int) astr_get (get_line_text (pt.p), p)))
           ++col;
         else
           {
-            col += make_char_printable (&buf, astr_get (pt.p->text, p));
+            col += make_char_printable (&buf, astr_get (get_line_text (pt.p), p));
             free (buf);
           }
 

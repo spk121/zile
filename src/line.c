@@ -33,6 +33,23 @@
 
 
 /*
+ * Structure
+ */
+struct Line
+{
+#define FIELD(ty, name) ty name;
+#include "line.h"
+#undef FIELD
+};
+
+#define FIELD(ty, field)                        \
+  GETTER (Line, line, ty, field)                \
+  SETTER (Line, line, ty, field)
+
+#include "line.h"
+#undef FIELD
+
+/*
  * Circular doubly-linked lists
  */
 

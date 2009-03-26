@@ -332,7 +332,7 @@ read_from_disk (const char *filename)
           for (i = 0; i < size; i++)
             {
               if (strncmp (get_buffer_eol (cur_bp), buf + i, eol_len) != 0)
-                astr_cat_char (lp->text, buf[i]);
+                astr_cat_char (get_line_text (lp), buf[i]);
               else
                 {
                   lp = line_insert (lp, astr_new ());
@@ -345,10 +345,10 @@ read_from_disk (const char *filename)
       while ((size = fread (buf, 1, BUFSIZ, fp)) > 0);
     }
 
-  lp->next = get_buffer_lines (cur_bp);
-  get_buffer_lines (cur_bp)->prev = lp;
+  set_line_next (lp, get_buffer_lines (cur_bp));
+  set_line_prev (get_buffer_lines (cur_bp), lp);
   pt = get_buffer_pt (cur_bp);
-  pt.p = get_buffer_lines (cur_bp)->next;
+  pt.p = get_line_next (get_buffer_lines (cur_bp));
   set_buffer_pt (cur_bp, pt);
 
   fclose (fp);
@@ -662,9 +662,9 @@ END_DEFUN
 static size_t
 insert_lines (size_t n, size_t end, size_t last, Line *from_lp)
 {
-  for (; n < end; n++, from_lp = from_lp->next)
+  for (; n < end; n++, from_lp = get_line_next (from_lp))
     {
-      insert_astr (from_lp->text);
+      insert_astr (get_line_text (from_lp));
       if (n < last)
         insert_newline ();
     }
@@ -674,14 +674,14 @@ insert_lines (size_t n, size_t end, size_t last, Line *from_lp)
 static void
 insert_buffer (Buffer * bp)
 {
-  Line *old_next = get_buffer_pt (bp).p->next;
-  astr old_cur_line = astr_cpy (astr_new (), get_buffer_pt (bp).p->text);
+  Line *old_next = get_line_next (get_buffer_pt (bp).p);
+  astr old_cur_line = astr_cpy (astr_new (), get_line_text (get_buffer_pt (bp).p));
   size_t old_cur_n = get_buffer_pt (bp).n, old_lines = get_buffer_last_line (bp);
   size_t size = calculate_buffer_size (bp);
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
   undo_nosave = true;
-  insert_lines (0, old_cur_n, old_lines, get_buffer_lines (bp)->next);
+  insert_lines (0, old_cur_n, old_lines, get_line_next (get_buffer_lines (bp)));
   insert_astr (old_cur_line);
   if (old_cur_n < old_lines)
     insert_newline ();
@@ -908,17 +908,19 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
     return -1;
 
   /* Save the lines. */
-  for (lp = get_buffer_lines (bp)->next; lp != get_buffer_lines (bp); lp = lp->next)
+  for (lp = get_line_next (get_buffer_lines (bp));
+       lp != get_buffer_lines (bp);
+       lp = get_line_next (lp))
     {
-      ssize_t len = (ssize_t) astr_len (lp->text);
+      ssize_t len = (ssize_t) astr_len (get_line_text (lp));
 
-      written = write (fd, astr_cstr (lp->text), len);
+      written = write (fd, astr_cstr (get_line_text (lp)), len);
       if (written != len)
         {
           ret = written;
           break;
         }
-      if (lp->next != get_buffer_lines (bp))
+      if (get_line_next (lp) != get_buffer_lines (bp))
         {
           written = write (fd, get_buffer_eol (bp), eol_len);
           if (written != eol_len)

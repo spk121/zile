@@ -82,7 +82,7 @@ int
 is_empty_line (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  return astr_len (pt.p->text) == 0;
+  return astr_len (get_line_text (pt.p)) == 0;
 }
 
 int
@@ -90,8 +90,8 @@ is_blank_line (void)
 {
   Point pt = get_buffer_pt (cur_bp);
   size_t c;
-  for (c = 0; c < astr_len (pt.p->text); c++)
-    if (!isspace ((int) astr_get (pt.p->text, c)))
+  for (c = 0; c < astr_len (get_line_text (pt.p)); c++)
+    if (!isspace ((int) astr_get (get_line_text (pt.p), c)))
       return false;
   return true;
 }
@@ -107,7 +107,7 @@ following_char (void)
   else
     {
       Point pt = get_buffer_pt (cur_bp);
-      return astr_get (pt.p->text, pt.o);
+      return astr_get (get_line_text (pt.p), pt.o);
     }
 }
 
@@ -122,7 +122,7 @@ preceding_char (void)
   else
     {
       Point pt = get_buffer_pt (cur_bp);
-      return astr_get (pt.p->text, pt.o - 1);
+      return astr_get (get_line_text (pt.p), pt.o - 1);
     }
 }
 
@@ -131,7 +131,7 @@ int
 bobp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  return (pt.p->prev == get_buffer_lines (cur_bp) && pt.o == 0);
+  return (get_line_prev (pt.p) == get_buffer_lines (cur_bp) && pt.o == 0);
 }
 
 /* Return true if point is at the end of the buffer. */
@@ -139,8 +139,8 @@ int
 eobp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  return (pt.p->next == get_buffer_lines (cur_bp) &&
-          pt.o == astr_len (pt.p->text));
+  return (get_line_next (pt.p) == get_buffer_lines (cur_bp) &&
+          pt.o == astr_len (get_line_text (pt.p)));
 }
 
 /* Return true if point is at the beginning of a line. */
@@ -156,7 +156,7 @@ int
 eolp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  return pt.o == astr_len (pt.p->text);
+  return pt.o == astr_len (get_line_text (pt.p));
 }
 
 /* Signal an error, and abort any ongoing macro definition. */

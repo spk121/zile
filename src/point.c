@@ -28,12 +28,12 @@ Point
 make_point (size_t lineno, size_t offset)
 {
   Point pt;
-  pt.p = get_buffer_lines (cur_bp)->next;
+  pt.p = get_line_next (get_buffer_lines (cur_bp));
   pt.n = lineno;
   pt.o = offset;
   while (lineno > 0)
     {
-      pt.p = pt.p->next;
+      pt.p = get_line_next (pt.p);
       lineno--;
     }
   return pt;
@@ -59,16 +59,16 @@ point_dist (Point pt1, Point pt2)
   if (cmp_point (pt1, pt2) > 0)
     swap_point (&pt1, &pt2);
 
-  for (lp = pt1.p;; lp = lp->next)
+  for (lp = pt1.p;; lp = get_line_next (lp))
     {
-      size += astr_len (lp->text);
+      size += astr_len (get_line_text (lp));
 
       if (lp == pt1.p)
         size -= pt1.o;
 
       if (lp == pt2.p)
         {
-          size -= astr_len (lp->text) - pt2.o;
+          size -= astr_len (get_line_text (lp)) - pt2.o;
           break;
         }
       else
@@ -99,7 +99,7 @@ Point
 point_min (void)
 {
   Point pt;
-  pt.p = get_buffer_lines (cur_bp)->next;
+  pt.p = get_line_next (get_buffer_lines (cur_bp));
   pt.n = 0;
   pt.o = 0;
   return pt;
@@ -109,9 +109,9 @@ Point
 point_max (void)
 {
   Point pt;
-  pt.p = get_buffer_lines (cur_bp)->prev;
+  pt.p = get_line_prev (get_buffer_lines (cur_bp));
   pt.n = get_buffer_last_line (cur_bp);
-  pt.o = astr_len (get_buffer_lines (cur_bp)->prev->text);
+  pt.o = astr_len (get_line_text (get_line_prev (get_buffer_lines (cur_bp))));
   return pt;
 }
 
@@ -126,10 +126,10 @@ line_beginning_position (int count)
   pt.o = 0;
 
   count--;
-  for (; count < 0 && pt.p->prev != get_buffer_lines (cur_bp); pt.n--, count++)
-    pt.p = pt.p->prev;
-  for (; count > 0 && pt.p->next != get_buffer_lines (cur_bp); pt.n++, count--)
-    pt.p = pt.p->next;
+  for (; count < 0 && get_line_prev (pt.p) != get_buffer_lines (cur_bp); pt.n--, count++)
+    pt.p = get_line_prev (pt.p);
+  for (; count > 0 && get_line_next (pt.p) != get_buffer_lines (cur_bp); pt.n++, count--)
+    pt.p = get_line_next (pt.p);
 
   return pt;
 }
@@ -138,7 +138,7 @@ Point
 line_end_position (int count)
 {
   Point pt = line_beginning_position (count);
-  pt.o = astr_len (pt.p->text);
+  pt.o = astr_len (get_line_text (pt.p));
   return pt;
 }
 

@@ -52,6 +52,7 @@ zile_base_SOURCES =					\
 	history.c					\
 	keycode.c					\
 	killring.c					\
+	line.h						\
 	line.c						\
 	macro.c						\
 	main.c						\

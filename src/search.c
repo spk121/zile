@@ -201,24 +201,24 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
   if (s2size < 1)
     return false;
 
-  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = lp->next)
+  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = get_line_next (lp))
     {
       if (lp == startp)
         {
-          sp = astr_cstr (lp->text) + starto;
-          s1size = astr_len (lp->text) - starto;
+          sp = astr_cstr (get_line_text (lp)) + starto;
+          s1size = astr_len (get_line_text (lp)) - starto;
         }
       else
         {
-          sp = astr_cstr (lp->text);
-          s1size = astr_len (lp->text);
+          sp = astr_cstr (get_line_text (lp));
+          s1size = astr_len (get_line_text (lp));
         }
       if (s1size < 1)
         continue;
 
       if (regexp)
         sp2 = re_find_substr (sp, s1size, s, s2size,
-                              sp == astr_cstr (lp->text), true, false,
+                              sp == astr_cstr (get_line_text (lp)), true, false,
                               translate);
       else
         sp2 = find_substr (sp, s1size, s, s2size, translate);
@@ -228,7 +228,7 @@ search_forward (Line * startp, size_t starto, const char *s, int regexp)
           Point pt;
           goto_linep (lp);
           pt = get_buffer_pt (cur_bp);
-          pt.o = sp2 - astr_cstr (lp->text);
+          pt.o = sp2 - astr_cstr (get_line_text (lp));
           set_buffer_pt (cur_bp, pt);
           return true;
         }
@@ -247,19 +247,19 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
   if (ssize < 1)
     return false;
 
-  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = lp->prev)
+  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = get_line_prev (lp))
     {
-      sp = astr_cstr (lp->text);
+      sp = astr_cstr (get_line_text (lp));
       if (lp == startp)
         s1size = starto;
       else
-        s1size = astr_len (lp->text);
+        s1size = astr_len (get_line_text (lp));
       if (s1size < 1)
         continue;
 
       if (regexp)
         sp2 = re_find_substr (sp, s1size, s, ssize,
-                              true, s1size == astr_len (lp->text), true,
+                              true, s1size == astr_len (get_line_text (lp)), true,
                               translate);
       else
         sp2 = rfind_substr (sp, s1size, s, ssize, translate);
@@ -269,7 +269,7 @@ search_backward (Line * startp, size_t starto, const char *s, int regexp)
           Point pt;
           goto_linep (lp);
           pt = get_buffer_pt (cur_bp);
-          pt.o = sp2 - astr_cstr (lp->text);
+          pt.o = sp2 - astr_cstr (get_line_text (lp));
           set_buffer_pt (cur_bp, pt);
           return true;
         }

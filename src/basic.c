@@ -68,7 +68,7 @@ size_t
 get_goalc_bp (Buffer * bp, Point pt)
 {
   size_t col = 0, t = tab_width (bp), i;
-  const char *sp = astr_cstr (pt.p->text);
+  const char *sp = astr_cstr (get_line_text (pt.p));
 
   for (i = 0; i < pt.o; i++)
     {
@@ -96,11 +96,11 @@ goto_goalc (size_t goalc)
   Point pt = get_buffer_pt (cur_bp);
   size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = 0; i < astr_len (pt.p->text); i++)
+  for (i = 0; i < astr_len (get_line_text (pt.p)); i++)
     {
       if (col == goalc)
         break;
-      else if (astr_get (pt.p->text, i) == '\t')
+      else if (astr_get (get_line_text (pt.p), i) == '\t')
         {
           size_t w;
           for (w = t - col % t; w > 0; w--)
@@ -118,7 +118,7 @@ goto_goalc (size_t goalc)
 int
 previous_line (void)
 {
-  if (get_buffer_pt (cur_bp).p->prev != get_buffer_lines (cur_bp))
+  if (get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
     {
       Point pt;
 
@@ -128,7 +128,7 @@ previous_line (void)
         cur_goalc = get_goalc ();
 
       pt = get_buffer_pt (cur_bp);
-      pt.p = pt.p->prev;
+      pt.p = get_line_prev (pt.p);
       pt.n--;
       set_buffer_pt (cur_bp, pt);
 
@@ -171,7 +171,7 @@ END_DEFUN
 int
 next_line (void)
 {
-  if (get_buffer_pt (cur_bp).p->next != get_buffer_lines (cur_bp))
+  if (get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
     {
       Point pt;
 
@@ -181,7 +181,7 @@ next_line (void)
         cur_goalc = get_goalc ();
 
       pt = get_buffer_pt (cur_bp);
-      pt.p = pt.p->next;
+      pt.p = get_line_next (pt.p);
       pt.n++;
       set_buffer_pt (cur_bp, pt);
 
@@ -348,7 +348,7 @@ backward_char (void)
     {
       Point pt = get_buffer_pt (cur_bp);
       thisflag |= FLAG_NEED_RESYNC;
-      pt.p = pt.p->prev;
+      pt.p = get_line_prev (pt.p);
       pt.n--;
       set_buffer_pt (cur_bp, pt);
       FUNCALL (end_of_line);
@@ -372,7 +372,7 @@ forward_char (void)
     {
       Point pt = get_buffer_pt (cur_bp);
       thisflag |= FLAG_NEED_RESYNC;
-      pt.p = pt.p->next;
+      pt.p = get_line_next (pt.p);
       pt.n++;
       set_buffer_pt (cur_bp, pt);
       FUNCALL (beginning_of_line);
@@ -410,7 +410,7 @@ int
 ngotoup (size_t n)
 {
   for (; n > 0; n--)
-    if (get_buffer_pt (cur_bp).p->prev != get_buffer_lines (cur_bp))
+    if (get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
       FUNCALL (previous_line);
     else
       return false;
@@ -422,7 +422,7 @@ int
 ngotodown (size_t n)
 {
   for (; n > 0; n--)
-    if (get_buffer_pt (cur_bp).p->next != get_buffer_lines (cur_bp))
+    if (get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
       FUNCALL (next_line);
     else
       return false;

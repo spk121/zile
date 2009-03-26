@@ -42,6 +42,7 @@
  *--------------------------------------------------------------------------*/
 
 /* Opaque types. */
+typedef struct Line Line;
 typedef struct History History;
 typedef struct Undo Undo;
 typedef struct Macro Macro;
@@ -51,21 +52,9 @@ typedef struct Window Window;
 typedef struct Completion Completion;
 
 /* FIXME: Types which should really be opaque. */
-typedef struct Line Line;
 typedef struct Point Point;
 typedef struct Marker Marker;
 typedef struct Region Region;
-
-/*
- * A line is a doubly-linked list of astrs.
- * The newline at the end of each line is implicit.
- */
-struct Line
-{
-  Line *prev;
-  Line *next;
-  astr text;
-};
 
 struct Point
 {

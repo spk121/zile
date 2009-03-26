@@ -162,6 +162,12 @@ astr keyvectostr (gl_list_t keys);
 void free_kill_ring (void);
 
 /* line.c ----------------------------------------------------------------- */
+#define FIELD(ty, field)                                \
+  ty get_line_ ## field (Line *wp);                     \
+  void set_line_ ## field (Line *wp, ty field);
+  FIELD(const char *, field)
+#include "line.h"
+#undef FIELD
 Line *line_new (void);
 void line_delete (Line *l);
 Line *line_insert (Line *l, astr i);

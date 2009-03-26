@@ -71,13 +71,15 @@ buffer_new (void)
 
   /* Allocate a line. */
   bp->pt.p = line_new ();
-  bp->pt.p->text = astr_new ();
+  set_line_text (bp->pt.p, astr_new ());
 
   /* Allocate the limit marker. */
   bp->lines = line_new ();
 
-  bp->lines->prev = bp->lines->next = bp->pt.p;
-  bp->pt.p->prev = bp->pt.p->next = bp->lines;
+  set_line_prev (bp->lines, bp->pt.p);
+  set_line_next (bp->lines, bp->pt.p);
+  set_line_prev (bp->pt.p, bp->lines);
+  set_line_next (bp->pt.p, bp->lines);
 
   /* Set default EOL string. */
   bp->eol = coding_eol_lf;
@@ -361,7 +363,7 @@ set_temporary_buffer (Buffer * bp)
 size_t
 calculate_buffer_size (Buffer * bp)
 {
-  Line *lp = bp->lines->next;
+  Line *lp = get_line_next (bp->lines);
   size_t size = 0;
 
   if (lp == bp->lines)
@@ -369,8 +371,8 @@ calculate_buffer_size (Buffer * bp)
 
   for (;;)
     {
-      size += astr_len (lp->text);
-      lp = lp->next;
+      size += astr_len (get_line_text (lp));
+      lp = get_line_next (lp);
       if (lp == bp->lines)
         break;
       ++size;
@@ -425,11 +427,11 @@ copy_text_block (size_t startn, size_t starto, size_t size)
   n = cur_bp->pt.n;
   if (n > startn)
     do
-      lp = lp->prev;
+      lp = get_line_prev (lp);
     while (--n > startn);
   else if (n < startn)
     do
-      lp = lp->next;
+      lp = get_line_next (lp);
     while (++n < startn);
 
   for (i = starto; dp - buf < (int) size;)
@@ -441,12 +443,12 @@ copy_text_block (size_t startn, size_t starto, size_t size)
           buf = (char *) xrealloc (buf, max_size);
           dp = buf + save_off;
         }
-      if (i < astr_len (lp->text))
-        *dp++ = astr_get (lp->text, i++);
+      if (i < astr_len (get_line_text (lp)))
+        *dp++ = astr_get (get_line_text (lp), i++);
       else
         {
           *dp++ = '\n';
-          lp = lp->next;
+          lp = get_line_next (lp);
           i = 0;
         }
     }

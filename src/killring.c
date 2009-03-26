@@ -94,7 +94,7 @@ kill_line (int literally)
       Region r;
 
       r.start = get_buffer_pt (cur_bp);
-      r.size = astr_len (get_buffer_pt (cur_bp).p->text) - get_buffer_pt (cur_bp).o;
+      r.size = astr_len (get_line_text (get_buffer_pt (cur_bp).p)) - get_buffer_pt (cur_bp).o;
 
       if (!copy_or_kill_region (true, &r))
         return false;
