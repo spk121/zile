@@ -56,6 +56,20 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
+struct Region
+{
+#define FIELD(ty, name) ty name;
+#include "region.h"
+#undef FIELD
+};
+
+#define FIELD(ty, field)                         \
+  GETTER (Region, region, ty, field)             \
+  SETTER (Region, region, ty, field)
+
+#include "region.h"
+#undef FIELD
+
 /*
  * Allocate a new buffer structure and set the default local
  * variable values.
@@ -299,9 +313,15 @@ warn_if_no_mark (void)
     return false;
 }
 
+Region *
+region_new (void)
+{
+  return XZALLOC (Region);
+}
+
 /*
  * Calculate the region size between point and mark and set the region
-   structure.
+ * structure.
  */
 int
 calculate_the_region (Region * rp)
@@ -312,18 +332,67 @@ calculate_the_region (Region * rp)
   if (cmp_point (cur_bp->pt, cur_bp->mark->pt) < 0)
     {
       /* Point is before mark. */
-      rp->start = cur_bp->pt;
-      rp->end = cur_bp->mark->pt;
+      set_region_start (rp, cur_bp->pt);
+      set_region_end (rp, cur_bp->mark->pt);
     }
   else
     {
       /* Mark is before point. */
-      rp->start = cur_bp->mark->pt;
-      rp->end = cur_bp->pt;
+      set_region_start (rp, cur_bp->mark->pt);
+      set_region_end (rp, cur_bp->pt);
     }
 
-  rp->size = point_dist (rp->start, rp->end);
+  set_region_size (rp, point_dist (get_region_start (rp),
+                                   get_region_end (rp)));
   return true;
+}
+
+bool
+delete_region (const Region * rp)
+{
+  size_t size = get_region_size (rp);
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  if (get_buffer_pt (cur_bp).p != get_region_start (rp).p ||
+      get_region_start (rp).o != get_buffer_pt (cur_bp).o)
+    FUNCALL (exchange_point_and_mark);
+
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), size, 0);
+  undo_nosave = true;
+  while (size--)
+    FUNCALL (delete_char);
+  undo_nosave = false;
+
+  return true;
+}
+
+bool
+in_region (size_t lineno, size_t x, Region * rp)
+{
+  if (lineno >= rp->start.n && lineno <= rp->end.n)
+    {
+      if (rp->start.n == rp->end.n)
+        {
+          if (x >= rp->start.o && x < rp->end.o)
+            return true;
+        }
+      else if (lineno == rp->start.n)
+        {
+          if (x >= rp->start.o)
+            return true;
+        }
+      else if (lineno == rp->end.n)
+        {
+          if (x < rp->end.o)
+            return true;
+        }
+      else
+        return true;
+    }
+
+  return false;
 }
 
 /*

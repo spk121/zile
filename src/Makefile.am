@@ -42,6 +42,7 @@ zile_base_SOURCES =					\
 	bind.c						\
 	buffer.h					\
 	buffer.c					\
+	region.h					\
 	completion.h					\
 	completion.c					\
 	editfns.c					\

@@ -93,37 +93,8 @@ outch (int c, size_t font, size_t * x)
   term_attrset (1, FONT_NORMAL);
 }
 
-static int
-in_region (size_t lineno, size_t x, Region * r)
-{
-  if (lineno >= r->start.n && lineno <= r->end.n)
-    {
-      if (r->start.n == r->end.n)
-        {
-          if (x >= r->start.o && x < r->end.o)
-            return true;
-        }
-      else if (lineno == r->start.n)
-        {
-          if (x >= r->start.o)
-            return true;
-        }
-      else if (lineno == r->end.n)
-        {
-          if (x < r->end.o)
-            return true;
-        }
-      else
-        {
-          return true;
-        }
-    }
-
-  return false;
-}
-
 static void
-draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * r,
+draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * rp,
                   int highlight, size_t x, size_t i)
 {
   if (x >= term_width ())
@@ -135,7 +106,7 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * r,
     {
       for (; x < get_window_ewidth (wp); ++i)
         {
-          if (in_region (lineno, i, r))
+          if (in_region (lineno, i, rp))
             outch (' ', FONT_REVERSE, &x);
           else
             x++;
@@ -162,7 +133,7 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
 }
 
 static void
-calculate_highlight_region (Window * wp, Region * r, int *highlight)
+calculate_highlight_region (Window * wp, Region * rp, int *highlight)
 {
   if ((wp != cur_wp
        && !get_variable_bool ("highlight-nonselected-windows"))
@@ -175,22 +146,28 @@ calculate_highlight_region (Window * wp, Region * r, int *highlight)
     }
 
   *highlight = true;
-  r->start = window_pt (wp);
-  r->end = get_buffer_mark (get_window_bp (wp))->pt;
-  if (cmp_point (r->end, r->start) < 0)
-    swap_point (&r->end, &r->start);
+  set_region_start (rp, window_pt (wp));
+  set_region_end (rp, get_buffer_mark (get_window_bp (wp))->pt);
+  if (cmp_point (get_region_end (rp), get_region_start (rp)) < 0)
+    {
+      Point pt1 = get_region_start (rp);
+      Point pt2 = get_region_end (rp);
+      swap_point (&pt1, &pt2);
+      set_region_start (rp, pt2);
+      set_region_end (rp, pt1);
+    }
 }
 
 static void
 draw_window (size_t topline, Window * wp)
 {
   size_t i, startcol, lineno;
-  Line *lp;
-  Region r;
+  Line * lp;
+  Region * rp = region_new ();
   int highlight;
   Point pt = window_pt (wp);
 
-  calculate_highlight_region (wp, &r, &highlight);
+  calculate_highlight_region (wp, rp, &highlight);
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
@@ -213,7 +190,7 @@ draw_window (size_t topline, Window * wp)
 
       startcol = get_window_start_column (wp);
 
-      draw_line (i, startcol, wp, lp, lineno, &r, highlight);
+      draw_line (i, startcol, wp, lp, lineno, rp, highlight);
 
       if (get_window_start_column (wp) > 0)
         {
@@ -223,6 +200,8 @@ draw_window (size_t topline, Window * wp)
 
       lp = get_line_next (lp);
     }
+
+  free (rp);
 }
 
 static char *

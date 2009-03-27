@@ -57,13 +57,13 @@ kill_ring_push_nstring (char *s, size_t size)
 }
 
 static bool
-copy_or_kill_region (bool kill, Region * r)
+copy_or_kill_region (bool kill, Region * rp)
 {
-  char *p = copy_text_block (r->start.n, r->start.o, r->size);
+  char *p = copy_text_block (get_region_start (rp).n, get_region_start (rp).o, get_region_size (rp));
 
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
-  kill_ring_push_nstring (p, r->size);
+  kill_ring_push_nstring (p, get_region_size (rp));
   free (p);
 
   if (kill)
@@ -71,7 +71,7 @@ copy_or_kill_region (bool kill, Region * r)
       if (get_buffer_readonly (cur_bp))
         minibuf_error ("Read only text copied to kill ring");
       else
-        assert (delete_region (r));
+        assert (delete_region (rp));
     }
 
   thisflag |= FLAG_DONE_KILL;
@@ -91,12 +91,16 @@ kill_line (int literally)
 
   if (!eolp ())
     {
-      Region r;
+      Region * rp = region_new ();
+      bool ret;
 
-      r.start = get_buffer_pt (cur_bp);
-      r.size = astr_len (get_line_text (get_buffer_pt (cur_bp).p)) - get_buffer_pt (cur_bp).o;
+      set_region_start (rp, get_buffer_pt (cur_bp));
+      set_region_size (rp, astr_len (get_line_text (get_buffer_pt (cur_bp).p)) - get_buffer_pt (cur_bp).o);
 
-      if (!copy_or_kill_region (true, &r))
+      ret = copy_or_kill_region (true, rp);
+      free (rp);
+
+      if (!ret)
         return false;
 
       if (!literally)
@@ -144,12 +148,14 @@ END_DEFUN
 static bool
 copy_or_kill_the_region (bool kill)
 {
-  Region r;
+  Region * rp = region_new ();
+  bool ret = false;
 
-  if (!calculate_the_region (&r))
-    return false;
+  if (calculate_the_region (rp))
+    ret = copy_or_kill_region (kill, rp);
 
-  return copy_or_kill_region (kill, &r);
+  free (rp);
+  return ret;
 }
 
 DEFUN ("kill-region", kill_region)

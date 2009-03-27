@@ -47,14 +47,21 @@ void free_bindings (Binding p);
 
 /* buffer.c --------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
-  ty get_buffer_ ## field (Buffer *bp);                 \
+  ty get_buffer_ ## field (const Buffer *bp);           \
   void set_buffer_ ## field (Buffer *bp, ty field);
 #define FIELD_STR(field)                                \
   FIELD(const char *, field)
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-int calculate_the_region (Region * rp);
+#define FIELD(ty, field)                                \
+  ty get_region_ ## field (const Region *cp);           \
+  void set_region_ ## field (Region *cp, ty field);
+#define FIELD_STR(field)                                \
+  FIELD(const char *, field)
+#include "region.h"
+#undef FIELD
+#undef FIELD_STR
 void free_buffer (Buffer * bp);
 void free_buffers (void);
 void init_buffer (Buffer * bp);
@@ -64,7 +71,11 @@ void set_buffer_names (Buffer * bp, const char *filename);
 Buffer * find_buffer (const char *name, int cflag);
 char *make_buffer_name (const char *filename);
 void switch_to_buffer (Buffer * bp);
+Region * region_new (void);
 int warn_if_readonly_buffer (void);
+int calculate_the_region (Region * rp);
+bool delete_region (const Region * rp);
+bool in_region (size_t lineno, size_t x, Region * rp);
 void set_temporary_buffer (Buffer * bp);
 size_t calculate_buffer_size (Buffer * bp);
 int transient_mark_mode (void);
@@ -74,10 +85,10 @@ size_t tab_width (Buffer * bp);
 char *copy_text_block (size_t startn, size_t starto, size_t size);
 
 /* completion.c ----------------------------------------------------------- */
-#define FIELD(ty, field)                                \
-  ty get_completion_ ## field (Completion *cp);         \
+#define FIELD(ty, field)                                        \
+  ty get_completion_ ## field (const Completion *cp);           \
   void set_completion_ ## field (Completion *cp, ty field);
-#define FIELD_STR(field)                                \
+#define FIELD_STR(field)                        \
   FIELD(const char *, field)
 #include "completion.h"
 #undef FIELD
@@ -134,7 +145,6 @@ void zile_exit (int doabort);
 void set_mark_interactive (void);
 le *universal_argument (int keytype, int xarg);
 void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...);
-bool delete_region (const Region * r);
 
 /* getkey.c --------------------------------------------------------------- */
 void pushkey (size_t key);
@@ -163,7 +173,7 @@ void free_kill_ring (void);
 
 /* line.c ----------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
-  ty get_line_ ## field (Line *wp);                     \
+  ty get_line_ ## field (const Line *wp);               \
   void set_line_ ## field (Line *wp, ty field);
   FIELD(const char *, field)
 #include "line.h"
@@ -308,7 +318,7 @@ bool get_variable_bool (const char *var);
 
 /* window.c --------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
-  ty get_window_ ## field (Window *wp);                 \
+  ty get_window_ ## field (const Window *wp);           \
   void set_window_ ## field (Window *wp, ty field);
   FIELD(const char *, field)
 #include "window.h"

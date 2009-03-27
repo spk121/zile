@@ -62,22 +62,24 @@ Copy region into the user specified register.
     ok = FUNCALL (keyboard_quit);
   else
     {
-      Region r;
+      Region * rp = region_new ();
 
       minibuf_clear ();
       if (reg < 0)
         reg = 0;
       reg %= NUM_REGISTERS;
 
-      if (!calculate_the_region (&r))
+      if (!calculate_the_region (rp))
         ok = leNIL;
       else
         {
-          char *p = copy_text_block (r.start.n, r.start.o, r.size);
+          char *p = copy_text_block (get_region_start (rp).n, get_region_start (rp).o, get_region_size (rp));
           register_free ((size_t) reg);
           regs[reg] = astr_new_cstr (p);
           free (p);
         }
+
+      free (rp);
     }
 
   STR_FREE (regchar);

@@ -43,6 +43,7 @@
 
 /* Opaque types. */
 typedef struct Line Line;
+typedef struct Region Region;
 typedef struct History History;
 typedef struct Undo Undo;
 typedef struct Macro Macro;
@@ -54,7 +55,6 @@ typedef struct Completion Completion;
 /* FIXME: Types which should really be opaque. */
 typedef struct Point Point;
 typedef struct Marker Marker;
-typedef struct Region Region;
 
 struct Point
 {
@@ -78,13 +78,6 @@ enum
   UNDO_END_SEQUENCE		/* End a multi operation sequence. */
 };
 
-struct Region
-{
-  Point start;			/* The region start. */
-  Point end;			/* The region end. */
-  size_t size;			/* The region size. */
-};
-
 enum
 {
   COMPLETION_NOTMATCHED,
@@ -104,7 +97,7 @@ enum
 
 #define GETTER(Obj, name, ty, field)            \
   ty                                            \
-  get_ ## name ## _ ## field (Obj *p)           \
+  get_ ## name ## _ ## field (const Obj *p)     \
   {                                             \
     return p->field;                            \
   }                                             \
