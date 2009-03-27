@@ -63,7 +63,7 @@ resize_windows (void)
 
   /* Resize windows vertically. */
   if (hdelta > 0)
-    {				/* Increase windows height. */
+    { /* Increase windows height. */
       for (wp = head_wp; hdelta > 0; wp = get_window_next (wp))
         {
           if (wp == NULL)
@@ -74,7 +74,7 @@ resize_windows (void)
         }
     }
   else
-    {				/* Decrease windows' height, and close windows if necessary. */
+    { /* Decrease windows' height, and close windows if necessary. */
       int decreased = true;
       while (decreased)
         {
