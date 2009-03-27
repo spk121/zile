@@ -38,7 +38,7 @@ DEFUN ("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-  cur_bp->pt = line_beginning_position (uniarg);
+  set_buffer_pt (cur_bp, line_beginning_position (uniarg));
 
   /* Change the `goalc' to the beginning of line for next
      `prev/next-line' calls.  */
@@ -52,7 +52,7 @@ DEFUN ("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  cur_bp->pt = line_end_position (uniarg);
+  set_buffer_pt (cur_bp, line_end_position (uniarg));
 
   /* Change the `goalc' to the end of line for next
      `prev/next-line' calls.  */
@@ -68,7 +68,7 @@ size_t
 get_goalc_bp (Buffer * bp, Point pt)
 {
   size_t col = 0, t = tab_width (bp), i;
-  const char *sp = astr_cstr (pt.p->text);
+  const char *sp = astr_cstr (get_line_text (pt.p));
 
   for (i = 0; i < pt.o; i++)
     {
@@ -83,7 +83,7 @@ get_goalc_bp (Buffer * bp, Point pt)
 size_t
 get_goalc (void)
 {
-  return get_goalc_bp (cur_bp, cur_bp->pt);
+  return get_goalc_bp (cur_bp, get_buffer_pt (cur_bp));
 }
 
 /*
@@ -91,18 +91,18 @@ get_goalc (void)
  * tabulations.
  */
 static void
-goto_goalc (int goalc)
+goto_goalc (size_t goalc)
 {
-  int col = 0, t = tab_width (cur_bp), w;
-  size_t i;
-  const char *sp = astr_cstr (cur_bp->pt.p->text);
+  Point pt = get_buffer_pt (cur_bp);
+  size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = 0; i < astr_len (cur_bp->pt.p->text); i++)
+  for (i = 0; i < astr_len (get_line_text (pt.p)); i++)
     {
       if (col == goalc)
         break;
-      else if (sp[i] == '\t')
+      else if (astr_get (get_line_text (pt.p), i) == '\t')
         {
+          size_t w;
           for (w = t - col % t; w > 0; w--)
             if (++col == goalc)
               break;
@@ -111,21 +111,26 @@ goto_goalc (int goalc)
         ++col;
     }
 
-  cur_bp->pt.o = i;
+  pt.o = i;
+  set_buffer_pt (cur_bp, pt);
 }
 
 int
 previous_line (void)
 {
-  if (cur_bp->pt.p->prev != cur_bp->lines)
+  if (get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
     {
+      Point pt;
+
       thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
       if (!(lastflag & FLAG_DONE_CPCN))
         cur_goalc = get_goalc ();
 
-      cur_bp->pt.p = cur_bp->pt.p->prev;
-      cur_bp->pt.n--;
+      pt = get_buffer_pt (cur_bp);
+      pt.p = get_line_prev (pt.p);
+      pt.n--;
+      set_buffer_pt (cur_bp, pt);
 
       goto_goalc (cur_goalc);
 
@@ -166,15 +171,19 @@ END_DEFUN
 int
 next_line (void)
 {
-  if (cur_bp->pt.p->next != cur_bp->lines)
+  if (get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
     {
+      Point pt;
+
       thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 
       if (!(lastflag & FLAG_DONE_CPCN))
         cur_goalc = get_goalc ();
 
-      cur_bp->pt.p = cur_bp->pt.p->next;
-      cur_bp->pt.n++;
+      pt = get_buffer_pt (cur_bp);
+      pt.p = get_line_next (pt.p);
+      pt.n++;
+      set_buffer_pt (cur_bp, pt);
 
       goto_goalc (cur_goalc);
 
@@ -247,8 +256,6 @@ Position 1 is the beginning of the buffer.
         if (!forward_char ())
           break;
     }
-
-  INT_FREE (n);
 }
 END_DEFUN
 
@@ -270,17 +277,20 @@ Goto line arg, counting from line 1 at beginning of buffer.
     ok = leNIL;
   else
     {
+      Point pt;
+
       if (n <= 0)
         n = 1;
       n--; /* Re-base to counting from zero */
-      if (cur_bp->pt.n > (size_t) n)
-        ngotoup (cur_bp->pt.n - (size_t) n);
-      else if (cur_bp->pt.n < (size_t) n)
-        ngotodown ((size_t) n - cur_bp->pt.n);
-      cur_bp->pt.o = 0;
+      pt = get_buffer_pt (cur_bp);
+      if (pt.n > (size_t) n)
+        ngotoup (pt.n - (size_t) n);
+      else if (pt.n < (size_t) n)
+        ngotodown ((size_t) n - pt.n);
+      pt = get_buffer_pt (cur_bp);
+      pt.o = 0;
+      set_buffer_pt (cur_bp, pt);
     }
-
-  INT_FREE (n);
 }
 END_DEFUN
 
@@ -290,7 +300,7 @@ END_DEFUN
 void
 gotobob (void)
 {
-  cur_bp->pt = point_min ();
+  set_buffer_pt (cur_bp, point_min ());
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -310,7 +320,7 @@ END_DEFUN
 void
 gotoeob (void)
 {
-  cur_bp->pt = point_max ();
+  set_buffer_pt (cur_bp, point_max ());
   thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
 }
 
@@ -329,14 +339,18 @@ backward_char (void)
 {
   if (!bolp ())
     {
-      cur_bp->pt.o--;
+      Point pt = get_buffer_pt (cur_bp);
+      pt.o--;
+      set_buffer_pt (cur_bp, pt);
       return true;
     }
   else if (!bobp ())
     {
+      Point pt = get_buffer_pt (cur_bp);
       thisflag |= FLAG_NEED_RESYNC;
-      cur_bp->pt.p = cur_bp->pt.p->prev;
-      cur_bp->pt.n--;
+      pt.p = get_line_prev (pt.p);
+      pt.n--;
+      set_buffer_pt (cur_bp, pt);
       FUNCALL (end_of_line);
       return true;
     }
@@ -349,14 +363,18 @@ forward_char (void)
 {
   if (!eolp ())
     {
-      cur_bp->pt.o++;
+      Point pt = get_buffer_pt (cur_bp);
+      pt.o++;
+      set_buffer_pt (cur_bp, pt);
       return true;
     }
   else if (!eobp ())
     {
+      Point pt = get_buffer_pt (cur_bp);
       thisflag |= FLAG_NEED_RESYNC;
-      cur_bp->pt.p = cur_bp->pt.p->next;
-      cur_bp->pt.n++;
+      pt.p = get_line_next (pt.p);
+      pt.n++;
+      set_buffer_pt (cur_bp, pt);
       FUNCALL (beginning_of_line);
       return true;
     }
@@ -392,7 +410,7 @@ int
 ngotoup (size_t n)
 {
   for (; n > 0; n--)
-    if (cur_bp->pt.p->prev != cur_bp->lines)
+    if (get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
       FUNCALL (previous_line);
     else
       return false;
@@ -404,7 +422,7 @@ int
 ngotodown (size_t n)
 {
   for (; n > 0; n--)
-    if (cur_bp->pt.p->next != cur_bp->lines)
+    if (get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
       FUNCALL (next_line);
     else
       return false;
@@ -415,21 +433,25 @@ ngotodown (size_t n)
 static int
 scroll_down (void)
 {
-  if (cur_bp->pt.n > 0)
-    return ngotoup (cur_wp->eheight) ? true : false;
-
-  minibuf_error ("Beginning of buffer");
-  return false;
+  if (get_buffer_pt (cur_bp).n > 0)
+    return ngotoup (get_window_eheight (cur_wp)) ? true : false;
+  else
+    {
+      minibuf_error ("Beginning of buffer");
+      return false;
+    }
 }
 
 static int
 scroll_up (void)
 {
-  if (cur_bp->pt.n < cur_bp->last_line)
-    return ngotodown (cur_wp->eheight) ? true : false;
-
-  minibuf_error ("End of buffer");
-  return false;
+  if (get_buffer_pt (cur_bp).n < get_buffer_last_line (cur_bp))
+    return ngotodown (get_window_eheight (cur_wp)) ? true : false;
+  else
+    {
+      minibuf_error ("End of buffer");
+      return false;
+    }
 }
 
 DEFUN ("scroll-down", scroll_down)
