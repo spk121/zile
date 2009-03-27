@@ -316,7 +316,7 @@ warn_if_no_mark (void)
 Region *
 region_new (void)
 {
-  return XZALLOC (Region);
+  return (Region *) XZALLOC (Region);
 }
 
 /*
