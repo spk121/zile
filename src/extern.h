@@ -80,6 +80,9 @@ void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);
 char *copy_text_block (size_t startn, size_t starto, size_t size);
+void kill_buffer (Buffer * kill_bp);
+Completion *make_buffer_completion (void);
+bool check_modified_buffer (Buffer * bp);
 
 /* completion.c ----------------------------------------------------------- */
 #define FIELD(ty, field)                                        \
@@ -135,7 +138,6 @@ astr get_home_dir (void);
 bool expand_path (astr path);
 astr compact_path (astr path);
 bool find_file (const char *filename);
-void kill_buffer (Buffer * kill_bp);
 void zile_exit (int doabort);
 
 /* funcs.c ---------------------------------------------------------------- */
@@ -214,6 +216,12 @@ extern Buffer *cur_bp, *head_bp;
 extern int thisflag, lastflag, last_uniarg;
 
 /* marker.c --------------------------------------------------------------- */
+#define FIELD(ty, field)                                \
+  ty get_marker_ ## field (const Marker *cp);           \
+  void set_marker_ ## field (Marker *cp, ty field);
+#include "marker.h"
+#undef FIELD
+Marker * marker_new (void);
 void free_marker (Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, Point pt);
 Marker *copy_marker (Marker * marker);

@@ -329,16 +329,16 @@ calculate_the_region (Region * rp)
   if (warn_if_no_mark ())
     return false;
 
-  if (cmp_point (cur_bp->pt, cur_bp->mark->pt) < 0)
+  if (cmp_point (cur_bp->pt, get_marker_pt (cur_bp->mark)) < 0)
     {
       /* Point is before mark. */
       set_region_start (rp, cur_bp->pt);
-      set_region_end (rp, cur_bp->mark->pt);
+      set_region_end (rp, get_marker_pt (cur_bp->mark));
     }
   else
     {
       /* Mark is before point. */
-      set_region_start (rp, cur_bp->mark->pt);
+      set_region_start (rp, get_marker_pt (cur_bp->mark));
       set_region_end (rp, cur_bp->pt);
     }
 
@@ -523,4 +523,166 @@ copy_text_block (size_t startn, size_t starto, size_t size)
     }
 
   return buf;
+}
+
+/*
+ * Remove the specified buffer from the buffer list and deallocate
+ * its space.  Avoid killing the sole buffers and creates the scratch
+ * buffer when required.
+ */
+void
+kill_buffer (Buffer * kill_bp)
+{
+  Buffer *next_bp;
+
+  if (get_buffer_next (kill_bp) != NULL)
+    next_bp = get_buffer_next (kill_bp);
+  else
+    next_bp = head_bp;
+
+  if (next_bp == kill_bp)
+    {
+      Window *wp;
+      Buffer *new_bp = create_buffer (get_buffer_name (cur_bp));
+      /* If this is the sole buffer available, then remove the contents
+         and set the name to `*scratch*' if it is not already set. */
+      assert (cur_bp == kill_bp);
+
+      free_buffer (cur_bp);
+
+      /* Scan all the windows that display this buffer. */
+      for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+        if (get_window_bp (wp) == cur_bp)
+          {
+            set_window_bp (wp, new_bp);
+            set_window_topdelta (wp, 0);
+            set_window_saved_pt (wp, NULL);	/* It was freed. */
+          }
+
+      head_bp = cur_bp = new_bp;
+      set_buffer_next (head_bp, NULL);
+      /* FIXME: Don't reset the buffer, recreate it. */
+      set_buffer_needname (cur_bp, true);
+      set_buffer_temporary (cur_bp, true);
+      set_buffer_nosave (cur_bp, true);
+      if (strcmp (get_buffer_name (cur_bp), "*scratch*") != 0)
+        {
+          set_buffer_name (cur_bp, "*scratch*");
+          set_buffer_filename (cur_bp, NULL);
+        }
+    }
+  else
+    {
+      Buffer *bp;
+      Window *wp;
+
+      /* Search for windows displaying the buffer to kill. */
+      for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+        if (get_window_bp (wp) == kill_bp)
+          {
+            set_window_bp (wp, next_bp);
+            set_window_topdelta (wp, 0);
+            set_window_saved_pt (wp, NULL);	/* The marker will be freed. */
+          }
+
+      /* Remove the buffer from the buffer list. */
+      cur_bp = next_bp;
+      if (head_bp == kill_bp)
+        head_bp = get_buffer_next (head_bp);
+      for (bp = head_bp; get_buffer_next (bp) != NULL; bp = get_buffer_next (bp))
+        if (get_buffer_next (bp) == kill_bp)
+          {
+            set_buffer_next (bp, get_buffer_next (get_buffer_next (bp)));
+            break;
+          }
+
+      free_buffer (kill_bp);
+
+      thisflag |= FLAG_NEED_RESYNC;
+    }
+}
+
+DEFUN_ARGS ("kill-buffer", kill_buffer,
+            STR_ARG (buffer))
+/*+
+Kill buffer BUFFER.
+With a nil argument, kill the current buffer.
++*/
+{
+  Buffer *bp;
+
+  STR_INIT (buffer)
+  else
+    {
+      Completion *cp = make_buffer_completion ();
+      buffer = minibuf_read_completion ("Kill buffer (default %s): ",
+                                        "", cp, NULL, get_buffer_name (cur_bp));
+      free_completion (cp);
+      if (buffer == NULL)
+        ok = FUNCALL (keyboard_quit);
+    }
+
+  if (buffer && buffer[0] != '\0')
+    {
+      bp = find_buffer (buffer, false);
+      if (bp == NULL)
+        {
+          minibuf_error ("Buffer `%s' not found", buffer);
+          free ((char *) buffer);
+          ok = leNIL;
+        }
+    }
+  else
+    bp = cur_bp;
+
+  if (ok == leT)
+    {
+      if (!check_modified_buffer (bp))
+        ok = leNIL;
+      else
+        kill_buffer (bp);
+    }
+
+  STR_FREE (buffer);
+}
+END_DEFUN
+
+Completion *
+make_buffer_completion (void)
+{
+  Buffer *bp;
+  Completion *cp;
+
+  cp = completion_new (false);
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+    gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
+                       xstrdup (get_buffer_name (bp)));
+
+  return cp;
+}
+
+/*
+ * Check if the buffer has been modified.  If so, asks the user if
+ * he/she wants to save the changes.  If the response is positive, return
+ * true, else false.
+ */
+bool
+check_modified_buffer (Buffer * bp)
+{
+  if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
+    for (;;)
+      {
+        int ans = minibuf_read_yesno
+          ("Buffer %s modified; kill anyway? (yes or no) ", get_buffer_name (bp));
+        if (ans == -1)
+          {
+            FUNCALL (keyboard_quit);
+            return false;
+          }
+        else if (!ans)
+          return false;
+        break;
+      }
+
+  return true;
 }

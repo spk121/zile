@@ -483,7 +483,7 @@ isearch (int dir, int regexp)
                 {
                   /* Save mark. */
                   set_mark ();
-                  get_buffer_mark (cur_bp)->pt = start;
+                  set_marker_pt (get_buffer_mark (cur_bp), start);
 
                   /* Save search string. */
                   free (last_search);

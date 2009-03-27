@@ -118,22 +118,28 @@ line_remove (Line *l)
 static void
 adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
 {
-  Marker *pt = point_marker (), *m;
+  Marker *m_pt = point_marker (), *m;
 
   assert (dir >= -1 && dir <= 1);
 
-  for (m = get_buffer_markers (cur_bp); m != NULL; m = m->next)
-    if (m->pt.p == oldlp && (dir == -1 || m->pt.o > pointo))
+  for (m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
+    if (get_marker_pt (m).p == oldlp && (dir == -1 || get_marker_pt (m).o > pointo))
       {
-        m->pt.p = newlp;
-        m->pt.o += delta - (pointo * dir);
-        m->pt.n += dir;
+        Point pt = get_marker_pt (m);
+        pt.p = newlp;
+        pt.o += delta - (pointo * dir);
+        pt.n += dir;
+        set_marker_pt (m, pt);
       }
-    else if (m->pt.n > get_buffer_pt (cur_bp).n)
-      m->pt.n += dir;
+    else if (get_marker_pt (m).n > get_buffer_pt (cur_bp).n)
+      {
+        Point pt = get_marker_pt (m);
+        pt.n += dir;
+        set_marker_pt (m, pt);
+      }
 
-  set_buffer_pt (cur_bp, pt->pt); /* This marker has been updated to new position */
-  free_marker (pt);
+  set_buffer_pt (cur_bp, get_marker_pt (m_pt)); /* This marker has been updated to new position */
+  free_marker (m_pt);
 }
 
 /* Insert the character at the current position and move the text at its right
@@ -658,7 +664,6 @@ does nothing.
 +*/
 {
   size_t target_goalc = 0, cur_goalc = get_goalc ();
-  Marker *old_point;
   size_t t = tab_width (cur_bp);
 
   ok = leNIL;
@@ -673,7 +678,7 @@ does nothing.
     target_goalc = 0;
   else
     {				/* Find goalc in previous non-blank line. */
-      old_point = point_marker ();
+      Marker *m = point_marker ();
 
       previous_nonblank_goalc ();
 
@@ -690,8 +695,8 @@ does nothing.
       if (!eolp ())
         target_goalc = get_goalc ();
 
-      set_buffer_pt (cur_bp, old_point->pt);
-      free_marker (old_point);
+      set_buffer_pt (cur_bp, get_marker_pt (m));
+      free_marker (m);
     }
 
   /* Insert indentation.  */
@@ -726,7 +731,7 @@ static size_t
 previous_line_indent (void)
 {
   size_t cur_indent;
-  Marker *save_point = point_marker ();
+  Marker *m = point_marker ();
 
   FUNCALL (previous_line);
   FUNCALL (beginning_of_line);
@@ -738,8 +743,8 @@ previous_line_indent (void)
   cur_indent = get_goalc ();
 
   /* Restore point. */
-  set_buffer_pt (cur_bp, save_point->pt);
-  free_marker (save_point);
+  set_buffer_pt (cur_bp, get_marker_pt (m));
+  free_marker (m);
 
   return cur_indent;
 }
@@ -775,7 +780,7 @@ Indentation is done using the `indent-for-tab-command' function.
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   if (insert_newline ())
     {
-      Marker *old_point = point_marker ();
+      Marker *m = point_marker ();
       int indent;
       size_t pos;
 
@@ -783,8 +788,8 @@ Indentation is done using the `indent-for-tab-command' function.
       previous_nonblank_goalc ();
       pos = get_goalc ();
       indent = pos > 0 || (!eolp () && isspace (following_char ()));
-      set_buffer_pt (cur_bp, old_point->pt);
-      free_marker (old_point);
+      set_buffer_pt (cur_bp, get_marker_pt (m));
+      free_marker (m);
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)

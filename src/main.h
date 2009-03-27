@@ -44,6 +44,7 @@
 /* Opaque types. */
 typedef struct Line Line;
 typedef struct Region Region;
+typedef struct Marker Marker;
 typedef struct History History;
 typedef struct Undo Undo;
 typedef struct Macro Macro;
@@ -54,20 +55,12 @@ typedef struct Completion Completion;
 
 /* FIXME: Types which should really be opaque. */
 typedef struct Point Point;
-typedef struct Marker Marker;
 
 struct Point
 {
   Line *p;			/* Line pointer. */
   size_t n;			/* Line number. */
   size_t o;			/* Offset. */
-};
-
-struct Marker
-{
-  Buffer *bp;			/* Buffer that points into. */
-  Point pt;			/* Point position. */
-  Marker *next;			/* Used to chain all markers in the buffer. */
 };
 
 /* Undo delta types. */

@@ -57,6 +57,7 @@ zile_base_SOURCES =					\
 	line.c						\
 	macro.c						\
 	main.c						\
+	marker.h					\
 	marker.c					\
 	minibuf.c					\
 	point.c						\

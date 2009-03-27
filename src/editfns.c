@@ -42,11 +42,12 @@ push_mark (void)
   /* Save the mark.  */
   if (get_buffer_mark (cur_bp))
     gl_list_add_last (mark_ring, copy_marker (get_buffer_mark (cur_bp)));
-  /* Save an invalid mark.  */
   else
-    {
+    { /* Save an invalid mark.  */
       Marker *m = point_min_marker ();
-      m->pt.p = NULL;
+      Point pt = get_marker_pt (m);
+      pt.p = NULL;
+      set_marker_pt (m, pt);
       gl_list_add_last (mark_ring, m);
     }
 }
@@ -59,10 +60,10 @@ pop_mark (void)
                                          gl_list_size (mark_ring) - 1);
 
   /* Replace the mark. */
-  if (get_buffer_mark (m->bp))
-    free_marker (get_buffer_mark (m->bp));
+  if (get_buffer_mark (get_marker_bp (m)))
+    free_marker (get_buffer_mark (get_marker_bp (m)));
 
-  set_buffer_mark (m->bp, (m->pt.p) ? copy_marker (m) : NULL);
+  set_buffer_mark (get_marker_bp (m), copy_marker (m));
 
   assert (gl_list_remove_at (mark_ring, gl_list_size (mark_ring) - 1));
   free_marker (m);

@@ -102,7 +102,7 @@ set_current_window (Window * wp)
      marker.  */
   if (cur_wp->saved_pt)
     {
-      set_buffer_pt (cur_bp, cur_wp->saved_pt->pt);
+      set_buffer_pt (cur_bp, get_marker_pt (cur_wp->saved_pt));
       free_marker (cur_wp->saved_pt);
       cur_wp->saved_pt = NULL;
     }
@@ -345,7 +345,7 @@ window_pt (Window * wp)
   else
     {
       if (wp->saved_pt != NULL)
-        return wp->saved_pt->pt;
+        return get_marker_pt (wp->saved_pt);
       else
         return get_buffer_pt (wp->bp);
     }
