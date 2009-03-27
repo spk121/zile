@@ -57,11 +57,8 @@ void free_bindings (Binding p);
 #define FIELD(ty, field)                                \
   ty get_region_ ## field (const Region *cp);           \
   void set_region_ ## field (Region *cp, ty field);
-#define FIELD_STR(field)                                \
-  FIELD(const char *, field)
 #include "region.h"
 #undef FIELD
-#undef FIELD_STR
 void free_buffer (Buffer * bp);
 void free_buffers (void);
 void init_buffer (Buffer * bp);
