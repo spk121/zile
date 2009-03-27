@@ -525,6 +525,16 @@ copy_text_block (size_t startn, size_t starto, size_t size)
   return buf;
 }
 
+Buffer *
+create_scratch_buffer (void)
+{
+  Buffer *bp = create_buffer ("*scratch*");
+  set_buffer_needname (bp, true);
+  set_buffer_temporary (bp, true);
+  set_buffer_nosave (bp, true);
+  return bp;
+}
+
 /*
  * Remove the specified buffer from the buffer list and deallocate
  * its space.  Avoid killing the sole buffers and creates the scratch
@@ -543,33 +553,15 @@ kill_buffer (Buffer * kill_bp)
   if (next_bp == kill_bp)
     {
       Window *wp;
-      Buffer *new_bp = create_buffer (get_buffer_name (cur_bp));
-      /* If this is the sole buffer available, then remove the contents
-         and set the name to `*scratch*' if it is not already set. */
-      assert (cur_bp == kill_bp);
 
+      create_scratch_buffer ();
+      assert (cur_bp == kill_bp);
       free_buffer (cur_bp);
 
-      /* Scan all the windows that display this buffer. */
+      /* Close all the windows that display this buffer. */
       for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
         if (get_window_bp (wp) == cur_bp)
-          {
-            set_window_bp (wp, new_bp);
-            set_window_topdelta (wp, 0);
-            set_window_saved_pt (wp, NULL);	/* It was freed. */
-          }
-
-      head_bp = cur_bp = new_bp;
-      set_buffer_next (head_bp, NULL);
-      /* FIXME: Don't reset the buffer, recreate it. */
-      set_buffer_needname (cur_bp, true);
-      set_buffer_temporary (cur_bp, true);
-      set_buffer_nosave (cur_bp, true);
-      if (strcmp (get_buffer_name (cur_bp), "*scratch*") != 0)
-        {
-          set_buffer_name (cur_bp, "*scratch*");
-          set_buffer_filename (cur_bp, NULL);
-        }
+          delete_window (wp);
     }
   else
     {

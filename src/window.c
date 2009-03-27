@@ -297,14 +297,7 @@ void
 create_first_window (void)
 {
   Window *wp;
-  Buffer *bp;
-
-  /* Create the scratch buffer. */
-  bp = create_buffer ("*scratch*");
-  set_buffer_needname (bp, true);
-  set_buffer_temporary (bp, true);
-  set_buffer_nosave (bp, true);
-  cur_bp = bp;
+  Buffer *bp = create_scratch_buffer ();
 
   wp = window_new ();
   cur_wp = head_wp = wp;
@@ -313,7 +306,7 @@ create_first_window (void)
   wp->fheight = term_height () - 1;
   /* Save space for status line. */
   wp->eheight = wp->fheight - 1;
-  wp->bp = bp;
+  wp->bp = cur_bp = bp;
 }
 
 Window *
