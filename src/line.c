@@ -67,38 +67,38 @@ line_new (void)
 
 /* Delete a list, freeing its nodes */
 void
-line_delete (Line *l)
+line_delete (Line *lp)
 {
-  while (l->next != l)
-    line_remove (l->next);
+  while (lp->next != lp)
+    line_remove (lp->next);
 
-  free (l);
+  free (lp);
 }
 
 /* Insert a line into list after the given point, returning the new line */
 Line *
-line_insert (Line *l, astr i)
+line_insert (Line *lp, astr i)
 {
   Line *n = XZALLOC (Line);
 
-  n->next = l->next;
-  n->prev = l;
+  n->next = lp->next;
+  n->prev = lp;
   n->text = i;
-  l->next = l->next->prev = n;
+  lp->next = lp->next->prev = n;
 
   return n;
 }
 
 /* Remove a line from a list, if not sole line in list */
 void
-line_remove (Line *l)
+line_remove (Line *lp)
 {
-  if (l->next || l->prev)
+  if (lp->next || lp->prev)
     {
-      astr as = l->text;
-      l->prev->next = l->next;
-      l->prev->next->prev = l->prev;
-      free (l);
+      astr as = lp->text;
+      lp->prev->next = lp->next;
+      lp->prev->next->prev = lp->prev;
+      free (lp);
       astr_delete (as);
     }
 }
