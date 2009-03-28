@@ -64,8 +64,16 @@ AC_SUBST(CURSES_LIB)
 
 dnl Lua
 AX_WITH_LUA
+if test -z "$LUA"; then
+  AC_MSG_FAILURE([Lua not found])
+fi
 AX_LUA_VERSION(501, 502)
+AX_LUA_HEADERS
+AX_LUA_LIBS
+AX_LUA_LIB_VERSION(501, 502)
 AC_SUBST(LUA)
+AC_SUBST(LUA_INCLUDES)
+AC_SUBST(LUA_LIBS)
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],
