@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <ctype.h>
+#include <assert.h>
 #include <limits.h>
 #include <locale.h>
 #include <stdarg.h>
@@ -40,7 +40,10 @@
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 2009 Free Software Foundation, Inc."
 
-/* The executable name */
+/* Clue declarations. */
+CLUE_DEFS(L);
+
+/* The executable name. */
 char *prog_name = PACKAGE;
 
 /* The current window; the first window in list. */
@@ -235,6 +238,10 @@ main (int argc, char **argv)
   if (argv[0])
     prog_name = base_name (argv[0]);
 
+  /* Set up Lua environment. */
+  CLUE_INIT(L);
+  assert(L);
+
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
   init_search ();
@@ -393,6 +400,7 @@ main (int argc, char **argv)
   free_buffers ();
   free_minibuf ();
   free (prog_name);
+  CLUE_CLOSE(L);
 
   return 0;
 }
