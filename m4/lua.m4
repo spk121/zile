@@ -19,9 +19,9 @@
 #   AX_LUA_VERSION checks that the version of Lua is at least
 #     MIN-VERSION and less than TOO-BIG-VERSION, if given.
 #   AX_LUA_HEADERS searches for Lua headers and defines HAVE_LUA_H
-#     and HAVE_LUALIB_H if found, and defines LUA_INCLUDES to the
+#     and HAVE_LUALIB_H if found, and defines LUA_INCLUDE to the
 #     preprocessor flags needed, if any.
-#   AX_LUA_LIBS searches for Lua libraries and defines LUA_LIBS if found.
+#   AX_LUA_LIBS searches for Lua libraries and defines LUA_LIB if found.
 #   AX_LUA_LIB_VERSION checks that the Lua libraries' version is at
 #     least MIN-VERSION, and less than TOO-BIG-VERSION, if given.
 #
@@ -145,38 +145,38 @@ AC_DEFUN([AX_LUA_VERSION],
 AC_DEFUN([AX_LUA_HEADERS],
   [_AX_LUA_OPTS
   if test "x$with_lua_includes" != x; then
-    LUA_INCLUDES="-I$with_lua_includes"
+    LUA_INCLUDE="-I$with_lua_includes"
   elif test "x$with_lua_prefix" != x; then
-    LUA_INCLUDES="-I$with_lua_prefix/include"
+    LUA_INCLUDE="-I$with_lua_prefix/include"
   fi
   LUA_OLD_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+  CPPFLAGS="$CPPFLAGS $LUA_INCLUDE"
   AC_CHECK_HEADERS([lua.h lualib.h])
   CPPFLAGS="$LUA_OLD_CPPFLAGS"])dnl
 
 AC_DEFUN([AX_LUA_LIBS],
   [_AX_LUA_OPTS
   if test "x$with_lua_libraries" != x; then
-    LUA_LIBS="-L$with_lua_libraries"
+    LUA_LIB="-L$with_lua_libraries"
   elif test "x$with_lua_prefix" != x; then
-    LUA_LIBS="-L$with_lua_prefix/lib"
+    LUA_LIB="-L$with_lua_prefix/lib"
   fi
   AC_CHECK_LIB([m], [exp], [lua_extra_libs="$lua_extra_libs -lm"], [])
   AC_CHECK_LIB([dl], [dlopen], [lua_extra_libs="$lua_extra_libs -ldl"], [])
   AC_CHECK_LIB([lua$with_lua_suffix],
     [lua_call],
-    [LUA_LIBS="$LUA_LIBS -llua$with_lua_suffix $lua_extra_libs"],
+    [LUA_LIB="$LUA_LIB -llua$with_lua_suffix $lua_extra_libs"],
     [],
-    [$LUA_LIBS $lua_extra_libs])])dnl
+    [$LUA_LIB $lua_extra_libs])])dnl
 
 AC_DEFUN([AX_LUA_LIB_VERSION],
   [_AX_LUA_OPTS
   AC_MSG_CHECKING([liblua version is in range $1 <= v < $2])
   _AX_LUA_VERSIONS($1, $2)
   LUA_OLD_LIBS="$LIBS"
-  LIBS="$LIBS $LUA_LIBS"
+  LIBS="$LIBS $LUA_LIB"
   LUA_OLD_CPPFLAGS="$CPPFLAGS"
-  CPPFLAGS="$CPPFLAGS $LUA_INCLUDES"
+  CPPFLAGS="$CPPFLAGS $LUA_INCLUDE"
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <lua.h>
 #include <stdlib.h>
