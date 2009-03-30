@@ -88,7 +88,7 @@ static char about_splash_str[] = "\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
 Type `C-x C-c' to exit " PACKAGE_NAME ".\n\
-Type `C-x u; to undo changes.\n\
+Type `C-x u' to undo changes.\n\
 Type `C-g' at any time to quit the current operation.\n\
 \n\
 `C-x' means hold the CTRL key while typing the character `x'.\n\
