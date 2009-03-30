@@ -30,7 +30,6 @@
 
 #include "main.h"
 #include "extern.h"
-#include "clue.h"
 
 static void
 set_variable_in_list (const char *var, const char *val,
