@@ -314,8 +314,7 @@ void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
-void free_variables (void);
-void free_variable_list (int);
+void free_variable_list (int ref);
 char *minibuf_read_variable_name (char *fmt, ...);
 void set_variable (const char *var, const char *val);
 const char *get_variable_doc (Buffer * bp, const char *var, char **defval);

@@ -91,7 +91,7 @@ static char about_splash_str[] = "\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
 Type `C-x C-c' to exit " PACKAGE_NAME ".\n\
-Type `C-x u; to undo changes.\n\
+Type `C-x u' to undo changes.\n\
 Type `C-g' at any time to quit the current operation.\n\
 \n\
 `C-x' means hold the CTRL key while typing the character `x'.\n\
@@ -226,6 +226,14 @@ struct option longopts[] = {
   {0, 0, 0, 0}
 };
 
+static int
+at_lua_panic (lua_State *L)
+{
+  fprintf (stderr, "PANIC: unprotected error in call to Lua API (%s)\n",
+           lua_tostring (L, -1));
+  abort ();
+}
+
 int
 main (int argc, char **argv)
 {
@@ -241,6 +249,7 @@ main (int argc, char **argv)
   /* Set up Lua environment. */
   CLUE_INIT(L);
   assert(L);
+  lua_atpanic (L, at_lua_panic);
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
@@ -388,7 +397,6 @@ main (int argc, char **argv)
   free_eval ();
 
   /* Free Lisp state. */
-  free_variables ();
   free_lisp ();
 
   /* Free all the memory allocated. */

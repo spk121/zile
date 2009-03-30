@@ -30,22 +30,13 @@
 
 #include "main.h"
 #include "extern.h"
-
-static int main_vars;
-
-static int
-new_lua_reftable (void)
-{
-  lua_newtable (L);
-  return luaL_ref (L, LUA_REGISTRYINDEX);
-}
+#include "clue.h"
 
 static void
-set_variable_in_list (int var_list, const char *var, const char *val,
+set_variable_in_list (const char *var, const char *val,
                       const char *defval, bool local, const char *doc)
 {
-  lua_rawgeti (L, LUA_REGISTRYINDEX, var_list);
-
+  /* Variable list is on Lua stack. */
   lua_newtable (L);
 
   lua_pushstring (L, val);
@@ -57,11 +48,8 @@ set_variable_in_list (int var_list, const char *var, const char *val,
       lua_setfield (L, -2, "defval");
     }
 
-  if (local)
-    {
-      lua_pushboolean (L, 1);
-      lua_setfield (L, -2, "local");
-    }
+  lua_pushboolean (L, (int) local);
+  lua_setfield (L, -2, "local");
 
   if (doc != NULL)
     {
@@ -70,7 +58,6 @@ set_variable_in_list (int var_list, const char *var, const char *val,
     }
 
   lua_setfield (L, -2, var);
-  lua_pop (L, 1);
 }
 
 void
@@ -78,43 +65,44 @@ set_variable (const char *var, const char *val)
 {
   bool local = false;
 
-  lua_rawgeti (L, LUA_REGISTRYINDEX, main_vars);
+  lua_getglobal (L, "main_vars");
   lua_getfield (L, -1, var);
   if (lua_istable (L, -1))
     {
       lua_getfield (L, -1, "local");
-      local = lua_isnil (L, -1) == 0;
-      lua_pop (L, 1);
+      local = (bool) lua_toboolean (L, -1);
+      lua_pop (L, 2);
     }
-  if (local && get_buffer_vars (cur_bp) == 0)
-    set_buffer_vars (cur_bp, new_lua_reftable ());
+  if (local)
+    {
+      lua_pop (L, 1);
+      if (get_buffer_vars (cur_bp) == 0)
+        {
+          lua_newtable (L);
+          set_buffer_vars (cur_bp, luaL_ref (L, LUA_REGISTRYINDEX));
+        }
+      lua_rawgeti (L, LUA_REGISTRYINDEX, get_buffer_vars (cur_bp));
+    }
 
-  set_variable_in_list (local ? get_buffer_vars (cur_bp) : main_vars,
-                        var, val, NULL, true, NULL);
-
-  lua_pop (L, 2);
+  set_variable_in_list (var, val, NULL, true, NULL);
+  lua_pop (L, 1);
 }
 
 void
 init_variables (void)
 {
-  main_vars = new_lua_reftable ();
+  lua_newtable (L);
 #define X(var, defval, local, doc)              \
-  set_variable_in_list (main_vars, var, defval, defval, local, doc);
+  set_variable_in_list (var, defval, defval, local, doc);
 #include "tbl_vars.h"
 #undef X
+  lua_setglobal (L, "main_vars");
 }
 
 void
 free_variable_list (int ref)
 {
   lua_unref (L, ref);
-}
-
-void
-free_variables (void)
-{
-  free_variable_list (main_vars);
 }
 
 static bool
@@ -127,19 +115,21 @@ get_variable_entry (Buffer * bp, const char *var)
       lua_rawgeti (L, LUA_REGISTRYINDEX, get_buffer_vars (bp));
       lua_getfield (L, -1, var);
       found = lua_istable (L, -1);
-      lua_remove (L, -2);
-      if (!found)
-        lua_pop (L, 1);
+      if (found)
+        lua_remove (L, -2);
+      else
+        lua_pop (L, 2);
     }
 
   if (!found)
     {
-      lua_rawgeti (L, LUA_REGISTRYINDEX, main_vars);
+      lua_getglobal (L, "main_vars");
       lua_getfield (L, -1, var);
       found = lua_istable (L, -1);
-      lua_remove (L, -2);
-      if (!found)
-        lua_pop (L, 1);
+      if (found)
+        lua_remove (L, -2);
+      else
+        lua_pop (L, 2);
     }
 
   return found;
@@ -220,7 +210,7 @@ minibuf_read_variable_name (char *fmt, ...)
   char *ms;
   Completion *cp = completion_new (false);
 
-  lua_rawgeti (L, LUA_REGISTRYINDEX, main_vars);
+  lua_getglobal (L, "main_vars");
   lua_pushnil (L);
   while (lua_next (L, -2) != 0) {
     char *s = (char *) lua_tostring (L, -2);
