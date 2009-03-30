@@ -70,8 +70,9 @@ set_variable (const char *var, const char *val)
     {
       lua_getfield (L, -1, "local");
       local = (bool) lua_toboolean (L, -1);
-      lua_pop (L, 2);
+      lua_pop (L, 1);
     }
+  lua_pop (L, 1);
   if (local)
     {
       lua_pop (L, 1);
