@@ -27,7 +27,7 @@ dnl Checks for programs
 AC_GNU_SOURCE
 AC_PROG_CC
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2 -std=c89"
+  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
 fi
 gl_EARLY
 AM_PROG_CC_C_O
