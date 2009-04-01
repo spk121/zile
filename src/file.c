@@ -378,7 +378,6 @@ find_file (const char *filename)
   if (!is_regular_file (filename))
     {
       minibuf_error ("%s is not a regular file", filename);
-      waitkey (WAITKEY_DEFAULT);
       return false;
     }
 
