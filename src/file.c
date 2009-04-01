@@ -54,13 +54,7 @@ is_regular_file (const char *filename)
 {
   struct stat st;
 
-  if (stat (filename, &st) == -1)
-    {
-      if (errno == ENOENT)
-        return true;
-      return false;
-    }
-  if (S_ISREG (st.st_mode))
+  if (stat (filename, &st) == 0 && S_ISREG (st.st_mode))
     return true;
 
   return false;
@@ -375,9 +369,9 @@ find_file (const char *filename)
       return false;
     }
 
-  if (!is_regular_file (filename))
+  if (exist_file (filename) && !is_regular_file (filename))
     {
-      minibuf_error ("%s is not a regular file", filename);
+      minibuf_error ("File exists but could not be read");
       return false;
     }
 
