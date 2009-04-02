@@ -882,10 +882,11 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
         set_buffer_names (bp, name);
       set_buffer_needname (bp, false);
       set_buffer_temporary (bp, false);
+      set_buffer_nosave (bp, false);
       if (write_to_disk (bp, name))
         {
           minibuf_write ("Wrote %s", name);
-          set_buffer_modified (bp, !get_buffer_modified (bp));
+          set_buffer_modified (bp, false);
           undo_set_unchanged (get_buffer_last_undop (bp));
         }
       else
