@@ -87,24 +87,24 @@ LUA_BUILDTIME = 					\
 
 ALLSOURCES = $(zile_base_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
-tbl_funcs.h: $(zile_base_SOURCES) $(srcdir)/mkfuncs.lua $(LUA_RUNTIME)
+tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_base_SOURCES)
 
-dotzile.sample: $(srcdir)/tbl_vars.h $(srcdir)/mkdotzile.lua $(LUA_RUNTIME) $(srcdir)/dotzile-extra.el
+dotzile.sample: tbl_vars.h mkdotzile.lua $(LUA_RUNTIME) dotzile-extra.el
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkdotzile.lua $(srcdir)/tbl_vars.h
 	cat $(srcdir)/dotzile-extra.el >> $@
 
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
 
-zile.1: $(srcdir)/zile.1.in
+zile.1: zile.1.in
 	rm -f $@ $@.tmp
 	$(edit) '$(srcdir)/$@.in' >$@.tmp
 	chmod +x $@.tmp
 	chmod a-w $@.tmp
 	mv $@.tmp $@
 
-zile.1.in: $(srcdir)/main.c $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
+zile.1.in: main.c man-extras zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample
@@ -115,8 +115,7 @@ CLEANFILES = 						\
 	tbl_opts.h					\
 	tbl_funcs.h					\
 	zile.1						\
-	dotzile.sample					\
-	man-extras
+	dotzile.sample
 
 loc:
 	cloc --no3 $(ALLSOURCES) Makefile.am ../Makefile.am ../configure.ac
