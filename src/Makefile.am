@@ -97,14 +97,14 @@ dotzile.sample: $(srcdir)/tbl_vars.h $(srcdir)/mkdotzile.lua $(LUA_RUNTIME) $(sr
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
 
-man-extras: Makefile $(srcdir)/man-extras.in
+zile.1: $(srcdir)/zile.1.in
 	rm -f $@ $@.tmp
 	$(edit) '$(srcdir)/$@.in' >$@.tmp
 	chmod +x $@.tmp
 	chmod a-w $@.tmp
 	mv $@.tmp $@
 
-zile.1: $(builddir)/zile $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
+zile.1.in: $(srcdir)/main.c $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(builddir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample

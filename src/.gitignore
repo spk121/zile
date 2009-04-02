@@ -10,7 +10,7 @@ funcs.texi
 dotzile.sample
 dotzile.texi
 zile.1
-man-extras
+zile.1.in
 zile.aux
 zile.cp
 zile.fn
