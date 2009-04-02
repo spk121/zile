@@ -96,12 +96,23 @@ init_variables (void)
 #undef X
 }
 
-static void
-set_variable_in_list (Hash_table *var_list, const char *var, const char *val)
+void
+set_variable (const char *var, const char *val)
 {
+  Hash_table *var_list;
+  struct var_entry *ent, *key = XZALLOC (var_entry);
   var_entry *p = XZALLOC (var_entry), *q;
 
-  /* Insert variable if it doesn't already exist */
+  /* Find whether variable is buffer-local when set, and if needed
+     create a buffer-local variable list. */
+  key->var = var;
+  ent = hash_lookup (main_vars, key);
+  free (key);
+  if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
+    set_buffer_vars (cur_bp, new_varlist ());
+  var_list = (ent && ent->local) ? get_buffer_vars (cur_bp) : main_vars;
+
+  /* Insert variable if it doesn't already exist. */
   p->var = xstrdup (var);
   q = hash_insert (var_list, p);
 
@@ -109,27 +120,18 @@ set_variable_in_list (Hash_table *var_list, const char *var, const char *val)
   free ((char *) q->val);
   q->val = xstrdup (val);
 
-  /* If variable is new, initialise other fields */
+  /* If variable is new, initialise other fields. */
   if (q == p)
     {
-      p->defval = xstrdup (val);
-      p->local = false;
-      p->doc = "";
+      if (var_list == main_vars)
+        {
+          p->defval = xstrdup (val);
+          p->local = false;
+          p->doc = "";
+        }
     }
-  else
+  if (q != p)
     var_free (p);
-}
-
-void
-set_variable (const char *var, const char *val)
-{
-  struct var_entry *ent, *key = XZALLOC (var_entry);
-  key->var = var;
-  ent = hash_lookup (main_vars, key);
-  free (key);
-  if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
-    set_buffer_vars (cur_bp, new_varlist ());
-  set_variable_in_list ((ent && ent->local) ? get_buffer_vars (cur_bp) : main_vars, var, val);
 }
 
 void
@@ -157,9 +159,9 @@ get_variable_entry (Buffer * bp, const char *var)
 }
 
 const char *
-get_variable_doc (Buffer * bp, const char *var, char **defval)
+get_variable_doc (const char *var, char **defval)
 {
-  var_entry *p = get_variable_entry (bp, var);
+  var_entry *p = get_variable_entry (NULL, var);
   if (p != NULL)
     {
       *defval = (char *) p->defval;

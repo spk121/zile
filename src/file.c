@@ -352,7 +352,6 @@ bool
 find_file (const char *filename)
 {
   Buffer *bp;
-  char *s;
 
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_filename (bp) != NULL &&
@@ -362,22 +361,14 @@ find_file (const char *filename)
         return true;
       }
 
-  s = make_buffer_name (filename);
-  if (strlen (s) < 1)
-    {
-      free (s);
-      return false;
-    }
-
   if (exist_file (filename) && !is_regular_file (filename))
     {
       minibuf_error ("File exists but could not be read");
       return false;
     }
 
-  bp = create_buffer (s);
-  free (s);
-  set_buffer_filename (bp, filename);
+  bp = buffer_new ();
+  set_buffer_names (bp, filename);
 
   switch_to_buffer (bp);
   read_from_disk (filename);
@@ -472,10 +463,15 @@ Select buffer @i{buffer} in the current window.
     {
       if (buffer && buffer[0] != '\0')
         {
-          bp = find_buffer (buffer, false);
+          bp = find_buffer (buffer);
           if (bp == NULL)
             {
-              bp = find_buffer (buffer, true);
+              bp = find_buffer (buffer);
+              if (bp == NULL)
+                {
+                  bp = buffer_new ();
+                  set_buffer_name (bp, buffer);
+                }
               set_buffer_needname (bp, true);
               set_buffer_nosave (bp, true);
             }
@@ -549,7 +545,7 @@ Puts mark after the inserted text.
 
       if (buffer && buffer[0] != '\0')
         {
-          bp = find_buffer (buffer, false);
+          bp = find_buffer (buffer);
           if (bp == NULL)
             {
               minibuf_error ("Buffer `%s' not found", buffer);

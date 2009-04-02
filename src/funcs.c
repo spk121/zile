@@ -159,13 +159,20 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
     set_current_window (wp);
   else
     {
+      Buffer *bp = find_buffer (name);
       if (show)
         set_current_window (popup_window ());
-      switch_to_buffer (find_buffer (name, true));
+      if (bp == NULL)
+        {
+          bp = buffer_new ();
+          set_buffer_name (bp, name);
+        }
+      switch_to_buffer (bp);
     }
 
   /* Remove the contents of that buffer. */
-  new_bp = create_buffer (get_buffer_name (cur_bp));
+  new_bp = buffer_new ();
+  set_buffer_name (new_bp, get_buffer_name (cur_bp));
   kill_buffer (cur_bp);
   cur_bp = new_bp;
   set_window_bp (cur_wp, cur_bp);

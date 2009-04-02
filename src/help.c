@@ -140,7 +140,7 @@ Display the full documentation of a variable.
   else
     {
       char *defval;
-      const char *doc = get_variable_doc (cur_bp, name, &defval);
+      const char *doc = get_variable_doc (name, &defval);
       if (doc == NULL)
         ok = leNIL;
       else
