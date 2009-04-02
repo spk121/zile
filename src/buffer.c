@@ -198,7 +198,17 @@ make_buffer_name (const char *filename)
 void
 set_buffer_names (Buffer * bp, const char *filename)
 {
-  set_buffer_filename (bp, filename);
+  if (filename[0] != '/')
+    {
+      astr as = agetcwd ();
+      astr_cat_char (as, '/');
+      astr_cat_cstr (as, filename);
+      set_buffer_filename (bp, astr_cstr (as));
+      filename = xstrdup (astr_cstr (as));
+      astr_delete (as);
+    }
+  else
+    set_buffer_filename (bp, filename);
 
   free ((char *) bp->name);
   bp->name = make_buffer_name (filename);
@@ -214,7 +224,7 @@ find_buffer (const char *name)
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
     {
-      char *bname = get_buffer_name (bp);
+      const char *bname = get_buffer_name (bp);
       if (bname && !strcmp (bname, name))
         return bp;
     }

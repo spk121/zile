@@ -63,7 +63,7 @@ is_regular_file (const char *filename)
 /*
  * Return the current directory, if available.
  */
-static astr
+astr
 agetcwd (void)
 {
   char *s = getcwd (NULL, 0);
@@ -183,7 +183,8 @@ compact_path (astr path)
     {
       /* Replace `/userhome/' (if found) with `~/'. */
       size_t homelen = strlen (pw->pw_dir);
-      if (!strncmp (pw->pw_dir, astr_cstr (path), homelen))
+      if (!strncmp (pw->pw_dir, astr_cstr (path),
+                    MIN (homelen, astr_len (path))))
         {
           astr buf = astr_new_cstr ("~/");
           if (!strcmp (pw->pw_dir, "/"))
