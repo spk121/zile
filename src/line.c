@@ -173,22 +173,21 @@ insert_char (int c)
 
   if (get_buffer_overwrite (cur_bp))
     {
+      Point pt = get_buffer_pt (cur_bp);
       /* Current character isn't the end of line
          && isn't a \t
          || tab width isn't correct
          || current char is a \t && we are in the tab limit.  */
-      if ((get_buffer_pt (cur_bp).o < astr_len (get_buffer_pt (cur_bp).p->text))
+      if ((pt.o < astr_len (pt.p->text))
           &&
-          ((astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o) != '\t')
+          ((astr_get (pt.p->text, pt.o) != '\t')
            ||
-           ((astr_get (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o) ==
-             '\t') && ((get_goalc () % t) == t))))
+           ((astr_get (pt.p->text, pt.o) == '\t') && ((get_goalc () % t) == t))))
         {
           /* Replace the character.  */
           char ch = (char) c;
-          Point pt = get_buffer_pt (cur_bp);
-          undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 1);
-          astr_nreplace_cstr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, 1, &ch, 1);
+          undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
+          astr_nreplace_cstr (pt.p->text, pt.o, 1, &ch, 1);
           ++pt.o;
           set_buffer_pt (cur_bp, pt);
           set_buffer_modified (cur_bp, true);
