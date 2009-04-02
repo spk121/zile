@@ -136,11 +136,11 @@ get_variable_entry (Buffer * bp, const char *var)
 }
 
 const char *
-get_variable_doc (Buffer * bp, const char *var, char **defval)
+get_variable_doc (const char *var, char **defval)
 {
   char *ret = NULL;
 
-  if (get_variable_entry (bp, var))
+  if (get_variable_entry (NULL, var))
     {
       lua_getfield (L, -1, "defval");
       *defval = (char *) lua_tostring (L, -1);

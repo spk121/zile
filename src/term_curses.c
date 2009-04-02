@@ -220,9 +220,9 @@ codetokey (int c)
 static size_t
 keytocodes (size_t key, int ** codevec)
 {
-  int * codes, * p;
+  int * p;
 
-  p = codes = XCALLOC (2, int);
+  p = *codevec = XCALLOC (2, int);
 
   if (key == KBD_NOKEY)
     return 0;
@@ -346,8 +346,7 @@ keytocodes (size_t key, int ** codevec)
       break;
     }
 
-  *codevec = codes;
-  return p - codes;
+  return p - *codevec;
 }
 
 size_t

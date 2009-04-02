@@ -71,17 +71,15 @@ struct Region
 #undef FIELD
 
 /*
- * Allocate a new buffer structure and set the default local
- * variable values.
+ * Allocate a new buffer structure, set the default local
+ * variable values, and insert it into the buffer list.
  * The allocation of the first empty line is done here to simplify
- * a lot the code.
+ * the code.
  */
-static Buffer *
+Buffer *
 buffer_new (void)
 {
-  Buffer *bp;
-
-  bp = (Buffer *) XZALLOC (Buffer);
+  Buffer *bp = (Buffer *) XZALLOC (Buffer);
 
   /* Allocate a line. */
   bp->pt.p = line_new ();
@@ -97,6 +95,12 @@ buffer_new (void)
 
   /* Set default EOL string. */
   bp->eol = coding_eol_lf;
+
+  /* Insert into buffer list. */
+  bp->next = head_bp;
+  head_bp = bp;
+
+  init_buffer (bp);
 
   return bp;
 }
@@ -148,33 +152,44 @@ init_buffer (Buffer * bp)
 }
 
 /*
- * Allocate a new buffer and insert it into the buffer list.
+ * Get filename, or buffer name if NULL.
  */
-Buffer *
-create_buffer (const char *name)
+const char *
+get_buffer_filename_or_name (Buffer * bp)
 {
-  Buffer *bp;
-
-  bp = buffer_new ();
-  set_buffer_name (bp, name);
-
-  bp->next = head_bp;
-  head_bp = bp;
-
-  init_buffer (bp);
-
-  return bp;
+  const char *fname = get_buffer_filename (bp);
+  return fname ? fname : get_buffer_name (bp);
 }
 
 /*
- * Get filename, or buffer name if NULL.
+ * Create a buffer name using the file name.
  */
-const char *get_buffer_filename_or_name (Buffer * bp)
+static char *
+make_buffer_name (const char *filename)
 {
-  const char *fname = get_buffer_filename (bp);
-  if (fname == NULL)
-    fname = get_buffer_name (bp);
-  return fname;
+  const char *p = strrchr (filename, '/');
+
+  if (p == NULL)
+    p = filename;
+  else
+    ++p;
+
+  if (find_buffer (p) == NULL)
+    return xstrdup (p);
+  else
+    {
+      char *name;
+      size_t i;
+
+      /* Note: there can't be more than SIZE_MAX buffers. */
+      for (i = 2; true; i++)
+        {
+          xasprintf (&name, "%s<%ld>", p, i);
+          if (find_buffer (name) == NULL)
+            return name;
+          free (name);
+        }
+    }
 }
 
 /*
@@ -183,57 +198,38 @@ const char *get_buffer_filename_or_name (Buffer * bp)
 void
 set_buffer_names (Buffer * bp, const char *filename)
 {
-  set_buffer_filename (bp, filename);
+  if (filename[0] != '/')
+    {
+      astr as = agetcwd ();
+      astr_cat_char (as, '/');
+      astr_cat_cstr (as, filename);
+      set_buffer_filename (bp, astr_cstr (as));
+      filename = xstrdup (astr_cstr (as));
+      astr_delete (as);
+    }
+  else
+    set_buffer_filename (bp, filename);
 
   free ((char *) bp->name);
   bp->name = make_buffer_name (filename);
 }
 
 /*
- * Search for a buffer named `name'.  If buffer is not found and
- * the `cflag' variable is set to `true', create a new buffer.
+ * Search for a buffer named `name'.
  */
 Buffer *
-find_buffer (const char *name, int cflag)
+find_buffer (const char *name)
 {
   Buffer *bp;
 
   for (bp = head_bp; bp != NULL; bp = bp->next)
-    if (!strcmp (get_buffer_name (bp), name))
-      return bp;
+    {
+      const char *bname = get_buffer_name (bp);
+      if (bname && !strcmp (bname, name))
+        return bp;
+    }
 
-  if (!cflag)
-    return NULL;
-
-  return create_buffer (name);
-}
-
-/*
- * Create a buffer name using the file name.
- */
-char *
-make_buffer_name (const char *filename)
-{
-  const char *p = strrchr (filename, '/');
-  char *name;
-  size_t i;
-
-  if (p == NULL)
-    p = filename;
-  else
-    ++p;
-
-  if (find_buffer (p, false) == NULL)
-    return xstrdup (p);
-  else
-    /* Note: there can't be more than SIZE_MAX buffers. */
-    for (i = 2; true; i++)
-      {
-        xasprintf (&name, "%s<%ld>", p, i);
-        if (find_buffer (name, false) == NULL)
-          return name;
-        free (name);
-      }
+  return NULL;
 }
 
 /* Move the selected buffer to head.  */
@@ -528,7 +524,8 @@ copy_text_block (size_t startn, size_t starto, size_t size)
 Buffer *
 create_scratch_buffer (void)
 {
-  Buffer *bp = create_buffer ("*scratch*");
+  Buffer *bp = buffer_new ();
+  set_buffer_name (bp, "*scratch*");
   set_buffer_needname (bp, true);
   set_buffer_temporary (bp, true);
   set_buffer_nosave (bp, true);
@@ -616,7 +613,7 @@ With a nil argument, kill the current buffer.
 
   if (buffer && buffer[0] != '\0')
     {
-      bp = find_buffer (buffer, false);
+      bp = find_buffer (buffer);
       if (bp == NULL)
         {
           minibuf_error ("Buffer `%s' not found", buffer);

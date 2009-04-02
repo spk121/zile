@@ -54,13 +54,7 @@ is_regular_file (const char *filename)
 {
   struct stat st;
 
-  if (stat (filename, &st) == -1)
-    {
-      if (errno == ENOENT)
-        return true;
-      return false;
-    }
-  if (S_ISREG (st.st_mode))
+  if (stat (filename, &st) == 0 && S_ISREG (st.st_mode))
     return true;
 
   return false;
@@ -69,7 +63,7 @@ is_regular_file (const char *filename)
 /*
  * Return the current directory, if available.
  */
-static astr
+astr
 agetcwd (void)
 {
   char *s = getcwd (NULL, 0);
@@ -189,7 +183,8 @@ compact_path (astr path)
     {
       /* Replace `/userhome/' (if found) with `~/'. */
       size_t homelen = strlen (pw->pw_dir);
-      if (!strncmp (pw->pw_dir, astr_cstr (path), homelen))
+      if (!strncmp (pw->pw_dir, astr_cstr (path),
+                    MIN (homelen, astr_len (path))))
         {
           astr buf = astr_new_cstr ("~/");
           if (!strcmp (pw->pw_dir, "/"))
@@ -358,7 +353,6 @@ bool
 find_file (const char *filename)
 {
   Buffer *bp;
-  char *s;
 
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_filename (bp) != NULL &&
@@ -368,23 +362,14 @@ find_file (const char *filename)
         return true;
       }
 
-  s = make_buffer_name (filename);
-  if (strlen (s) < 1)
+  if (exist_file (filename) && !is_regular_file (filename))
     {
-      free (s);
+      minibuf_error ("File exists but could not be read");
       return false;
     }
 
-  if (!is_regular_file (filename))
-    {
-      minibuf_error ("%s is not a regular file", filename);
-      waitkey (WAITKEY_DEFAULT);
-      return false;
-    }
-
-  bp = create_buffer (s);
-  free (s);
-  set_buffer_filename (bp, filename);
+  bp = buffer_new ();
+  set_buffer_names (bp, filename);
 
   switch_to_buffer (bp);
   read_from_disk (filename);
@@ -479,10 +464,15 @@ Select buffer @i{buffer} in the current window.
     {
       if (buffer && buffer[0] != '\0')
         {
-          bp = find_buffer (buffer, false);
+          bp = find_buffer (buffer);
           if (bp == NULL)
             {
-              bp = find_buffer (buffer, true);
+              bp = find_buffer (buffer);
+              if (bp == NULL)
+                {
+                  bp = buffer_new ();
+                  set_buffer_name (bp, buffer);
+                }
               set_buffer_needname (bp, true);
               set_buffer_nosave (bp, true);
             }
@@ -556,7 +546,7 @@ Puts mark after the inserted text.
 
       if (buffer && buffer[0] != '\0')
         {
-          bp = find_buffer (buffer, false);
+          bp = find_buffer (buffer);
           if (bp == NULL)
             {
               minibuf_error ("Buffer `%s' not found", buffer);
@@ -863,9 +853,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 
   if (needname)
     {
-      const char *fname = get_buffer_filename_or_name (bp);
-
-      name = minibuf_read_filename (prompt, fname, NULL);
+      name = minibuf_read_filename (prompt, "", NULL);
       name_from_minibuffer = true;
       if (name == NULL)
         return FUNCALL (keyboard_quit);
@@ -894,10 +882,11 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
         set_buffer_names (bp, name);
       set_buffer_needname (bp, false);
       set_buffer_temporary (bp, false);
+      set_buffer_nosave (bp, false);
       if (write_to_disk (bp, name))
         {
           minibuf_write ("Wrote %s", name);
-          set_buffer_modified (bp, !get_buffer_modified (bp));
+          set_buffer_modified (bp, false);
           undo_set_unchanged (get_buffer_last_undop (bp));
         }
       else

@@ -109,17 +109,13 @@ make_buffer_modeline (Buffer * bp)
  * if a cut is needed.
  */
 static astr
-shorten_string (const char *s, int maxlen)
+shorten_string (astr as, int maxlen)
 {
-  astr as = astr_new ();
-  int len = strlen (s);
-
-  if (len <= maxlen)
-    astr_cpy_cstr (as, s);
-  else
+  int len = astr_len (as);
+  if (len > maxlen)
     {
-      astr_cpy_cstr (as, "...");
-      astr_cat_cstr (as, s + len - maxlen + 3);
+      astr_replace_cstr (as, 0, 0, "...");
+      astr_truncate (as, len - maxlen + 3);
     }
 
   return as;
@@ -139,7 +135,7 @@ print_buf (Buffer * old_bp, Buffer * bp)
   astr_delete (mode);
   if (get_buffer_filename (bp) != NULL)
     {
-      astr shortname = shorten_string (get_buffer_filename (bp), 40);
+      astr shortname = shorten_string (compact_path (astr_new_cstr (get_buffer_filename (bp))), 40);
       insert_astr (shortname);
       astr_delete (shortname);
     }
@@ -159,13 +155,20 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
     set_current_window (wp);
   else
     {
+      Buffer *bp = find_buffer (name);
       if (show)
         set_current_window (popup_window ());
-      switch_to_buffer (find_buffer (name, true));
+      if (bp == NULL)
+        {
+          bp = buffer_new ();
+          set_buffer_name (bp, name);
+        }
+      switch_to_buffer (bp);
     }
 
   /* Remove the contents of that buffer. */
-  new_bp = create_buffer (get_buffer_name (cur_bp));
+  new_bp = buffer_new ();
+  set_buffer_name (new_bp, get_buffer_name (cur_bp));
   kill_buffer (cur_bp);
   cur_bp = new_bp;
   set_window_bp (cur_wp, cur_bp);
