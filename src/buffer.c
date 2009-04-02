@@ -154,10 +154,42 @@ init_buffer (Buffer * bp)
 /*
  * Get filename, or buffer name if NULL.
  */
-const char *get_buffer_filename_or_name (Buffer * bp)
+const char *
+get_buffer_filename_or_name (Buffer * bp)
 {
   const char *fname = get_buffer_filename (bp);
   return fname ? fname : get_buffer_name (bp);
+}
+
+/*
+ * Create a buffer name using the file name.
+ */
+static char *
+make_buffer_name (const char *filename)
+{
+  const char *p = strrchr (filename, '/');
+
+  if (p == NULL)
+    p = filename;
+  else
+    ++p;
+
+  if (find_buffer (p) == NULL)
+    return xstrdup (p);
+  else
+    {
+      char *name;
+      size_t i;
+
+      /* Note: there can't be more than SIZE_MAX buffers. */
+      for (i = 2; true; i++)
+        {
+          xasprintf (&name, "%s<%ld>", p, i);
+          if (find_buffer (name) == NULL)
+            return name;
+          free (name);
+        }
+    }
 }
 
 /*
@@ -188,34 +220,6 @@ find_buffer (const char *name)
     }
 
   return NULL;
-}
-
-/*
- * Create a buffer name using the file name.
- */
-char *
-make_buffer_name (const char *filename)
-{
-  const char *p = strrchr (filename, '/');
-  char *name;
-  size_t i;
-
-  if (p == NULL)
-    p = filename;
-  else
-    ++p;
-
-  if (find_buffer (p) == NULL)
-    return xstrdup (p);
-  else
-    /* Note: there can't be more than SIZE_MAX buffers. */
-    for (i = 2; true; i++)
-      {
-        xasprintf (&name, "%s<%ld>", p, i);
-        if (find_buffer (name) == NULL)
-          return name;
-        free (name);
-      }
 }
 
 /* Move the selected buffer to head.  */
