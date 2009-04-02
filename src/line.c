@@ -195,9 +195,8 @@ insert_char (int c)
           return true;
         }
       /*
-       * Fall through the "insertion" mode of a character
-       * at the end of the line, since it is totally
-       * equivalent to "overwrite" mode.
+       * Fall through the "insertion" mode of a character at the end
+       * of the line, since it is the same as "overwrite" mode.
        */
     }
 
