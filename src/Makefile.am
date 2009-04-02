@@ -97,7 +97,7 @@ dotzile.sample: tbl_vars.h mkdotzile.lua $(LUA_RUNTIME) dotzile-extra.el
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
 
-zile.1: zile.1.in
+zile.1: zile.1.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) '$(srcdir)/$@.in' >$@.tmp
 	chmod +x $@.tmp
