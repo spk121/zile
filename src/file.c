@@ -853,9 +853,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 
   if (needname)
     {
-      const char *fname = get_buffer_filename_or_name (bp);
-
-      name = minibuf_read_filename (prompt, fname, NULL);
+      name = minibuf_read_filename (prompt, "", NULL);
       name_from_minibuffer = true;
       if (name == NULL)
         return FUNCALL (keyboard_quit);
