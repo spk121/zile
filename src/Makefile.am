@@ -333,6 +333,5 @@ EXTRA_DIST =						\
 	test-bad-argument				\
 	quit.el						\
 	dotzile-extra.el				\
-	man-extras.in					\
 	tbl_opts.h.in					\
 	zile-help2man-wrapper
