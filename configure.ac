@@ -20,7 +20,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.3.5, bug-zile@gnu.org)
+AC_INIT(Zile, 2.4.0, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl Checks for programs
@@ -64,8 +64,16 @@ AC_SUBST(CURSES_LIB)
 
 dnl Lua
 AX_WITH_LUA
+if test -z "$LUA"; then
+  AC_MSG_FAILURE([Lua not found])
+fi
 AX_LUA_VERSION(501, 502)
+AX_LUA_HEADERS
+AX_LUA_LIBS
+AX_LUA_LIB_VERSION(501, 502)
 AC_SUBST(LUA)
+AC_SUBST(LUA_INCLUDE)
+AC_SUBST(LUA_LIB)
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],

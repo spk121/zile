@@ -55,8 +55,6 @@ gl_list.c
 gl_list.h
 group-member.c
 group-member.h
-hash.c
-hash.h
 intprops.h
 lchown.c
 localcharset.c
@@ -155,9 +153,5 @@ unistd.h
 /file-set.h
 /filenamecat.c
 /filenamecat.h
-/hash-pjw.c
-/hash-pjw.h
-/hash-triple.c
-/hash-triple.h
-/same.c
-/same.h
+/close-hook.c
+/close-hook.h

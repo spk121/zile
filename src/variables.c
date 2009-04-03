@@ -21,160 +21,151 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "hash.h"
 #include "gl_list.h"
 
 #include "main.h"
 #include "extern.h"
 
-/*
- * Variable type.
- */
-struct var_entry
-{
-  const char *var;		/* Variable name. */
-  const char *defval;		/* Default value. */
-  const char *val;		/* Current value, if any. */
-  bool local;			/* If true, becomes local when set. */
-  const char *doc;              /* Documentation */
-};
-typedef struct var_entry var_entry;
-
-static Hash_table *main_vars;
-
-static size_t
-var_hash (const void *v, size_t n)
-{
-  return hash_string (((var_entry *) v)->var, n);
-}
-
-static bool
-var_cmp (const void *v, const void *w)
-{
-  return strcmp (((var_entry *) v)->var, ((var_entry *) w)->var) == 0;
-}
-
 static void
-var_free (void *v)
+set_variable_in_list (const char *var, const char *val,
+                      const char *defval, bool local, const char *doc)
 {
-  var_entry *p = (var_entry *) v;
-  free ((char *) p->var);
-  free ((char *) p->val);
-  free (p);
-}
+  /* Variable list is on Lua stack. */
+  lua_newtable (L);
 
-static void
-init_builtin_var (const char *var, const char *defval, bool local, const char *doc)
-{
-  var_entry *p = XZALLOC (var_entry);
-  p->var = xstrdup (var);
-  p->defval = defval;
-  p->val = xstrdup (defval);
-  p->local = local;
-  p->doc = doc;
-  hash_insert (main_vars, p);
-}
+  lua_pushstring (L, val);
+  lua_setfield (L, -2, "val");
 
-static Hash_table *
-new_varlist (void)
-{
-  /* Initial size is big enough for default variables and some more */
-  return hash_initialize (32, NULL, var_hash, var_cmp, var_free);
-}
+  if (defval != NULL)
+    {
+      lua_pushstring (L, defval);
+      lua_setfield (L, -2, "defval");
+    }
 
-void
-init_variables (void)
-{
-  main_vars = new_varlist ();
-#define X(var, defval, local, doc)              \
-  init_builtin_var (var, defval, local, doc);
-#include "tbl_vars.h"
-#undef X
+  lua_pushboolean (L, (int) local);
+  lua_setfield (L, -2, "local");
+
+  if (doc != NULL)
+    {
+      lua_pushstring (L, doc);
+      lua_setfield (L, -2, "doc");
+    }
+
+  lua_setfield (L, -2, var);
 }
 
 void
 set_variable (const char *var, const char *val)
 {
-  Hash_table *var_list;
-  struct var_entry *ent, *key = XZALLOC (var_entry);
-  var_entry *p = XZALLOC (var_entry), *q;
+  bool local = false;
 
-  /* Find whether variable is buffer-local when set, and if needed
-     create a buffer-local variable list. */
-  key->var = var;
-  ent = hash_lookup (main_vars, key);
-  free (key);
-  if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
-    set_buffer_vars (cur_bp, new_varlist ());
-  var_list = (ent && ent->local) ? get_buffer_vars (cur_bp) : main_vars;
-
-  /* Insert variable if it doesn't already exist. */
-  p->var = xstrdup (var);
-  q = hash_insert (var_list, p);
-
-  /* Update value */
-  free ((char *) q->val);
-  q->val = xstrdup (val);
-
-  /* If variable is new, initialise other fields. */
-  if (q == p)
+  lua_getglobal (L, "main_vars");
+  lua_getfield (L, -1, var);
+  if (lua_istable (L, -1))
     {
-      if (var_list == main_vars)
-        {
-          p->defval = xstrdup (val);
-          p->local = false;
-          p->doc = "";
-        }
+      lua_getfield (L, -1, "local");
+      local = (bool) lua_toboolean (L, -1);
+      lua_pop (L, 1);
     }
-  if (q != p)
-    var_free (p);
+  lua_pop (L, 1);
+  if (local)
+    {
+      lua_pop (L, 1);
+      if (get_buffer_vars (cur_bp) == 0)
+        {
+          lua_newtable (L);
+          set_buffer_vars (cur_bp, luaL_ref (L, LUA_REGISTRYINDEX));
+        }
+      lua_rawgeti (L, LUA_REGISTRYINDEX, get_buffer_vars (cur_bp));
+    }
+
+  set_variable_in_list (var, val, NULL, true, NULL);
+  lua_pop (L, 1);
 }
 
 void
-free_variables (void)
+init_variables (void)
 {
-  hash_free (main_vars);
+  lua_newtable (L);
+#define X(var, defval, local, doc)              \
+  set_variable_in_list (var, defval, defval, local, doc);
+#include "tbl_vars.h"
+#undef X
+  lua_setglobal (L, "main_vars");
 }
 
-static var_entry *
+void
+free_variable_list (int ref)
+{
+  lua_unref (L, ref);
+}
+
+static bool
 get_variable_entry (Buffer * bp, const char *var)
 {
-  var_entry *p = NULL, *key = XZALLOC (var_entry);
-
-  key->var = var;
+  bool found = false;
 
   if (bp && get_buffer_vars (bp))
-    p = hash_lookup (get_buffer_vars (bp), key);
+    {
+      lua_rawgeti (L, LUA_REGISTRYINDEX, get_buffer_vars (bp));
+      lua_getfield (L, -1, var);
+      found = lua_istable (L, -1);
+      if (found)
+        lua_remove (L, -2);
+      else
+        lua_pop (L, 2);
+    }
 
-  if (p == NULL)
-    p = hash_lookup (main_vars, key);
+  if (!found)
+    {
+      lua_getglobal (L, "main_vars");
+      lua_getfield (L, -1, var);
+      found = lua_istable (L, -1);
+      if (found)
+        lua_remove (L, -2);
+      else
+        lua_pop (L, 2);
+    }
 
-  free (key);
-
-  return p;
+  return found;
 }
 
 const char *
 get_variable_doc (const char *var, char **defval)
 {
-  var_entry *p = get_variable_entry (NULL, var);
-  if (p != NULL)
+  char *ret = NULL;
+
+  if (get_variable_entry (NULL, var))
     {
-      *defval = (char *) p->defval;
-      return p->doc;
+      lua_getfield (L, -1, "defval");
+      *defval = (char *) lua_tostring (L, -1);
+      lua_pop (L, 1);
+      lua_getfield (L, -1, "doc");
+      ret = (char *) lua_tostring (L, -1);
+      lua_pop (L, 2);
     }
-  return NULL;
+
+  return ret;
 }
 
 const char *
 get_variable_bp (Buffer * bp, const char *var)
 {
-  var_entry *p = get_variable_entry (bp, var);
-  return p ? p->val : NULL;
+  char *ret = NULL;
+
+  if (get_variable_entry (bp, var))
+    {
+      lua_getfield (L, -1, "val");
+      ret = (char *) lua_tostring (L, -1);
+      lua_pop (L, 2);
+    }
+
+  return ret;
 }
 
 const char *
@@ -218,15 +209,17 @@ minibuf_read_variable_name (char *fmt, ...)
   va_list ap;
   char *ms;
   Completion *cp = completion_new (false);
-  var_entry *p;
 
-  for (p = hash_get_first (main_vars);
-       p != NULL;
-       p = hash_get_next (main_vars, p))
-    {
-      gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
-                         xstrdup (p->var));
-    }
+  lua_getglobal (L, "main_vars");
+  lua_pushnil (L);
+  while (lua_next (L, -2) != 0) {
+    char *s = (char *) lua_tostring (L, -2);
+    assert (s);
+    gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
+                       xstrdup (s));
+    lua_pop (L, 1);
+  }
+  lua_pop (L, 1);
 
   va_start (ap, fmt);
   ms = minibuf_vread_completion (fmt, "", cp, NULL,

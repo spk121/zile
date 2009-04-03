@@ -25,13 +25,15 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <lua.h>
+#include <lauxlib.h>
 #include "config.h"
 #include "xalloc.h"
 #include "size_max.h"
 #include "minmax.h"
-#include "hash.h"
 #include "gl_list.h"
 
+#include "clue.h"
 #include "astr.h"
 #include "lists.h"
 

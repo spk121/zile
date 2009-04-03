@@ -19,6 +19,7 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
+#include <lua.h>
 #include "gl_list.h"
 
 #include "xalloc_extra.h"
@@ -211,6 +212,7 @@ Macro *get_macro (const char *name);
 void add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f);
 
 /* main.c ----------------------------------------------------------------- */
+CLUE_DECLS(L);
 extern char *prog_name;
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
@@ -312,7 +314,7 @@ void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
-void free_variables (void);
+void free_variable_list (int ref);
 char *minibuf_read_variable_name (char *fmt, ...);
 void set_variable (const char *var, const char *val);
 const char *get_variable_doc (const char *var, char **defval);

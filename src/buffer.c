@@ -120,8 +120,8 @@ free_buffer (Buffer * bp)
   free ((char *) bp->name);
   free ((char *) bp->filename);
 
-  if (bp->vars != NULL)
-    hash_free (bp->vars);
+  if (bp->vars != 0)
+    free_variable_list (bp->vars);
 
   free (bp);
 }
