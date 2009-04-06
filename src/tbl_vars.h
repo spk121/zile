@@ -29,7 +29,7 @@ X ("tab-width", "8", true, "Distance between tab stops (for display of tab chara
 X ("tab-always-indent", "t", false, "Controls the operation of the @kbd{TAB} key.\nIf @samp{t}, hitting @kbd{TAB} always just indents the current line.\nIf @samp{nil}, hitting @kbd{TAB} indents the current line if point is at the\nleft margin or in the line's indentation, otherwise it inserts a\n\"real\" TAB character.")
 X ("indent-tabs-mode", "nil", true, "If non-nil, insert-tab inserts \"real\" tabs; otherwise, it always inserts\nspaces.")
 X ("fill-column", "70", true, "Column beyond which automatic line-wrapping should happen.\nAutomatically becomes buffer-local when set in any fashion.")
-X ("auto-fill-mode", "nil", false, "If non-nil, @i{Auto Fill Mode} is automatically enabled.")
+X ("auto-fill-mode", "nil", false, "If non-nil, Auto Fill Mode is automatically enabled.")
 X ("kill-whole-line", "nil", false, "If non-nil, `kill-line' with no arg at beg of line kills the whole line.")
 X ("case-fold-search", "t", true, "Non-nil means searches ignore case.")
 X ("case-replace", "t", false, "Non-nil means `query-replace' should preserve case in replacements.")
