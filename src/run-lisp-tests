@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 # run-lisp-tests
 #
@@ -41,7 +41,7 @@ if test -z "$TERM" -o "$TERM" = "unknown"; then
     export TERM
 fi
 
-for test; do
+for test in "$@"; do
     test=`basename $test`
     test=`echo $test | sed -e 's/\.el$//'`
 
