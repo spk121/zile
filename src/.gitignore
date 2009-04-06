@@ -3,6 +3,8 @@ astr
 zile
 tbl_funcs.h
 tbl_opts.h
+tbl_vars.h
+mkvars.stamp
 gendocs_template
 zile.info
 vars.texi

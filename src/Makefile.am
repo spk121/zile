@@ -83,16 +83,25 @@ LUA_RUNTIME =						\
 
 LUA_BUILDTIME = 					\
 	mkfuncs.lua					\
-	mkdotzile.lua
+	mkvars.lua
 
 ALLSOURCES = $(zile_base_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
 tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_base_SOURCES)
 
-dotzile.sample: tbl_vars.h mkdotzile.lua $(LUA_RUNTIME) dotzile-extra.el
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkdotzile.lua $(srcdir)/tbl_vars.h
+mkvars.stamp: tbl_vars.h.in mkvars.lua $(LUA_RUNTIME)
+	@rm -f mkvars.tmp
+	@touch mkvars.tmp
+	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h.in
 	cat $(srcdir)/dotzile-extra.el >> $@
+	@mv -f mkvars.tmp $@
+tbl_vars.h dotzile.sample: mkvars.stamp
+	@if test -f $@; then :; else \
+	  rm -f mkvars.stamp; \
+	  $(MAKE) $(AM_MAKEFLAGS) mkvars.stamp; \
+	fi
+dotzile.sample: dotzile-extra.el
 
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
