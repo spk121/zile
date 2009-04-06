@@ -336,6 +336,9 @@ main (int argc, char **argv)
         }
     }
 
+  /* Load Lisp files given on the command line. */
+  load_files (l_args);
+
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (cur_bp);
 
@@ -357,6 +360,7 @@ main (int argc, char **argv)
      or load file is specified on the command line. */
   if (minibuf_contents == NULL && argc == 0 && gl_list_size (l_args) == 0)
     about_screen ();
+  gl_list_free (l_args);
 
   setup_main_screen (argc);
 
@@ -369,9 +373,6 @@ main (int argc, char **argv)
       minibuf_write (buf);
       free (buf);
     }
-
-  load_files (l_args);
-  gl_list_free (l_args);
 
   /* Run the main loop. */
   if (!(thisflag & FLAG_QUIT))
