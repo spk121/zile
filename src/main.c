@@ -260,6 +260,10 @@ main (int argc, char **argv)
                    prog_name, argv[this_optind]);
           exit (1);
         }
+      else if (c == 'q')
+        longindex = 0;
+      else if (c == 'l')
+        longindex = 1;
 
       switch (longindex)
         {
