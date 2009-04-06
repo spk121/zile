@@ -19,6 +19,9 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
+/* Cope with bad definition in some system headers. */
+#undef lines
+
 /* Dynamically allocated string fields of Buffer. */
 FIELD_STR(name)           /* The name of the buffer. */
 FIELD_STR(filename)       /* The file being edited. */
