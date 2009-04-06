@@ -138,7 +138,8 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t de
         set_marker_pt (m, pt);
       }
 
-  set_buffer_pt (cur_bp, get_marker_pt (m_pt)); /* This marker has been updated to new position */
+  /* This marker has been updated to new position. */
+  set_buffer_pt (cur_bp, get_marker_pt (m_pt));
   free_marker (m_pt);
 }
 
@@ -373,39 +374,27 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
 bool
 fill_break_line (void)
 {
-  size_t i, break_col = 0, excess = 0, old_col;
+  size_t i, break_col = 0, old_col;
   size_t fillcol = get_variable_number ("fill-column");
+  bool break_made = false;
 
-  /* If we're not beyond fill-column, stop now. */
-  if (get_goalc () <= fillcol)
-    return false;
-
-  /* Move cursor back to fill column */
-  old_col = get_buffer_pt (cur_bp).o;
-  while (get_goalc () > fillcol + 1)
+  /* Only break if we're beyond fill-column. */
+  if (get_goalc () > fillcol)
     {
-      Point pt = get_buffer_pt (cur_bp);
-      pt.o--;
-      set_buffer_pt (cur_bp, pt);
-      excess++;
-    }
+      /* Save point. */
+      Marker *m = point_marker ();
 
-  /* Find break point moving left from fill-column. */
-  for (i = get_buffer_pt (cur_bp).o; i > 0; i--)
-    {
-      int c = astr_get (get_buffer_pt (cur_bp).p->text, i - 1);
-      if (isspace (c))
+      /* Move cursor back to fill column */
+      old_col = get_buffer_pt (cur_bp).o;
+      while (get_goalc () > fillcol + 1)
         {
-          break_col = i;
-          break;
+          Point pt = get_buffer_pt (cur_bp);
+          pt.o--;
+          set_buffer_pt (cur_bp, pt);
         }
-    }
 
-  /* If no break point moving left from fill-column, find first
-     possible moving right. */
-  if (break_col == 0)
-    {
-      for (i = get_buffer_pt (cur_bp).o + 1; i < astr_len (get_buffer_pt (cur_bp).p->text); i++)
+      /* Find break point moving left from fill-column. */
+      for (i = get_buffer_pt (cur_bp).o; i > 0; i--)
         {
           int c = astr_get (get_buffer_pt (cur_bp).p->text, i - 1);
           if (isspace (c))
@@ -414,28 +403,45 @@ fill_break_line (void)
               break;
             }
         }
+
+      /* If no break point moving left from fill-column, find first
+         possible moving right. */
+      if (break_col == 0)
+        {
+          for (i = get_buffer_pt (cur_bp).o + 1;
+               i < astr_len (get_buffer_pt (cur_bp).p->text);
+               i++)
+            {
+              int c = astr_get (get_buffer_pt (cur_bp).p->text, i - 1);
+              if (isspace (c))
+                {
+                  break_col = i;
+                  break;
+                }
+            }
+        }
+
+      if (break_col >= 1) /* Break line. */
+        {
+          Point pt = get_buffer_pt (cur_bp);
+          pt.o = break_col;
+          set_buffer_pt (cur_bp, pt);
+          FUNCALL (delete_horizontal_space);
+          insert_newline ();
+          set_buffer_pt (cur_bp, get_marker_pt (m));
+          break_made = true;
+        }
+      else /* Undo fiddling with point. */
+        {
+          Point pt = get_buffer_pt (cur_bp);
+          pt.o = old_col;
+          set_buffer_pt (cur_bp, pt);
+        }
+
+      free_marker (m);
     }
 
-  if (break_col >= 1) /* Break line. */
-    {
-      size_t last_col = get_buffer_pt (cur_bp).o - break_col;
-      Point pt = get_buffer_pt (cur_bp);
-      pt.o = break_col;
-      set_buffer_pt (cur_bp, pt);
-      FUNCALL (delete_horizontal_space);
-      insert_newline ();
-      pt = get_buffer_pt (cur_bp);
-      pt.o = last_col + excess;
-      set_buffer_pt (cur_bp, pt);
-      return true;
-    }
-  else /* Undo fiddling with point. */
-    {
-      Point pt = get_buffer_pt (cur_bp);
-      pt.o = old_col;
-      set_buffer_pt (cur_bp, pt);
-      return false;
-    }
+  return break_made;
 }
 
 static int
@@ -675,7 +681,7 @@ does nothing.
   if (get_buffer_pt (cur_bp).p->prev == get_buffer_lines (cur_bp))
     target_goalc = 0;
   else
-    {				/* Find goalc in previous non-blank line. */
+    { /* Find goalc in previous non-blank line. */
       Marker *m = point_marker ();
 
       previous_nonblank_goalc ();
