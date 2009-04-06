@@ -150,7 +150,7 @@ Display the full documentation of a variable.
           astr_afmt (bufname, "*Help: variable `%s'*", name);
           write_temp_buffer (astr_cstr (bufname), true,
                              write_variable_description,
-                             name, defval, get_variable (name), doc);
+                             name, get_variable (name), doc);
           astr_delete (bufname);
         }
     }
