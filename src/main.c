@@ -289,7 +289,7 @@ main (int argc, char **argv)
           qflag = true;
           break;
         case 1:
-          gl_list_add_last (f_args, optarg);
+          gl_list_add_last (f_args, (void *) optarg);
           break;
         case 2:
           gl_list_add_last (l_args, (void *) optarg);
@@ -357,9 +357,6 @@ main (int argc, char **argv)
         }
     }
 
-  /* Load Lisp files given on the command line. */
-  load_files (l_args);
-
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (cur_bp);
 
@@ -383,6 +380,9 @@ main (int argc, char **argv)
       gl_list_size (f_args) == 0 &&
       gl_list_size (l_args) == 0)
     about_screen ();
+
+  /* Load Lisp files given on the command line. */
+  load_files (l_args);
   gl_list_free (l_args);
 
   setup_main_screen (argc);
