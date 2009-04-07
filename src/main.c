@@ -112,6 +112,20 @@ about_screen (void)
 }
 
 static void
+execute_functions (gl_list_t funcs)
+{
+  size_t i;
+  for (i = 0; i < gl_list_size (funcs); i++)
+    {
+      char *func = (char *) gl_list_get_at (funcs, i);
+      term_redisplay ();
+      if (!execute_function (func, 1))
+        minibuf_error ("Function `%s' not defined", func);
+      lastflag |= FLAG_NEED_RESYNC;
+    }
+}
+
+static void
 load_files (gl_list_t files)
 {
   size_t i;
@@ -228,6 +242,8 @@ main (int argc, char **argv)
   int qflag = false;
   gl_list_t l_args = gl_list_create_empty (GL_LINKED_LIST,
                                            NULL, NULL, NULL, false);
+  gl_list_t f_args = gl_list_create_empty (GL_LINKED_LIST,
+                                           NULL, NULL, NULL, false);
   size_t line;
 
   /* Set prog_name to executable name, if available */
@@ -248,7 +264,7 @@ main (int argc, char **argv)
       char *buf, *shortopt;
 
       /* Leading : so as to return ':' for a missing arg, not '?' */
-      c = getopt_long (argc, argv, ":l:q", longopts, &longindex);
+      c = getopt_long (argc, argv, ":f:l:q", longopts, &longindex);
 
       if (c == -1)
         break;
@@ -262,8 +278,10 @@ main (int argc, char **argv)
         }
       else if (c == 'q')
         longindex = 0;
-      else if (c == 'l')
+      else if (c == 'f')
         longindex = 1;
+      else if (c == 'l')
+        longindex = 2;
 
       switch (longindex)
         {
@@ -271,9 +289,12 @@ main (int argc, char **argv)
           qflag = true;
           break;
         case 1:
-          gl_list_add_last (l_args, (void *) optarg);
+          gl_list_add_last (f_args, optarg);
           break;
         case 2:
+          gl_list_add_last (l_args, (void *) optarg);
+          break;
+        case 3:
           printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
                   "\n"
                   "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
@@ -296,7 +317,7 @@ main (int argc, char **argv)
           printf ("\n"
                   "Report bugs to " PACKAGE_BUGREPORT ".\n");
           exit (0);
-        case 3:
+        case 4:
           printf (ZILE_VERSION_STRING "\n"
                   ZILE_COPYRIGHT_STRING "\n"
                   "GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n"
@@ -358,11 +379,17 @@ main (int argc, char **argv)
 
   /* Show the splash screen only if no files and no Lisp expression
      or load file is specified on the command line. */
-  if (minibuf_contents == NULL && argc == 0 && gl_list_size (l_args) == 0)
+  if (minibuf_contents == NULL && argc == 0 &&
+      gl_list_size (f_args) == 0 &&
+      gl_list_size (l_args) == 0)
     about_screen ();
   gl_list_free (l_args);
 
   setup_main_screen (argc);
+
+  /* Run command-line functions. */
+  execute_functions (f_args);
+  gl_list_free (f_args);
 
   /* Refresh minibuffer in case there's an error that couldn't be
      written during startup */

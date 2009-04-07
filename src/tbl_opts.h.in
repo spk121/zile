@@ -35,6 +35,7 @@
 D ("Initialization options:")
 D ("")
 O ("no-init-file", 'q', optional_argument, "", "do not load ~/.@PACKAGE@")
+O ("funcall", 'f', required_argument, "FUNC", "call @PACKAGE_NAME@ Lisp function FUNC with no arguments")
 O ("load", 'l', required_argument, "FILE", "load @PACKAGE_NAME@ Lisp FILE using the load function")
 O ("help", '\0', optional_argument, "", "display this help message and exit")
 O ("version", '\0', optional_argument, "", "display version information and exit")
