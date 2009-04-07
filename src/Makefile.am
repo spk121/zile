@@ -123,8 +123,10 @@ dist_man_MANS = zile.1
 CLEANFILES = 						\
 	tbl_opts.h					\
 	tbl_funcs.h					\
-	zile.1						\
-	dotzile.sample
+	tbl_vars.h					\
+	dotzile.sample					\
+	mkvars.stamp					\
+	zile.1
 
 loc:
 	cloc --no3 $(ALLSOURCES) Makefile.am ../Makefile.am ../configure.ac
