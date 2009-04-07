@@ -1,6 +1,6 @@
 Release 2.3.5:
 
-This release fixes a bug write-file, where the undo state was not
+This release fixes a bug in write-file, where the undo state was not
 properly updated, resulting in dirty states being marked clean. A
 crash bug in paragraph filling was fixed, and some other minor bugs.
 The --funcall option was reintroduced for backwards compatibility with
