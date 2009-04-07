@@ -343,6 +343,7 @@ EXTRA_DIST =						\
 	quit.el						\
 	dotzile-extra.el				\
 	tbl_opts.h.in					\
+	tbl_vars.h.in					\
 	man-extras					\
 	zile.1.in					\
 	zile-help2man-wrapper
