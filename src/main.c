@@ -245,6 +245,7 @@ main (int argc, char **argv)
   gl_list_t f_args = gl_list_create_empty (GL_LINKED_LIST,
                                            NULL, NULL, NULL, false);
   size_t line;
+  Buffer *scratch_bp;
 
   /* Set prog_name to executable name, if available */
   if (argv[0])
@@ -342,6 +343,7 @@ main (int argc, char **argv)
 
   /* Create the `*scratch*' buffer. */
   create_first_window ();
+  scratch_bp = cur_bp;
   term_redisplay ();
 
   /* Read settings after creating *scratch* buffer so that any
@@ -356,9 +358,6 @@ main (int argc, char **argv)
           astr_delete (as);
         }
     }
-
-  /* Reinitialise the scratch buffer to catch settings */
-  init_buffer (cur_bp);
 
   /* Open files given on the command line */
   for (line = 1; *argv; argv++)
@@ -380,12 +379,14 @@ main (int argc, char **argv)
       gl_list_size (f_args) == 0 &&
       gl_list_size (l_args) == 0)
     about_screen ();
+  setup_main_screen (argc);
 
   /* Load Lisp files given on the command line. */
   load_files (l_args);
   gl_list_free (l_args);
 
-  setup_main_screen (argc);
+  /* Reinitialise the scratch buffer to catch settings */
+  init_buffer (scratch_bp);
 
   /* Run command-line functions. */
   execute_functions (f_args);
