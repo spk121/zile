@@ -335,6 +335,8 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/setq_nonexistent_variable.output	\
 	lisp-tests/zile_test.input
 
+# Distribute tbl_vars.h & mkvars.stamp so that Lua is not needed for
+# building a release.
 EXTRA_DIST =						\
 	$(LUA_RUNTIME)					\
 	$(LUA_BUILDTIME)				\
@@ -346,6 +348,8 @@ EXTRA_DIST =						\
 	dotzile-extra.el				\
 	tbl_opts.h.in					\
 	tbl_vars.h.in					\
+	tbl_vars.h					\
+	mkvars.stamp					\
 	man-extras					\
 	zile.1.in					\
 	zile-help2man-wrapper
