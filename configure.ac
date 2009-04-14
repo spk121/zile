@@ -34,9 +34,6 @@ AM_PROG_CC_C_O
 
 dnl help2man
 AC_PATH_PROG(HELP2MAN, help2man)
-if test "$ac_cv_path_HELP2MAN" = ""; then
-  AC_MSG_FAILURE([cannot find help2man])
-fi
 
 dnl Valgrind
 AC_ARG_ENABLE(valgrind,
