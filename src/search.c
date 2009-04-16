@@ -587,9 +587,8 @@ As each match is found, the user must type a character saying
 what to do with it.
 +*/
 {
-  int count = 0;
   bool noask = false, find_no_upper;
-  size_t find_len;
+  size_t find_len, count = 0;
   char *find = minibuf_read ("Query replace string: ", "");
   char *repl;
 
