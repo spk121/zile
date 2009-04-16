@@ -53,7 +53,7 @@ init_search (void)
 
 /* Return true if there are no upper-case letters in the given string.
    If `regex' is true, ignore escaped letters. */
-static int
+static bool
 no_upper (const char *s, size_t len, int regex)
 {
   int quote_flag = 0;
@@ -587,7 +587,8 @@ As each match is found, the user must type a character saying
 what to do with it.
 +*/
 {
-  int count = 0, noask = false, exitloop = false, find_no_upper;
+  int count = 0;
+  bool noask = false, find_no_upper;
   size_t find_len;
   char *find = minibuf_read ("Query replace string: ", "");
   char *repl;
@@ -609,12 +610,13 @@ what to do with it.
       return FUNCALL (keyboard_quit);
     }
 
-  /* Spaghetti code follows... :-( */
   while (search_forward (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, find, false))
     {
+      Point pt;
+      int c = ' ';
+
       if (!noask)
         {
-          int c;
           if (thisflag & FLAG_NEED_RESYNC)
             resync_redisplay ();
           for (;;)
@@ -625,50 +627,33 @@ what to do with it.
               c = getkey ();
               if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
                   || c == 'n' || c == 'q' || c == '.' || c == '!')
-                goto exitloop;
+                break;
               minibuf_error ("Please answer y, n, !, . or q.");
               waitkey (WAITKEY_DEFAULT);
             }
-        exitloop:
           minibuf_clear ();
 
-          switch (c)
-            {
-            case KBD_CANCEL:	/* C-g */
-              return FUNCALL (keyboard_quit);
-            case 'q':		/* Quit immediately. */
-              goto endoffunc;
-            case '.':		/* Replace and quit. */
-              exitloop = true;
-              goto replblock;
-            case '!':		/* Replace all without asking. */
-              noask = true;
-              goto replblock;
-            case ' ':		/* Replace. */
-            case 'y':
-              goto replblock;
-              break;
-            case 'n':		/* Do not replace. */
-            case KBD_RET:
-            case KBD_DEL:
-              goto nextmatch;
-            }
+          if (c == 'q')			/* Quit immediately. */
+            break;
+          else if (c == KBD_CANCEL)	/* C-g */
+            return FUNCALL (keyboard_quit);
+          else if (c == '!')		/* Replace all without asking. */
+            noask = true;
+          else if (c == 'n' || c == KBD_RET || c == KBD_DEL) /* Do not replace. */
+            continue;
         }
 
-    replblock:
-      {
-        Point pt = get_buffer_pt (cur_bp);
-        ++count;
-        undo_save (UNDO_REPLACE_BLOCK,
-                   make_point (pt.n, pt.o - find_len), find_len, strlen (repl));
-        line_replace_text (pt.p, pt.o - find_len, find_len, repl, find_no_upper);
-      }
-    nextmatch:
-      if (exitloop)
+      /* Perform replacement. */
+      pt = get_buffer_pt (cur_bp);
+      ++count;
+      undo_save (UNDO_REPLACE_BLOCK,
+                 make_point (pt.n, pt.o - find_len), find_len, strlen (repl));
+      line_replace_text (pt.p, pt.o - find_len, find_len, repl, find_no_upper);
+
+      if (c == '.')		/* Replace and quit. */
         break;
     }
 
-endoffunc:
   free (find);
   free (repl);
 
