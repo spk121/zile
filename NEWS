@@ -1,3 +1,9 @@
+Release 2.3.7
+
+This release fixes a crash in query-replace introduced in 2.3.5. Some
+code cleanup was done. A bug in the build system that caused help2man
+to be required to build Zile was removed.
+
 Release 2.3.6:
 
 This release fixes a build-system bug that caused Lua to be required
