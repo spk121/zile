@@ -335,7 +335,7 @@ check_case (const char *s, size_t len)
  * true then the new characters will be the same case as the old.
  */
 void
-line_replace_text (Line ** lp, size_t offset, size_t oldlen,
+line_replace_text (Line * lp, size_t offset, size_t oldlen,
                    char *newtext, int replace_case)
 {
   int case_type = 0;
@@ -346,7 +346,7 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
 
   if (replace_case)
     {
-      case_type = check_case (astr_cstr ((*lp)->text) + offset, oldlen);
+      case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
 
       if (case_type != 0)
         {
@@ -356,8 +356,8 @@ line_replace_text (Line ** lp, size_t offset, size_t oldlen,
     }
 
   set_buffer_modified (cur_bp, true);
-  astr_replace_cstr ((*lp)->text, offset, oldlen, newtext);
-  adjust_markers (*lp, *lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
+  astr_replace_cstr (lp->text, offset, oldlen, newtext);
+  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
 
   if (case_type != 0)
     astr_delete (as);

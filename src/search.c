@@ -661,7 +661,7 @@ what to do with it.
         ++count;
         undo_save (UNDO_REPLACE_BLOCK,
                    make_point (pt.n, pt.o - find_len), find_len, strlen (repl));
-        line_replace_text (&pt.p, pt.o - find_len, find_len, repl, find_no_upper);
+        line_replace_text (pt.p, pt.o - find_len, find_len, repl, find_no_upper);
       }
     nextmatch:
       if (exitloop)

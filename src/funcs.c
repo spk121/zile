@@ -582,7 +582,7 @@ untabify_string (char *dest, char *src, size_t scol, size_t tw)
 #define TAB_TABIFY	1
 #define TAB_UNTABIFY	2
 static void
-edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
+edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
                int action)
 {
   char *src, *dest;
@@ -593,14 +593,14 @@ edit_tab_line (Line ** lp, size_t lineno, size_t offset, size_t size,
 
   src = (char *) xzalloc (size + 1);
   dest = (char *) xzalloc (size * t + 1);
-  strncpy (src, astr_cstr (get_line_text (*lp)) + offset, size);
+  strncpy (src, astr_cstr (get_line_text (lp)) + offset, size);
   src[size] = '\0';
 
   /* Get offset's column.  */
   col = 0;
   for (i = 0; i < offset; i++)
     {
-      if (astr_get (get_line_text (*lp), i) == '\t')
+      if (astr_get (get_line_text (lp), i) == '\t')
         col |= t - 1;
       ++col;
     }
@@ -647,18 +647,18 @@ edit_tab_region (int action)
             {
               /* Region on a sole line. */
               if (lineno == get_region_end (rp).n)
-                edit_tab_line (&lp, lineno, get_region_start (rp).o, get_region_size (rp), action);
+                edit_tab_line (lp, lineno, get_region_start (rp).o, get_region_size (rp), action);
               /* Region is multi-line. */
               else
-                edit_tab_line (&lp, lineno, get_region_start (rp).o,
+                edit_tab_line (lp, lineno, get_region_start (rp).o,
                                astr_len (get_line_text (lp)) - get_region_start (rp).o, action);
             }
           /* Last line of multi-line region. */
           else if (lineno == get_region_end (rp).n)
-            edit_tab_line (&lp, lineno, 0, get_region_end (rp).o, action);
+            edit_tab_line (lp, lineno, 0, get_region_end (rp).o, action);
           /* Middle line of multi-line region. */
           else
-            edit_tab_line (&lp, lineno, 0, astr_len (get_line_text (lp)), action);
+            edit_tab_line (lp, lineno, 0, astr_len (get_line_text (lp)), action);
           /* Done?  */
           if (lineno == get_region_end (rp).n)
             break;
