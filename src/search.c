@@ -661,7 +661,6 @@ what to do with it.
 
   if (thisflag & FLAG_NEED_RESYNC)
     resync_redisplay ();
-  term_redisplay ();
 
   if (ok)
     minibuf_write ("Replaced %d occurrences", count);

@@ -52,7 +52,6 @@ Copy region into the user specified register.
   else
     {
       minibuf_write ("Copy to register: ");
-      term_refresh ();
       reg = getkey ();
     }
   if (regchar != NULL)
@@ -112,7 +111,6 @@ Puts point before and mark after the inserted text.
   else
     {
       minibuf_write ("Insert register: ");
-      term_refresh ();
       reg = getkey ();
     }
   if (regchar != NULL)
