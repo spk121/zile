@@ -636,7 +636,10 @@ what to do with it.
           if (c == 'q')			/* Quit immediately. */
             break;
           else if (c == KBD_CANCEL)	/* C-g */
-            return FUNCALL (keyboard_quit);
+            {
+             ok = FUNCALL (keyboard_quit);
+             break;
+            }
           else if (c == '!')		/* Replace all without asking. */
             noask = true;
           else if (c == 'n' || c == KBD_RET || c == KBD_DEL) /* Do not replace. */
@@ -661,7 +664,8 @@ what to do with it.
     resync_redisplay ();
   term_redisplay ();
 
-  minibuf_write ("Replaced %d occurrences", count);
+  if (ok)
+    minibuf_write ("Replaced %d occurrences", count);
 }
 END_DEFUN
 
