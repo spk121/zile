@@ -74,7 +74,7 @@ outch (int c, size_t font, size_t * x)
   if (*x >= term_width ())
     return;
 
-  term_attrset (1, font);
+  term_attrset (font);
 
   if (c == '\t')
     for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < term_width ();
@@ -90,7 +90,7 @@ outch (int c, size_t font, size_t * x)
       free (buf);
     }
 
-  term_attrset (1, FONT_NORMAL);
+  term_attrset (FONT_NORMAL);
 }
 
 static void
@@ -296,7 +296,7 @@ draw_status_line (size_t line, Window * wp)
   Point pt = window_pt (wp);
   astr as, bs;
 
-  term_attrset (1, FONT_REVERSE);
+  term_attrset (FONT_REVERSE);
 
   term_move (line, 0);
   for (i = 0; i < get_window_ewidth (wp); ++i)
@@ -331,7 +331,7 @@ draw_status_line (size_t line, Window * wp)
   term_addnstr (astr_cstr (as), MIN (term_width (), astr_len (as)));
   astr_delete (as);
 
-  term_attrset (1, FONT_NORMAL);
+  term_attrset (FONT_NORMAL);
 }
 
 void
@@ -398,7 +398,7 @@ term_tidy (void)
 {
   term_move (term_height () - 1, 0);
   term_clrtoeol ();
-  term_attrset (1, FONT_NORMAL);
+  term_attrset (FONT_NORMAL);
   term_refresh ();
 }
 

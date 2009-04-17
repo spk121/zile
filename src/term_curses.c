@@ -22,7 +22,6 @@
 #include "config.h"
 
 #include <stddef.h>
-#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #ifdef HAVE_NCURSES_H
@@ -65,26 +64,15 @@ term_addch (int c)
 }
 
 void
-term_attrset (size_t attrs, ...)
+term_attrset (size_t attr)
 {
-  size_t i;
   unsigned long a = 0;
-  va_list ap;
-  va_start (ap, attrs);
-  for (i = 0; i < attrs; i++)
-    {
-      size_t f = va_arg (ap, size_t);
-      switch (f)
-        {
-        case FONT_NORMAL:
-          a = 0;
-          break;
-        case FONT_REVERSE:
-          a |= A_REVERSE;
-          break;
-        }
-    }
-  va_end (ap);
+
+  if (attr == FONT_NORMAL)
+    a = 0;
+  else if (attr ==  FONT_REVERSE)
+    a = A_REVERSE;
+
   attrset (a);
 }
 

@@ -297,7 +297,7 @@ void term_clrtoeol (void);
 void term_refresh (void);
 void term_clear (void);
 void term_addch (int c);
-void term_attrset (size_t attrs, ...);
+void term_attrset (size_t attr);
 void term_beep (void);
 size_t term_xgetkey (int mode, size_t timeout);
 void term_ungetkey (size_t key);
