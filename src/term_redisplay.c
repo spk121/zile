@@ -116,20 +116,20 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * rp,
 
 static void
 draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
-           size_t lineno, Region * r, int highlight)
+           size_t lineno, Region * rp, int highlight)
 {
   size_t x, i;
 
   term_move (line, 0);
   for (x = 0, i = startcol; i < astr_len (get_line_text (lp)) && x < get_window_ewidth (wp); i++)
     {
-      if (highlight && in_region (lineno, i, r))
+      if (highlight && in_region (lineno, i, rp))
         outch (astr_get (get_line_text (lp), i), FONT_REVERSE, &x);
       else
         outch (astr_get (get_line_text (lp), i), FONT_NORMAL, &x);
     }
 
-  draw_end_of_line (line, wp, lineno, r, highlight, x, i);
+  draw_end_of_line (line, wp, lineno, rp, highlight, x, i);
 }
 
 static void
@@ -152,7 +152,6 @@ calculate_highlight_region (Window * wp, Region * rp, int *highlight)
     {
       Point pt1 = get_region_start (rp);
       Point pt2 = get_region_end (rp);
-      swap_point (&pt1, &pt2);
       set_region_start (rp, pt2);
       set_region_end (rp, pt1);
     }
