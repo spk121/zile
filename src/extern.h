@@ -255,7 +255,6 @@ Point make_point (size_t lineno, size_t offset);
 int cmp_point (Point pt1, Point pt2);
 int point_dist (Point pt1, Point pt2);
 int count_lines (Point pt1, Point pt2);
-void swap_point (Point * pt1, Point * pt2);
 Point point_min (void);
 Point point_max (void);
 Point line_beginning_position (int count);
