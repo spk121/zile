@@ -57,7 +57,11 @@ point_dist (Point pt1, Point pt2)
   Line *lp;
 
   if (cmp_point (pt1, pt2) > 0)
-    swap_point (&pt1, &pt2);
+    {
+      Point pt0 = pt1;
+      pt1 = pt2;
+      pt2 = pt0;
+    }
 
   for (lp = pt1.p;; lp = get_line_next (lp))
     {
@@ -81,18 +85,7 @@ point_dist (Point pt1, Point pt2)
 int
 count_lines (Point pt1, Point pt2)
 {
-  if (cmp_point (pt1, pt2) > 0)
-    swap_point (&pt1, &pt2);
-
-  return pt2.n - pt1.n;
-}
-
-void
-swap_point (Point * pt1, Point * pt2)
-{
-  Point pt0 = *pt1;
-  *pt1 = *pt2;
-  *pt2 = pt0;
+  return abs (pt2.n - pt1.n);
 }
 
 Point
