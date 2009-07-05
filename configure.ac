@@ -20,7 +20,7 @@ dnl Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.3.7, bug-zile@gnu.org)
+AC_INIT(Zile, 2.3.8, bug-zile@gnu.org)
 AM_INIT_AUTOMAKE(std-options)
 
 dnl Checks for programs
