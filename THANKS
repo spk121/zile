@@ -6,6 +6,8 @@ The Zile maintainers would like to thank:
   package, and fixing and reporting several bugs
 * Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
   `goto-line' function, Debian package and continuous support
+* Nelson Beebe for portability reports and fixes
+* Thomas Dickey for help with ncurses
 * Daniel Sobral <Daniel_Sobral@voga.com.br> for suggestions
 * Mikael Karpberg <karpen@ocean.campus.luth.se> for bug reports, fixes
   and suggestions
@@ -33,10 +35,9 @@ The Zile maintainers would like to thank:
 * Alan James <alan@tomun.org> for suggestions
 * Joseph Boyd <k963@bonbon.net> for the `back-to-indentation' feature
 * Han Boetes for a security fix
-* Thomas Dickey for help with ncurses
 * Robert Millan for bug reports and fixes
 * Aaron Swartz for clarifying problems on Mac OS X
 * Julien Chaffraix for indenting fixes
-* Nelson Beebe for portability reports and fixes
+* Ulrich Mueller for bug reports
 
 and everyone else who has reported bugs and made suggestions.

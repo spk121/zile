@@ -67,6 +67,8 @@ astr
 agetcwd (void)
 {
   char *s = getcwd (NULL, 0);
+  if (s == NULL)
+    s = "";
   astr as = astr_new_cstr (s);
   free (s);
   return as;
@@ -422,11 +424,21 @@ If the current buffer now contains an empty file that you just visited
 +*/
 {
   const char *buf = get_buffer_filename (cur_bp);
-  char *base = base_name (buf);
-  char *ms = minibuf_read_filename ("Find alternate: ", buf, base);
+  char *base = xstrdup ("");
+  char *ms;
+  astr as = NULL;
+
+  if (buf == NULL)
+    {
+      as = agetcwd ();
+      buf = astr_cstr (as);
+    }
+  else
+    base = base_name (buf);
+  ms = minibuf_read_filename ("Find alternate: ", buf, base);
+  free (base);
 
   ok = leNIL;
-
   if (ms == NULL)
     ok = FUNCALL (keyboard_quit);
   else if (ms[0] != '\0' && check_modified_buffer (cur_bp))
@@ -436,7 +448,10 @@ If the current buffer now contains an empty file that you just visited
     }
 
   free (ms);
-  free (base);
+  if (as)
+    astr_delete (as);
+  else
+    free (buf);
 }
 END_DEFUN
 
