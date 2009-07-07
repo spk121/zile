@@ -1,3 +1,7 @@
+Release 2.3.9
+
+This release fixes a build problem on OSF/1.
+
 Release 2.3.8
 
 This release fixes a crash in find-file-alternate, and another
