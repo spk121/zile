@@ -185,7 +185,7 @@ Save the region as if killed, but don't kill it.
 END_DEFUN
 
 static le *
-kill (int uniarg, Function mark_func)
+kill_text (int uniarg, Function mark_func)
 {
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
@@ -211,7 +211,7 @@ Kill characters forward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  ok = kill (uniarg, F_mark_word);
+  ok = kill_text (uniarg, F_mark_word);
 }
 END_DEFUN
 
@@ -221,7 +221,7 @@ Kill characters backward until encountering the end of a word.
 With argument, do this that many times.
 +*/
 {
-  ok = kill (-uniarg, F_mark_word);
+  ok = kill_text (-uniarg, F_mark_word);
 }
 END_DEFUN
 
@@ -232,7 +232,7 @@ With ARG, kill that many sexps after the cursor.
 Negative arg -N means kill N sexps before the cursor.
 +*/
 {
-  ok = kill (uniarg, F_mark_sexp);
+  ok = kill_text (uniarg, F_mark_sexp);
 }
 END_DEFUN
 
