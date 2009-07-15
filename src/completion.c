@@ -29,7 +29,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 #include "dirname.h"
 #include "gl_linked_list.h"
 
@@ -261,11 +260,12 @@ completion_readdir (Completion * cp, astr as)
   s2 = xstrdup (astr_cstr (as));
   if (astr_get (as, astr_len (as) - 1) != '/')
     {
-      pdir = dirname (s1);
+      pdir = dir_name (s1);
       /* Append `/' to pdir */
       astr_cat_cstr (bs, pdir);
       if (astr_get (bs, astr_len (bs) - 1) != '/')
         astr_cat_char (bs, '/');
+      free ((char *) pdir);
       pdir = astr_cstr (bs);
       base = base_name (s2);
     }
