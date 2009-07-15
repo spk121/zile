@@ -87,7 +87,7 @@ END_DEFUN
 
 static int reg;
 
-static int
+static bool
 insert_register (void)
 {
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, astr_len (regs[reg]));

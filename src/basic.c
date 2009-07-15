@@ -115,7 +115,7 @@ goto_goalc (size_t goalc)
   set_buffer_pt (cur_bp, pt);
 }
 
-int
+bool
 previous_line (void)
 {
   if (get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
@@ -168,7 +168,7 @@ column, or at the end of the line if it is not long enough.
 }
 END_DEFUN
 
-int
+bool
 next_line (void)
 {
   if (get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
@@ -334,7 +334,7 @@ Move point to the end of the buffer; leave mark at previous position.
 }
 END_DEFUN
 
-int
+bool
 backward_char (void)
 {
   if (!bolp ())
@@ -358,7 +358,7 @@ backward_char (void)
   return false;
 }
 
-int
+bool
 forward_char (void)
 {
   if (!eolp ())
@@ -406,7 +406,7 @@ On reaching end of buffer, stop and signal error.
 }
 END_DEFUN
 
-int
+bool
 ngotoup (size_t n)
 {
   for (; n > 0; n--)
@@ -418,7 +418,7 @@ ngotoup (size_t n)
   return true;
 }
 
-int
+bool
 ngotodown (size_t n)
 {
   for (; n > 0; n--)
@@ -430,7 +430,7 @@ ngotodown (size_t n)
   return true;
 }
 
-static int
+static bool
 scroll_down (void)
 {
   if (get_buffer_pt (cur_bp).n > 0)
@@ -440,7 +440,7 @@ scroll_down (void)
   return false;
 }
 
-static int
+static bool
 scroll_up (void)
 {
   if (get_buffer_pt (cur_bp).n < get_buffer_last_line (cur_bp))

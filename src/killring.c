@@ -80,34 +80,55 @@ copy_or_kill_region (bool kill, Region * rp)
   return true;
 }
 
-static int
-kill_line (int literally)
+static bool
+kill_to_bol (void)
 {
+  bool ok;
+
+  if (!bolp ())
+    {
+      Region * rp = region_new ();
+      Point pt = get_buffer_pt (cur_bp);
+
+      set_region_size (rp, pt.o);
+      pt.o = 0;
+      set_region_start (rp, pt);
+
+      ok = copy_or_kill_region (true, rp);
+      free (rp);
+    }
+
+  return ok;
+}
+
+static bool
+kill_line (bool literally)
+{
+  bool ok = true;
+  bool deleted_text = false;
+
   if (eobp ())
     {
       minibuf_error ("End of buffer");
       return false;
     }
 
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+
   if (!eolp ())
     {
       Region * rp = region_new ();
-      bool ret;
 
       set_region_start (rp, get_buffer_pt (cur_bp));
       set_region_size (rp, astr_len (get_line_text (get_buffer_pt (cur_bp).p)) - get_buffer_pt (cur_bp).o);
 
-      ret = copy_or_kill_region (true, rp);
+      ok = copy_or_kill_region (true, rp);
       free (rp);
 
-      if (!ret)
-        return false;
-
-      if (!literally)
-        return true;
+      deleted_text = true;
     }
 
-  if (!eobp ())
+  if (ok && (literally || !deleted_text) && !eobp ())
     {
       if (!FUNCALL (delete_char))
         return false;
@@ -116,19 +137,33 @@ kill_line (int literally)
       thisflag |= FLAG_DONE_KILL;
     }
 
-  return true;
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+
+  return ok;
 }
 
-static int
+static bool
 kill_line_literally (void)
 {
   return kill_line (true);
 }
 
+static bool
+kill_line_backward (void)
+{
+  return previous_line () && kill_line_literally ();
+}
+
 DEFUN ("kill-line", kill_line)
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
-With prefix argument, kill that many lines from point.
+With prefix argument @i{arg}, kill that many lines from point.
+Negative arguments kill lines backward.
+With zero argument, kills the text before point on the current line.
+
+If `kill-whole-line' is non-nil, then this command kills the whole line
+including its terminating newline, when used at the beginning of a line
+with no argument.
 +*/
 {
   le * ret = leT;
@@ -139,7 +174,12 @@ With prefix argument, kill that many lines from point.
   if (!(lastflag & FLAG_SET_UNIARG))
     kill_line (get_variable_bool ("kill-whole-line"));
   else
-    ret = execute_with_uniarg (true, uniarg, kill_line_literally, NULL);
+    {
+      if (uniarg == 0)
+        kill_to_bol ();
+      else
+        ret = execute_with_uniarg (true, uniarg, kill_line_literally, kill_line_backward);
+    }
 
   deactivate_mark ();
 }
@@ -149,13 +189,13 @@ static bool
 copy_or_kill_the_region (bool kill)
 {
   Region * rp = region_new ();
-  bool ret = false;
+  bool ok = false;
 
   if (calculate_the_region (rp))
-    ret = copy_or_kill_region (kill, rp);
+    ok = copy_or_kill_region (kill, rp);
 
   free (rp);
-  return ret;
+  return ok;
 }
 
 DEFUN ("kill-region", kill_region)

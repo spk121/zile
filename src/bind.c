@@ -219,7 +219,7 @@ completion_scan (Binding bindings, size_t key, gl_list_t * keys)
     }
 }
 
-static int
+static bool
 self_insert_command (void)
 {
   int ret = true;
@@ -260,9 +260,9 @@ process_key (Binding bindings, size_t key)
   if (key == KBD_NOKEY)
     return;
 
-  if (key & KBD_META && isdigit ((int) (key & 0xff)))
-    /* Got an ESC x sequence where `x' is a digit. */
-    universal_argument (KBD_META, (int) ((key & 0xff) - '0'));
+  if (key & KBD_META && (isdigit ((int) (key & 0xff)) || (key & 0xff) == '-'))
+    /* Got an ESC x sequence where `x' is a digit or `-'. */
+    universal_argument (KBD_META, (int) ((key & 0xff)));
   else
     {
       gl_list_t keys;

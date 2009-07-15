@@ -254,7 +254,7 @@ insert_expanded_tab (int (*inschr) (int chr))
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 
-static int
+static bool
 insert_tab (void)
 {
   if (warn_if_readonly_buffer ())
@@ -282,7 +282,7 @@ END_DEFUN
  * Insert a newline at the current position without moving the cursor.
  * Update markers after point in the split line.
  */
-static int
+static bool
 intercalate_newline (void)
 {
   if (warn_if_readonly_buffer ())
@@ -304,7 +304,7 @@ intercalate_newline (void)
   return true;
 }
 
-int
+bool
 insert_newline (void)
 {
   return intercalate_newline () && forward_char ();
@@ -444,7 +444,7 @@ fill_break_line (void)
   return break_made;
 }
 
-static int
+static bool
 newline (void)
 {
   if (get_buffer_autofill (cur_bp) &&
@@ -507,7 +507,7 @@ bprintf (const char *fmt, ...)
   free (buf);
 }
 
-int
+bool
 delete_char (void)
 {
   deactivate_mark ();
@@ -547,7 +547,7 @@ delete_char (void)
   return true;
 }
 
-static int
+static bool
 backward_delete_char (void)
 {
   deactivate_mark ();
@@ -562,7 +562,7 @@ backward_delete_char (void)
   return true;
 }
 
-static int
+static bool
 backward_delete_char_overwrite (void)
 {
   if (bolp () || eolp ())
@@ -601,7 +601,7 @@ Delete the previous character.
 Join lines if the character is a newline.
 +*/
 {
-  int (*forward) (void) = get_buffer_overwrite (cur_bp) ?
+  bool (*forward) (void) = get_buffer_overwrite (cur_bp) ?
     backward_delete_char_overwrite : backward_delete_char;
   ok = execute_with_uniarg (true, uniarg, forward, delete_char);
 }

@@ -350,19 +350,19 @@ bool
 delete_region (const Region * rp)
 {
   size_t size = get_region_size (rp);
+  Marker *m = point_marker ();
 
   if (warn_if_readonly_buffer ())
     return false;
 
-  if (get_buffer_pt (cur_bp).p != get_region_start (rp).p ||
-      get_region_start (rp).o != get_buffer_pt (cur_bp).o)
-    FUNCALL (exchange_point_and_mark);
-
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), size, 0);
+  goto_point (get_region_start (rp));
+  undo_save (UNDO_REPLACE_BLOCK, get_region_start (rp), size, 0);
   undo_nosave = true;
   while (size--)
-    FUNCALL (delete_char);
+    delete_char ();
   undo_nosave = false;
+  set_buffer_pt (cur_bp, get_marker_pt (m));
+  free_marker (m);
 
   return true;
 }

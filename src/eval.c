@@ -189,10 +189,10 @@ leEval (le * list)
 }
 
 le *
-execute_with_uniarg (bool undo, int uniarg, int (*forward) (void), int (*backward) (void))
+execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backward) (void))
 {
   int uni, ret = true;
-  int (*func) (void) = forward;
+  bool (*func) (void) = forward;
 
   if (backward && uniarg < 0)
     {

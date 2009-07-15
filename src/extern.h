@@ -26,14 +26,14 @@
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp (Buffer * bp, Point pt);
 size_t get_goalc (void);
-int backward_char (void);
-int forward_char (void);
+bool previous_line (void);
+bool next_line (void);
+bool backward_char (void);
+bool forward_char (void);
 void gotobob (void);
 void gotoeob (void);
-int next_line (void);
-int ngotodown (size_t n);
-int ngotoup (size_t n);
-int previous_line (void);
+bool ngotodown (size_t n);
+bool ngotoup (size_t n);
 
 /* bind.c ----------------------------------------------------------------- */
 extern Binding root_bindings;
@@ -104,22 +104,22 @@ int completion_try (Completion * cp, astr search, int popup_when_complete);
 void push_mark (void);
 void pop_mark (void);
 void set_mark (void);
-int is_empty_line (void);
-int is_blank_line (void);
-int following_char (void);
-int preceding_char (void);
-int bobp (void);
-int eobp (void);
-int bolp (void);
-int eolp (void);
+bool is_empty_line (void);
+bool is_blank_line (void);
+bool following_char (void);
+bool preceding_char (void);
+bool bobp (void);
+bool eobp (void);
+bool bolp (void);
+bool eolp (void);
 void ding (void);
 
 /* eval.c ----------------------------------------------------------------- */
 extern le *leNIL, *leT;
 size_t countNodes (le * branch);
 void leEval (le * list);
-le *execute_with_uniarg (bool undo, int uniarg, int (*forward) (void),
-                         int (*backward) (void));
+le *execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void),
+                         bool (*backward) (void));
 le *execute_function (const char *name, int uniarg);
 Function get_function (const char *name);
 const char *get_function_doc (const char *name);
@@ -187,11 +187,11 @@ void line_replace_text (Line * lp, size_t offset, size_t oldlen,
 int insert_char (int c);
 int insert_char_in_insert_mode (int c);
 bool fill_break_line (void);
-int insert_newline (void);
+bool insert_newline (void);
 void insert_nstring (const char *s, size_t len);
 void insert_astr (astr as);
 void bprintf (const char *fmt, ...);
-int delete_char (void);
+bool delete_char (void);
 void free_registers (void);
 
 /* lisp.c ----------------------------------------------------------------- */

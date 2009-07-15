@@ -79,14 +79,14 @@ set_mark (void)
     move_marker (get_buffer_mark (cur_bp), cur_bp, get_buffer_pt (cur_bp));
 }
 
-int
+bool
 is_empty_line (void)
 {
   Point pt = get_buffer_pt (cur_bp);
   return astr_len (get_line_text (pt.p)) == 0;
 }
 
-int
+bool
 is_blank_line (void)
 {
   Point pt = get_buffer_pt (cur_bp);
@@ -98,7 +98,7 @@ is_blank_line (void)
 }
 
 /* Returns the character following point in the current buffer. */
-int
+bool
 following_char (void)
 {
   if (eobp ())
@@ -113,7 +113,7 @@ following_char (void)
 }
 
 /* Return the character preceding point in the current buffer. */
-int
+bool
 preceding_char (void)
 {
   if (bobp ())
@@ -128,7 +128,7 @@ preceding_char (void)
 }
 
 /* Return true if point is at the beginning of the buffer. */
-int
+bool
 bobp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
@@ -136,7 +136,7 @@ bobp (void)
 }
 
 /* Return true if point is at the end of the buffer. */
-int
+bool
 eobp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
@@ -145,7 +145,7 @@ eobp (void)
 }
 
 /* Return true if point is at the beginning of a line. */
-int
+bool
 bolp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
@@ -153,7 +153,7 @@ bolp (void)
 }
 
 /* Return true if point is at the end of a line. */
-int
+bool
 eolp (void)
 {
   Point pt = get_buffer_pt (cur_bp);

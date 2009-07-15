@@ -432,7 +432,7 @@ universal_argument (int keytype, int xarg)
   if (keytype == KBD_META)
     {
       astr_cpy_cstr (as, "ESC");
-      pushkey ((size_t) (xarg + '0'));
+      pushkey ((size_t) (xarg));
     }
   else
     {
@@ -714,8 +714,8 @@ END_DEFUN
                           Move through words
 ***********************************************************************/
 #define ISWORDCHAR(c)	(isalnum (c) || c == '$')
-static int
-move_word (int dir, int (*next_char) (void), int (*move_char) (void), int (*at_extreme) (void))
+static bool
+move_word (int dir, bool (*next_char) (void), bool (*move_char) (void), bool (*at_extreme) (void))
 {
   int gotword = false;
   for (;;)
@@ -744,13 +744,13 @@ move_word (int dir, int (*next_char) (void), int (*move_char) (void), int (*at_e
   return false;
 }
 
-static int
+static bool
 forward_word (void)
 {
   return move_word (1, following_char, forward_char, eolp);
 }
 
-static int
+static bool
 backward_word (void)
 {
   return move_word (-1, preceding_char, backward_char, bolp);
@@ -892,13 +892,13 @@ move_sexp (int dir)
   return false;
 }
 
-static int
+static bool
 forward_sexp (void)
 {
   return move_sexp (1);
 }
 
-static int
+static bool
 backward_sexp (void)
 {
   return move_sexp (-1);
@@ -946,7 +946,7 @@ astr_append_region (astr s)
 }
 
 static bool
-transpose_subr (int (*forward_func) (void), int (*backward_func) (void))
+transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
 {
   Marker *p0 = point_marker (), *m1, *m2;
   astr as1, as2 = NULL;
@@ -1054,7 +1054,7 @@ transpose_subr (int (*forward_func) (void), int (*backward_func) (void))
 }
 
 static le *
-transpose (int uniarg, int (*forward_func) (void), int (*backward_func) (void))
+transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void))
 {
   int uni, ret = true;
 
@@ -1063,7 +1063,7 @@ transpose (int uniarg, int (*forward_func) (void), int (*backward_func) (void))
 
   if (uniarg < 0)
     {
-      int (*tmp_func) (void) = forward_func;
+      bool (*tmp_func) (void) = forward_func;
       forward_func = backward_func;
       backward_func = tmp_func;
       uniarg = -uniarg;
@@ -1172,7 +1172,7 @@ Precisely, if point is on line I, move to the start of line I + N.
 END_DEFUN
 
 static le *
-move_paragraph (int uniarg, int (*forward) (void), int (*backward) (void),
+move_paragraph (int uniarg, bool (*forward) (void), bool (*backward) (void),
                      Function line_extremum)
 {
   if (uniarg < 0)
@@ -1280,7 +1280,7 @@ Fill paragraph at or after point.
 }
 END_DEFUN
 
-static int
+static bool
 setcase_word (int rcase)
 {
   size_t i;
@@ -1313,7 +1313,7 @@ setcase_word (int rcase)
   return true;
 }
 
-static int
+static bool
 setcase_word_lowercase (void)
 {
   return setcase_word (case_lower);
@@ -1328,7 +1328,7 @@ Convert following word (or argument N words) to lower case, moving over.
 }
 END_DEFUN
 
-static int
+static bool
 setcase_word_uppercase (void)
 {
   return setcase_word (case_upper);
@@ -1343,7 +1343,7 @@ Convert following word (or argument N words) to upper case, moving over.
 }
 END_DEFUN
 
-static int
+static bool
 setcase_word_capitalize (void)
 {
   return setcase_word (case_capitalized);
