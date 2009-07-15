@@ -11,7 +11,7 @@
 Building from a release tarball
 -------------------------------
 
-Prerequisites: (n)curses, help2man.
+Prerequisites: (n)curses.
 
 1) Run configure:
 
@@ -35,7 +35,7 @@ Building from the repository
 ----------------------------
 
 Prerequisites: automake >= 1.9, autoconf >= 2.59, gnulib from 2008 or
-later.
+later, help2man, Lua >= 5.1.
 
 Check out Zile and bootstrap the build system:
 
