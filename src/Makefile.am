@@ -122,8 +122,6 @@ dist_man_MANS = zile.1
 
 CLEANFILES = 						\
 	tbl_opts.h					\
-	tbl_funcs.h					\
-	tbl_vars.h					\
 	dotzile.sample					\
 	mkvars.stamp					\
 	zile.1
