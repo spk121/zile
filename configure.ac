@@ -54,7 +54,7 @@ AC_CHECK_FUNCS(fchmod)
 
 dnl Curses
 MP_WITH_CURSES
-if test "$mp_cv_curses" != "yes" -a "$mp_cv_ncurses" != "yes"; then
+if test "$mp_cv_curses" != "yes"; then
   AC_MSG_FAILURE([cannot find curses])
 fi
 AC_SUBST(CURSES_LIB)
