@@ -253,6 +253,7 @@ main (int argc, char **argv)
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
+  init_getkey ();
   init_search ();
   init_lisp ();
   init_variables ();
@@ -420,6 +421,7 @@ main (int argc, char **argv)
   free_search ();
   free_kill_ring ();
   free_registers ();
+  free_getkey ();
   free_macros ();
   free_windows ();
   free_buffers ();

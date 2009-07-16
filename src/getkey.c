@@ -25,10 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "gl_array_list.h"
 
 #include "main.h"
 #include "extern.h"
 
+static gl_list_t key_buf;
 static size_t _last_key;
 
 /* Return last key pressed */
@@ -46,7 +48,15 @@ lastkey (void)
 size_t
 xgetkey (int mode, size_t timeout)
 {
-  _last_key = term_xgetkey (mode, timeout);
+  size_t size = gl_list_size (key_buf);
+
+  if (size > 0)
+    {
+      _last_key = (int) gl_list_get_at (key_buf, size - 1);
+      gl_list_remove_at (key_buf, size - 1);
+    }
+  else
+    _last_key = term_xgetkey (mode, timeout);
 
   if (thisflag & FLAG_DEFINING_MACRO)
     add_key_to_cmd (_last_key);
@@ -80,7 +90,8 @@ waitkey (size_t timeout)
 void
 pushkey (size_t key)
 {
-  term_ungetkey (key);
+  if (key != KBD_NOKEY)
+    gl_list_add_last (key_buf, (void *) key);
 }
 
 /*
@@ -92,4 +103,14 @@ void ungetkey (size_t key)
 
   if (thisflag & FLAG_DEFINING_MACRO)
     remove_key_from_cmd ();
+}
+
+void init_getkey (void)
+{
+  key_buf = gl_list_create_empty (GL_ARRAY_LIST, NULL, NULL, NULL, true);
+}
+
+void free_getkey (void)
+{
+  gl_list_free (key_buf);
 }
