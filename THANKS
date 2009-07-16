@@ -1,7 +1,6 @@
 The Zile maintainers would like to thank:
 
-* Richard M. Stallman <rms@gnu.org> for creating the powerful Emacs
-  editor
+* Richard M. Stallman <rms@gnu.org> for creating the Emacs editor
 * Nicolas Duboc <nicolas@duboc.net> for maintaining the Debian
   package, and fixing and reporting several bugs
 * Carsten Leonhardt <leo@debian.org> for a lot of bug fixes, the
@@ -39,5 +38,6 @@ The Zile maintainers would like to thank:
 * Aaron Swartz for clarifying problems on Mac OS X
 * Julien Chaffraix for indenting fixes
 * Ulrich Mueller for bug reports
+* Piotr Wieczorek for bug reports
 
 and everyone else who has reported bugs and made suggestions.
