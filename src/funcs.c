@@ -715,7 +715,7 @@ END_DEFUN
 ***********************************************************************/
 #define ISWORDCHAR(c)	(isalnum (c) || c == '$')
 static bool
-move_word (int dir, bool (*next_char) (void), bool (*move_char) (void), bool (*at_extreme) (void))
+move_word (int dir, int (*next_char) (void), bool (*move_char) (void), bool (*at_extreme) (void))
 {
   int gotword = false;
   for (;;)

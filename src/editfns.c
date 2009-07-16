@@ -98,7 +98,7 @@ is_blank_line (void)
 }
 
 /* Returns the character following point in the current buffer. */
-bool
+int
 following_char (void)
 {
   if (eobp ())
@@ -113,7 +113,7 @@ following_char (void)
 }
 
 /* Return the character preceding point in the current buffer. */
-bool
+int
 preceding_char (void)
 {
   if (bobp ())
