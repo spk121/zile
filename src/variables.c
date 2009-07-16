@@ -21,6 +21,7 @@
 
 #include "config.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,7 +77,7 @@ init_builtin_var (const char *var, const char *defval, bool local, const char *d
   p->val = xstrdup (defval);
   p->local = local;
   p->doc = doc;
-  hash_insert (main_vars, p);
+  assert (hash_insert (main_vars, p));
 }
 
 static Hash_table *
