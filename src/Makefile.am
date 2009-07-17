@@ -120,11 +120,14 @@ dist_pkgdata_DATA = dotzile.sample
 
 dist_man_MANS = zile.1
 
-CLEANFILES = 						\
-	tbl_opts.h					\
+DISTCLEANFILES = 					\
 	dotzile.sample					\
 	mkvars.stamp					\
 	zile.1
+
+MAINTAINERCLEANFILES =					\
+	tbl_funcs.h					\
+	tbl_vars.h
 
 loc:
 	cloc --no3 $(ALLSOURCES) Makefile.am ../Makefile.am ../configure.ac
