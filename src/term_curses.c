@@ -29,9 +29,12 @@
 #else
 #include <curses.h>
 #endif
+#include "gl_array_list.h"
 
 #include "main.h"
 #include "extern.h"
+
+static gl_list_t key_buf;
 
 void
 term_move (size_t y, size_t x)
@@ -93,6 +96,7 @@ term_init (void)
   meta (stdscr, true);
   intrflush (stdscr, false);
   keypad (stdscr, true);
+  key_buf = gl_list_create_empty (GL_ARRAY_LIST, NULL, NULL, NULL, true);
 }
 
 void
@@ -104,6 +108,7 @@ term_close (void)
   term_refresh ();
 
   /* Free memory and finish with ncurses. */
+  gl_list_free (key_buf);
   endwin ();
 }
 
@@ -205,6 +210,155 @@ codetokey (int c)
     }
 }
 
+static size_t
+keytocodes (size_t key, int ** codevec)
+{
+  int * p;
+
+  p = *codevec = XCALLOC (2, int);
+
+  if (key == KBD_NOKEY)
+    return 0;
+
+  if (key & KBD_META)				/* META */
+    *p++ = '\33';
+  key &= ~KBD_META;
+
+  switch (key)
+    {
+    case KBD_CTRL | '@':			/* C-@ */
+      *p++ = '\0';
+      break;
+    case KBD_CTRL | 'a':
+    case KBD_CTRL | 'b':
+    case KBD_CTRL | 'c':
+    case KBD_CTRL | 'd':
+    case KBD_CTRL | 'e':
+    case KBD_CTRL | 'f':
+    case KBD_CTRL | 'g':
+    case KBD_CTRL | 'h':
+    case KBD_CTRL | 'j':
+    case KBD_CTRL | 'k':
+    case KBD_CTRL | 'l':
+    case KBD_CTRL | 'n':
+    case KBD_CTRL | 'o':
+    case KBD_CTRL | 'p':
+    case KBD_CTRL | 'q':
+    case KBD_CTRL | 'r':
+    case KBD_CTRL | 's':
+    case KBD_CTRL | 't':
+    case KBD_CTRL | 'u':
+    case KBD_CTRL | 'v':
+    case KBD_CTRL | 'w':
+    case KBD_CTRL | 'x':
+    case KBD_CTRL | 'y':
+    case KBD_CTRL | 'z':	/* C-a ... C-z */
+      *p++ = (key & ~KBD_CTRL) + 1 - 'a';
+      break;
+    case KBD_TAB:
+      *p++ = '\11';
+      break;
+    case KBD_RET:
+      *p++ ='\15';
+      break;
+    case '\37':
+      *p++ = (key & ~KBD_CTRL) ^ 0x40;
+      break;
+    case KBD_PGUP:		/* PGUP */
+      *p++ = KEY_PPAGE;
+      break;
+    case KBD_PGDN:		/* PGDN */
+      *p++ = KEY_NPAGE;
+      break;
+    case KBD_HOME:
+      *p++ = KEY_HOME;
+      break;
+    case KBD_END:
+      *p++ = KEY_END;
+      break;
+    case KBD_DEL:		/* DEL */
+      *p++ = KEY_DC;
+      break;
+    case KBD_BS:		/* BS */
+      *p++ = KEY_BACKSPACE;
+      break;
+    case KBD_INS:		/* INSERT */
+      *p++ = KEY_IC;
+      break;
+    case KBD_LEFT:
+      *p++ = KEY_LEFT;
+      break;
+    case KBD_RIGHT:
+      *p++ = KEY_RIGHT;
+      break;
+    case KBD_UP:
+      *p++ = KEY_UP;
+      break;
+    case KBD_DOWN:
+      *p++ = KEY_DOWN;
+      break;
+    case KBD_F1:
+      *p++ = KEY_F (1);
+      break;
+    case KBD_F2:
+      *p++ = KEY_F (2);
+      break;
+    case KBD_F3:
+      *p++ = KEY_F (3);
+      break;
+    case KBD_F4:
+      *p++ = KEY_F (4);
+      break;
+    case KBD_F5:
+      *p++ = KEY_F (5);
+      break;
+    case KBD_F6:
+      *p++ = KEY_F (6);
+      break;
+    case KBD_F7:
+      *p++ = KEY_F (7);
+      break;
+    case KBD_F8:
+      *p++ = KEY_F (8);
+      break;
+    case KBD_F9:
+      *p++ = KEY_F (9);
+      break;
+    case KBD_F10:
+      *p++ = KEY_F (10);
+      break;
+    case KBD_F11:
+      *p++ = KEY_F (11);
+      break;
+    case KBD_F12:
+      *p++ = KEY_F (12);
+      break;
+    default:
+      if ((key & 0xff) == key)
+        *p++ = key;
+      break;
+    }
+
+  return p - *codevec;
+}
+
+static int
+get_char (void)
+{
+  int c;
+  size_t size = gl_list_size (key_buf);
+
+  if (size > 0)
+    {
+      c = (int) gl_list_get_at (key_buf, size - 1);
+      gl_list_remove_at (key_buf, size - 1);
+    }
+  else
+    c = getch ();
+
+  return c;
+}
+
 size_t
 term_xgetkey (int mode, size_t timeout)
 {
@@ -216,7 +370,8 @@ term_xgetkey (int mode, size_t timeout)
 
       if (mode & GETKEY_DELAYED)
         wtimeout (stdscr, (int) timeout * 100);
-      c = getch ();
+
+      c = get_char ();
       if (mode & GETKEY_DELAYED)
         wtimeout (stdscr, -1);
 
@@ -235,10 +390,22 @@ term_xgetkey (int mode, size_t timeout)
         {
           key = codetokey (c);
           while (key == KBD_META)
-            key = codetokey (getch ()) | KBD_META;
+            key = codetokey (get_char ()) | KBD_META;
         }
       break;
     }
 
   return key;
+}
+
+void
+term_ungetkey (size_t key)
+{
+  int * codes = NULL;
+  size_t i, n = keytocodes (key, &codes);
+
+  for (i = n; i > 0; i--)
+    gl_list_add_last (key_buf, (void *) codes[i - 1]);
+
+  free (codes);
 }
