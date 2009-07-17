@@ -158,7 +158,6 @@ column, or at the end of the line if it is not long enough.
       for (i = 0; i < uniarg; i++)
         if (!previous_line ())
           {
-            thisflag |= FLAG_DONE_CPCN;
             FUNCALL (beginning_of_line);
             break;
           }
@@ -212,7 +211,6 @@ column, or at the end of the line if it is not long enough.
         if (!next_line ())
           {
             int old = cur_goalc;
-            thisflag |= FLAG_DONE_CPCN;
             FUNCALL (end_of_line);
             cur_goalc = old;
             break;
