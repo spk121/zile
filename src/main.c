@@ -366,8 +366,13 @@ main (int argc, char **argv)
         line = strtoul (*argv + 1, NULL, 10);
       else
         {
+          astr as = astr_afmt (astr_new (), "%d", line);
+          le *branch;
+          branch = leAddDataElement (leAddDataElement (NULL, "", 0), astr_cstr (as), 0);
           find_file (*argv);
-          ngotodown (line - 1);
+          F_goto_line (0, branch);
+          leWipe (branch);
+          astr_delete (as);
           line = 1;
           lastflag |= FLAG_NEED_RESYNC;
         }

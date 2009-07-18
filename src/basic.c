@@ -212,6 +212,30 @@ Position 1 is the beginning of the buffer.
 }
 END_DEFUN
 
+static bool
+ngotoup (size_t n)
+{
+  for (;
+       n > 0 &&
+         get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
+       n--)
+    FUNCALL (previous_line);
+
+  return n == 0;
+}
+
+static bool
+ngotodown (size_t n)
+{
+  for (;
+       n > 0 &&
+         get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
+       n--)
+    FUNCALL (next_line);
+
+  return n == 0;
+}
+
 DEFUN_ARGS ("goto-line", goto_line,
             INT_ARG (n))
 /*+
@@ -358,30 +382,6 @@ On reaching end of buffer, stop and signal error.
     minibuf_error ("End of buffer");
 }
 END_DEFUN
-
-bool
-ngotoup (size_t n)
-{
-  for (;
-       n > 0 &&
-         get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
-       n--)
-    FUNCALL (previous_line);
-
-  return n == 0;
-}
-
-bool
-ngotodown (size_t n)
-{
-  for (;
-       n > 0 &&
-         get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
-       n--)
-    FUNCALL (next_line);
-
-  return n == 0;
-}
 
 static bool
 scroll_down (void)

@@ -32,8 +32,6 @@ bool backward_char (void);
 bool forward_char (void);
 void gotobob (void);
 void gotoeob (void);
-bool ngotodown (size_t n);
-bool ngotoup (size_t n);
 
 /* bind.c ----------------------------------------------------------------- */
 extern Binding root_bindings;
