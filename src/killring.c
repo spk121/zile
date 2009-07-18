@@ -83,7 +83,7 @@ copy_or_kill_region (bool kill, Region * rp)
 static bool
 kill_to_bol (void)
 {
-  bool ok;
+  bool ok = true;
 
   if (!bolp ())
     {
@@ -154,7 +154,8 @@ kill_line_backward (void)
   return previous_line () && kill_line_literally ();
 }
 
-DEFUN ("kill-line", kill_line)
+DEFUN_ARGS ("kill-line", kill_line,
+            INT_ARG (arg))
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
 With prefix argument @i{arg}, kill that many lines from point.
@@ -167,18 +168,29 @@ with no argument.
 +*/
 {
   le * ret = leT;
+  bool noarg = false;
 
   if (!(lastflag & FLAG_DONE_KILL))
     free_kill_ring ();
 
-  if (!(lastflag & FLAG_SET_UNIARG))
-    kill_line (get_variable_bool ("kill-whole-line"));
+  INT_INIT (arg)
   else
     {
-      if (uniarg == 0)
-        kill_to_bol ();
-      else
-        ret = execute_with_uniarg (true, uniarg, kill_line_literally, kill_line_backward);
+      if (!(lastflag & FLAG_SET_UNIARG))
+        noarg = true;
+      arg = uniarg;
+    }
+
+  if (noarg)
+    ret = bool_to_lisp (kill_line (get_variable_bool ("kill-whole-line")));
+  else
+    {
+      undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+      if (arg <= 0)
+        ret = bool_to_lisp (kill_to_bol ());
+      if (arg != 0 && ret == leT)
+        ret = execute_with_uniarg (true, arg, kill_line_literally, kill_line_backward);
+      undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
     }
 
   deactivate_mark ();
