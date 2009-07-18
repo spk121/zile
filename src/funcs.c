@@ -1271,8 +1271,6 @@ Fill paragraph at or after point.
          && fill_break_line ())
     ;
 
-  thisflag &= ~FLAG_DONE_CPCN;
-
   set_buffer_pt (cur_bp, get_marker_pt (m));
   free_marker (m);
 

@@ -42,7 +42,6 @@ Move point to beginning of current line.
 
   /* Change the `goalc' to the beginning of line for next
      `prev/next-line' calls.  */
-  thisflag |= FLAG_DONE_CPCN;
   cur_goalc = 0;
 }
 END_DEFUN
@@ -56,7 +55,6 @@ Move point to end of current line.
 
   /* Change the `goalc' to the end of line for next
      `prev/next-line' calls.  */
-  thisflag |= FLAG_DONE_CPCN;
   cur_goalc = INT_MAX;
 }
 END_DEFUN
@@ -122,9 +120,9 @@ previous_line (void)
     {
       Point pt;
 
-      thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+      thisflag |= FLAG_NEED_RESYNC;
 
-      if (!(lastflag & FLAG_DONE_CPCN))
+      if (last_command () != F_next_line && last_command () != F_previous_line)
         cur_goalc = get_goalc ();
 
       pt = get_buffer_pt (cur_bp);
@@ -162,8 +160,6 @@ column, or at the end of the line if it is not long enough.
             break;
           }
     }
-  else if (lastflag & FLAG_DONE_CPCN)
-    thisflag |= FLAG_DONE_CPCN;
 }
 END_DEFUN
 
@@ -174,9 +170,9 @@ next_line (void)
     {
       Point pt;
 
-      thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+      thisflag |= FLAG_NEED_RESYNC;
 
-      if (!(lastflag & FLAG_DONE_CPCN))
+      if (last_command () != F_next_line && last_command () != F_previous_line)
         cur_goalc = get_goalc ();
 
       pt = get_buffer_pt (cur_bp);
@@ -216,8 +212,6 @@ column, or at the end of the line if it is not long enough.
             break;
           }
     }
-  else if (lastflag & FLAG_DONE_CPCN)
-    thisflag |= FLAG_DONE_CPCN;
 }
 END_DEFUN
 
@@ -299,7 +293,7 @@ void
 gotobob (void)
 {
   set_buffer_pt (cur_bp, point_min ());
-  thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  thisflag |= FLAG_NEED_RESYNC;
 }
 
 DEFUN ("beginning-of-buffer", beginning_of_buffer)
@@ -319,7 +313,7 @@ void
 gotoeob (void)
 {
   set_buffer_pt (cur_bp, point_max ());
-  thisflag |= FLAG_DONE_CPCN | FLAG_NEED_RESYNC;
+  thisflag |= FLAG_NEED_RESYNC;
 }
 
 DEFUN ("end-of-buffer", end_of_buffer)
