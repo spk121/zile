@@ -154,20 +154,10 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (uniarg < 0)
-    return FUNCALL_ARG (next_line, -uniarg);
-
-  if (!bobp ())
-    {
-      int i;
-
-      for (i = 0; i < uniarg; i++)
-        if (!previous_line ())
-          {
-            FUNCALL (beginning_of_line);
-            break;
-          }
-    }
+  if (uniarg < 0 || !bobp ())
+    ok = execute_with_uniarg (false, uniarg, previous_line, next_line);
+  if (ok == leNIL)
+    FUNCALL (beginning_of_line);
 }
 END_DEFUN
 
@@ -179,22 +169,10 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (uniarg < 0)
-    return FUNCALL_ARG (previous_line, -uniarg);
-
-  if (!eobp ())
-    {
-      int i;
-
-      for (i = 0; i < uniarg; i++)
-        if (!next_line ())
-          {
-            int old = cur_goalc;
-            FUNCALL (end_of_line);
-            cur_goalc = old;
-            break;
-          }
-    }
+  if (uniarg < 0 || !eobp ())
+    ok = execute_with_uniarg (false, uniarg, next_line, previous_line);
+  if (ok == leNIL)
+    FUNCALL (end_of_line);
 }
 END_DEFUN
 
