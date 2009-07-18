@@ -362,25 +362,25 @@ END_DEFUN
 bool
 ngotoup (size_t n)
 {
-  for (; n > 0; n--)
-    if (get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
-      FUNCALL (previous_line);
-    else
-      return false;
+  for (;
+       n > 0 &&
+         get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
+       n--)
+    FUNCALL (previous_line);
 
-  return true;
+  return n == 0;
 }
 
 bool
 ngotodown (size_t n)
 {
-  for (; n > 0; n--)
-    if (get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
-      FUNCALL (next_line);
-    else
-      return false;
+  for (;
+       n > 0 &&
+         get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
+       n--)
+    FUNCALL (next_line);
 
-  return true;
+  return n == 0;
 }
 
 static bool
