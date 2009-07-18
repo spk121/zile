@@ -118,20 +118,16 @@ move_line (int dir)
 {
   if ((dir > 0 ? get_line_next : get_line_prev) (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
     {
-      Point pt;
-
-      thisflag |= FLAG_NEED_RESYNC;
-
-      if (last_command () != F_next_line && last_command () != F_previous_line)
-        cur_goalc = get_goalc ();
-
-      pt = get_buffer_pt (cur_bp);
+      Point pt = get_buffer_pt (cur_bp);
       pt.p = (dir > 0 ? get_line_next : get_line_prev) (pt.p);
       pt.n += dir;
       set_buffer_pt (cur_bp, pt);
 
+      if (last_command () != F_next_line && last_command () != F_previous_line)
+        cur_goalc = get_goalc ();
       goto_goalc (cur_goalc);
 
+      thisflag |= FLAG_NEED_RESYNC;
       return true;
     }
 
