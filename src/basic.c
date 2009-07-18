@@ -258,9 +258,7 @@ Goto line arg, counting from line 1 at beginning of buffer.
         ngotoup (pt.n - (size_t) n);
       else if (pt.n < (size_t) n)
         ngotodown ((size_t) n - pt.n);
-      pt = get_buffer_pt (cur_bp);
-      pt.o = 0;
-      set_buffer_pt (cur_bp, pt);
+      FUNCALL (beginning_of_line);
     }
 }
 END_DEFUN
