@@ -215,11 +215,8 @@ END_DEFUN
 static bool
 ngotoup (size_t n)
 {
-  for (;
-       n > 0 &&
-         get_line_prev (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
-       n--)
-    FUNCALL (previous_line);
+  while (n-- > 0 && FUNCALL (previous_line) == leT)
+    ;
 
   return n == 0;
 }
@@ -227,11 +224,8 @@ ngotoup (size_t n)
 static bool
 ngotodown (size_t n)
 {
-  for (;
-       n > 0 &&
-         get_line_next (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp);
-       n--)
-    FUNCALL (next_line);
+  while (n-- > 0 && FUNCALL (next_line) == leT)
+    ;
 
   return n == 0;
 }
