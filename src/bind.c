@@ -252,8 +252,6 @@ Whichever character you type to run this command is inserted.
 }
 END_DEFUN
 
-static Function _last_command;
-
 void
 process_key (Binding bindings, size_t key)
 {
@@ -269,8 +267,10 @@ process_key (Binding bindings, size_t key)
       Function f = completion_scan (bindings, key, &keys);
       if (f != NULL)
         {
+          set_last_command (NULL);
           f (last_uniarg, NULL);
-          _last_command = f;
+          if (last_command () == NULL)
+            set_last_command (f);
         }
       else
         {
@@ -287,10 +287,18 @@ process_key (Binding bindings, size_t key)
     add_cmd_to_macro ();
 }
 
+static Function _last_command;
+
 Function
 last_command (void)
 {
   return _last_command;
+}
+
+void
+set_last_command (Function cmd)
+{
+  _last_command = cmd;
 }
 
 Binding
