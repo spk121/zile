@@ -247,10 +247,9 @@ typedef le * (*Function) (long uniarg, le * list);
 
 /*
  * Zile font codes
- * Designed to fit in an int, leaving room for a char underneath.
  */
-#define FONT_NORMAL		0x000
-#define FONT_REVERSE		0x100
+#define FONT_NORMAL		0000
+#define FONT_REVERSE		0001
 
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
