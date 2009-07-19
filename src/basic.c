@@ -30,19 +30,13 @@
 #include "main.h"
 #include "extern.h"
 
-/* Goal-column to arrive when `prev/next-line' functions are used.  */
-static int cur_goalc;
-
 DEFUN ("beginning-of-line", beginning_of_line)
 /*+
 Move point to beginning of current line.
 +*/
 {
   set_buffer_pt (cur_bp, line_beginning_position (uniarg));
-
-  /* Change the `goalc' to the beginning of line for next
-     `prev/next-line' calls.  */
-  cur_goalc = 0;
+  set_buffer_goalc (cur_bp, 0);
 }
 END_DEFUN
 
@@ -52,10 +46,7 @@ Move point to end of current line.
 +*/
 {
   set_buffer_pt (cur_bp, line_end_position (uniarg));
-
-  /* Change the `goalc' to the end of line for next
-     `prev/next-line' calls.  */
-  cur_goalc = INT_MAX;
+  set_buffer_goalc (cur_bp, SIZE_MAX);
 }
 END_DEFUN
 
@@ -89,20 +80,20 @@ get_goalc (void)
  * tabulations.
  */
 static void
-goto_goalc (size_t goalc)
+goto_goalc (void)
 {
   Point pt = get_buffer_pt (cur_bp);
   size_t i, col = 0, t = tab_width (cur_bp);
 
   for (i = 0; i < astr_len (get_line_text (pt.p)); i++)
     {
-      if (col == goalc)
+      if (col == get_buffer_goalc (cur_bp))
         break;
       else if (astr_get (get_line_text (pt.p), i) == '\t')
         {
           size_t w;
           for (w = t - col % t; w > 0; w--)
-            if (++col == goalc)
+            if (++col == get_buffer_goalc (cur_bp))
               break;
         }
       else
@@ -151,8 +142,8 @@ move_line (int n)
     }
 
   if (last_command () != F_next_line && last_command () != F_previous_line)
-    cur_goalc = get_goalc ();
-  goto_goalc (cur_goalc);
+    set_buffer_goalc (cur_bp, get_goalc ());
+  goto_goalc ();
 
   thisflag |= FLAG_NEED_RESYNC;
 
