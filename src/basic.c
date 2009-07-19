@@ -255,13 +255,8 @@ Goto line arg, counting from line 1 at beginning of buffer.
     ok = leNIL;
   else
     {
-      Point pt;
-
-      if (n <= 0)
-        n = 1;
-      n--; /* Re-base to counting from zero */
-      pt = get_buffer_pt (cur_bp);
-      move_line ((size_t) n - pt.n);
+      Point pt = get_buffer_pt (cur_bp);
+      move_line ((size_t) (MAX (n, 1) - 1) - pt.n);
       FUNCALL (beginning_of_line);
     }
 }
