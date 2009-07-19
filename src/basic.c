@@ -114,24 +114,49 @@ goto_goalc (size_t goalc)
 }
 
 static bool
-move_line (int dir)
+move_line (int n)
 {
-  if ((dir > 0 ? get_line_next : get_line_prev) (get_buffer_pt (cur_bp).p) != get_buffer_lines (cur_bp))
+  bool ok = true;
+  int dir;
+  Point pt = get_buffer_pt (cur_bp);
+
+  if (n == 0)
+    return false;
+  else if (n > 0)
+    {
+      dir = 1;
+      if ((size_t) n > get_buffer_last_line (cur_bp) - pt.n)
+        {
+          ok = false;
+          n = get_buffer_last_line (cur_bp) - pt.n;
+        }
+    }
+  else
+    {
+      dir = -1;
+      n = -n;
+      if ((size_t) n > pt.n)
+        {
+          ok = false;
+          n = pt.n;
+        }
+    }
+
+  for (; n > 0; n--)
     {
       Point pt = get_buffer_pt (cur_bp);
       pt.p = (dir > 0 ? get_line_next : get_line_prev) (pt.p);
       pt.n += dir;
       set_buffer_pt (cur_bp, pt);
-
-      if (last_command () != F_next_line && last_command () != F_previous_line)
-        cur_goalc = get_goalc ();
-      goto_goalc (cur_goalc);
-
-      thisflag |= FLAG_NEED_RESYNC;
-      return true;
     }
 
-  return false;
+  if (last_command () != F_next_line && last_command () != F_previous_line)
+    cur_goalc = get_goalc ();
+  goto_goalc (cur_goalc);
+
+  thisflag |= FLAG_NEED_RESYNC;
+
+  return ok;
 }
 
 bool
@@ -212,24 +237,6 @@ Position 1 is the beginning of the buffer.
 }
 END_DEFUN
 
-static bool
-ngotoup (size_t n)
-{
-  while (n-- > 0 && FUNCALL (previous_line) == leT)
-    ;
-
-  return n == 0;
-}
-
-static bool
-ngotodown (size_t n)
-{
-  while (n-- > 0 && FUNCALL (next_line) == leT)
-    ;
-
-  return n == 0;
-}
-
 DEFUN_ARGS ("goto-line", goto_line,
             INT_ARG (n))
 /*+
@@ -254,10 +261,7 @@ Goto line arg, counting from line 1 at beginning of buffer.
         n = 1;
       n--; /* Re-base to counting from zero */
       pt = get_buffer_pt (cur_bp);
-      if (pt.n > (size_t) n)
-        ngotoup (pt.n - (size_t) n);
-      else if (pt.n < (size_t) n)
-        ngotodown ((size_t) n - pt.n);
+      move_line ((size_t) n - pt.n);
       FUNCALL (beginning_of_line);
     }
 }
@@ -379,7 +383,7 @@ static bool
 scroll_down (void)
 {
   if (get_buffer_pt (cur_bp).n > 0)
-    return ngotoup (get_window_eheight (cur_wp));
+    return move_line (-get_window_eheight (cur_wp));
 
   minibuf_error ("Beginning of buffer");
   return false;
@@ -389,7 +393,7 @@ static bool
 scroll_up (void)
 {
   if (get_buffer_pt (cur_bp).n < get_buffer_last_line (cur_bp))
-    return ngotodown (get_window_eheight (cur_wp));
+    return move_line (get_window_eheight (cur_wp));
 
   minibuf_error ("End of buffer");
   return false;
