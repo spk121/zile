@@ -307,24 +307,27 @@ Move point to the end of the buffer; leave mark at previous position.
 }
 END_DEFUN
 
-bool
-backward_char (void)
+static bool
+move_char (int dir)
 {
-  if (!bolp ())
+  if (dir > 0 ? !eolp () : !bolp ())
     {
       Point pt = get_buffer_pt (cur_bp);
-      pt.o--;
+      pt.o += dir;
       set_buffer_pt (cur_bp, pt);
       return true;
     }
-  else if (!bobp ())
+  else if (dir > 0 ? !eobp () : !bobp ())
     {
       Point pt = get_buffer_pt (cur_bp);
       thisflag |= FLAG_NEED_RESYNC;
-      pt.p = get_line_prev (pt.p);
-      pt.n--;
+      pt.p = (dir > 0 ? get_line_next : get_line_prev) (pt.p);
+      pt.n += dir;
       set_buffer_pt (cur_bp, pt);
-      FUNCALL (end_of_line);
+      if (dir > 0)
+        FUNCALL (beginning_of_line);
+      else
+        FUNCALL (end_of_line);
       return true;
     }
 
@@ -332,27 +335,15 @@ backward_char (void)
 }
 
 bool
+backward_char (void)
+{
+  return move_char (-1);
+}
+
+bool
 forward_char (void)
 {
-  if (!eolp ())
-    {
-      Point pt = get_buffer_pt (cur_bp);
-      pt.o++;
-      set_buffer_pt (cur_bp, pt);
-      return true;
-    }
-  else if (!eobp ())
-    {
-      Point pt = get_buffer_pt (cur_bp);
-      thisflag |= FLAG_NEED_RESYNC;
-      pt.p = get_line_next (pt.p);
-      pt.n++;
-      set_buffer_pt (cur_bp, pt);
-      FUNCALL (beginning_of_line);
-      return true;
-    }
-
-  return false;
+  return move_char (1);
 }
 
 DEFUN ("backward-char", backward_char)
