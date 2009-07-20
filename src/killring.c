@@ -30,8 +30,6 @@
 #include "main.h"
 #include "extern.h"
 
-static Function KILL_COMMAND;
-
 static astr kill_ring_text;
 
 void
@@ -63,7 +61,7 @@ copy_or_kill_region (bool kill, Region * rp)
 {
   char *p = copy_text_block (get_region_start (rp).n, get_region_start (rp).o, get_region_size (rp));
 
-  if (last_command () != KILL_COMMAND)
+  if (last_command () != F_kill_region)
     free_kill_ring ();
   kill_ring_push_nstring (p, get_region_size (rp));
   free (p);
@@ -76,7 +74,7 @@ copy_or_kill_region (bool kill, Region * rp)
         assert (delete_region (rp));
     }
 
-  set_last_command (KILL_COMMAND);
+  set_this_command (F_kill_region);
   deactivate_mark ();
 
   return true;
@@ -136,7 +134,7 @@ kill_line (bool literally)
         return false;
 
       kill_ring_push ('\n');
-      set_last_command (KILL_COMMAND);
+      set_this_command (F_kill_region);
     }
 
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
@@ -172,7 +170,7 @@ with no argument.
   le * ret = leT;
   bool noarg = false;
 
-  if (last_command () != KILL_COMMAND)
+  if (last_command () != F_kill_region)
     free_kill_ring ();
 
   INT_INIT (arg)
@@ -241,7 +239,7 @@ END_DEFUN
 static le *
 kill_text (int uniarg, Function mark_func)
 {
-  if (last_command () != KILL_COMMAND)
+  if (last_command () != F_kill_region)
     free_kill_ring ();
 
   if (warn_if_readonly_buffer ())
@@ -254,7 +252,7 @@ kill_text (int uniarg, Function mark_func)
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   pop_mark ();
 
-  set_last_command (KILL_COMMAND);
+  set_this_command (F_kill_region);
   minibuf_write ("");		/* Erase "Set mark" message.  */
   return leT;
 }
