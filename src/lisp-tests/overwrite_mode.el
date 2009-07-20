@@ -4,4 +4,4 @@
 (insert-char "c")
 (insert-char "d")
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

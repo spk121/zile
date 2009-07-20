@@ -5,4 +5,4 @@
 (newline-and-indent)
 (newline-and-indent)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

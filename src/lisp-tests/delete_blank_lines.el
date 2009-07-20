@@ -2,4 +2,4 @@
 (next-line)
 (delete-blank-lines)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

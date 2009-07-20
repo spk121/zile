@@ -8,4 +8,4 @@
 (exchange-point-and-mark)
 (insert-char "f")
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

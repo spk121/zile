@@ -2,4 +2,4 @@
 (transpose-lines)
 (transpose-lines)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

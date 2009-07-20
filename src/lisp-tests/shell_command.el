@@ -1,3 +1,3 @@
 (shell-command "echo foo" t)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

@@ -8,4 +8,4 @@
 (indent-for-tab-command)
 (next-line)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

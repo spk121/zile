@@ -2,4 +2,4 @@
 (copy-region-as-kill)
 (yank)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

@@ -2,4 +2,4 @@
 (search-backward-regexp "l.n")
 (insert-char "a")
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

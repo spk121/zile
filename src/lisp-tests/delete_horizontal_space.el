@@ -4,4 +4,4 @@
 (forward-char)
 (delete-horizontal-space)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

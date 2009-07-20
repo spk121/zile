@@ -3,4 +3,4 @@
 (next-line)
 (upcase-region)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

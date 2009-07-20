@@ -30,4 +30,4 @@
 (mark-whole-buffer)
 (tabify)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

@@ -6,4 +6,4 @@
 (beginning-of-line)
 (kill-sexp)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

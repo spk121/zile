@@ -5,4 +5,4 @@
 (next-line)
 (shell-command-on-region "sort" t)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

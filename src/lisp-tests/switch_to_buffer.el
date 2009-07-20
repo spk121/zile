@@ -27,4 +27,4 @@
 (insert-char "t")
 (insert-char ".")
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

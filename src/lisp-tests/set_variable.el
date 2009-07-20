@@ -1,4 +1,4 @@
 (set-variable "kill-whole-line" t)
 (kill-line)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

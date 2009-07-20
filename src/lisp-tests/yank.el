@@ -7,4 +7,4 @@
 (next-line)
 (yank)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

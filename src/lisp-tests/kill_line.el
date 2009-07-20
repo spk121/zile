@@ -10,4 +10,4 @@
 (end-of-line)
 (kill-line 0)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

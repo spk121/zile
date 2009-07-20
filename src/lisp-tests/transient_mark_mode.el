@@ -12,4 +12,4 @@
 (insert-char "a")
 (insert-char "t")
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

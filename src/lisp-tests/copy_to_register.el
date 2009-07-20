@@ -6,4 +6,4 @@
 (copy-to-register 1)
 (insert-register 1)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

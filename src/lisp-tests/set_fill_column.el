@@ -25,4 +25,4 @@
 (set-fill-column 33)
 (fill-paragraph)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

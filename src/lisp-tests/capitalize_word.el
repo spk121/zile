@@ -2,4 +2,4 @@
 (capitalize-word)
 (capitalize-word)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)

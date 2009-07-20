@@ -5,4 +5,4 @@
 (transpose-sexps)
 (transpose-sexps)
 (save-buffer)
-(save-buffers-kill-zile)
+(save-buffers-kill-emacs)
