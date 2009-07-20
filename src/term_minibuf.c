@@ -116,7 +116,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
         case KBD_NOKEY:
           break;
         case KBD_CTRL | 'z':
-          FUNCALL (suspend_zile);
+          FUNCALL (suspend_emacs);
           break;
         case KBD_RET:
           term_move (term_height () - 1, 0);

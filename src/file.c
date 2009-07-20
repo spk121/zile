@@ -1027,7 +1027,7 @@ Save some modified file-visiting buffers.  Asks user about each one.
 }
 END_DEFUN
 
-DEFUN ("save-buffers-kill-zile", save_buffers_kill_zile)
+DEFUN ("save-buffers-kill-emacs", save_buffers_kill_emacs)
 /*+
 Offer to save each buffer, then kill this Zile process.
 +*/

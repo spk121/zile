@@ -59,7 +59,7 @@ show_file (char *filename)
   return leT;
 }
 
-DEFUN ("view-zile-FAQ", view_zile_FAQ)
+DEFUN ("view-emacs-FAQ", view_emacs_FAQ)
 /*+
 Display the Zile Frequently Asked Questions (FAQ) file.
 +*/

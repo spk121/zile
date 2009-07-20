@@ -34,7 +34,7 @@
 #include "extern.h"
 
 
-DEFUN ("suspend-zile", suspend_zile)
+DEFUN ("suspend-emacs", suspend_emacs)
 /*+
 Stop Zile and return to superior process.
 +*/

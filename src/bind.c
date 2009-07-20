@@ -329,8 +329,6 @@ init_default_bindings (void)
     }
   gl_list_free (keys);
 
-  /* FIXME: Rename -zile commands to -emacs commands to be able to run
-     tests in Emacs. */
   as = astr_new_cstr ("\
 (global-set-key \"\\M-m\" 'back-to-indentation)\
 (global-set-key \"\\C-b\" 'backward-char)\
@@ -415,7 +413,7 @@ init_default_bindings (void)
 (global-set-key \"\\C-q\" 'quoted-insert)\
 (global-set-key \"\\C-l\" 'recenter)\
 (global-set-key \"\\C-x\\C-s\" 'save-buffer)\
-(global-set-key \"\\C-x\\C-c\" 'save-buffers-kill-zile)\
+(global-set-key \"\\C-x\\C-c\" 'save-buffers-kill-emacs)\
 (global-set-key \"\\C-xs\" 'save-some-buffers)\
 (global-set-key \"\\M-v\" 'scroll-down)\
 (global-set-key \"\\PRIOR\" 'scroll-down)\
@@ -427,8 +425,8 @@ init_default_bindings (void)
 (global-set-key \"\\M-|\" 'shell-command-on-region)\
 (global-set-key \"\\C-x2\" 'split-window)\
 (global-set-key \"\\C-x(\" 'start-kbd-macro)\
-(global-set-key \"\\C-x\\C-z\" 'suspend-zile)\
-(global-set-key \"\\C-z\" 'suspend-zile)\
+(global-set-key \"\\C-x\\C-z\" 'suspend-emacs)\
+(global-set-key \"\\C-z\" 'suspend-emacs)\
 (global-set-key \"\\C-xb\" 'switch-to-buffer)\
 (global-set-key \"\\M-i\" 'tab-to-tab-stop)\
 (global-set-key \"\\C-x\\C-q\" 'toggle-read-only)\
@@ -441,8 +439,8 @@ init_default_bindings (void)
 (global-set-key \"\\C-u\" 'universal-argument)\
 (global-set-key \"\\C-x\\C-u\" 'upcase-region)\
 (global-set-key \"\\M-u\" 'upcase-word)\
-(global-set-key \"\\C-h\\C-f\" 'view-zile-FAQ)\
-(global-set-key \"\\F1\\C-f\" 'view-zile-FAQ)\
+(global-set-key \"\\C-h\\C-f\" 'view-emacs-FAQ)\
+(global-set-key \"\\F1\\C-f\" 'view-emacs-FAQ)\
 (global-set-key \"\\C-hw\" 'where-is)\
 (global-set-key \"\\F1w\" 'where-is)\
 (global-set-key \"\\C-x\\C-w\" 'write-file)\
