@@ -49,6 +49,12 @@ for test in "$@"; do
     cp $srcdir/lisp-tests/zile_test.input $edit_file
     chmod +w $edit_file
 
+    # FIXME: Put $edit_file before --load, and make it NOT work this
+    # way around (as in Emacs).
+
+    # FIXME: Run the tests in Emacs too to check they do the same
+    # thing. Needs configure check that Emacs is installed, and
+    # possibly for a version.
     if $valgrind $builddir/zile --no-init-file --load $srcdir/lisp-tests/$test.el $edit_file; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
             pass=`expr $pass + 1`
