@@ -264,7 +264,7 @@ main (int argc, char **argv)
       int this_optind = optind ? optind : 1, longindex, c;
       char *buf, *shortopt;
 
-      /* Leading : so as to return ':' for a missing arg, not '?' */
+      /* Leading `:' so as to return ':' for a missing arg, not '?' */
       c = getopt_long (argc, argv, ":f:l:q", longopts, &longindex);
 
       if (c == -1)
