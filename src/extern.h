@@ -41,7 +41,7 @@ void process_key (Binding bindings, size_t key);
 Binding init_bindings (void);
 void init_default_bindings (void);
 Function last_command (void);
-void set_last_command (Function cmd);
+void set_this_command (Function cmd);
 void free_bindings (Binding p);
 
 /* buffer.c --------------------------------------------------------------- */
