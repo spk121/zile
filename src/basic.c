@@ -58,8 +58,9 @@ get_goalc_bp (Buffer * bp, Point pt)
 {
   size_t col = 0, t = tab_width (bp), i;
   const char *sp = astr_cstr (get_line_text (pt.p));
+  size_t end = MIN (pt.o, astr_len (get_line_text (pt.p)));
 
-  for (i = 0; i < pt.o; i++)
+  for (i = 0; i < end; i++)
     {
       if (sp[i] == '\t')
         col |= t - 1;
