@@ -11,7 +11,12 @@
 Building from a release tarball
 -------------------------------
 
-Prerequisites: (n)curses.
+Prerequisites: (n)curses. If you wish to use a non-standard library
+name, this can be specified using CURSES_LIB, and CPPFLAGS can be used
+for non-standard include paths. For example, to use the X version of
+PDcurses:
+
+CPPFLAGS=/usr/local/include/xcurses CURSES_LIB=-lXCurses ./configure
 
 1) Run configure:
 
