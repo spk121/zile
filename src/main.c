@@ -111,34 +111,6 @@ about_screen (void)
     }
 }
 
-static bool
-do_execute_function (char *func)
-{
-  term_redisplay ();
-  /* FIXME: execute_function never returns NULL; need to know if we
-     had an error or couldn't find the function! */
-  if (!execute_function (func, 1))
-    {
-      minibuf_error ("Function `%s' not defined", func);
-      return false;
-    }
-  lastflag |= FLAG_NEED_RESYNC;
-  return true;
-}
-
-static bool
-do_load_file (char *file)
-{
-  term_redisplay ();
-  lastflag |= FLAG_NEED_RESYNC;
-  if (!lisp_loadfile (file))
-    {
-      minibuf_error ("Cannot open load file: %s\n", file);
-      return false;
-    }
-  return true;
-}
-
 static void
 setup_main_screen (void)
 {
@@ -348,7 +320,6 @@ then enter the text in that file's own buffer.\n\
   insert_astr (as);
   astr_delete (as);
   set_buffer_modified (cur_bp, false);
-  lastflag |= FLAG_NEED_RESYNC;
 
   if (!qflag)
     {
@@ -371,19 +342,27 @@ then enter the text in that file's own buffer.\n\
      line. */
   for (i = 0; ok && i < gl_list_size (arg_arg); i++)
     {
+      char *arg = (char *) gl_list_get_at (arg_arg, i);
+
       switch ((int) gl_list_get_at (arg_type, i))
         {
         case ARG_FUNCTION:
-          ok = do_execute_function ((char *) gl_list_get_at (arg_arg, i));
+          ok = get_function (arg);
+          if (ok)
+            ok = execute_function (arg, 1);
+          else
+            minibuf_error ("Function `%s' not defined", arg);
           break;
         case ARG_LOADFILE:
-          ok = do_load_file ((char *) gl_list_get_at (arg_arg, i));
+          ok = lisp_loadfile (arg);
+          if (!ok)
+            minibuf_error ("Cannot open load file: %s\n", arg);
           break;
         case ARG_FILE:
           {
             astr as = astr_afmt (astr_new (), "%d", line);
             le *branch = leAddDataElement (leAddDataElement (NULL, "", 0), astr_cstr (as), 0);
-            ok = find_file ((char *) gl_list_get_at (arg_arg, i));
+            ok = find_file (arg);
             if (ok)
               F_goto_line (0, branch);
             leWipe (branch);
@@ -398,6 +377,7 @@ then enter the text in that file's own buffer.\n\
   gl_list_free (arg_type);
   gl_list_free (arg_arg);
   gl_list_free (arg_line);
+  lastflag |= FLAG_NEED_RESYNC;
 
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (scratch_bp);
