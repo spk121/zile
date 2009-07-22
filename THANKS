@@ -36,6 +36,8 @@ The Zile maintainers would like to thank:
 * Han Boetes for a security fix
 * Robert Millan for bug reports and fixes
 * Aaron Swartz for clarifying problems on Mac OS X
+* Anthony Williams <rugxulo@gmail.com> for bug reports, particularly
+  for DJGPP
 * Julien Chaffraix for indenting fixes
 * Ulrich Mueller for bug reports
 * Piotr Wieczorek <pwiecz@gmail.com> for bug reports
