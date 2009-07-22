@@ -30,9 +30,7 @@ dist_pkgdata_DATA = FAQ
 ChangeLog:
 	git2cl > ChangeLog
 
-# Note: before writing release notes, check there are some for the current version
 release: distcheck
-	agrep -d '^Release' $(VERSION) NEWS && \
 	agrep -d '^Release' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
 	git diff --exit-code && \
 	git tag -a -m "Release tag" rel-`echo $(VERSION) | sed -e 's/\./-/g'` && \
