@@ -34,19 +34,13 @@ gl_EARLY
 AM_PROG_CC_C_O
 
 dnl help2man
-AC_PATH_PROG(HELP2MAN, help2man)
+AX_WITH_PROG(HELP2MAN, help2man)
 
 dnl Valgrind
-AC_ARG_ENABLE(valgrind,
-  [AS_HELP_STRING([--disable-valgrind],
-    [do not run tests with Valgrind])],
-  [],
-  [enable_valgrind=yes])
-AS_IF([test "$enable_valgrind" != "no"],
-  [AC_PATH_PROG(VALGRIND, valgrind)
-  if test -n "$VALGRIND"; then
-    VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=full"
-  fi])
+AX_WITH_PROG(VALGRIND, valgrind)
+if test -n "$VALGRIND"; then
+  VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=full"
+fi
 
 dnl Checks for functions and headers
 gl_INIT
@@ -61,9 +55,7 @@ fi
 AC_ARG_VAR(CURSES_LIB, [linker flags for curses library])
 
 dnl Emacs
-dnl FIXME: Use AX_WITH_PROG instead of AC_PATH_PROG
-AC_PATH_PROG(EMACS, emacs)
-AC_ARG_VAR(EMACS, [Emacs binary for cross-checking tests])
+AX_WITH_PROG(EMACS, emacs)
 if test -n "$EMACS"; then
   emacs_min_version=22.1
   emacs_version=$($EMACS --version 2>&1 | head -n 1 | cut -d' ' -f3)
