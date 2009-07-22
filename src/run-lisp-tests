@@ -50,8 +50,7 @@ for test in "$@"; do
     chmod +w $edit_file
 
     # FIXME: Run the tests in Emacs too to check they do the same
-    # thing. Needs configure check that Emacs is installed, and
-    # possibly for a version.
+    # thing.
     if $valgrind $builddir/zile --no-init-file $edit_file --load $srcdir/lisp-tests/$test.el; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
             pass=`expr $pass + 1`
