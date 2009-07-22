@@ -49,18 +49,31 @@ for test in "$@"; do
     cp $srcdir/lisp-tests/zile_test.input $edit_file
     chmod +w $edit_file
 
-    # FIXME: Run the tests in Emacs too to check they do the same
-    # thing.
-    if $valgrind $builddir/zile --no-init-file $edit_file --load $srcdir/lisp-tests/$test.el; then
+    if test -n "$EMACS"; then
+        # FIXME: Put the command line into a variable and re-use it
+        if $EMACS --no-init-file $edit_file --load $srcdir/lisp-tests/$test.el; then
+            if diff $srcdir/lisp-tests/$test.output $edit_file; then
+                pass=`expr $pass + 1`
+                rm -f $edit_file $edit_file~
+            else
+                echo "(Emacs) $test failed to produce correct output"
+                fail=`expr $fail + 1`
+            fi
+        else
+            echo "(Emacs) $test failed to run with error code $?"
+            fail=`expr $fail + 1`
+        fi
+    fi
+    if $VALGRIND $builddir/zile --no-init-file $edit_file --load $srcdir/lisp-tests/$test.el; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
             pass=`expr $pass + 1`
             rm -f $edit_file $edit_file~
         else
-            echo $test failed to produce correct output
+            echo "$test failed to produce correct output"
             fail=`expr $fail + 1`
         fi
     else
-        echo $test failed to run with error code $?
+        echo "$test failed to run with error code $?"
         fail=`expr $fail + 1`
     fi
 done
