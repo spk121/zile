@@ -186,6 +186,7 @@ minibuf_read_filename (const char *fmt, const char *value,
           if (expand_path (as))
             {
               add_history_element (files_history, p);
+              free (p);
               p = xstrdup (astr_cstr (as));
             }
           else
