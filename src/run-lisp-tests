@@ -21,6 +21,8 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+# FIXME: Rewrite in Lua to avoid problems with spaces in paths
+
 # N.B. Tests that use execute-kbd-macro must note that keyboard input
 # is only evaluated once the script has finished running.
 
@@ -50,8 +52,8 @@ for test in "$@"; do
     chmod +w $edit_file
 
     if test -n "$EMACS"; then
-        # FIXME: Put the command line into a variable and re-use it
-        if $EMACS --no-init-file $edit_file --load $srcdir/lisp-tests/$test.el; then
+        args="--no-init-file $edit_file --load $srcdir/lisp-tests/$test.el"
+        if $EMACS $args; then
             if diff $srcdir/lisp-tests/$test.output $edit_file; then
                 pass=`expr $pass + 1`
                 rm -f $edit_file $edit_file~
@@ -64,7 +66,7 @@ for test in "$@"; do
             fail=`expr $fail + 1`
         fi
     fi
-    if $VALGRIND $builddir/zile --no-init-file $edit_file --load $srcdir/lisp-tests/$test.el; then
+    if $VALGRIND $builddir/zile $args; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
             pass=`expr $pass + 1`
             rm -f $edit_file $edit_file~
