@@ -1,6 +1,4 @@
 (goto-char 40)
-(insert-char "f")
-(insert-char "f")
-(insert-char "f")
+(insert "fff")
 (save-buffer)
 (save-buffers-kill-emacs)

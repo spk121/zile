@@ -1,5 +1,5 @@
 (switch-to-buffer "*scratch*")
 (kill-buffer "*scratch*")
-(insert-char "a")
+(insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

@@ -1,5 +1,5 @@
 (end-of-buffer)
 (scroll-down)
-(insert-char "a")
+(insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

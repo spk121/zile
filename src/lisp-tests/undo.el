@@ -1,7 +1,4 @@
-(delete-char)
-(delete-char)
-(delete-char)
-(delete-char)
+(delete-char 4)
 (undo)
 (undo)
 (undo)

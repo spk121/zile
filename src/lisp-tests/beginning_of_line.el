@@ -3,6 +3,6 @@
 (forward-word)
 (forward-word)
 (beginning-of-line)
-(insert-char "a")
+(insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

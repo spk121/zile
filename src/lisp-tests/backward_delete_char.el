@@ -1,5 +1,4 @@
-(insert-char "a")
-(insert-char "a")
-(backward-delete-char)
+(insert "aa")
+(backward-delete-char 1)
 (save-buffer)
 (save-buffers-kill-emacs)

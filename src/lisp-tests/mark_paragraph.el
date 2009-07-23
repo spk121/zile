@@ -1,7 +1,5 @@
 (mark-paragraph)
 (kill-region)
-(insert-char "a")
-(insert-char "a")
-(insert-char "a")
+(insert "aaa")
 (save-buffer)
 (save-buffers-kill-emacs)

@@ -208,21 +208,6 @@ insert_char (int c)
   return true;
 }
 
-DEFUN_NONINTERACTIVE_ARGS ("insert-char", insert_char,
-                   STR_ARG (c))
-/*+
-Insert CHARACTER.
-+*/
-{
-  STR_INIT (c);
-  if (strlen (c) > 0)
-    ok = bool_to_lisp (insert_char (*c));
-  else
-    ok = leNIL;
-  STR_FREE (c);
-}
-END_DEFUN
-
 /*
  * Insert a character at the current position in insert mode
  * whatever the current insert mode is.
@@ -488,6 +473,18 @@ insert_nstring (const char *s, size_t len)
   undo_nosave = false;
 }
 
+DEFUN_NONINTERACTIVE_ARGS ("insert", insert,
+                           STR_ARG (arg))
+/*+
+Insert the argument at point.
++*/
+{
+  STR_INIT (arg);
+  insert_nstring (arg, strlen (arg));
+  STR_FREE (arg);
+}
+END_DEFUN
+
 void
 insert_astr (astr as)
 {
@@ -585,25 +582,27 @@ backward_delete_char_overwrite (void)
   return true;
 }
 
-DEFUN ("delete-char", delete_char)
+DEFUN_ARGS ("delete-char", delete_char,
+            INT_OR_UNIARG (n))
 /*+
-Delete the following character.
-Join lines if the character is a newline.
+Delete the following @i{n} characters (previous if @i{n} is negative).
 +*/
 {
-  ok = execute_with_uniarg (true, uniarg, delete_char, backward_delete_char);
+  INT_OR_UNIARG_INIT (n);
+  ok = execute_with_uniarg (true, n, delete_char, backward_delete_char);
 }
 END_DEFUN
 
-DEFUN ("backward-delete-char", backward_delete_char)
+DEFUN_ARGS ("backward-delete-char", backward_delete_char,
+            INT_OR_UNIARG (n))
 /*+
-Delete the previous character.
-Join lines if the character is a newline.
+Delete the previous @i{n} characters (following if @i{n} is negative).
 +*/
 {
+  INT_OR_UNIARG (n);
   bool (*forward) (void) = get_buffer_overwrite (cur_bp) ?
     backward_delete_char_overwrite : backward_delete_char;
-  ok = execute_with_uniarg (true, uniarg, forward, delete_char);
+  ok = execute_with_uniarg (true, n, forward, delete_char);
 }
 END_DEFUN
 

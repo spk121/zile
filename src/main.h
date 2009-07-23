@@ -125,69 +125,82 @@ typedef le * (*Function) (long uniarg, le * list);
 
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
-        DEFUN_ARGS(zile_func, c_func, )
+  DEFUN_ARGS(zile_func, c_func, )
 #define DEFUN_ARGS(zile_func, c_func, args) \
-        le * F_ ## c_func (long uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
-        { \
-          le * ok = leT; \
-          args
-#define END_DEFUN \
-          return ok; \
-        }
+  le * F_ ## c_func (long uniarg GCC_UNUSED, le *arglist GCC_UNUSED)    \
+  {                                                                     \
+    le * ok = leT;                                                      \
+    args
+#define END_DEFUN    \
+    return ok;       \
+  }
 
 /* Define a non-user-visible function. */
 #define DEFUN_NONINTERACTIVE(zile_func, c_func) \
-        DEFUN(zile_func, c_func)
+  DEFUN(zile_func, c_func)
 #define DEFUN_NONINTERACTIVE_ARGS(zile_func, c_func, args) \
-        DEFUN_ARGS(zile_func, c_func, args)
+  DEFUN_ARGS(zile_func, c_func, args)
 
 /* String argument. */
-#define STR_ARG(name) \
-        const char *name = NULL; \
-        bool free_ ## name = true;
-#define STR_INIT(name) \
-        if (arglist && arglist->next) \
-          { \
-            name = arglist->next->data; \
-            arglist = arglist->next; \
-            free_ ## name = false; \
-          }
-#define STR_FREE(name) \
-        if (free_ ## name) \
-          free ((char *) name);
+#define STR_ARG(name)                   \
+  const char *name = NULL;              \
+  bool free_ ## name = true;
+#define STR_INIT(name)                  \
+  if (arglist && arglist->next)         \
+    {                                   \
+      name = arglist->next->data;       \
+      arglist = arglist->next;          \
+      free_ ## name = false;            \
+    }
+#define STR_FREE(name)                  \
+  if (free_ ## name)                    \
+    free ((char *) name);
 
 /* Integer argument. */
 #define INT_ARG(name) \
-        long name = 1;
+  long name = 1;
 #define INT_INIT(name) \
-        if (arglist && arglist->next) \
-          { \
-            const char *s = arglist->next->data; \
-            arglist = arglist->next; \
-            name = strtol (s, NULL, 10); \
-            if (name == LONG_MAX) \
-              ok = leNIL; \
-          }
+  if (arglist && arglist->next)                 \
+    {                                           \
+      const char *s = arglist->next->data;      \
+      arglist = arglist->next;                  \
+      name = strtol (s, NULL, 10);              \
+      if (name == LONG_MAX)                     \
+        ok = leNIL;                             \
+    }
+
+/* Integer argument which can either be argument or uniarg. */
+#define INT_OR_UNIARG(name) \
+  long name = 1;            \
+  bool noarg = false;
+#define INT_OR_UNIARG_INIT(name)                \
+  INT_INIT(name)                                \
+  else                                          \
+    {                                           \
+      if (!(lastflag & FLAG_SET_UNIARG))        \
+        noarg = true;                           \
+      name = uniarg;                            \
+    }
 
 /* Boolean argument. */
-#define BOOL_ARG(name) \
-        bool name = true;
-#define BOOL_INIT(name) \
-        if (arglist && arglist->next) \
-          { \
-            const char *s = arglist->next->data; \
-            arglist = arglist->next; \
-            if (strcmp (s, "nil") == 0) \
-              name = false; \
-          }
+#define BOOL_ARG(name)                          \
+  bool name = true;
+#define BOOL_INIT(name)                         \
+  if (arglist && arglist->next)                 \
+    {                                           \
+      const char *s = arglist->next->data;      \
+      arglist = arglist->next;                  \
+      if (strcmp (s, "nil") == 0)               \
+        name = false;                           \
+    }
 
 /* Call an interactive function. */
-#define FUNCALL(c_func)                         \
-        F_ ## c_func (1, NULL)
+#define FUNCALL(c_func)                 \
+  F_ ## c_func (1, NULL)
 
 /* Call an interactive function with a universal argument. */
-#define FUNCALL_ARG(c_func, uniarg)             \
-        F_ ## c_func (uniarg, NULL)
+#define FUNCALL_ARG(c_func, uniarg)     \
+  F_ ## c_func (uniarg, NULL)
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.

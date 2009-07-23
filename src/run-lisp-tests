@@ -48,12 +48,12 @@ for test in "$@"; do
     test=`echo $test | sed -e 's/\.el$//'`
 
     edit_file=$builddir/$test.input
-    cp $srcdir/lisp-tests/zile_test.input $edit_file
-    chmod +w $edit_file
+    args="--no-init-file $edit_file --load $srcdir/lisp-tests/$test.el"
 
     if test -n "$EMACS"; then
-        args="--no-init-file $edit_file --load $srcdir/lisp-tests/$test.el"
-        if $EMACS $args; then
+        cp $srcdir/lisp-tests/zile_test.input $edit_file
+        chmod +w $edit_file
+        if $EMACS --quick $args; then
             if diff $srcdir/lisp-tests/$test.output $edit_file; then
                 pass=`expr $pass + 1`
                 rm -f $edit_file $edit_file~
@@ -66,6 +66,9 @@ for test in "$@"; do
             fail=`expr $fail + 1`
         fi
     fi
+
+    cp $srcdir/lisp-tests/zile_test.input $edit_file
+    chmod +w $edit_file
     if $VALGRIND $builddir/zile $args; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
             pass=`expr $pass + 1`

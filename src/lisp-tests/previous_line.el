@@ -2,6 +2,6 @@
 (previous-line)
 (previous-line)
 (previous-line)
-(insert-char "a")
+(insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

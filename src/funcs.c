@@ -1153,16 +1153,15 @@ move to with the same argument.
 }
 END_DEFUN
 
+/* FIXME: Use new macro for arg/uniarg */
 DEFUN_ARGS ("forward-line", forward_line,
-            INT_ARG (n))
+            INT_OR_UNIARG (n))
 /*+
 Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
-  INT_INIT (n)
-  else
-    n = uniarg;
+  INT_OR_UNIARG_INIT (n);
   if (ok == leT)
     {
       FUNCALL (beginning_of_line);

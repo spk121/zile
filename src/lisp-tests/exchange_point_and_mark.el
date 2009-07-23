@@ -6,6 +6,6 @@
 (next-line)
 (next-line)
 (exchange-point-and-mark)
-(insert-char "f")
+(insert "f")
 (save-buffer)
 (save-buffers-kill-emacs)

@@ -1,7 +1,4 @@
 (overwrite-mode)
-(insert-char "a")
-(insert-char "b")
-(insert-char "c")
-(insert-char "d")
+(insert "abcd")
 (save-buffer)
 (save-buffers-kill-emacs)

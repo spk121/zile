@@ -1,5 +1,5 @@
 (end-of-buffer)
 (search-backward "li")
-(insert-char "a")
+(insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)

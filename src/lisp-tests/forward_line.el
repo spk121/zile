@@ -1,4 +1,4 @@
 (forward-line 2)
-(insert-char "a")
+(insert "a")
 (save-buffer)
 (save-buffers-kill-emacs)
