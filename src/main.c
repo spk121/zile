@@ -67,7 +67,7 @@ loop (void)
       thisflag = lastflag & FLAG_DEFINING_MACRO;
       key = getkey ();
       minibuf_clear ();
-      process_key (root_bindings, key);
+      process_key (key);
 
       if (thisflag & FLAG_QUIT)
         break;
@@ -400,7 +400,7 @@ then enter the text in that file's own buffer.\n\
   /* Tidy and close the terminal. */
   term_finish ();
 
-  free_bindings (root_bindings);
+  free_default_bindings ();
   free_eval ();
 
   /* Free Lisp state. */

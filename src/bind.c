@@ -47,7 +47,7 @@ struct Binding
   size_t vecnum, vecmax;
 };
 
-Binding root_bindings;
+static Binding root_bindings;
 
 static Binding
 node_new (int vecmax)
@@ -268,7 +268,7 @@ set_this_command (Function cmd)
 }
 
 void
-process_key (Binding bindings, size_t key)
+process_key (size_t key)
 {
   if (key == KBD_NOKEY)
     return;
@@ -279,7 +279,7 @@ process_key (Binding bindings, size_t key)
   else
     {
       gl_list_t keys;
-      Function f = completion_scan (bindings, key, &keys);
+      Function f = completion_scan (root_bindings, key, &keys);
       if (f != NULL)
         {
           set_this_command (f);
@@ -301,7 +301,7 @@ process_key (Binding bindings, size_t key)
     add_cmd_to_macro ();
 }
 
-Binding
+static Binding
 init_bindings (void)
 {
   return node_new (10);
@@ -450,7 +450,7 @@ init_default_bindings (void)
   astr_delete (as);
 }
 
-void
+static void
 free_bindings (Binding binding)
 {
   size_t i;
@@ -458,6 +458,12 @@ free_bindings (Binding binding)
     free_bindings (binding->vec[i]);
   free (binding->vec);
   free (binding);
+}
+
+void
+free_default_bindings (void)
+{
+  free_bindings (root_bindings);
 }
 
 DEFUN_ARGS ("global-set-key", global_set_key,

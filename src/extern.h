@@ -34,15 +34,13 @@ void gotobob (void);
 void gotoeob (void);
 
 /* bind.c ----------------------------------------------------------------- */
-extern Binding root_bindings;
-size_t do_binding_completion (astr as);
-const char *get_function_by_key (size_t key);
-void process_key (Binding bindings, size_t key);
-Binding init_bindings (void);
-void init_default_bindings (void);
 Function last_command (void);
 void set_this_command (Function cmd);
-void free_bindings (Binding p);
+size_t do_binding_completion (astr as);
+const char *get_function_by_key (size_t key);
+void process_key (size_t key);
+void init_default_bindings (void);
+void free_default_bindings (void);
 
 /* buffer.c --------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
