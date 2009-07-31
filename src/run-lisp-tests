@@ -53,7 +53,7 @@ for test in "$@"; do
     if test -n "$EMACS"; then
         cp $srcdir/lisp-tests/zile_test.input $edit_file
         chmod +w $edit_file
-        if $EMACS --quick --no-window-system $args; then
+        if $EMACS --quick --batch $args; then
             if diff $srcdir/lisp-tests/$test.output $edit_file; then
                 pass=`expr $pass + 1`
                 rm -f $edit_file $edit_file~
