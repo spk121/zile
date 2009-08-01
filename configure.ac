@@ -26,9 +26,9 @@ AM_INIT_AUTOMAKE([std-options check-news])
 dnl Checks for programs
 AC_GNU_SOURCE
 AC_PROG_CC
-# FIXME: Use AX_CFLAGS_WARN_ALL from autoconf-archive
+AX_CFLAGS_WARN_ALL_ANSI
 if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -Wall -W -Wmissing-prototypes -Wstrict-prototypes -pedantic -D_FORTIFY_SOURCE=2"
+  CFLAGS="$CFLAGS -W -Wmissing-prototypes -Wstrict-prototypes -D_FORTIFY_SOURCE=2"
 fi
 gl_EARLY
 AM_PROG_CC_C_O
