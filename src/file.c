@@ -67,9 +67,10 @@ astr
 agetcwd (void)
 {
   char *s = getcwd (NULL, 0);
+  astr as;
   if (s == NULL)
     s = "";
-  astr as = astr_new_cstr (s);
+  as = astr_new_cstr (s);
   free (s);
   return as;
 }
