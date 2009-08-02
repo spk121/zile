@@ -200,19 +200,22 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
 END_DEFUN
 
 static void
-call_keys (gl_list_t keys)
+process_keys (gl_list_t keys)
 {
-  size_t i;
+  size_t i, len = gl_list_size (keys), cur = term_buf_len ();
 
-  for (i = gl_list_size (keys) - 1; i != SIZE_MAX; i--)
-    pushkey ((size_t) gl_list_get_at (keys, i));
+  for (i = 0; i < len; i++)
+    pushkey ((size_t) gl_list_get_at (keys, len - i - 1));
+
+  while (term_buf_len () > cur)
+    process_key (getkey ());
 }
 
 void
 call_macro (Macro * mp)
 {
   assert (mp);
-  call_keys (mp->keys);
+  process_keys (mp->keys);
 }
 
 DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
@@ -251,7 +254,7 @@ Execute macro as string of editor command characters.
   keys = keystrtovec (keystr);
   if (keys)
     {
-      call_keys (keys);
+      process_keys (keys);
       gl_list_free (keys);
     }
   else
