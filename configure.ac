@@ -26,7 +26,7 @@ AM_INIT_AUTOMAKE([std-options check-news])
 dnl Checks for programs
 AC_GNU_SOURCE
 AC_PROG_CC
-AX_CFLAGS_WARN_ALL_ANSI
+AX_CFLAGS_WARN_ALL
 if test "$GCC" = "yes"; then
   CFLAGS="$CFLAGS -W -Wmissing-prototypes -Wstrict-prototypes -D_FORTIFY_SOURCE=2"
 fi
