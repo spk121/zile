@@ -164,7 +164,8 @@ typedef le * (*Function) (long uniarg, le * list);
     {                                           \
       const char *s = arglist->next->data;      \
       arglist = arglist->next;                  \
-      name = strtol (s, NULL, 10);              \
+      if (s != NULL)                            \
+        name = strtol (s, NULL, 10);            \
       if (name == LONG_MAX)                     \
         ok = leNIL;                             \
     }
@@ -190,7 +191,7 @@ typedef le * (*Function) (long uniarg, le * list);
     {                                           \
       const char *s = arglist->next->data;      \
       arglist = arglist->next;                  \
-      if (strcmp (s, "nil") == 0)               \
+      if (s != NULL && strcmp (s, "nil") == 0)  \
         name = false;                           \
     }
 
