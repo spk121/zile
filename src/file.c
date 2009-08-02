@@ -919,9 +919,9 @@ save_buffer (Buffer * bp)
   if (!get_buffer_modified (bp))
     minibuf_write ("(No changes need to be saved)");
   else
+    /* FIXME: Check return value of write_buffer. */
     write_buffer (bp, get_buffer_needname (bp), false, get_buffer_filename (bp),
                   "File to save in: ");
-
   return true;
 }
 
