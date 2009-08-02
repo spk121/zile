@@ -270,6 +270,7 @@ void init_search (void);
 void free_search (void);
 
 /* term_curses.c ---------------------------------------------------------- */
+size_t term_buf_len (void);
 void term_init (void);
 void term_close (void);
 void term_suspend (void);

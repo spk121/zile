@@ -36,6 +36,12 @@
 
 static gl_list_t key_buf;
 
+size_t
+term_buf_len (void)
+{
+  return gl_list_size (key_buf);
+}
+
 void
 term_move (size_t y, size_t x)
 {
@@ -339,7 +345,7 @@ static int
 get_char (void)
 {
   int c;
-  size_t size = gl_list_size (key_buf);
+  size_t size = term_buf_len ();
 
   if (size > 0)
     {
