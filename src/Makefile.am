@@ -138,7 +138,7 @@ TESTS_ENVIRONMENT = $(TESTS_VARS) $(VALGRIND)
 TESTS = $(check_PROGRAMS)
 
 check-local:
-	echo $(srcdir)/lisp-tests/*.el | $(TESTS_VARS) EMACS="$(EMACS)" VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
+	echo $(LISP_TESTS) | $(TESTS_VARS) EMACS="$(EMACS)" VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
 
 check_PROGRAMS = astr
 
