@@ -52,35 +52,6 @@ int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
 
-static void
-loop (void)
-{
-  for (;;)
-    {
-      size_t key;
-
-      if (lastflag & FLAG_NEED_RESYNC)
-        resync_redisplay ();
-      term_redisplay ();
-      term_refresh ();
-
-      thisflag = lastflag & FLAG_DEFINING_MACRO;
-      key = getkey ();
-      minibuf_clear ();
-      process_key (key);
-
-      if (thisflag & FLAG_QUIT)
-        break;
-      if (!(thisflag & FLAG_SET_UNIARG))
-        last_uniarg = 1;
-
-      if (last_command () != F_undo)
-        set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
-
-      lastflag = thisflag;
-    }
-}
-
 static char about_splash_str[] = "\
 " ZILE_VERSION_STRING "\n\
 \n\
@@ -394,8 +365,14 @@ then enter the text in that file's own buffer.\n\
     }
 
   /* Run the main loop. */
-  if (!(thisflag & FLAG_QUIT))
-    loop ();
+  while (!(thisflag & FLAG_QUIT))
+    {
+      if (lastflag & FLAG_NEED_RESYNC)
+        resync_redisplay ();
+      term_redisplay ();
+      term_refresh ();
+      process_key (getkey ());
+    }
 
   /* Tidy and close the terminal. */
   term_finish ();

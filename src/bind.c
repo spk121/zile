@@ -270,35 +270,46 @@ set_this_command (Function cmd)
 void
 process_key (size_t key)
 {
-  if (key == KBD_NOKEY)
-    return;
+  thisflag = lastflag & FLAG_DEFINING_MACRO;
+  minibuf_clear ();
 
-  if (key & KBD_META && (isdigit ((int) (key & 0xff)) || (key & 0xff) == '-'))
-    /* Got an ESC x sequence where `x' is a digit or `-'. */
-    universal_argument (KBD_META, (int) ((key & 0xff)));
-  else
+  if (key != KBD_NOKEY)
     {
-      gl_list_t keys;
-      Function f = completion_scan (root_bindings, key, &keys);
-      if (f != NULL)
-        {
-          set_this_command (f);
-          f (last_uniarg, NULL);
-          _last_command = _this_command;
-        }
+      if (key & KBD_META && (isdigit ((int) (key & 0xff)) || (key & 0xff) == '-'))
+        /* Got an ESC x sequence where `x' is a digit or `-'. */
+        universal_argument (KBD_META, (int) ((key & 0xff)));
       else
         {
-          astr as = keyvectostr (keys);
-          minibuf_error ("%s is undefined", astr_cstr (as));
-          astr_delete (as);
+          gl_list_t keys;
+          Function f = completion_scan (root_bindings, key, &keys);
+          if (f != NULL)
+            {
+              set_this_command (f);
+              f (last_uniarg, NULL);
+              _last_command = _this_command;
+            }
+          else
+            {
+              astr as = keyvectostr (keys);
+              minibuf_error ("%s is undefined", astr_cstr (as));
+              astr_delete (as);
+            }
+          gl_list_free (keys);
         }
-      gl_list_free (keys);
+
+      /* Only add keystrokes if we were already in macro defining mode
+         before the function call, to cope with start-kbd-macro. */
+      if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
+        add_cmd_to_macro ();
     }
 
-  /* Only add keystrokes if we were already in macro defining mode
-     before the function call, to cope with start-kbd-macro. */
-  if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
-    add_cmd_to_macro ();
+  if (!(thisflag & FLAG_SET_UNIARG))
+    last_uniarg = 1;
+
+  if (last_command () != F_undo)
+    set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
+
+  lastflag = thisflag;
 }
 
 static Binding
