@@ -420,6 +420,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
 }
 END_DEFUN
 
+/* FIXME: Simplify to one argument, which if KBD_NOKEY is ignored. */
 le *
 universal_argument (int keytype, int xarg)
 {
@@ -511,7 +512,7 @@ Repeating @kbd{C-u} without digits or minus sign multiplies the argument
 by 4 each time.
 +*/
 {
-  ok = universal_argument (KBD_CTRL | 'u', 0);
+  ok = universal_argument (0, 0);
 }
 END_DEFUN
 
@@ -1316,12 +1317,14 @@ setcase_word_lowercase (void)
   return setcase_word (case_lower);
 }
 
-DEFUN ("downcase-word", downcase_word)
+DEFUN_ARGS ("downcase-word", downcase_word,
+            INT_OR_UNIARG (arg))
 /*+
-Convert following word (or argument N words) to lower case, moving over.
+Convert following word (or @i{arg} words) to lower case, moving over.
 +*/
 {
-  ok = execute_with_uniarg (true, uniarg, setcase_word_lowercase, NULL);
+  INT_OR_UNIARG_INIT (arg);
+  ok = execute_with_uniarg (true, arg, setcase_word_lowercase, NULL);
 }
 END_DEFUN
 
@@ -1331,12 +1334,14 @@ setcase_word_uppercase (void)
   return setcase_word (case_upper);
 }
 
-DEFUN ("upcase-word", upcase_word)
+DEFUN_ARGS ("upcase-word", upcase_word,
+            INT_OR_UNIARG (arg))
 /*+
-Convert following word (or argument N words) to upper case, moving over.
+Convert following word (or @i{arg} words) to upper case, moving over.
 +*/
 {
-  ok = execute_with_uniarg (true, uniarg, setcase_word_uppercase, NULL);
+  INT_OR_UNIARG_INIT (arg);
+  ok = execute_with_uniarg (true, arg, setcase_word_uppercase, NULL);
 }
 END_DEFUN
 
@@ -1346,14 +1351,16 @@ setcase_word_capitalize (void)
   return setcase_word (case_capitalized);
 }
 
-DEFUN ("capitalize-word", capitalize_word)
+DEFUN_ARGS ("capitalize-word", capitalize_word,
+            INT_OR_UNIARG (arg))
 /*+
-Capitalize the following word (or argument N words), moving over.
-This gives the word(s) a first character in upper case and the rest
-lower case.
+Capitalize the following word (or @i{arg} words), moving over.
+This gives the word(s) a first character in upper case
+and the rest lower case.
 +*/
 {
-  ok = execute_with_uniarg (true, uniarg, setcase_word_capitalize, NULL);
+  INT_OR_UNIARG_INIT (arg);
+  ok = execute_with_uniarg (true, arg, setcase_word_capitalize, NULL);
 }
 END_DEFUN
 
