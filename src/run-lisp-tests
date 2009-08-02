@@ -34,8 +34,10 @@ if test -z "$builddir"; then
     builddir=.
 fi
 
-pass=0
-fail=0
+zile_pass=0
+zile_fail=0
+emacs_pass=0
+emacs_fail=0
 
 # If TERM is not set to a terminal type, choose a default
 if test -z "$TERM" -o "$TERM" = "unknown"; then
@@ -51,38 +53,39 @@ for test in "$@"; do
     args="--no-init-file $edit_file --load $srcdir/lisp-tests/$test.el"
 
     if test -n "$EMACS"; then
-        cp $srcdir/lisp-tests/zile_test.input $edit_file
+        cp $srcdir/lisp-tests/test.input $edit_file
         chmod +w $edit_file
         if $EMACS --quick --batch $args; then
             if diff $srcdir/lisp-tests/$test.output $edit_file; then
-                pass=`expr $pass + 1`
+                emacs_pass=`expr $emacs_pass + 1`
                 rm -f $edit_file $edit_file~
             else
-                echo "(Emacs) $test failed to produce correct output"
-                fail=`expr $fail + 1`
+                echo "Emacs $test failed to produce correct output"
+                emacs_fail=`expr $emacs_fail + 1`
             fi
         else
-            echo "(Emacs) $test failed to run with error code $?"
-            fail=`expr $fail + 1`
+            echo "Emacs $test failed to run with error code $?"
+            emacs_fail=`expr $emacs_fail + 1`
         fi
     fi
 
-    cp $srcdir/lisp-tests/zile_test.input $edit_file
+    cp $srcdir/lisp-tests/test.input $edit_file
     chmod +w $edit_file
     if $VALGRIND $builddir/zile $args; then
         if diff $srcdir/lisp-tests/$test.output $edit_file; then
-            pass=`expr $pass + 1`
+            zile_pass=`expr $zile_pass + 1`
             rm -f $edit_file $edit_file~
         else
-            echo "$test failed to produce correct output"
-            fail=`expr $fail + 1`
+            echo "Zile $test failed to produce correct output"
+            zile_fail=`expr $zile_fail + 1`
         fi
     else
-        echo "$test failed to run with error code $?"
-        fail=`expr $fail + 1`
+        echo "Zile $test failed to run with error code $?"
+        zile_fail=`expr $zile_fail + 1`
     fi
 done
 
-echo "$pass pass(es) and $fail failure(s)"
+echo "Zile: $zile_pass pass(es) and $zile_fail failure(s)"
+echo "Emacs: $emacs_pass pass(es) and $emacs_fail failure(s)"
 
 exit $fail
