@@ -1,5 +1,5 @@
-(set-mark-command)
-(next-line)
-(kill-region)
+(set-mark (point))
+(forward-line)
+(kill-region (point) (mark))
 (save-buffer)
 (save-buffers-kill-emacs)

@@ -1,5 +1,5 @@
-(next-line)
-(next-line)
+(forward-line)
+(forward-line)
 (insert-buffer "insert_buffer.input")
 (save-buffer)
 (save-buffers-kill-emacs)

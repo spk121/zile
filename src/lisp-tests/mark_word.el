@@ -1,5 +1,5 @@
 (mark-word)
-(kill-region)
+(kill-region (point) (mark))
 (end-of-line)
 (yank)
 (save-buffer)

@@ -1,4 +1,4 @@
-(set-mark-command)
+(set-mark (point))
 (forward-char)
 (forward-char)
 (forward-char)

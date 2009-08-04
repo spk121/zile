@@ -1,5 +1,5 @@
-(next-line)
-(next-line)
+(forward-line)
+(forward-line)
 (tab-to-tab-stop)
 (tab-to-tab-stop)
 (insert "tab")

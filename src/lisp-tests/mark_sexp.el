@@ -12,6 +12,6 @@
 (backward-char)
 (backward-char)
 (mark-sexp)
-(kill-region)
+(kill-region (point) (mark))
 (save-buffer)
 (save-buffers-kill-emacs)

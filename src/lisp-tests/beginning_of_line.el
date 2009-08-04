@@ -1,4 +1,4 @@
-(next-line)
+(forward-line)
 (forward-word)
 (forward-word)
 (forward-word)
