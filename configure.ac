@@ -57,7 +57,7 @@ AC_ARG_VAR(CURSES_LIB, [linker flags for curses library])
 dnl Emacs
 AX_WITH_PROG(EMACS, emacs)
 if test -n "$EMACS"; then
-  emacs_min_version=22.1
+  emacs_min_version=23.1
   emacs_version=$($EMACS --version 2>&1 | head -n 1 | cut -d' ' -f3)
   AC_MSG_CHECKING([Emacs version $emacs_version >= $emacs_min_version])
   AX_COMPARE_VERSION("$emacs_version", ge, $emacs_min_version,
