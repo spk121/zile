@@ -360,7 +360,7 @@ END_DEFUN
 static bool
 scroll_down (void)
 {
-  if (get_buffer_pt (cur_bp).n > 0)
+  if (get_buffer_pt (cur_bp).n > get_window_eheight (cur_wp))
     return move_line (-get_window_eheight (cur_wp));
 
   minibuf_error ("Beginning of buffer");
@@ -370,7 +370,8 @@ scroll_down (void)
 static bool
 scroll_up (void)
 {
-  if (get_buffer_pt (cur_bp).n < get_buffer_last_line (cur_bp))
+  if (get_buffer_pt (cur_bp).n <
+      get_buffer_last_line (cur_bp) - get_window_eheight (cur_wp))
     return move_line (get_window_eheight (cur_wp));
 
   minibuf_error ("End of buffer");
