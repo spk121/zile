@@ -164,6 +164,7 @@ static const char *keyname[] = {
   "\\PAGEDOWN",
   "\\PAGEUP",
   "\\PRIOR",
+  "\\r", /* FIXME: Kludge to make keystrings work in both Emacs and Zile. */
   "\\RET",
   "\\RIGHT",
   "\\SPC",
@@ -201,6 +202,7 @@ static int keycode[] = {
   KBD_PGDN,
   KBD_PGUP,
   KBD_PGUP,
+  KBD_RET,
   KBD_RET,
   KBD_RIGHT,
   ' ',
