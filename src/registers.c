@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "main.h"
 #include "extern.h"
@@ -43,7 +44,7 @@ register_free (size_t n)
 DEFUN_ARGS ("copy-to-register", copy_to_register,
             STR_ARG (regchar))
 /*+
-Copy region into the user specified register.
+Copy region into register @i{register}.
 +*/
 {
   int reg = 0;
@@ -98,7 +99,7 @@ insert_register (void)
 }
 
 DEFUN_ARGS ("insert-register", insert_register,
-            STR_ARG (regchar))
+            INIT_ARG (reg))
 /*+
 Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
@@ -107,14 +108,12 @@ Puts point before and mark after the inserted text.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  STR_INIT (regchar)
+  INT_INIT (regchar)
   else
     {
       minibuf_write ("Insert register: ");
       reg = getkey ();
     }
-  if (regchar != NULL)
-    reg = *regchar;
 
   if (reg == KBD_CANCEL)
     ok = FUNCALL (keyboard_quit);
@@ -136,32 +135,40 @@ Puts point before and mark after the inserted text.
           deactivate_mark ();
         }
     }
-
-  STR_FREE (regchar);
 }
 END_DEFUN
 
 static void
 write_registers_list (va_list ap GCC_UNUSED)
 {
-  size_t i, count;
+  size_t i;
 
-  bprintf ("%-8s %8s\n", "Register", "Size");
-  bprintf ("%-8s %8s\n", "--------", "----");
-  for (i = count = 0; i < NUM_REGISTERS; ++i)
+  for (i = 0; i < NUM_REGISTERS; ++i)
     if (regs[i] != NULL)
       {
+        const char *s = astr_cstr (regs[i]);
         astr as = astr_new ();
-        ++count;
+        size_t len;
+
         if (isprint (i))
-          astr_afmt (as, "`%c'", i);
+          astr_afmt (as, "%c", i);
         else
-          astr_afmt (as, "`\\%o'", i);
-        bprintf ("%-8s %8d\n", astr_cstr (as), astr_len (regs[i]));
+          astr_afmt (as, "\\%o", i);
+
+        while (*s == ' ' || *s == '\t' || *s == '\n')
+          s++;
+        len = MIN (20, MAX (0, ((int) get_window_ewidth (cur_wp)) - 6)) + 1;
+
+        bprintf ("Register %s contains ", astr_cstr (as));
+        if (strlen (s) > 0)
+          bprintf ("text starting with\n    %.*s\n", len, s);
+        else if (s != astr_cstr (regs[i]))
+          bprintf ("whitespace\n");
+        else
+          bprintf ("the empty string\n");
+
         astr_delete (as);
       }
-  if (!count)
-    bprintf ("No registers defined\n");
 }
 
 DEFUN ("list-registers", list_registers)
