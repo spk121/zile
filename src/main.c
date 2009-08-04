@@ -284,9 +284,9 @@ main (int argc, char **argv)
   create_first_window ();
   scratch_bp = cur_bp;
   as = astr_new_cstr ("\
-This buffer is for notes you don't want to save.\n\
-If you want to create a file, visit that file with C-x C-f,\n\
-then enter the text in that file's own buffer.\n\
+;; This buffer is for notes you don't want to save.\n\
+;; If you want to create a file, visit that file with C-x C-f,\n\
+;; then enter the text in that file's own buffer.\n\
 \n");
   insert_astr (as);
   astr_delete (as);
