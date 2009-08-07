@@ -1,5 +1,5 @@
 (set-mark (point))
-(copy-to-register "1" (point) (mark))
+(copy-to-register 49 (point) (mark))
 (list-registers)
 (other-window 1)
 (set-mark (point))

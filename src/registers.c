@@ -42,21 +42,17 @@ register_free (size_t n)
 }
 
 DEFUN_ARGS ("copy-to-register", copy_to_register,
-            STR_ARG (regchar))
+            INT_ARG (reg))
 /*+
 Copy region into register @i{register}.
 +*/
 {
-  int reg = 0;
-
-  STR_INIT (regchar)
+  INT_INIT (reg)
   else
     {
       minibuf_write ("Copy to register: ");
       reg = getkey ();
     }
-  if (regchar != NULL)
-    reg = *regchar;
 
   if (reg == KBD_CANCEL)
     ok = FUNCALL (keyboard_quit);
@@ -67,7 +63,8 @@ Copy region into register @i{register}.
       minibuf_clear ();
       if (reg < 0)
         reg = 0;
-      reg %= NUM_REGISTERS;
+      reg %= NUM_REGISTERS; /* Nice numbering relies on NUM_REGISTERS
+                               being a power of 2. */
 
       if (!calculate_the_region (rp))
         ok = leNIL;
@@ -81,19 +78,17 @@ Copy region into register @i{register}.
 
       free (rp);
     }
-
-  STR_FREE (regchar);
 }
 END_DEFUN
 
-static int reg;
+static int regnum;
 
 static bool
 insert_register (void)
 {
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, astr_len (regs[reg]));
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, astr_len (regs[regnum]));
   undo_nosave = true;
-  insert_astr (regs[reg]);
+  insert_astr (regs[regnum]);
   undo_nosave = false;
   return true;
 }
@@ -130,6 +125,7 @@ Puts point before and mark after the inserted text.
       else
         {
           set_mark_interactive ();
+          regnum = reg;
           execute_with_uniarg (true, uniarg, insert_register, NULL);
           FUNCALL (exchange_point_and_mark);
           deactivate_mark ();
