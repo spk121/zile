@@ -3,7 +3,7 @@
 (forward-char)
 (forward-char)
 (forward-char)
-(copy-region-as-kill)
+(copy-region-as-kill (mark) (point))
 (yank)
 (save-buffer)
 (save-buffers-kill-emacs)

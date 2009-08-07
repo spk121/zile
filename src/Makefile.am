@@ -130,7 +130,8 @@ MAINTAINERCLEANFILES =					\
 	tbl_vars.h
 
 loc:
-	cloc --no3 $(ALLSOURCES) $(LISP_TESTS) *.el Makefile.am ../Makefile.am ../configure.ac
+	cloc --no3 $(ALLSOURCES) $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) *.el \
+	Makefile.am ../Makefile.am ../configure.ac
 
 TESTS_VARS = srcdir=$(srcdir) builddir=$(builddir)
 TESTS_ENVIRONMENT = $(TESTS_VARS) $(VALGRIND)
@@ -139,19 +140,22 @@ TESTS = $(check_PROGRAMS)
 
 check-local:
 	echo $(LISP_TESTS) | $(TESTS_VARS) EMACS="$(EMACS)" VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
+	echo $(LISP_TESTS_ZILE_ONLY) | $(TESTS_VARS) VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
 
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
 astr_LDADD = xalloc_extra.o $(LDADD)
 
-# FIXME: Tests only to be run in Zile
-#	lisp-tests/call_last_kbd_macro.el		\
-#	lisp-tests/list_buffers.el			\
-#	lisp-tests/scroll_down.el			\
-#	lisp-tests/scroll_up.el				\
-#	lisp-tests/undo.el				\
-#
+# FIXME: Make these work in Emacs too
+LISP_TESTS_ZILE_ONLY =					\
+	lisp-tests/call_last_kbd_macro.el		\
+	lisp-tests/keyboard_quit.el			\
+	lisp-tests/list_buffers.el			\
+	lisp-tests/name_last_kbd_macro.el		\
+	lisp-tests/scroll_down.el			\
+	lisp-tests/scroll_up.el				\
+	lisp-tests/undo.el
 
 LISP_TESTS =						\
 	lisp-tests/backward_char.el			\
@@ -198,7 +202,6 @@ LISP_TESTS =						\
 	lisp-tests/isearch_forward.el			\
 	lisp-tests/isearch_forward_regexp.el		\
 	lisp-tests/just_one_space.el			\
-	lisp-tests/keyboard_quit.el			\
 	lisp-tests/kill_buffer.el			\
 	lisp-tests/kill_line.el				\
 	lisp-tests/kill_region.el			\
@@ -209,7 +212,6 @@ LISP_TESTS =						\
 	lisp-tests/mark_sexp.el				\
 	lisp-tests/mark_whole_buffer.el			\
 	lisp-tests/mark_word.el				\
-	lisp-tests/name_last_kbd_macro.el		\
 	lisp-tests/newline.el				\
 	lisp-tests/newline_and_indent.el		\
 	lisp-tests/next_line.el				\
@@ -243,14 +245,6 @@ LISP_TESTS =						\
 	lisp-tests/yank.el				\
 	lisp-tests/setq_nonexistent_variable.el
 
-# FIXME: Tests only to be run in Zile
-#	lisp-tests/call_last_kbd_macro.output		\
-#	lisp-tests/list_buffers.output			\
-#	lisp-tests/scroll_down.output			\
-#	lisp-tests/scroll_up.output			\
-#	lisp-tests/undo.output				\
-#
-
 LISP_TESTS_OUTPUTS =					\
 	lisp-tests/backward_char.output			\
 	lisp-tests/backward_delete_char.output		\
@@ -260,6 +254,7 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/backward_word.output			\
 	lisp-tests/beginning_of_buffer.output		\
 	lisp-tests/beginning_of_line.output		\
+	lisp-tests/call_last_kbd_macro.output		\
 	lisp-tests/capitalize_word.output		\
 	lisp-tests/copy_region_as_kill.output		\
 	lisp-tests/copy_to_register.output		\
@@ -302,6 +297,7 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/kill_region.output			\
 	lisp-tests/kill_sexp.output			\
 	lisp-tests/kill_word.output			\
+	lisp-tests/list_buffers.output			\
 	lisp-tests/list_registers.output		\
 	lisp-tests/mark_paragraph.output		\
 	lisp-tests/mark_sexp.output			\
@@ -317,6 +313,8 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/query_replace.output			\
 	lisp-tests/quoted_insert.output			\
 	lisp-tests/save_some_buffers.output		\
+	lisp-tests/scroll_down.output			\
+	lisp-tests/scroll_up.output			\
 	lisp-tests/search_backward.output		\
 	lisp-tests/search_backward_regexp.output	\
 	lisp-tests/search_forward.output		\
@@ -334,6 +332,7 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/transpose_lines.output		\
 	lisp-tests/transpose_sexps.output		\
 	lisp-tests/transpose_words.output		\
+	lisp-tests/undo.output				\
 	lisp-tests/universal_argument.output		\
 	lisp-tests/untabify.output			\
 	lisp-tests/upcase_region.output			\
