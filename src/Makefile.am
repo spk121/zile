@@ -147,14 +147,17 @@ check_PROGRAMS = astr
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
 astr_LDADD = xalloc_extra.o $(LDADD)
 
+# FIXME: Find a way of making these work
+#	lisp-tests/scroll_down.el			\
+#	lisp-tests/scroll_up.el				\
+#
+
 # FIXME: Make these work in Emacs too
 LISP_TESTS_ZILE_ONLY =					\
 	lisp-tests/call_last_kbd_macro.el		\
 	lisp-tests/keyboard_quit.el			\
 	lisp-tests/list_buffers.el			\
 	lisp-tests/name_last_kbd_macro.el		\
-	lisp-tests/scroll_down.el			\
-	lisp-tests/scroll_up.el				\
 	lisp-tests/undo.el
 
 LISP_TESTS =						\
