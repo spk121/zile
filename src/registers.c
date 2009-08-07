@@ -99,7 +99,7 @@ insert_register (void)
 }
 
 DEFUN_ARGS ("insert-register", insert_register,
-            INIT_ARG (reg))
+            INT_ARG (reg))
 /*+
 Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
@@ -108,7 +108,7 @@ Puts point before and mark after the inserted text.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  INT_INIT (regchar)
+  INT_INIT (reg)
   else
     {
       minibuf_write ("Insert register: ");
