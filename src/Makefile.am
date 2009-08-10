@@ -350,6 +350,7 @@ EXTRA_DIST =						\
 	$(LUA_RUNTIME)					\
 	$(LUA_BUILDTIME)				\
 	$(LISP_TESTS)					\
+	$(LISP_TESTS_ZILE_ONLY)				\
 	$(LISP_TESTS_OUTPUTS)				\
 	run-lisp-tests					\
 	test-bad-argument				\
