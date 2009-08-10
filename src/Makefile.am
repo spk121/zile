@@ -342,7 +342,7 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/upcase_word.output			\
 	lisp-tests/yank.output				\
 	lisp-tests/setq_nonexistent_variable.output	\
-	lisp-tests/zile_test.input
+	lisp-tests/test.input
 
 # Distribute tbl_vars.h & mkvars.stamp so that Lua is not needed for
 # building a release.
