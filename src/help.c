@@ -21,7 +21,7 @@
 
 #include "config.h"
 
-#include <ctype.h>
+#include <assert.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -148,6 +148,23 @@ Display the full documentation of a variable.
 }
 END_DEFUN
 
+static void
+write_key_description (va_list ap)
+{
+  const char *name = va_arg (ap, const char *);
+  const char *doc = va_arg (ap, const char *);
+  const char *binding = va_arg (ap, const char *);
+  int interactive = get_function_interactive (name);
+
+  assert (interactive != -1);
+
+  bprintf ("%s runs the command %s, which is %s built-in\n"
+           "function in `C source code'.\n\n%s",
+           binding, name,
+           interactive ? "an interactive" : "a",
+           doc);
+}
+
 DEFUN_ARGS ("describe-key", describe_key,
             STR_ARG (keystr))
 /*+
@@ -194,7 +211,7 @@ Display documentation of the command invoked by a key sequence.
         ok = leNIL;
       else
         write_temp_buffer ("*Help*", true,
-                           write_function_description, name, doc);
+                           write_key_description, name, doc, astr_cstr (binding));
     }
 
   if (binding)

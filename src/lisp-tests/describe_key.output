@@ -1,4 +1,4 @@
-Function: forward-char
+C-f runs the command forward-char, which is an interactive built-in
 Here is a sample file.
 It has several lines.
 

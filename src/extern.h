@@ -120,6 +120,7 @@ le *execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void),
 le *execute_function (const char *name, int uniarg);
 Function get_function (const char *name);
 const char *get_function_doc (const char *name);
+int get_function_interactive (const char *name);
 const char *get_function_name (Function p);
 const char *minibuf_read_function_name (const char *fmt, ...);
 void init_eval (void);

@@ -70,6 +70,14 @@ get_function (const char *name)
   return f ? f->func : NULL;
 }
 
+/* Return function's interactive flag, or -1 if not found. */
+int
+get_function_interactive (const char *name)
+{
+  fentry * f = get_fentry (name);
+  return f ? f->interactive : -1;
+}
+
 const char *
 get_function_doc (const char *name)
 {

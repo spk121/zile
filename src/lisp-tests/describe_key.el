@@ -2,7 +2,7 @@
 (other-window 1)
 (set-mark (point))
 (forward-line)
-(kill-region (point) (mark))
+(copy-region-as-kill (mark) (point))
 (other-window -1)
 (yank)
 (save-buffer)
