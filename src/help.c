@@ -73,8 +73,12 @@ write_function_description (va_list ap)
 {
   const char *name = va_arg (ap, const char *);
   const char *doc = va_arg (ap, const char *);
+  int interactive = get_function_interactive (name);
 
-  bprintf ("Function: %s\n\n" "Documentation:\n%s", name, doc);
+  bprintf ("%s is %s built-in function in `C source code'.\n\n%s",
+           name,
+           interactive ? "an interactive" : "a",
+           doc);
 }
 
 DEFUN_ARGS ("describe-function", describe_function,
@@ -115,8 +119,7 @@ write_variable_description (va_list ap)
   char *curval = va_arg (ap, char *);
   char *doc = va_arg (ap, char *);
   bprintf ("%s is a variable defined in `C source code'.\n\n"
-           "Its value is %s\n\n"
-           "Documentation:\n%s",
+           "Its value is %s\n\n\n%s",
            name, curval, doc);
 }
 

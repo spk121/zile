@@ -1,4 +1,4 @@
-Function: forward-char
+forward-char is an interactive built-in function in `C source code'.
 Here is a sample file.
 It has several lines.
 
