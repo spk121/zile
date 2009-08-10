@@ -100,13 +100,8 @@ Display the full documentation of a function.
       if (doc == NULL)
         ok = leNIL;
       else
-        {
-          bufname = astr_new ();
-          astr_afmt (bufname, "*Help: function `%s'*", func);
-          write_temp_buffer (astr_cstr (bufname), true,
-                             write_function_description, func, doc);
-          astr_delete (bufname);
-        }
+        write_temp_buffer ("*Help*", true,
+                           write_function_description, func, doc);
     }
 
   STR_FREE (func);
@@ -144,15 +139,9 @@ Display the full documentation of a variable.
       if (doc == NULL)
         ok = leNIL;
       else
-        {
-          astr bufname = astr_new ();
-
-          astr_afmt (bufname, "*Help: variable `%s'*", name);
-          write_temp_buffer (astr_cstr (bufname), true,
-                             write_variable_description,
-                             name, get_variable (name), doc);
-          astr_delete (bufname);
-        }
+        write_temp_buffer ("*Help*", true,
+                           write_variable_description,
+                           name, get_variable (name), doc);
     }
 
   STR_FREE (name);
@@ -204,13 +193,8 @@ Display documentation of the command invoked by a key sequence.
       if (doc == NULL)
         ok = leNIL;
       else
-        {
-          astr bufname = astr_new ();
-          astr_afmt (bufname, "*Help: function `%s'*", name);
-          write_temp_buffer (astr_cstr (bufname), true,
-                             write_function_description, name, doc);
-          astr_delete (bufname);
-        }
+        write_temp_buffer ("*Help*", true,
+                           write_function_description, name, doc);
     }
 
   if (binding)
