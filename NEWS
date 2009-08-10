@@ -1,3 +1,14 @@
+Release 2.3.10
+
+This release runs the test suite on Emacs as well as Zile (currently,
+requires Emacs 23 or later), and contains many small fixes to both the
+test suite and to Zile to improve Emacs compatibility. Various other
+bug fixes, improvements and tidy-ups have also been made. Note in
+particular that the commands `suspend-zile’, `save-buffers-kill-zile’
+and `view-zile-FAQ’ are now called `suspend-emacs’,
+`save-buffers-kill-emacs’ and `view-emacs-FAQ’ respectively, and
+`kill-line’ now works with non-positive arguments.
+
 Release 2.3.9
 
 This release fixes a build problem on OSF/1.
