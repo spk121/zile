@@ -4,10 +4,11 @@ This release runs the test suite on Emacs as well as Zile (currently,
 requires Emacs 23 or later), and contains many small fixes to both the
 test suite and to Zile to improve Emacs compatibility. Various other
 bug fixes, improvements and tidy-ups have also been made. Note in
-particular that the commands `suspend-zile’, `save-buffers-kill-zile’
-and `view-zile-FAQ’ are now called `suspend-emacs’,
-`save-buffers-kill-emacs’ and `view-emacs-FAQ’ respectively, and
-`kill-line’ now works with non-positive arguments.
+particular that the commands `suspend-zile', `save-buffers-kill-zile'
+and `view-zile-FAQ' are now called `suspend-emacs',
+`save-buffers-kill-emacs' and `view-emacs-FAQ' respectively, and
+`kill-line' now works with non-positive arguments. Portability has
+been improved, in particular to DOS systems.
 
 Release 2.3.9
 
