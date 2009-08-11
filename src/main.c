@@ -331,13 +331,9 @@ main (int argc, char **argv)
           break;
         case ARG_FILE:
           {
-            astr as = astr_afmt (astr_new (), "%d", line);
-            le *branch = leAddDataElement (leAddDataElement (NULL, "", 0), astr_cstr (as), 0);
             ok = find_file (arg);
             if (ok)
-              F_goto_line (0, branch);
-            leWipe (branch);
-            astr_delete (as);
+              FUNCALL_ARG (goto_line, line);
             lastflag |= FLAG_NEED_RESYNC;
           }
           break;
