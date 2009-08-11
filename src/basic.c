@@ -230,13 +230,13 @@ Position 1 is the beginning of the buffer.
 END_DEFUN
 
 DEFUN_ARGS ("goto-line", goto_line,
-            INT_ARG (n))
+            INT_OR_UNIARG (n))
 /*+
 Goto line arg, counting from line 1 at beginning of buffer.
 +*/
 {
-  INT_INIT (n)
-  else
+  INT_OR_UNIARG_INIT (n);
+  if (noarg)
     {
       n = minibuf_read_number ("Goto line: ");
       if (n == LONG_MAX - 1)
