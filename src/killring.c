@@ -105,7 +105,7 @@ static bool
 kill_line (bool literally)
 {
   bool ok = true;
-  bool deleted_text = false;
+  bool start_of_line = bolp ();
 
   if (eobp ())
     {
@@ -124,11 +124,9 @@ kill_line (bool literally)
 
       ok = copy_or_kill_region (true, rp);
       free (rp);
-
-      deleted_text = true;
     }
 
-  if (ok && (literally || !deleted_text) && !eobp ())
+  if (ok && (literally && start_of_line) && !eobp ())
     {
       if (!FUNCALL (delete_char))
         return false;
