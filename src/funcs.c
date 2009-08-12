@@ -1530,9 +1530,11 @@ says to insert the output in the current buffer.
 }
 END_DEFUN
 
+/* The `start' and `end' arguments are fake, hence their string type,
+   so they can be ignored. */
 DEFUN_ARGS ("shell-command-on-region", shell_command_on_region,
-            INT_ARG (start)
-            INT_ARG (end)
+            STR_ARG (start)
+            STR_ARG (end)
             STR_ARG (cmd)
             BOOL_ARG (insert))
 /*+
@@ -1548,8 +1550,8 @@ there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
 The output is available in that buffer in both cases.
 +*/
 {
-  INT_INIT (start);
-  INT_INIT (end);
+  STR_INIT (start);
+  STR_INIT (end);
   STR_INIT (cmd)
   else
     cmd = minibuf_read_shell_command ();
