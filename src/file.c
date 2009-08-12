@@ -538,7 +538,6 @@ Puts mark after the inserted text.
 +*/
 {
   Buffer *def_bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
-  Completion *cp;
 
   if (warn_if_readonly_buffer ())
     return leNIL;
@@ -546,7 +545,7 @@ Puts mark after the inserted text.
   STR_INIT (buffer)
   else
     {
-      cp = make_buffer_completion ();
+      Completion *cp = make_buffer_completion ();
       buffer = minibuf_read_completion ("Insert buffer (default %s): ",
                                         "", cp, NULL, get_buffer_name (def_bp));
       if (buffer == NULL)
