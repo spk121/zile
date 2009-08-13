@@ -1,16 +1,14 @@
 # ===========================================================================
-#     http://www.nongnu.org/autoconf-archive/ax_cflags_warn_all_ansi.html
+#       http://www.nongnu.org/autoconf-archive/ax_cflags_warn_all.html
 # ===========================================================================
 #
 # SYNOPSIS
 #
-#   AX_CFLAGS_WARN_ALL_ANSI [(shellvar [,default, [A/NA]])]
+#   AX_CFLAGS_WARN_ALL [(shellvar [,default, [A/NA]])]
 #
 # DESCRIPTION
 #
 #   Try to find a compiler option that enables most reasonable warnings.
-#   This macro is directly derived from VL_PROG_CC_WARNINGS which is split
-#   up into two AX_CFLAGS_WARN_ALL and AX_CFLAGS_WARN_ALL_ANSI
 #
 #   For the GNU CC compiler it will be -Wall (and -ansi -pedantic) The
 #   result is added to the shellvar being CFLAGS by default.
@@ -55,28 +53,23 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
-AC_DEFUN([AX_CFLAGS_WARN_ALL_ANSI],[dnl
+AC_DEFUN([AX_CFLAGS_WARN_ALL],[dnl
 AS_VAR_PUSHDEF([FLAGS],[CFLAGS])dnl
-AS_VAR_PUSHDEF([VAR],[ac_cv_cflags_warn_all_ansi])dnl
-AC_CACHE_CHECK([m4_ifval($1,$1,FLAGS) for maximum ansi warnings],
+AS_VAR_PUSHDEF([VAR],[ac_cv_cflags_warn_all])dnl
+AC_CACHE_CHECK([m4_ifval($1,$1,FLAGS) for maximum warnings],
 VAR,[VAR="no, unknown"
  AC_LANG_SAVE
  AC_LANG_C
  ac_save_[]FLAGS="$[]FLAGS"
-# IRIX C compiler:
-#      -use_readonly_const is the default for IRIX C,
-#       puts them into .rodata, but they are copied later.
-#       need to be "-G0 -rdatashared" for strictmode but
-#       I am not sure what effect that has really.         - guidod
 for ac_arg dnl
-in "-pedantic  % -Wall -ansi -pedantic"       dnl   GCC
-   "-xstrconst % -v -Xc"                      dnl Solaris C
-   "-std1      % -verbose -w0 -warnprotos -std1" dnl Digital Unix
-   " % -qlanglvl=ansi -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
-   " % -ansi -ansiE -fullwarn"                dnl IRIX
-   "+ESlit     % +w1 -Aa"                     dnl HP-UX C
-   "-Xc        % -pvctl[,]fullmsg -Xc"        dnl NEC SX-5 (Super-UX 10)
-   "-h conform % -h msglevel 2 -h conform"    dnl Cray C (Unicos)
+in "-pedantic  % -Wall"       dnl   GCC
+   "-xstrconst % -v"          dnl Solaris C
+   "-std1      % -verbose -w0 -warnprotos" dnl Digital Unix
+   "-qlanglvl=ansi % -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
+   "-ansi -ansiE % -fullwarn" dnl IRIX
+   "+ESlit     % +w1"         dnl HP-UX C
+   "-Xc        % -pvctl[,]fullmsg" dnl NEC SX-5 (Super-UX 10)
+   "-h conform % -h msglevel 2" dnl Cray C (Unicos)
    #
 do FLAGS="$ac_save_[]FLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
    AC_TRY_COMPILE([],[return 0;],
@@ -103,28 +96,23 @@ AS_VAR_POPDEF([FLAGS])dnl
 
 dnl the only difference - the LANG selection... and the default FLAGS
 
-AC_DEFUN([AX_CXXFLAGS_WARN_ALL_ANSI],[dnl
+AC_DEFUN([AX_CXXFLAGS_WARN_ALL],[dnl
 AS_VAR_PUSHDEF([FLAGS],[CXXFLAGS])dnl
-AS_VAR_PUSHDEF([VAR],[ac_cv_cxxflags_warn_all_ansi])dnl
-AC_CACHE_CHECK([m4_ifval($1,$1,FLAGS) for maximum ansi warnings],
+AS_VAR_PUSHDEF([VAR],[ax_cv_cxxflags_warn_all])dnl
+AC_CACHE_CHECK([m4_ifval($1,$1,FLAGS) for maximum warnings],
 VAR,[VAR="no, unknown"
  AC_LANG_SAVE
  AC_LANG_CPLUSPLUS
  ac_save_[]FLAGS="$[]FLAGS"
-# IRIX C compiler:
-#      -use_readonly_const is the default for IRIX C,
-#       puts them into .rodata, but they are copied later.
-#       need to be "-G0 -rdatashared" for strictmode but
-#       I am not sure what effect that has really.         - guidod
 for ac_arg dnl
-in "-pedantic  % -Wall -ansi -pedantic"       dnl   GCC
-   "-xstrconst % -v -Xc"                      dnl Solaris C
-   "-std1      % -verbose -w0 -warnprotos -std1" dnl Digital Unix
-   " % -qlanglvl=ansi -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
-   " % -ansi -ansiE -fullwarn"                dnl IRIX
-   "+ESlit     % +w1 -Aa"                     dnl HP-UX C
-   "-Xc        % -pvctl[,]fullmsg -Xc"        dnl NEC SX-5 (Super-UX 10)
-   "-h conform % -h msglevel 2 -h conform"    dnl Cray C (Unicos)
+in "-pedantic  % -Wall"       dnl   GCC
+   "-xstrconst % -v"          dnl Solaris C
+   "-std1      % -verbose -w0 -warnprotos" dnl Digital Unix
+   "-qlanglvl=ansi % -qsrcmsg -qinfo=all:noppt:noppc:noobs:nocnd" dnl AIX
+   "-ansi -ansiE % -fullwarn" dnl IRIX
+   "+ESlit     % +w1"         dnl HP-UX C
+   "-Xc        % -pvctl[,]fullmsg" dnl NEC SX-5 (Super-UX 10)
+   "-h conform % -h msglevel 2" dnl Cray C (Unicos)
    #
 do FLAGS="$ac_save_[]FLAGS "`echo $ac_arg | sed -e 's,%%.*,,' -e 's,%,,'`
    AC_TRY_COMPILE([],[return 0;],
@@ -148,3 +136,14 @@ esac
 AS_VAR_POPDEF([VAR])dnl
 AS_VAR_POPDEF([FLAGS])dnl
 ])
+
+dnl  implementation tactics:
+dnl   the for-argument contains a list of options. The first part of
+dnl   these does only exist to detect the compiler - usually it is
+dnl   a global option to enable -ansi or -extrawarnings. All other
+dnl   compilers will fail about it. That was needed since a lot of
+dnl   compilers will give false positives for some option-syntax
+dnl   like -Woption or -Xoption as they think of it is a pass-through
+dnl   to later compile stages or something. The "%" is used as a
+dnl   delimimiter. A non-option comment can be given after "%%" marks
+dnl   which will be shown but not added to the respective C/CXXFLAGS.
