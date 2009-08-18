@@ -577,10 +577,6 @@ backward_delete_char_overwrite (void)
     insert_char (' ');
   backward_char ();
 
-  /* FIXME: Remove this line (we've already called insert_char, which
-     sets the modified flag). */
-  set_buffer_modified (cur_bp, true);
-
   return true;
 }
 
