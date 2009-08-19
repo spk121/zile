@@ -74,17 +74,6 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
 }
 END_DEFUN
 
-static astr
-make_buffer_modeline (Buffer * bp)
-{
-  astr as = astr_new ();
-
-  if (get_buffer_autofill (bp))
-    astr_cat_cstr (as, " Fill");
-
-  return as;
-}
-
 /*
  * Return a string of maximum length `maxlen', prepending `...'
  * if a cut is needed.

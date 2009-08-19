@@ -88,7 +88,6 @@ Display the full documentation of a function.
 +*/
 {
   const char *doc;
-  astr bufname;
 
   STR_INIT (func)
   else
