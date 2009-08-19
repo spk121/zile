@@ -88,4 +88,4 @@ done
 echo "Zile: $zile_pass pass(es) and $zile_fail failure(s)"
 echo "Emacs: $emacs_pass pass(es) and $emacs_fail failure(s)"
 
-exit $fail
+exit `expr $zile_fail + $emacs_fail`
