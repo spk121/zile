@@ -270,7 +270,8 @@ strtochord (const char *buf, size_t * len)
 }
 
 /*
- * Convert a key sequence string into a key code sequence.
+ * Convert a key sequence string into a key code sequence, or NULL if
+ * it can't be converted.
  */
 gl_list_t
 keystrtovec (const char *key)
