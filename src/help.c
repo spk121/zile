@@ -118,7 +118,7 @@ write_variable_description (va_list ap)
   char *curval = va_arg (ap, char *);
   char *doc = va_arg (ap, char *);
   bprintf ("%s is a variable defined in `C source code'.\n\n"
-           "Its value is %s\n\n\n%s",
+           "Its value is %s\n\n%s",
            name, curval, doc);
 }
 
