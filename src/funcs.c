@@ -1139,7 +1139,6 @@ move to with the same argument.
 }
 END_DEFUN
 
-/* FIXME: Use new macro for arg/uniarg */
 DEFUN_ARGS ("forward-line", forward_line,
             INT_OR_UNIARG (n))
 /*+
