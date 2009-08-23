@@ -430,7 +430,7 @@ universal_argument (int keytype, int xarg)
     {
       astr_cat_char (as, '-'); /* Add the `-' character. */
       key = do_binding_completion (as);
-      astr_truncate (as, astr_len (as) - 1); /* Remove the '-' character. */
+      astr_truncate (as, astr_len (as) - 1); /* Remove the `-' character. */
 
       /* Cancelled. */
       if (key == KBD_CANCEL)
