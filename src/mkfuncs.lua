@@ -1,4 +1,4 @@
--- Generate tbl_funcs.lua
+-- Generate tbl_funcs.h
 --
 -- Copyright (c) 2006, 2007, 2009 Free Software Foundation, Inc.
 --
@@ -74,7 +74,7 @@ for i in ipairs (arg) do
 
         h:write ("X(\"" .. name .. "\", " .. string.gsub (name, "-", "_") .. ", " ..
                (interactive and "true" or "false") .. ", \"\\\n")
-        h:write (string.gsub (texi (doc), "\n", "\\n\\\n"))
+        h:write ((string.gsub (texi (doc), "\n", "\\n\\\n"))) -- extra parentheses to get only string result
         h:write ("\")\n")
       end
     end
