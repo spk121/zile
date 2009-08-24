@@ -566,7 +566,7 @@ kill_buffer (Buffer * kill_bp)
             delete_window (wp);
         }
 
-      create_first_window ();
+      create_scratch_window ();
     }
   else
     {
