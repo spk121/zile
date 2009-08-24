@@ -155,10 +155,13 @@ delete_window (Window * del_wp)
           break;
         }
 
-  wp->fheight += cur_wp->fheight;
-  wp->eheight += cur_wp->eheight + 1;
+  if (wp != NULL)
+    {
+      wp->fheight += del_wp->fheight;
+      wp->eheight += del_wp->eheight + 1;
+      set_current_window (wp);
+    }
 
-  set_current_window (wp);
   free_window (del_wp);
 }
 
@@ -290,11 +293,11 @@ This command selects the window one step away in that order.
 END_DEFUN
 
 /*
- * This function is called once in main, for creating
- * the scratch buffer.
+ * This function creates the scratch buffer and window when there are
+ * no other windows (and possibly no other buffers).
  */
 void
-create_first_window (void)
+create_scratch_window (void)
 {
   Window *wp;
   Buffer *bp = create_scratch_buffer ();

@@ -281,7 +281,7 @@ main (int argc, char **argv)
 
   /* Create the `*scratch*' buffer, so that initialisation commands
      that act on a buffer have something to act on. */
-  create_first_window ();
+  create_scratch_window ();
   scratch_bp = cur_bp;
   as = astr_new_cstr ("\
 ;; This buffer is for notes you don't want to save.\n\

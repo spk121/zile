@@ -550,18 +550,23 @@ kill_buffer (Buffer * kill_bp)
   else
     next_bp = head_bp;
 
-  if (next_bp == kill_bp)
+  if (next_bp == kill_bp) /* Only one buffer. */
     {
-      Window *wp;
+      Window *wp, *next_wp;
 
-      create_scratch_buffer ();
       assert (cur_bp == kill_bp);
       free_buffer (cur_bp);
+      head_bp = NULL;
 
       /* Close all the windows that display this buffer. */
-      for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
-        if (get_window_bp (wp) == cur_bp)
-          delete_window (wp);
+      for (wp = head_wp; wp != NULL; wp = next_wp)
+        {
+          next_wp = get_window_next (wp);
+          if (get_window_bp (wp) == cur_bp)
+            delete_window (wp);
+        }
+
+      create_first_window ();
     }
   else
     {

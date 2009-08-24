@@ -329,7 +329,7 @@ bool get_variable_bool (const char *var);
   FIELD(const char *, field)
 #include "window.h"
 #undef FIELD
-void create_first_window (void);
+void create_scratch_window (void);
 Window *find_window (const char *name);
 void free_windows (void);
 Window *popup_window (void);
