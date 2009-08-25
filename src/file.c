@@ -175,7 +175,7 @@ expand_path (astr path)
 
 /*
  * Return a `~/foo' like path if the user is under his home directory,
- * and restart from / if // found, else the unmodified path.
+ * else the unmodified path.
  */
 astr
 compact_path (astr path)
