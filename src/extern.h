@@ -142,7 +142,6 @@ void zile_exit (int doabort);
 
 /* funcs.c ---------------------------------------------------------------- */
 void set_mark_interactive (void);
-le *universal_argument (size_t key);
 void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...);
 
 /* getkey.c --------------------------------------------------------------- */

@@ -291,17 +291,13 @@ set_this_command (Function cmd)
 void
 process_command (void)
 {
-  gl_list_t keys;
-  Function f;
+  gl_list_t keys = get_key_sequence ();
+  Function f = get_function_by_keys (keys);
 
   thisflag = lastflag & FLAG_DEFINING_MACRO;
-
-  keys = get_key_sequence ();
   minibuf_clear ();
-  f = get_function_by_keys (keys);
-  if (f == F_universal_argument)
-    universal_argument ((((size_t) gl_list_get_at (keys, 0)) & 0xff));
-  else if (f != NULL)
+
+  if (f != NULL)
     {
       set_this_command (f);
       f (last_uniarg, NULL);
