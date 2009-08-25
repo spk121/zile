@@ -1,3 +1,8 @@
+Release 2.3.11
+
+This release fixes a crash in `find-alternate-file', a build system
+bug, and various cosmetic bugs, and cleans up the code a little.
+
 Release 2.3.10
 
 This release runs the test suite on Emacs as well as Zile (currently,
