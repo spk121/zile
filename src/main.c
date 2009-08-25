@@ -367,7 +367,7 @@ main (int argc, char **argv)
         resync_redisplay ();
       term_redisplay ();
       term_refresh ();
-      process_key (getkey ());
+      process_command ();
     }
 
   /* Tidy and close the terminal. */

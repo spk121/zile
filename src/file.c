@@ -358,12 +358,14 @@ find_file (const char *filename)
   Buffer *bp;
 
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
-    if (get_buffer_filename (bp) != NULL &&
-        !strcmp (get_buffer_filename (bp), filename))
-      {
-        switch_to_buffer (bp);
-        return true;
-      }
+    {
+      if (get_buffer_filename (bp) != NULL &&
+          !strcmp (get_buffer_filename (bp), filename))
+        {
+          switch_to_buffer (bp);
+          return true;
+        }
+    }
 
   if (exist_file (filename) && !is_regular_file (filename))
     {
@@ -912,16 +914,17 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
   return ok;
 }
 
-static bool
+static le *
 save_buffer (Buffer * bp)
 {
   if (!get_buffer_modified (bp))
-    minibuf_write ("(No changes need to be saved)");
+    {
+      minibuf_write ("(No changes need to be saved)");
+      return leT;
+    }
   else
-    /* FIXME: Check return value of write_buffer. */
-    write_buffer (bp, get_buffer_needname (bp), false, get_buffer_filename (bp),
-                  "File to save in: ");
-  return true;
+    return write_buffer (bp, get_buffer_needname (bp), false, get_buffer_filename (bp),
+                         "File to save in: ");
 }
 
 DEFUN ("save-buffer", save_buffer)
@@ -930,7 +933,7 @@ Save current buffer in visited file if modified. By default, makes the
 previous version into a backup file if this is the first save.
 +*/
 {
-  ok = bool_to_lisp (save_buffer (cur_bp));
+  ok = save_buffer (cur_bp);
 }
 END_DEFUN
 

@@ -405,20 +405,18 @@ You may also type up to 3 octal digits, to insert a character with that code.
 }
 END_DEFUN
 
-/* FIXME: Simplify to one argument, which if KBD_NOKEY is ignored. */
 le *
-universal_argument (int keytype, int xarg)
+universal_argument (size_t key)
 {
   int i = 0, arg = 4, sgn = 1, digit;
-  size_t key;
   astr as = astr_new ();
 
   thisflag &= ~FLAG_UNIARG_EMPTY;
 
-  if (keytype == KBD_META)
+  if (key & KBD_META)
     {
       astr_cpy_cstr (as, "ESC");
-      pushkey ((size_t) (xarg));
+      pushkey ((size_t) (key & 0xff));
     }
   else
     {
@@ -497,7 +495,7 @@ Repeating @kbd{C-u} without digits or minus sign multiplies the argument
 by 4 each time.
 +*/
 {
-  ok = universal_argument (0, 0);
+  ok = universal_argument (0);
 }
 END_DEFUN
 

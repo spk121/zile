@@ -142,6 +142,27 @@ search_key (Binding tree, gl_list_t keys, size_t from)
   return NULL;
 }
 
+static astr
+make_completion (gl_list_t keys)
+{
+  astr as = astr_new (), key;
+  size_t i, len = 0;
+
+  for (i = 0; i < gl_list_size (keys); i++)
+    {
+      if (i > 0)
+        {
+          astr_cat_char (as, ' ');
+          len++;
+        }
+      key = chordtostr ((size_t) gl_list_get_at (keys, i));
+      astr_cat (as, key);
+      astr_delete (key);
+    }
+
+  return astr_cat_char (as, '-');
+}
+
 size_t
 do_binding_completion (astr as)
 {
@@ -176,47 +197,47 @@ do_binding_completion (astr as)
   return key;
 }
 
-static astr
-make_completion (gl_list_t keys)
+/* Get a key sequence from the keyboard; the sequence returned
+   has at most the last stroke unbound. */
+gl_list_t
+get_key_sequence (void)
 {
-  astr as = astr_new (), key;
-  size_t i, len = 0;
+  gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                         NULL, NULL, NULL, true);
 
-  for (i = 0; i < gl_list_size (keys); i++)
-    {
-      if (i > 0)
-        {
-          astr_cat_char (as, ' ');
-          len++;
-        }
-      key = chordtostr ((size_t) gl_list_get_at (keys, i));
-      astr_cat (as, key);
-      astr_delete (key);
-    }
-
-  return astr_cat_char (as, '-');
-}
-
-static Function
-completion_scan (Binding bindings, size_t key, gl_list_t * keys)
-{
-  *keys = gl_list_create_empty (GL_ARRAY_LIST,
-                                NULL, NULL, NULL, true);
-
-  gl_list_add_last (*keys, (void *) key);
-
+  gl_list_add_last (keys, (void *) getkey ());
   for (;;)
     {
       astr as;
-      Binding p = search_key (bindings, *keys, 0);
-      if (p == NULL)
-        return NULL;
-      if (p->func != NULL)
-        return p->func;
-      as = make_completion (*keys);
-      gl_list_add_last (*keys, (void *) do_binding_completion (as));
+      Binding p = search_key (root_bindings, keys, 0);
+      if (p == NULL || p->func != NULL)
+        break;
+      as = make_completion (keys);
+      gl_list_add_last (keys, (void *) do_binding_completion (as));
       astr_delete (as);
     }
+
+  return keys;
+}
+
+Function
+get_function_by_keys (gl_list_t keys)
+{
+  Binding p;
+
+  /* Detect Meta-digit */
+  if (gl_list_size (keys) == 1)
+    {
+      size_t key = (size_t) gl_list_get_at (keys, 0);
+      if (key & KBD_META &&
+          (isdigit ((int) (key & 0xff)) || (int) (key & 0xff) == '-'))
+        return F_universal_argument;
+    }
+
+  /* See if we've got a valid key sequence */
+  p = search_key (root_bindings, keys, 0);
+
+  return p ? p->func : NULL;
 }
 
 static bool
@@ -268,40 +289,36 @@ set_this_command (Function cmd)
 }
 
 void
-process_key (size_t key)
+process_command (void)
 {
+  gl_list_t keys;
+  Function f;
+
   thisflag = lastflag & FLAG_DEFINING_MACRO;
+
+  keys = get_key_sequence ();
   minibuf_clear ();
-
-  if (key != KBD_NOKEY)
+  f = get_function_by_keys (keys);
+  if (f == F_universal_argument)
+    universal_argument ((((size_t) gl_list_get_at (keys, 0)) & 0xff));
+  else if (f != NULL)
     {
-      if (key & KBD_META && (isdigit ((int) (key & 0xff)) || (key & 0xff) == '-'))
-        /* Got an ESC x sequence where `x' is a digit or `-'. */
-        universal_argument (KBD_META, (int) ((key & 0xff)));
-      else
-        {
-          gl_list_t keys;
-          Function f = completion_scan (root_bindings, key, &keys);
-          if (f != NULL)
-            {
-              set_this_command (f);
-              f (last_uniarg, NULL);
-              _last_command = _this_command;
-            }
-          else
-            {
-              astr as = keyvectostr (keys);
-              minibuf_error ("%s is undefined", astr_cstr (as));
-              astr_delete (as);
-            }
-          gl_list_free (keys);
-        }
-
-      /* Only add keystrokes if we were already in macro defining mode
-         before the function call, to cope with start-kbd-macro. */
-      if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
-        add_cmd_to_macro ();
+      set_this_command (f);
+      f (last_uniarg, NULL);
+      _last_command = _this_command;
     }
+  else
+    {
+      astr as = keyvectostr (keys);
+      minibuf_error ("%s is undefined", astr_cstr (as));
+      astr_delete (as);
+    }
+  gl_list_free (keys);
+
+  /* Only add keystrokes if we were already in macro defining mode
+     before the function call, to cope with start-kbd-macro. */
+  if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
+    add_cmd_to_macro ();
 
   if (!(thisflag & FLAG_SET_UNIARG))
     last_uniarg = 1;
@@ -502,11 +519,9 @@ sequence.
   else
     {
       astr as;
-      size_t key;
 
       minibuf_write ("Set key globally: ");
-      key = getkey ();
-      completion_scan (root_bindings, key, &keys);
+      keys = get_key_sequence ();
       as = keyvectostr (keys);
       keystr = xstrdup (astr_cstr (as));
       astr_delete (as);
@@ -636,20 +651,6 @@ message in the buffer.
   free ((char *) name);
 }
 END_DEFUN
-
-const char *
-get_function_by_key (size_t key)
-{
-  Function f;
-  gl_list_t keys;
-
-  if (key & KBD_META && isdigit ((int) (key & 0xff)))
-    return "universal-argument";
-
-  f = completion_scan (root_bindings, key, &keys);
-  gl_list_free (keys);
-  return f ? get_function_name (f) : NULL;
-}
 
 static void
 print_binding (astr key, Binding p, void *st GCC_UNUSED)

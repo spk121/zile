@@ -175,28 +175,31 @@ Display documentation of the command invoked by a key sequence.
 {
   const char *name = NULL, *doc;
   astr binding = NULL;
-  size_t key;
 
   STR_INIT (keystr);
   if (keystr != NULL)
     {
-      size_t len;
+      gl_list_t keys = keystrtovec (keystr);
 
-      key = strtochord (keystr, &len);
-      if (len == strlen (keystr))
+      if (keys != NULL)
         {
-          name = get_function_by_key (key);
-          binding = chordtostr (key);
+          name = get_function_name (get_function_by_keys (keys));
+          binding = keyvectostr (keys);
+          free (keys);
         }
       else
         ok = leNIL;
     }
   else
     {
+      gl_list_t keys;
+
       minibuf_write ("Describe key:");
-      key = getkey ();
-      name = get_function_by_key (key);
-      binding = chordtostr (key);
+      keys = get_key_sequence ();
+      name = get_function_name (get_function_by_keys (keys));
+      binding = keyvectostr (keys);
+      gl_list_free (keys);
+
       if (name == NULL)
         {
           minibuf_error ("%s is undefined", astr_cstr (binding));
