@@ -318,9 +318,9 @@ main (int argc, char **argv)
       switch ((int) gl_list_get_at (arg_type, i))
         {
         case ARG_FUNCTION:
-          ok = get_function (arg);
+          ok = get_function (arg) != NULL;
           if (ok)
-            ok = execute_function (arg, 1);
+            ok = execute_function (arg, 1) != leNIL;
           else
             minibuf_error ("Function `%s' not defined", arg);
           break;
