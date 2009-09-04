@@ -155,6 +155,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
 
   gotobob ();
   set_buffer_readonly (cur_bp, true);
+  set_buffer_modified (cur_bp, false);
 
   /* Restore old current window. */
   set_current_window (old_wp);
