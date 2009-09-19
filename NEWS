@@ -1,3 +1,8 @@
+Release 2.3.12
+
+This release fixes the +LINE command-line action, which was broken a
+few releases ago, and makes a cosmetic fix to temporary buffers.
+
 Release 2.3.11
 
 This release fixes a crash in `find-alternate-file', a build system
