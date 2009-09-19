@@ -264,8 +264,8 @@ main (int argc, char **argv)
               gl_list_add_last (arg_type, (void *) ARG_FILE);
               gl_list_add_last (arg_arg, (void *) optarg);
               gl_list_add_last (arg_line, (void *) line);
+              line = 1;
             }
-          line = 1;
           break;
         }
     }
@@ -333,7 +333,7 @@ main (int argc, char **argv)
           {
             ok = find_file (arg);
             if (ok)
-              FUNCALL_ARG (goto_line, line);
+              FUNCALL_ARG (goto_line, (size_t) gl_list_get_at (arg_line, i));
             lastflag |= FLAG_NEED_RESYNC;
           }
           break;
