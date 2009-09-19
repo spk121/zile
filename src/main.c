@@ -164,7 +164,7 @@ main (int argc, char **argv)
                                              NULL, NULL, NULL, false);
   gl_list_t arg_line = gl_list_create_empty (GL_LINKED_LIST,
                                              NULL, NULL, NULL, false);
-  size_t i, line;
+  size_t i, line = 1;
   Buffer *scratch_bp;
   astr as;
   bool ok = true;
