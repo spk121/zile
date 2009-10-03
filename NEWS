@@ -1,3 +1,7 @@
+Release 2.3.13
+
+This release fixes a bug in `scroll-up' and `scroll-down'.
+
 Release 2.3.12
 
 This release fixes the +LINE command-line action, which was broken a
