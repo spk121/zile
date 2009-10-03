@@ -336,6 +336,8 @@ Window *popup_window (void);
 void set_current_window (Window * wp);
 void delete_window (Window * del_wp);
 Point window_pt (Window * wp);
+bool window_top_visible (Window * wp);
+bool window_bottom_visible (Window * wp);
 
 
 /*

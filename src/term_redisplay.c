@@ -272,17 +272,18 @@ calculate_start_column (Window * wp)
 static char *
 make_screen_pos (Window * wp, char **buf)
 {
-  Point pt = window_pt (wp);
+  bool tv = window_top_visible (wp);
+  bool bv = window_bottom_visible (wp);
 
-  if (get_buffer_last_line (get_window_bp (wp)) <= get_window_eheight (wp) && get_window_topdelta (wp) == pt.n)
+  if (tv && bv)
     xasprintf (buf, "All");
-  else if (pt.n == get_window_topdelta (wp))
+  else if (tv)
     xasprintf (buf, "Top");
-  else if (pt.n + (get_window_eheight (wp) - get_window_topdelta (wp)) > get_buffer_last_line (get_window_bp (wp)))
+  else if (bv)
     xasprintf (buf, "Bot");
   else
     xasprintf (buf, "%2d%%",
-               (int) ((float) pt.n / get_buffer_last_line (get_window_bp (wp)) * 100));
+               (int) ((float) window_pt (wp).n / get_buffer_last_line (get_window_bp (wp)) * 100));
 
   return *buf;
 }
