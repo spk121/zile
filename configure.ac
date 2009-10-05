@@ -48,8 +48,8 @@ AC_HEADER_STDC
 AC_CHECK_FUNCS(fchmod)
 
 dnl Curses
-MP_WITH_CURSES
-if test "$mp_cv_curses" != "yes"; then
+AX_WITH_CURSES
+if test "$ax_cv_curses" != "yes"; then
   AC_MSG_ERROR([cannot find curses])
 fi
 AC_ARG_VAR(CURSES_LIB, [linker flags for curses library])
