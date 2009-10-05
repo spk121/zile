@@ -95,8 +95,8 @@ AC_DEFUN([MP_WITH_CURSES],
      then
        AC_DEFINE([HAVE_NCURSES_H],[1],[Define if you have ncurses.h])
        CURSES_LIB="-lncurses"
+       mp_cv_curses=yes
      fi
-     mp_cv_curses=yes
    fi
    if test "$mp_cv_curses" != yes -a "$with_ncurses" != yes -a "$with_ncursesw" != yes
    then
