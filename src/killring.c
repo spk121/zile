@@ -115,7 +115,7 @@ kill_line (bool whole_line)
       for (i = cur_pt.o; i < astr_len (cur_line); i++)
         {
           char c = astr_get (cur_line, i);
-          /* FIXME: Use isblank when we work out how to get it from gnulib */
+          /* FIXME: Use isblank when we work out how to get it from gnulib. */
           if (c != ' ' && c != '\t')
             {
               only_blanks_to_end_of_line = false;
