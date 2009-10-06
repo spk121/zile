@@ -1,6 +1,8 @@
 Release 2.3.13
 
-This release fixes a bug in `scroll-up' and `scroll-down'.
+This release fixes bugs in `kill-line`, `scroll-up' and `scroll-down',
+squashes some space leaks found by Valgrind, and fixes some build
+problems reported by the indefatigable Nelson Beebe.
 
 Release 2.3.12
 
