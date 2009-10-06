@@ -56,6 +56,7 @@ macro_delete (Macro * mp)
   if (mp)
     {
       gl_list_free (mp->keys);
+      free (mp->name);
       free (mp);
     }
 }
