@@ -285,7 +285,7 @@ Just C-u as argument means to use the current column.
   if (ok == leT)
     {
       le *branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
-      F_set_variable (0, branch);
+      F_set_variable (0, false, branch);
       leWipe (branch);
     }
 
@@ -1102,7 +1102,7 @@ mark (int uniarg, Function func)
 {
   le * ret;
   FUNCALL (set_mark_command);
-  ret = func (uniarg, NULL);
+  ret = func (uniarg, true, NULL);
   if (ret)
     FUNCALL (exchange_point_and_mark);
   return ret;
@@ -1165,7 +1165,7 @@ move_paragraph (int uniarg, bool (*forward) (void), bool (*backward) (void),
   if (is_empty_line ())
     FUNCALL (beginning_of_line);
   else
-    line_extremum (1, NULL);
+    line_extremum (1, false, NULL);
 
   return leT;
 }

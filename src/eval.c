@@ -130,7 +130,7 @@ evaluateBranch (le * trybranch)
   func = get_fentry (keyword->data);
   leWipe (keyword);
   if (func)
-    return func->func (1, trybranch);
+    return func->func (1, false, trybranch);
 
   return NULL;
 }
@@ -224,7 +224,7 @@ execute_function (const char *name, int uniarg)
   Macro *mp;
 
   if (func)
-    return func (uniarg, NULL);
+    return func (uniarg, true, NULL);
   else
     {
       mp = get_macro (name);

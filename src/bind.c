@@ -300,7 +300,7 @@ process_command (void)
   if (f != NULL)
     {
       set_this_command (f);
-      f (last_uniarg, NULL);
+      f (last_uniarg, true, NULL);
       _last_command = _this_command;
     }
   else

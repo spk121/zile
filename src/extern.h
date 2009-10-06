@@ -344,6 +344,6 @@ bool window_bottom_visible (Window * wp);
  * Declare external Zile functions.
  */
 #define X(zile_name, c_name, interactive, doc)   \
-  le *F_ ## c_name (long uniarg, le * l);
+  le *F_ ## c_name (long uniarg, bool is_uniarg, le * l);
 #include "tbl_funcs.h"
 #undef X

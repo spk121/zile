@@ -253,7 +253,7 @@ kill_text (int uniarg, Function mark_func)
 
   push_mark ();
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
-  mark_func (uniarg, NULL);
+  mark_func (uniarg, true, NULL);
   FUNCALL (kill_region);
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   pop_mark ();

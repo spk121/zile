@@ -116,9 +116,10 @@ enum
 
 /*
  * The type of a Zile exported function.
- * `uniarg' is the number of times to repeat the function.
+ * `uniarg' is the universal argument, if any, whose presence is
+ * indicated by `is_uniarg'.
  */
-typedef le * (*Function) (long uniarg, le * list);
+typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 
 /* Turn a bool into a Lisp boolean */
 #define bool_to_lisp(b) ((b) ? leT : leNIL)
@@ -127,7 +128,7 @@ typedef le * (*Function) (long uniarg, le * list);
 #define DEFUN(zile_func, c_func) \
   DEFUN_ARGS(zile_func, c_func, )
 #define DEFUN_ARGS(zile_func, c_func, args) \
-  le * F_ ## c_func (long uniarg GCC_UNUSED, le *arglist GCC_UNUSED)    \
+  le * F_ ## c_func (long uniarg GCC_UNUSED, bool is_uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
   {                                                                     \
     le * ok = leT;                                                      \
     args
@@ -178,7 +179,8 @@ typedef le * (*Function) (long uniarg, le * list);
   INT_INIT (name)                                            \
   else                                                       \
     {                                                        \
-      if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)  \
+      if (!(lastflag & FLAG_SET_UNIARG) && !is_uniarg &&     \
+          (arglist == NULL || arglist->next == NULL))        \
         noarg = true;                                        \
       name = uniarg;                                         \
     }
@@ -197,11 +199,11 @@ typedef le * (*Function) (long uniarg, le * list);
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-  F_ ## c_func (1, leNIL)
+  F_ ## c_func (1, false, leNIL)
 
 /* Call an interactive function with a universal argument. */
 #define FUNCALL_ARG(c_func, uniarg)             \
-  F_ ## c_func (uniarg, leNIL)
+  F_ ## c_func (uniarg, true, leNIL)
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
