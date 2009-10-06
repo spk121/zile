@@ -25,7 +25,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "main.h"
 #include "extern.h"
@@ -102,10 +101,28 @@ kill_to_bol (void)
 }
 
 static bool
-kill_line (bool literally)
+kill_line (bool whole_line)
 {
   bool ok = true;
-  bool start_of_line = bolp ();
+  bool only_blanks_to_end_of_line = true;
+
+  if (!whole_line)
+    {
+      Point cur_pt = get_buffer_pt (cur_bp);
+      astr cur_line = get_line_text (cur_pt.p);
+      size_t i;
+
+      for (i = cur_pt.o; i < astr_len (cur_line); i++)
+        {
+          char c = astr_get (cur_line, i);
+          /* FIXME: Use isblank when we work out how to get it from gnulib */
+          if (c != ' ' && c != '\t')
+            {
+              only_blanks_to_end_of_line = false;
+              break;
+            }
+        }
+    }
 
   if (eobp ())
     {
@@ -126,7 +143,7 @@ kill_line (bool literally)
       free (rp);
     }
 
-  if (ok && (literally && start_of_line) && !eobp ())
+  if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
     {
       if (!FUNCALL (delete_char))
         return false;
@@ -141,7 +158,7 @@ kill_line (bool literally)
 }
 
 static bool
-kill_line_literally (void)
+kill_whole_line (void)
 {
   return kill_line (true);
 }
@@ -149,7 +166,7 @@ kill_line_literally (void)
 static bool
 kill_line_backward (void)
 {
-  return previous_line () && kill_line_literally ();
+  return previous_line () && kill_whole_line ();
 }
 
 DEFUN_ARGS ("kill-line", kill_line,
@@ -171,14 +188,14 @@ with no argument.
   INT_OR_UNIARG_INIT (arg);
 
   if (noarg)
-    ok = bool_to_lisp (kill_line (get_variable_bool ("kill-whole-line")));
+    ok = bool_to_lisp (kill_line (bolp () && get_variable_bool ("kill-whole-line")));
   else
     {
       undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
       if (arg <= 0)
         ok = bool_to_lisp (kill_to_bol ());
       if (arg != 0 && ok == leT)
-        ok = execute_with_uniarg (true, arg, kill_line_literally, kill_line_backward);
+        ok = execute_with_uniarg (true, arg, kill_whole_line, kill_line_backward);
       undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
     }
 
