@@ -162,6 +162,8 @@ re_find_substr (const char *s1, size_t s1size,
             ret = ((char *) s1) + search_regs.end[0];
           else
             ret = ((char *) s1) + search_regs.start[0];
+          free (search_regs.start);
+          free (search_regs.end);
         }
       else if (index == -1)
         {

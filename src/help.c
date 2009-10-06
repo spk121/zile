@@ -185,7 +185,7 @@ Display documentation of the command invoked by a key sequence.
         {
           name = get_function_name (get_function_by_keys (keys));
           binding = keyvectostr (keys);
-          free (keys);
+          gl_list_free (keys);
         }
       else
         ok = leNIL;

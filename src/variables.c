@@ -64,6 +64,7 @@ var_free (void *v)
 {
   var_entry *p = (var_entry *) v;
   free ((char *) p->var);
+  free ((char *) p->defval);
   free ((char *) p->val);
   free (p);
 }
@@ -73,7 +74,7 @@ init_builtin_var (const char *var, const char *defval, bool local, const char *d
 {
   var_entry *p = XZALLOC (var_entry);
   p->var = xstrdup (var);
-  p->defval = defval;
+  p->defval = xstrdup (defval);
   p->val = xstrdup (defval);
   p->local = local;
   p->doc = doc;
