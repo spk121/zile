@@ -467,7 +467,7 @@ by 4 each time.
           if (sgn > 0)
             {
               sgn = -sgn;
-              astr_cat_char (as, '-');
+              astr_cat_cstr (as, " -");
               /* The default negative arg is -1, not -4. */
               arg = 1;
               thisflag &= ~FLAG_UNIARG_EMPTY;
