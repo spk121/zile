@@ -315,7 +315,7 @@ main (int argc, char **argv)
     {
       char *arg = (char *) gl_list_get_at (arg_arg, i);
 
-      switch ((int) gl_list_get_at (arg_type, i))
+      switch ((ptrdiff_t) gl_list_get_at (arg_type, i))
         {
         case ARG_FUNCTION:
           ok = get_function (arg) != NULL;
