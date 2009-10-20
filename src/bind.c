@@ -204,8 +204,12 @@ get_key_sequence (void)
 {
   gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
                                          NULL, NULL, NULL, true);
+  size_t key;
 
-  gl_list_add_last (keys, (void *) getkey ());
+  do
+    key = getkey ();
+  while (key == KBD_NOKEY);
+  gl_list_add_last (keys, (void *) key);
   for (;;)
     {
       astr as;
