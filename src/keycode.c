@@ -126,8 +126,8 @@ chordtostr (size_t key)
       astr_cat_cstr (as, "SPC");
       break;
     default:
-      if (isgraph (key))
-        astr_cat_char (as, (int) (key & 0xff));
+      if (key <= 0xff && isgraph (key))
+        astr_cat_char (as, (int) key);
       else
         astr_afmt (as, "<%x>", key);
     }
