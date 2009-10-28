@@ -104,7 +104,7 @@ static bool
 kill_line (bool whole_line)
 {
   bool ok = true;
-  bool only_blanks_to_end_of_line = true;
+  bool only_blanks_to_end_of_line = false;
 
   if (!whole_line)
     {
@@ -115,13 +115,12 @@ kill_line (bool whole_line)
       for (i = cur_pt.o; i < astr_len (cur_line); i++)
         {
           char c = astr_get (cur_line, i);
-
-          if (c != ' ' && c != '\t')
-            {
-              only_blanks_to_end_of_line = false;
-              break;
-            }
+          if (!(c == ' ' || c == '\t'))
+            break;
         }
+
+      if (i == astr_len (cur_line))
+        only_blanks_to_end_of_line = true;
     }
 
   if (eobp ())
