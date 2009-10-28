@@ -304,7 +304,7 @@ process_command (void)
   if (f != NULL)
     {
       set_this_command (f);
-      f (last_uniarg, true, NULL);
+      f (last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
       _last_command = _this_command;
     }
   else
