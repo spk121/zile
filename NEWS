@@ -1,3 +1,8 @@
+Release 2.3.14
+
+This release fixes a minor bug in filename tab expansion, which
+resulted in `/' being expanded to `~/'.
+
 Release 2.3.13
 
 This release fixes bugs in `kill-line`, `scroll-up' and `scroll-down',
