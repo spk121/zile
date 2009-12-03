@@ -186,8 +186,8 @@ compact_path (astr path)
     {
       /* Replace `/userhome/' (if found) with `~/'. */
       size_t homelen = strlen (pw->pw_dir);
-      if (!strncmp (pw->pw_dir, astr_cstr (path),
-                    MIN (homelen, astr_len (path))))
+      if (astr_len (path) >= homelen &&
+          !strncmp (pw->pw_dir, astr_cstr (path), homelen))
         {
           astr buf = astr_new_cstr ("~/");
           if (!strcmp (pw->pw_dir, "/"))
