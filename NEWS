@@ -1,3 +1,10 @@
+Release 2.3.15
+
+This release fixes the default universal argument, which should be 4
+but was 16, and also some cosmetic errors with the display of
+universal arguments in the minibuffer. Some fixes to the build system
+were also made (thanks to Giuseppe Scrivano).
+
 Release 2.3.14
 
 This release fixes a minor bug in filename tab expansion, which
