@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2009 Free Software Foundation, Inc.
+# Copyright (C) 2002-2010 Free Software Foundation, Inc.
 #
 # This file is free software, distributed under the terms of the GNU
 # General Public License.  As a special exception to the GNU General
@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=. --no-libtool --macro-prefix=gl alloca-opt array-list chown dirname euidaccess fcntl gendocs getcwd getopt-gnu hash linked-list minmax regex size_max stdarg stdbool sys_stat vasprintf version-etc-fsf xalloc
+#   gnulib-tool --import --dir=. --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=. --no-libtool --macro-prefix=gl alloca-opt array-list chown dirname euidaccess fcntl gendocs getcwd getopt-gnu hash linked-list minmax regex size_max stdarg stdbool sys_stat vasprintf version-etc-fsf xalloc xlist
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([])
@@ -40,6 +40,7 @@ gl_MODULES([
   vasprintf
   version-etc-fsf
   xalloc
+  xlist
 ])
 gl_AVOID([])
 gl_SOURCE_BASE([lib])

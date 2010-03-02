@@ -19,7 +19,7 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "gl_list.h"
+#include "gl_xlist.h"
 
 #include "xalloc_extra.h"
 

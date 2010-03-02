@@ -20,7 +20,8 @@ stamp-h1
 zile*.tar.gz
 zile*.tar.gz.sig
 zile*.tar.gz.directive*
-link-warning.h
+arg-nonnull.h
+warn-on-use.h
 gendocs.sh
 Makefile
 Makefile.in

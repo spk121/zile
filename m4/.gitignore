@@ -12,11 +12,14 @@ error.m4
 euidaccess.m4
 exitfail.m4
 extensions.m4
+fcntl.m4
+fcntl-o.m4
 fcntl_h.m4
 float_h.m4
 getcwd-abort-bug.m4
 getcwd-path-max.m4
 getcwd.m4
+getgroups.m4
 getopt.m4
 gl_list.m4
 glibc21.m4
@@ -29,11 +32,14 @@ include_next.m4
 inline.m4
 intmax_t.m4
 inttypes_h.m4
+langinfo_h.m4
 localcharset.m4
 longlong.m4
 malloc.m4
 mempcpy.m4
 minmax.m4
+mkdir.m4
+nl_langinfo.m4
 onceonly_2_57.m4
 regex.m4
 size_max.m4
@@ -49,6 +55,7 @@ string_h.m4
 strndup.m4
 strnlen.m4
 sys_stat_h.m4
+time_h.m4
 unistd_h.m4
 vasnprintf.m4
 vasprintf.m4
@@ -59,6 +66,7 @@ wint_t.m4
 xalloc.m4
 xsize.m4
 xstrndup.m4
+warn-on-use.m4
 /chdir-long.m4
 /dup2.m4
 /eealloc.m4
@@ -105,3 +113,4 @@ xstrndup.m4
 /stddef_h.m4
 /stat.m4
 /unlink.m4
+/getdtablesize.m4

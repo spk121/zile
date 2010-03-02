@@ -5,6 +5,7 @@ asnprintf.c
 asprintf.c
 at-func.c
 basename.c
+basename-lgpl.c
 canonicalize-lgpl.c
 canonicalize.h
 chdir-long.c
@@ -19,6 +20,7 @@ dirfd.c
 dirfd.h
 dirname.c
 dirname.h
+dirname-lgpl.c
 dup-safer.c
 dup2.c
 errno.in.h
@@ -139,6 +141,16 @@ stdlib.h
 string.h
 sys
 unistd.h
+fcntl.c
+getgroups.c
+langinfo.h
+langinfo.in.h
+link-warning.h
+mkdir.c
+nl_langinfo.c
+time.h
+time.in.h
+wchar.h
 /close.c
 /fclose.c
 /w32sock.h
@@ -175,3 +187,6 @@ unistd.h
 /stat.c
 /unlink.c
 /unlinkat.c
+/getdtablesize.c
+/gl_xlist.c
+/gl_xlist.h

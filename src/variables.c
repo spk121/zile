@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "hash.h"
-#include "gl_list.h"
 
 #include "main.h"
 #include "extern.h"
