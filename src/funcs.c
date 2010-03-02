@@ -422,6 +422,8 @@ by 4 each time.
   /* Need to process key used to invoke universal-argument. */
   pushkey (lastkey ());
 
+  thisflag |= FLAG_UNIARG_EMPTY;
+
   for (;;)
     {
       size_t key;
