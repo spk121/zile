@@ -29,3 +29,4 @@ Makefile.in
 *~
 .deps
 release-notes
+/c++defs.h
