@@ -87,6 +87,8 @@ LUA_BUILDTIME = 					\
 
 ALLSOURCES = $(zile_base_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
 
+$(zile_OBJECTS): tbl_funcs.h
+
 tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
 	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_base_SOURCES)
 

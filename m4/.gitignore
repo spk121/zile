@@ -114,3 +114,5 @@ warn-on-use.m4
 /stat.m4
 /unlink.m4
 /getdtablesize.m4
+/wchar_h.m4
+/wctype_h.m4
