@@ -192,3 +192,5 @@ wchar.h
 /gl_xlist.c
 /gl_xlist.h
 /c++defs.h
+/cloexec.c
+/cloexec.h
