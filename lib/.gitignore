@@ -123,6 +123,7 @@ version-etc.c
 version-etc.h
 wchar.in.h
 wctype.in.h
+wctype.h
 xalloc-die.c
 xalloc.h
 xgetcwd.c
@@ -190,3 +191,4 @@ wchar.h
 /getdtablesize.c
 /gl_xlist.c
 /gl_xlist.h
+/c++defs.h
