@@ -36,5 +36,5 @@ X ("case-replace", "t", false, "Non-nil means `query-replace' should preserve ca
 X ("ring-bell", "t", false, "Non-nil means ring the terminal bell on any error.")
 X ("transient-mark-mode", "t", false, "If non-nil, deactivates the mark when the buffer contents change.\nAlso enables highlighting of the region whenever the mark is active.\nThe variable `highlight-nonselected-windows' controls whether to\nhighlight all windows or just the selected window.")
 X ("highlight-nonselected-windows", "nil", false, "If non-nil, highlight region even in nonselected windows.")
-X ("backup-directory", "nil", false, "The directory for backup files, which must exist.\nIf this variable is @samp{nil}, the backup is made in the original file's\ndirectory.\nThis value is used only when `make-backup-files' is @samp{t}.")
 X ("make-backup-files", "t", false, "Non-nil means make a backup of a file the first time it is saved.\nThis is done by appending `@samp{~}' to the file name.")
+X ("backup-directory", "nil", false, "The directory for backup files, which must exist.\nIf this variable is @samp{nil}, the backup is made in the original file's\ndirectory.\nThis value is used only when `make-backup-files' is @samp{t}.")
