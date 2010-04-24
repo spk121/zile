@@ -148,7 +148,7 @@ codetokey (int c)
     case '\15':
       return KBD_RET;
     case '\37':
-      return KBD_CTRL | (c ^ 0x40);
+      return KBD_CTRL | '_';
 #ifdef KEY_SUSPEND
     case KEY_SUSPEND:		/* C-z */
       return KBD_CTRL | 'z';
@@ -258,10 +258,10 @@ keytocodes (size_t key, int ** codevec)
       *p++ = '\11';
       break;
     case KBD_RET:
-      *p++ ='\15';
+      *p++ = '\15';
       break;
-    case '\37':
-      *p++ = (key & ~KBD_CTRL) ^ 0x40;
+    case KBD_CTRL | '_':
+      *p++ = '\37';
       break;
     case KBD_PGUP:		/* PGUP */
       *p++ = KEY_PPAGE;
