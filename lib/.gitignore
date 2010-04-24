@@ -43,6 +43,7 @@ float.in.h
 fstatat.c
 getcwd.c
 getopt.c
+getopt.h
 getopt.in.h
 getopt1.c
 getopt_int.h
