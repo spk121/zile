@@ -274,8 +274,6 @@ void free_search (void);
 size_t term_buf_len (void);
 void term_init (void);
 void term_close (void);
-void term_suspend (void);
-void term_resume (void);
 void term_move (size_t y, size_t x);
 void term_clrtoeol (void);
 void term_refresh (void);
