@@ -1,6 +1,6 @@
 /* Point facility functions
 
-   Copyright (c) 2004, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 2004, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -48,44 +48,6 @@ cmp_point (Point pt1, Point pt2)
     return +1;
   else
     return ((pt1.o < pt2.o) ? -1 : (pt1.o > pt2.o) ? +1 : 0);
-}
-
-int
-point_dist (Point pt1, Point pt2)
-{
-  int size = 0;
-  Line *lp;
-
-  if (cmp_point (pt1, pt2) > 0)
-    {
-      Point pt0 = pt1;
-      pt1 = pt2;
-      pt2 = pt0;
-    }
-
-  for (lp = pt1.p;; lp = get_line_next (lp))
-    {
-      size += astr_len (get_line_text (lp));
-
-      if (lp == pt1.p)
-        size -= pt1.o;
-
-      if (lp == pt2.p)
-        {
-          size -= astr_len (get_line_text (lp)) - pt2.o;
-          break;
-        }
-      else
-        size++;
-    }
-
-  return size;
-}
-
-int
-count_lines (Point pt1, Point pt2)
-{
-  return abs (pt2.n - pt1.n);
 }
 
 Point

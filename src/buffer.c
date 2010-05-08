@@ -1,6 +1,6 @@
 /* Buffer-oriented functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -341,8 +341,17 @@ calculate_the_region (Region * rp)
       set_region_end (rp, cur_bp->pt);
     }
 
-  set_region_size (rp, point_dist (get_region_start (rp),
-                                   get_region_end (rp)));
+  {
+    Point pt1 = get_region_start (rp), pt2 = get_region_end (rp);
+    int size = -pt1.o + pt2.o;
+    Line *lp;
+
+    for (lp = pt1.p; lp != pt2.p; lp = get_line_next (lp))
+      size += astr_len (get_line_text (lp)) + 1;
+
+    set_region_size (rp, size);
+  }
+
   return true;
 }
 

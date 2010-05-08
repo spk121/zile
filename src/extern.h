@@ -1,6 +1,6 @@
 /* Global function prototypes
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -253,8 +253,6 @@ void minibuf_clear (void);
 /* point.c ---------------------------------------------------------------- */
 Point make_point (size_t lineno, size_t offset);
 int cmp_point (Point pt1, Point pt2);
-int point_dist (Point pt1, Point pt2);
-int count_lines (Point pt1, Point pt2);
 Point point_min (void);
 Point point_max (void);
 Point line_beginning_position (int count);

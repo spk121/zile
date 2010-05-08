@@ -93,14 +93,11 @@ line_insert (Line *lp, astr i)
 void
 line_remove (Line *lp)
 {
-  if (lp->next || lp->prev)
-    {
-      astr as = lp->text;
-      lp->prev->next = lp->next;
-      lp->prev->next->prev = lp->prev;
-      free (lp);
-      astr_delete (as);
-    }
+  astr as = lp->text;
+  lp->prev->next = lp->next;
+  lp->next->prev = lp->prev;
+  free (lp);
+  astr_delete (as);
 }
 
 
