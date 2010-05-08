@@ -1,6 +1,6 @@
 /* Useful editing functions
 
-   Copyright (c) 2004, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 2004, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -44,7 +44,8 @@ push_mark (void)
     gl_list_add_last (mark_ring, copy_marker (get_buffer_mark (cur_bp)));
   else
     { /* Save an invalid mark.  */
-      Marker *m = point_min_marker ();
+      Marker *m = marker_new ();
+      move_marker (m, cur_bp, point_min ());
       Point pt = get_marker_pt (m);
       pt.p = NULL;
       set_marker_pt (m, pt);

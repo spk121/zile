@@ -1,6 +1,6 @@
 /* Marker facility functions
 
-   Copyright (c) 2004, 2008 Free Software Foundation, Inc.
+   Copyright (c) 2004, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -121,13 +121,5 @@ point_marker (void)
 {
   Marker *marker = marker_new ();
   move_marker (marker, cur_bp, get_buffer_pt (cur_bp));
-  return marker;
-}
-
-Marker *
-point_min_marker (void)
-{
-  Marker *marker = marker_new ();
-  move_marker (marker, cur_bp, point_min ());
   return marker;
 }
