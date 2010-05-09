@@ -40,15 +40,7 @@ free_kill_ring (void)
 }
 
 static void
-kill_ring_push (int c)
-{
-  if (kill_ring_text == NULL)
-    kill_ring_text = astr_new ();
-  astr_cat_char (kill_ring_text, c);
-}
-
-static void
-kill_ring_push_nstring (char *s, size_t size)
+kill_ring_push (char *s, size_t size)
 {
   if (kill_ring_text == NULL)
     kill_ring_text = astr_new ();
@@ -62,7 +54,7 @@ copy_or_kill_region (bool kill, Region * rp)
 
   if (last_command () != F_kill_region)
     free_kill_ring ();
-  kill_ring_push_nstring (p, get_region_size (rp));
+  kill_ring_push (p, get_region_size (rp));
   free (p);
 
   if (kill)
@@ -147,7 +139,7 @@ kill_line (bool whole_line)
       if (!FUNCALL (delete_char))
         return false;
 
-      kill_ring_push ('\n');
+      kill_ring_push ("\n", 1);
       set_this_command (F_kill_region);
     }
 
