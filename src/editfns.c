@@ -45,8 +45,9 @@ push_mark (void)
   else
     { /* Save an invalid mark.  */
       Marker *m = marker_new ();
+      Point pt;
       move_marker (m, cur_bp, point_min ());
-      Point pt = get_marker_pt (m);
+      pt = get_marker_pt (m);
       pt.p = NULL;
       set_marker_pt (m, pt);
       gl_list_add_last (mark_ring, m);
