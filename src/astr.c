@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
 
-   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -212,21 +212,14 @@ astr astr_fread (FILE * fp)
 }
 
 astr
-astr_vafmt (astr as, const char *fmt, va_list ap)
-{
-  char *buf;
-  xvasprintf (&buf, fmt, ap);
-  astr_cat_cstr (as, buf);
-  free (buf);
-  return as;
-}
-
-astr
 astr_afmt (astr as, const char *fmt, ...)
 {
   va_list ap;
+  char *buf;
   va_start (ap, fmt);
-  astr_vafmt (as, fmt, ap);
+  xvasprintf (&buf, fmt, ap);
+  astr_cat_cstr (as, buf);
+  free (buf);
   va_end (ap);
   return as;
 }
