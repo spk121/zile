@@ -373,22 +373,5 @@ main (int argc, char **argv)
   /* Tidy and close the terminal. */
   term_finish ();
 
-  free_default_bindings ();
-  free_eval ();
-
-  /* Free Lisp state. */
-  free_variables ();
-  free_lisp ();
-
-  /* Free all the memory allocated. */
-  free_search ();
-  free_kill_ring ();
-  free_registers ();
-  free_macros ();
-  free_windows ();
-  free_buffers ();
-  free_minibuf ();
-  free (prog_name);
-
   return 0;
 }

@@ -1,6 +1,6 @@
 /* Zile variables handling functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -133,12 +133,6 @@ set_variable (const char *var, const char *val)
     }
   if (q != p)
     var_free (p);
-}
-
-void
-free_variables (void)
-{
-  hash_free (main_vars);
 }
 
 static var_entry *

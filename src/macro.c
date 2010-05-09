@@ -1,6 +1,6 @@
 /* Macro facility functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -264,23 +264,6 @@ Execute macro as string of editor command characters.
   STR_FREE (keystr);
 }
 END_DEFUN
-
-/*
- * Free all the macros (used at Zile exit).
- */
-void
-free_macros (void)
-{
-  Macro *mp, *next;
-
-  macro_delete (cur_mp);
-
-  for (mp = head_mp; mp; mp = next)
-    {
-      next = mp->next;
-      macro_delete (mp);
-    }
-}
 
 /*
  * Find a macro given its name.

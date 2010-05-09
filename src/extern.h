@@ -41,7 +41,6 @@ gl_list_t get_key_sequence (void);
 Function get_function_by_keys (gl_list_t keys);
 void process_command (void);
 void init_default_bindings (void);
-void free_default_bindings (void);
 
 /* buffer.c --------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
@@ -58,7 +57,6 @@ void free_default_bindings (void);
 #include "region.h"
 #undef FIELD
 void free_buffer (Buffer * bp);
-void free_buffers (void);
 void init_buffer (Buffer * bp);
 Buffer * buffer_new (void);
 const char *get_buffer_filename_or_name (Buffer * bp);
@@ -125,7 +123,6 @@ int get_function_interactive (const char *name);
 const char *get_function_name (Function p);
 const char *minibuf_read_function_name (const char *fmt, ...);
 void init_eval (void);
-void free_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
 extern char coding_eol_lf[3];
@@ -192,11 +189,9 @@ void insert_nstring (const char *s, size_t len);
 void insert_astr (astr as);
 void bprintf (const char *fmt, ...);
 bool delete_char (void);
-void free_registers (void);
 
 /* lisp.c ----------------------------------------------------------------- */
 void init_lisp (void);
-void free_lisp (void);
 void lisp_loadstring (astr as);
 bool lisp_loadfile (const char *file);
 
@@ -206,7 +201,6 @@ void add_cmd_to_macro (void);
 void add_key_to_cmd (size_t key);
 void remove_key_from_cmd (void);
 void call_macro (Macro * mp);
-void free_macros (void);
 Macro *get_macro (const char *name);
 void add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f);
 
@@ -231,7 +225,6 @@ Marker *point_marker (void);
 /* minibuf.c -------------------------------------------------------------- */
 extern char *minibuf_contents;
 void init_minibuf (void);
-void free_minibuf (void);
 void minibuf_error (const char *fmt, ...);
 void minibuf_write (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
@@ -265,7 +258,6 @@ void recenter (Window * wp);
 
 /* search.c --------------------------------------------------------------- */
 void init_search (void);
-void free_search (void);
 
 /* term_curses.c ---------------------------------------------------------- */
 size_t term_buf_len (void);
@@ -306,7 +298,6 @@ void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
-void free_variables (void);
 char *minibuf_read_variable_name (char *fmt, ...);
 void set_variable (const char *var, const char *val);
 const char *get_variable_doc (const char *var, char **defval);
@@ -325,7 +316,6 @@ bool get_variable_bool (const char *var);
 #undef FIELD
 void create_scratch_window (void);
 Window *find_window (const char *name);
-void free_windows (void);
 Window *popup_window (void);
 void set_current_window (Window * wp);
 void delete_window (Window * del_wp);

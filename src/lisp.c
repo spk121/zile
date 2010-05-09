@@ -1,6 +1,6 @@
 /* Lisp parser
 
-   Copyright (c) 2001, 2005, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2005, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -32,13 +32,6 @@ init_lisp (void)
 {
   leNIL = leNew ("nil");
   leT = leNew ("t");
-}
-
-void
-free_lisp (void)
-{
-  leReallyWipe (leNIL);
-  leReallyWipe (leT);
 }
 
 

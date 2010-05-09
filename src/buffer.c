@@ -127,21 +127,6 @@ free_buffer (Buffer * bp)
 }
 
 /*
- * Free all the allocated buffers (used at Zile exit).
- */
-void
-free_buffers (void)
-{
-  Buffer *bp, *next;
-
-  for (bp = head_bp; bp != NULL; bp = next)
-    {
-      next = bp->next;
-      free_buffer (bp);
-    }
-}
-
-/*
  * Initialise a buffer
  */
 void

@@ -66,21 +66,6 @@ free_window (Window * wp)
 }
 
 /*
- * Free all the allocated windows (used at Zile exit).
- */
-void
-free_windows (void)
-{
-  Window *wp, *next;
-
-  for (wp = head_wp; wp != NULL; wp = next)
-    {
-      next = wp->next;
-      free_window (wp);
-    }
-}
-
-/*
  * Set the current window and his buffer as the current buffer.
  */
 void

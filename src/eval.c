@@ -1,6 +1,6 @@
 /* Lisp eval
 
-   Copyright (c) 2001, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -297,10 +297,4 @@ void
 init_eval (void)
 {
   functions_history = history_new ();
-}
-
-void
-free_eval (void)
-{
-  free_history (functions_history);
 }

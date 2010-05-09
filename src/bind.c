@@ -1,6 +1,6 @@
 /* Key bindings and extended commands
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -476,22 +476,6 @@ init_default_bindings (void)
 ");
   lisp_loadstring (as);
   astr_delete (as);
-}
-
-static void
-free_bindings (Binding binding)
-{
-  size_t i;
-  for (i = 0; i < binding->vecnum; ++i)
-    free_bindings (binding->vec[i]);
-  free (binding->vec);
-  free (binding);
-}
-
-void
-free_default_bindings (void)
-{
-  free_bindings (root_bindings);
 }
 
 DEFUN_ARGS ("global-set-key", global_set_key,
