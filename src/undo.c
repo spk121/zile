@@ -85,7 +85,7 @@ undo_save (int type, Point pt, size_t osize, size_t size)
     {
       up->block.osize = osize;
       up->block.size = size;
-      up->block.text = copy_text_block (pt.n, pt.o, osize);
+      up->block.text = copy_text_block (pt, osize);
     }
 
   up->next = get_buffer_last_undop (cur_bp);

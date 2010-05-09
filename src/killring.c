@@ -50,7 +50,7 @@ kill_ring_push (char *s, size_t size)
 static bool
 copy_or_kill_region (bool kill, Region * rp)
 {
-  char *p = copy_text_block (get_region_start (rp).n, get_region_start (rp).o, get_region_size (rp));
+  char *p = copy_text_block (get_region_start (rp), get_region_size (rp));
 
   if (last_command () != F_kill_region)
     free_kill_ring ();

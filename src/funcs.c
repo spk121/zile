@@ -915,7 +915,7 @@ astr_append_region (astr s)
   activate_mark ();
   calculate_the_region (rp);
 
-  t = copy_text_block (get_region_start (rp).n, get_region_start (rp).o, get_region_size (rp));
+  t = copy_text_block (get_region_start (rp), get_region_size (rp));
   astr_ncat_cstr (s, t, get_region_size (rp));
   free (t);
 
@@ -1556,7 +1556,7 @@ The output is available in that buffer in both cases.
             }
           else
             {
-              char *p = copy_text_block (get_region_start (rp).n, get_region_start (rp).o, get_region_size (rp));
+              char *p = copy_text_block (get_region_start (rp), get_region_size (rp));
               ssize_t written = write (fd, p, get_region_size (rp));
 
               free (p);

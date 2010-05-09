@@ -476,40 +476,20 @@ tab_width (Buffer * bp)
  * Copy a region of text into an allocated buffer.
  */
 char *
-copy_text_block (size_t startn, size_t starto, size_t size)
+copy_text_block (Point pt, size_t size)
 {
-  char *buf, *dp;
-  size_t max_size, n, i;
-  Line *lp;
+  char *buf = (char *) xzalloc (size);
+  size_t i = pt.o;
+  Line *lp = pt.p;
+  char *dp;
 
-  max_size = 10;
-  dp = buf = (char *) xzalloc (max_size);
-
-  lp = cur_bp->pt.p;
-  n = cur_bp->pt.n;
-  if (n > startn)
-    do
-      lp = get_line_prev (lp);
-    while (--n > startn);
-  else if (n < startn)
-    do
-      lp = get_line_next (lp);
-    while (++n < startn);
-
-  for (i = starto; dp - buf < (int) size;)
+  for (dp = buf; dp - buf < (int) size; dp++)
     {
-      if (dp >= buf + max_size)
-        {
-          int save_off = dp - buf;
-          max_size += 10;
-          buf = (char *) xrealloc (buf, max_size);
-          dp = buf + save_off;
-        }
       if (i < astr_len (get_line_text (lp)))
-        *dp++ = astr_get (get_line_text (lp), i++);
+        *dp = astr_get (get_line_text (lp), i++);
       else
         {
-          *dp++ = '\n';
+          *dp = '\n';
           lp = get_line_next (lp);
           i = 0;
         }
