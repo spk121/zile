@@ -910,14 +910,14 @@ static void
 astr_append_region (astr s)
 {
   Region * rp = region_new ();
-  char *t;
+  astr as;
 
   activate_mark ();
   calculate_the_region (rp);
 
-  t = copy_text_block (get_region_start (rp), get_region_size (rp));
-  astr_ncat_cstr (s, t, get_region_size (rp));
-  free (t);
+  as = copy_text_block (get_region_start (rp), get_region_size (rp));
+  astr_cat (s, as);
+  astr_delete (as);
 
   free (rp);
 }
@@ -1556,10 +1556,10 @@ The output is available in that buffer in both cases.
             }
           else
             {
-              char *p = copy_text_block (get_region_start (rp), get_region_size (rp));
-              ssize_t written = write (fd, p, get_region_size (rp));
+              astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
+              ssize_t written = write (fd, astr_cstr (as), get_region_size (rp));
 
-              free (p);
+              astr_delete (as);
               close (fd);
 
               if (written != (ssize_t) get_region_size (rp))

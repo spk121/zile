@@ -40,7 +40,7 @@ free_kill_ring (void)
 }
 
 static void
-kill_ring_push (char *s, size_t size)
+kill_ring_push (const char *s, size_t size)
 {
   if (kill_ring_text == NULL)
     kill_ring_text = astr_new ();
@@ -50,12 +50,12 @@ kill_ring_push (char *s, size_t size)
 static bool
 copy_or_kill_region (bool kill, Region * rp)
 {
-  char *p = copy_text_block (get_region_start (rp), get_region_size (rp));
+  astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
 
   if (last_command () != F_kill_region)
     free_kill_ring ();
-  kill_ring_push (p, get_region_size (rp));
-  free (p);
+  kill_ring_push (astr_cstr (as), get_region_size (rp));
+  astr_delete (as);
 
   if (kill)
     {

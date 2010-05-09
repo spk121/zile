@@ -51,7 +51,7 @@ struct Undo
   /* The block to insert. */
   struct
   {
-    char *text;
+    astr text;
     size_t osize;		/* Original size. */
     size_t size;		/* New block size. */
   } block;
@@ -125,7 +125,7 @@ revert_action (Undo * up)
       undo_nosave = true;
       for (i = 0; i < up->block.size; ++i)
         delete_char ();
-      insert_nstring (up->block.text, up->block.osize);
+      insert_nstring (astr_cstr (up->block.text), up->block.osize);
       undo_nosave = false;
     }
 
@@ -171,7 +171,7 @@ free_undo (Undo *up)
     {
       Undo *next_up = up->next;
       if (up->type == UNDO_REPLACE_BLOCK)
-        free (up->block.text);
+        astr_delete (up->block.text);
       free (up);
       up = next_up;
     }

@@ -74,7 +74,7 @@ int transient_mark_mode (void);
 void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);
-char *copy_text_block (Point pt, size_t size);
+astr copy_text_block (Point pt, size_t size);
 Buffer *create_scratch_buffer (void);
 void kill_buffer (Buffer * kill_bp);
 Completion *make_buffer_completion (void);

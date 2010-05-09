@@ -34,13 +34,6 @@
 
 static astr regs[NUM_REGISTERS];
 
-static void
-register_free (size_t n)
-{
-  if (regs[n] != NULL)
-    astr_delete (regs[n]);
-}
-
 DEFUN_ARGS ("copy-to-register", copy_to_register,
             INT_ARG (reg))
 /*+
@@ -70,11 +63,9 @@ Copy region into register @i{register}.
         ok = leNIL;
       else
         {
-          char *p = copy_text_block (get_region_start (rp), get_region_size (rp));
-          register_free ((size_t) reg);
-          regs[reg] = astr_new ();
-          astr_ncat_cstr (regs[reg], p, get_region_size (rp));
-          free (p);
+          if (regs[reg] != NULL)
+            astr_delete (regs[reg]);
+          regs[reg] = copy_text_block (get_region_start (rp), get_region_size (rp));
         }
 
       free (rp);
