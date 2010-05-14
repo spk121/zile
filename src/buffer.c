@@ -545,10 +545,14 @@ kill_buffer (Buffer * kill_bp)
      it. */
   if (next_bp == NULL)
     {
-      cur_bp = head_bp = create_scratch_buffer ();
+      cur_bp = head_bp = next_bp = create_scratch_buffer ();
       for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
         set_window_bp (wp, head_bp);
     }
+
+  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+    if (get_window_bp (wp) == next_bp)
+      resync_redisplay (wp);
 
   thisflag |= FLAG_NEED_RESYNC;
 }
