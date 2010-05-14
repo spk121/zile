@@ -120,20 +120,20 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t de
   assert (dir >= -1 && dir <= 1);
 
   for (m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
-    if (get_marker_pt (m).p == oldlp && (dir == -1 || get_marker_pt (m).o > pointo))
-      {
-        Point pt = get_marker_pt (m);
-        pt.p = newlp;
-        pt.o += delta - (pointo * dir);
+    {
+      Point pt = get_marker_pt (m);
+
+      if (pt.p == oldlp && (dir == -1 || pt.o > pointo))
+        {
+          pt.p = newlp;
+          pt.o += delta - (pointo * dir);
+          pt.n += dir;
+        }
+      else if (pt.n > get_buffer_pt (cur_bp).n)
         pt.n += dir;
-        set_marker_pt (m, pt);
-      }
-    else if (get_marker_pt (m).n > get_buffer_pt (cur_bp).n)
-      {
-        Point pt = get_marker_pt (m);
-        pt.n += dir;
-        set_marker_pt (m, pt);
-      }
+
+      set_marker_pt (m, pt);
+    }
 
   /* This marker has been updated to new position. */
   set_buffer_pt (cur_bp, get_marker_pt (m_pt));
