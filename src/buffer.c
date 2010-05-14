@@ -505,56 +505,50 @@ create_scratch_buffer (void)
 
 /*
  * Remove the specified buffer from the buffer list and deallocate
- * its space.  Avoid killing the sole buffers and creates the scratch
- * buffer when required.
+ * its space.  Recreate the scratch buffer when required.
  */
 void
 kill_buffer (Buffer * kill_bp)
 {
-  Buffer *next_bp;
+  Buffer *bp, *next_bp;
+  Window *wp;
 
   if (get_buffer_next (kill_bp) != NULL)
     next_bp = get_buffer_next (kill_bp);
   else
-    next_bp = head_bp;
+    next_bp = (head_bp == kill_bp) ? NULL : head_bp;
 
-  if (next_bp == kill_bp) /* Only one buffer. */
+  /* Search for windows displaying the buffer to kill. */
+  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+    if (get_window_bp (wp) == kill_bp)
+      {
+        set_window_bp (wp, next_bp);
+        set_window_topdelta (wp, 0);
+        set_window_saved_pt (wp, NULL); /* The old marker will be freed. */
+      }
+
+  /* Remove the buffer from the buffer list. */
+  if (cur_bp == kill_bp)
+    cur_bp = next_bp;
+  if (head_bp == kill_bp)
+    head_bp = get_buffer_next (head_bp);
+  for (bp = head_bp; bp != NULL && get_buffer_next (bp) != NULL; bp = get_buffer_next (bp))
+    if (get_buffer_next (bp) == kill_bp)
+      {
+        set_buffer_next (bp, get_buffer_next (get_buffer_next (bp)));
+        break;
+      }
+
+  free_buffer (kill_bp);
+
+  if (next_bp == NULL)
     {
-      assert (cur_bp == kill_bp);
-      free_buffer (cur_bp);
-      head_bp = NULL;
-
-      create_scratch_window ();
-    }
-  else
-    {
-      Buffer *bp;
-      Window *wp;
-
-      /* Search for windows displaying the buffer to kill. */
+      cur_bp = head_bp = create_scratch_buffer ();
       for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
-        if (get_window_bp (wp) == kill_bp)
-          {
-            set_window_bp (wp, next_bp);
-            set_window_topdelta (wp, 0);
-            set_window_saved_pt (wp, NULL); /* The old marker will be freed. */
-          }
-
-      /* Remove the buffer from the buffer list. */
-      cur_bp = next_bp;
-      if (head_bp == kill_bp)
-        head_bp = get_buffer_next (head_bp);
-      for (bp = head_bp; get_buffer_next (bp) != NULL; bp = get_buffer_next (bp))
-        if (get_buffer_next (bp) == kill_bp)
-          {
-            set_buffer_next (bp, get_buffer_next (get_buffer_next (bp)));
-            break;
-          }
-
-      free_buffer (kill_bp);
-
-      thisflag |= FLAG_NEED_RESYNC;
+        set_window_bp (wp, head_bp);
     }
+
+  thisflag |= FLAG_NEED_RESYNC;
 }
 
 DEFUN_ARGS ("kill-buffer", kill_buffer,
