@@ -261,7 +261,7 @@ char coding_eol_cr[3] = "\r";
  * Return quietly if the file doesn't exist, or other error.
  */
 static void
-read_from_disk (const char *filename)
+read_file (const char *filename)
 {
   Line *lp;
   int i, size;
@@ -377,7 +377,7 @@ find_file (const char *filename)
   set_buffer_names (bp, filename);
 
   switch_to_buffer (bp);
-  read_from_disk (filename);
+  read_file (filename);
 
   thisflag |= FLAG_NEED_RESYNC;
 
