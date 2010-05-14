@@ -54,18 +54,6 @@ window_new (void)
 }
 
 /*
- * Free a window's allocated memory.
- */
-static void
-free_window (Window * wp)
-{
-  if (wp->saved_pt)
-    free_marker (wp->saved_pt);
-
-  free (wp);
-}
-
-/*
  * Set the current window and his buffer as the current buffer.
  */
 void
@@ -147,7 +135,10 @@ delete_window (Window * del_wp)
       set_current_window (wp);
     }
 
-  free_window (del_wp);
+  if (wp->saved_pt)
+    free_marker (wp->saved_pt);
+
+  free (wp);
 }
 
 DEFUN ("delete-window", delete_window)
