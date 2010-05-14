@@ -257,7 +257,7 @@ char coding_eol_cr[3] = "\r";
 #define MAX_EOL_CHECK_COUNT 3
 
 /*
- * Read the file contents into a buffer.
+ * Read the file contents into current buffer.
  * Return quietly if the file doesn't exist, or other error.
  */
 static void
