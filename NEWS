@@ -1,3 +1,8 @@
+Release 2.3.17
+
+This release fixes some small bugs in delete-window, and contains some
+code cleanup.
+
 Release 2.3.16
 
 This release fixes a potential buffer overrun, and a long-standing bug
