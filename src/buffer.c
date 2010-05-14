@@ -550,11 +550,10 @@ kill_buffer (Buffer * kill_bp)
         set_window_bp (wp, head_bp);
     }
 
+  /* Resync windows that need it. */
   for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
     if (get_window_bp (wp) == next_bp)
       resync_redisplay (wp);
-
-  thisflag |= FLAG_NEED_RESYNC;
 }
 
 DEFUN_ARGS ("kill-buffer", kill_buffer,
