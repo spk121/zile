@@ -132,7 +132,7 @@ MAINTAINERCLEANFILES =					\
 	tbl_vars.h
 
 loc:
-	cloc --no3 $(ALLSOURCES) $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) *.el \
+	cloc --force-lang="C",h --no3 $(ALLSOURCES) $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) *.el \
 	Makefile.am ../Makefile.am ../configure.ac
 
 TESTS_VARS = srcdir=$(srcdir) builddir=$(builddir)
