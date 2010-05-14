@@ -130,11 +130,11 @@ delete_window (Window * del_wp)
 {
   Window *wp;
 
-  if (cur_wp == head_wp)
+  if (del_wp == head_wp)
     wp = head_wp = head_wp->next;
   else
     for (wp = head_wp; wp != NULL; wp = wp->next)
-      if (wp->next == cur_wp)
+      if (wp->next == del_wp)
         {
           wp->next = wp->next->next;
           break;
@@ -253,16 +253,8 @@ Make the selected window fill the screen.
     {
       nextwp = wp->next;
       if (wp != cur_wp)
-        free_window (wp);
+        delete_window (wp);
     }
-
-  cur_wp->fwidth = cur_wp->ewidth = term_width ();
-  /* Save space for minibuffer. */
-  cur_wp->fheight = term_height () - 1;
-  /* Save space for status line. */
-  cur_wp->eheight = cur_wp->fheight - 1;
-  cur_wp->next = NULL;
-  head_wp = cur_wp;
 }
 END_DEFUN
 
