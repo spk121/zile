@@ -289,6 +289,7 @@ read_file (const char *filename)
   lp = pt.p;
 
   /* Read first chunk and determine EOL type. */
+  /* FIXME: Don't assume first EOL occurs in first chunk. */
   size = fread (buf, 1, BUFSIZ, fp);
   if (size > 0)
     {
