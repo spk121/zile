@@ -148,7 +148,7 @@ completion_scroll_down (void)
   if (pt.n == 0 || !FUNCALL (scroll_down))
     {
       gotoeob ();
-      resync_redisplay ();
+      resync_redisplay (cur_wp);
     }
   set_current_window (old_wp);
 

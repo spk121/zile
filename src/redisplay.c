@@ -26,21 +26,21 @@
 #include "extern.h"
 
 void
-resync_redisplay (void)
+resync_redisplay (Window * wp)
 {
-  int delta = get_buffer_pt (cur_bp).n - get_window_lastpointn (cur_wp);
+  int delta = get_buffer_pt (get_window_bp (wp)).n - get_window_lastpointn (wp);
 
   if (delta)
     {
-      if ((delta > 0 && get_window_topdelta (cur_wp) + delta < get_window_eheight (cur_wp)) ||
-          (delta < 0 && get_window_topdelta (cur_wp) >= (size_t) (-delta)))
-        set_window_topdelta (cur_wp, get_window_topdelta (cur_wp) + delta);
-      else if (get_buffer_pt (cur_bp).n > get_window_eheight (cur_wp) / 2)
-        set_window_topdelta (cur_wp, get_window_eheight (cur_wp) / 2);
+      if ((delta > 0 && get_window_topdelta (wp) + delta < get_window_eheight (wp)) ||
+          (delta < 0 && get_window_topdelta (wp) >= (size_t) (-delta)))
+        set_window_topdelta (wp, get_window_topdelta (wp) + delta);
+      else if (get_buffer_pt (get_window_bp (wp)).n > get_window_eheight (wp) / 2)
+        set_window_topdelta (wp, get_window_eheight (wp) / 2);
       else
-        set_window_topdelta (cur_wp, get_buffer_pt (cur_bp).n);
+        set_window_topdelta (wp, get_buffer_pt (get_window_bp (wp)).n);
     }
-  set_window_lastpointn (cur_wp, get_buffer_pt (cur_bp).n);
+  set_window_lastpointn (wp, get_buffer_pt (get_window_bp (wp)).n);
 }
 
 void

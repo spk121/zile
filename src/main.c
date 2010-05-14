@@ -364,7 +364,7 @@ main (int argc, char **argv)
   while (!(thisflag & FLAG_QUIT))
     {
       if (lastflag & FLAG_NEED_RESYNC)
-        resync_redisplay ();
+        resync_redisplay (cur_wp);
       term_redisplay ();
       term_refresh ();
       process_command ();

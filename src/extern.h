@@ -252,7 +252,7 @@ Point line_end_position (int count);
 void goto_point (Point pt);
 
 /* redisplay.c ------------------------------------------------------------ */
-void resync_redisplay (void);
+void resync_redisplay (Window * wp);
 void resize_windows (void);
 void recenter (Window * wp);
 
