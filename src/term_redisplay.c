@@ -122,12 +122,9 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
 
   term_move (line, 0);
   for (x = 0, i = startcol; i < astr_len (get_line_text (lp)) && x < get_window_ewidth (wp); i++)
-    {
-      if (highlight && in_region (lineno, i, rp))
-        outch (astr_get (get_line_text (lp), i), FONT_REVERSE, &x);
-      else
-        outch (astr_get (get_line_text (lp), i), FONT_NORMAL, &x);
-    }
+    outch (astr_get (get_line_text (lp), i),
+           highlight && in_region (lineno, i, rp) ? FONT_REVERSE : FONT_NORMAL,
+           &x);
 
   draw_end_of_line (line, wp, lineno, rp, highlight, x, i);
 }
