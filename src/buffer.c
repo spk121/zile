@@ -520,19 +520,9 @@ kill_buffer (Buffer * kill_bp)
 
   if (next_bp == kill_bp) /* Only one buffer. */
     {
-      Window *wp, *next_wp;
-
       assert (cur_bp == kill_bp);
       free_buffer (cur_bp);
       head_bp = NULL;
-
-      /* Close all the windows that display this buffer. */
-      for (wp = head_wp; wp != NULL; wp = next_wp)
-        {
-          next_wp = get_window_next (wp);
-          if (get_window_bp (wp) == cur_bp)
-            delete_window (wp);
-        }
 
       create_scratch_window ();
     }
