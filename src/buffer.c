@@ -541,6 +541,8 @@ kill_buffer (Buffer * kill_bp)
 
   free_buffer (kill_bp);
 
+  /* If no buffers left, recreate scratch buffer and point windows at
+     it. */
   if (next_bp == NULL)
     {
       cur_bp = head_bp = create_scratch_buffer ();
