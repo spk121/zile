@@ -537,7 +537,7 @@ kill_buffer (Buffer * kill_bp)
           {
             set_window_bp (wp, next_bp);
             set_window_topdelta (wp, 0);
-            set_window_saved_pt (wp, NULL);	/* The marker will be freed. */
+            set_window_saved_pt (wp, NULL); /* The old marker will be freed. */
           }
 
       /* Remove the buffer from the buffer list. */
