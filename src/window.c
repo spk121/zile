@@ -135,10 +135,10 @@ delete_window (Window * del_wp)
       set_current_window (wp);
     }
 
-  if (wp->saved_pt)
-    free_marker (wp->saved_pt);
+  if (del_wp->saved_pt)
+    free_marker (del_wp->saved_pt);
 
-  free (wp);
+  free (del_wp);
 }
 
 DEFUN ("delete-window", delete_window)
