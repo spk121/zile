@@ -75,8 +75,6 @@ search_node (Binding tree, size_t key)
 static void
 add_node (Binding tree, Binding p)
 {
-  size_t i;
-
   /* Erase any previous binding the current key might have had in case
      it was non-prefix and is now being made prefix, as we don't want
      to accidentally create a default for the prefix map. */
@@ -90,18 +88,8 @@ add_node (Binding tree, Binding p)
       tree->vec = (Binding *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
     }
 
-  /* Insert the node at the sorted position. */
-  for (i = 0; i < tree->vecnum; i++)
-    if (tree->vec[i]->key > p->key)
-      {
-        memmove (&tree->vec[i + 1], &tree->vec[i],
-                 sizeof (p) * (tree->vecnum - i));
-        tree->vec[i] = p;
-        break;
-      }
-  if (i == tree->vecnum)
-    tree->vec[tree->vecnum] = p;
-  ++tree->vecnum;
+  /* Insert the node. */
+  tree->vec[tree->vecnum++] = p;
 }
 
 static void
@@ -359,24 +347,24 @@ init_default_bindings (void)
 
   as = astr_new_cstr ("\
 (global-set-key \"\\M-m\" 'back-to-indentation)\
-(global-set-key \"\\C-b\" 'backward-char)\
 (global-set-key \"\\LEFT\" 'backward-char)\
+(global-set-key \"\\C-b\" 'backward-char)\
 (global-set-key \"\\BACKSPACE\" 'backward-delete-char)\
 (global-set-key \"\\M-\\BACKSPACE\" 'backward-kill-word)\
 (global-set-key \"\\M-{\" 'backward-paragraph)\
 (global-set-key \"\\C-\\M-b\" 'backward-sexp)\
 (global-set-key \"\\M-b\" 'backward-word)\
 (global-set-key \"\\M-<\" 'beginning-of-buffer)\
-(global-set-key \"\\C-a\" 'beginning-of-line)\
 (global-set-key \"\\HOME\" 'beginning-of-line)\
+(global-set-key \"\\C-a\" 'beginning-of-line)\
 (global-set-key \"\\C-xe\" 'call-last-kbd-macro)\
 (global-set-key \"\\M-c\" 'capitalize-word)\
 (global-set-key \"\\M-w\" 'copy-region-as-kill)\
-(global-set-key \"\\C-xrx\" 'copy-to-register)\
 (global-set-key \"\\C-xrs\" 'copy-to-register)\
+(global-set-key \"\\C-xrx\" 'copy-to-register)\
 (global-set-key \"\\C-x\\C-o\" 'delete-blank-lines)\
-(global-set-key \"\\C-d\" 'delete-char)\
 (global-set-key \"\\DELETE\" 'delete-char)\
+(global-set-key \"\\C-d\" 'delete-char)\
 (global-set-key \"\\M-\\\\\" 'delete-horizontal-space)\
 (global-set-key \"\\C-x1\" 'delete-other-windows)\
 (global-set-key \"\\C-x0\" 'delete-window)\
@@ -392,8 +380,8 @@ init_default_bindings (void)
 (global-set-key \"\\M-l\" 'downcase-word)\
 (global-set-key \"\\C-x)\" 'end-kbd-macro)\
 (global-set-key \"\\M->\" 'end-of-buffer)\
-(global-set-key \"\\C-e\" 'end-of-line)\
 (global-set-key \"\\END\" 'end-of-line)\
+(global-set-key \"\\C-e\" 'end-of-line)\
 (global-set-key \"\\C-x^\" 'enlarge-window)\
 (global-set-key \"\\C-x\\C-x\" 'exchange-point-and-mark)\
 (global-set-key \"\\M-x\" 'execute-extended-command)\
@@ -410,8 +398,8 @@ init_default_bindings (void)
 (global-set-key \"\\M-g\\M-g\" 'goto-line)\
 (global-set-key \"\\TAB\" 'indent-for-tab-command)\
 (global-set-key \"\\C-xi\" 'insert-file)\
-(global-set-key \"\\C-xrg\" 'insert-register)\
 (global-set-key \"\\C-xri\" 'insert-register)\
+(global-set-key \"\\C-xrg\" 'insert-register)\
 (global-set-key \"\\C-r\" 'isearch-backward)\
 (global-set-key \"\\C-\\M-r\" 'isearch-backward-regexp)\
 (global-set-key \"\\C-s\" 'isearch-forward)\
@@ -430,23 +418,23 @@ init_default_bindings (void)
 (global-set-key \"\\M-@\" 'mark-word)\
 (global-set-key \"\\RET\" 'newline)\
 (global-set-key \"\\C-j\" 'newline-and-indent)\
-(global-set-key \"\\C-n\" 'next-line)\
 (global-set-key \"\\DOWN\" 'next-line)\
+(global-set-key \"\\C-n\" 'next-line)\
 (global-set-key \"\\C-o\" 'open-line)\
 (global-set-key \"\\C-xo\" 'other-window)\
 (global-set-key \"\\INSERT\" 'overwrite-mode)\
-(global-set-key \"\\C-p\" 'previous-line)\
 (global-set-key \"\\UP\" 'previous-line)\
+(global-set-key \"\\C-p\" 'previous-line)\
 (global-set-key \"\\M-%\" 'query-replace)\
 (global-set-key \"\\C-q\" 'quoted-insert)\
 (global-set-key \"\\C-l\" 'recenter)\
 (global-set-key \"\\C-x\\C-s\" 'save-buffer)\
 (global-set-key \"\\C-x\\C-c\" 'save-buffers-kill-emacs)\
 (global-set-key \"\\C-xs\" 'save-some-buffers)\
-(global-set-key \"\\M-v\" 'scroll-down)\
 (global-set-key \"\\PRIOR\" 'scroll-down)\
-(global-set-key \"\\C-v\" 'scroll-up)\
+(global-set-key \"\\M-v\" 'scroll-down)\
 (global-set-key \"\\NEXT\" 'scroll-up)\
+(global-set-key \"\\C-v\" 'scroll-up)\
 (global-set-key \"\\C-xf\" 'set-fill-column)\
 (global-set-key \"\\C-@\" 'set-mark-command)\
 (global-set-key \"\\M-!\" 'shell-command)\
