@@ -161,7 +161,6 @@ const char *next_history_element (History * hp);
 
 /* keycode.c -------------------------------------------------------------- */
 astr chordtostr (size_t key);
-size_t strtochord (const char *buf, size_t * len);
 gl_list_t keystrtovec (const char *key);
 astr keyvectostr (gl_list_t keys);
 
