@@ -520,6 +520,10 @@ sequence.
 }
 END_DEFUN
 
+/* FIXME: This function relies on chordtostr (0) returning ""; it
+   should not call chordtostr in this case, should iterate from j=0,
+   not j=1, and should only remove an element from the array at the
+   end of the function if one was added. */
 static void
 walk_bindings_tree (Binding tree, gl_list_t keys,
                     void (*process) (astr key, Binding p, void *st), void *st)
