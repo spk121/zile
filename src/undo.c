@@ -1,6 +1,6 @@
 /* Undo facility functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -40,9 +40,9 @@ struct Undo
   /* The type of undo delta. */
   int type;
 
-  /* Where the undo delta need to be applied.
-     Warning!: Do not use the "pt.p" field. */
-  Point pt;
+  /* Location of the undo delta. Stored as a numeric position because
+     line pointers can change. */
+  size_t n, o;
 
   /* Flag indicating that reverting this undo leaves the buffer
      in an unchanged state. */
@@ -77,7 +77,8 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 
   up = (Undo *) XZALLOC (Undo);
   up->type = type;
-  up->pt = pt;
+  up->n = pt.n;
+  up->o = pt.o;
   if (!get_buffer_modified (cur_bp))
     up->unchanged = true;
 
@@ -102,25 +103,29 @@ static Undo *
 revert_action (Undo * up)
 {
   size_t i;
+  Point pt;
+
+  pt.n = up->n;
+  pt.o = up->o;
 
   doing_undo = true;
 
   if (up->type == UNDO_END_SEQUENCE)
     {
-      undo_save (UNDO_START_SEQUENCE, up->pt, 0, 0);
+      undo_save (UNDO_START_SEQUENCE, pt, 0, 0);
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
         up = revert_action (up);
-      undo_save (UNDO_END_SEQUENCE, up->pt, 0, 0);
-      goto_point (up->pt);
+      undo_save (UNDO_END_SEQUENCE, pt, 0, 0);
+      goto_point (pt);
       return up->next;
     }
 
-  goto_point (up->pt);
+  goto_point (pt);
 
   if (up->type == UNDO_REPLACE_BLOCK)
     {
-      undo_save (UNDO_REPLACE_BLOCK, up->pt,
+      undo_save (UNDO_REPLACE_BLOCK, pt,
                  up->block.size, up->block.osize);
       undo_nosave = true;
       for (i = 0; i < up->block.size; ++i)
