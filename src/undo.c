@@ -116,6 +116,8 @@ revert_action (Undo * up)
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
         up = revert_action (up);
+      pt.n = up->n;
+      pt.o = up->o;
       undo_save (UNDO_END_SEQUENCE, pt, 0, 0);
       goto_point (pt);
       return up->next;
