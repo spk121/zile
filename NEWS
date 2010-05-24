@@ -1,7 +1,7 @@
 Release 2.3.17
 
-This release fixes some small bugs in delete-window, and contains some
-code cleanup.
+This release fixes a crash in undo introduced in 2.3.16 as well as
+some small bugs in delete-window, and contains some code cleanup.
 
 Release 2.3.16
 
