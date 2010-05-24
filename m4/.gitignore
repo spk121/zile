@@ -118,3 +118,4 @@ warn-on-use.m4
 /wctype_h.m4
 /cloexec.m4
 /printf.m4
+/asm-underscore.m4
