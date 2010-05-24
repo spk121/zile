@@ -97,6 +97,7 @@ line_end_position (int count)
   return pt;
 }
 
+/* Go to coordinates described by pt (ignoring pt.p) */
 void
 goto_point (Point pt)
 {
