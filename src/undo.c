@@ -84,6 +84,19 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 
   if (type == UNDO_REPLACE_BLOCK)
     {
+      Line * lp = get_buffer_pt (cur_bp).p;
+      size_t n = get_buffer_pt (cur_bp).n;
+
+      if (n > pt.n)
+        do
+          lp = get_line_prev (lp);
+        while (--n > pt.n);
+      else if (n < pt.n)
+        do
+          lp = get_line_next (lp);
+        while (++n < pt.n);
+
+      pt.p = lp;
       up->block.osize = osize;
       up->block.size = size;
       up->block.text = copy_text_block (pt, osize);

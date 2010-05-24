@@ -478,20 +478,8 @@ tab_width (Buffer * bp)
 astr
 copy_text_block (Point pt, size_t size)
 {
-  astr as;
-  Line *lp = cur_bp->pt.p;
-  size_t n = cur_bp->pt.n;
-
-  if (n > pt.n)
-    do
-      lp = get_line_prev (lp);
-    while (--n > pt.n);
-  else if (n < pt.n)
-    do
-      lp = get_line_next (lp);
-    while (++n < pt.n);
-
-  as = astr_substr (get_line_text (lp), pt.o, astr_len (get_line_text (lp)) - pt.o);
+  Line * lp = pt.p;
+  astr as = astr_substr (get_line_text (lp), pt.o, astr_len (get_line_text (lp)) - pt.o);
 
   astr_cat_char (as, '\n');
   for (lp = get_line_next (lp); astr_len (as) < size; lp = get_line_next (lp))
