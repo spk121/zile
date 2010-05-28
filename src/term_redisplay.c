@@ -65,32 +65,34 @@ make_char_printable (char **buf, int c)
     return xasprintf (buf, "\\%o", c & 0xff);
 }
 
-static void
-outch (int c, size_t font, size_t * x)
+static size_t
+outch (int c, size_t font, size_t x)
 {
-  int j, w;
-  char *buf;
+  int w;
 
-  if (*x >= term_width ())
-    return;
+  if (x >= term_width ())
+    return x;
 
   term_attrset (font);
 
   if (c == '\t')
-    for (w = cur_tab_width - *x % cur_tab_width; w > 0 && *x < term_width ();
+    for (w = cur_tab_width - x % cur_tab_width; w > 0 && x < term_width ();
          w--)
-      term_addch (' '), ++(*x);
+      term_addch (' '), ++x;
   else if (isprint (c))
-    term_addch (c), ++(*x);
+    term_addch (c), ++x;
   else
     {
-      j = make_char_printable (&buf, c);
-      for (w = 0; w < j && *x < term_width (); ++w)
-        term_addch (buf[w]), ++(*x);
+      char *buf;
+      int j = make_char_printable (&buf, c);
+      for (w = 0; w < j && x < term_width (); ++w)
+        term_addch (buf[w]), ++x;
       free (buf);
     }
 
   term_attrset (FONT_NORMAL);
+
+  return x;
 }
 
 static void
@@ -107,7 +109,7 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * rp,
       for (; x < get_window_ewidth (wp); ++i)
         {
           if (in_region (lineno, i, rp))
-            outch (' ', FONT_REVERSE, &x);
+            x = outch (' ', FONT_REVERSE, x);
           else
             x++;
         }
@@ -122,9 +124,9 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
 
   term_move (line, 0);
   for (x = 0, i = startcol; i < astr_len (get_line_text (lp)) && x < get_window_ewidth (wp); i++)
-    outch (astr_get (get_line_text (lp), i),
-           highlight && in_region (lineno, i, rp) ? FONT_REVERSE : FONT_NORMAL,
-           &x);
+    x = outch (astr_get (get_line_text (lp), i),
+               highlight && in_region (lineno, i, rp) ? FONT_REVERSE : FONT_NORMAL,
+               x);
 
   draw_end_of_line (line, wp, lineno, rp, highlight, x, i);
 }
@@ -227,7 +229,6 @@ calculate_start_column (Window * wp)
 {
   size_t col = 0, lastcol = 0, t = tab_width (get_window_bp (wp));
   int rpfact, lpfact;
-  char *buf;
   size_t rp, lp, p;
   Point pt = window_pt (wp);
 
@@ -246,6 +247,7 @@ calculate_start_column (Window * wp)
           ++col;
         else
           {
+            char *buf;
             col += make_char_printable (&buf, astr_get (get_line_text (pt.p), p));
             free (buf);
           }
