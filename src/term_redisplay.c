@@ -131,20 +131,16 @@ draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
   draw_end_of_line (line, wp, lineno, rp, highlight, x, i);
 }
 
-static void
-calculate_highlight_region (Window * wp, Region * rp, int *highlight)
+static int
+calculate_highlight_region (Window * wp, Region * rp)
 {
   if ((wp != cur_wp
        && !get_variable_bool ("highlight-nonselected-windows"))
       || (get_buffer_mark (get_window_bp (wp)) == NULL)
       || (!transient_mark_mode ())
       || (transient_mark_mode () && !get_buffer_mark_active (get_window_bp (wp))))
-    {
-      *highlight = false;
-      return;
-    }
+    return false;
 
-  *highlight = true;
   set_region_start (rp, window_pt (wp));
   set_region_end (rp, get_marker_pt (get_buffer_mark (get_window_bp (wp))));
   if (cmp_point (get_region_end (rp), get_region_start (rp)) < 0)
@@ -154,6 +150,7 @@ calculate_highlight_region (Window * wp, Region * rp, int *highlight)
       set_region_start (rp, pt2);
       set_region_end (rp, pt1);
     }
+  return true;
 }
 
 static void
@@ -165,7 +162,7 @@ draw_window (size_t topline, Window * wp)
   int highlight;
   Point pt = window_pt (wp);
 
-  calculate_highlight_region (wp, rp, &highlight);
+  highlight = calculate_highlight_region (wp, rp);
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
