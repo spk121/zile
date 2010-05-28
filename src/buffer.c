@@ -364,28 +364,15 @@ delete_region (const Region * rp)
 bool
 in_region (size_t lineno, size_t x, Region * rp)
 {
-  if (lineno >= rp->start.n && lineno <= rp->end.n)
-    {
-      if (rp->start.n == rp->end.n)
-        {
-          if (x >= rp->start.o && x < rp->end.o)
-            return true;
-        }
-      else if (lineno == rp->start.n)
-        {
-          if (x >= rp->start.o)
-            return true;
-        }
-      else if (lineno == rp->end.n)
-        {
-          if (x < rp->end.o)
-            return true;
-        }
-      else
-        return true;
-    }
-
-  return false;
+  if (lineno < rp->start.n || lineno > rp->end.n)
+    return false;
+  else if (rp->start.n == rp->end.n)
+    return x >= rp->start.o && x < rp->end.o;
+  else if (lineno == rp->start.n)
+    return x >= rp->start.o;
+  else if (lineno == rp->end.n)
+    return x < rp->end.o;
+  return true;
 }
 
 /*
