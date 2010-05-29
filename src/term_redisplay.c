@@ -156,7 +156,7 @@ calculate_highlight_region (Window * wp, Region * rp)
 static void
 draw_window (size_t topline, Window * wp)
 {
-  size_t i, startcol, lineno;
+  size_t i, lineno;
   Line * lp;
   Region * rp = region_new ();
   int highlight;
@@ -183,9 +183,7 @@ draw_window (size_t topline, Window * wp)
       if (lp == get_buffer_lines (get_window_bp (wp)))
         continue;
 
-      startcol = get_window_start_column (wp);
-
-      draw_line (i, startcol, wp, lp, lineno, rp, highlight);
+      draw_line (i, get_window_start_column (wp), wp, lp, lineno, rp, highlight);
 
       if (get_window_start_column (wp) > 0)
         {
