@@ -200,18 +200,13 @@ draw_window (size_t topline, Window * wp)
 static char *
 make_mode_line_flags (Window * wp)
 {
-  static char buf[3];
-
   if (get_buffer_modified (get_window_bp (wp)) && get_buffer_readonly (get_window_bp (wp)))
-    buf[0] = '%', buf[1] = '*';
+    return "%*";
   else if (get_buffer_modified (get_window_bp (wp)))
-    buf[0] = buf[1] = '*';
+    return "**";
   else if (get_buffer_readonly (get_window_bp (wp)))
-    buf[0] = buf[1] = '%';
-  else
-    buf[0] = buf[1] = '-';
-
-  return buf;
+    return "%%";
+  return "--";
 }
 
 /*
