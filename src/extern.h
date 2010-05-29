@@ -300,7 +300,6 @@ void init_variables (void);
 char *minibuf_read_variable_name (char *fmt, ...);
 void set_variable (const char *var, const char *val);
 const char *get_variable_doc (const char *var, char **defval);
-const char *get_variable_bp (Buffer * bp, const char *var);
 const char *get_variable (const char *var);
 long get_variable_number_bp (Buffer * bp, const char *var);
 long get_variable_number (const char *var);

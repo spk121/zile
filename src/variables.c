@@ -165,7 +165,7 @@ get_variable_doc (const char *var, char **defval)
   return NULL;
 }
 
-const char *
+static const char *
 get_variable_bp (Buffer * bp, const char *var)
 {
   var_entry *p = get_variable_entry (bp, var);
