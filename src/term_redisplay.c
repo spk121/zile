@@ -211,8 +211,7 @@ make_mode_line_flags (Window * wp)
 
 /*
  * This function calculates the best start column to draw if the line
- * needs to get truncated.
- * Called only for the line where is the point.
+ * at point has to be truncated.
  */
 static void
 calculate_start_column (Window * wp)
