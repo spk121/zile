@@ -221,10 +221,11 @@ Marker *copy_marker (Marker * marker);
 Marker *point_marker (void);
 
 /* minibuf.c -------------------------------------------------------------- */
-extern char *minibuf_contents;
 void init_minibuf (void);
-void minibuf_error (const char *fmt, ...);
+int minibuf_no_error (void);
+void minibuf_refresh (void);
 void minibuf_write (const char *fmt, ...);
+void minibuf_error (const char *fmt, ...);
 char *minibuf_read (const char *fmt, const char *value, ...);
 unsigned long minibuf_read_number (const char *fmt, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);

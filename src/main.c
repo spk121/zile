@@ -305,7 +305,7 @@ main (int argc, char **argv)
 
   /* Show the splash screen only if no files, function or load file is
      specified on the command line, and there has been no error. */
-  if (minibuf_contents == NULL && gl_list_size (arg_arg) == 0)
+  if (gl_list_size (arg_arg) == 0 && minibuf_no_error ())
     about_screen ();
   setup_main_screen ();
 
@@ -349,16 +349,9 @@ main (int argc, char **argv)
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (scratch_bp);
 
-  /* Refresh minibuffer in case there's an error that couldn't be
+  /* Refresh minibuffer in case there was an error that couldn't be
      written during startup */
-  if (minibuf_contents != NULL)
-    {
-      /* Copy minibuf_contents because minibuf_write frees it */
-      char *buf = xstrdup (minibuf_contents);
-
-      minibuf_write (buf);
-      free (buf);
-    }
+  minibuf_refresh ();
 
   /* Run the main loop. */
   while (!(thisflag & FLAG_QUIT))
