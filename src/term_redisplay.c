@@ -243,7 +243,7 @@ calculate_start_column (Window * wp)
 
       lpfact = lp / (get_window_ewidth (wp) / 3);
 
-      if (col >= get_window_ewidth (wp) - 1 || lpfact < (rpfact - 2))
+      if (col >= get_window_ewidth (wp) - 1 || lpfact < rpfact - 2)
         {
           set_window_start_column (wp, lp + 1);
           point_screen_column = lastcol;
