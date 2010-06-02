@@ -125,10 +125,9 @@ const char *minibuf_read_function_name (const char *fmt, ...);
 void init_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
-extern char coding_eol_lf[3];
-extern char coding_eol_crlf[3];
-extern char coding_eol_cr[3];
-extern char coding_eol_undecided[3];
+extern const char *coding_eol_lf;
+extern const char *coding_eol_crlf;
+extern const char *coding_eol_cr;
 int exist_file (const char *filename);
 astr get_home_dir (void);
 astr agetcwd (void);

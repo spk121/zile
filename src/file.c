@@ -249,9 +249,9 @@ check_writable (const char *filename)
 }
 
 /* Formats of end-of-line. */
-char coding_eol_lf[3] = "\n";
-char coding_eol_crlf[3] = "\r\n";
-char coding_eol_cr[3] = "\r";
+const char *coding_eol_lf = "\n";
+const char *coding_eol_crlf = "\r\n";
+const char *coding_eol_cr = "\r";
 
 /* Maximum number of EOLs to check before deciding type. */
 #define MAX_EOL_CHECK_COUNT 3
@@ -266,7 +266,7 @@ read_file (const char *filename)
   Line *lp;
   int i, size;
   bool first_eol = true;
-  char *this_eol_type;
+  const char *this_eol_type;
   size_t eol_len = 0, total_eols = 0;
   char buf[BUFSIZ];
   FILE *fp = fopen (filename, "r");
