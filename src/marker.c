@@ -55,20 +55,19 @@ marker_new (void)
 static void
 unchain_marker (Marker * marker)
 {
-  Marker *m, *next, *prev = NULL;
+  Marker *m, *prev = NULL;
 
   if (!marker->bp)
     return;
 
-  for (m = get_buffer_markers (marker->bp); m; m = next)
+  for (m = get_buffer_markers (marker->bp); m; m = m->next)
     {
-      next = m->next;
       if (m == marker)
         {
           if (prev)
-            prev->next = next;
+            prev->next = m->next;
           else
-            set_buffer_markers (m->bp, next);
+            set_buffer_markers (m->bp, m->next);
 
           m->bp = NULL;
           break;
