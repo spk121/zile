@@ -130,27 +130,6 @@ search_key (Binding tree, gl_list_t keys, size_t from)
   return NULL;
 }
 
-static astr
-make_completion (gl_list_t keys)
-{
-  astr as = astr_new (), key;
-  size_t i, len = 0;
-
-  for (i = 0; i < gl_list_size (keys); i++)
-    {
-      if (i > 0)
-        {
-          astr_cat_char (as, ' ');
-          len++;
-        }
-      key = chordtostr ((size_t) gl_list_get_at (keys, i));
-      astr_cat (as, key);
-      astr_delete (key);
-    }
-
-  return astr_cat_char (as, '-');
-}
-
 size_t
 do_binding_completion (astr as)
 {
@@ -204,7 +183,7 @@ get_key_sequence (void)
       Binding p = search_key (root_bindings, keys, 0);
       if (p == NULL || p->func != NULL)
         break;
-      as = make_completion (keys);
+      as = astr_cat_char (keyvectostr (keys), '-');
       gl_list_add_last (keys, (void *) do_binding_completion (as));
       astr_delete (as);
     }
