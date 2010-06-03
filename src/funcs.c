@@ -283,11 +283,7 @@ Just C-u as argument means to use the current column.
     }
 
   if (ok == leT)
-    {
-      le *branch = leAddDataElement (leAddDataElement (leAddDataElement (NULL, "", 0), "fill-column", 0), buf, 0);
-      F_set_variable (0, false, branch);
-      leWipe (branch);
-    }
+    set_variable ("fill-column", buf);
 
   if (arglist == NULL)
     free (buf);
