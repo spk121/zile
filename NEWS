@@ -1,3 +1,8 @@
+Release 2.3.18
+
+This release plugs a minor space leak, stops Zile from catching the
+user signal SIGQUIT, and cleans the code up a little.
+
 Release 2.3.17
 
 This release fixes a crash in undo introduced in 2.3.16 as well as
