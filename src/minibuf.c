@@ -54,7 +54,8 @@ minibuf_refresh (void)
 {
   if (cur_wp)
     {
-      term_minibuf_write (minibuf_contents);
+      if (minibuf_contents)
+        term_minibuf_write (minibuf_contents);
 
       /* Redisplay (and leave the cursor in the correct position). */
       term_redisplay ();
