@@ -214,12 +214,13 @@ minibuf_read_yn (const char *fmt, ...)
 {
   va_list ap;
   char *buf, *errmsg = "";
+  int ret;
 
   va_start (ap, fmt);
   xvasprintf (&buf, fmt, ap);
   va_end (ap);
 
-  for (;;) {
+  for (ret = -2; ret == -2;) {
     size_t key;
 
     minibuf_write ("%s%s", errmsg, buf);
@@ -227,15 +228,21 @@ minibuf_read_yn (const char *fmt, ...)
     switch (key)
       {
       case 'y':
-        return true;
+        ret = true;
+        break;
       case 'n':
-        return false;
+        ret = false;
+        break;
       case KBD_CTRL | 'g':
-        return -1;
+        ret = -1;
+        break;
       default:
         errmsg = "Please answer y or n.  ";
       }
   }
+
+  free (buf);
+  return ret;
 }
 
 int
