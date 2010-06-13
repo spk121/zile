@@ -184,6 +184,7 @@ void
 set_buffer_names (Buffer * bp, const char *filename)
 {
   astr as = NULL;
+  const char *oldname;
 
   if (filename[0] != '/')
     {
@@ -196,10 +197,11 @@ set_buffer_names (Buffer * bp, const char *filename)
   else
     set_buffer_filename (bp, filename);
 
-  free ((char *) bp->name);
+  oldname = bp->name;
   bp->name = make_buffer_name (filename);
   if (as)
     astr_delete (as);
+  free ((char *) oldname);
 }
 
 /*
