@@ -135,7 +135,6 @@ signal_init (void)
   signal (SIGBUS, segv_sig_handler);
   signal (SIGHUP, other_sig_handler);
   signal (SIGINT, other_sig_handler);
-  signal (SIGQUIT, other_sig_handler);
   signal (SIGTERM, other_sig_handler);
 }
 
