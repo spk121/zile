@@ -150,6 +150,7 @@ minibuf_read_number (const char *fmt, ...)
     }
   while (n == ULONG_MAX);
 
+  free (buf);
   return n;
 }
 
