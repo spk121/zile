@@ -222,8 +222,9 @@ find_buffer (const char *name)
   return NULL;
 }
 
-/* Move the selected buffer to head.  */
-
+/*
+ * Move the selected buffer to head.
+ */
 static void
 move_buffer_to_head (Buffer * bp)
 {
