@@ -150,8 +150,7 @@ eobp (void)
 bool
 bolp (void)
 {
-  Point pt = get_buffer_pt (cur_bp);
-  return pt.o == 0;
+  return get_buffer_pt (cur_bp).o == 0;
 }
 
 /* Return true if point is at the end of a line. */
