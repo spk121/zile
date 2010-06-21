@@ -172,13 +172,9 @@ insert_char (int c)
   if (get_buffer_overwrite (cur_bp))
     {
       Point pt = get_buffer_pt (cur_bp);
-      /* Current character isn't the end of line
-         && isn't a \t
-         || tab width isn't correct
-         || current char is a \t && we are in the tab limit.  */
-      if ((pt.o < astr_len (pt.p->text))
-          &&
-          ((astr_get (pt.p->text, pt.o) != '\t')
+      /* Current character isn't the end of line or a \t
+         || current char is a \t && we are on the tab limit.  */
+      if ((pt.o < astr_len (pt.p->text)) && ((astr_get (pt.p->text, pt.o) != '\t')
            ||
            ((astr_get (pt.p->text, pt.o) == '\t') && ((get_goalc () % t) == t))))
         {
