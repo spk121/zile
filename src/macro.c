@@ -39,7 +39,7 @@ struct Macro
   Macro *next;		/* Next macro in the list. */
 };
 
-static Macro *cur_mp, *cmd_mp = NULL, *head_mp = NULL;
+static Macro *cur_mp = NULL, *cmd_mp = NULL, *head_mp = NULL;
 
 static Macro *
 macro_new (void)
