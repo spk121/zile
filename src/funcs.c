@@ -219,8 +219,8 @@ is supposed to make it easier to insert characters when necessary.
 +*/
 {
   INT_OR_UNIARG_INIT (arg);
-  set_buffer_overwrite (cur_bp, lastflag & FLAG_SET_UNIARG ? uniarg > 0 :
-                        !get_buffer_overwrite (cur_bp));
+  set_buffer_overwrite (cur_bp, noarg ? !get_buffer_overwrite (cur_bp) :
+                        uniarg > 0);
 }
 END_DEFUN
 
