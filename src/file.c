@@ -208,25 +208,18 @@ compact_path (astr path)
 static astr
 get_buffer_dir (void)
 {
-  astr buf;
-  const char *p, *q;
+  astr ret;
 
-  if (get_buffer_filename (cur_bp) != NULL)
-    /* If the current buffer has a filename, get the current directory
-       name from it. */
-    buf = astr_new_cstr (get_buffer_filename (cur_bp));
-  else
-    { /* Get the current directory name from the system. */
-      buf = agetcwd ();
-      if (astr_len (buf) != 0 && astr_get (buf, astr_len (buf) - 1) != '/')
-        astr_cat_char (buf, '/');
+  if (get_buffer_filename (cur_bp))
+    {
+      const char *name = dir_name (get_buffer_filename (cur_bp));
+      ret = astr_new_cstr (name);
+      free ((char *) name);
     }
+  else
+    ret = agetcwd ();
 
-  p = astr_cstr (buf);
-  q = strrchr (p, '/');
-  astr_truncate (buf, q ? q - p + 1 : 0);
-
-  return buf;
+  return ret;
 }
 
 /*
@@ -852,7 +845,7 @@ write_to_disk (Buffer * bp, const char *filename)
       if (ret == -1)
         minibuf_error ("Error writing `%s': %s", filename, strerror (errno));
       else
-        minibuf_error ("Error writing `%s': %s", filename);
+        minibuf_error ("Error writing `%s'", filename);
       return false;
     }
 
@@ -886,7 +879,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
       ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", name);
       if (ans == -1)
         FUNCALL (keyboard_quit);
-      if (ans == false)
+      else if (ans == false)
         minibuf_error ("Canceled");
       if (ans != true)
         ok = leNIL;
@@ -956,7 +949,7 @@ static int
 save_some_buffers (void)
 {
   Buffer *bp;
-  size_t i = 0;
+  bool none_to_save = true;
   bool noask = false;
 
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
@@ -965,7 +958,7 @@ save_some_buffers (void)
         {
           const char *fname = get_buffer_filename_or_name (bp);
 
-          ++i;
+          none_to_save = false;
 
           if (noask)
             save_buffer (bp);
@@ -987,7 +980,6 @@ save_some_buffers (void)
                     goto endoffunc;
                   case '.':
                     save_buffer (bp);
-                    ++i;
                     return true;
                   case '!':
                     noask = true;
@@ -995,7 +987,6 @@ save_some_buffers (void)
                   case ' ':
                   case 'y':
                     save_buffer (bp);
-                    ++i;
                     /* FALLTHROUGH */
                   case 'n':
                   case KBD_RET:
@@ -1013,7 +1004,7 @@ save_some_buffers (void)
     }
 
 endoffunc:
-  if (i == 0)
+  if (none_to_save)
     minibuf_write ("(No files need saving)");
 
   return true;
