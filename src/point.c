@@ -76,7 +76,7 @@ line_beginning_position (int count)
   Point pt;
 
   /* Copy current point position without offset (beginning of
-   * line). */
+     line). */
   pt = get_buffer_pt (cur_bp);
   pt.o = 0;
 
