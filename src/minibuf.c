@@ -360,5 +360,5 @@ minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
 void
 minibuf_clear (void)
 {
-  term_minibuf_write ("");
+  minibuf_write ("");
 }
