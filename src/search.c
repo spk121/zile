@@ -440,7 +440,6 @@ isearch (int dir, int regexp)
         {
           minibuf_write ("%s^Q-", astr_cstr (buf));
           astr_cat_char (pattern, xgetkey (GETKEY_UNFILTERED, 0));
-          minibuf_write ("%s", astr_cstr (buf));
         }
       else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's'))
         {
