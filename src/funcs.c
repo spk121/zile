@@ -352,33 +352,31 @@ Put point at beginning and mark at end of buffer.
 }
 END_DEFUN
 
-static int
+static void
 quoted_insert_octal (int c1)
 {
   int c2, c3;
-  minibuf_write ("C-q %d-", c1 - '0');
+  minibuf_write ("C-q %c-", c1);
   c2 = getkey ();
 
   if (!isdigit (c2) || c2 - '0' >= 8)
     {
       insert_char_in_insert_mode (c1 - '0');
       insert_char_in_insert_mode (c2);
-      return true;
     }
-
-  minibuf_write ("C-q %d %d-", c1 - '0', c2 - '0');
-  c3 = getkey ();
-
-  if (!isdigit (c3) || c3 - '0' >= 8)
+  else
     {
-      insert_char_in_insert_mode ((c1 - '0') * 8 + (c2 - '0'));
-      insert_char_in_insert_mode (c3);
-      return true;
+      minibuf_write ("C-q %c %c-", c1, c2);
+      c3 = getkey ();
+
+      if (!isdigit (c3) || c3 - '0' >= 8)
+        {
+          insert_char_in_insert_mode ((c1 - '0') * 8 + (c2 - '0'));
+          insert_char_in_insert_mode (c3);
+        }
+      else
+        insert_char_in_insert_mode ((c1 - '0') * 64 + (c2 - '0') * 8 + (c3 - '0'));
     }
-
-  insert_char_in_insert_mode ((c1 - '8') * 64 + (c2 - '0') * 8 + (c3 - '0'));
-
-  return true;
 }
 
 DEFUN ("quoted-insert", quoted_insert)

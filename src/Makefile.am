@@ -1,6 +1,6 @@
 # Source Makefile.am
 #
-# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -225,6 +225,7 @@ LISP_TESTS =						\
 	lisp-tests/previous_line.el			\
 	lisp-tests/query_replace.el			\
 	lisp-tests/quoted_insert.el			\
+	lisp-tests/quoted_insert_octal.el		\
 	lisp-tests/save_some_buffers.el			\
 	lisp-tests/search_backward.el			\
 	lisp-tests/search_backward_regexp.el		\
