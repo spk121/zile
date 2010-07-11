@@ -318,6 +318,7 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/previous_line.output			\
 	lisp-tests/query_replace.output			\
 	lisp-tests/quoted_insert.output			\
+	lisp-tests/quoted_insert_octal.output		\
 	lisp-tests/save_some_buffers.output		\
 	lisp-tests/scroll_down.output			\
 	lisp-tests/scroll_up.output			\
