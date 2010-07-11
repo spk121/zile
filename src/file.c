@@ -477,12 +477,8 @@ Select buffer @i{buffer} in the current window.
           bp = find_buffer (buffer);
           if (bp == NULL)
             {
-              bp = find_buffer (buffer);
-              if (bp == NULL)
-                {
-                  bp = buffer_new ();
-                  set_buffer_name (bp, buffer);
-                }
+              bp = buffer_new ();
+              set_buffer_name (bp, buffer);
               set_buffer_needname (bp, true);
               set_buffer_nosave (bp, true);
             }
