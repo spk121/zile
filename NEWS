@@ -1,8 +1,8 @@
 Release 2.3.18
 
-This release fixes some minor space leak and a read of freed memory,
-stops Zile from catching the user signal SIGQUIT, and cleans the code
-up a little.
+This release fixes some minor space leaks, a read of freed memory, and
+a bug in quoted-insert, stops Zile from catching the user signal
+SIGQUIT, and cleans the code up a little.
 
 Release 2.3.17
 
