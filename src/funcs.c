@@ -1,6 +1,6 @@
 /* Miscellaneous Emacs functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -74,23 +74,6 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
 }
 END_DEFUN
 
-/*
- * Return a string of maximum length `maxlen', prepending `...'
- * if a cut is needed.
- */
-static astr
-shorten_string (astr as, int maxlen)
-{
-  int len = astr_len (as);
-  if (len > maxlen)
-    {
-      astr_replace_cstr (as, 0, 0, "...");
-      astr_truncate (as, len - maxlen + 3);
-    }
-
-  return as;
-}
-
 static void
 print_buf (Buffer * old_bp, Buffer * bp)
 {
@@ -104,7 +87,7 @@ print_buf (Buffer * old_bp, Buffer * bp)
            get_buffer_name (bp), calculate_buffer_size (bp), "Fundamental");
   if (get_buffer_filename (bp) != NULL)
     {
-      astr shortname = shorten_string (compact_path (astr_new_cstr (get_buffer_filename (bp))), 40);
+      astr shortname = compact_path (astr_new_cstr (get_buffer_filename (bp)));
       insert_astr (shortname);
       astr_delete (shortname);
     }
