@@ -1395,12 +1395,12 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
 
   xasprintf (&cmdline, "%s 2>&1 <%s", cmd, tempfile);
   pipe = popen (cmdline, "r");
+  free (cmdline);
   if (pipe == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
       return false;
     }
-  free (cmdline);
 
   out = astr_fread (pipe);
   pclose (pipe);
