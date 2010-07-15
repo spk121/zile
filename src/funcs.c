@@ -1537,7 +1537,6 @@ The output is available in that buffer in both cases.
               ssize_t written = write (fd, astr_cstr (as), get_region_size (rp));
 
               astr_delete (as);
-              close (fd);
 
               if (written != (ssize_t) get_region_size (rp))
                 {
@@ -1551,6 +1550,7 @@ The output is available in that buffer in both cases.
               else
                 ok = bool_to_lisp (pipe_command (cmd, tempfile, insert, true));
 
+              close (fd);
               remove (tempfile);
             }
         }
