@@ -1548,8 +1548,7 @@ The output is available in that buffer in both cases.
                     minibuf_error ("Error writing to temporary file");
                   ok = leNIL;
                 }
-
-              if (ok == leT)
+              else
                 ok = bool_to_lisp (pipe_command (cmd, tempfile, insert, true));
 
               remove (tempfile);
