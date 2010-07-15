@@ -1570,9 +1570,7 @@ Delete the text between point and mark.
 {
   Region * rp = region_new ();
 
-  if (!calculate_the_region (rp))
-    ok = leNIL;
-  else if (!delete_region (rp))
+  if (!calculate_the_region (rp) || !delete_region (rp))
     ok = leNIL;
   else
     deactivate_mark ();
