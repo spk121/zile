@@ -132,8 +132,8 @@ re_find_substr (const char *s1, size_t s1size,
   struct re_registers search_regs;
   char *ret = NULL;
   int index;
-  reg_syntax_t old_syntax = re_set_syntax (RE_SYNTAX_EMACS);
 
+  re_set_syntax (RE_SYNTAX_EMACS);
   search_regs.num_regs = 1;
 
   /* translate table is never written to, so this cast is safe */
@@ -165,20 +165,11 @@ re_find_substr (const char *s1, size_t s1size,
           free (search_regs.start);
           free (search_regs.end);
         }
-      else if (index == -1)
-        {
-          /* no match */
-        }
-      else
-        {
-          /* error */
-        }
     }
 
-  re_set_syntax (old_syntax);
   pattern.translate = NULL;	/* regfree requires translate to be NULL
                                    or malloced */
-  regfree (&pattern);
+  regfree (&pattern); /* There is no GNU API to do this! */
 
   return ret;
 }
