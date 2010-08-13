@@ -203,7 +203,7 @@ compact_path (astr path)
 }
 
 /*
- * Return the current directory for the buffer.
+ * Return the current directory for the buffer, always ending in `/'.
  */
 static astr
 get_buffer_dir (void)
@@ -218,6 +218,9 @@ get_buffer_dir (void)
     }
   else
     ret = agetcwd ();
+
+  if (astr_len (ret) != 0 && astr_get (ret, astr_len (ret) - 1) != '/')
+    astr_cat_char (ret, '/');
 
   return ret;
 }
