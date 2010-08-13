@@ -1,3 +1,9 @@
+Release 2.3.19
+
+This release fixes a space leak, a small bug in reading filenames in
+the minibuffer introduced in 2.3.18, and some behaviour that was not
+the same as Emacs, and cleans up the code a little.
+
 Release 2.3.18
 
 This release fixes some minor space leaks, a read of freed memory, and
