@@ -1,3 +1,9 @@
+Release 2.3.20
+
+This release fixes a bug in the build system, in which a dependency
+for `zile.1.in' was inadvertently omitted. Thanks to Ulrich Mueller
+for reporting the bug and providing a fix.
+
 Release 2.3.19
 
 This release fixes a space leak, a small bug in reading filenames in
