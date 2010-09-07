@@ -142,7 +142,7 @@ TESTS = $(check_PROGRAMS)
 
 check-local:
 	echo $(LISP_TESTS) | $(TESTS_VARS) EMACS="$(EMACS)" VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
-	echo $(LISP_TESTS_ZILE_ONLY) | $(TESTS_VARS) VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
+	echo $(LISP_TESTS_ZILE_ONLY) | $(TESTS_VARS) EMACS= VALGRIND="$(VALGRIND)" xargs $(srcdir)/run-lisp-tests
 
 check_PROGRAMS = astr
 
