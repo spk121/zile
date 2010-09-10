@@ -115,7 +115,7 @@ zile.1: zile.1.in Makefile
 	chmod a-w $@.tmp
 	mv $@.tmp $@
 
-zile.1.in: main.c man-extras zile-help2man-wrapper zile$(EXEEXT)
+zile.1.in: main.c man-extras zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/man-extras $(srcdir)/zile-help2man-wrapper
 
 dist_pkgdata_DATA = dotzile.sample

@@ -1,9 +1,7 @@
 Release 2.3.20
 
-This release fixes two bugs in the build system: a missing dependency
-for `zile.1.in' (thanks to Ulrich Mueller for the bug report and fix)
-is added, and the Zile-only tests now run correctly when an EMACS
-environment variable is defined.
+This release fixes a bug in the build system: the Zile-only tests now
+run correctly when an EMACS environment variable is defined.
 
 Release 2.3.19
 
