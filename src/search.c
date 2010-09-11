@@ -35,22 +35,6 @@
 #include "main.h"
 #include "extern.h"
 
-/* Downcasing table for case-folding search */
-static char id[UCHAR_MAX + 1];
-static char downcase[UCHAR_MAX + 1];
-
-void
-init_search (void)
-{
-  int i;
-
-  for (i = 0; i <= UCHAR_MAX; i++)
-    {
-      id[i] = i;
-      downcase[i] = tolower (i);
-    }
-}
-
 /* Return true if there are no upper-case letters in the given string.
    If `regex' is true, ignore escaped letters. */
 static bool
@@ -70,105 +54,80 @@ no_upper (const char *s, size_t len, int regex)
   return true;
 }
 
-static const char *
-fold_table (const char *s, int regex)
+static bool
+fold_case (const char *s, int regex)
 {
-  if (get_variable_bool ("case-fold-search")
-      && no_upper (s, strlen (s), regex))
-    return downcase;
-  else
-    return id;
+  return get_variable_bool ("case-fold-search")
+    && no_upper (s, strlen (s), regex);
 }
 
-static const char *
-find_substr (const char *s1, size_t s1size,
-             const char *s2, size_t s2size,
-             const char translate[UCHAR_MAX + 1])
+static int
+find_substr (astr as, const char *s2, size_t s2size)
 {
-  const char *e1 = s1 + s1size, *e2 = s2 + s2size;
+  const char *s1 = astr_cstr (as);
+  const char *e1 = s1 + astr_len (as), *e2 = s2 + s2size;
 
   for (; s1 <= e1 - s2size; s1++)
     {
       const char *sp1 = s1, *sp2 = s2;
 
-      while (translate[(unsigned char) *sp1++] ==
-             translate[(unsigned char) *sp2++])
+      while (*sp1++ == *sp2++)
         if (sp2 == e2)
-          return sp1;
+          return sp1 - astr_cstr (as);
     }
 
-  return NULL;
+  return -1;
 }
 
-static const char *
-rfind_substr (const char *s1, size_t s1size,
-              const char *s2, size_t s2size,
-              const char translate[UCHAR_MAX + 1])
+static int
+rfind_substr (astr as, const char *s2, size_t s2size)
 {
-  const char *e1 = s1 + s1size, *e2 = s2 + s2size;
+  const char *s1 = astr_cstr (as);
+  const char *e1 = s1 + astr_len (as), *e2 = s2 + s2size;
 
   for (; e1 >= s1 + s2size; e1--)
     {
       const char *sp1 = e1, *sp2 = e2;
 
-      while (translate[(unsigned char) *--sp1] ==
-             translate[(unsigned char) *--sp2])
+      while (*--sp1 == *--sp2)
         if (sp2 == s2)
-          return sp1;
+          return sp1 - astr_cstr (as);
     }
 
-  return NULL;
+  return -1;
 }
 
 static const char *re_find_err = NULL;
 
-static char *
-re_find_substr (const char *s1, size_t s1size,
-                const char *s2, size_t s2size,
-                int bol, int eol, int backward,
-                const char translate[UCHAR_MAX + 1])
+static int
+re_find_substr (astr as, const char *s2, size_t s2size,
+                int notbol, int noteol, int backward)
 {
   struct re_pattern_buffer pattern;
   struct re_registers search_regs;
-  char *ret = NULL;
-  int index;
+  const char *s1 = astr_cstr (as);
+  size_t s1size = astr_len (as);
+  int ret = -1;
 
-  re_set_syntax (RE_SYNTAX_EMACS);
+  memset (&pattern, 0, sizeof (pattern));
   search_regs.num_regs = 1;
-
-  /* translate table is never written to, so this cast is safe */
-  pattern.translate = (unsigned char *) translate;
-  pattern.fastmap = NULL;
-  pattern.buffer = NULL;
-  pattern.allocated = 0;
 
   re_find_err = re_compile_pattern (s2, (int) s2size, &pattern);
   if (!re_find_err)
     {
-      pattern.not_bol = !bol;
-      pattern.not_eol = !eol;
+      pattern.not_bol = notbol;
+      pattern.not_eol = noteol;
 
-      if (!backward)
-        index = re_search (&pattern, s1, (int) s1size, 0, (int) s1size,
-                           &search_regs);
-      else
-        index =
-          re_search (&pattern, s1, (int) s1size, (int) s1size, -(int) s1size,
-                     &search_regs);
-
-      if (index >= 0)
+      if (re_search (&pattern, s1, (int) s1size, !backward ? 0 : (int) s1size,
+                     !backward ? (int) s1size : -(int) s1size,
+                     &search_regs) >= 0)
         {
-          if (!backward)
-            ret = ((char *) s1) + search_regs.end[0];
-          else
-            ret = ((char *) s1) + search_regs.start[0];
+          ret = !backward ? search_regs.end[0] : search_regs.start[0];
           free (search_regs.start);
           free (search_regs.end);
         }
     }
 
-  pattern.translate = NULL;	/* regfree requires translate to be NULL
-                                   or malloced */
   regfree (&pattern); /* There is no GNU API to do this! */
 
   return ret;
@@ -185,98 +144,72 @@ goto_linep (Line * lp)
 }
 
 static int
-search_forward (Line * startp, size_t starto, const char *s, int regexp)
+search (Point pt, const char *s, int backward, int regexp)
 {
-  Line *lp;
-  const char *sp, *sp2, *translate = fold_table (s, regexp);
-  size_t s1size, s2size = strlen (s);
-
-  if (s2size < 1)
-    return false;
-
-  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = get_line_next (lp))
-    {
-      if (lp == startp)
-        {
-          sp = astr_cstr (get_line_text (lp)) + starto;
-          s1size = astr_len (get_line_text (lp)) - starto;
-        }
-      else
-        {
-          sp = astr_cstr (get_line_text (lp));
-          s1size = astr_len (get_line_text (lp));
-        }
-      if (s1size < 1)
-        continue;
-
-      if (regexp)
-        sp2 = re_find_substr (sp, s1size, s, s2size,
-                              sp == astr_cstr (get_line_text (lp)), true, false,
-                              translate);
-      else
-        sp2 = find_substr (sp, s1size, s, s2size, translate);
-
-      if (sp2 != NULL)
-        {
-          Point pt;
-          goto_linep (lp);
-          pt = get_buffer_pt (cur_bp);
-          pt.o = sp2 - astr_cstr (get_line_text (lp));
-          set_buffer_pt (cur_bp, pt);
-          return true;
-        }
-    }
-
-  return false;
-}
-
-static int
-search_backward (Line * startp, size_t starto, const char *s, int regexp)
-{
-  Line *lp;
-  const char *sp, *sp2, *translate = fold_table (s, regexp);
-  size_t s1size, ssize = strlen (s);
+  Line *lp = pt.p;
+  bool downcase = fold_case (s, regexp), notbol = false, noteol = false;
+  size_t ssize = strlen (s);
+  astr as, bs;
+  int ret = false;
 
   if (ssize < 1)
     return false;
 
-  for (lp = startp; lp != get_buffer_lines (cur_bp); lp = get_line_prev (lp))
+  as = get_line_text (lp);
+  if (!backward)
     {
-      sp = astr_cstr (get_line_text (lp));
-      if (lp == startp)
-        s1size = starto;
-      else
-        s1size = astr_len (get_line_text (lp));
-      if (s1size < 1)
+      bs = astr_substr (as, pt.o, astr_len (as) - pt.o);
+      notbol = pt.o > 0;
+    }
+  else
+    {
+      bs = astr_substr (as, 0, pt.o);
+      noteol = pt.o < astr_len (as);
+    }
+  as = bs;
+
+  for (;
+       lp != get_buffer_lines (cur_bp);
+       lp = (!backward ? get_line_next : get_line_prev) (lp),
+         as = get_line_text (lp),
+         notbol = false, noteol = false)
+    {
+      int pos = -1;
+
+      if (astr_len (as) < 1)
         continue;
 
-      if (regexp)
-        sp2 = re_find_substr (sp, s1size, s, ssize,
-                              true, s1size == astr_len (get_line_text (lp)), true,
-                              translate);
-      else
-        sp2 = rfind_substr (sp, s1size, s, ssize, translate);
+      if (downcase)
+        as = astr_recase (astr_cpy (astr_new (), as), case_lower);
 
-      if (sp2 != NULL)
+      if (regexp)
+        pos = re_find_substr (as, s, ssize, notbol, noteol, backward);
+      else
+        pos = (!backward ? find_substr : rfind_substr) (as, s, ssize);
+
+      if (downcase)
+        astr_delete (as);
+
+      if (pos >= 0)
         {
-          Point pt;
+          Point cur_pt;
           goto_linep (lp);
-          pt = get_buffer_pt (cur_bp);
-          pt.o = sp2 - astr_cstr (get_line_text (lp));
-          set_buffer_pt (cur_bp, pt);
-          return true;
+          cur_pt = get_buffer_pt (cur_bp);
+          cur_pt.o = pos + ((!backward && lp == pt.p) ? pt.o : 0);
+          set_buffer_pt (cur_bp, cur_pt);
+          ret = true;
+          break;
         }
     }
 
-  return false;
+  astr_delete (bs);
+  return ret;
 }
 
 static char *last_search = NULL;
 
-typedef int (*Searcher) (Line * startp, size_t starto, const char *s, int regexp);
-
 static le *
-search (Searcher searcher, bool regexp, const char *pattern, const char *search_msg)
+do_search (bool backward, bool regexp, const char *pattern, const char *search_msg)
 {
   le * ok = leT;
   const char *ms = NULL;
@@ -293,7 +226,7 @@ search (Searcher searcher, bool regexp, const char *pattern, const char *search_
       free (last_search);
       last_search = xstrdup (pattern);
 
-      if (!searcher (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, pattern, regexp))
+      if (!search (get_buffer_pt (cur_bp), pattern, backward, regexp))
         {
           minibuf_error ("Search failed: \"%s\"", pattern);
           ok = leNIL;
@@ -311,7 +244,7 @@ Search forward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = search (search_forward, false, pattern, "Search: ");
+  ok = do_search (false, false, pattern, "Search: ");
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -323,7 +256,7 @@ Search backward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = search (search_backward, false, pattern, "Search backward: ");
+  ok = do_search (true, false, pattern, "Search backward: ");
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -335,7 +268,7 @@ Search forward from point for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = search (search_forward, true, pattern, "RE search: ");
+  ok = do_search (false, true, pattern, "RE search: ");
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -347,18 +280,16 @@ Search backward from point for match for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = search (search_backward, true, pattern, "RE search backward: ");
+  ok = do_search (true, true, pattern, "RE search backward: ");
   STR_FREE (pattern);
 }
 END_DEFUN
 
-#define ISEARCH_FORWARD		1
-#define ISEARCH_BACKWARD	2
 /*
  * Incremental search engine.
  */
 static le *
-isearch (int dir, int regexp)
+isearch (int backward, int regexp)
 {
   int c;
   int last = true;
@@ -380,7 +311,7 @@ isearch (int dir, int regexp)
                  (last ?
                   (regexp ? "Regexp " : "") :
                   (regexp ? "Failing regexp " : "Failing ")),
-                 (dir == ISEARCH_FORWARD) ? "" : " backward",
+                 !backward ? "" : " backward",
                  astr_cstr (pattern));
 
       /* Regex error. */
@@ -435,10 +366,10 @@ isearch (int dir, int regexp)
       else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's'))
         {
           /* Invert direction. */
-          if ((c & 0xff) == 'r' && dir == ISEARCH_FORWARD)
-            dir = ISEARCH_BACKWARD;
-          else if ((c & 0xff) == 's' && dir == ISEARCH_BACKWARD)
-            dir = ISEARCH_FORWARD;
+          if ((c & 0xff) == 'r')
+            backward = true;
+          else if ((c & 0xff) == 's')
+            backward = false;
           if (astr_len (pattern) > 0)
             {
               /* Find next match. */
@@ -454,7 +385,7 @@ isearch (int dir, int regexp)
         {
           if (c == KBD_RET && astr_len (pattern) == 0)
             {
-              if (dir == ISEARCH_FORWARD)
+              if (!backward)
                 {
                   if (regexp)
                     FUNCALL (search_forward_regexp);
@@ -494,13 +425,7 @@ isearch (int dir, int regexp)
         astr_cat_char (pattern, c);
 
       if (astr_len (pattern) > 0)
-        {
-          if (dir == ISEARCH_FORWARD)
-            last = search_forward (cur.p, cur.o, astr_cstr (pattern), regexp);
-          else
-            last =
-              search_backward (cur.p, cur.o, astr_cstr (pattern), regexp);
-        }
+        last = search (cur, astr_cstr (pattern), backward, regexp);
       else
         last = true;
 
@@ -530,7 +455,7 @@ Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 +*/
 {
-  ok = isearch (ISEARCH_FORWARD, lastflag & FLAG_SET_UNIARG);
+  ok = isearch (false, lastflag & FLAG_SET_UNIARG);
 }
 END_DEFUN
 
@@ -544,7 +469,7 @@ Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
 @kbd{C-g} when search is successful aborts and moves point to starting point.
 +*/
 {
-  ok = isearch (ISEARCH_BACKWARD, lastflag & FLAG_SET_UNIARG);
+  ok = isearch (true, lastflag & FLAG_SET_UNIARG);
 }
 END_DEFUN
 
@@ -556,7 +481,7 @@ Like ordinary incremental search except that your input
 is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
 +*/
 {
-  ok = isearch (ISEARCH_FORWARD, !(lastflag & FLAG_SET_UNIARG));
+  ok = isearch (false, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
@@ -568,7 +493,7 @@ Like ordinary incremental search except that your input
 is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
 +*/
 {
-  ok = isearch (ISEARCH_BACKWARD, !(lastflag & FLAG_SET_UNIARG));
+  ok = isearch (true, !(lastflag & FLAG_SET_UNIARG));
 }
 END_DEFUN
 
@@ -601,7 +526,7 @@ what to do with it.
       return FUNCALL (keyboard_quit);
     }
 
-  while (search_forward (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, find, false))
+  while (search (get_buffer_pt (cur_bp), find, false, false))
     {
       Point pt;
       int c = ' ';

@@ -174,7 +174,6 @@ main (int argc, char **argv)
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
-  init_search ();
   init_lisp ();
   init_variables ();
   init_eval ();
