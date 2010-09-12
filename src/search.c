@@ -128,13 +128,13 @@ search (Point pt, const char *s, int forward, int regexp)
 static char *last_search = NULL;
 
 static le *
-do_search (bool forward, bool regexp, const char *pattern, const char *search_msg)
+do_search (bool forward, bool regexp, const char *pattern)
 {
   le * ok = leNIL;
   const char *ms = NULL;
 
   if (pattern == NULL)
-    pattern = ms = minibuf_read (search_msg, last_search);
+    pattern = ms = minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward");
 
   if (pattern == NULL)
     return FUNCALL (keyboard_quit);
@@ -160,7 +160,7 @@ Search forward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (true, false, pattern, "Search: ");
+  ok = do_search (true, false, pattern);
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -172,7 +172,7 @@ Search backward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (false, false, pattern, "Search backward: ");
+  ok = do_search (false, false, pattern);
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -184,7 +184,7 @@ Search forward from point for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (true, true, pattern, "RE search: ");
+  ok = do_search (true, true, pattern);
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -196,7 +196,7 @@ Search backward from point for match for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (false, true, pattern, "RE search backward: ");
+  ok = do_search (false, true, pattern);
   STR_FREE (pattern);
 }
 END_DEFUN
@@ -300,22 +300,7 @@ isearch (int forward, int regexp)
       else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB)
         {
           if (c == KBD_RET && astr_len (pattern) == 0)
-            {
-              if (forward)
-                {
-                  if (regexp)
-                    FUNCALL (search_forward_regexp);
-                  else
-                    FUNCALL (search_forward);
-                }
-              else
-                {
-                  if (regexp)
-                    FUNCALL (search_backward_regexp);
-                  else
-                    FUNCALL (search_backward);
-                }
-            }
+            do_search (forward, regexp, NULL);
           else
             {
               if (astr_len (pattern) > 0)
