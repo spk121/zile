@@ -82,7 +82,7 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
                        forward ? (to - from) : -(to - from), NULL);
     }
 
-  regfree (&pattern); /* There is no GNU API to do this! */
+  regfree (&pattern);
 
   return ret;
 }
@@ -90,11 +90,10 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
 static void
 goto_linep (Line * lp)
 {
-  Point pt;
   set_buffer_pt (cur_bp, point_min ());
-  resync_redisplay (cur_wp);
-  for (pt = get_buffer_pt (cur_bp); pt.p != lp; pt = get_buffer_pt (cur_bp))
+  while (get_buffer_pt (cur_bp).p != lp)
     next_line ();
+  resync_redisplay (cur_wp);
 }
 
 static bool
