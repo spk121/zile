@@ -130,7 +130,7 @@ static char *last_search = NULL;
 static le *
 do_search (bool forward, bool regexp, const char *pattern, const char *search_msg)
 {
-  le * ok = leT;
+  le * ok = leNIL;
   const char *ms = NULL;
 
   if (pattern == NULL)
@@ -138,18 +138,15 @@ do_search (bool forward, bool regexp, const char *pattern, const char *search_ms
 
   if (pattern == NULL)
     return FUNCALL (keyboard_quit);
-  if (pattern[0] == '\0')
-    ok = leNIL;
-  else
+  if (pattern[0] != '\0')
     {
       free (last_search);
       last_search = xstrdup (pattern);
 
       if (!search (get_buffer_pt (cur_bp), pattern, forward, regexp))
-        {
-          minibuf_error ("Search failed: \"%s\"", pattern);
-          ok = leNIL;
-        }
+        minibuf_error ("Search failed: \"%s\"", pattern);
+      else
+        ok = leT;
     }
 
   free ((char *) ms);
