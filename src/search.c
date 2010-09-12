@@ -21,15 +21,9 @@
 
 #include "config.h"
 
-#include <limits.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#if HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+#include <ctype.h>
 #include "regex.h"
 
 #include "main.h"
@@ -73,27 +67,14 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
   re_set_syntax (syntax);
 
   re_find_err = re_compile_pattern (s2, (int) s2size, &pattern);
+  pattern.not_bol = notbol;
+  pattern.not_eol = noteol;
   if (!re_find_err)
-    {
-      pattern.not_bol = notbol;
-      pattern.not_eol = noteol;
-
-      ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to,
-                       forward ? (to - from) : -(to - from), NULL);
-    }
+    ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to,
+                     forward ? (to - from) : -(to - from), NULL);
 
   regfree (&pattern);
-
   return ret;
-}
-
-static void
-goto_linep (Line * lp)
-{
-  set_buffer_pt (cur_bp, point_min ());
-  while (get_buffer_pt (cur_bp).p != lp)
-    next_line ();
-  resync_redisplay (cur_wp);
 }
 
 static bool
@@ -135,10 +116,12 @@ search (Point pt, const char *s, int forward, int regexp)
   if (pos < 0)
     return false;
 
-  goto_linep (lp);
+  while (get_buffer_pt (cur_bp).p != lp)
+    (forward ? next_line : previous_line) ();
   pt = get_buffer_pt (cur_bp);
   pt.o = pos + (forward ? ssize : 0);
   set_buffer_pt (cur_bp, pt);
+  thisflag |= FLAG_NEED_RESYNC;
   return true;
 }
 
