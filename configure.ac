@@ -43,8 +43,22 @@ if test -n "$VALGRIND"; then
 fi
 
 dnl Checks for functions and headers
-gl_INIT
 AC_HEADER_STDC
+dnl If system lacks RE_PLAIN, force --with-included-regex
+AC_MSG_CHECKING([whether system regex.h has RE_PLAIN])
+AC_COMPILE_IFELSE(
+  [AC_LANG_PROGRAM(
+    [AC_INCLUDES_DEFAULT[
+     #include <regex.h>
+     ]],
+    [[reg_syntax_t syn = RE_PLAIN;]])],
+ [AC_MSG_RESULT([yes])],
+ [AC_MSG_RESULT([no])
+ with_included_regex=yes],
+ dnl When crosscompiling, force included regex.
+ [AC_MSG_RESULT([no])
+ with_included_regex=yes])
+gl_INIT
 AC_CHECK_FUNCS_ONCE(fchmod)
 
 dnl Curses
