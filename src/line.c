@@ -298,14 +298,14 @@ check_case (const char *s, size_t len)
 {
   size_t i;
 
-  if (!isupper ((int) *s))
-    return 0;
-
-  for (i = 1; i < len; i++)
-    if (!isupper ((int) s[i]))
-      return 1;
-
-  return 2;
+  for (i = 0; i < len && isupper ((int) s[i]); i++)
+    ;
+  if (i == len)
+    return 2;
+  else if (i == 1)
+    for (; i < len && !isupper ((int) s[i]); i++)
+      ;
+  return i == len;
 }
 
 /*
