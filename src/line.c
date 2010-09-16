@@ -314,7 +314,7 @@ check_case (const char *s, size_t len)
  */
 void
 line_replace_text (Line * lp, size_t offset, size_t oldlen,
-                   char *newtext, int replace_case)
+                   const char *newtext, int replace_case)
 {
   int case_type = 0;
   size_t newlen = strlen (newtext);

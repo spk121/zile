@@ -178,7 +178,7 @@ void line_delete (Line *l);
 Line *line_insert (Line *l, astr i);
 void line_remove (Line *l);
 void line_replace_text (Line * lp, size_t offset, size_t oldlen,
-                        char *newtext, int replace_case);
+                        const char *newtext, int replace_case);
 int insert_char (int c);
 int insert_char_in_insert_mode (int c);
 bool fill_break_line (void);
