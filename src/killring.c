@@ -44,7 +44,7 @@ kill_ring_push (astr as)
 {
   if (kill_ring_text == NULL)
     kill_ring_text = astr_new ();
-  astr_cpy (kill_ring_text, as);
+  astr_cat (kill_ring_text, as);
 }
 
 static bool
