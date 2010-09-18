@@ -81,6 +81,11 @@ char astr_get (astr as, size_t pos);
 astr astr_substr (astr as, size_t pos, size_t size);
 
 /*
+ * Compare as1 and as2; result as for memcmp.
+ */
+int astr_cmp (astr as1, astr as2);
+
+/*
  * Assign the contents of the argument string to the string as.
  */
 astr astr_cpy (astr as, astr src);

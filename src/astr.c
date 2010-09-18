@@ -27,6 +27,7 @@
 #include <string.h>
 #include <ctype.h>
 #include "xalloc.h"
+#include "minmax.h"
 
 #include "astr.h"
 #include "xalloc_extra.h"
@@ -172,6 +173,14 @@ astr_substr (astr as, size_t pos, size_t size)
 {
   assert (pos + size <= astr_len (as));
   return astr_ncat_cstr (astr_new (), astr_cstr (as) + pos, size);
+}
+
+int
+astr_cmp (astr as1, astr as2)
+{
+  size_t len1 = astr_len (as1), len2 = astr_len (as2);
+  int ret =  strncmp (astr_cstr (as1), astr_cstr (as2), MIN (len1, len2));
+  return len1 == len2 ? ret : (ret || len2 - len1);
 }
 
 astr

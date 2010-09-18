@@ -473,40 +473,37 @@ END_DEFUN
  * Compact the spaces into tabulations according to the `tw' tab width.
  */
 static astr
-tabify_string (char *src, size_t scol, size_t tw)
+tabify_string (astr src, size_t scol, size_t tw)
 {
-  char *sp;
   astr dest = astr_new ();
-  size_t dcol = scol;
+  size_t dcol = scol, i;
 
-  for (sp = src; *sp; ++sp)
-    switch (*sp)
-      {
-      case ' ':
-        ++dcol;
-        break;
-      case '\t':
-        dcol += tw;
-        dcol -= dcol % tw;
-        break;
-      default:
-        while (((scol + tw) - (scol + tw) % tw) <= dcol)
-          {
-            if (scol + 1 == dcol)
-              break;
-            astr_cat_char (dest, '\t');
-            scol += tw;
-            scol -= scol % tw;
-          }
-        while (scol < dcol)
-          {
+  for (i = 0; i < astr_len (src); i++)
+    {
+      char c = astr_get (src, i);
+      switch (c)
+        {
+        case ' ':
+          ++dcol;
+          break;
+        case '\t':
+          dcol += tw;
+          dcol -= dcol % tw;
+          break;
+        default:
+          while (((scol + tw) - (scol + tw) % tw) <= dcol && scol != dcol - 1)
+            {
+              astr_cat_char (dest, '\t');
+              scol += tw;
+              scol -= scol % tw;
+            }
+          for (; scol < dcol; scol++)
             astr_cat_char (dest, ' ');
-            scol++;
-          }
-        astr_cat_char (dest, *sp);
-        ++scol;
-        ++dcol;
-      }
+          astr_cat_char (dest, c);
+          ++scol;
+          ++dcol;
+        }
+    }
 
   return dest;
 }
@@ -517,27 +514,24 @@ tabify_string (char *src, size_t scol, size_t tw)
  * i.e. strlen (src) * tw + 1.
  */
 static astr
-untabify_string (char *src, size_t scol, size_t tw)
+untabify_string (astr src, size_t scol, size_t tw)
 {
-  char *sp;
   astr dest = astr_new ();
-  int col = scol;
+  size_t i;
 
-  for (sp = src; *sp; ++sp)
-    if (*sp == '\t')
-      {
+  for (i = 0; i < astr_len (src); i++)
+    {
+      char c = astr_get (src, i);
+      if (c == '\t')
         do
-          {
-            astr_cat_char (dest, ' ');
-            ++col;
-          }
-        while ((col % tw) > 0);
-      }
-    else
-      {
-        astr_cat_char (dest, *sp);
-        ++col;
-      }
+          astr_cat_char (dest, ' ');
+        while ((++scol % tw) > 0);
+      else
+        {
+          astr_cat_char (dest, c);
+          ++scol;
+        }
+    }
 
   return dest;
 }
@@ -548,16 +542,8 @@ static void
 edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
                int action)
 {
-  char *src;
-  astr dest;
   size_t col, i, t = tab_width (cur_bp);
-
-  if (size == 0)
-    return;
-
-  src = (char *) xzalloc (size + 1);
-  strncpy (src, astr_cstr (get_line_text (lp)) + offset, size);
-  src[size] = '\0';
+  astr src = astr_substr (get_line_text (lp), offset, size), dest;
 
   /* Get offset's column.  */
   col = 0;
@@ -568,17 +554,17 @@ edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
       ++col;
     }
 
-  /* Call (un)tabify function.  */
   dest = ((action == TAB_UNTABIFY) ? untabify_string : tabify_string) (src, col, t);
 
-  if (strcmp (src, astr_cstr (dest)) != 0)
+  /* Only make an edit if the line has changed. */
+  if (astr_cmp (src, dest) != 0)
     {
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
                  size, astr_len (dest));
       line_replace_text (lp, offset, size, astr_cstr (dest), false);
     }
 
-  free (src);
+  astr_delete (src);
   astr_delete (dest);
 }
 
