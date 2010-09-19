@@ -195,3 +195,4 @@ wchar.h
 /c++defs.h
 /cloexec.c
 /cloexec.h
+/sys_wait.in.h

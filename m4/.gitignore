@@ -119,3 +119,4 @@ warn-on-use.m4
 /cloexec.m4
 /printf.m4
 /asm-underscore.m4
+/sys_wait_h.m4
