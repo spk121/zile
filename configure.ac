@@ -36,6 +36,9 @@ AM_PROG_CC_C_O
 dnl help2man
 AX_WITH_PROG(HELP2MAN, help2man)
 
+dnl Code complexity reports
+AC_PATH_PROG([PMCCABE], [pmccabe], [false])
+
 dnl Valgrind
 AX_WITH_PROG(VALGRIND, valgrind)
 if test -n "$VALGRIND"; then

@@ -30,3 +30,5 @@ Makefile.in
 .deps
 release-notes
 /c++defs.h
+/pmccabe.css
+/pmccabe2html

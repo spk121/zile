@@ -37,3 +37,15 @@ release: distcheck
 	git push git.sv.gnu.org:/srv/git/zile.git master && git pull && \
 	woger gnu,freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
+
+cyclo-$(PACKAGE).html:
+	$(PMCCABE) ${top_srcdir}/src/*.[ch] \
+		| sort -nr \
+		| $(AWK) -f ${top_srcdir}/pmccabe2html \
+			-v lang=html -v name="$(PACKAGE_NAME)" \
+			-v vcurl="http://git.savannah.gnu.org/gitweb/?p=$(PACKAGE).git;a=blob;f=%FILENAME%;hb=HEAD" \
+			-v url="http://www.gnu.org/software/$(PACKAGE)/" \
+			-v css=${top_srcdir}/pmccabe.css \
+			-v cut_dir=${top_srcdir}/ \
+			> $@-tmp
+	mv $@-tmp $@
