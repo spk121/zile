@@ -624,7 +624,7 @@ DEFUN ("tabify", tabify)
 Convert multiple spaces in region to tabs when possible.
 A group of spaces is partially replaced by tabs
 when this can be done without changing the column they end at.
-The variable `tab-width' controls the spacing of tab stops.
+The variable @samp{tab-width} controls the spacing of tab stops.
 +*/
 {
   ok = edit_tab_region (TAB_TABIFY);
