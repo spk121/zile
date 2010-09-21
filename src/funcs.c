@@ -536,11 +536,9 @@ untabify_string (astr src, size_t scol, size_t tw)
   return dest;
 }
 
-#define TAB_TABIFY	1
-#define TAB_UNTABIFY	2
 static void
 edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
-               int action)
+               astr (*action) (astr as, size_t scol, size_t tw))
 {
   size_t col, i, t = tab_width (cur_bp);
   astr src = astr_substr (get_line_text (lp), offset, size), dest;
@@ -554,7 +552,7 @@ edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
       ++col;
     }
 
-  dest = ((action == TAB_UNTABIFY) ? untabify_string : tabify_string) (src, col, t);
+  dest = action (src, col, t);
 
   /* Only make an edit if the line has changed. */
   if (astr_cmp (src, dest) != 0)
@@ -569,7 +567,7 @@ edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
 }
 
 static le *
-edit_tab_region (int action)
+edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
 {
   Region * rp = region_new ();
 
@@ -627,7 +625,7 @@ when this can be done without changing the column they end at.
 The variable @samp{tab-width} controls the spacing of tab stops.
 +*/
 {
-  ok = edit_tab_region (TAB_TABIFY);
+  ok = edit_tab_region (tabify_string);
 }
 END_DEFUN
 
@@ -637,7 +635,7 @@ Convert all tabs in region to multiple spaces, preserving columns.
 The variable @samp{tab-width} controls the spacing of tab stops.
 +*/
 {
-  ok = edit_tab_region (TAB_UNTABIFY);
+  ok = edit_tab_region (untabify_string);
 }
 END_DEFUN
 
