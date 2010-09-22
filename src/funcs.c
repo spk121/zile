@@ -1310,12 +1310,11 @@ END_DEFUN
  * Set the region case.
  */
 static le *
-setcase_region (enum casing rcase)
+setcase_region (int (*func) (int))
 {
   Region * rp = region_new ();
   Line * lp;
   size_t i, size;
-  int (*func) (int) = rcase == case_upper ? toupper : tolower;
 
   if (warn_if_readonly_buffer () || !calculate_the_region (rp))
     {
@@ -1354,7 +1353,7 @@ DEFUN ("upcase-region", upcase_region)
 Convert the region to upper case.
 +*/
 {
-  ok = setcase_region (case_upper);
+  ok = setcase_region (toupper);
 }
 END_DEFUN
 
@@ -1363,7 +1362,7 @@ DEFUN ("downcase-region", downcase_region)
 Convert the region to lower case.
 +*/
 {
-  ok = setcase_region (case_lower);
+  ok = setcase_region (tolower);
 }
 END_DEFUN
 
