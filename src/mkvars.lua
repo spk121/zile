@@ -1,6 +1,6 @@
 -- Produce dotzile.sample
 --
--- Copyright (c) 2006, 2007, 2009 Free Software Foundation, Inc.
+-- Copyright (c) 2006, 2007, 2009, 2010 Free Software Foundation, Inc.
 --
 -- This file is part of GNU Zile.
 --
@@ -18,10 +18,6 @@
 -- along with GNU Zile; see the file COPYING.  If not, write to the
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
-
-prog = {
-  name = "mkvars"
-}
 
 require "lib"
 require "texinfo"
@@ -42,7 +38,6 @@ function escape_for_C (s)
   return s
 end
 
-local vars = {}
 for l in io.lines (arg[1]) do
   if string.find (l, "^X %(") then
     assert (loadstring (l)) ()

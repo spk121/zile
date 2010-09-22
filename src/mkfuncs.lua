@@ -19,10 +19,6 @@
 -- Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 -- MA 02111-1301, USA.
 
-prog = {
-  name = "mkfuncs"
-}
-
 require "lib"
 require "texinfo"
 
@@ -38,8 +34,6 @@ h:write ("/*\n" ..
          " * Generated from C sources.\n" ..
          " */\n" ..
          "\n")
-
-local funcs = {}
 
 for i in ipairs (arg) do
   if arg[i] then
