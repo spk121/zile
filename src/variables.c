@@ -131,7 +131,7 @@ set_variable (const char *var, const char *val)
           p->doc = "";
         }
     }
-  if (q != p)
+  else
     var_free (p);
 }
 
