@@ -1,6 +1,6 @@
 # Top-level Makefile.am
 #
-# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -38,7 +38,7 @@ release: distcheck
 	woger gnu,freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
 
-cyclo-$(PACKAGE).html:
+cyclo:
 	$(PMCCABE) ${top_srcdir}/src/*.[ch] \
 		| sort -nr \
 		| $(AWK) -f ${top_srcdir}/pmccabe2html \
@@ -47,5 +47,5 @@ cyclo-$(PACKAGE).html:
 			-v url="http://www.gnu.org/software/$(PACKAGE)/" \
 			-v css=${top_srcdir}/pmccabe.css \
 			-v cut_dir=${top_srcdir}/ \
-			> $@-tmp
-	mv $@-tmp $@
+			> cyclo-$(PACKAGE).html-tmp
+	mv cyclo-$(PACKAGE).html-tmp cyclo-$(PACKAGE).html
