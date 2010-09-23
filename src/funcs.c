@@ -259,7 +259,7 @@ Just C-u as argument means to use the current column.
     }
   else
     {
-      xasprintf (&buf, "%ld", fill_col);
+      buf = xasprintf ("%ld", fill_col);
       /* Only print message when run interactively. */
       minibuf_write ("Fill column set to %s (was %d)", buf,
                      get_variable_number ("fill-column"));
@@ -1382,7 +1382,7 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
   char *cmdline, *eol;
   FILE * pipe;
 
-  xasprintf (&cmdline, "%s 2>&1 <%s", cmd, tempfile);
+  cmdline = xasprintf ("%s 2>&1 <%s", cmd, tempfile);
   pipe = popen (cmdline, "r");
   free (cmdline);
   if (pipe == NULL)

@@ -54,7 +54,7 @@ add_history_element (History * hp, const char *string)
 
   if (!hp->elements)
     hp->elements = gl_list_create_empty (GL_LINKED_LIST,
-                                         NULL, NULL, list_free, true);
+                                         NULL, NULL, (gl_listelement_dispose_fn) free, true);
   else
     last = (char *) gl_list_get_at (hp->elements, gl_list_size (hp->elements) - 1);
   if (!last || strcmp (last, string) != 0)

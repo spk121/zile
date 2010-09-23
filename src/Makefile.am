@@ -29,8 +29,6 @@ zile_LDADD = $(LDADD) $(LIBOBJS)
 zile_base_SOURCES =					\
 	astr.c						\
 	astr.h						\
-	xalloc_extra.c					\
-	xalloc_extra.h					\
 	extern.h					\
 	main.h						\
 	tbl_vars.h					\
@@ -142,7 +140,7 @@ check-local:
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
-astr_LDADD = xalloc_extra.o $(LDADD)
+astr_LDADD = $(LDADD)
 
 # FIXME: Find a way of making these work
 #	lisp-tests/scroll_down.el			\

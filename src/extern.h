@@ -21,8 +21,6 @@
 
 #include "gl_xlist.h"
 
-#include "xalloc_extra.h"
-
 /* basic.c ---------------------------------------------------------------- */
 size_t get_goalc_bp (Buffer * bp, Point pt);
 size_t get_goalc (void);

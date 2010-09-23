@@ -85,7 +85,7 @@ completion_new (int fileflag)
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
                                           completion_streq, NULL,
-                                          list_free, false);
+                                          (gl_listelement_dispose_fn) free, false);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST,
                                       completion_streq, NULL,
                                       NULL, false);
@@ -247,7 +247,7 @@ completion_readdir (Completion * cp, astr as)
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
                                           completion_streq, NULL,
-                                          list_free, false);
+                                          (gl_listelement_dispose_fn) free, false);
 
   if (!expand_path (as))
     return false;

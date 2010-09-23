@@ -27,6 +27,7 @@
 #include <limits.h>
 #include "config.h"
 #include "xalloc.h"
+#include "xvasprintf.h"
 #include "size_max.h"
 #include "minmax.h"
 #include "hash.h"

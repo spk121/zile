@@ -169,7 +169,7 @@ make_buffer_name (const char *filename)
       /* Note: there can't be more than SIZE_MAX buffers. */
       for (i = 2; true; i++)
         {
-          xasprintf (&name, "%s<%ld>", p, i);
+          name = xasprintf ("%s<%ld>", p, (unsigned long) i);
           if (find_buffer (name) == NULL)
             return name;
           free (name);

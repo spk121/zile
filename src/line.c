@@ -491,7 +491,7 @@ bprintf (const char *fmt, ...)
   char *buf;
 
   va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
+  buf = xvasprintf (fmt, ap);
   va_end (ap);
   insert_nstring (buf, strlen (buf));
   free (buf);

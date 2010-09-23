@@ -232,8 +232,8 @@ main (int argc, char **argv)
 #define D(text)                                 \
           printf (text "\n");
 #define O(longname, shortname, arg, argstring, docstring)               \
-          xasprintf (&shortopt, ", -%c", shortname);                    \
-          xasprintf (&buf, "--%s%s %s", longname, shortname ? shortopt : "", argstring); \
+          shortopt = xasprintf (", -%c", shortname);                    \
+          buf = xasprintf ("--%s%s %s", longname, shortname ? shortopt : "", argstring); \
           printf ("%-24s%s\n", buf, docstring);                         \
           free (buf);                                                   \
           free (shortopt);

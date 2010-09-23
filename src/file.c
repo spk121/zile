@@ -657,13 +657,7 @@ copy_file (const char *source, const char *dest)
       return false;
     }
 
-  if (xasprintf (&tname, "%s_XXXXXXXXXX", dest) == -1)
-    {
-      minibuf_error ("Cannot allocate temporary file name `%s'",
-                     strerror (errno));
-      return false;
-    }
-
+  tname = xasprintf ("%s_XXXXXXXXXX", dest);
   ofd = mkstemp (tname);
   if (ofd == -1)
     {

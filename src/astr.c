@@ -27,10 +27,11 @@
 #include <string.h>
 #include <ctype.h>
 #include "xalloc.h"
+#include "xvasprintf.h"
+#include "memcmp2.h"
 #include "minmax.h"
 
 #include "astr.h"
-#include "xalloc_extra.h"
 
 #define ALLOCATION_CHUNK_SIZE	16
 
@@ -178,9 +179,7 @@ astr_substr (astr as, size_t pos, size_t size)
 int
 astr_cmp (astr as1, astr as2)
 {
-  size_t len1 = astr_len (as1), len2 = astr_len (as2);
-  int ret =  strncmp (astr_cstr (as1), astr_cstr (as2), MIN (len1, len2));
-  return len1 == len2 ? ret : (ret || len2 - len1);
+  return memcmp2 (astr_cstr (as1), astr_len (as1), astr_cstr (as2), astr_len (as2));
 }
 
 astr
@@ -224,11 +223,11 @@ astr
 astr_afmt (astr as, const char *fmt, ...)
 {
   va_list ap;
-  char *buf;
+  const char *buf;
   va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
+  buf = xvasprintf (fmt, ap);
   astr_cat_cstr (as, buf);
-  free (buf);
+  free ((char *) buf);
   va_end (ap);
   return as;
 }

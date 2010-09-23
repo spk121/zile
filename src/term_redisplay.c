@@ -54,15 +54,15 @@ term_set_size (size_t cols, size_t rows)
   height = rows;
 }
 
-static int
-make_char_printable (char **buf, int c)
+static char *
+make_char_printable (int c)
 {
   if (c == '\0')
-    return xasprintf (buf, "^@");
+    return xasprintf ("^@");
   else if (c > 0 && c <= '\32')
-    return xasprintf (buf, "^%c", 'A' + c - 1);
+    return xasprintf ("^%c", 'A' + c - 1);
   else
-    return xasprintf (buf, "\\%o", c & 0xff);
+    return xasprintf ("\\%o", c & 0xff);
 }
 
 static size_t
@@ -83,8 +83,8 @@ outch (int c, size_t font, size_t x)
     term_addch (c), ++x;
   else
     {
-      char *buf;
-      int j = make_char_printable (&buf, c);
+      char *buf = make_char_printable (c);
+      int j = strlen (buf);
       for (w = 0; w < j && x < term_width (); ++w)
         term_addch (buf[w]), ++x;
       free (buf);
@@ -236,8 +236,8 @@ calculate_start_column (Window * wp)
           ++col;
         else
           {
-            char *buf;
-            col += make_char_printable (&buf, astr_get (get_line_text (pt.p), p));
+            char *buf = make_char_printable (astr_get (get_line_text (pt.p), p));
+            col += strlen (buf);
             free (buf);
           }
 
@@ -264,13 +264,13 @@ make_screen_pos (Window * wp, char **buf)
   bool bv = window_bottom_visible (wp);
 
   if (tv && bv)
-    xasprintf (buf, "All");
+    *buf = xasprintf ("All");
   else if (tv)
-    xasprintf (buf, "Top");
+    *buf = xasprintf ("Top");
   else if (bv)
-    xasprintf (buf, "Bot");
+    *buf = xasprintf ("Bot");
   else
-    xasprintf (buf, "%2d%%",
+    *buf = xasprintf ("%2d%%",
                (int) ((float) window_pt (wp).n / get_buffer_last_line (get_window_bp (wp)) * 100));
 
   return *buf;

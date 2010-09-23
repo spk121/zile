@@ -67,7 +67,7 @@ static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
   free (minibuf_contents);
-  xvasprintf (&minibuf_contents, fmt, ap);
+  minibuf_contents = xvasprintf (fmt, ap);
   minibuf_refresh ();
 }
 
@@ -109,7 +109,7 @@ minibuf_read (const char *fmt, const char *value, ...)
   char *buf, *p;
 
   va_start (ap, value);
-  xvasprintf (&buf, fmt, ap);
+  buf = xvasprintf (fmt, ap);
   va_end (ap);
 
   p = term_minibuf_read (buf, value ? value : "", SIZE_MAX, NULL, NULL);
@@ -129,7 +129,7 @@ minibuf_read_number (const char *fmt, ...)
   unsigned long n;
 
   va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
+  buf = xvasprintf (fmt, ap);
   va_end (ap);
 
   do
@@ -172,7 +172,7 @@ minibuf_read_filename (const char *fmt, const char *value,
   if (expand_path (as))
     {
       va_start (ap, file);
-      xvasprintf (&buf, fmt, ap);
+      buf = xvasprintf (fmt, ap);
       va_end (ap);
 
       as = compact_path (as);
@@ -218,7 +218,7 @@ minibuf_read_yn (const char *fmt, ...)
   int ret;
 
   va_start (ap, fmt);
-  xvasprintf (&buf, fmt, ap);
+  buf = xvasprintf (fmt, ap);
   va_end (ap);
 
   for (ret = -2; ret == -2;) {
@@ -284,7 +284,7 @@ minibuf_read_completion (const char *fmt, char *value, Completion * cp,
   char *buf, *ms;
 
   va_start (ap, hp);
-  xvasprintf (&buf, fmt, ap);
+  buf = xvasprintf (fmt, ap);
   va_end (ap);
 
   ms = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
@@ -302,9 +302,8 @@ minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
                           bool (*test) (const char *s, gl_list_t completions),
                           const char *invalid_err, va_list ap)
 {
-  char *buf, *ms;
-
-  xvasprintf (&buf, fmt, ap);
+  char *ms;
+  char *buf = xvasprintf (fmt, ap);
 
   for (;;)
     {
