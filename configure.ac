@@ -83,10 +83,8 @@ if test -n "$EMACS"; then
     unset EMACS])
 fi
 
-dnl Lua
-AX_WITH_LUA
-AX_LUA_VERSION(501, 502)
-AC_SUBST(LUA)
+dnl Perl
+AX_WITH_PROG(PERL, perl)
 
 dnl Extra definitions for config.h
 AC_DEFINE_UNQUOTED(CONFIGURE_DATE, ["`date '+%a %b %d %Y'`"],

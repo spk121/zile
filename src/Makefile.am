@@ -77,26 +77,23 @@ zile_SOURCES =						\
 	tbl_funcs.h					\
 	tbl_opts.h.in
 
-LUA_RUNTIME =						\
-	lib.lua						\
-	texinfo.lua
+PERL_BUILDTIME = 					\
+	Zile.pm						\
+	mkfuncs.pl					\
+	mkvars.pl
 
-LUA_BUILDTIME = 					\
-	mkfuncs.lua					\
-	mkvars.lua
-
-ALLSOURCES = $(zile_base_SOURCES) $(LUA_BUILDTIME) $(LUA_RUNTIME)
+ALLSOURCES = $(zile_base_SOURCES) $(PERL_BUILDTIME)
 
 $(zile_OBJECTS): tbl_funcs.h
 
-tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.lua $(LUA_RUNTIME)
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE_NAME="$(PACKAGE_NAME)"' $(srcdir)/mkfuncs.lua $(srcdir) $(zile_base_SOURCES)
+tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.pl
+	PACKAGE_NAME="$(PACKAGE_NAME)" $(PERL) -I$(srcdir) $(srcdir)/mkfuncs.pl $(srcdir) $(zile_base_SOURCES)
 
-mkvars.stamp: tbl_vars.h.in mkvars.lua $(LUA_RUNTIME)
+mkvars.stamp: tbl_vars.h.in mkvars.pl
 	@rm -f mkvars.tmp
 	@touch mkvars.tmp
-	LUA_INIT= LUA_PATH="$(srcdir)/?.lua" $(LUA) -e 'PACKAGE="$(PACKAGE)"' $(srcdir)/mkvars.lua $(srcdir)/tbl_vars.h.in
-	cat $(srcdir)/dotzile-extra.el >> $@
+	PACKAGE="$(PACKAGE)" $(PERL) -I$(srcdir) $(srcdir)/mkvars.pl $(srcdir)/tbl_vars.h.in
+	cat $(srcdir)/dotzile-extra.el >> dotzile.sample
 	@mv -f mkvars.tmp $@
 tbl_vars.h dotzile.sample: mkvars.stamp
 	@if test -f $@; then :; else \
@@ -125,11 +122,9 @@ dist_man_MANS = zile.1
 DISTCLEANFILES = 					\
 	dotzile.sample					\
 	mkvars.stamp					\
-	zile.1
-
-MAINTAINERCLEANFILES =					\
 	tbl_funcs.h					\
-	tbl_vars.h
+	tbl_vars.h					\
+	zile.1
 
 loc:
 	cloc --force-lang="C",h --no3 $(ALLSOURCES) $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) *.el \
@@ -348,11 +343,8 @@ LISP_TESTS_OUTPUTS =					\
 	lisp-tests/setq_nonexistent_variable.output	\
 	lisp-tests/test.input
 
-# Distribute tbl_vars.h & mkvars.stamp so that Lua is not needed for
-# building a release.
 EXTRA_DIST =						\
-	$(LUA_RUNTIME)					\
-	$(LUA_BUILDTIME)				\
+	$(PERL_BUILDTIME)				\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_ZILE_ONLY)				\
 	$(LISP_TESTS_OUTPUTS)				\
@@ -362,8 +354,6 @@ EXTRA_DIST =						\
 	dotzile-extra.el				\
 	tbl_opts.h.in					\
 	tbl_vars.h.in					\
-	tbl_vars.h					\
-	mkvars.stamp					\
 	man-extras					\
 	zile.1.in					\
 	zile-help2man-wrapper
