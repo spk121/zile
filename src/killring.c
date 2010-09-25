@@ -31,12 +31,15 @@
 
 static astr kill_ring_text;
 
-void
-free_kill_ring (void)
+static void
+maybe_free_kill_ring (void)
 {
-  if (kill_ring_text != NULL)
-    astr_delete (kill_ring_text);
-  kill_ring_text = NULL;
+  if (last_command () != F_kill_region)
+    {
+      if (kill_ring_text != NULL)
+        astr_delete (kill_ring_text);
+      kill_ring_text = NULL;
+    }
 }
 
 static void
@@ -52,8 +55,7 @@ copy_or_kill_region (bool kill, Region * rp)
 {
   astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
 
-  if (last_command () != F_kill_region)
-    free_kill_ring ();
+  maybe_free_kill_ring ();
   kill_ring_push (as);
   astr_delete (as);
 
@@ -177,8 +179,7 @@ including its terminating newline, when used at the beginning of a line
 with no argument.
 +*/
 {
-  if (last_command () != F_kill_region)
-    free_kill_ring ();
+  maybe_free_kill_ring ();
 
   INT_OR_UNIARG_INIT (arg);
 
@@ -240,8 +241,7 @@ END_DEFUN
 static le *
 kill_text (int uniarg, Function mark_func)
 {
-  if (last_command () != F_kill_region)
-    free_kill_ring ();
+  maybe_free_kill_ring ();
 
   if (warn_if_readonly_buffer ())
     return leNIL;

@@ -161,9 +161,6 @@ astr chordtostr (size_t key);
 gl_list_t keystrtovec (const char *key);
 astr keyvectostr (gl_list_t keys);
 
-/* killring.c ------------------------------------------------------------- */
-void free_kill_ring (void);
-
 /* line.c ----------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
   ty get_line_ ## field (const Line *wp);               \
