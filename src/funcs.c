@@ -236,7 +236,7 @@ Just C-u as argument means to use the current column.
 {
   long fill_col = (lastflag & FLAG_UNIARG_EMPTY) ?
     get_buffer_pt (cur_bp).o : (unsigned long) uniarg;
-  char *buf;
+  char *buf = NULL;
 
   if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)
     {
