@@ -777,9 +777,9 @@ move_sexp (int dir)
               level++;
               gotsexp = true;
               if (c == '\"')
-                double_quote ^= 1;
+                double_quote = !double_quote;
               if (c == '\'')
-                single_quote ^= 1;
+                single_quote = !double_quote;
             }
           else if (dir > 0 ? ISCLOSEBRACKETCHAR (c) : ISOPENBRACKETCHAR (c))
             {
@@ -789,9 +789,9 @@ move_sexp (int dir)
               level--;
               gotsexp = true;
               if (c == '\"')
-                double_quote ^= 1;
+                double_quote = !double_quote;
               if (c == '\'')
-                single_quote ^= 1;
+                single_quote = !single_quote;
 
               if (level < 0)
                 {
