@@ -53,11 +53,7 @@ static int
 is_regular_file (const char *filename)
 {
   struct stat st;
-
-  if (stat (filename, &st) == 0 && S_ISREG (st.st_mode))
-    return true;
-
-  return false;
+  return stat (filename, &st) == 0 && S_ISREG (st.st_mode);
 }
 
 /*
