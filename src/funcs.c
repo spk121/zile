@@ -1588,11 +1588,8 @@ On nonblank line, delete any immediately following blank lines.
           activate_mark ();
           while (FUNCALL (forward_line) == leT && is_blank_line ())
             ;
-          if (!seq_started)
-            {
-              seq_started = true;
-              undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
-            }
+          seq_started = true;
+          undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
           FUNCALL (delete_region);
           pop_mark ();
         }
