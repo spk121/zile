@@ -1,15 +1,15 @@
 Release 2.3.20
 
-This release fixes search and replace with embedded NULs, a bug in the
-build system (the Zile-only tests now run correctly when an EMACS
-environment variable is defined), and a bug introduced in 2.3.17 which
-caused consecutive kills not to save the killed text (thanks to Chris
-Leyon for the report). Some code was cleaned up and better use made of
-gnulib. The build scripts that were previously in Lua have been
-rewritten in Perl; Perl is now required to build Zile (previously, Lua
-was not required, at the expense of making the build system more
-complicated and fragile). A cyclomatic complexity report on the C code
-can now be produced.
+This release fixes a potential buffer overflow, search and replace
+with embedded NULs, a bug in the build system (the Zile-only tests now
+run correctly when an EMACS environment variable is defined), and a
+bug introduced in 2.3.17 which caused consecutive kills not to save
+the killed text (thanks to Chris Leyon for the report). Some code was
+cleaned up and better use made of gnulib. The build scripts that were
+previously in Lua have been rewritten in Perl; Perl is now required to
+build Zile (previously, Lua was not required, at the expense of making
+the build system more complicated and fragile). A cyclomatic
+complexity report on the C code can now be produced.
 
 Release 2.3.19
 
