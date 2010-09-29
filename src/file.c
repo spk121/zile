@@ -292,7 +292,7 @@ read_file (const char *filename)
               total_eols++;
               if (buf[i] == '\n')
                 this_eol_type = coding_eol_lf;
-              else if (i >= size || buf[i + 1] != '\n')
+              else if (i == size - 1 || buf[i + 1] != '\n')
                 this_eol_type = coding_eol_cr;
               else
                 {
