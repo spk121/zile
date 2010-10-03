@@ -2,6 +2,7 @@ configure
 configure.lineno
 autom4te.cache
 aclocal.m4
+build-aux
 config.log
 config.guess
 config.sub
