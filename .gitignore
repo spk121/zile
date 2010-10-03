@@ -4,14 +4,8 @@ autom4te.cache
 aclocal.m4
 /build-aux
 config.log
-config.guess
-config.sub
 config.status
 config.status.lineno
-compile
-depcomp
-install-sh
-missing
 ChangeLog
 config.h
 config.h.in
@@ -22,9 +16,6 @@ zile*.tar.gz
 zile*.tar.gz.sig
 zile*.tar.gz.directive*
 cyclo-zile.html
-arg-nonnull.h
-warn-on-use.h
-gendocs.sh
 Makefile
 Makefile.in
 *.[oa]
@@ -32,6 +23,5 @@ Makefile.in
 .deps
 .sc-start*
 release-notes
-/c++defs.h
 /GNUmakefile
 /maint.mk
