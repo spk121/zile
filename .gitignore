@@ -29,7 +29,10 @@ Makefile.in
 *.[oa]
 *~
 .deps
+.sc-start*
 release-notes
 /c++defs.h
 /pmccabe.css
 /pmccabe2html
+/GNUmakefile
+/maint.mk

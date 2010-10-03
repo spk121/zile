@@ -21,7 +21,8 @@ dnl MA 02111-1301, USA.
 
 dnl Initialise autoconf and automake
 AC_INIT(Zile, 2.3.20, bug-zile@gnu.org)
-AM_INIT_AUTOMAKE([std-options check-news])
+AC_CONFIG_AUX_DIR([build-aux])
+AM_INIT_AUTOMAKE([-Wall -Werror std-options check-news])
 
 dnl Checks for programs
 AC_GNU_SOURCE
