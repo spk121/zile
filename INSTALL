@@ -40,7 +40,7 @@ Building from the repository
 ----------------------------
 
 Prerequisites: automake >= 1.9, autoconf >= 2.59, gnulib from 2008 or
-later, help2man, Lua >= 5.1.
+later, help2man.
 
 Check out Zile and bootstrap the build system:
 
