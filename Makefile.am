@@ -38,14 +38,16 @@ release: distcheck
 	woger gnu,freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
 
-cyclo:
-	$(PMCCABE) ${top_srcdir}/src/*.[ch] \
+CYCLO_SRCS = ${top_srcdir}/src/*.[ch]
+
+cyclo-$(PACKAGE).html: $(CYCLO_SRCS)
+	$(PMCCABE) $(CYCLO_SRCS) \
 		| sort -nr \
-		| $(AWK) -f ${top_srcdir}/pmccabe2html \
+		| $(AWK) -f ${top_srcdir}/build-aux/pmccabe2html \
 			-v lang=html -v name="$(PACKAGE_NAME)" \
 			-v vcurl="http://git.savannah.gnu.org/gitweb/?p=$(PACKAGE).git;a=blob;f=%FILENAME%;hb=HEAD" \
 			-v url="http://www.gnu.org/software/$(PACKAGE)/" \
-			-v css=${top_srcdir}/pmccabe.css \
+			-v css=${top_srcdir}/build-aux/pmccabe.css \
 			-v cut_dir=${top_srcdir}/ \
-			> cyclo-$(PACKAGE).html-tmp
-	mv cyclo-$(PACKAGE).html-tmp cyclo-$(PACKAGE).html
+			> $@-tmp
+	mv $@-tmp $@
