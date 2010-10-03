@@ -80,25 +80,20 @@ PERL_BUILDTIME = 					\
 	mkfuncs.pl					\
 	mkvars.pl
 
-ALLSOURCES = $(zile_base_SOURCES) $(PERL_BUILDTIME)
+PRODUCTIONSOURCES =					\
+	$(zile_base_SOURCES)				\
+	tbl_opts.h.in					\
+	$(PERL_BUILDTIME)				\
+	Makefile.am ../Makefile.am ../configure.ac	\
+	*.el
 
 $(zile_OBJECTS): tbl_funcs.h
 
 tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.pl
 	PACKAGE_NAME="$(PACKAGE_NAME)" $(PERL) -I$(srcdir) $(srcdir)/mkfuncs.pl $(srcdir) $(zile_base_SOURCES)
 
-mkvars.stamp: tbl_vars.h.in mkvars.pl
-	@rm -f mkvars.tmp
-	@touch mkvars.tmp
+tbl_vars.h: tbl_vars.h.in mkvars.pl
 	PACKAGE="$(PACKAGE)" $(PERL) -I$(srcdir) $(srcdir)/mkvars.pl $(srcdir)/tbl_vars.h.in
-	cat $(srcdir)/dotzile-extra.el >> dotzile.sample
-	@mv -f mkvars.tmp $@
-tbl_vars.h dotzile.sample: mkvars.stamp
-	@if test -f $@; then :; else \
-	  rm -f mkvars.stamp; \
-	  $(MAKE) $(AM_MAKEFLAGS) mkvars.stamp; \
-	fi
-dotzile.sample: dotzile-extra.el
 
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
@@ -113,20 +108,24 @@ zile.1: zile.1.in Makefile
 zile.1.in: main.c man-extras zile-help2man-wrapper
 	builddir=$(builddir) $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/man-extras $(srcdir)/zile-help2man-wrapper
 
-dist_pkgdata_DATA = dotzile.sample
+dist_pkgdata_DATA = dotzile-extra.el
 
 dist_man_MANS = zile.1
 
 DISTCLEANFILES = 					\
-	dotzile.sample					\
-	mkvars.stamp					\
 	tbl_funcs.h					\
 	tbl_vars.h					\
 	zile.1
 
+CLOC = cloc --force-lang="C",h
+
+TESTSOURCES = $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY)
+
 loc:
-	cloc --force-lang="C",h --no3 $(ALLSOURCES) $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY) *.el \
-	Makefile.am ../Makefile.am ../configure.ac
+	$(CLOC) $(PRODUCTIONSOURCES)
+
+loc-all:
+	$(CLOC) $(PRODUCTIONSOURCES) $(TESTSOURCES)
 
 TESTS_VARS = srcdir=$(srcdir) builddir=$(builddir)
 TESTS_ENVIRONMENT = $(TESTS_VARS) $(VALGRIND)
@@ -349,7 +348,6 @@ EXTRA_DIST =						\
 	run-lisp-tests					\
 	test-bad-argument				\
 	quit.el						\
-	dotzile-extra.el				\
 	tbl_opts.h.in					\
 	tbl_vars.h.in					\
 	man-extras					\
