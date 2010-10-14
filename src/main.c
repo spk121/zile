@@ -40,7 +40,7 @@
   "Copyright (C) 2010 Free Software Foundation, Inc."
 
 /* The executable name */
-char *prog_name = PACKAGE;
+char *program_name = PACKAGE;
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -115,7 +115,7 @@ segv_sig_handler (int signo GCC_UNUSED)
            "%s: " PACKAGE_NAME
            " crashed.  Please send a bug report to <"
            PACKAGE_BUGREPORT ">.\r\n",
-           prog_name);
+           program_name);
   zile_exit (true);
 }
 
@@ -123,7 +123,7 @@ static void
 other_sig_handler (int signo GCC_UNUSED)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
-           prog_name, signo);
+           program_name, signo);
   zile_exit (false);
 }
 
@@ -168,9 +168,9 @@ main (int argc, char **argv)
   astr as;
   bool ok = true;
 
-  /* Set prog_name to executable name, if available */
+  /* Set program_name to executable name, if available */
   if (argv[0])
-    prog_name = base_name (argv[0]);
+    program_name = base_name (argv[0]);
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */
@@ -198,7 +198,7 @@ main (int argc, char **argv)
       else if (c == ':') /* Missing argument */
         {
           fprintf (stderr, "%s: Option `%s' requires an argument\n",
-                   prog_name, argv[this_optind]);
+                   program_name, argv[this_optind]);
           exit (1);
         }
       else if (c == 'q')
