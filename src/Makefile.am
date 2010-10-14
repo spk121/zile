@@ -101,8 +101,6 @@ edit = sed \
 zile.1: zile.1.in Makefile
 	rm -f $@ $@.tmp
 	$(edit) '$(srcdir)/$@.in' >$@.tmp
-	chmod +x $@.tmp
-	chmod a-w $@.tmp
 	mv $@.tmp $@
 
 zile.1.in: main.c man-extras zile-help2man-wrapper
