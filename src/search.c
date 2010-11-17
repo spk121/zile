@@ -70,8 +70,8 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
   pattern.not_bol = notbol;
   pattern.not_eol = noteol;
   if (!re_find_err)
-    ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to,
-                     forward ? (to - from) : -(to - from), NULL);
+    ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to - 1,
+                     forward ? (to - from) : -(to - 1 - from), NULL);
 
   regfree (&pattern);
   return ret;
