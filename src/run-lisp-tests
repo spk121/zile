@@ -46,25 +46,25 @@ if test -z "$TERM" -o "$TERM" = "unknown"; then
 fi
 
 for test in "$@"; do
-    test=`basename $test`
     test=`echo $test | sed -e 's/\.el$//'`
+    name=`basename $test`
 
-    edit_file=$builddir/$test.input
-    args="--no-init-file $edit_file --load $srcdir/lisp-tests/$test.el"
+    edit_file=$builddir/$name.input
+    args="--no-init-file $edit_file --load $test.el"
 
     if test -n "$EMACS"; then
         cp $srcdir/lisp-tests/test.input $edit_file
         chmod +w $edit_file
         if $EMACS --quick --batch $args; then
-            if diff $srcdir/lisp-tests/$test.output $edit_file; then
+            if diff $test.output $edit_file; then
                 emacs_pass=`expr $emacs_pass + 1`
                 rm -f $edit_file $edit_file~
             else
-                echo "Emacs $test failed to produce correct output"
+                echo "Emacs $name failed to produce correct output"
                 emacs_fail=`expr $emacs_fail + 1`
             fi
         else
-            echo "Emacs $test failed to run with error code $?"
+            echo "Emacs $name failed to run with error code $?"
             emacs_fail=`expr $emacs_fail + 1`
         fi
     fi
@@ -72,15 +72,15 @@ for test in "$@"; do
     cp $srcdir/lisp-tests/test.input $edit_file
     chmod +w $edit_file
     if $VALGRIND $builddir/zile $args; then
-        if diff $srcdir/lisp-tests/$test.output $edit_file; then
+        if diff $test.output $edit_file; then
             zile_pass=`expr $zile_pass + 1`
             rm -f $edit_file $edit_file~
         else
-            echo "Zile $test failed to produce correct output"
+            echo "Zile $name failed to produce correct output"
             zile_fail=`expr $zile_fail + 1`
         fi
     else
-        echo "Zile $test failed to run with error code $?"
+        echo "Zile $name failed to run with error code $?"
         zile_fail=`expr $zile_fail + 1`
     fi
 done
