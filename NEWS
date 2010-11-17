@@ -1,3 +1,9 @@
+Release 2.3.21
+
+This release fixes a bug that caused build failure on non-GNU systems,
+and a bug in backward search introduced in 2.3.18, and simplifies the
+test system. A little other code cleanup was done.
+
 Release 2.3.20
 
 This release fixes a potential buffer overflow, search and replace
