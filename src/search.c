@@ -56,6 +56,7 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
 {
   int ret = -1;
   struct re_pattern_buffer pattern;
+  struct re_registers search_regs;
   reg_syntax_t syntax = RE_SYNTAX_EMACS;
 
   memset (&pattern, 0, sizeof (pattern));
@@ -65,16 +66,19 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
   if (icase)
     syntax |= RE_ICASE;
   re_set_syntax (syntax);
+  search_regs.num_regs = 1;
 
   re_find_err = re_compile_pattern (s2, (int) s2size, &pattern);
   pattern.not_bol = notbol;
   pattern.not_eol = noteol;
   if (!re_find_err)
     ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to - 1,
-                     forward ? (to - from) : -(to - 1 - from), NULL);
+                     forward ? (to - from) : -(to - 1 - from), &search_regs);
 
   regfree (&pattern);
-  return ret;
+  if (ret < 0)
+    return ret;
+  return forward ? search_regs.end[0] : ret;
 }
 
 static bool
@@ -119,7 +123,7 @@ search (Point pt, const char *s, int forward, int regexp)
   while (get_buffer_pt (cur_bp).p != lp)
     (forward ? next_line : previous_line) ();
   pt = get_buffer_pt (cur_bp);
-  pt.o = pos + (forward ? ssize : 0);
+  pt.o = pos;
   set_buffer_pt (cur_bp, pt);
   thisflag |= FLAG_NEED_RESYNC;
   return true;
