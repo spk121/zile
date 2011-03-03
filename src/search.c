@@ -75,10 +75,15 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
     ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to - 1,
                      forward ? (to - from) : -(to - 1 - from), &search_regs);
 
+  if (ret >= 0)
+    {
+      ret = forward ? search_regs.end[0] : ret;
+      free (search_regs.start);
+      free (search_regs.end);
+    }
+
   regfree (&pattern);
-  if (ret < 0)
-    return ret;
-  return forward ? search_regs.end[0] : ret;
+  return ret;
 }
 
 static bool
