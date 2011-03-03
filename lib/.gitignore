@@ -222,3 +222,6 @@
 /xstrndup.h
 /xvasprintf.c
 /xvasprintf.h
+/dosname.h
+/mbtowc-impl.h
+/mbtowc.c

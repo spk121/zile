@@ -137,3 +137,5 @@ warn-on-use.m4
 /signbit.m4
 /vasprintf-posix.m4
 /xvasprintf.m4
+/configmake.m4
+/mbtowc.m4
