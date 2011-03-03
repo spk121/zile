@@ -126,6 +126,7 @@ loc-all:
 	$(CLOC) $(PRODUCTIONSOURCES) $(TESTSOURCES)
 
 TESTS_VARS = srcdir=$(srcdir) builddir=$(builddir)
+TESTS_ENVIRONMENT = $(TESTS_VARS) $(VALGRIND)
 
 TESTS = $(check_PROGRAMS)
 
