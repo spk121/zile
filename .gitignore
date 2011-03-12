@@ -3,6 +3,7 @@ configure.lineno
 autom4te.cache
 aclocal.m4
 /build-aux
+config.cache
 config.log
 config.status
 config.status.lineno
