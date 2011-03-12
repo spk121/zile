@@ -20,5 +20,13 @@
 # MA 02111-1301, USA.
 
 local-checks-to-skip = \
+	sc_cast_of_argument_to_free \
 	sc_bindtextdomain \
-	sc_cast_of_argument_to_free
+	sc_error_message_period \
+	sc_error_message_uppercase
+
+# Rationale:
+#
+# sc_cast_of_argument_to_free: other warnings of this sort are useful
+# sc_bindtextdomain: Emacs isn't internationalised
+# sc_error_message_{period,uppercase}: Emacs does these
