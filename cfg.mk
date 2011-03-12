@@ -19,4 +19,6 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-local-checks-to-skip = sc_bindtextdomain
+local-checks-to-skip = \
+	sc_bindtextdomain \
+	sc_cast_of_argument_to_free
