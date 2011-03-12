@@ -1,3 +1,8 @@
+Release 2.3.23
+
+This release fixes a long-standing bug where {beginning,end}-of-buffer
+failed to take account of transient-mark-mode.
+
 Release 2.3.22
 
 This release fixes a bug in forward regex isearch introduced recently,
