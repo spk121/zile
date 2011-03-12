@@ -269,7 +269,8 @@ DEFUN ("beginning-of-buffer", beginning_of_buffer)
 Move point to the beginning of the buffer; leave mark at previous position.
 +*/
 {
-  set_mark_interactive ();
+  if (!get_variable_bool ("transient-mark-mode"))
+    set_mark_interactive ();
   gotobob ();
 }
 END_DEFUN
@@ -289,7 +290,8 @@ DEFUN ("end-of-buffer", end_of_buffer)
 Move point to the end of the buffer; leave mark at previous position.
 +*/
 {
-  set_mark_interactive ();
+  if (!get_variable_bool ("transient-mark-mode"))
+    set_mark_interactive ();
   gotoeob ();
 }
 END_DEFUN
