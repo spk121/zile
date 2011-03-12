@@ -1,5 +1,5 @@
 # ===========================================================================
-#         http://www.nongnu.org/autoconf-archive/ax_with_curses.html
+#      http://www.gnu.org/software/autoconf-archive/ax_with_curses.html
 # ===========================================================================
 #
 # SYNOPSIS
@@ -30,7 +30,7 @@
 #
 #   Copyright (c) 2009 Mark Pulford <mark@kyne.com.au>
 #   Copyright (c) 2009 Damian Pietras <daper@daper.net>
-#   Copyright (c) 2009 Reuben Thomas <rrt@sc3d.org>
+#   Copyright (c) 2011 Reuben Thomas <rrt@sc3d.org>
 #
 #   This program is free software: you can redistribute it and/or modify it
 #   under the terms of the GNU General Public License as published by the
@@ -58,12 +58,14 @@
 #   modified version of the Autoconf Macro, you may extend this special
 #   exception to the GPL to apply to your modified version as well.
 
+#serial 7
+
 AU_ALIAS([MP_WITH_CURSES], [AX_WITH_CURSES])
 AC_DEFUN([AX_WITH_CURSES],
-  [AC_ARG_WITH(ncurses, [AC_HELP_STRING([--with-ncurses],
+  [AC_ARG_WITH(ncurses, [AS_HELP_STRING([--with-ncurses],
         [Force the use of ncurses over curses])],,)
    ax_save_LIBS="$LIBS"
-   AC_ARG_WITH(ncursesw, [AC_HELP_STRING([--without-ncursesw],
+   AC_ARG_WITH(ncursesw, [AS_HELP_STRING([--without-ncursesw],
         [Don't use ncursesw (wide character support)])],,)
    if test ! "$CURSES_LIB" -a "$with_ncurses" != no -a "$with_ncursesw" != "no"
    then
@@ -75,10 +77,10 @@ AC_DEFUN([AX_WITH_CURSES],
             ax_cv_ncursesw=yes, ax_cv_ncursesw=no)])
        if test "$ax_cv_ncursesw" = yes
        then
-         AC_CHECK_HEADER([ncursesw/curses.h], AC_DEFINE(HAVE_NCURSESW_H, 1,
+         AC_CHECK_HEADER([ncursesw/curses.h], AC_DEFINE([HAVE_NCURSESW_H], 1,
             [Define if you have ncursesw.h]))
-         AC_DEFINE(HAVE_NCURSES_H, 1, [Define if you have ncursesw/curses.h])
-         AC_DEFINE(HAVE_NCURSESW, 1, [Define if you have libncursesw])
+         AC_DEFINE([HAVE_NCURSES_H], 1, [Define if you have ncursesw/curses.h])
+         AC_DEFINE([HAVE_NCURSESW], 1, [Define if you have libncursesw])
          CURSES_LIB="-lncursesw"
          ax_cv_ncurses=yes
          ax_cv_curses=yes
