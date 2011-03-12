@@ -44,7 +44,7 @@ AC_PATH_PROG([PMCCABE], [pmccabe], [false])
 dnl Valgrind
 AX_WITH_PROG(VALGRIND, valgrind)
 if test -n "$VALGRIND"; then
-  VALGRIND="$VALGRIND --error-exitcode=1 --leak-check=full"
+  VALGRIND="$VALGRIND -q --error-exitcode=1 --leak-check=full"
 fi
 
 dnl Checks for functions and headers
