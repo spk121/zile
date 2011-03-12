@@ -85,7 +85,7 @@ astr_ncat_cstr (astr as, const char *s, size_t csize)
   if (as->len + csize > as->maxlen)
     {
       as->maxlen = as->len + csize + ALLOCATION_CHUNK_SIZE;
-      as->text = (char *) xrealloc (as->text, as->maxlen + 1);
+      as->text = xrealloc (as->text, as->maxlen + 1);
     }
   memcpy (as->text + as->len, s, csize);
   as->len += csize;

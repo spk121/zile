@@ -85,7 +85,7 @@ add_node (Binding tree, Binding p)
   if (tree->vecnum + 1 >= tree->vecmax)
     {
       tree->vecmax += 5;
-      tree->vec = (Binding *) xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
+      tree->vec = xrealloc (tree->vec, sizeof (*p) * tree->vecmax);
     }
 
   /* Insert the node. */
