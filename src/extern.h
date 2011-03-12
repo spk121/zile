@@ -68,7 +68,6 @@ bool delete_region (const Region * rp);
 bool in_region (size_t lineno, size_t x, Region * rp);
 void set_temporary_buffer (Buffer * bp);
 size_t calculate_buffer_size (Buffer * bp);
-int transient_mark_mode (void);
 void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);

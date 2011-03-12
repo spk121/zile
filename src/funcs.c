@@ -62,7 +62,7 @@ With arg, turn Transient Mark mode on if arg is positive, off otherwise.
 {
   if (!(lastflag & FLAG_SET_UNIARG))
     {
-      if (transient_mark_mode ())
+      if (get_variable_bool ("transient-mark-mode"))
         set_variable ("transient-mark-mode", "nil");
       else
         set_variable ("transient-mark-mode", "t");
@@ -317,7 +317,7 @@ Put the mark where point is now, and point where the mark is now.
   set_marker_pt (get_buffer_mark (cur_bp), tmp);
 
   /* In transient-mark-mode we must reactivate the mark.  */
-  if (transient_mark_mode ())
+  if (get_variable_bool ("transient-mark-mode"))
     activate_mark ();
 
   thisflag |= FLAG_NEED_RESYNC;

@@ -291,7 +291,8 @@ warn_if_no_mark (void)
       minibuf_error ("The mark is not set now");
       return true;
     }
-  else if (!get_buffer_mark_active (cur_bp) && transient_mark_mode ())
+  else if (!get_buffer_mark_active (cur_bp) &&
+           get_variable_bool ("transient-mark-mode"))
     {
       minibuf_error ("The mark is not active now");
       return true;
@@ -431,12 +432,6 @@ calculate_buffer_size (Buffer * bp)
     }
 
   return size;
-}
-
-int
-transient_mark_mode (void)
-{
-  return get_variable_bool ("transient-mark-mode");
 }
 
 void
