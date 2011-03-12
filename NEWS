@@ -1,7 +1,8 @@
 Release 2.3.23
 
 This release fixes a long-standing bug where {beginning,end}-of-buffer
-failed to take account of transient-mark-mode.
+failed to take account of transient-mark-mode, turns on more compiler
+warnings, and adds support for libmudflap (run-time checks).
 
 Release 2.3.22
 
