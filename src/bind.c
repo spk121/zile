@@ -518,14 +518,14 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
       if (p->func != NULL)
         {
           astr key = astr_new ();
-          astr as = chordtostr (p->key);
+          astr bs = chordtostr (p->key);
           for (j = 1; j < gl_list_size (keys); j++)
             {
               astr_cat (key, (astr) gl_list_get_at (keys, j));
               astr_cat_char (key, ' ');
             }
-          astr_cat (key, as);
-          astr_delete (as);
+          astr_cat (key, bs);
+          astr_delete (bs);
           process (key, p, st);
           astr_delete (key);
         }
@@ -608,13 +608,13 @@ message in the buffer.
 END_DEFUN
 
 static void
-print_binding (astr key, Binding p, void *st GCC_UNUSED)
+print_binding (astr key, Binding p, void *st _GL_UNUSED_PARAMETER)
 {
   bprintf ("%-15s %s\n", astr_cstr (key), get_function_name (p->func));
 }
 
 static void
-write_bindings_list (va_list ap GCC_UNUSED)
+write_bindings_list (va_list ap _GL_UNUSED_PARAMETER)
 {
   bprintf ("Key translations:\n");
   bprintf ("%-15s %s\n", "key", "binding");

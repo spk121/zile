@@ -197,6 +197,7 @@
 /unistd-safer.h
 /unlinkat.c
 /unlink.c
+/unused-parameter.h
 /vasnprintf.c
 /vasnprintf.h
 /vasprintf.c

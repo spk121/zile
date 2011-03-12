@@ -540,7 +540,7 @@ kill_buffer (Buffer * kill_bp)
 }
 
 DEFUN_ARGS ("kill-buffer", kill_buffer,
-            STR_ARG (buffer))
+            STR_ARG (buf))
 /*+
 Kill buffer BUFFER.
 With a nil argument, kill the current buffer.
@@ -548,24 +548,24 @@ With a nil argument, kill the current buffer.
 {
   Buffer *bp;
 
-  STR_INIT (buffer)
+  STR_INIT (buf)
   else
     {
       Completion *cp = make_buffer_completion ();
-      buffer = minibuf_read_completion ("Kill buffer (default %s): ",
-                                        "", cp, NULL, get_buffer_name (cur_bp));
+      buf = minibuf_read_completion ("Kill buffer (default %s): ",
+                                     "", cp, NULL, get_buffer_name (cur_bp));
       free_completion (cp);
-      if (buffer == NULL)
+      if (buf == NULL)
         ok = FUNCALL (keyboard_quit);
     }
 
-  if (buffer && buffer[0] != '\0')
+  if (buf && buf[0] != '\0')
     {
-      bp = find_buffer (buffer);
+      bp = find_buffer (buf);
       if (bp == NULL)
         {
-          minibuf_error ("Buffer `%s' not found", buffer);
-          free ((char *) buffer);
+          minibuf_error ("Buffer `%s' not found", buf);
+          free ((char *) buf);
           ok = leNIL;
         }
     }
@@ -580,7 +580,7 @@ With a nil argument, kill the current buffer.
         kill_buffer (bp);
     }
 
-  STR_FREE (buffer);
+  STR_FREE (buf);
 }
 END_DEFUN
 

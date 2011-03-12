@@ -1380,19 +1380,19 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
   astr out;
   bool more_than_one_line = false;
   char *cmdline, *eol;
-  FILE * pipe;
+  FILE * fh;
 
   cmdline = xasprintf ("%s 2>&1 <%s", cmd, tempfile);
-  pipe = popen (cmdline, "r");
+  fh = popen (cmdline, "r");
   free (cmdline);
-  if (pipe == NULL)
+  if (fh == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
       return false;
     }
 
-  out = astr_fread (pipe);
-  pclose (pipe);
+  out = astr_fread (fh);
+  pclose (fh);
   eol = strchr (astr_cstr (out), '\n');
   if (eol && eol != astr_cstr (out) + astr_len (out) - 1)
     more_than_one_line = true;

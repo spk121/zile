@@ -359,7 +359,7 @@ get_char (void)
 }
 
 size_t
-term_xgetkey (int mode, size_t timeout)
+term_xgetkey (int mode, size_t delay)
 {
   size_t key;
 
@@ -368,7 +368,7 @@ term_xgetkey (int mode, size_t timeout)
       int c;
 
       if (mode & GETKEY_DELAYED)
-        wtimeout (stdscr, (int) timeout * 100);
+        wtimeout (stdscr, (int) delay * 100);
 
       c = get_char ();
       if (mode & GETKEY_DELAYED)

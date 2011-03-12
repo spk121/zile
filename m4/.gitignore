@@ -139,3 +139,5 @@ warn-on-use.m4
 /xvasprintf.m4
 /configmake.m4
 /mbtowc.m4
+/manywarnings.m4
+/warnings.m4

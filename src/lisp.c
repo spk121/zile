@@ -138,6 +138,10 @@ read_token (enum tokenname *tokenid, astr as, size_t * pos)
               astr_truncate (tok, astr_len (tok) -1);
               *tokenid = T_WORD;
               return tok;
+              break;
+
+            default:
+              break;
             }
         }
 
@@ -183,6 +187,9 @@ lisp_read (le * list, astr as, size_t * pos)
           quoted = 0;
           astr_delete (tok);
           return list;
+
+        default:
+          break;
         }
 
       astr_delete (tok);

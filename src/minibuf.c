@@ -187,16 +187,16 @@ minibuf_read_filename (const char *fmt, const char *value,
 
       if (p != NULL)
         {
-          astr as = astr_new_cstr (p);
-          if (expand_path (as))
+          astr bs = astr_new_cstr (p);
+          if (expand_path (bs))
             {
               add_history_element (files_history, p);
               free (p);
-              p = xstrdup (astr_cstr (as));
+              p = xstrdup (astr_cstr (bs));
             }
           else
             p = NULL;
-          astr_delete (as);
+          astr_delete (bs);
         }
     }
   astr_delete (as);
@@ -214,7 +214,8 @@ int
 minibuf_read_yn (const char *fmt, ...)
 {
   va_list ap;
-  char *buf, *errmsg = "";
+  char *buf;
+  const char *errmsg = "";
   int ret;
 
   va_start (ap, fmt);
@@ -268,7 +269,7 @@ minibuf_read_yesno (const char *fmt, ...)
       gl_list_node_t n = gl_sortedlist_search (get_completion_completions (cp),
                                                completion_strcmp, ms);
       assert (n);
-      ret = !strcmp ((char *) gl_list_node_value (get_completion_completions (cp), n),
+      ret = !strcmp ((const char *) gl_list_node_value (get_completion_completions (cp), n),
                      "yes");
     }
   free_completion (cp);
@@ -277,7 +278,7 @@ minibuf_read_yesno (const char *fmt, ...)
 }
 
 char *
-minibuf_read_completion (const char *fmt, char *value, Completion * cp,
+minibuf_read_completion (const char *fmt, const char *value, Completion * cp,
                          History * hp, ...)
 {
   va_list ap;
@@ -289,15 +290,15 @@ minibuf_read_completion (const char *fmt, char *value, Completion * cp,
 
   ms = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
 
- free (buf);
- return ms;
+  free (buf);
+  return ms;
 }
 
 /*
  * Read a string from the minibuffer using a completion.
  */
 char *
-minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
+minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
                           History * hp, const char *empty_err,
                           bool (*test) (const char *s, gl_list_t completions),
                           const char *invalid_err, va_list ap)

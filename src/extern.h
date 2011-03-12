@@ -225,9 +225,9 @@ unsigned long minibuf_read_number (const char *fmt, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
 int minibuf_read_yn (const char *fmt, ...);
 int minibuf_read_yesno (const char *fmt, ...);
-char *minibuf_read_completion (const char *fmt, char *value, Completion * cp,
+char *minibuf_read_completion (const char *fmt, const char *value, Completion * cp,
                                History * hp, ...);
-char *minibuf_vread_completion (const char *fmt, char *value, Completion * cp,
+char *minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
                                 History * hp, const char *empty_err,
                                 bool (*test) (const char *s, gl_list_t completions),
                                 const char *invalid_err, va_list ap);
@@ -291,7 +291,7 @@ void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */
 void init_variables (void);
-char *minibuf_read_variable_name (char *fmt, ...);
+char *minibuf_read_variable_name (const char *fmt, ...);
 void set_variable (const char *var, const char *val);
 const char *get_variable_doc (const char *var, char **defval);
 const char *get_variable (const char *var);

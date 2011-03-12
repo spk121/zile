@@ -28,12 +28,36 @@ AM_SILENT_RULES([yes])
 dnl Checks for programs
 AC_GNU_SOURCE
 AC_PROG_CC
-AX_CFLAGS_WARN_ALL
-if test "$GCC" = "yes"; then
-  CFLAGS="$CFLAGS -W -Wmissing-prototypes -Wstrict-prototypes -D_FORTIFY_SOURCE=2"
-fi
 gl_EARLY
 AM_PROG_CC_C_O
+gl_MANYWARN_ALL_GCC([warnings])
+# Set up the list of undesired warnings.
+nw=
+nw="$nw -Wsystem-headers"   # Don’t let system headers trigger warnings
+nw="$nw -Wundef"            # All compiler preprocessors support #if UNDEF
+nw="$nw -Wtraditional"      # All compilers nowadays support ANSI C
+nw="$nw -Wstrict-overflow"  # Use a lower level (see below).
+nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
+nw="$nw -Wsign-conversion"  # Likewise.
+nw="$nw -Waggregate-return" # We do this on purpose.
+nw="$nw -Wcast-qual"        # We do this on purpose.
+nw="$nw -Wbad-function-cast" # We do this on purpose.
+nw="$nw -Wtraditional-conversion" # Don't care.
+nw="$nw -Wpadded"           # Don't care.
+nw="$nw -Wc++-compat"       # Don't care.
+nw="$nw -Woverlength-strings" # Don't care.
+nw="$nw -Wmissing-format-attribute" # Don't care.
+nw="$nw -Wunreachable-code" # Seems buggy.
+# Enable all GCC warnings not in this list.
+gl_MANYWARN_COMPLEMENT([warnings], [$warnings], [$nw])
+for w in $warnings; do
+  gl_WARN_ADD([$w])
+done
+# Add an extra warning
+gl_WARN_ADD([-Wstrict-overflow=1], [WARN_FLAGS])
+# Add some more safety measures
+gl_WARN_ADD([-D_FORTIFY_SOURCE=2], [WARN_FLAGS])
+gl_WARN_ADD([-fmudflap], [WARN_FLAGS])
 
 dnl help2man
 AX_WITH_PROG(HELP2MAN, help2man)

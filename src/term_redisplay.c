@@ -198,7 +198,7 @@ draw_window (size_t topline, Window * wp)
   free (rp);
 }
 
-static char *
+static const char *
 make_mode_line_flags (Window * wp)
 {
   if (get_buffer_modified (get_window_bp (wp)) && get_buffer_readonly (get_window_bp (wp)))
@@ -281,7 +281,8 @@ static void
 draw_status_line (size_t line, Window * wp)
 {
   size_t i;
-  char *buf, *eol_type;
+  char *buf;
+  const char *eol_type;
   Point pt = window_pt (wp);
   astr as, bs;
 

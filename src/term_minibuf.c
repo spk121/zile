@@ -39,14 +39,14 @@ term_minibuf_write (const char *s)
 
   for (x = 0; *s != '\0' && x < term_width (); s++)
     {
-      term_addch (*(unsigned char *) s);
+      term_addch (*(const unsigned char *) s);
       ++x;
     }
 }
 
 static void
 draw_minibuf_read (const char *prompt, const char *value,
-                   size_t prompt_len, char *match, size_t pointo)
+                   size_t prompt_len, const char *match, size_t pointo)
 {
   int margin = 1, n = 0;
 
@@ -84,7 +84,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
   static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
   size_t prompt_len;
-  char *s;
+  const char *s;
   astr as = astr_new_cstr (value), saved = NULL;
 
   prompt_len = strlen (prompt);
@@ -273,6 +273,9 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
                   }
                 case COMPLETION_NOTMATCHED:
                   ding ();
+                  break;
+                default:
+                  break;
                 }
             }
           break;

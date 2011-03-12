@@ -62,12 +62,12 @@ is_regular_file (const char *filename)
 astr
 agetcwd (void)
 {
-  char *s = getcwd (NULL, 0);
+  const char *s = getcwd (NULL, 0);
   astr as;
   if (s == NULL)
     s = "";
   as = astr_new_cstr (s);
-  free (s);
+  free ((char *) s);
   return as;
 }
 
@@ -450,34 +450,34 @@ If the current buffer now contains an empty file that you just visited
 END_DEFUN
 
 DEFUN_ARGS ("switch-to-buffer", switch_to_buffer,
-            STR_ARG (buffer))
+            STR_ARG (buf))
 /*+
 Select buffer @i{buffer} in the current window.
 +*/
 {
   Buffer *bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
 
-  STR_INIT (buffer)
+  STR_INIT (buf)
   else
     {
       Completion *cp = make_buffer_completion ();
-      buffer = minibuf_read_completion ("Switch to buffer (default %s): ",
-                                        "", cp, NULL, get_buffer_name (bp));
+      buf = minibuf_read_completion ("Switch to buffer (default %s): ",
+                                     "", cp, NULL, get_buffer_name (bp));
       free_completion (cp);
 
-      if (buffer == NULL)
+      if (buf == NULL)
         ok = FUNCALL (keyboard_quit);
     }
 
   if (ok == leT)
     {
-      if (buffer && buffer[0] != '\0')
+      if (buf && buf[0] != '\0')
         {
-          bp = find_buffer (buffer);
+          bp = find_buffer (buf);
           if (bp == NULL)
             {
               bp = buffer_new ();
-              set_buffer_name (bp, buffer);
+              set_buffer_name (bp, buf);
               set_buffer_needname (bp, true);
               set_buffer_nosave (bp, true);
             }
@@ -486,7 +486,7 @@ Select buffer @i{buffer} in the current window.
       switch_to_buffer (bp);
     }
 
-  STR_FREE (buffer);
+  STR_FREE (buf);
 }
 END_DEFUN
 
@@ -522,7 +522,7 @@ insert_buffer (Buffer * bp)
 }
 
 DEFUN_ARGS ("insert-buffer", insert_buffer,
-            STR_ARG (buffer))
+            STR_ARG (buf))
 /*+
 Insert after point the contents of BUFFER.
 Puts mark after the inserted text.
@@ -533,13 +533,13 @@ Puts mark after the inserted text.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  STR_INIT (buffer)
+  STR_INIT (buf)
   else
     {
       Completion *cp = make_buffer_completion ();
-      buffer = minibuf_read_completion ("Insert buffer (default %s): ",
-                                        "", cp, NULL, get_buffer_name (def_bp));
-      if (buffer == NULL)
+      buf = minibuf_read_completion ("Insert buffer (default %s): ",
+                                     "", cp, NULL, get_buffer_name (def_bp));
+      if (buf == NULL)
         ok = FUNCALL (keyboard_quit);
       free_completion (cp);
     }
@@ -548,12 +548,12 @@ Puts mark after the inserted text.
     {
       Buffer *bp;
 
-      if (buffer && buffer[0] != '\0')
+      if (buf && buf[0] != '\0')
         {
-          bp = find_buffer (buffer);
+          bp = find_buffer (buf);
           if (bp == NULL)
             {
-              minibuf_error ("Buffer `%s' not found", buffer);
+              minibuf_error ("Buffer `%s' not found", buf);
               ok = leNIL;
             }
         }
@@ -564,7 +564,7 @@ Puts mark after the inserted text.
       set_mark_interactive ();
     }
 
-  STR_FREE (buffer);
+  STR_FREE (buf);
 }
 END_DEFUN
 
@@ -683,7 +683,10 @@ copy_file (const char *source, const char *dest)
 #ifdef HAVE_FCHMOD
       fchmod (ofd, st.st_mode);
 #endif
-      fchown (ofd, st.st_uid, st.st_gid);
+      if (fchown (ofd, st.st_uid, st.st_gid))
+        {
+          /* Avoid compiler warning for ignoring return value. */
+        }
     }
 
   close (ifd);
@@ -1046,7 +1049,7 @@ END_DEFUN
  * otherwise, exit.
  */
 void
-zile_exit (int doabort)
+__attribute__(( noreturn )) zile_exit (int doabort)
 {
   Buffer *bp;
 

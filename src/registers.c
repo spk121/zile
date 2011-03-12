@@ -127,7 +127,7 @@ Puts point before and mark after the inserted text.
 END_DEFUN
 
 static void
-write_registers_list (va_list ap GCC_UNUSED)
+write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
 {
   size_t i;
 

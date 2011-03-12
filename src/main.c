@@ -40,7 +40,7 @@
   "Copyright (C) 2010 Free Software Foundation, Inc."
 
 /* The executable name */
-char *program_name = PACKAGE;
+const char *program_name = PACKAGE;
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -109,7 +109,7 @@ setup_main_screen (void)
 }
 
 static void
-segv_sig_handler (int signo GCC_UNUSED)
+segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr,
            "%s: " PACKAGE_NAME
@@ -120,7 +120,7 @@ segv_sig_handler (int signo GCC_UNUSED)
 }
 
 static void
-other_sig_handler (int signo GCC_UNUSED)
+other_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
            program_name, signo);
@@ -265,6 +265,8 @@ main (int argc, char **argv)
               line = 1;
             }
           break;
+        default:
+          break;
         }
     }
 
@@ -292,7 +294,7 @@ main (int argc, char **argv)
 
   if (!qflag)
     {
-      astr as = get_home_dir ();
+      as = get_home_dir ();
       if (as)
         {
           astr_cat_cstr (as, "/." PACKAGE);
@@ -334,6 +336,8 @@ main (int argc, char **argv)
               FUNCALL_ARG (goto_line, (size_t) gl_list_get_at (arg_line, i));
             lastflag |= FLAG_NEED_RESYNC;
           }
+          break;
+        default:
           break;
         }
       if (thisflag & FLAG_QUIT)

@@ -22,16 +22,18 @@
 #ifndef ZILE_H
 #define ZILE_H
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
-#include "config.h"
 #include "xalloc.h"
 #include "xvasprintf.h"
 #include "size_max.h"
 #include "minmax.h"
 #include "hash.h"
 #include "gl_xlist.h"
+#include "unused-parameter.h"
 
 #include "astr.h"
 #include "lists.h"
@@ -129,7 +131,7 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 #define DEFUN(zile_func, c_func) \
   DEFUN_ARGS(zile_func, c_func, )
 #define DEFUN_ARGS(zile_func, c_func, args) \
-  le * F_ ## c_func (long uniarg GCC_UNUSED, bool is_uniarg GCC_UNUSED, le *arglist GCC_UNUSED) \
+  le * F_ ## c_func (long uniarg _GL_UNUSED_PARAMETER, bool is_uniarg _GL_UNUSED_PARAMETER, le *arglist _GL_UNUSED_PARAMETER) \
   {                                                                     \
     le * ok = leT;                                                      \
     args
@@ -270,12 +272,11 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
 
-/* Avoid warnings about unused parameters. */
-#undef GCC_UNUSED
-#ifdef __GNUC__
-#define GCC_UNUSED __attribute__ ((unused))
+/* Avoid warnings about functions that don't return. */
+#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 8)
+# define _GL_ATTRIBUTE_NORETURN __attribute__ ((__noreturn__))
 #else
-#define GCC_UNUSED
+# define _GL_ATTRIBUTE_NORETURN /* empty */
 #endif
 
 #endif /* !ZILE_H */

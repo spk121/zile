@@ -136,10 +136,10 @@ move_line (int n)
 
   for (; n > 0; n--)
     {
-      Point pt = get_buffer_pt (cur_bp);
-      pt.p = (dir > 0 ? get_line_next : get_line_prev) (pt.p);
-      pt.n += dir;
-      set_buffer_pt (cur_bp, pt);
+      Point pt2 = get_buffer_pt (cur_bp);
+      pt2.p = (dir > 0 ? get_line_next : get_line_prev) (pt2.p);
+      pt2.n += dir;
+      set_buffer_pt (cur_bp, pt2);
     }
 
   if (last_command () != F_next_line && last_command () != F_previous_line)

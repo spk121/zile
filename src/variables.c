@@ -55,7 +55,7 @@ var_hash (const void *v, size_t n)
 static bool
 var_cmp (const void *v, const void *w)
 {
-  return strcmp (((var_entry *) v)->var, ((var_entry *) w)->var) == 0;
+  return strcmp (((const var_entry *) v)->var, ((const var_entry *) w)->var) == 0;
 }
 
 static void
@@ -208,7 +208,7 @@ get_variable_bool (const char *var)
 }
 
 char *
-minibuf_read_variable_name (char *fmt, ...)
+minibuf_read_variable_name (const char *fmt, ...)
 {
   va_list ap;
   char *ms;
