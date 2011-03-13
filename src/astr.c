@@ -263,6 +263,8 @@ astr_recase (astr as, enum casing newcase)
 #include <stdio.h>
 #include "progname.h"
 
+#include "main.h"
+
 static void
 assert_eq (astr as, const char *s)
 {
@@ -274,15 +276,17 @@ assert_eq (astr as, const char *s)
 }
 
 /* Stub to make xalloc_die happy. */
+void zile_exit (int doabort) _GL_ATTRIBUTE_NORETURN;
+
 void
-zile_exit (int doabort)
+zile_exit (int doabort _GL_UNUSED_PARAMETER)
 {
   exit (EXIT_CRASH);
 }
 
 
 int
-main (void)
+main (int argc _GL_UNUSED_PARAMETER, char **argv)
 {
   astr as1, as2, as3;
 

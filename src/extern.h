@@ -131,7 +131,7 @@ astr agetcwd (void);
 bool expand_path (astr path);
 astr compact_path (astr path);
 bool find_file (const char *filename);
-void zile_exit (int doabort);
+void zile_exit (int doabort) _GL_ATTRIBUTE_NORETURN;
 
 /* funcs.c ---------------------------------------------------------------- */
 void set_mark_interactive (void);

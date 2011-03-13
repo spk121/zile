@@ -1047,7 +1047,7 @@ END_DEFUN
  * otherwise, exit.
  */
 void
-__attribute__(( noreturn )) zile_exit (int doabort)
+zile_exit (int doabort)
 {
   Buffer *bp;
 

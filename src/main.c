@@ -106,7 +106,7 @@ setup_main_screen (void)
 }
 
 static void
-segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
+_GL_ATTRIBUTE_NORETURN segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr,
            "%s: " PACKAGE_NAME
@@ -117,7 +117,7 @@ segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
 }
 
 static void
-other_sig_handler (int signo _GL_UNUSED_PARAMETER)
+_GL_ATTRIBUTE_NORETURN other_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
            program_name, signo);
