@@ -1,6 +1,6 @@
 /* Completion facility functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,7 +19,7 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/stat.h>
 #include <assert.h>
@@ -27,7 +27,6 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include "dirname.h"
 #include "gl_linked_list.h"
@@ -70,9 +69,9 @@ completion_strcmp (const void *p1, const void *p2)
 }
 
 static bool
-completion_streq (const void *p1, const void *p2)
+completion_STREQ (const void *p1, const void *p2)
 {
-  return strcmp ((char *) p1, (char *) p2) == 0;
+  return STREQ ((char *) p1, (char *) p2);
 }
 
 /*
@@ -84,10 +83,10 @@ completion_new (int fileflag)
   Completion *cp = (Completion *) XZALLOC (Completion);
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
-                                          completion_streq, NULL,
+                                          completion_STREQ, NULL,
                                           (gl_listelement_dispose_fn) free, false);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST,
-                                      completion_streq, NULL,
+                                      completion_STREQ, NULL,
                                       NULL, false);
 
   if (fileflag)
@@ -246,7 +245,7 @@ completion_readdir (Completion * cp, astr as)
   gl_list_free (cp->completions);
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
-                                          completion_streq, NULL,
+                                          completion_STREQ, NULL,
                                           (gl_listelement_dispose_fn) free, false);
 
   if (!expand_path (as))
@@ -322,7 +321,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
   char c;
 
   gl_list_free (cp->matches);
-  cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_streq, NULL, NULL, false);
+  cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_STREQ, NULL, NULL, false);
 
   if (cp->flags & CFLAG_FILENAME)
     if (!completion_readdir (cp, search))
@@ -353,7 +352,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
         {
           ++partmatches;
           gl_sortedlist_add (cp->matches, completion_strcmp, s);
-          if (!strcmp (s, astr_cstr (search)))
+          if (STREQ (s, astr_cstr (search)))
             ++fullmatches;
         }
     }

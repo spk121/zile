@@ -1,6 +1,6 @@
 /* History facility functions
 
-   Copyright (c) 2004, 2008 Free Software Foundation, Inc.
+   Copyright (c) 2004, 2008, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,10 +19,9 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <stdlib.h>
-#include <string.h>
 #include "gl_linked_list.h"
 
 #include "main.h"
@@ -57,7 +56,7 @@ add_history_element (History * hp, const char *string)
                                          NULL, NULL, (gl_listelement_dispose_fn) free, true);
   else
     last = (char *) gl_list_get_at (hp->elements, gl_list_size (hp->elements) - 1);
-  if (!last || strcmp (last, string) != 0)
+  if (!last || STRNEQ (last, string))
     gl_list_add_last (hp->elements, xstrdup (string));
 }
 

@@ -1,6 +1,6 @@
 /* Lisp eval
 
-   Copyright (c) 2001, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,12 +19,11 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "main.h"
 #include "extern.h"
@@ -58,7 +57,7 @@ get_fentry (const char *name)
   size_t i;
   assert (name);
   for (i = 0; i < fentry_table_size; ++i)
-    if (!strcmp (name, fentry_table[i].name))
+    if (STREQ (name, fentry_table[i].name))
       return &fentry_table[i];
   return NULL;
 }

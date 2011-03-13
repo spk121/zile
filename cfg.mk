@@ -19,6 +19,16 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+gnulib_dir = $(GNULIB_SRCDIR)
+
+# Set format of NEWS
+news-check-lines-spec = 1,20
+news-check-regexp = '^\*.* $(VERSION_REGEXP) \($(today)\)'
+old_NEWS_hash := d41d8cd98f00b204e9800998ecf8427e
+
+# Don't check test outputs or diff patches
+VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
+
 local-checks-to-skip = \
 	sc_cast_of_argument_to_free \
 	sc_bindtextdomain \

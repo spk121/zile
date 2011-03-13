@@ -25,7 +25,7 @@
 # srcdir and builddir are defined in the environment
 
 # If TERM is not set to a terminal type, choose a default
-if test -z "$TERM" -o "$TERM" = "unknown"; then
+if test -z "$TERM" || test "$TERM" = "unknown"; then
     TERM=vt100
     export TERM
 fi

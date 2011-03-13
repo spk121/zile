@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
 
-   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2002, 2003, 2004, 2005, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,7 +19,7 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <assert.h>
 #include <stdarg.h>
@@ -258,7 +258,7 @@ astr_recase (astr as, enum casing newcase)
 
 #ifdef TEST
 
-#include "config.h"
+#include <config.h>
 
 #include <stdio.h>
 #include "progname.h"
@@ -266,10 +266,10 @@ astr_recase (astr as, enum casing newcase)
 static void
 assert_eq (astr as, const char *s)
 {
-  if (strcmp (astr_cstr (as), s))
+  if (STRNEQ (astr_cstr (as), s))
     {
       printf ("test failed: \"%s\" != \"%s\"\n", astr_cstr (as), s);
-      exit (1);
+      exit (EXIT_FAILURE);
     }
 }
 
@@ -277,7 +277,7 @@ assert_eq (astr as, const char *s)
 void
 zile_exit (int doabort)
 {
-  exit (2);
+  exit (EXIT_CRASH);
 }
 
 
@@ -370,7 +370,7 @@ main (void)
   astr_delete (as3);
   printf ("astr test successful.\n");
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
 #endif /* TEST */

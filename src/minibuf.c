@@ -1,6 +1,6 @@
 /* Minibuffer facility functions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,13 +19,12 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "main.h"
 #include "extern.h"
@@ -269,8 +268,8 @@ minibuf_read_yesno (const char *fmt, ...)
       gl_list_node_t n = gl_sortedlist_search (get_completion_completions (cp),
                                                completion_strcmp, ms);
       assert (n);
-      ret = !strcmp ((const char *) gl_list_node_value (get_completion_completions (cp), n),
-                     "yes");
+      ret = STREQ ((const char *) gl_list_node_value (get_completion_completions (cp), n),
+                   "yes");
     }
   free_completion (cp);
 

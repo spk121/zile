@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,14 +19,13 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <limits.h>
 #include <locale.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <signal.h>
@@ -38,7 +37,7 @@
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 2010 Free Software Foundation, Inc."
+  "Copyright (C) 2011 Free Software Foundation, Inc."
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -195,7 +194,7 @@ main (int argc, char **argv)
         {
           fprintf (stderr, "%s: Option `%s' requires an argument\n",
                    program_name, argv[this_optind]);
-          exit (1);
+          exit (EXIT_FAILURE);
         }
       else if (c == 'q')
         longindex = 0;
@@ -241,7 +240,7 @@ main (int argc, char **argv)
 #undef A
           printf ("\n"
                   "Report bugs to " PACKAGE_BUGREPORT ".\n");
-          exit (0);
+          exit (EXIT_SUCCESS);
         case 4:
           printf (ZILE_VERSION_STRING "\n"
                   ZILE_COPYRIGHT_STRING "\n"
@@ -249,7 +248,7 @@ main (int argc, char **argv)
                   "You may redistribute copies of " PACKAGE_NAME "\n"
                   "under the terms of the GNU General Public License.\n"
                   "For more information about these matters, see the file named COPYING.\n");
-          exit (0);
+          exit (EXIT_SUCCESS);
         case 5:
           if (*optarg == '+')
             line = strtoul (optarg + 1, NULL, 10);
@@ -364,5 +363,5 @@ main (int argc, char **argv)
   /* Tidy and close the terminal. */
   term_finish ();
 
-  return 0;
+  return EXIT_SUCCESS;
 }

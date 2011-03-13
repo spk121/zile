@@ -1,6 +1,6 @@
 /* Main types and definitions
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -22,11 +22,12 @@
 #ifndef ZILE_H
 #define ZILE_H
 
-#include "config.h"
+#include <config.h>
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <string.h>
 #include "xalloc.h"
 #include "xvasprintf.h"
 #include "size_max.h"
@@ -196,7 +197,7 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
     {                                           \
       const char *s = arglist->next->data;      \
       arglist = arglist->next;                  \
-      if (s != NULL && strcmp (s, "nil") == 0)  \
+      if (s != NULL && STREQ (s, "nil"))        \
         name = false;                           \
     }
 
@@ -263,14 +264,24 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
                                            with no number. */
 #define FLAG_DEFINING_MACRO	0020	/* We are defining a macro. */
 
-/*
- * Zile font codes
- */
+/* Zile font codes */
 #define FONT_NORMAL		0000
 #define FONT_REVERSE		0001
 
+/* Custom exit code */
+#define EXIT_CRASH	2
+
 /* Default waitkey pause in ds */
 #define WAITKEY_DEFAULT 20
+
+
+/*--------------------------------------------------------------------------
+ * Things that should really be in gnulib.
+ *--------------------------------------------------------------------------*/
+
+/* String comparison */
+#define STREQ(a, b) (strcmp (a, b) == 0)
+#define STRNEQ(a, b) (strcmp (a, b) != 0)
 
 /* Avoid warnings about functions that don't return. */
 #if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 8)

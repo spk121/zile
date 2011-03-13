@@ -19,7 +19,7 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include "config.h"
+#include <config.h>
 
 #include <sys/stat.h>
 #include <errno.h>
@@ -28,7 +28,6 @@
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 #include <utime.h>
 #include "dirname.h"
@@ -126,7 +125,7 @@ expand_path (astr path)
                   ok = false;
                   break;
                 }
-              if (strcmp (pw->pw_dir, "/") != 0)
+              if (STRNEQ (pw->pw_dir, "/"))
                 astr_cat_cstr (epath, pw->pw_dir);
             }
           else
@@ -185,7 +184,7 @@ compact_path (astr path)
           !strncmp (pw->pw_dir, astr_cstr (path), homelen))
         {
           astr buf = astr_new_cstr ("~/");
-          if (!strcmp (pw->pw_dir, "/"))
+          if (STREQ (pw->pw_dir, "/"))
             astr_cat_cstr (buf, astr_cstr (path) + 1);
           else
             astr_cat_cstr (buf, astr_cstr (path) + homelen + 1);
@@ -352,7 +351,7 @@ find_file (const char *filename)
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     {
       if (get_buffer_filename (bp) != NULL &&
-          !strcmp (get_buffer_filename (bp), filename))
+          STREQ (get_buffer_filename (bp), filename))
         {
           switch_to_buffer (bp);
           return true;
@@ -1071,7 +1070,7 @@ __attribute__(( noreturn )) zile_exit (int doabort)
   if (doabort)
     abort ();
   else
-    exit (2);
+    exit (EXIT_CRASH);
 }
 
 DEFUN ("cd", cd)

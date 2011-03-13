@@ -1,6 +1,6 @@
 /* Terminal independent redisplay routines
 
-   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,9 +19,10 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
+#include <config.h>
+
 #include <stdarg.h>
 
-#include "config.h"
 #include "main.h"
 #include "extern.h"
 

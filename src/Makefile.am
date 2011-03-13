@@ -76,7 +76,7 @@ zile_SOURCES =						\
 	tbl_funcs.h					\
 	tbl_opts.h.in
 
-PERL_BUILDTIME = 					\
+PERL_BUILDTIME =					\
 	Zile.pm						\
 	mkfuncs.pl					\
 	mkvars.pl
@@ -111,7 +111,7 @@ dist_pkgdata_DATA = dotzile-extra.el
 
 dist_man_MANS = zile.1
 
-DISTCLEANFILES = 					\
+DISTCLEANFILES =					\
 	tbl_funcs.h					\
 	tbl_vars.h					\
 	zile.1
