@@ -22,7 +22,6 @@
 gnulib_dir = $(GNULIB_SRCDIR)
 
 # Set format of NEWS
-news-check-lines-spec = 1,20
 news-check-regexp = '^\*.* $(VERSION_REGEXP) \($(today)\)'
 old_NEWS_hash := d41d8cd98f00b204e9800998ecf8427e
 
