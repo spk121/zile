@@ -226,3 +226,5 @@
 /dosname.h
 /mbtowc-impl.h
 /mbtowc.c
+/progname.c
+/progname.h

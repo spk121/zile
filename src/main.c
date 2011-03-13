@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <signal.h>
+#include "progname.h"
 #include "dirname.h"
 #include "gl_linked_list.h"
 
@@ -38,9 +39,6 @@
 
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 2010 Free Software Foundation, Inc."
-
-/* The executable name */
-const char *program_name = PACKAGE;
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -168,9 +166,7 @@ main (int argc, char **argv)
   astr as;
   bool ok = true;
 
-  /* Set program_name to executable name, if available */
-  if (argv[0])
-    program_name = base_name (argv[0]);
+  set_program_name (argv[0]);
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */

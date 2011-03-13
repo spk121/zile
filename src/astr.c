@@ -258,7 +258,10 @@ astr_recase (astr as, enum casing newcase)
 
 #ifdef TEST
 
+#include "config.h"
+
 #include <stdio.h>
+#include "progname.h"
 
 static void
 assert_eq (astr as, const char *s)
@@ -270,11 +273,7 @@ assert_eq (astr as, const char *s)
     }
 }
 
-/*
- * Stubs to make xalloc_die happy.
- */
-char *prog_name = "astr";
-
+/* Stub to make xalloc_die happy. */
 void
 zile_exit (int doabort)
 {
@@ -286,6 +285,8 @@ int
 main (void)
 {
   astr as1, as2, as3;
+
+  set_program_name (argv[0]);
 
   as1 = astr_new ();
   astr_cpy_cstr (as1, "hello world");
