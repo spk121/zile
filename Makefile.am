@@ -1,6 +1,6 @@
 # Top-level Makefile.am
 #
-# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+# Copyright (c) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -30,8 +30,8 @@ dist_pkgdata_DATA = FAQ
 ChangeLog:
 	git2cl > ChangeLog
 
-release: distcheck
-	agrep -d '^\* Release' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
+release:
+	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
 	woger freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
 
