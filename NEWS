@@ -1,4 +1,4 @@
-* Release 2.3.23 (2011-03-13)
+* Release 2.3.23 (2011-03-14)
 
 This release fixes a long-standing bug where {beginning,end}-of-buffer
 failed to take account of transient-mark-mode, turns on more compiler
