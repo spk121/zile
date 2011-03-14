@@ -31,7 +31,7 @@ ChangeLog:
 	git2cl > ChangeLog
 
 release: distcheck
-	agrep -d '^Release' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
+	agrep -d '^\* Release' $(VERSION) NEWS | tail -n +3 | head -n -1 > release-notes && \
 	woger freshmeat $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
 	rm -f release-notes
 
