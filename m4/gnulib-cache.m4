@@ -15,7 +15,7 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=gnulib-local --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=build-aux --no-libtool --macro-prefix=gl announce-gen array-list chown dirname euidaccess fcntl gendocs getcwd getopt-gnu hash linked-list maintainer-makefile manywarnings memcmp2 minmax pmccabe2html progname regex size_max stdarg stdbool streq unused-parameter warnings xalloc-die xlist xvasprintf-posix
+#   gnulib-tool --import --dir=. --local-dir=gnulib-local --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=build-aux --no-libtool --macro-prefix=gl announce-gen array-list chown dirname euidaccess fcntl gendocs getcwd getopt-gnu gnupload hash linked-list maintainer-makefile manywarnings memcmp2 minmax pmccabe2html progname regex size_max stdarg stdbool streq unused-parameter warnings xalloc-die xlist xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([gnulib-local])
@@ -29,6 +29,7 @@ gl_MODULES([
   gendocs
   getcwd
   getopt-gnu
+  gnupload
   hash
   linked-list
   maintainer-makefile
