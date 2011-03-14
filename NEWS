@@ -1,4 +1,4 @@
-* Release 2.3.23 (2011-03-14)
+* Noteworthy changes in release 2.3.23 (2011-03-14)
 
 ** Bug fixes
 
@@ -10,7 +10,7 @@
   Turn on more compiler and build system, and run-time checks (thanks,
   gnulib!).
 
-* Release 2.3.22 (2011-03-03)
+* Noteworthy changes in release 2.3.22 (2011-03-03)
 
 This release fixes a bug in forward regex isearch introduced recently,
 and makes the build system use silent rules by default.
