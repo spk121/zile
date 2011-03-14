@@ -22,7 +22,7 @@
 gnulib_dir = $(GNULIB_SRCDIR)
 
 # Set format of NEWS
-old_NEWS_hash := ef3a4652dacb8fa592664d5d8b5beabf
+old_NEWS_hash := 18a8786bec3ad723d32d8dda57ff04e5
 
 # Don't check test outputs or diff patches
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
