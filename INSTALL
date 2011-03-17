@@ -53,5 +53,5 @@ Then follow the instructions for building from a release tarball.
 Automated releases
 ------------------
 
-To make a release automatically, you need woger, from
+To make a release automatically, you need ncftp, and woger, from
 http://rrt.sc3d.org/Software/woger
