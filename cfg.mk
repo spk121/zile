@@ -28,7 +28,6 @@ old_NEWS_hash := 369bb8fbd9477b007c030a0453449e30
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
 local-checks-to-skip = \
-	sc_cast_of_argument_to_free \
 	sc_bindtextdomain \
 	sc_error_message_period \
 	sc_error_message_uppercase

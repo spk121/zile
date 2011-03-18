@@ -44,8 +44,9 @@ void init_default_bindings (void);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
   void set_buffer_ ## field (Buffer *bp, ty field);
-#define FIELD_STR(field)                                \
-  FIELD(const char *, field)
+#define FIELD_STR(field)                                                \
+  char *get_buffer_ ## field (const Buffer *cp);                        \
+  void set_buffer_ ## field (Buffer *cp, const char *field);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
@@ -81,8 +82,9 @@ bool check_modified_buffer (Buffer * bp);
 #define FIELD(ty, field)                                        \
   ty get_completion_ ## field (const Completion *cp);           \
   void set_completion_ ## field (Completion *cp, ty field);
-#define FIELD_STR(field)                        \
-  FIELD(const char *, field)
+#define FIELD_STR(field)                                               \
+  char *get_completion_ ## field (const Completion *cp);               \
+  void set_completion_ ## field (Completion *cp, const char *field);
 #include "completion.h"
 #undef FIELD
 #undef FIELD_STR
@@ -118,7 +120,7 @@ Function get_function (const char *name);
 const char *get_function_doc (const char *name);
 int get_function_interactive (const char *name);
 const char *get_function_name (Function p);
-const char *minibuf_read_function_name (const char *fmt, ...);
+char *minibuf_read_function_name (const char *fmt, ...);
 void init_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
@@ -209,9 +211,10 @@ extern int thisflag, lastflag, last_uniarg;
 #include "marker.h"
 #undef FIELD
 Marker * marker_new (void);
+void unchain_marker (const Marker * marker);
 void free_marker (Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, Point pt);
-Marker *copy_marker (Marker * marker);
+Marker *copy_marker (const Marker * marker);
 Marker *point_marker (void);
 
 /* minibuf.c -------------------------------------------------------------- */
@@ -293,7 +296,7 @@ void undo_set_unchanged (Undo *up);
 void init_variables (void);
 char *minibuf_read_variable_name (const char *fmt, ...);
 void set_variable (const char *var, const char *val);
-const char *get_variable_doc (const char *var, char **defval);
+const char *get_variable_doc (const char *var, const char **defval);
 const char *get_variable (const char *var);
 long get_variable_number_bp (Buffer * bp, const char *var);
 long get_variable_number (const char *var);

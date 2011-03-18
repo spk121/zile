@@ -40,7 +40,6 @@ nw="$nw -Wstrict-overflow"  # Use a lower level (see below).
 nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
 nw="$nw -Wsign-conversion"  # Likewise.
 nw="$nw -Waggregate-return" # We do this on purpose.
-nw="$nw -Wcast-qual"        # We do this on purpose.
 nw="$nw -Wbad-function-cast" # We do this on purpose.
 nw="$nw -Wtraditional-conversion" # Don't care.
 nw="$nw -Wpadded"           # Don't care.

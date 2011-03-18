@@ -241,7 +241,7 @@ DEFUN ("execute-extended-command", execute_extended_command)
 Read function name, then read its arguments and call it.
 +*/
 {
-  const char *name;
+  char *name;
   astr msg = astr_new ();
 
   if (lastflag & FLAG_SET_UNIARG)
@@ -259,7 +259,7 @@ Read function name, then read its arguments and call it.
     return false;
 
   ok = execute_function (name, uniarg);
-  free ((char *) name);
+  free (name);
 }
 END_DEFUN
 
@@ -267,7 +267,7 @@ END_DEFUN
  * Read a function name from the minibuffer.
  */
 static History *functions_history = NULL;
-const char *
+char *
 minibuf_read_function_name (const char *fmt, ...)
 {
   va_list ap;

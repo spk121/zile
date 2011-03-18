@@ -139,7 +139,7 @@ static le *
 do_search (bool forward, bool regexp, const char *pattern)
 {
   le * ok = leNIL;
-  const char *ms = NULL;
+  char *ms = NULL;
 
   if (pattern == NULL)
     pattern = ms = minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward");
@@ -157,7 +157,7 @@ do_search (bool forward, bool regexp, const char *pattern)
         ok = leT;
     }
 
-  free ((char *) ms);
+  free (ms);
   return ok;
 }
 

@@ -42,6 +42,7 @@
  * The opaque string type.
  */
 typedef struct astr *astr;
+typedef struct astr const *castr;
 
 /*
  * Allocate a new string with zero length.
@@ -62,12 +63,12 @@ void astr_delete (astr as);
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_len (as) - 1] inclusive may be read.
  */
-const char *astr_cstr (astr as);
+const char *astr_cstr (castr as);
 
 /*
  * Return the length of the argument string as.
  */
-size_t astr_len (astr as);
+size_t astr_len (castr as);
 
 /*
  * Return the pos'th character of as.
@@ -94,7 +95,7 @@ astr astr_cpy_cstr (astr as, const char *s);
 /*
  * Append the contents of the argument string or character to as.
  */
-astr astr_cat (astr as, astr src);
+astr astr_cat (astr as, castr src);
 astr astr_cat_cstr (astr as, const char *s);
 astr astr_ncat_cstr (astr as, const char *s, size_t len);
 astr astr_cat_char (astr as, int c);

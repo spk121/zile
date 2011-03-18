@@ -37,7 +37,7 @@
 struct Buffer
 {
 #define FIELD(ty, name) ty name;
-#define FIELD_STR(name) const char *name;
+#define FIELD_STR(name) char *name;
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
@@ -48,7 +48,7 @@ struct Buffer
   SETTER (Buffer, buffer, ty, field)
 
 #define FIELD_STR(field)                         \
-  GETTER (Buffer, buffer, const char *, field)   \
+  GETTER (Buffer, buffer, char *, field)   \
   STR_SETTER (Buffer, buffer, field)
 
 #include "buffer.h"
@@ -116,8 +116,8 @@ free_buffer (Buffer * bp)
   while (bp->markers)
     free_marker (bp->markers);
 
-  free ((char *) bp->name);
-  free ((char *) bp->filename);
+  free (bp->name);
+  free (bp->filename);
 
   if (bp->vars != NULL)
     hash_free (bp->vars);
@@ -183,7 +183,7 @@ void
 set_buffer_names (Buffer * bp, const char *filename)
 {
   astr as = NULL;
-  const char *oldname;
+  char *oldname;
 
   if (filename[0] != '/')
     {
@@ -200,7 +200,7 @@ set_buffer_names (Buffer * bp, const char *filename)
   bp->name = make_buffer_name (filename);
   if (as)
     astr_delete (as);
-  free ((char *) oldname);
+  free (oldname);
 }
 
 /*
@@ -564,7 +564,7 @@ With a nil argument, kill the current buffer.
       if (bp == NULL)
         {
           minibuf_error ("Buffer `%s' not found", buf);
-          free ((char *) buf);
+          free (buf);
           ok = leNIL;
         }
     }

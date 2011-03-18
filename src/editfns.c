@@ -37,7 +37,7 @@ push_mark (void)
 {
   if (!mark_ring)
     mark_ring = gl_list_create_empty (GL_LINKED_LIST,
-                                      NULL, NULL, NULL, true);
+                                      NULL, NULL, (gl_listelement_dispose_fn) free, true);
 
   /* Save the mark.  */
   if (get_buffer_mark (cur_bp))
@@ -58,8 +58,8 @@ push_mark (void)
 void
 pop_mark (void)
 {
-  Marker *m = (Marker *) gl_list_get_at (mark_ring,
-                                         gl_list_size (mark_ring) - 1);
+  const Marker *m = (const Marker *) gl_list_get_at (mark_ring,
+                                                     gl_list_size (mark_ring) - 1);
 
   /* Replace the mark. */
   if (get_buffer_mark (get_marker_bp (m)))
@@ -67,8 +67,8 @@ pop_mark (void)
 
   set_buffer_mark (get_marker_bp (m), copy_marker (m));
 
+  unchain_marker (m);
   assert (gl_list_remove_at (mark_ring, gl_list_size (mark_ring) - 1));
-  free_marker (m);
 }
 
 /* Set the mark to point. */

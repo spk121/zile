@@ -317,7 +317,7 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
       else if (ms[0] == '\0')
         {
           minibuf_error (empty_err);
-          free ((char *) ms);
+          free (ms);
           ms = NULL;
           break;
         }
@@ -328,7 +328,7 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
           /* Complete partial words if possible. */
           if (completion_try (cp, as, false) == COMPLETION_MATCHED)
             {
-              free ((char *) ms);
+              free (ms);
               ms = xstrdup (get_completion_match (cp));
             }
           astr_delete (as);

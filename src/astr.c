@@ -67,13 +67,13 @@ astr_delete (astr as)
 }
 
 const char *
-astr_cstr (astr as)
+astr_cstr (castr as)
 {
   return (const char *) (as->text);
 }
 
 size_t
-astr_len (astr as)
+astr_len (castr as)
 {
   return as->len;
 }
@@ -152,7 +152,7 @@ astr_cpy_cstr (astr as, const char *s)
 }
 
 astr
-astr_cat (astr as, astr src)
+astr_cat (astr as, castr src)
 {
   return astr_ncat_cstr (as, astr_cstr (src), astr_len (src));
 }
@@ -223,11 +223,11 @@ astr
 astr_afmt (astr as, const char *fmt, ...)
 {
   va_list ap;
-  const char *buf;
+  char *buf;
   va_start (ap, fmt);
   buf = xvasprintf (fmt, ap);
   astr_cat_cstr (as, buf);
-  free ((char *) buf);
+  free (buf);
   va_end (ap);
   return as;
 }

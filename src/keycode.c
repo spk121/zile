@@ -219,10 +219,10 @@ strtokey (const char *buf, size_t * len)
   if (*buf == '\\')
     {
       size_t i;
-      char **p = NULL;
+      const char **p = NULL;
       for (i = 0; i < sizeof (keyname) / sizeof (keyname[0]); i++)
         if (strncmp (keyname[i], buf, strlen (keyname[i])) == 0)
-          p = (char **) &keyname[i];
+          p = (const char **) &keyname[i];
       if (p == NULL)
         {
           *len = 0;
@@ -231,13 +231,13 @@ strtokey (const char *buf, size_t * len)
       else
         {
           *len = strlen (*p);
-          return keycode[p - (char **) keyname];
+          return keycode[p - (const char **) keyname];
         }
     }
   else
     {
       *len = 1;
-      return (size_t) * (unsigned char *) buf;
+      return (size_t) *(const unsigned char *) buf;
     }
 }
 

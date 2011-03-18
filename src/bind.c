@@ -520,7 +520,7 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
           astr bs = chordtostr (p->key);
           for (j = 1; j < gl_list_size (keys); j++)
             {
-              astr_cat (key, (astr) gl_list_get_at (keys, j));
+              astr_cat (key, (castr) gl_list_get_at (keys, j));
               astr_cat_char (key, ' ');
             }
           astr_cat (key, bs);
@@ -532,7 +532,6 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
         walk_bindings_tree (p, keys, process, st);
     }
 
-  astr_delete ((astr) gl_list_get_at (keys, gl_list_size (keys) - 1));
   assert (gl_list_remove_at (keys, gl_list_size (keys) - 1));
 }
 
@@ -541,7 +540,7 @@ walk_bindings (Binding tree, void (*process) (astr key, Binding p, void *st),
                void *st)
 {
   gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
-                                      NULL, NULL, NULL, true);
+                                      NULL, NULL, (gl_listelement_dispose_fn) astr_delete, true);
   walk_bindings_tree (tree, l, process, st);
   gl_list_free (l);
 }
@@ -572,7 +571,7 @@ Argument is a command name.  If the prefix arg is non-nil, insert the
 message in the buffer.
 +*/
 {
-  const char *name = minibuf_read_function_name ("Where is command: ");
+  char *name = minibuf_read_function_name ("Where is command: ");
   gather_bindings_state g;
 
   ok = leNIL;
@@ -602,7 +601,7 @@ message in the buffer.
         }
     }
 
-  free ((char *) name);
+  free (name);
 }
 END_DEFUN
 

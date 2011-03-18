@@ -60,12 +60,9 @@ is_regular_file (const char *filename)
 astr
 agetcwd (void)
 {
-  const char *s = getcwd (NULL, 0);
-  astr as;
-  if (s == NULL)
-    s = "";
-  as = astr_new_cstr (s);
-  free ((char *) s);
+  char *s = getcwd (NULL, 0);
+  astr as = astr_new_cstr (s ? s : "");
+  free (s);
   return as;
 }
 
@@ -206,9 +203,9 @@ get_buffer_dir (void)
 
   if (get_buffer_filename (cur_bp))
     {
-      const char *name = dir_name (get_buffer_filename (cur_bp));
+      char *name = dir_name (get_buffer_filename (cur_bp));
       ret = astr_new_cstr (name);
-      free ((char *) name);
+      free (name);
     }
   else
     ret = agetcwd ();
@@ -844,21 +841,23 @@ write_to_disk (Buffer * bp, const char *filename)
 
 static le *
 write_buffer (Buffer *bp, bool needname, bool confirm,
-              const char *name, const char *prompt)
+              const char *name0, const char *prompt)
 {
   bool ans = true;
-  bool name_from_minibuffer = false;
   le * ok = leT;
+  char *name;
+
+  if (!needname)
+    name = xstrdup (name0);
 
   if (needname)
     {
       name = minibuf_read_filename (prompt, "", NULL);
-      name_from_minibuffer = true;
       if (name == NULL)
         return FUNCALL (keyboard_quit);
       if (name[0] == '\0')
         {
-          free ((char *) name);
+          free (name);
           return leNIL;
         }
       confirm = true;
@@ -892,9 +891,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
         ok = leNIL;
     }
 
-  if (name_from_minibuffer)
-    free ((char *) name);
-
+  free (name);
   return ok;
 }
 

@@ -308,7 +308,7 @@ main (int argc, char **argv)
      line. */
   for (i = 0; ok && i < gl_list_size (arg_arg); i++)
     {
-      char *arg = (char *) gl_list_get_at (arg_arg, i);
+      const char *arg = (const char *) gl_list_get_at (arg_arg, i);
 
       switch ((ptrdiff_t) gl_list_get_at (arg_type, i))
         {

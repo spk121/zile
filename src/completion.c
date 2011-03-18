@@ -41,7 +41,7 @@
 struct Completion
 {
 #define FIELD(ty, name) ty name;
-#define FIELD_STR(name) const char *name;
+#define FIELD_STR(name) char *name;
 #include "completion.h"
 #undef FIELD
 #undef FIELD_STR
@@ -51,8 +51,8 @@ struct Completion
   GETTER (Completion, completion, ty, field)    \
   SETTER (Completion, completion, ty, field)
 
-#define FIELD_STR(field)                                        \
-  GETTER (Completion, completion, const char *, field)          \
+#define FIELD_STR(field)                                  \
+  GETTER (Completion, completion, char *, field)          \
   STR_SETTER (Completion, completion, field)
 
 #include "completion.h"
@@ -65,13 +65,13 @@ struct Completion
 int
 completion_strcmp (const void *p1, const void *p2)
 {
-  return strcmp ((char *) p1, (char *) p2);
+  return strcmp ((const char *) p1, (const char *) p2);
 }
 
 static bool
 completion_STREQ (const void *p1, const void *p2)
 {
-  return STREQ ((char *) p1, (char *) p2);
+  return STREQ ((const char *) p1, (const char *) p2);
 }
 
 /*
@@ -164,7 +164,7 @@ calculate_max_length (gl_list_t l, size_t size)
 
   for (i = 0; i < MIN (size, gl_list_size (l)); i++)
     {
-      size_t len = strlen ((char *) gl_list_get_at (l, i));
+      size_t len = strlen ((const char *) gl_list_get_at (l, i));
       maxlen = MAX (len, maxlen);
     }
 
@@ -185,7 +185,7 @@ completion_print (gl_list_t l, size_t size)
   bprintf ("Possible completions are:\n");
   for (i = col = 0; i < MIN (size, gl_list_size (l)); i++)
     {
-      char *s = (char *) gl_list_get_at (l, i);
+      const char *s = (const char *) gl_list_get_at (l, i);
       size_t len = strlen (s);
       if (col >= numcols)
         {
@@ -237,7 +237,8 @@ completion_readdir (Completion * cp, astr as)
 {
   DIR *dir;
   char *s1, *s2;
-  const char *pdir, *base;
+  const char *pdir;
+  char *base;
   struct dirent *d;
   struct stat st;
   astr bs;
@@ -259,12 +260,12 @@ completion_readdir (Completion * cp, astr as)
   s2 = xstrdup (astr_cstr (as));
   if (astr_get (as, astr_len (as) - 1) != '/')
     {
-      pdir = dir_name (s1);
-      /* Append `/' to pdir */
-      astr_cat_cstr (bs, pdir);
+      char *s = dir_name (s1);
+      /* Append `/' to dir */
+      astr_cat_cstr (bs, s);
       if (astr_get (bs, astr_len (bs) - 1) != '/')
         astr_cat_char (bs, '/');
-      free ((char *) pdir);
+      free (s);
       pdir = astr_cstr (bs);
       base = base_name (s2);
     }
@@ -275,7 +276,7 @@ completion_readdir (Completion * cp, astr as)
     }
 
   astr_cpy_cstr (as, base);
-  free ((char *) base);
+  free (base);
 
   dir = opendir (pdir);
   if (dir != NULL)
@@ -331,7 +332,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 
   if (ssize == 0)
     {
-      cp->match = (char *) gl_list_get_at (cp->completions, 0);
+      cp->match = xstrdup ((const char *) gl_list_get_at (cp->completions, 0));
       if (gl_list_size (cp->completions) > 1)
         {
           cp->matchsize = 0;
@@ -347,7 +348,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 
   for (i = 0; i < gl_list_size (cp->completions); i++)
     {
-      char *s = (char *) gl_list_get_at (cp->completions, i);
+      const char *s = (const char *) gl_list_get_at (cp->completions, i);
       if (!strncmp (s, astr_cstr (search), ssize))
         {
           ++partmatches;
@@ -361,14 +362,14 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
     return COMPLETION_NOTMATCHED;
   else if (partmatches == 1)
     {
-      cp->match = (char *) gl_list_get_at (cp->matches, 0);
+      cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
       cp->matchsize = strlen (cp->match);
       return COMPLETION_MATCHED;
     }
 
   if (fullmatches == 1 && partmatches > 1)
     {
-      cp->match = (char *) gl_list_get_at (cp->matches, 0);
+      cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
       cp->matchsize = strlen (cp->match);
       if (popup_when_complete)
         popup_completion (cp, false, partmatches);
@@ -377,7 +378,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
 
   for (j = ssize;; ++j)
     {
-      const char *s = (char *) gl_list_get_at (cp->matches, 0);
+      const char *s = (const char *) gl_list_get_at (cp->matches, 0);
 
       c = s[j];
       for (i = 1; i < partmatches; ++i)
@@ -385,7 +386,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
           s = gl_list_get_at (cp->matches, i);
           if (s[j] != c)
             {
-              cp->match = (char *) gl_list_get_at (cp->matches, 0);
+              cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
               cp->matchsize = j;
               popup_completion (cp, false, partmatches);
               return COMPLETION_NONUNIQUE;

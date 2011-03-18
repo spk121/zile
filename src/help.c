@@ -91,7 +91,7 @@ Display the full documentation of a function.
   STR_INIT (func)
   else
     {
-      func = minibuf_read_function_name ("Describe function: ");
+      func = xstrdup (minibuf_read_function_name ("Describe function: "));
       if (func == NULL)
         ok = leNIL;
     }
@@ -135,7 +135,7 @@ Display the full documentation of a variable.
     ok = leNIL;
   else
     {
-      char *defval;
+      const char *defval;
       const char *doc = get_variable_doc (name, &defval);
       if (doc == NULL)
         ok = leNIL;

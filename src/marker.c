@@ -51,8 +51,8 @@ marker_new (void)
   return (Marker *) XZALLOC (Marker);
 }
 
-static void
-unchain_marker (Marker * marker)
+void
+unchain_marker (const Marker * marker)
 {
   Marker *m, *prev = NULL;
 
@@ -103,7 +103,7 @@ move_marker (Marker * marker, Buffer * bp, Point pt)
 }
 
 Marker *
-copy_marker (Marker * m)
+copy_marker (const Marker * m)
 {
   Marker *marker = NULL;
   if (m)

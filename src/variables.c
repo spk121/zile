@@ -35,9 +35,9 @@
  */
 struct var_entry
 {
-  const char *var;		/* Variable name. */
-  const char *defval;		/* Default value. */
-  const char *val;		/* Current value, if any. */
+  char *var;			/* Variable name. */
+  char *defval;			/* Default value. */
+  char *val;			/* Current value, if any. */
   bool local;			/* If true, becomes local when set. */
   const char *doc;              /* Documentation */
 };
@@ -48,7 +48,7 @@ static Hash_table *main_vars;
 static size_t
 var_hash (const void *v, size_t n)
 {
-  return hash_string (((var_entry *) v)->var, n);
+  return hash_string (((const var_entry *) v)->var, n);
 }
 
 static bool
@@ -61,9 +61,9 @@ static void
 var_free (void *v)
 {
   var_entry *p = (var_entry *) v;
-  free ((char *) p->var);
-  free ((char *) p->defval);
-  free ((char *) p->val);
+  free (p->var);
+  free (p->defval);
+  free (p->val);
   free (p);
 }
 
@@ -105,7 +105,7 @@ set_variable (const char *var, const char *val)
 
   /* Find whether variable is buffer-local when set, and if needed
      create a buffer-local variable list. */
-  key->var = var;
+  key->var = xstrdup (var);
   ent = hash_lookup (main_vars, key);
   free (key);
   if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
@@ -117,7 +117,7 @@ set_variable (const char *var, const char *val)
   q = hash_insert (var_list, p);
 
   /* Update value */
-  free ((char *) q->val);
+  free (q->val);
   q->val = xstrdup (val);
 
   /* If variable is new, initialise other fields. */
@@ -139,7 +139,7 @@ get_variable_entry (Buffer * bp, const char *var)
 {
   var_entry *p = NULL, *key = XZALLOC (var_entry);
 
-  key->var = var;
+  key->var = xstrdup (var);
 
   if (bp && get_buffer_vars (bp))
     p = hash_lookup (get_buffer_vars (bp), key);
@@ -147,18 +147,18 @@ get_variable_entry (Buffer * bp, const char *var)
   if (p == NULL)
     p = hash_lookup (main_vars, key);
 
-  free (key);
+  var_free (key);
 
   return p;
 }
 
 const char *
-get_variable_doc (const char *var, char **defval)
+get_variable_doc (const char *var, const char **defval)
 {
   var_entry *p = get_variable_entry (NULL, var);
   if (p != NULL)
     {
-      *defval = (char *) p->defval;
+      *defval = p->defval;
       return p->doc;
     }
   return NULL;

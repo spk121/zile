@@ -110,7 +110,7 @@ enum
   void                                                          \
   set_ ## name ## _ ## field (Obj *p, const char *field)        \
   {                                                             \
-    free ((char *) p->field);                                   \
+    free (p->field);                                            \
     p->field = field ? xstrdup (field) : NULL;                  \
   }
 
@@ -148,7 +148,7 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 
 /* String argument. */
 #define STR_ARG(name)                   \
-  const char *name = NULL;              \
+  char *name = NULL;                    \
   bool free_ ## name = true;
 #define STR_INIT(name)                  \
   if (arglist && arglist->next)         \
@@ -159,7 +159,7 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
     }
 #define STR_FREE(name)                  \
   if (free_ ## name)                    \
-    free ((char *) name);
+    free (name);
 
 /* Integer argument. */
 #define INT_ARG(name) \
