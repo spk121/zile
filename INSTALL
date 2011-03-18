@@ -39,7 +39,7 @@ CPPFLAGS=/usr/local/include/xcurses CURSES_LIB=-lXCurses ./configure
 Building from the repository
 ----------------------------
 
-Extra prerequisites: automake >= 1.9, autoconf >= 2.59, recent gnulib
+Extra prerequisites: automake >= 1.9, autoconf >= 2.62, recent gnulib
 (at time of reading!), help2man.
 
 Check out Zile and bootstrap the build system:
