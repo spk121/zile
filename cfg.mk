@@ -34,6 +34,5 @@ local-checks-to-skip = \
 
 # Rationale:
 #
-# sc_cast_of_argument_to_free: other warnings of this sort are useful
 # sc_bindtextdomain: Emacs isn't internationalised
 # sc_error_message_{period,uppercase}: Emacs does these
