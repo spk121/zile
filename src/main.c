@@ -302,7 +302,6 @@ main (int argc, char **argv)
      specified on the command line, and there has been no error. */
   if (gl_list_size (arg_arg) == 0 && minibuf_no_error ())
     about_screen ();
-  setup_main_screen ();
 
   /* Load files and load files and run functions given on the command
      line. */
@@ -342,6 +341,9 @@ main (int argc, char **argv)
   gl_list_free (arg_arg);
   gl_list_free (arg_line);
   lastflag |= FLAG_NEED_RESYNC;
+
+  /* Set up screen according to number of files loaded. */
+  setup_main_screen ();
 
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (scratch_bp);
