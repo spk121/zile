@@ -217,7 +217,7 @@ END_DEFUN
 Window *
 popup_window (void)
 {
-  if (head_wp->next == NULL)
+  if (head_wp && head_wp->next == NULL)
     {
       /* There is only one window on the screen, so split it. */
       FUNCALL (split_window);
