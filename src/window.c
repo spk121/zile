@@ -224,12 +224,8 @@ popup_window (void)
       return cur_wp->next;
     }
 
-  /* Use the window after the current one. */
-  if (cur_wp->next != NULL)
-    return cur_wp->next;
-
-  /* Use the first window. */
-  return head_wp;
+  /* Use the window after the current one, or first window if none. */
+  return cur_wp->next ? cur_wp->next : head_wp;
 }
 
 DEFUN ("delete-other-windows", delete_other_windows)
