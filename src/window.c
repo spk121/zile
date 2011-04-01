@@ -162,7 +162,8 @@ Make current window one line bigger.
 {
   Window *wp;
 
-  if (cur_wp == head_wp && cur_wp->next == NULL)
+  if (cur_wp == head_wp && (cur_wp->next == NULL ||
+                            cur_wp->next->fheight < 3))
     return leNIL;
 
   wp = cur_wp->next;
@@ -174,9 +175,6 @@ Make current window one line bigger.
             return leNIL;
           break;
         }
-
-  if (cur_wp == head_wp && cur_wp->next->fheight < 3)
-    return leNIL;
 
   --wp->fheight;
   --wp->eheight;
