@@ -228,3 +228,10 @@
 /mbtowc.c
 /progname.c
 /progname.h
+/fd-hook.c
+/fd-hook.h
+/gettimeofday.c
+/mkstemp.c
+/sys_time.in.h
+/tempname.c
+/tempname.h

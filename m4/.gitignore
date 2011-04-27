@@ -141,3 +141,7 @@ warn-on-use.m4
 /mbtowc.m4
 /manywarnings.m4
 /warnings.m4
+/gettimeofday.m4
+/mkstemp.m4
+/sys_time_h.m4
+/tempname.m4
