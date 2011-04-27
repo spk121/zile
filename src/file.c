@@ -648,7 +648,7 @@ copy_file (const char *source, const char *dest)
       return false;
     }
 
-  tname = xasprintf ("%s_XXXXXXXXXX", dest);
+  tname = xasprintf ("%s_XXXXXX", dest);
   ofd = mkstemp (tname);
   if (ofd == -1)
     {
