@@ -235,3 +235,4 @@
 /sys_time.in.h
 /tempname.c
 /tempname.h
+/getcwd-lgpl.c
