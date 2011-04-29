@@ -236,3 +236,5 @@
 /tempname.c
 /tempname.h
 /getcwd-lgpl.c
+/filenamecat-lgpl.c
+/xalloc-oversized.h
