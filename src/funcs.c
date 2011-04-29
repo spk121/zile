@@ -417,7 +417,11 @@ by 4 each time.
           thisflag &= ~FLAG_UNIARG_EMPTY;
 
           if (key & KBD_META)
-            astr_cat_cstr (as, "ESC");
+            {
+              if (astr_len (as) > 0)
+                astr_cat_char (as, ' ');
+              astr_cat_cstr (as, "ESC");
+            }
 
           astr_afmt (as, " %d", digit);
 
