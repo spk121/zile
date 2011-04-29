@@ -54,7 +54,6 @@ copy_or_kill_region (bool kill, Region * rp)
 {
   astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
 
-  maybe_free_kill_ring ();
   kill_ring_push (as);
   astr_delete (as);
 
@@ -205,7 +204,10 @@ copy_or_kill_the_region (bool kill)
   bool ok = false;
 
   if (calculate_the_region (rp))
-    ok = copy_or_kill_region (kill, rp);
+    {
+      maybe_free_kill_ring ();
+      ok = copy_or_kill_region (kill, rp);
+    }
 
   free (rp);
   return ok;
