@@ -152,7 +152,7 @@ do_binding_completion (astr as)
       } while (arg != 0);
     }
 
-  minibuf_write ("%s%s%s",
+  minibuf_write ("%s%s%s-",
                  lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
                  astr_cstr (bs),
                  astr_cstr (as));
@@ -182,7 +182,7 @@ get_key_sequence (void)
       Binding p = search_key (root_bindings, keys, 0);
       if (p == NULL || p->func != NULL)
         break;
-      as = astr_cat_char (keyvectostr (keys), '-');
+      as = keyvectostr (keys);
       gl_list_add_last (keys, (void *) do_binding_completion (as));
       astr_delete (as);
     }

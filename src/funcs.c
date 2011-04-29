@@ -402,11 +402,7 @@ by 4 each time.
 
   for (;;)
     {
-      size_t key;
-
-      astr_cat_char (as, '-'); /* Add the `-' character. */
-      key = do_binding_completion (as);
-      astr_truncate (as, astr_len (as) - 1); /* Remove the `-' character. */
+      size_t key = do_binding_completion (as);
 
       /* Cancelled. */
       if (key == KBD_CANCEL)
