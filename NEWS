@@ -1,5 +1,28 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+* Noteworthy changes in release 2.3.24 (2011-04-29) [stable]
+
+** Bug fixes
+
+  Fix kill-line with prefix argument.
+
+  Fix a cosmetic problem with multiple ESC-digit combinations.
+
+  Use gnulib’s mkstemp to avoid problems on some platforms.
+
+  Fix initial screen setup when some files are loaded on the command
+  line.
+
+** Build-related
+
+  Re-automate a bit more of the release, using gnulib and woger.
+
+  Add more compiler warnings.
+
+** Miscellaneous
+
+  As usual, various bits of code cleanup and simplification.
+
 * Noteworthy changes in release 2.3.23 (2011-03-14) [stable]
 
 ** Bug fixes
