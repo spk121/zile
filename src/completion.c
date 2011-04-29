@@ -108,6 +108,7 @@ free_completion (Completion * cp)
   gl_list_free (cp->matches);
   if (cp->flags & CFLAG_FILENAME)
     astr_delete (cp->path);
+  free (cp->match);
   free (cp);
 }
 
@@ -366,8 +367,7 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
       cp->matchsize = strlen (cp->match);
       return COMPLETION_MATCHED;
     }
-
-  if (fullmatches == 1 && partmatches > 1)
+  else if (partmatches > 1 && fullmatches == 1)
     {
       cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
       cp->matchsize = strlen (cp->match);

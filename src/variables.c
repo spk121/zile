@@ -107,6 +107,7 @@ set_variable (const char *var, const char *val)
      create a buffer-local variable list. */
   key->var = xstrdup (var);
   ent = hash_lookup (main_vars, key);
+  free (key->var);
   free (key);
   if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
     set_buffer_vars (cur_bp, new_varlist ());
