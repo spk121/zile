@@ -36,8 +36,3 @@ local-checks-to-skip = \
 #
 # sc_bindtextdomain: Emacs isn't internationalised
 # sc_error_message_{period,uppercase}: Emacs does these
-
-# Configuration for update-copyright
-update-copyright-env = \
-     UPDATE_COPYRIGHT_USE_INTERVALS=1 \
-     UPDATE_COPYRIGHT_MAX_LINE_LENGTH=79
