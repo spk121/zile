@@ -37,7 +37,7 @@ leNew (const char *text)
   return new;
 }
 
-void
+static void
 leReallyWipe (le * list)
 {
   if (list)
