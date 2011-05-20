@@ -126,6 +126,9 @@ loc:
 loc-all:
 	$(CLOC) $(PRODUCTIONSOURCES) $(TESTSOURCES)
 
+check-syntax:
+	$(COMPILE) -o /dev/null -S $(CHK_SOURCES)
+
 TESTS_VARS = srcdir=$(srcdir) builddir=$(builddir)
 TESTS_ENVIRONMENT = $(TESTS_VARS) $(VALGRIND)
 
