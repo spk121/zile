@@ -85,11 +85,7 @@ print_buf (Buffer * old_bp, Buffer * bp)
            get_buffer_modified (bp) ? '*' : ' ',
            get_buffer_name (bp), calculate_buffer_size (bp), "Fundamental");
   if (get_buffer_filename (bp) != NULL)
-    {
-      astr shortname = compact_path (astr_new_cstr (get_buffer_filename (bp)));
-      insert_astr (shortname);
-      astr_delete (shortname);
-    }
+    insert_astr (compact_path (astr_new_cstr (get_buffer_filename (bp))));
   insert_newline ();
 }
 
@@ -266,9 +262,6 @@ Just C-u as argument means to use the current column.
 
   if (ok == leT)
     set_variable ("fill-column", buf);
-
-  if (arglist == NULL)
-    free (buf);
 }
 END_DEFUN
 
@@ -463,7 +456,6 @@ by 4 each time.
       last_uniarg = arg * sgn;
       thisflag |= FLAG_SET_UNIARG;
       minibuf_clear ();
-      astr_delete (as);
     }
 }
 END_DEFUN
@@ -560,9 +552,6 @@ edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
                  size, astr_len (dest));
       line_replace_text (lp, offset, size, astr_cstr (dest), false);
     }
-
-  astr_delete (src);
-  astr_delete (dest);
 }
 
 static le *
@@ -571,10 +560,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
   Region * rp = region_new ();
 
   if (warn_if_readonly_buffer () || !calculate_the_region (rp))
-    {
-      free (rp);
-      return leNIL;
-    }
+    return leNIL;
 
   if (get_region_size (rp) != 0)
     {
@@ -608,11 +594,10 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
         }
       set_buffer_pt (cur_bp, get_marker_pt (m));
       undo_save (UNDO_END_SEQUENCE, get_marker_pt (m), 0, 0);
-      free_marker (m);
+      unchain_marker (m);
       deactivate_mark ();
     }
 
-  free (rp);
   return leT;
 }
 
@@ -883,9 +868,6 @@ astr_append_region (astr s)
 
   as = copy_text_block (get_region_start (rp), get_region_size (rp));
   astr_cat (s, as);
-  astr_delete (as);
-
-  free (rp);
 }
 
 static bool
@@ -905,7 +887,7 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
   if (!backward_func ())
     {
       minibuf_error ("Beginning of buffer");
-      free_marker (p0);
+      unchain_marker (p0);
       return false;
     }
 
@@ -930,8 +912,8 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
           goto_point (get_marker_pt (m1));
           minibuf_error ("End of buffer");
 
-          free_marker (p0);
-          free_marker (m1);
+          unchain_marker (p0);
+          unchain_marker (m1);
           return false;
         }
     }
@@ -945,7 +927,7 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
   as1 = astr_new ();
   astr_append_region (as1);
 
-  free_marker (p0);
+  unchain_marker (p0);
 
   FUNCALL (delete_region);
 
@@ -972,18 +954,16 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
 
   /* Insert the first string. */
   goto_point (get_marker_pt (m2));
-  free_marker (m2);
+  unchain_marker (m2);
   insert_astr (as1);
-  astr_delete (as1);
 
   /* Insert the second string. */
   if (as2)
     {
       goto_point (get_marker_pt (m1));
       insert_astr (as2);
-      astr_delete (as2);
     }
-  free_marker (m1);
+  unchain_marker (m1);
 
   /* Restore mark. */
   pop_mark ();
@@ -1213,7 +1193,7 @@ Fill paragraph at or after point.
     ;
 
   set_buffer_pt (cur_bp, get_marker_pt (m));
-  free_marker (m);
+  unchain_marker (m);
 
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
@@ -1244,7 +1224,6 @@ setcase_word (int rcase)
       astr_nreplace_cstr (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o, astr_len (as),
                           astr_cstr (as), astr_len (as));
     }
-  astr_delete (as);
 
   forward_word ();
   set_buffer_modified (cur_bp, true);
@@ -1316,10 +1295,7 @@ setcase_region (int (*func) (int))
   size_t i, size;
 
   if (warn_if_readonly_buffer () || !calculate_the_region (rp))
-    {
-      free (rp);
-      return leNIL;
-    }
+    return leNIL;
 
   size = get_region_size (rp);
   undo_save (UNDO_REPLACE_BLOCK, get_region_start (rp), size, get_region_size (rp));
@@ -1342,7 +1318,6 @@ setcase_region (int (*func) (int))
     }
 
   set_buffer_modified (cur_bp, true);
-  free (rp);
 
   return leT;
 }
@@ -1383,7 +1358,6 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
 
   cmdline = xasprintf ("%s 2>&1 <%s", cmd, tempfile);
   fh = popen (cmdline, "r");
-  free (cmdline);
   if (fh == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
@@ -1419,7 +1393,6 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
             minibuf_write ("%s", astr_cstr (out));
         }
     }
-  astr_delete (out);
 
   return true;
 }
@@ -1435,10 +1408,7 @@ minibuf_read_shell_command (void)
       return NULL;
     }
   if (ms[0] == '\0')
-    {
-      free (ms);
-      return NULL;
-    }
+    return NULL;
 
   return ms;
 }
@@ -1469,8 +1439,6 @@ says to insert the output in the current buffer.
 
   if (cmd != NULL)
     ok = bool_to_lisp (pipe_command (cmd, "/dev/null", insert, false));
-
-  STR_FREE (cmd);
 }
 END_DEFUN
 
@@ -1524,8 +1492,6 @@ The output is available in that buffer in both cases.
               astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
               ssize_t written = write (fd, astr_cstr (as), get_region_size (rp));
 
-              astr_delete (as);
-
               if (written != (ssize_t) get_region_size (rp))
                 {
                   if (written == -1)
@@ -1542,11 +1508,7 @@ The output is available in that buffer in both cases.
               remove (tempfile);
             }
         }
-
-      free (rp);
     }
-
-  STR_FREE (cmd);
 }
 END_DEFUN
 
@@ -1561,8 +1523,6 @@ Delete the text between point and mark.
     ok = leNIL;
   else
     deactivate_mark ();
-
-  free (rp);
 }
 END_DEFUN
 
@@ -1644,7 +1604,7 @@ On nonblank line, delete any immediately following blank lines.
   if (seq_started)
     undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
-  free_marker (m);
+  unchain_marker (m);
   deactivate_mark ();
 }
 END_DEFUN

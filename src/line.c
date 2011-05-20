@@ -70,8 +70,6 @@ line_delete (Line *lp)
 {
   while (lp->next != lp)
     line_remove (lp->next);
-
-  free (lp);
 }
 
 /* Insert a line into list after the given point, returning the new line */
@@ -92,11 +90,8 @@ line_insert (Line *lp, astr i)
 void
 line_remove (Line *lp)
 {
-  astr as = lp->text;
   lp->prev->next = lp->next;
   lp->next->prev = lp->prev;
-  free (lp);
-  astr_delete (as);
 }
 
 
@@ -136,7 +131,7 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t de
 
   /* This marker has been updated to new position. */
   set_buffer_pt (cur_bp, get_marker_pt (m_pt));
-  free_marker (m_pt);
+  unchain_marker (m_pt);
 }
 
 /* Insert the character at the current position and move the text at its right
@@ -333,7 +328,6 @@ line_replace_text (Line * lp, size_t offset, size_t oldlen,
   set_buffer_modified (cur_bp, true);
   astr_replace_cstr (lp->text, offset, oldlen, astr_cstr (as));
   adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
-  astr_delete (as);
 }
 
 /*
@@ -411,7 +405,7 @@ fill_break_line (void)
           set_buffer_pt (cur_bp, pt);
         }
 
-      free_marker (m);
+      unchain_marker (m);
     }
 
   return break_made;
@@ -469,7 +463,6 @@ Insert the argument at point.
 {
   STR_INIT (arg);
   insert_nstring (arg, strlen (arg));
-  STR_FREE (arg);
 }
 END_DEFUN
 
@@ -489,7 +482,6 @@ bprintf (const char *fmt, ...)
   buf = xvasprintf (fmt, ap);
   va_end (ap);
   insert_nstring (buf, strlen (buf));
-  free (buf);
 }
 
 bool
@@ -685,7 +677,7 @@ does nothing.
         target_goalc = get_goalc ();
 
       set_buffer_pt (cur_bp, get_marker_pt (m));
-      free_marker (m);
+      unchain_marker (m);
     }
 
   /* Insert indentation.  */
@@ -733,7 +725,7 @@ previous_line_indent (void)
 
   /* Restore point. */
   set_buffer_pt (cur_bp, get_marker_pt (m));
-  free_marker (m);
+  unchain_marker (m);
 
   return cur_indent;
 }
@@ -778,7 +770,7 @@ Indentation is done using the `indent-for-tab-command' function.
       pos = get_goalc ();
       indent = pos > 0 || (!eolp () && isspace (following_char ()));
       set_buffer_pt (cur_bp, get_marker_pt (m));
-      free_marker (m);
+      unchain_marker (m);
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)

@@ -34,11 +34,7 @@ static void
 maybe_free_kill_ring (void)
 {
   if (last_command () != F_kill_region)
-    {
-      if (kill_ring_text != NULL)
-        astr_delete (kill_ring_text);
-      kill_ring_text = NULL;
-    }
+    kill_ring_text = NULL;
 }
 
 static void
@@ -55,7 +51,6 @@ copy_or_kill_region (bool kill, Region * rp)
   astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
 
   kill_ring_push (as);
-  astr_delete (as);
 
   if (kill)
     {
@@ -86,7 +81,6 @@ kill_to_bol (void)
       set_region_start (rp, pt);
 
       ok = copy_or_kill_region (true, rp);
-      free (rp);
     }
 
   return ok;
@@ -131,7 +125,6 @@ kill_line (bool whole_line)
       set_region_size (rp, astr_len (get_line_text (get_buffer_pt (cur_bp).p)) - get_buffer_pt (cur_bp).o);
 
       ok = copy_or_kill_region (true, rp);
-      free (rp);
     }
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
@@ -143,7 +136,6 @@ kill_line (bool whole_line)
 
       as = astr_new_cstr ("\n");
       kill_ring_push (as);
-      astr_delete (as);
       set_this_command (F_kill_region);
     }
 
@@ -209,7 +201,6 @@ copy_or_kill_the_region (bool kill)
       ok = copy_or_kill_region (kill, rp);
     }
 
-  free (rp);
   return ok;
 }
 

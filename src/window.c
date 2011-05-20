@@ -60,7 +60,7 @@ set_current_window (Window * wp)
 {
   /* Save buffer's point in a new marker.  */
   if (cur_wp->saved_pt)
-    free_marker (cur_wp->saved_pt);
+    unchain_marker (cur_wp->saved_pt);
 
   cur_wp->saved_pt = point_marker ();
 
@@ -75,7 +75,7 @@ set_current_window (Window * wp)
   if (cur_wp->saved_pt)
     {
       set_buffer_pt (cur_bp, get_marker_pt (cur_wp->saved_pt));
-      free_marker (cur_wp->saved_pt);
+      unchain_marker (cur_wp->saved_pt);
       cur_wp->saved_pt = NULL;
     }
 }
@@ -135,9 +135,7 @@ delete_window (Window * del_wp)
     }
 
   if (del_wp->saved_pt)
-    free_marker (del_wp->saved_pt);
-
-  free (del_wp);
+    unchain_marker (del_wp->saved_pt);
 }
 
 DEFUN ("delete-window", delete_window)

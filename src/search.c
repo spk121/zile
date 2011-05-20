@@ -75,13 +75,8 @@ find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
                      forward ? (to - from) : -(to - 1 - from), &search_regs);
 
   if (ret >= 0)
-    {
-      ret = forward ? search_regs.end[0] : ret;
-      free (search_regs.start);
-      free (search_regs.end);
-    }
+    ret = forward ? search_regs.end[0] : ret;
 
-  regfree (&pattern);
   return ret;
 }
 
@@ -148,7 +143,6 @@ do_search (bool forward, bool regexp, const char *pattern)
     return FUNCALL (keyboard_quit);
   if (pattern[0] != '\0')
     {
-      free (last_search);
       last_search = xstrdup (pattern);
 
       if (!search (get_buffer_pt (cur_bp), pattern, forward, regexp))
@@ -157,7 +151,6 @@ do_search (bool forward, bool regexp, const char *pattern)
         ok = leT;
     }
 
-  free (ms);
   return ok;
 }
 
@@ -169,7 +162,6 @@ Search forward from point for the user specified text.
 {
   STR_INIT (pattern);
   ok = do_search (true, false, pattern);
-  STR_FREE (pattern);
 }
 END_DEFUN
 
@@ -181,7 +173,6 @@ Search backward from point for the user specified text.
 {
   STR_INIT (pattern);
   ok = do_search (false, false, pattern);
-  STR_FREE (pattern);
 }
 END_DEFUN
 
@@ -193,7 +184,6 @@ Search forward from point for regular expression REGEXP.
 {
   STR_INIT (pattern);
   ok = do_search (true, true, pattern);
-  STR_FREE (pattern);
 }
 END_DEFUN
 
@@ -205,7 +195,6 @@ Search backward from point for match for regular expression REGEXP.
 {
   STR_INIT (pattern);
   ok = do_search (false, true, pattern);
-  STR_FREE (pattern);
 }
 END_DEFUN
 
@@ -265,7 +254,7 @@ isearch (int forward, int regexp)
 
           /* Restore old mark position. */
           if (get_buffer_mark (cur_bp))
-            free_marker (get_buffer_mark (cur_bp));
+            unchain_marker (get_buffer_mark (cur_bp));
 
           set_buffer_mark (cur_bp, copy_marker (old_mark));
           break;
@@ -299,7 +288,6 @@ isearch (int forward, int regexp)
               /* Find next match. */
               cur = get_buffer_pt (cur_bp);
               /* Save search string. */
-              free (last_search);
               last_search = xstrdup (astr_cstr (pattern));
             }
           else if (last_search != NULL)
@@ -318,7 +306,6 @@ isearch (int forward, int regexp)
                   set_marker_pt (get_buffer_mark (cur_bp), start);
 
                   /* Save search string. */
-                  free (last_search);
                   last_search = xstrdup (astr_cstr (pattern));
 
                   minibuf_write ("Mark saved when search started");
@@ -345,11 +332,8 @@ isearch (int forward, int regexp)
   /* done */
   set_buffer_isearch (get_window_bp (cur_wp), false);
 
-  astr_delete (buf);
-  astr_delete (pattern);
-
   if (old_mark)
-    free_marker (old_mark);
+    unchain_marker (old_mark);
 
   return leT;
 }
@@ -421,19 +405,13 @@ what to do with it.
   if (find == NULL)
     return FUNCALL (keyboard_quit);
   if (*find == '\0')
-    {
-      free (find);
-      return leNIL;
-    }
+    return leNIL;
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, false);
 
   repl = minibuf_read ("Query replace `%s' with: ", "", find);
   if (repl == NULL)
-    {
-      free (find);
-      return FUNCALL (keyboard_quit);
-    }
+    return FUNCALL (keyboard_quit);
 
   while (search (get_buffer_pt (cur_bp), find, true, false))
     {
@@ -481,9 +459,6 @@ what to do with it.
       if (c == '.')		/* Replace and quit. */
         break;
     }
-
-  free (find);
-  free (repl);
 
   if (thisflag & FLAG_NEED_RESYNC)
     resync_redisplay (cur_wp);

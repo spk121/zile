@@ -84,7 +84,7 @@ completion_new (int fileflag)
 
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
                                           completion_STREQ, NULL,
-                                          (gl_listelement_dispose_fn) free, false);
+                                          NULL, false);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST,
                                       completion_STREQ, NULL,
                                       NULL, false);
@@ -96,20 +96,6 @@ completion_new (int fileflag)
     }
 
   return cp;
-}
-
-/*
- * Dispose an completion structure.
- */
-void
-free_completion (Completion * cp)
-{
-  gl_list_free (cp->completions);
-  gl_list_free (cp->matches);
-  if (cp->flags & CFLAG_FILENAME)
-    astr_delete (cp->path);
-  free (cp->match);
-  free (cp);
 }
 
 /*
@@ -244,11 +230,9 @@ completion_readdir (Completion * cp, astr as)
   struct stat st;
   astr bs;
 
-  gl_list_free (cp->completions);
-
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
                                           completion_STREQ, NULL,
-                                          (gl_listelement_dispose_fn) free, false);
+                                          NULL, false);
 
   if (!expand_path (as))
     return false;
@@ -266,7 +250,6 @@ completion_readdir (Completion * cp, astr as)
       astr_cat_cstr (bs, s);
       if (astr_get (bs, astr_len (bs) - 1) != '/')
         astr_cat_char (bs, '/');
-      free (s);
       pdir = astr_cstr (bs);
       base = base_name (s2);
     }
@@ -277,7 +260,6 @@ completion_readdir (Completion * cp, astr as)
     }
 
   astr_cpy_cstr (as, base);
-  free (base);
 
   dir = opendir (pdir);
   if (dir != NULL)
@@ -300,14 +282,8 @@ completion_readdir (Completion * cp, astr as)
         }
       closedir (dir);
 
-      astr_delete (cp->path);
       cp->path = compact_path (astr_new_cstr (pdir));
-      astr_delete (buf);
     }
-
-  astr_delete (bs);
-  free (s1);
-  free (s2);
 
   return dir != NULL;
 }
@@ -322,7 +298,6 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
   size_t fullmatches = 0, partmatches = 0;
   char c;
 
-  gl_list_free (cp->matches);
   cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_STREQ, NULL, NULL, false);
 
   if (cp->flags & CFLAG_FILENAME)

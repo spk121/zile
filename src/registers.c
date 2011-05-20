@@ -61,13 +61,7 @@ Copy region into register @i{register}.
       if (!calculate_the_region (rp))
         ok = leNIL;
       else
-        {
-          if (regs[reg] != NULL)
-            astr_delete (regs[reg]);
-          regs[reg] = copy_text_block (get_region_start (rp), get_region_size (rp));
-        }
-
-      free (rp);
+        regs[reg] = copy_text_block (get_region_start (rp), get_region_size (rp));
     }
 }
 END_DEFUN
@@ -153,8 +147,6 @@ write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
           bprintf ("whitespace\n");
         else
           bprintf ("the empty string\n");
-
-        astr_delete (as);
       }
 }
 

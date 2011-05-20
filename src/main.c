@@ -230,9 +230,7 @@ main (int argc, char **argv)
 #define O(longname, shortname, arg, argstring, docstring)               \
           shortopt = xasprintf (", -%c", shortname);                    \
           buf = xasprintf ("--%s%s %s", longname, shortname ? shortopt : "", argstring); \
-          printf ("%-24s%s\n", buf, docstring);                         \
-          free (buf);                                                   \
-          free (shortopt);
+          printf ("%-24s%s\n", buf, docstring);
 #define A(argstring, docstring) \
           printf ("%-24s%s\n", argstring, docstring);
 #include "tbl_opts.h"
@@ -285,7 +283,6 @@ main (int argc, char **argv)
 ;; then enter the text in that file's own buffer.\n\
 \n");
   insert_astr (as);
-  astr_delete (as);
   set_buffer_modified (cur_bp, false);
 
   if (!qflag)
@@ -295,7 +292,6 @@ main (int argc, char **argv)
         {
           astr_cat_cstr (as, "/." PACKAGE);
           lisp_loadfile (astr_cstr (as));
-          astr_delete (as);
         }
     }
 
@@ -338,9 +334,6 @@ main (int argc, char **argv)
       if (thisflag & FLAG_QUIT)
         break;
     }
-  gl_list_free (arg_type);
-  gl_list_free (arg_arg);
-  gl_list_free (arg_line);
   lastflag |= FLAG_NEED_RESYNC;
 
   /* Set up screen according to number of files loaded. */

@@ -45,10 +45,6 @@ leReallyWipe (le * list)
       /* free descendants */
       leWipe (list->branch);
       leWipe (list->next);
-
-      /* free ourself */
-      free (list->data);
-      free (list);
     }
 }
 

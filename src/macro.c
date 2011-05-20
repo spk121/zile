@@ -50,17 +50,6 @@ macro_new (void)
 }
 
 static void
-macro_delete (Macro * mp)
-{
-  if (mp)
-    {
-      gl_list_free (mp->keys);
-      free (mp->name);
-      free (mp);
-    }
-}
-
-static void
 add_macro_key (Macro * mp, size_t key)
 {
   gl_list_add_last (mp->keys, (void *) key);
@@ -86,7 +75,6 @@ add_cmd_to_macro (void)
 {
   assert (cmd_mp);
   append_key_list (cur_mp, cmd_mp);
-  macro_delete (cmd_mp);
   cmd_mp = NULL;
 }
 
@@ -109,8 +97,6 @@ remove_key_from_cmd (void)
 void
 cancel_kbd_macro (void)
 {
-  macro_delete (cmd_mp);
-  macro_delete (cur_mp);
   cmd_mp = cur_mp = NULL;
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
@@ -180,10 +166,7 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
     }
 
   mp = get_macro (ms);
-  if (mp)
-    /* If a macro with this name already exists, update its key list */
-    free (mp->keys);
-  else
+  if (mp == NULL)
     {
       /* Add a new macro to the list */
       mp = macro_new ();
@@ -194,8 +177,6 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
 
   /* Copy the keystrokes from cur_mp. */
   append_key_list (mp, cur_mp);
-
-  free(ms);
 }
 END_DEFUN
 
@@ -254,13 +235,9 @@ Execute macro as string of editor command characters.
   STR_INIT (keystr);
   keys = keystrtovec (keystr);
   if (keys)
-    {
-      process_keys (keys);
-      gl_list_free (keys);
-    }
+    process_keys (keys);
   else
     ok = leNIL;
-  STR_FREE (keystr);
 }
 END_DEFUN
 

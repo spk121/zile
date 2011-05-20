@@ -156,7 +156,6 @@ do_binding_completion (astr as)
                  lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
                  astr_cstr (bs),
                  astr_cstr (as));
-  astr_delete (bs);
   key = getkey ();
   minibuf_clear ();
 
@@ -184,7 +183,6 @@ get_key_sequence (void)
         break;
       as = keyvectostr (keys);
       gl_list_add_last (keys, (void *) do_binding_completion (as));
-      astr_delete (as);
     }
 
   return keys;
@@ -277,9 +275,7 @@ process_command (void)
     {
       astr as = keyvectostr (keys);
       minibuf_error ("%s is undefined", astr_cstr (as));
-      astr_delete (as);
     }
-  gl_list_free (keys);
 
   /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
@@ -321,7 +317,6 @@ init_default_bindings (void)
           bind_key_vec (root_bindings, keys, 0, F_self_insert_command);
         }
     }
-  gl_list_free (keys);
 
   as = astr_new_cstr ("\
 (global-set-key \"\\M-m\" 'back-to-indentation)\
@@ -441,7 +436,6 @@ init_default_bindings (void)
 (global-set-key \"\\C-y\" 'yank)\
 ");
   lisp_loadstring (as);
-  astr_delete (as);
 }
 
 DEFUN_ARGS ("global-set-key", global_set_key,
@@ -474,7 +468,6 @@ sequence.
       keys = get_key_sequence ();
       as = keyvectostr (keys);
       keystr = xstrdup (astr_cstr (as));
-      astr_delete (as);
     }
 
   STR_INIT (name)
@@ -491,10 +484,6 @@ sequence.
       return leNIL;
     }
   bind_key_vec (root_bindings, keys, 0, func);
-
-  gl_list_free (keys);
-  STR_FREE (keystr);
-  STR_FREE (name);
 }
 END_DEFUN
 
@@ -524,9 +513,7 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
               astr_cat_char (key, ' ');
             }
           astr_cat (key, bs);
-          astr_delete (bs);
           process (key, p, st);
-          astr_delete (key);
         }
       else
         walk_bindings_tree (p, keys, process, st);
@@ -539,10 +526,8 @@ static void
 walk_bindings (Binding tree, void (*process) (astr key, Binding p, void *st),
                void *st)
 {
-  gl_list_t l = gl_list_create_empty (GL_LINKED_LIST,
-                                      NULL, NULL, (gl_listelement_dispose_fn) astr_delete, true);
-  walk_bindings_tree (tree, l, process, st);
-  gl_list_free (l);
+  walk_bindings_tree (tree, gl_list_create_empty (GL_LINKED_LIST,
+                                                  NULL, NULL, NULL, true), process, st);
 }
 
 typedef struct
@@ -594,14 +579,10 @@ message in the buffer.
                 bprintf ("%s", astr_cstr (as));
               else
                 minibuf_write ("%s", astr_cstr (as));
-              astr_delete (as);
             }
-          astr_delete (g.bindings);
           ok = leT;
         }
     }
-
-  free (name);
 }
 END_DEFUN
 

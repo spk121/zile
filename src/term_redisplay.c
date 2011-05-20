@@ -86,7 +86,6 @@ outch (int c, size_t font, size_t x)
       int j = strlen (buf);
       for (w = 0; w < j && x < term_width (); ++w)
         term_addch (buf[w]), ++x;
-      free (buf);
     }
 
   term_attrset (FONT_NORMAL);
@@ -193,8 +192,6 @@ draw_window (size_t topline, Window * wp)
 
       lp = get_line_next (lp);
     }
-
-  free (rp);
 }
 
 static const char *
@@ -238,7 +235,6 @@ calculate_start_column (Window * wp)
           {
             char *buf = make_char_printable (astr_get (get_line_text (pt.p), p));
             col += strlen (buf);
-            free (buf);
           }
 
       lpfact = lp / (get_window_ewidth (wp) / 3);
@@ -304,8 +300,6 @@ draw_status_line (size_t line, Window * wp)
   as = astr_afmt (astr_new (), "--%s%2s  %-15s   %s %-9s (Fundamental",
                   eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
                   make_screen_pos (wp, &buf), astr_cstr (bs));
-  free (buf);
-  astr_delete (bs);
 
   if (get_buffer_autofill (get_window_bp (wp)))
     astr_cat_cstr (as, " Fill");
@@ -318,7 +312,6 @@ draw_status_line (size_t line, Window * wp)
 
   astr_cat_char (as, ')');
   term_addnstr (astr_cstr (as), MIN (term_width (), astr_len (as)));
-  astr_delete (as);
 
   term_attrset (FONT_NORMAL);
 }

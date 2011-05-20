@@ -39,21 +39,13 @@ History *history_new (void)
 }
 
 void
-free_history (History * hp)
-{
-  if (hp->elements)
-    gl_list_free (hp->elements);
-  free (hp);
-}
-
-void
 add_history_element (History * hp, const char *string)
 {
   const char *last = NULL;
 
   if (!hp->elements)
     hp->elements = gl_list_create_empty (GL_LINKED_LIST,
-                                         NULL, NULL, (gl_listelement_dispose_fn) free, true);
+                                         NULL, NULL, NULL, true);
   else
     last = (const char *) gl_list_get_at (hp->elements, gl_list_size (hp->elements) - 1);
   if (!last || STRNEQ (last, string))

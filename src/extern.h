@@ -90,7 +90,6 @@ bool check_modified_buffer (Buffer * bp);
 #undef FIELD_STR
 int completion_strcmp (const void *p1, const void *p2);
 Completion *completion_new (int fileflag);
-void free_completion (Completion * cp);
 void completion_scroll_up (void);
 void completion_scroll_down (void);
 int completion_try (Completion * cp, astr search, int popup_when_complete);
@@ -151,7 +150,6 @@ void free_getkey (void);
 
 /* history.c -------------------------------------------------------------- */
 History *history_new (void);
-void free_history (History * hp);
 void add_history_element (History * hp, const char *string);
 void prepare_history (History * hp);
 const char *previous_history_element (History * hp);
@@ -212,7 +210,6 @@ extern int thisflag, lastflag, last_uniarg;
 #undef FIELD
 Marker * marker_new (void);
 void unchain_marker (const Marker * marker);
-void free_marker (Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, Point pt);
 Marker *copy_marker (const Marker * marker);
 Marker *point_marker (void);
@@ -289,7 +286,6 @@ extern int undo_nosave;
 void undo_start_sequence (void);
 void undo_end_sequence (void);
 void undo_save (int type, Point pt, size_t arg1, size_t arg2);
-void free_undo (Undo *up);
 void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */

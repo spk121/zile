@@ -120,15 +120,10 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
         case KBD_RET:
           term_move (term_height () - 1, 0);
           term_clrtoeol ();
-          if (saved)
-            astr_delete (saved);
           return as;
         case KBD_CANCEL:
           term_move (term_height () - 1, 0);
           term_clrtoeol ();
-          if (saved)
-            astr_delete (saved);
-          astr_delete (as);
           return NULL;
         case KBD_CTRL | 'a':
         case KBD_HOME:
@@ -227,7 +222,6 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
               else if (saved)
                 {
                   astr_cpy (as, saved);
-                  astr_delete (saved);
                   saved = NULL;
                 }
             }
@@ -251,7 +245,6 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
               astr bs = astr_new ();
               astr_cpy (bs, as);
               thistab = completion_try (cp, bs, true);
-              astr_delete (bs);
               switch (thistab)
                 {
                 case COMPLETION_MATCHED:
@@ -265,7 +258,6 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
                     if (strncmp (astr_cstr (as), astr_cstr (bs),
                                  astr_len (bs)) != 0)
                       thistab = -1;
-                    astr_delete (as);
                     as = bs;
                     pos = astr_len (as);
                     break;
@@ -310,10 +302,7 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
 
   as = do_minibuf_read (prompt, value, pos, cp, hp);
   if (as)
-    {
-      s = xstrdup (astr_cstr (as));
-      astr_delete (as);
-    }
+    s = xstrdup (astr_cstr (as));
 
   if (cp != NULL && (get_completion_flags (cp) & CFLAG_POPPEDUP)
       && (wp = find_window ("*Completions*")) != NULL)

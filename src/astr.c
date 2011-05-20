@@ -57,15 +57,6 @@ astr_new (void)
   return as;
 }
 
-void
-astr_delete (astr as)
-{
-  assert (as != NULL);
-  free (as->text);
-  as->text = NULL;
-  free (as);
-}
-
 const char *
 astr_cstr (castr as)
 {
@@ -109,7 +100,6 @@ astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
   as->text[pos] = '\0';
   astr_ncat_cstr (as, s, csize);
   astr_cat (as, tail);
-  astr_delete (tail);
 
   return as;
 }
@@ -227,7 +217,6 @@ astr_afmt (astr as, const char *fmt, ...)
   va_start (ap, fmt);
   buf = xvasprintf (fmt, ap);
   astr_cat_cstr (as, buf);
-  free (buf);
   va_end (ap);
   return as;
 }
@@ -250,7 +239,6 @@ astr_recase (astr as, enum casing newcase)
     astr_cat_char (bs, ((newcase == case_upper) ? toupper : tolower) (astr_get (as, i)));
 
   astr_cpy (as, bs);
-  astr_delete (bs);
 
   return as;
 }
@@ -306,12 +294,10 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   astr_cat_char (as2, '.');
   assert_eq (as2, "The world.");
 
-  astr_delete (as3);
   as3 = astr_substr (as1, astr_len (as1) - 6, 5);
   assert_eq (as3, "world");
 
   astr_cpy_cstr (as1, "12345");
-  astr_delete (as2);
 
   astr_cpy_cstr (as1, "12345");
   astr_insert_char (as1, astr_len (as1) - 2, 'x');
@@ -340,7 +326,6 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   assert_eq (as2, "45");
 
   astr_cpy_cstr (as1, "12345");
-  astr_delete (as2);
   as2 = astr_substr (as1, astr_len (as1) - 5, 5);
   assert_eq (as2, "12345");
 
@@ -369,9 +354,6 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   astr_recase (as1, case_lower);
   assert_eq (as1, "some text");
 
-  astr_delete (as1);
-  astr_delete (as2);
-  astr_delete (as3);
   printf ("astr test successful.\n");
 
   return EXIT_SUCCESS;

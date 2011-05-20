@@ -184,14 +184,11 @@ lisp_read (le * list, astr as, size_t * pos)
         case T_CLOSEPAREN:
         case T_EOF:
           quoted = 0;
-          astr_delete (tok);
           return list;
 
         default:
           break;
         }
-
-      astr_delete (tok);
     }
 }
 
@@ -214,7 +211,6 @@ lisp_loadfile (const char *file)
     {
       astr bs = astr_fread (fp);
       lisp_loadstring (bs);
-      astr_delete (bs);
       fclose (fp);
       return true;
     }

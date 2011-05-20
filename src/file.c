@@ -61,9 +61,7 @@ astr
 agetcwd (void)
 {
   char *s = getcwd (NULL, 0);
-  astr as = astr_new_cstr (s ? s : "");
-  free (s);
-  return as;
+  return astr_new_cstr (s ? s : "");
 }
 
 /*
@@ -85,9 +83,7 @@ expand_path (astr path)
 
   if (*sp != '/' && *sp != '~')
     {
-      astr cwd = agetcwd ();
-      astr_cat (epath, cwd);
-      astr_delete (cwd);
+      astr_cat (epath, agetcwd ());
       if (astr_len (epath) == 0 ||
           astr_get (epath, astr_len (epath) - 1) != '/')
         astr_cat_char (epath, '/');
@@ -131,7 +127,6 @@ expand_path (astr path)
               while (*p != '\0' && *p != '/')
                 astr_cat_char (as, *p++);
               pw = getpwnam (astr_cstr (as));
-              astr_delete (as);
               if (pw == NULL)
                 {
                   ok = false;
@@ -159,7 +154,6 @@ expand_path (astr path)
     }
 
   astr_cpy (path, epath);
-  astr_delete (epath);
 
   return ok;
 }
@@ -186,7 +180,6 @@ compact_path (astr path)
           else
             astr_cat_cstr (buf, astr_cstr (path) + homelen + 1);
           astr_cpy (path, buf);
-          astr_delete (buf);
         }
     }
 
@@ -315,9 +308,7 @@ read_file (const char *filename)
   pt.p = get_line_next (get_buffer_lines (cur_bp));
   set_buffer_pt (cur_bp, pt);
   ms = dir_name (filename);
-  astr_delete (get_buffer_dir (cur_bp));
   set_buffer_dir (cur_bp, astr_new_cstr (ms));
-  free (ms);
 
   fclose (fp);
 }
@@ -350,9 +341,7 @@ find_file (const char *filename)
   switch_to_buffer (bp);
   read_file (filename);
   buf = dir_name (filename);
-  astr_delete (get_buffer_dir (bp));
   set_buffer_dir (bp, astr_new_cstr (buf));
-  free (buf);
   if (chdir (astr_cstr (get_buffer_dir (bp)))) {
     /* Avoid compiler warning for ignoring return value. */
   }
@@ -378,8 +367,6 @@ creating one if none already exists.
     ok = FUNCALL (keyboard_quit);
   else if (ms[0] != '\0')
     ok = bool_to_lisp (find_file (ms));
-
-  free (ms);
 }
 END_DEFUN
 
@@ -406,14 +393,12 @@ If the current buffer now contains an empty file that you just visited
   const char *buf = get_buffer_filename (cur_bp);
   char *base = NULL;
   char *ms;
-  astr as = NULL;
 
   if (buf == NULL)
     buf = astr_cstr (get_buffer_dir (cur_bp));
   else
     base = base_name (buf);
   ms = minibuf_read_filename ("Find alternate: ", buf, base);
-  free (base);
 
   ok = leNIL;
   if (ms == NULL)
@@ -423,10 +408,6 @@ If the current buffer now contains an empty file that you just visited
       kill_buffer (cur_bp);
       ok = bool_to_lisp (find_file (ms));
     }
-
-  free (ms);
-  if (as)
-    astr_delete (as);
 }
 END_DEFUN
 
@@ -444,7 +425,6 @@ Select buffer @i{buffer} in the current window.
       Completion *cp = make_buffer_completion ();
       buf = minibuf_read_completion ("Switch to buffer (default %s): ",
                                      "", cp, NULL, get_buffer_name (bp));
-      free_completion (cp);
 
       if (buf == NULL)
         ok = FUNCALL (keyboard_quit);
@@ -466,8 +446,6 @@ Select buffer @i{buffer} in the current window.
 
       switch_to_buffer (bp);
     }
-
-  STR_FREE (buf);
 }
 END_DEFUN
 
@@ -498,7 +476,6 @@ insert_buffer (Buffer * bp)
   if (old_cur_n < old_lines)
     insert_newline ();
   insert_lines (old_cur_n + 1, old_lines, old_lines, old_next);
-  astr_delete (old_cur_line);
   undo_nosave = false;
 }
 
@@ -522,7 +499,6 @@ Puts mark after the inserted text.
                                      "", cp, NULL, get_buffer_name (def_bp));
       if (buf == NULL)
         ok = FUNCALL (keyboard_quit);
-      free_completion (cp);
     }
 
   if (ok == leT)
@@ -544,8 +520,6 @@ Puts mark after the inserted text.
       insert_buffer (bp);
       set_mark_interactive ();
     }
-
-  STR_FREE (buf);
 }
 END_DEFUN
 
@@ -610,8 +584,6 @@ Set mark after the inserted text.
     ok = leNIL;
   else
     set_mark_interactive ();
-
-  STR_FREE (file);
 }
 END_DEFUN
 
@@ -641,7 +613,6 @@ copy_file (const char *source, const char *dest)
       serrno = errno;
       close (ifd);
       minibuf_error ("%s: unable to create backup", dest);
-      free (tname);
       errno = serrno;
       return false;
     }
@@ -686,7 +657,6 @@ copy_file (const char *source, const char *dest)
   else if (unlink (tname) == -1)
     minibuf_error ("Cannot remove temporary file `%s'", strerror (errno));
 
-  free (tname);
   errno = serrno;
 
   /* Recover file modification time. */
@@ -771,10 +741,7 @@ create_backup_filename (const char *filename, const char *backupdir)
         }
 
       if (!expand_path (buf))
-        {
-          astr_delete (buf);
-          buf = NULL;
-        }
+        buf = NULL;
       res = buf;
     }
   else
@@ -808,7 +775,6 @@ write_to_disk (Buffer * bp, const char *filename)
           minibuf_error ("Cannot make backup file: %s", strerror (errno));
           waitkey (WAITKEY_DEFAULT);
         }
-      astr_delete (bfilename);
     }
 
   ret = raw_write_to_disk (bp, filename, S_IRUSR | S_IWUSR |
@@ -842,10 +808,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
       if (name == NULL)
         return FUNCALL (keyboard_quit);
       if (name[0] == '\0')
-        {
-          free (name);
-          return leNIL;
-        }
+        return leNIL;
       confirm = true;
     }
 
@@ -877,7 +840,6 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
         ok = leNIL;
     }
 
-  free (name);
   return ok;
 }
 
@@ -1044,10 +1006,8 @@ zile_exit (int doabort)
         as = astr_new_cstr (PACKAGE);
         astr_recase (as, case_upper);
         astr_afmt (buf, ".%sSAVE", astr_cstr (as));
-        astr_delete (as);
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
         raw_write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
-        astr_delete (buf);
       }
 
   if (doabort)
@@ -1083,7 +1043,5 @@ Make DIR become the current buffer's default directory.
           ok = leNIL;
         }
     }
-
-  STR_FREE (dir);
 }
 END_DEFUN

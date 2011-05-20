@@ -105,8 +105,6 @@ Display the full documentation of a function.
         write_temp_buffer ("*Help*", true,
                            write_function_description, func, doc);
     }
-
-  STR_FREE (func);
 }
 END_DEFUN
 
@@ -144,8 +142,6 @@ Display the full documentation of a variable.
                            write_variable_description,
                            name, get_variable (name), doc);
     }
-
-  STR_FREE (name);
 }
 END_DEFUN
 
@@ -184,7 +180,6 @@ Display documentation of the command invoked by a key sequence.
         {
           name = get_function_name (get_function_by_keys (keys));
           binding = keyvectostr (keys);
-          gl_list_free (keys);
         }
       else
         ok = leNIL;
@@ -197,7 +192,6 @@ Display documentation of the command invoked by a key sequence.
       keys = get_key_sequence ();
       name = get_function_name (get_function_by_keys (keys));
       binding = keyvectostr (keys);
-      gl_list_free (keys);
 
       if (name == NULL)
         {
@@ -217,10 +211,5 @@ Display documentation of the command invoked by a key sequence.
         write_temp_buffer ("*Help*", true,
                            write_key_description, name, doc, astr_cstr (binding));
     }
-
-  if (binding)
-    astr_delete (binding);
-
-  STR_FREE (keystr);
 }
 END_DEFUN

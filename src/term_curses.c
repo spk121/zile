@@ -99,8 +99,7 @@ term_init (void)
 void
 term_close (void)
 {
-  /* Free memory and finish with ncurses. */
-  gl_list_free (key_buf);
+  /* Finish with ncurses. */
   endwin ();
 }
 
@@ -398,6 +397,4 @@ term_ungetkey (size_t key)
 
   for (i = n; i > 0; i--)
     gl_list_add_last (key_buf, (void *)(ptrdiff_t) codes[i - 1]);
-
-  free (codes);
 }

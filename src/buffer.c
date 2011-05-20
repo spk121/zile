@@ -115,19 +115,9 @@ void
 free_buffer (Buffer * bp)
 {
   line_delete (bp->lines);
-  free_undo (bp->last_undop);
 
   while (bp->markers)
-    free_marker (bp->markers);
-
-  free (bp->name);
-  free (bp->filename);
-  astr_delete (bp->dir);
-
-  if (bp->vars != NULL)
-    hash_free (bp->vars);
-
-  free (bp);
+    unchain_marker (bp->markers);
 }
 
 /*
@@ -176,7 +166,6 @@ make_buffer_name (const char *filename)
           name = xasprintf ("%s<%ld>", p, (unsigned long) i);
           if (find_buffer (name) == NULL)
             return name;
-          free (name);
         }
     }
 }
@@ -203,9 +192,6 @@ set_buffer_names (Buffer * bp, const char *filename)
 
   oldname = bp->name;
   bp->name = make_buffer_name (filename);
-  if (as)
-    astr_delete (as);
-  free (oldname);
 }
 
 /*
@@ -369,7 +355,7 @@ delete_region (const Region * rp)
     delete_char ();
   undo_nosave = false;
   set_buffer_pt (cur_bp, get_marker_pt (m));
-  free_marker (m);
+  unchain_marker (m);
 
   return true;
 }
@@ -563,7 +549,6 @@ With a nil argument, kill the current buffer.
       Completion *cp = make_buffer_completion ();
       buf = minibuf_read_completion ("Kill buffer (default %s): ",
                                      "", cp, NULL, get_buffer_name (cur_bp));
-      free_completion (cp);
       if (buf == NULL)
         ok = FUNCALL (keyboard_quit);
     }
@@ -574,7 +559,6 @@ With a nil argument, kill the current buffer.
       if (bp == NULL)
         {
           minibuf_error ("Buffer `%s' not found", buf);
-          free (buf);
           ok = leNIL;
         }
     }
@@ -588,8 +572,6 @@ With a nil argument, kill the current buffer.
       else
         kill_buffer (bp);
     }
-
-  STR_FREE (buf);
 }
 END_DEFUN
 

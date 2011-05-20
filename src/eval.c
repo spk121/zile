@@ -254,12 +254,10 @@ Read function name, then read its arguments and call it.
   astr_cat_cstr (msg, "M-x ");
 
   name = minibuf_read_function_name (astr_cstr (msg));
-  astr_delete (msg);
   if (name == NULL)
     return false;
 
   ok = execute_function (name, uniarg);
-  free (name);
 }
 END_DEFUN
 
@@ -287,7 +285,6 @@ minibuf_read_function_name (const char *fmt, ...)
                                  minibuf_test_in_completions,
                                  "Undefined function name `%s'", ap);
   va_end (ap);
-  free_completion (cp);
 
   return ms;
 }

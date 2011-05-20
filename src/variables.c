@@ -58,16 +58,6 @@ var_cmp (const void *v, const void *w)
 }
 
 static void
-var_free (void *v)
-{
-  var_entry *p = (var_entry *) v;
-  free (p->var);
-  free (p->defval);
-  free (p->val);
-  free (p);
-}
-
-static void
 init_builtin_var (const char *var, const char *defval, bool local, const char *doc)
 {
   var_entry *p = XZALLOC (var_entry);
@@ -83,7 +73,7 @@ static Hash_table *
 new_varlist (void)
 {
   /* Initial size is big enough for default variables and some more */
-  return hash_initialize (32, NULL, var_hash, var_cmp, var_free);
+  return hash_initialize (32, NULL, var_hash, var_cmp, NULL);
 }
 
 void
@@ -107,8 +97,6 @@ set_variable (const char *var, const char *val)
      create a buffer-local variable list. */
   key->var = xstrdup (var);
   ent = hash_lookup (main_vars, key);
-  free (key->var);
-  free (key);
   if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
     set_buffer_vars (cur_bp, new_varlist ());
   var_list = (ent && ent->local) ? get_buffer_vars (cur_bp) : main_vars;
@@ -118,7 +106,6 @@ set_variable (const char *var, const char *val)
   q = hash_insert (var_list, p);
 
   /* Update value */
-  free (q->val);
   q->val = xstrdup (val);
 
   /* If variable is new, initialise other fields. */
@@ -131,8 +118,6 @@ set_variable (const char *var, const char *val)
           p->doc = "";
         }
     }
-  else
-    var_free (p);
 }
 
 static var_entry *
@@ -147,8 +132,6 @@ get_variable_entry (Buffer * bp, const char *var)
 
   if (p == NULL)
     p = hash_lookup (main_vars, key);
-
-  var_free (key);
 
   return p;
 }
@@ -253,8 +236,5 @@ Set a variable value to the user-specified value.
 
   if (ok == leT)
     set_variable (var, val);
-
-  STR_FREE (var);
-  STR_FREE (val);
 }
 END_DEFUN

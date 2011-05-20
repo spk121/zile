@@ -183,19 +183,6 @@ Repeat this command to undo more changes.
 }
 END_DEFUN
 
-void
-free_undo (Undo *up)
-{
-  while (up != NULL)
-    {
-      Undo *next_up = up->next;
-      if (up->type == UNDO_REPLACE_BLOCK)
-        astr_delete (up->block.text);
-      free (up);
-      up = next_up;
-    }
-}
-
 /*
  * Set unchanged flags to false.
  */

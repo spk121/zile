@@ -282,10 +282,7 @@ keystrtovec (const char *key)
     {
       size_t len, code = strtochord (key, &len);
       if (code == KBD_NOKEY)
-        {
-          gl_list_free (keys);
-          return NULL;
-        }
+        return NULL;
       gl_list_add_last (keys, (void *) code);
       key += len;
     }
@@ -306,7 +303,6 @@ keyvectostr (gl_list_t keys)
     {
       astr key = chordtostr ((size_t) gl_list_get_at (keys, i));
       astr_cat (as, key);
-      astr_delete (key);
       if (i < gl_list_size (keys) - 1)
         astr_cat_char (as, ' ');
     }

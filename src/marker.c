@@ -76,13 +76,6 @@ unchain_marker (const Marker * marker)
 }
 
 void
-free_marker (Marker * marker)
-{
-  unchain_marker (marker);
-  free (marker);
-}
-
-void
 move_marker (Marker * marker, Buffer * bp, Point pt)
 {
   if (bp != marker->bp)

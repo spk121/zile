@@ -37,7 +37,7 @@ push_mark (void)
 {
   if (!mark_ring)
     mark_ring = gl_list_create_empty (GL_LINKED_LIST,
-                                      NULL, NULL, (gl_listelement_dispose_fn) free, true);
+                                      NULL, NULL, NULL, true);
 
   /* Save the mark.  */
   if (get_buffer_mark (cur_bp))
@@ -63,7 +63,7 @@ pop_mark (void)
 
   /* Replace the mark. */
   if (get_buffer_mark (get_marker_bp (m)))
-    free_marker (get_buffer_mark (get_marker_bp (m)));
+    unchain_marker (get_buffer_mark (get_marker_bp (m)));
 
   set_buffer_mark (get_marker_bp (m), copy_marker (m));
 

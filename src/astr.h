@@ -55,11 +55,6 @@ astr astr_new (void);
 astr astr_new_cstr (const char *s);
 
 /*
- * Deallocate the previously allocated string as.
- */
-void astr_delete (astr as);
-
-/*
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_len (as) - 1] inclusive may be read.
  */

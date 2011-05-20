@@ -65,7 +65,6 @@ minibuf_refresh (void)
 static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
-  free (minibuf_contents);
   minibuf_contents = xvasprintf (fmt, ap);
   minibuf_refresh ();
 }
@@ -105,16 +104,13 @@ char *
 minibuf_read (const char *fmt, const char *value, ...)
 {
   va_list ap;
-  char *buf, *p;
+  char *buf;
 
   va_start (ap, value);
   buf = xvasprintf (fmt, ap);
   va_end (ap);
 
-  p = term_minibuf_read (buf, value ? value : "", SIZE_MAX, NULL, NULL);
-  free (buf);
-
-  return p;
+  return term_minibuf_read (buf, value ? value : "", SIZE_MAX, NULL, NULL);
 }
 
 /*
@@ -144,13 +140,11 @@ minibuf_read_number (const char *fmt, ...)
         n = ULONG_MAX - 1;
       else
         n = strtoul (ms, NULL, 10);
-      free (ms);
       if (n == ULONG_MAX)
         minibuf_write ("Please enter a number.");
     }
   while (n == ULONG_MAX);
 
-  free (buf);
   return n;
 }
 
@@ -184,8 +178,6 @@ minibuf_read_filename (const char *fmt, const char *value,
       if (file)
         pos -= strlen (file);
       p = term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history);
-      free_completion (cp);
-      free (buf);
 
       if (p != NULL)
         {
@@ -193,15 +185,12 @@ minibuf_read_filename (const char *fmt, const char *value,
           if (expand_path (bs))
             {
               add_history_element (files_history, p);
-              free (p);
               p = xstrdup (astr_cstr (bs));
             }
           else
             p = NULL;
-          astr_delete (bs);
         }
     }
-  astr_delete (as);
 
   return p;
 }
@@ -245,7 +234,6 @@ minibuf_read_yn (const char *fmt, ...)
       }
   }
 
-  free (buf);
   return ret;
 }
 
@@ -274,7 +262,6 @@ minibuf_read_yesno (const char *fmt, ...)
       ret = STREQ ((const char *) gl_list_node_value (get_completion_completions (cp), n),
                    "yes");
     }
-  free_completion (cp);
 
   return ret;
 }
@@ -284,16 +271,13 @@ minibuf_read_completion (const char *fmt, const char *value, Completion * cp,
                          History * hp, ...)
 {
   va_list ap;
-  char *buf, *ms;
+  char *buf;
 
   va_start (ap, hp);
   buf = xvasprintf (fmt, ap);
   va_end (ap);
 
-  ms = term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
-
-  free (buf);
-  return ms;
+  return term_minibuf_read (buf, value, SIZE_MAX, cp, hp);
 }
 
 /*
@@ -320,7 +304,6 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
       else if (ms[0] == '\0')
         {
           minibuf_error (empty_err);
-          free (ms);
           ms = NULL;
           break;
         }
@@ -330,11 +313,7 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
           astr_cpy_cstr (as, ms);
           /* Complete partial words if possible. */
           if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-            {
-              free (ms);
-              ms = xstrdup (get_completion_match (cp));
-            }
-          astr_delete (as);
+            ms = xstrdup (get_completion_match (cp));
 
           if (test (ms, get_completion_completions (cp)))
             {
@@ -350,8 +329,6 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
             }
         }
     }
-
-  free (buf);
 
   return ms;
 }

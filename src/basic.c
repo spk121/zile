@@ -212,7 +212,6 @@ Position 1 is the beginning of the buffer.
         n = strtoul (ms, NULL, 10);
         if (n == LONG_MAX)
           ding ();
-        free (ms);
       }
     while (n == LONG_MAX);
 
