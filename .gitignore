@@ -27,3 +27,4 @@ release-notes
 /GNUmakefile
 /maint.mk
 /README-release
+/README-release.in
