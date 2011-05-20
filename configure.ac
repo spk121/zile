@@ -67,7 +67,7 @@ AC_PATH_PROG([PMCCABE], [pmccabe], [false])
 dnl Valgrind
 AX_WITH_PROG(VALGRIND, valgrind)
 if test -n "$VALGRIND"; then
-  VALGRIND="$VALGRIND -q --error-exitcode=1 --leak-check=full"
+  VALGRIND="$VALGRIND -q --error-exitcode=1"
 fi
 
 dnl Checks for functions and headers
@@ -95,6 +95,43 @@ if test "$ax_cv_curses" != "yes"; then
   AC_MSG_ERROR([cannot find curses])
 fi
 AC_ARG_VAR(CURSES_LIB, [linker flags for curses library])
+
+dnl libgc (BDW garbage collector)
+if test "x$enable_debug" != "yes"; then
+  AC_CHECK_HEADERS([gc.h gc/gc.h], [
+    dnl To test for the different required libs, we have to
+    dnl overcome autoconf's caching system, so we change the
+    dnl desired function name.  They're all in libgc.
+    dnl The "break" will exit from the top level
+    dnl AC_CHECK_HEADERS.
+    gc_libs=""
+    AC_CHECK_LIB(gc, GC_init, [
+      gc_ok=yes;
+      LIBS="-lgc $gc_libs $LIBS";
+      break], [gc_ok=no], [$gc_libs])
+    gc_libs="-lpthread"
+    AC_CHECK_LIB(gc, GC_malloc, [
+      gc_ok=yes;
+      LIBS="-lgc $gc_libs $LIBS";
+      break], [gc_ok=no], [$gc_libs])
+    gc_libs="-ldl"
+    AC_CHECK_LIB(gc, GC_realloc, [
+      gc_ok=yes;
+      LIBS="-lgc $gc_libs $LIBS";
+      break], [gc_ok=no], [$gc_libs])
+    gc_libs="-lpthread -ldl"
+    AC_CHECK_LIB(gc, GC_free, [
+      gc_ok=yes;
+      LIBS="-lgc $gc_libs $LIBS";
+      break], [gc_ok=no], [$gc_libs])
+    break],
+    [gc_ok=no])
+  if test "x$gc_ok" != "xyes"; then
+    AC_MSG_FAILURE([cannot find libgc])
+  fi
+  LIBGC_CPPFLAGS="-DREDIRECT_MALLOC=GC_malloc -DIGNORE_FREE"
+  AC_SUBST(LIBGC_CPPFLAGS)
+fi
 
 dnl Emacs
 AX_WITH_PROG(EMACS, emacs)

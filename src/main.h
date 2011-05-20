@@ -36,6 +36,8 @@
 #include "gl_xlist.h"
 #include "unused-parameter.h"
 
+#include <gc.h>
+
 #include "astr.h"
 #include "lists.h"
 

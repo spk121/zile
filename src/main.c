@@ -165,6 +165,7 @@ main (int argc, char **argv)
   astr as;
   bool ok = true;
 
+  GC_INIT ();
   set_program_name (argv[0]);
 
   /* Set up Lisp environment now so it's available to files and
