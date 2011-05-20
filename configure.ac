@@ -31,7 +31,7 @@ AC_PROG_CC
 gl_EARLY
 AM_PROG_CC_C_O
 gl_MANYWARN_ALL_GCC([warnings])
-# Set up the list of undesired warnings.
+dnl Set up the list of undesired warnings.
 nw=
 nw="$nw -Wsystem-headers"   # Don’t let system headers trigger warnings
 nw="$nw -Wundef"            # All compiler preprocessors support #if UNDEF
@@ -47,14 +47,14 @@ nw="$nw -Wc++-compat"       # Don't care.
 nw="$nw -Woverlength-strings" # Don't care.
 nw="$nw -Wmissing-format-attribute" # Don't care.
 nw="$nw -Wunreachable-code" # Seems buggy.
-# Enable all GCC warnings not in this list.
+dnl Enable all GCC warnings not in this list.
 gl_MANYWARN_COMPLEMENT([warnings], [$warnings], [$nw])
 for w in $warnings; do
   gl_WARN_ADD([$w])
 done
-# Add an extra warning
+dnl Add an extra warning
 gl_WARN_ADD([-Wstrict-overflow=1], [WARN_FLAGS])
-# Add some more safety measures
+dnl Add some more safety measures
 gl_WARN_ADD([-D_FORTIFY_SOURCE=2], [WARN_FLAGS])
 gl_WARN_ADD([-fmudflap], [WARN_FLAGS])
 
