@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "main.h"
 #include "extern.h"
@@ -95,6 +96,9 @@ buffer_new (void)
   /* Set default EOL string. */
   bp->eol = coding_eol_lf;
 
+  /* Set directory. */
+  bp->dir = agetcwd ();
+
   /* Insert into buffer list. */
   bp->next = head_bp;
   head_bp = bp;
@@ -118,6 +122,7 @@ free_buffer (Buffer * bp)
 
   free (bp->name);
   free (bp->filename);
+  astr_delete (bp->dir);
 
   if (bp->vars != NULL)
     hash_free (bp->vars);
@@ -262,6 +267,11 @@ switch_to_buffer (Buffer * bp)
 
   /* Move the buffer to head.  */
   move_buffer_to_head (bp);
+
+  /* Change to buffer's default directory.  */
+  if (chdir (astr_cstr (bp->dir))) {
+    /* Avoid compiler warning for ignoring return value. */
+  }
 
   thisflag |= FLAG_NEED_RESYNC;
 }

@@ -168,6 +168,9 @@ minibuf_read_filename (const char *fmt, const char *value,
   size_t pos;
 
   as = astr_new_cstr (value);
+  if (file == NULL && (astr_len (as) == 0 || astr_get (as, astr_len (as) - 1) != '/'))
+    astr_cat_char (as, '/');
+
   if (expand_path (as))
     {
       va_start (ap, file);

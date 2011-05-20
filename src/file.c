@@ -194,29 +194,6 @@ compact_path (astr path)
 }
 
 /*
- * Return the current directory for the buffer, always ending in `/'.
- */
-static astr
-get_buffer_dir (void)
-{
-  astr ret;
-
-  if (get_buffer_filename (cur_bp))
-    {
-      char *name = dir_name (get_buffer_filename (cur_bp));
-      ret = astr_new_cstr (name);
-      free (name);
-    }
-  else
-    ret = agetcwd ();
-
-  if (astr_len (ret) != 0 && astr_get (ret, astr_len (ret) - 1) != '/')
-    astr_cat_char (ret, '/');
-
-  return ret;
-}
-
-/*
  * Get HOME directory.
  */
 astr
@@ -254,6 +231,7 @@ read_file (const char *filename)
   int i, size;
   bool first_eol = true;
   const char *this_eol_type;
+  char *ms;
   size_t eol_len = 0, total_eols = 0;
   char buf[BUFSIZ];
   FILE *fp = fopen (filename, "r");
@@ -336,6 +314,10 @@ read_file (const char *filename)
   pt = get_buffer_pt (cur_bp);
   pt.p = get_line_next (get_buffer_lines (cur_bp));
   set_buffer_pt (cur_bp, pt);
+  ms = dir_name (filename);
+  astr_delete (get_buffer_dir (cur_bp));
+  set_buffer_dir (cur_bp, astr_new_cstr (ms));
+  free (ms);
 
   fclose (fp);
 }
@@ -344,6 +326,7 @@ bool
 find_file (const char *filename)
 {
   Buffer *bp;
+  char *buf;
 
   for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     {
@@ -366,6 +349,13 @@ find_file (const char *filename)
 
   switch_to_buffer (bp);
   read_file (filename);
+  buf = dir_name (filename);
+  astr_delete (get_buffer_dir (bp));
+  set_buffer_dir (bp, astr_new_cstr (buf));
+  free (buf);
+  if (chdir (astr_cstr (get_buffer_dir (bp)))) {
+    /* Avoid compiler warning for ignoring return value. */
+  }
 
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -379,12 +369,11 @@ Switch to a buffer visiting the file,
 creating one if none already exists.
 +*/
 {
-  astr buf = get_buffer_dir ();
-  char *ms = minibuf_read_filename ("Find file: ", astr_cstr (buf), NULL);
+  char *ms = minibuf_read_filename ("Find file: ",
+                                    astr_cstr (get_buffer_dir (cur_bp)), NULL);
 
   ok = leNIL;
 
-  astr_delete (buf);
   if (ms == NULL)
     ok = FUNCALL (keyboard_quit);
   else if (ms[0] != '\0')
@@ -420,10 +409,7 @@ If the current buffer now contains an empty file that you just visited
   astr as = NULL;
 
   if (buf == NULL)
-    {
-      as = get_buffer_dir ();
-      buf = astr_cstr (as);
-    }
+    buf = astr_cstr (get_buffer_dir (cur_bp));
   else
     base = base_name (buf);
   ms = minibuf_read_filename ("Find alternate: ", buf, base);
@@ -614,8 +600,8 @@ Set mark after the inserted text.
   STR_INIT (file)
   else
     {
-      astr buf = get_buffer_dir ();
-      file = minibuf_read_filename ("Insert file: ", astr_cstr (buf), NULL);
+      file = minibuf_read_filename ("Insert file: ",
+                                    astr_cstr (get_buffer_dir (cur_bp)), NULL);
       if (file == NULL)
         ok = FUNCALL (keyboard_quit);
     }
@@ -1070,43 +1056,34 @@ zile_exit (int doabort)
     exit (EXIT_CRASH);
 }
 
-DEFUN ("cd", cd)
+DEFUN_ARGS ("cd", cd,
+       STR_ARG (dir))
 /*+
-Make the user specified directory become the current buffer's default
-directory.
+Make DIR become the current buffer's default directory.
 +*/
 {
-  struct stat st;
-  astr buf = get_buffer_dir ();
-  char *ms = minibuf_read_filename ("Change default directory: ",
-                                    astr_cstr (buf), NULL);
+  if (arglist == NULL)
+    dir = minibuf_read_filename ("Change default directory: ",
+                                 astr_cstr (get_buffer_dir (cur_bp)), NULL);
 
-  if (ms == NULL)
+  if (dir == NULL)
+    ok = FUNCALL (keyboard_quit);
+  else if (dir[0] != '\0')
     {
-      astr_delete (buf);
-      return FUNCALL (keyboard_quit);
-    }
-  astr_delete (buf);
+      struct stat st;
 
-  if (ms[0] != '\0')
-    {
-      if (stat (ms, &st) != 0 || !S_ISDIR (st.st_mode))
+      if (stat (dir, &st) != 0 || !S_ISDIR (st.st_mode))
         {
-          minibuf_error ("`%s' is not a directory", ms);
-          free (ms);
-          return leNIL;
+          minibuf_error ("`%s' is not a directory", dir);
+          ok = leNIL;
         }
-      if (chdir (ms) == -1)
+      else if (chdir (dir) == -1)
         {
-          minibuf_write ("%s: %s", ms, strerror (errno));
-          free (ms);
-          return leNIL;
+          minibuf_write ("%s: %s", dir, strerror (errno));
+          ok = leNIL;
         }
-      free (ms);
-      return leT;
     }
 
-  free (ms);
-  return leNIL;
+  STR_FREE (dir);
 }
 END_DEFUN
