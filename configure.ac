@@ -27,7 +27,7 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Checks for programs
 AC_GNU_SOURCE
-AC_PROG_CC
+AC_PROG_CC_C99
 gl_EARLY
 AM_PROG_CC_C_O
 gl_MANYWARN_ALL_GCC([warnings])
@@ -36,6 +36,7 @@ nw=
 nw="$nw -Wsystem-headers"   # Don’t let system headers trigger warnings
 nw="$nw -Wundef"            # All compiler preprocessors support #if UNDEF
 nw="$nw -Wtraditional"      # All compilers nowadays support ANSI C
+nw="$nw -Wdeclaration-after-statement" # We require C99.
 nw="$nw -Wstrict-overflow"  # Use a lower level (see below).
 nw="$nw -Wconversion"       # These warnings usually don’t point to mistakes.
 nw="$nw -Wsign-conversion"  # Likewise.
@@ -87,7 +88,6 @@ AC_COMPILE_IFELSE(
  [AC_MSG_RESULT([no])
  with_included_regex=yes])
 gl_INIT
-AC_CHECK_FUNCS_ONCE(fchmod)
 
 dnl Curses
 AX_WITH_CURSES

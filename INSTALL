@@ -1,7 +1,7 @@
              GNU Zile build and installation instructions
              --------------------------------------------
 
-     Copyright (c) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+     Copyright (c) 2004-2011 Free Software Foundation, Inc.
 
      Copying and distribution of this file, with or without
      modification, are permitted in any medium without royalty
@@ -11,7 +11,7 @@
 Building from a release tarball
 -------------------------------
 
-Prerequisites: (n)curses, Perl. If you wish to use a non-standard
+Prerequisites: libgc, (n)curses, Perl. If you wish to use a non-standard
 library name, this can be specified using CURSES_LIB, and CPPFLAGS can
 be used for non-standard include paths. For example, to use the X
 version of PDcurses:

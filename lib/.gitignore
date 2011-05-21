@@ -75,6 +75,7 @@
 /getopt_int.h
 /getpagesize.c
 /gettext.h
+/glthread
 /gl_anylinked_list1.h
 /gl_anylinked_list2.h
 /gl_array_list.c
@@ -238,3 +239,13 @@
 /getcwd-lgpl.c
 /filenamecat-lgpl.c
 /xalloc-oversized.h
+/fflush.c
+/fpurge.c
+/freading.c
+/freading.h
+/fseeko.c
+/ftello.c
+/lseek.c
+/stdio-impl.h
+/strerror-impl.h
+/strerror_r.c

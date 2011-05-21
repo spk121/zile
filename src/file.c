@@ -630,15 +630,10 @@ copy_file (const char *source, const char *dest)
   stat_valid = fstat (ifd, &st) != -1;
 
   /* Recover file permissions and ownership. */
-  if (stat_valid)
+  if (stat_valid &&
+      (fchmod (ofd, st.st_mode) || fchown (ofd, st.st_uid, st.st_gid)))
     {
-#ifdef HAVE_FCHMOD
-      fchmod (ofd, st.st_mode);
-#endif
-      if (fchown (ofd, st.st_uid, st.st_gid))
-        {
-          /* Avoid compiler warning for ignoring return value. */
-        }
+      /* Avoid compiler warning for ignoring return values. */
     }
 
   close (ifd);
