@@ -114,9 +114,7 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 static Undo *
 revert_action (Undo * up)
 {
-  size_t i;
   Point pt;
-
   pt.n = up->n;
   pt.o = up->o;
 
@@ -142,7 +140,7 @@ revert_action (Undo * up)
       undo_save (UNDO_REPLACE_BLOCK, pt,
                  up->block.size, up->block.osize);
       undo_nosave = true;
-      for (i = 0; i < up->block.size; ++i)
+      for (size_t i = 0; i < up->block.size; ++i)
         delete_char ();
       insert_nstring (astr_cstr (up->block.text), up->block.osize);
       undo_nosave = false;

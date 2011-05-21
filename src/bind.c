@@ -62,9 +62,7 @@ node_new (int vecmax)
 static Binding
 search_node (Binding tree, size_t key)
 {
-  size_t i;
-
-  for (i = 0; i < tree->vecnum; ++i)
+  for (size_t i = 0; i < tree->vecnum; ++i)
     if (tree->vec[i]->key == key)
       return tree->vec[i];
 
@@ -300,16 +298,13 @@ init_bindings (void)
 void
 init_default_bindings (void)
 {
-  size_t i;
-  gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
-                                         NULL, NULL, NULL, true);
-  astr as;
-
   root_bindings = init_bindings ();
 
   /* Bind all printing keys to self_insert_command */
+  gl_list_t keys = gl_list_create_empty (GL_ARRAY_LIST,
+                                         NULL, NULL, NULL, true);
   gl_list_add_last (keys, NULL);
-  for (i = 0; i <= 0xff; i++)
+  for (size_t i = 0; i <= 0xff; i++)
     {
       if (isprint (i))
         {
@@ -318,7 +313,7 @@ init_default_bindings (void)
         }
     }
 
-  as = astr_new_cstr ("\
+  astr as = astr_new_cstr ("\
 (global-set-key \"\\M-m\" 'back-to-indentation)\
 (global-set-key \"\\LEFT\" 'backward-char)\
 (global-set-key \"\\C-b\" 'backward-char)\
@@ -495,24 +490,20 @@ static void
 walk_bindings_tree (Binding tree, gl_list_t keys,
                     void (*process) (astr key, Binding p, void *st), void *st)
 {
-  size_t i, j;
-  astr as = chordtostr (tree->key);
+  gl_list_add_last (keys, chordtostr (tree->key));
 
-  gl_list_add_last (keys, as);
-
-  for (i = 0; i < tree->vecnum; ++i)
+  for (size_t i = 0; i < tree->vecnum; ++i)
     {
       Binding p = tree->vec[i];
       if (p->func != NULL)
         {
           astr key = astr_new ();
-          astr bs = chordtostr (p->key);
-          for (j = 1; j < gl_list_size (keys); j++)
+          for (size_t j = 1; j < gl_list_size (keys); j++)
             {
               astr_cat (key, (castr) gl_list_get_at (keys, j));
               astr_cat_char (key, ' ');
             }
-          astr_cat (key, bs);
+          astr_cat (key, chordtostr (p->key));
           process (key, p, st);
         }
       else

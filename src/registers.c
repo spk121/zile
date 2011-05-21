@@ -122,9 +122,7 @@ END_DEFUN
 static void
 write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
 {
-  size_t i;
-
-  for (i = 0; i < NUM_REGISTERS; ++i)
+  for (size_t i = 0; i < NUM_REGISTERS; ++i)
     if (regs[i] != NULL)
       {
         const char *s = astr_cstr (regs[i]);

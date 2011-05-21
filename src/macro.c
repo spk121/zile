@@ -64,9 +64,7 @@ remove_macro_key (Macro * mp)
 static void
 append_key_list (Macro *to, Macro *from)
 {
-  size_t i;
-
-  for (i = 0; i < gl_list_size (from->keys); i++)
+  for (size_t i = 0; i < gl_list_size (from->keys); i++)
     add_macro_key (to, (size_t) gl_list_get_at (from->keys, i));
 }
 
@@ -183,9 +181,9 @@ END_DEFUN
 static void
 process_keys (gl_list_t keys)
 {
-  size_t i, len = gl_list_size (keys), cur = term_buf_len ();
-
-  for (i = 0; i < len; i++)
+  size_t len = gl_list_size (keys);
+  size_t cur = term_buf_len ();
+  for (size_t i = 0; i < len; i++)
     pushkey ((size_t) gl_list_get_at (keys, len - i - 1));
 
   while (term_buf_len () > cur)
@@ -209,8 +207,6 @@ To make a macro permanent so you can call it even after
 defining others, use @kbd{M-x name-last-kbd-macro}.
 +*/
 {
-  int uni;
-
   if (cur_mp == NULL)
     {
       minibuf_error ("No kbd macro has been defined");
@@ -218,7 +214,7 @@ defining others, use @kbd{M-x name-last-kbd-macro}.
     }
 
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
-  for (uni = 0; uni < uniarg; ++uni)
+  for (int uni = 0; uni < uniarg; ++uni)
     call_macro (cur_mp);
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
@@ -230,10 +226,8 @@ DEFUN_NONINTERACTIVE_ARGS ("execute-kbd-macro", execute_kbd_macro,
 Execute macro as string of editor command characters.
 +*/
 {
-  gl_list_t keys;
-
   STR_INIT (keystr);
-  keys = keystrtovec (keystr);
+  gl_list_t keys = keystrtovec (keystr);
   if (keys)
     process_keys (keys);
   else
@@ -247,9 +241,8 @@ END_DEFUN
 Macro *
 get_macro (const char *name)
 {
-  Macro *mp;
   assert (name);
-  for (mp = head_mp; mp; mp = mp->next)
+  for (Macro *mp = head_mp; mp; mp = mp->next)
     if (STREQ (mp->name, name))
       return mp;
   return NULL;
@@ -261,8 +254,6 @@ get_macro (const char *name)
 void
 add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f)
 {
-  Macro *mp;
-
-  for (mp = head_mp; mp; mp = mp->next)
+  for (Macro *mp = head_mp; mp; mp = mp->next)
     gl_sortedlist_add (l, f, xstrdup (mp->name));
 }

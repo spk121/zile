@@ -229,9 +229,7 @@ DEFUN ("delete-other-windows", delete_other_windows)
 Make the selected window fill the screen.
 +*/
 {
-  Window *wp, *nextwp;
-
-  for (wp = head_wp; wp != NULL; wp = nextwp)
+  for (Window *wp = head_wp, *nextwp; wp != NULL; wp = nextwp)
     {
       nextwp = wp->next;
       if (wp != cur_wp)
@@ -274,9 +272,7 @@ create_scratch_window (void)
 Window *
 find_window (const char *name)
 {
-  Window *wp;
-
-  for (wp = head_wp; wp != NULL; wp = wp->next)
+  for (Window *wp = head_wp; wp != NULL; wp = wp->next)
     if (STREQ (get_buffer_name (wp->bp), name))
       return wp;
 

@@ -92,8 +92,7 @@ bool
 is_blank_line (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  size_t c;
-  for (c = 0; c < astr_len (get_line_text (pt.p)); c++)
+  for (size_t c = 0; c < astr_len (get_line_text (pt.p)); c++)
     if (!isspace ((int) astr_get (get_line_text (pt.p), c)))
       return false;
   return true;

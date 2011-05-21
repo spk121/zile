@@ -193,12 +193,9 @@ get_variable_bool (const char *var)
 char *
 minibuf_read_variable_name (const char *fmt, ...)
 {
-  va_list ap;
-  char *ms;
   Completion *cp = completion_new (false);
-  var_entry *p;
 
-  for (p = hash_get_first (main_vars);
+  for (var_entry *p = hash_get_first (main_vars);
        p != NULL;
        p = hash_get_next (main_vars, p))
     {
@@ -206,11 +203,12 @@ minibuf_read_variable_name (const char *fmt, ...)
                          xstrdup (p->var));
     }
 
+  va_list ap;
   va_start (ap, fmt);
-  ms = minibuf_vread_completion (fmt, "", cp, NULL,
-                                 "No variable name given",
-                                 minibuf_test_in_completions,
-                                 "Undefined variable name `%s'", ap);
+  char *ms = minibuf_vread_completion (fmt, "", cp, NULL,
+                                       "No variable name given",
+                                       minibuf_test_in_completions,
+                                       "Undefined variable name `%s'", ap);
   va_end (ap);
 
   return ms;

@@ -218,9 +218,8 @@ strtokey (const char *buf, size_t * len)
 {
   if (*buf == '\\')
     {
-      size_t i;
       const char **p = NULL;
-      for (i = 0; i < sizeof (keyname) / sizeof (keyname[0]); i++)
+      for (size_t i = 0; i < sizeof (keyname) / sizeof (keyname[0]); i++)
         if (strncmp (keyname[i], buf, strlen (keyname[i])) == 0)
           p = (const char **) &keyname[i];
       if (p == NULL)
@@ -296,10 +295,9 @@ keystrtovec (const char *key)
 astr
 keyvectostr (gl_list_t keys)
 {
-  size_t i;
   astr as = astr_new ();
 
-  for (i = 0; i < gl_list_size (keys); i++)
+  for (size_t i = 0; i < gl_list_size (keys); i++)
     {
       astr key = chordtostr ((size_t) gl_list_get_at (keys, i));
       astr_cat (as, key);

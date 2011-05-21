@@ -82,10 +82,10 @@ about_screen (void)
 static void
 setup_main_screen (void)
 {
-  Buffer *bp, *last_bp = NULL;
+  Buffer *last_bp = NULL;
   int c = 0;
 
-  for (bp = head_bp; bp; bp = get_buffer_next (bp))
+  for (Buffer *bp = head_bp; bp; bp = get_buffer_next (bp))
     {
       /* Last buffer that isn't *scratch*. */
       if (get_buffer_next (bp) && !get_buffer_next (get_buffer_next (bp)))
@@ -160,10 +160,7 @@ main (int argc, char **argv)
                                              NULL, NULL, NULL, false);
   gl_list_t arg_line = gl_list_create_empty (GL_LINKED_LIST,
                                              NULL, NULL, NULL, false);
-  size_t i, line = 1;
-  Buffer *scratch_bp;
-  astr as;
-  bool ok = true;
+  size_t line = 1;
 
   GC_INIT ();
   set_program_name (argv[0]);
@@ -276,18 +273,17 @@ main (int argc, char **argv)
   /* Create the `*scratch*' buffer, so that initialisation commands
      that act on a buffer have something to act on. */
   create_scratch_window ();
-  scratch_bp = cur_bp;
-  as = astr_new_cstr ("\
+  Buffer *scratch_bp = cur_bp;
+  bprintf ("%s", "\
 ;; This buffer is for notes you don't want to save.\n\
 ;; If you want to create a file, visit that file with C-x C-f,\n\
 ;; then enter the text in that file's own buffer.\n\
 \n");
-  insert_astr (as);
   set_buffer_modified (cur_bp, false);
 
   if (!qflag)
     {
-      as = get_home_dir ();
+      astr as = get_home_dir ();
       if (as)
         {
           astr_cat_cstr (as, "/." PACKAGE);
@@ -302,7 +298,8 @@ main (int argc, char **argv)
 
   /* Load files and load files and run functions given on the command
      line. */
-  for (i = 0; ok && i < gl_list_size (arg_arg); i++)
+  bool ok = true;
+  for (size_t i = 0; ok && i < gl_list_size (arg_arg); i++)
     {
       const char *arg = (const char *) gl_list_get_at (arg_arg, i);
 

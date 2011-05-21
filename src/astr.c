@@ -228,14 +228,13 @@ astr
 astr_recase (astr as, enum casing newcase)
 {
   astr bs = astr_new ();
-  size_t i, len;
 
   if (newcase == case_capitalized || newcase == case_upper)
     astr_cat_char (bs, toupper (astr_get (as, 0)));
   else
     astr_cat_char (bs, tolower (astr_get (as, 0)));
 
-  for (i = 1, len = astr_len (as); i < len; i++)
+  for (size_t i = 1, len = astr_len (as); i < len; i++)
     astr_cat_char (bs, ((newcase == case_upper) ? toupper : tolower) (astr_get (as, i)));
 
   astr_cpy (as, bs);

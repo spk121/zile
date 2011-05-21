@@ -54,9 +54,8 @@ static fentry fentry_table[] = {
 static fentry *
 get_fentry (const char *name)
 {
-  size_t i;
   assert (name);
-  for (i = 0; i < fentry_table_size; ++i)
+  for (size_t i = 0; i < fentry_table_size; ++i)
     if (STREQ (name, fentry_table[i].name))
       return &fentry_table[i];
   return NULL;
@@ -87,8 +86,7 @@ get_function_doc (const char *name)
 const char *
 get_function_name (Function p)
 {
-  size_t i;
-  for (i = 0; i < fentry_table_size; ++i)
+  for (size_t i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].func == p)
       return fentry_table[i].name;
   return NULL;
@@ -101,8 +99,8 @@ size_t
 countNodes (le * branch)
 {
   int count;
-
-  for (count = 0; branch; branch = branch->next, count++);
+  for (count = 0; branch; branch = branch->next, count++)
+    ;
   return count;
 }
 
@@ -167,12 +165,11 @@ The symbols sym are variables; they are literal (not evaluated).
 The values val are expressions; they are evaluated.
 +*/
 {
-  le *newvalue = leNIL, *current;
-  size_t argc = countNodes (arglist);
+  le *newvalue = leNIL;
 
-  if (arglist != NULL && argc >= 2)
+  if (arglist != NULL && countNodes (arglist) >= 2)
     {
-      for (current = arglist->next; current;
+      for (le *current = arglist->next; current;
            current = current->next->next)
         {
           if (newvalue != leNIL)
@@ -198,7 +195,6 @@ leEval (le * list)
 le *
 execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backward) (void))
 {
-  int uni, ret = true;
   bool (*func) (void) = forward;
 
   if (backward && uniarg < 0)
@@ -208,7 +204,8 @@ execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backw
     }
   if (undo)
     undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
-  for (uni = 0; ret && uni < uniarg; ++uni)
+  bool ret = true;
+  for (int uni = 0; ret && uni < uniarg; ++uni)
     ret = func ();
   if (undo)
     undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
@@ -269,21 +266,19 @@ char *
 minibuf_read_function_name (const char *fmt, ...)
 {
   va_list ap;
-  char *ms;
   Completion *cp = completion_new (false);
-  size_t i;
 
-  for (i = 0; i < fentry_table_size; ++i)
+  for (size_t i = 0; i < fentry_table_size; ++i)
     if (fentry_table[i].interactive)
       gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
                          xstrdup (fentry_table[i].name));
   add_macros_to_list (get_completion_completions (cp), completion_strcmp);
 
   va_start (ap, fmt);
-  ms = minibuf_vread_completion (fmt, "", cp, functions_history,
-                                 "No function name given",
-                                 minibuf_test_in_completions,
-                                 "Undefined function name `%s'", ap);
+  char *ms = minibuf_vread_completion (fmt, "", cp, functions_history,
+                                       "No function name given",
+                                       minibuf_test_in_completions,
+                                       "Undefined function name `%s'", ap);
   va_end (ap);
 
   return ms;

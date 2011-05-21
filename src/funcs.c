@@ -467,9 +467,9 @@ static astr
 tabify_string (astr src, size_t scol, size_t tw)
 {
   astr dest = astr_new ();
-  size_t dcol = scol, i;
+  size_t dcol = scol;
 
-  for (i = 0; i < astr_len (src); i++)
+  for (size_t i = 0; i < astr_len (src); i++)
     {
       char c = astr_get (src, i);
       switch (c)
@@ -508,9 +508,8 @@ static astr
 untabify_string (astr src, size_t scol, size_t tw)
 {
   astr dest = astr_new ();
-  size_t i;
 
-  for (i = 0; i < astr_len (src); i++)
+  for (size_t i = 0; i < astr_len (src); i++)
     {
       char c = astr_get (src, i);
       if (c == '\t')
@@ -531,21 +530,20 @@ static void
 edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
                astr (*action) (astr as, size_t scol, size_t tw))
 {
-  size_t col, i, t = tab_width (cur_bp);
-  astr src = astr_substr (get_line_text (lp), offset, size), dest;
+  size_t t = tab_width (cur_bp);
 
   /* Get offset's column.  */
-  col = 0;
-  for (i = 0; i < offset; i++)
+  size_t col = 0;
+  for (size_t i = 0; i < offset; i++)
     {
       if (astr_get (get_line_text (lp), i) == '\t')
         col |= t - 1;
       ++col;
     }
 
-  dest = action (src, col, t);
-
   /* Only make an edit if the line has changed. */
+  astr src = astr_substr (get_line_text (lp), offset, size);
+  astr dest = action (src, col, t);
   if (astr_cmp (src, dest) != 0)
     {
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
@@ -979,8 +977,6 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
 static le *
 transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void))
 {
-  int uni, ret = true;
-
   if (warn_if_readonly_buffer ())
     return leNIL;
 
@@ -991,8 +987,10 @@ transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void)
       backward_func = tmp_func;
       uniarg = -uniarg;
     }
+
+  bool ret = true;
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
-  for (uni = 0; ret && uni < uniarg; ++uni)
+  for (int uni = 0; ret && uni < uniarg; ++uni)
     ret = transpose_subr (forward_func, backward_func);
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
@@ -1162,25 +1160,24 @@ DEFUN ("fill-paragraph", fill_paragraph)
 Fill paragraph at or after point.
 +*/
 {
-  int i, start, end;
   Marker *m = point_marker ();
 
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
   FUNCALL (forward_paragraph);
-  end = get_buffer_pt (cur_bp).n;
+  int end = get_buffer_pt (cur_bp).n;
   if (is_empty_line ())
     end--;
 
   FUNCALL (backward_paragraph);
-  start = get_buffer_pt (cur_bp).n;
+  int start = get_buffer_pt (cur_bp).n;
   if (is_empty_line ())
     { /* Move to next line if between two paragraphs. */
       next_line ();
       start++;
     }
 
-  for (i = start; i < end; i++)
+  for (int i = start; i < end; i++)
     {
       FUNCALL (end_of_line);
       delete_char ();
@@ -1202,16 +1199,13 @@ END_DEFUN
 static bool
 setcase_word (int rcase)
 {
-  size_t i;
-  char c;
-  astr as;
-
   if (!ISWORDCHAR (following_char ()))
     if (!forward_word () || !backward_word ())
       return false;
 
-  as = astr_new ();
-  for (i = get_buffer_pt (cur_bp).o;
+  astr as = astr_new ();
+  char c;
+  for (size_t i = get_buffer_pt (cur_bp).o;
        i < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) &&
          ISWORDCHAR ((int) (c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i)));
        i++)

@@ -47,10 +47,8 @@ resync_redisplay (Window * wp)
 void
 resize_windows (void)
 {
-  Window *wp;
-  int hdelta;
-
   /* Resize windows horizontally. */
+  Window *wp;
   for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
     {
       set_window_fwidth (wp, term_width ());
@@ -59,6 +57,7 @@ resize_windows (void)
 
   /* Work out difference in window height; windows may be taller than
      terminal if the terminal was very short. */
+  int hdelta;
   for (hdelta = term_height () - 1, wp = head_wp;
        wp != NULL; hdelta -= get_window_fheight (wp), wp = get_window_next (wp));
 

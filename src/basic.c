@@ -55,11 +55,11 @@ END_DEFUN
 size_t
 get_goalc_bp (Buffer * bp, Point pt)
 {
-  size_t col = 0, t = tab_width (bp), i;
+  size_t col = 0, t = tab_width (bp);
   const char *sp = astr_cstr (get_line_text (pt.p));
   size_t end = MIN (pt.o, astr_len (get_line_text (pt.p)));
 
-  for (i = 0; i < end; i++)
+  for (size_t i = 0; i < end; i++)
     {
       if (sp[i] == '\t')
         col |= t - 1;
@@ -217,10 +217,8 @@ Position 1 is the beginning of the buffer.
 
   if (ok == leT && n != LONG_MAX)
     {
-      long count;
-
       gotobob ();
-      for (count = 1; count < n; count++)
+      for (long count = 1; count < n; count++)
         if (!forward_char ())
           break;
     }

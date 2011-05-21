@@ -78,7 +78,7 @@ bool
 expand_path (astr path)
 {
   int ok = true;
-  const char *sp = astr_cstr (path), *p;
+  const char *sp = astr_cstr (path);
   astr epath = astr_new ();
 
   if (*sp != '/' && *sp != '~')
@@ -89,7 +89,7 @@ expand_path (astr path)
         astr_cat_char (epath, '/');
     }
 
-  for (p = sp; *p != '\0';)
+  for (const char *p = sp; *p != '\0';)
     {
       if (*p == '/')
         {
@@ -221,15 +221,15 @@ static void
 read_file (const char *filename)
 {
   Line *lp;
-  int i, size;
+  int size;
   bool first_eol = true;
   const char *this_eol_type;
   char *ms;
-  size_t eol_len = 0, total_eols = 0;
+  size_t total_eols = 0;
   char buf[BUFSIZ];
-  FILE *fp = fopen (filename, "r");
   Point pt;
 
+  FILE *fp = fopen (filename, "r");
   if (fp == NULL)
     {
       if (errno != ENOENT)
@@ -251,7 +251,7 @@ read_file (const char *filename)
   size = fread (buf, 1, BUFSIZ, fp);
   if (size > 0)
     {
-      for (i = 0; i < size && total_eols < MAX_EOL_CHECK_COUNT; i++)
+      for (int i = 0; i < size && total_eols < MAX_EOL_CHECK_COUNT; i++)
         {
           if (buf[i] == '\n' || buf[i] == '\r')
             {
@@ -283,10 +283,10 @@ read_file (const char *filename)
         }
 
       /* Process this and subsequent chunks into lines. */
-      eol_len = strlen (get_buffer_eol (cur_bp));
+      size_t eol_len = strlen (get_buffer_eol (cur_bp));
       do
         {
-          for (i = 0; i < size; i++)
+          for (int i = 0; i < size; i++)
             {
               if (strncmp (get_buffer_eol (cur_bp), buf + i, eol_len) != 0)
                 astr_cat_char (get_line_text (lp), buf[i]);
@@ -316,10 +316,7 @@ read_file (const char *filename)
 bool
 find_file (const char *filename)
 {
-  Buffer *bp;
-  char *buf;
-
-  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+  for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     {
       if (get_buffer_filename (bp) != NULL &&
           STREQ (get_buffer_filename (bp), filename))
@@ -335,13 +332,12 @@ find_file (const char *filename)
       return false;
     }
 
-  bp = buffer_new ();
+  Buffer *bp = buffer_new ();
   set_buffer_names (bp, filename);
 
   switch_to_buffer (bp);
   read_file (filename);
-  buf = dir_name (filename);
-  set_buffer_dir (bp, astr_new_cstr (buf));
+  set_buffer_dir (bp, astr_new_cstr (dir_name (filename)));
   if (chdir (astr_cstr (get_buffer_dir (bp)))) {
     /* Avoid compiler warning for ignoring return value. */
   }
@@ -672,22 +668,20 @@ copy_file (const char *source, const char *dest)
 static int
 raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 {
-  ssize_t eol_len = (ssize_t) strlen (get_buffer_eol (bp)), written;
-  Line *lp;
-  int ret = 0;
+  ssize_t eol_len = (ssize_t) strlen (get_buffer_eol (bp));
   int fd = creat (filename, mode);
 
   if (fd < 0)
     return -1;
 
   /* Save the lines. */
-  for (lp = get_line_next (get_buffer_lines (bp));
+  int ret = 0;
+  for (Line *lp = get_line_next (get_buffer_lines (bp));
        lp != get_buffer_lines (bp);
        lp = get_line_next (lp))
     {
       ssize_t len = (ssize_t) astr_len (get_line_text (lp));
-
-      written = write (fd, astr_cstr (get_line_text (lp)), len);
+      ssize_t written = write (fd, astr_cstr (get_line_text (lp)), len);
       if (written != len)
         {
           ret = written;
@@ -878,11 +872,10 @@ END_DEFUN
 static int
 save_some_buffers (void)
 {
-  Buffer *bp;
   bool none_to_save = true;
   bool noask = false;
 
-  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+  for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     {
       if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
         {
@@ -955,12 +948,10 @@ DEFUN ("save-buffers-kill-emacs", save_buffers_kill_emacs)
 Offer to save each buffer, then kill this Zile process.
 +*/
 {
-  Buffer *bp;
-
   if (!save_some_buffers ())
     return leNIL;
 
-  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+  for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_modified (bp) && !get_buffer_needname (bp))
       {
         for (;;)
@@ -989,10 +980,8 @@ END_DEFUN
 void
 zile_exit (int doabort)
 {
-  Buffer *bp;
-
   fprintf (stderr, "Trying to save modified buffers (if any)...\r\n");
-  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+  for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
       {
         astr buf = astr_new (), as;

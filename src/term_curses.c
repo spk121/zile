@@ -393,8 +393,6 @@ void
 term_ungetkey (size_t key)
 {
   int * codes = NULL;
-  size_t i, n = keytocodes (key, &codes);
-
-  for (i = n; i > 0; i--)
+  for (size_t i = keytocodes (key, &codes); i > 0; i--)
     gl_list_add_last (key_buf, (void *)(ptrdiff_t) codes[i - 1]);
 }

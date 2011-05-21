@@ -109,11 +109,11 @@ line_remove (Line *lp)
 static void
 adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
 {
-  Marker *m_pt = point_marker (), *m;
+  Marker *m_pt = point_marker ();
 
   assert (dir >= -1 && dir <= 1);
 
-  for (m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
+  for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
     {
       Point pt = get_marker_pt (m);
 
@@ -215,11 +215,10 @@ insert_char_in_insert_mode (int c)
 static void
 insert_expanded_tab (int (*inschr) (int chr))
 {
-  int c = get_goalc ();
-  int t = tab_width (cur_bp);
-
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 
+  int c = get_goalc ();
+  int t = tab_width (cur_bp);
   for (c = t - c % t; c > 0; --c)
     (*inschr) (' ');
 
@@ -341,18 +340,19 @@ line_replace_text (Line * lp, size_t offset, size_t oldlen,
 bool
 fill_break_line (void)
 {
-  size_t i, break_col = 0, old_col;
   size_t fillcol = get_variable_number ("fill-column");
   bool break_made = false;
 
   /* Only break if we're beyond fill-column. */
   if (get_goalc () > fillcol)
     {
+      size_t break_col = 0;
+
       /* Save point. */
       Marker *m = point_marker ();
 
       /* Move cursor back to fill column */
-      old_col = get_buffer_pt (cur_bp).o;
+      size_t old_col = get_buffer_pt (cur_bp).o;
       while (get_goalc () > fillcol + 1)
         {
           Point pt = get_buffer_pt (cur_bp);
@@ -361,7 +361,7 @@ fill_break_line (void)
         }
 
       /* Find break point moving left from fill-column. */
-      for (i = get_buffer_pt (cur_bp).o; i > 0; i--)
+      for (size_t i = get_buffer_pt (cur_bp).o; i > 0; i--)
         {
           int c = astr_get (get_buffer_pt (cur_bp).p->text, i - 1);
           if (isspace (c))
@@ -375,7 +375,7 @@ fill_break_line (void)
          possible moving right. */
       if (break_col == 0)
         {
-          for (i = get_buffer_pt (cur_bp).o + 1;
+          for (size_t i = get_buffer_pt (cur_bp).o + 1;
                i < astr_len (get_buffer_pt (cur_bp).p->text);
                i++)
             {
@@ -442,10 +442,9 @@ END_DEFUN
 void
 insert_nstring (const char *s, size_t len)
 {
-  size_t i;
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, len);
   undo_nosave = true;
-  for (i = 0; i < len; i++)
+  for (size_t i = 0; i < len; i++)
     {
       if (s[i] == '\n')
         insert_newline ();

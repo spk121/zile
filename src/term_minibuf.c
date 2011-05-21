@@ -31,12 +31,10 @@
 void
 term_minibuf_write (const char *s)
 {
-  size_t x;
-
   term_move (term_height () - 1, 0);
   term_clrtoeol ();
 
-  for (x = 0; *s != '\0' && x < term_width (); s++)
+  for (size_t x = 0; *s != '\0' && x < term_width (); s++)
     {
       term_addch (*(const unsigned char *) s);
       ++x;

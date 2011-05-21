@@ -54,12 +54,11 @@ marker_new (void)
 void
 unchain_marker (const Marker * marker)
 {
-  Marker *m, *prev = NULL;
-
   if (!marker->bp)
     return;
 
-  for (m = get_buffer_markers (marker->bp); m; m = m->next)
+  Marker *prev = NULL;
+  for (Marker *m = get_buffer_markers (marker->bp); m; m = m->next)
     {
       if (m == marker)
         {

@@ -34,9 +34,8 @@ static bool
 no_upper (const char *s, size_t len, int regex)
 {
   int quote_flag = 0;
-  size_t i;
 
-  for (i = 0; i < len; i++)
+  for (size_t i = 0; i < len; i++)
     {
       if (regex && s[i] == '\\')
         quote_flag = !quote_flag;

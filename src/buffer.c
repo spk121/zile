@@ -328,9 +328,8 @@ calculate_the_region (Region * rp)
   {
     Point pt1 = get_region_start (rp), pt2 = get_region_end (rp);
     int size = -pt1.o + pt2.o;
-    Line *lp;
 
-    for (lp = pt1.p; lp != pt2.p; lp = get_line_next (lp))
+    for (Line *lp = pt1.p; lp != pt2.p; lp = get_line_next (lp))
       size += astr_len (get_line_text (lp)) + 1;
 
     set_region_size (rp, size);
@@ -465,9 +464,7 @@ copy_text_block (Point pt, size_t size)
       astr_cat (as, get_line_text (lp));
       astr_cat_char (as, '\n');
     }
-  astr_truncate (as, size);
-
-  return as;
+  return astr_truncate (as, size);
 }
 
 Buffer *
@@ -488,8 +485,7 @@ create_scratch_buffer (void)
 void
 kill_buffer (Buffer * kill_bp)
 {
-  Buffer *bp, *next_bp;
-  Window *wp;
+  Buffer *next_bp;
 
   if (get_buffer_next (kill_bp) != NULL)
     next_bp = get_buffer_next (kill_bp);
@@ -497,7 +493,7 @@ kill_buffer (Buffer * kill_bp)
     next_bp = (head_bp == kill_bp) ? NULL : head_bp;
 
   /* Search for windows displaying the buffer to kill. */
-  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+  for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
     if (get_window_bp (wp) == kill_bp)
       {
         set_window_bp (wp, next_bp);
@@ -510,7 +506,7 @@ kill_buffer (Buffer * kill_bp)
     cur_bp = next_bp;
   if (head_bp == kill_bp)
     head_bp = get_buffer_next (head_bp);
-  for (bp = head_bp; bp != NULL && get_buffer_next (bp) != NULL; bp = get_buffer_next (bp))
+  for (Buffer *bp = head_bp; bp != NULL && get_buffer_next (bp) != NULL; bp = get_buffer_next (bp))
     if (get_buffer_next (bp) == kill_bp)
       {
         set_buffer_next (bp, get_buffer_next (get_buffer_next (bp)));
@@ -524,12 +520,12 @@ kill_buffer (Buffer * kill_bp)
   if (next_bp == NULL)
     {
       cur_bp = head_bp = next_bp = create_scratch_buffer ();
-      for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+      for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
         set_window_bp (wp, head_bp);
     }
 
   /* Resync windows that need it. */
-  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+  for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
     if (get_window_bp (wp) == next_bp)
       resync_redisplay (wp);
 }
@@ -578,11 +574,8 @@ END_DEFUN
 Completion *
 make_buffer_completion (void)
 {
-  Buffer *bp;
-  Completion *cp;
-
-  cp = completion_new (false);
-  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+  Completion *cp = completion_new (false);
+  for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
                        xstrdup (get_buffer_name (bp)));
 
