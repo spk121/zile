@@ -482,23 +482,17 @@ sequence.
 }
 END_DEFUN
 
-/* FIXME: This function relies on chordtostr (0) returning ""; it
-   should not call chordtostr in this case, should iterate from j=0,
-   not j=1, and should only remove an element from the array at the
-   end of the function if one was added. */
 static void
 walk_bindings_tree (Binding tree, gl_list_t keys,
                     void (*process) (astr key, Binding p, void *st), void *st)
 {
-  gl_list_add_last (keys, chordtostr (tree->key));
-
   for (size_t i = 0; i < tree->vecnum; ++i)
     {
       Binding p = tree->vec[i];
       if (p->func != NULL)
         {
           astr key = astr_new ();
-          for (size_t j = 1; j < gl_list_size (keys); j++)
+          for (size_t j = 0; j < gl_list_size (keys); j++)
             {
               astr_cat (key, (castr) gl_list_get_at (keys, j));
               astr_cat_char (key, ' ');
@@ -507,10 +501,12 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
           process (key, p, st);
         }
       else
-        walk_bindings_tree (p, keys, process, st);
+        {
+          gl_list_add_last (keys, chordtostr (p->key));
+          walk_bindings_tree (p, keys, process, st);
+          assert (gl_list_remove_at (keys, gl_list_size (keys) - 1));
+        }
     }
-
-  assert (gl_list_remove_at (keys, gl_list_size (keys) - 1));
 }
 
 static void
