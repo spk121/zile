@@ -164,7 +164,6 @@ astr keyvectostr (gl_list_t keys);
 #define FIELD(ty, field)                                \
   ty get_line_ ## field (const Line *wp);               \
   void set_line_ ## field (Line *wp, ty field);
-  FIELD(const char *, field)
 #include "line.h"
 #undef FIELD
 Line *line_new (void);
@@ -300,7 +299,6 @@ bool get_variable_bool (const char *var);
 #define FIELD(ty, field)                                \
   ty get_window_ ## field (const Window *wp);           \
   void set_window_ ## field (Window *wp, ty field);
-  FIELD(const char *, field)
 #include "window.h"
 #undef FIELD
 void create_scratch_window (void);
