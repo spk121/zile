@@ -61,14 +61,6 @@ line_new (void)
   return l;
 }
 
-/* Delete a list, freeing its nodes */
-void
-line_delete (Line *lp)
-{
-  while (lp->next != lp)
-    line_remove (lp->next);
-}
-
 /* Insert a line into list after the given point, returning the new line */
 Line *
 line_insert (Line *lp, astr as)
@@ -78,14 +70,6 @@ line_insert (Line *lp, astr as)
   lp->next = lp->next->prev = n;
 
   return n;
-}
-
-/* Remove a line from a list, if not sole line in list */
-void
-line_remove (Line *lp)
-{
-  lp->prev->next = lp->next;
-  lp->next->prev = lp->prev;
 }
 
 
@@ -495,7 +479,8 @@ delete_char (void)
 
       /* Join the lines. */
       astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
-      line_remove (oldlp);
+      oldlp->prev->next = oldlp->next;
+      oldlp->next->prev = oldlp->prev;
 
       adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);

@@ -114,8 +114,6 @@ buffer_new (void)
 void
 free_buffer (Buffer * bp)
 {
-  line_delete (bp->lines);
-
   while (bp->markers)
     unchain_marker (bp->markers);
 }

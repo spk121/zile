@@ -168,9 +168,7 @@ astr keyvectostr (gl_list_t keys);
 #include "line.h"
 #undef FIELD
 Line *line_new (void);
-void line_delete (Line *l);
 Line *line_insert (Line *l, astr i);
-void line_remove (Line *l);
 void line_replace_text (Line * lp, size_t offset, size_t oldlen,
                         const char *newtext, int replace_case);
 int insert_char (int c);
