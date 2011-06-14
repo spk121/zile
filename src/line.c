@@ -57,10 +57,7 @@ Line *
 line_new (void)
 {
   Line *l = XZALLOC (Line);
-
-  l->next = l->prev = l;
-  l->text = NULL;
-
+  *l = (Line) {.next = l, .prev = l, .text = NULL};
   return l;
 }
 
@@ -74,13 +71,10 @@ line_delete (Line *lp)
 
 /* Insert a line into list after the given point, returning the new line */
 Line *
-line_insert (Line *lp, astr i)
+line_insert (Line *lp, astr as)
 {
   Line *n = XZALLOC (Line);
-
-  n->next = lp->next;
-  n->prev = lp;
-  n->text = i;
+  *n = (Line) {.next = lp->next, .prev = lp, .text = as};
   lp->next = lp->next->prev = n;
 
   return n;
@@ -202,11 +196,10 @@ insert_char (int c)
 int
 insert_char_in_insert_mode (int c)
 {
-  int ret;
   bool old_overwrite = get_buffer_overwrite (cur_bp);
 
   set_buffer_overwrite (cur_bp, false);
-  ret = insert_char (c);
+  int ret = insert_char (c);
   set_buffer_overwrite (cur_bp, old_overwrite);
 
   return ret;
@@ -310,23 +303,21 @@ void
 line_replace_text (Line * lp, size_t offset, size_t oldlen,
                    const char *newtext, int replace_case)
 {
-  int case_type = 0;
-  size_t newlen = strlen (newtext);
   astr as = astr_new_cstr (newtext);
 
   replace_case = replace_case && get_variable_bool ("case-replace");
 
   if (replace_case)
     {
-      case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
+      int case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
 
       if (case_type != 0)
           astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
     }
 
   set_buffer_modified (cur_bp, true);
-  astr_replace_cstr (lp->text, offset, oldlen, astr_cstr (as));
-  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (newlen - oldlen));
+  astr_replace (lp->text, offset, oldlen, as);
+  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (astr_len (as) - oldlen));
 }
 
 /*
@@ -475,12 +466,10 @@ void
 bprintf (const char *fmt, ...)
 {
   va_list ap;
-  char *buf;
 
   va_start (ap, fmt);
-  buf = xvasprintf (fmt, ap);
+  insert_astr (astr_vfmt (fmt, ap));
   va_end (ap);
-  insert_nstring (buf, strlen (buf));
 }
 
 bool
@@ -761,13 +750,11 @@ Indentation is done using the `indent-for-tab-command' function.
   if (insert_newline ())
     {
       Marker *m = point_marker ();
-      int indent;
-      size_t pos;
 
       /* Check where last non-blank goalc is. */
       previous_nonblank_goalc ();
-      pos = get_goalc ();
-      indent = pos > 0 || (!eolp () && isspace (following_char ()));
+      size_t pos = get_goalc ();
+      int indent = pos > 0 || (!eolp () && isspace (following_char ()));
       set_buffer_pt (cur_bp, get_marker_pt (m));
       unchain_marker (m);
       /* Only indent if we're in column > 0 or we're in column 0 and

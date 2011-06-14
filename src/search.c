@@ -218,13 +218,12 @@ isearch (int forward, int regexp)
   for (;;)
     {
       /* Make the minibuf message. */
-      astr_truncate (buf, 0);
-      astr_afmt (buf, "%sI-search%s: %s",
-                 (last ?
-                  (regexp ? "Regexp " : "") :
-                  (regexp ? "Failing regexp " : "Failing ")),
-                 forward ? "" : " backward",
-                 astr_cstr (pattern));
+      buf = astr_fmt ("%sI-search%s: %s",
+                      (last ?
+                       (regexp ? "Regexp " : "") :
+                       (regexp ? "Failing regexp " : "Failing ")),
+                      forward ? "" : " backward",
+                      astr_cstr (pattern));
 
       /* Regex error. */
       if (re_find_err)
@@ -235,7 +234,7 @@ isearch (int forward, int regexp)
             {
               re_find_err = "incomplete input";
             }
-          astr_afmt (buf, " [%s]", re_find_err);
+          astr_cat (buf, astr_fmt (" [%s]", re_find_err));
           re_find_err = NULL;
         }
 

@@ -295,11 +295,11 @@ draw_status_line (size_t line, Window * wp)
     eol_type = ":";
 
   term_move (line, 0);
-  bs = astr_afmt (astr_new (), "(%d,%d)", pt.n + 1,
-                  get_goalc_bp (get_window_bp (wp), window_pt (wp)));
-  as = astr_afmt (astr_new (), "--%s%2s  %-15s   %s %-9s (Fundamental",
-                  eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
-                  make_screen_pos (wp, &buf), astr_cstr (bs));
+  bs = astr_fmt ("(%d,%d)", pt.n + 1,
+                 get_goalc_bp (get_window_bp (wp), window_pt (wp)));
+  as = astr_fmt ("--%s%2s  %-15s   %s %-9s (Fundamental",
+                 eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
+                 make_screen_pos (wp, &buf), astr_cstr (bs));
 
   if (get_buffer_autofill (get_window_bp (wp)))
     astr_cat_cstr (as, " Fill");
@@ -355,17 +355,15 @@ term_full_redisplay (void)
 void
 show_splash_screen (const char *splash)
 {
-  size_t i;
-  const char *p;
-
-  for (i = 0; i < term_height () - 2; ++i)
+  for (size_t i = 0; i < term_height () - 2; ++i)
     {
       term_move (i, 0);
       term_clrtoeol ();
     }
 
   term_move (0, 0);
-  for (i = 0, p = splash; *p != '\0' && i < term_height () - 2; ++p)
+  const char *p = splash;
+  for (size_t i = 0; *p != '\0' && i < term_height () - 2; ++p)
     if (*p == '\n')
       term_move (++i, 0);
     else
@@ -391,7 +389,6 @@ term_finish (void)
 void
 term_addnstr (const char *s, size_t len)
 {
-  size_t i;
-  for (i = 0; i < len; i++)
+  for (size_t i = 0; i < len; i++)
     term_addch (*s++);
 }

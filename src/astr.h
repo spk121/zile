@@ -99,8 +99,7 @@ astr astr_cat_char (astr as, int c);
  * Replace size characters of as, starting at pos, with the argument
  * string.
  */
-astr astr_replace_cstr (astr as, size_t pos, size_t size,
-                               const char *s);
+astr astr_replace (astr as, size_t pos, size_t size, astr bs);
 astr astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
                          size_t csize);
 
@@ -125,9 +124,10 @@ astr astr_truncate (astr as, size_t pos);
 astr astr_fread (FILE * fp);
 
 /*
- * Append formatted text to the argument string.
+ * Format text into a string and return it.
  */
-astr astr_afmt (astr as, const char *fmt, ...);
+astr astr_vfmt (const char *fmt, va_list ap);
+astr astr_fmt (const char *fmt, ...);
 
 /* Enumeration for casing. */
 enum casing {

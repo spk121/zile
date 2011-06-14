@@ -69,15 +69,11 @@ static int doing_undo = false;
 void
 undo_save (int type, Point pt, size_t osize, size_t size)
 {
-  Undo *up;
-
   if (get_buffer_noundo (cur_bp) || undo_nosave)
     return;
 
-  up = (Undo *) XZALLOC (Undo);
-  up->type = type;
-  up->n = pt.n;
-  up->o = pt.o;
+  Undo * up = (Undo *) XZALLOC (Undo);
+  *up = (Undo) {.type = type, .n = pt.n, .o = pt.o};
   if (!get_buffer_modified (cur_bp))
     up->unchanged = true;
 
@@ -114,9 +110,7 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 static Undo *
 revert_action (Undo * up)
 {
-  Point pt;
-  pt.n = up->n;
-  pt.o = up->o;
+  Point pt = {.n = up->n, .o = up->o};
 
   doing_undo = true;
 
@@ -126,8 +120,7 @@ revert_action (Undo * up)
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
         up = revert_action (up);
-      pt.n = up->n;
-      pt.o = up->o;
+      pt = (Point) {.n = up->n, .o = up->o};
       undo_save (UNDO_END_SEQUENCE, pt, 0, 0);
       goto_point (pt);
       return up->next;

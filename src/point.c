@@ -27,15 +27,13 @@
 Point
 make_point (size_t lineno, size_t offset)
 {
-  Point pt;
-  pt.p = get_line_next (get_buffer_lines (cur_bp));
-  pt.n = lineno;
-  pt.o = offset;
-  while (lineno > 0)
-    {
-      pt.p = get_line_next (pt.p);
-      lineno--;
-    }
+  Point pt = {
+    .p = get_line_next (get_buffer_lines (cur_bp)),
+    .n = lineno,
+    .o = offset
+  };
+  while (lineno-- > 0)
+    pt.p = get_line_next (pt.p);
   return pt;
 }
 
@@ -53,31 +51,29 @@ cmp_point (Point pt1, Point pt2)
 Point
 point_min (void)
 {
-  Point pt;
-  pt.p = get_line_next (get_buffer_lines (cur_bp));
-  pt.n = 0;
-  pt.o = 0;
-  return pt;
+  return (Point) {
+    .p = get_line_next (get_buffer_lines (cur_bp)),
+    .n = 0,
+    .o = 0
+  };
 }
 
 Point
 point_max (void)
 {
-  Point pt;
-  pt.p = get_line_prev (get_buffer_lines (cur_bp));
-  pt.n = get_buffer_last_line (cur_bp);
-  pt.o = astr_len (get_line_text (get_line_prev (get_buffer_lines (cur_bp))));
-  return pt;
+  return (Point) {
+    .p = get_line_prev (get_buffer_lines (cur_bp)),
+    .n = get_buffer_last_line (cur_bp),
+    .o = astr_len (get_line_text (get_line_prev (get_buffer_lines (cur_bp))))
+  };
 }
 
 Point
 line_beginning_position (int count)
 {
-  Point pt;
-
   /* Copy current point position without offset (beginning of
      line). */
-  pt = get_buffer_pt (cur_bp);
+  Point pt = get_buffer_pt (cur_bp);
   pt.o = 0;
 
   count--;

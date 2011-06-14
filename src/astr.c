@@ -173,10 +173,9 @@ astr_cmp (astr as1, astr as2)
 }
 
 astr
-astr_replace_cstr (astr as, size_t pos, size_t size, const char *s)
+astr_replace (astr as, size_t pos, size_t size, astr bs)
 {
-  assert (s != NULL);
-  return astr_nreplace_cstr (as, pos, size, s, strlen (s));
+  return astr_nreplace_cstr (as, pos, size, astr_cstr (bs), astr_len (bs));
 }
 
 astr
@@ -210,13 +209,17 @@ astr astr_fread (FILE * fp)
 }
 
 astr
-astr_afmt (astr as, const char *fmt, ...)
+astr_vfmt (const char *fmt, va_list ap)
+{
+  return astr_new_cstr (xvasprintf (fmt, ap));
+}
+
+astr
+astr_fmt (const char *fmt, ...)
 {
   va_list ap;
-  char *buf;
   va_start (ap, fmt);
-  buf = xvasprintf (fmt, ap);
-  astr_cat_cstr (as, buf);
+  astr as = astr_vfmt (fmt, ap);
   va_end (ap);
   return as;
 }
@@ -305,15 +308,15 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   assert_eq (as1, "y123x45z");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, astr_len (as1) - 4, 2, "foo");
+  astr_replace (as1, astr_len (as1) - 4, 2, astr_new_cstr ("foo"));
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, 1, 3, "foo");
+  astr_replace (as1, 1, 3, astr_new_cstr ("foo"));
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, astr_len (as1) - 1, 5, "foo");
+  astr_replace (as1, astr_len (as1) - 1, 5, astr_new_cstr ("foo"));
   assert_eq (as1, "123456foo");
 
   astr_cpy_cstr (as1, "1234567");
@@ -329,20 +332,19 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   assert_eq (as2, "12345");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, astr_len (as1) - 4, 2, "foo");
+  astr_replace (as1, astr_len (as1) - 4, 2, astr_new_cstr ("foo"));
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, 1, 3, "foo");
+  astr_replace (as1, 1, 3, astr_new_cstr ("foo"));
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace_cstr (as1, astr_len (as1) - 1, 5, "foo");
+  astr_replace (as1, astr_len (as1) - 1, 5, astr_new_cstr ("foo"));
   assert_eq (as1, "123456foo");
 
-  astr_cpy_cstr (as1, "");
-  astr_afmt (as1, "%s * %d = ", "5", 3);
-  astr_afmt (as1, "%d", 15);
+  as1 = astr_fmt ("%s * %d = ", "5", 3);
+  astr_cat (as1, astr_fmt ("%d", 15));
   assert_eq (as1, "5 * 3 = 15");
 
   astr_cpy_cstr (as1, "some text");

@@ -560,10 +560,9 @@ message in the buffer.
             minibuf_write ("%s is not on any key", name);
           else
             {
-              astr as = astr_new ();
-              astr_afmt (as, "%s is on %s", name, astr_cstr (g.bindings));
+              astr as = astr_fmt ("%s is on %s", name, astr_cstr (g.bindings));
               if (lastflag & FLAG_SET_UNIARG)
-                bprintf ("%s", astr_cstr (as));
+                insert_astr (as);
               else
                 minibuf_write ("%s", astr_cstr (as));
             }

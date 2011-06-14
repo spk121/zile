@@ -984,12 +984,9 @@ zile_exit (int doabort)
   for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_modified (bp) && !get_buffer_nosave (bp))
       {
-        astr buf = astr_new (), as;
-        const char *fname = get_buffer_filename_or_name (bp);
-        astr_cpy_cstr (buf, fname);
-        as = astr_new_cstr (PACKAGE);
-        astr_recase (as, case_upper);
-        astr_afmt (buf, ".%sSAVE", astr_cstr (as));
+        astr buf = astr_fmt ("%s.%sSAVE",
+                             get_buffer_filename_or_name (bp),
+                             astr_cstr (astr_recase (astr_new_cstr (PACKAGE), case_upper)));
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
         raw_write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
       }

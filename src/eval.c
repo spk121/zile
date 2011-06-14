@@ -244,9 +244,9 @@ Read function name, then read its arguments and call it.
   if (lastflag & FLAG_SET_UNIARG)
     {
       if (lastflag & FLAG_UNIARG_EMPTY)
-        astr_afmt (msg, "C-u ");
+        msg = astr_fmt ("C-u ");
       else
-        astr_afmt (msg, "%d ", uniarg);
+        msg = astr_fmt ("%d ", uniarg);
     }
   astr_cat_cstr (msg, "M-x ");
 

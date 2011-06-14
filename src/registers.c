@@ -126,19 +126,11 @@ write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
     if (regs[i] != NULL)
       {
         const char *s = astr_cstr (regs[i]);
-        astr as = astr_new ();
-        size_t len;
-
-        if (isprint (i))
-          astr_afmt (as, "%c", i);
-        else
-          astr_afmt (as, "\\%o", i);
-
         while (*s == ' ' || *s == '\t' || *s == '\n')
           s++;
-        len = MIN (20, MAX (0, ((int) get_window_ewidth (cur_wp)) - 6)) + 1;
+        size_t len = MIN (20, MAX (0, ((int) get_window_ewidth (cur_wp)) - 6)) + 1;
 
-        bprintf ("Register %s contains ", astr_cstr (as));
+        bprintf ("Register %s contains ", astr_cstr (astr_fmt (isprint (i) ? "%c" : "\\%o", i)));
         if (strlen (s) > 0)
           bprintf ("text starting with\n    %.*s\n", len, s);
         else if (s != astr_cstr (regs[i]))

@@ -416,7 +416,7 @@ by 4 each time.
               astr_cat_cstr (as, "ESC");
             }
 
-          astr_afmt (as, " %d", digit);
+          astr_cat (as, astr_fmt (" %d", digit));
 
           if (i == 0)
             arg = digit;
