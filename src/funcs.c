@@ -305,7 +305,7 @@ Put the mark where point is now, and point where the mark is now.
     }
 
   tmp = get_buffer_pt (cur_bp);
-  set_buffer_pt (cur_bp, get_marker_pt (get_buffer_mark (cur_bp)));
+  goto_point (get_marker_pt (get_buffer_mark (cur_bp)));
   set_marker_pt (get_buffer_mark (cur_bp), tmp);
 
   /* In transient-mark-mode we must reactivate the mark.  */
@@ -590,7 +590,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
           if (lineno == get_region_end (rp).n)
             break;
         }
-      set_buffer_pt (cur_bp, get_marker_pt (m));
+      goto_point (get_marker_pt (m));
       undo_save (UNDO_END_SEQUENCE, get_marker_pt (m), 0, 0);
       unchain_marker (m);
       deactivate_mark ();
@@ -626,7 +626,7 @@ DEFUN ("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  set_buffer_pt (cur_bp, line_beginning_position (1));
+  goto_point (line_beginning_position (1));
   while (!eolp ())
     {
       if (!isspace (following_char ()))
@@ -660,7 +660,7 @@ move_word (int dir, int (*next_char) (void), bool (*move_char) (void), bool (*at
             gotword = true;
           pt = get_buffer_pt (cur_bp);
           pt.o += dir;
-          set_buffer_pt (cur_bp, pt);
+          goto_point (pt);
         }
       if (gotword)
         return true;
@@ -747,7 +747,7 @@ move_sexp (int dir)
             {
               pt = get_buffer_pt (cur_bp);
               pt.o += dir;
-              set_buffer_pt (cur_bp, pt);
+              goto_point (pt);
               c = 'a';		/* Treat ' and " like word chars. */
             }
 
@@ -785,7 +785,7 @@ move_sexp (int dir)
 
           pt = get_buffer_pt (cur_bp);
           pt.o += dir;
-          set_buffer_pt (cur_bp, pt);
+          goto_point (pt);
 
           if (!ISSEXPCHAR (c))
             {
@@ -795,7 +795,7 @@ move_sexp (int dir)
                     {
                       pt = get_buffer_pt (cur_bp);
                       pt.o -= dir;
-                      set_buffer_pt (cur_bp, pt);
+                      goto_point (pt);
                     }
                   return true;
                 }
@@ -813,7 +813,7 @@ move_sexp (int dir)
         }
       pt = get_buffer_pt (cur_bp);
       pt.o = dir > 0 ? 0 : astr_len (get_line_text (pt.p));
-      set_buffer_pt (cur_bp, pt);
+      goto_point (pt);
     }
   return false;
 }
@@ -1189,7 +1189,7 @@ Fill paragraph at or after point.
          && fill_break_line ())
     ;
 
-  set_buffer_pt (cur_bp, get_marker_pt (m));
+  goto_point (get_marker_pt (m));
   unchain_marker (m);
 
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
@@ -1292,14 +1292,14 @@ setcase_region (int (*func) (int))
   undo_save (UNDO_START_SEQUENCE, get_region_start (rp), 0, 0);
 
   Marker *m = point_marker ();
-  set_buffer_pt (cur_bp, get_region_start (rp));
+  goto_point (get_region_start (rp));
   for (size_t size = get_region_size (rp); size > 0; size--)
     {
       char c = func (following_char ());
       delete_char ();
       insert_char (c);
     }
-  set_buffer_pt (cur_bp, get_marker_pt (m));
+  goto_point (get_marker_pt (m));
   unchain_marker (m);
 
   undo_save (UNDO_END_SEQUENCE, get_region_start (rp), 0, 0);
@@ -1584,7 +1584,7 @@ On nonblank line, delete any immediately following blank lines.
       pop_mark ();
     }
 
-  set_buffer_pt (cur_bp, get_marker_pt (m));
+  goto_point (get_marker_pt (m));
 
   if (seq_started)
     undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);

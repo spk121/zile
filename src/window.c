@@ -74,7 +74,7 @@ set_current_window (Window * wp)
      marker.  */
   if (cur_wp->saved_pt)
     {
-      set_buffer_pt (cur_bp, get_marker_pt (cur_wp->saved_pt));
+      goto_point (get_marker_pt (cur_wp->saved_pt));
       unchain_marker (cur_wp->saved_pt);
       cur_wp->saved_pt = NULL;
     }

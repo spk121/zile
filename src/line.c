@@ -108,7 +108,7 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t de
     }
 
   /* This marker has been updated to new position. */
-  set_buffer_pt (cur_bp, get_marker_pt (m_pt));
+  goto_point (get_marker_pt (m_pt));
   unchain_marker (m_pt);
 }
 
@@ -175,7 +175,7 @@ insert_char (int c)
           undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
           astr_nreplace_cstr (pt.p->text, pt.o, 1, &ch, 1);
           ++pt.o;
-          set_buffer_pt (cur_bp, pt);
+          goto_point (pt);
           set_buffer_modified (cur_bp, true);
 
           return true;
@@ -373,7 +373,7 @@ fill_break_line (void)
         {
           Point pt = get_buffer_pt (cur_bp);
           pt.o--;
-          set_buffer_pt (cur_bp, pt);
+          goto_point (pt);
         }
 
       /* Find break point moving left from fill-column. */
@@ -408,17 +408,17 @@ fill_break_line (void)
         {
           Point pt = get_buffer_pt (cur_bp);
           pt.o = break_col;
-          set_buffer_pt (cur_bp, pt);
+          goto_point (pt);
           FUNCALL (delete_horizontal_space);
           insert_newline ();
-          set_buffer_pt (cur_bp, get_marker_pt (m));
+          goto_point (get_marker_pt (m));
           break_made = true;
         }
       else /* Undo fiddling with point. */
         {
           Point pt = get_buffer_pt (cur_bp);
           pt.o = old_col;
-          set_buffer_pt (cur_bp, pt);
+          goto_point (pt);
         }
 
       unchain_marker (m);
@@ -649,7 +649,7 @@ does nothing.
       if (!eolp ())
         target_goalc = get_goalc ();
 
-      set_buffer_pt (cur_bp, get_marker_pt (m));
+      goto_point (get_marker_pt (m));
       unchain_marker (m);
     }
 
@@ -697,7 +697,7 @@ previous_line_indent (void)
   cur_indent = get_goalc ();
 
   /* Restore point. */
-  set_buffer_pt (cur_bp, get_marker_pt (m));
+  goto_point (get_marker_pt (m));
   unchain_marker (m);
 
   return cur_indent;
@@ -740,7 +740,7 @@ Indentation is done using the `indent-for-tab-command' function.
       previous_nonblank_goalc ();
       size_t pos = get_goalc ();
       int indent = pos > 0 || (!eolp () && isspace (following_char ()));
-      set_buffer_pt (cur_bp, get_marker_pt (m));
+      goto_point (get_marker_pt (m));
       unchain_marker (m);
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */

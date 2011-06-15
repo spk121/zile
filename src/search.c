@@ -122,7 +122,7 @@ search (Point pt, const char *s, int forward, int regexp)
     (forward ? next_line : previous_line) ();
   pt = get_buffer_pt (cur_bp);
   pt.o = pos;
-  set_buffer_pt (cur_bp, pt);
+  goto_point (pt);
   thisflag |= FLAG_NEED_RESYNC;
   return true;
 }
@@ -244,7 +244,7 @@ isearch (int forward, int regexp)
 
       if (c == KBD_CANCEL)
         {
-          set_buffer_pt (cur_bp, start);
+          goto_point (start);
           thisflag |= FLAG_NEED_RESYNC;
 
           /* Quit. */
@@ -263,7 +263,7 @@ isearch (int forward, int regexp)
             {
               astr_truncate (pattern, astr_len (pattern) - 1);
               cur = start;
-              set_buffer_pt (cur_bp, start);
+              goto_point (start);
               thisflag |= FLAG_NEED_RESYNC;
             }
           else

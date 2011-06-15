@@ -34,7 +34,7 @@ DEFUN ("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-  set_buffer_pt (cur_bp, line_beginning_position (uniarg));
+  goto_point (line_beginning_position (uniarg));
   set_buffer_goalc (cur_bp, 0);
 }
 END_DEFUN
@@ -44,7 +44,7 @@ DEFUN ("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  set_buffer_pt (cur_bp, line_end_position (uniarg));
+  goto_point (line_end_position (uniarg));
   set_buffer_goalc (cur_bp, SIZE_MAX);
 }
 END_DEFUN
@@ -256,7 +256,7 @@ END_DEFUN
 void
 gotobob (void)
 {
-  set_buffer_pt (cur_bp, point_min ());
+  goto_point (point_min ());
   thisflag |= FLAG_NEED_RESYNC;
 }
 
@@ -277,7 +277,7 @@ END_DEFUN
 void
 gotoeob (void)
 {
-  set_buffer_pt (cur_bp, point_max ());
+  goto_point (point_max ());
   thisflag |= FLAG_NEED_RESYNC;
 }
 

@@ -351,7 +351,7 @@ delete_region (const Region * rp)
   while (size--)
     delete_char ();
   undo_nosave = false;
-  set_buffer_pt (cur_bp, get_marker_pt (m));
+  goto_point (get_marker_pt (m));
   unchain_marker (m);
 
   return true;
