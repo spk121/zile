@@ -249,3 +249,7 @@
 /stdio-impl.h
 /strerror-impl.h
 /strerror_r.c
+/fseek.c
+/ftell.c
+/strerror-override.c
+/strerror-override.h

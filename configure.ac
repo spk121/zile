@@ -88,6 +88,7 @@ AC_COMPILE_IFELSE(
  [AC_MSG_RESULT([no])
  with_included_regex=yes])
 gl_INIT
+AC_CHECK_FUNCS(fchmod,, AC_MSG_ERROR([fchmod not found]))
 
 dnl Curses
 AX_WITH_CURSES

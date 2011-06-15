@@ -157,3 +157,6 @@ warn-on-use.m4
 /lseek.m4
 /strerror_r.m4
 /threadlib.m4
+/fseek.m4
+/ftell.m4
+/sys_socket_h.m4

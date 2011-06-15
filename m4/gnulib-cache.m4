@@ -15,17 +15,20 @@
 
 
 # Specification in the form of a command-line invocation:
-#   gnulib-tool --import --dir=. --local-dir=gnulib-local --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=build-aux --no-libtool --macro-prefix=gl announce-gen array-list dirname do-release-commit-and-tag euidaccess gendocs getopt-gnu gnupload hash linked-list maintainer-makefile manywarnings memcmp2 minmax pmccabe2html progname readme-release regex streq unused-parameter warnings xalloc-die xlist xvasprintf-posix
+#   gnulib-tool --import --dir=. --local-dir=gnulib-local --lib=libgnu --source-base=lib --m4-base=m4 --doc-base=src --tests-base=tests --aux-dir=build-aux --no-conditional-dependencies --no-libtool --macro-prefix=gl announce-gen array-list chown dirname do-release-commit-and-tag euidaccess fcntl gendocs getcwd getopt-gnu gnupload hash linked-list maintainer-makefile manywarnings memcmp2 minmax mkstemp pmccabe2html progname readme-release regex size_max stdarg stdbool streq unused-parameter warnings xalloc-die xlist xvasprintf-posix
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
 gl_LOCAL_DIR([gnulib-local])
 gl_MODULES([
   announce-gen
   array-list
+  chown
   dirname
   do-release-commit-and-tag
   euidaccess
+  fcntl
   gendocs
+  getcwd
   getopt-gnu
   gnupload
   hash
@@ -34,10 +37,14 @@ gl_MODULES([
   manywarnings
   memcmp2
   minmax
+  mkstemp
   pmccabe2html
   progname
   readme-release
   regex
+  size_max
+  stdarg
+  stdbool
   streq
   unused-parameter
   warnings
@@ -55,3 +62,4 @@ gl_LIB([libgnu])
 gl_MAKEFILE_NAME([])
 gl_MACRO_PREFIX([gl])
 gl_PO_DOMAIN([])
+gl_WITNESS_C_DOMAIN([])
