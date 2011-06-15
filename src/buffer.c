@@ -614,18 +614,14 @@ move_char (int dir)
 {
   if (dir > 0 ? !eolp () : !bolp ())
     {
-      Point pt = get_buffer_pt (cur_bp);
-      pt.o += dir;
-      set_buffer_pt (cur_bp, pt);
+      cur_bp->pt.o += dir;
       return true;
     }
   else if (dir > 0 ? !eobp () : !bobp ())
     {
-      Point pt = get_buffer_pt (cur_bp);
       thisflag |= FLAG_NEED_RESYNC;
-      pt.p = (dir > 0 ? get_line_next : get_line_prev) (pt.p);
-      pt.n += dir;
-      set_buffer_pt (cur_bp, pt);
+      cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
+      cur_bp->pt.n += dir;
       if (dir > 0)
         FUNCALL (beginning_of_line);
       else
@@ -643,14 +639,13 @@ move_char (int dir)
 static void
 goto_goalc (void)
 {
-  Point pt = get_buffer_pt (cur_bp);
   size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = 0; i < astr_len (get_line_text (pt.p)); i++)
+  for (i = 0; i < astr_len (get_line_text (cur_bp->pt.p)); i++)
     {
       if (col == get_buffer_goalc (cur_bp))
         break;
-      else if (astr_get (get_line_text (pt.p), i) == '\t')
+      else if (astr_get (get_line_text (cur_bp->pt.p), i) == '\t')
         {
           size_t w;
           for (w = t - col % t; w > 0; w--)
@@ -661,8 +656,7 @@ goto_goalc (void)
         ++col;
     }
 
-  pt.o = i;
-  set_buffer_pt (cur_bp, pt);
+  cur_bp->pt.o = i;
 }
 
 bool
@@ -670,36 +664,33 @@ move_line (int n)
 {
   bool ok = true;
   int dir;
-  Point pt = get_buffer_pt (cur_bp);
 
   if (n == 0)
     return false;
   else if (n > 0)
     {
       dir = 1;
-      if ((size_t) n > get_buffer_last_line (cur_bp) - pt.n)
+      if ((size_t) n > get_buffer_last_line (cur_bp) - cur_bp->pt.n)
         {
           ok = false;
-          n = get_buffer_last_line (cur_bp) - pt.n;
+          n = get_buffer_last_line (cur_bp) - cur_bp->pt.n;
         }
     }
   else
     {
       dir = -1;
       n = -n;
-      if ((size_t) n > pt.n)
+      if ((size_t) n > cur_bp->pt.n)
         {
           ok = false;
-          n = pt.n;
+          n = cur_bp->pt.n;
         }
     }
 
   for (; n > 0; n--)
     {
-      Point pt2 = get_buffer_pt (cur_bp);
-      pt2.p = (dir > 0 ? get_line_next : get_line_prev) (pt2.p);
-      pt2.n += dir;
-      set_buffer_pt (cur_bp, pt2);
+      cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
+      cur_bp->pt.n += dir;
     }
 
   if (last_command () != F_next_line && last_command () != F_previous_line)
