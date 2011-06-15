@@ -95,7 +95,7 @@ kill_line (bool whole_line)
   if (!whole_line)
     {
       Point cur_pt = get_buffer_pt (cur_bp);
-      astr cur_line = get_line_text (cur_pt.p);
+      castr cur_line = get_line_text (cur_pt.p);
       size_t i;
 
       for (i = cur_pt.o; i < astr_len (cur_line); i++)

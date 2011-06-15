@@ -49,7 +49,7 @@ no_upper (const char *s, size_t len, int regex)
 static const char *re_find_err = NULL;
 
 static int
-find_substr (astr as, const char *s2, size_t s2size, size_t from, size_t to,
+find_substr (castr as, const char *s2, size_t s2size, size_t from, size_t to,
              bool forward, bool notbol, bool noteol, bool regex, bool icase)
 {
   int ret = -1;
@@ -83,7 +83,7 @@ static bool
 search (Point pt, const char *s, int forward, int regexp)
 {
   Line *lp = pt.p;
-  astr as = get_line_text (lp);
+  castr as = get_line_text (lp);
   size_t ssize = strlen (s), from = 0, to = astr_len (as);
   bool downcase = get_variable_bool ("case-fold-search") && no_upper (s, ssize, regexp);
   bool notbol = false, noteol = false;

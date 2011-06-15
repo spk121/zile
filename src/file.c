@@ -220,15 +220,6 @@ const char *coding_eol_cr = "\r";
 static void
 read_file (const char *filename)
 {
-  Line *lp;
-  int size;
-  bool first_eol = true;
-  const char *this_eol_type;
-  char *ms;
-  size_t total_eols = 0;
-  char buf[BUFSIZ];
-  Point pt;
-
   FILE *fp = fopen (filename, "r");
   if (fp == NULL)
     {
@@ -243,18 +234,19 @@ read_file (const char *filename)
   if (!check_writable (filename))
     set_buffer_readonly (cur_bp, true);
 
-  pt = get_buffer_pt (cur_bp);
-  lp = pt.p;
-
   /* Read first chunk and determine EOL type. */
   /* FIXME: Don't assume first EOL occurs in first chunk. */
-  size = fread (buf, 1, BUFSIZ, fp);
+  bool first_eol = true;
+  char buf[BUFSIZ];
+  int size = fread (buf, 1, BUFSIZ, fp);
   if (size > 0)
     {
+      size_t total_eols = 0;
       for (int i = 0; i < size && total_eols < MAX_EOL_CHECK_COUNT; i++)
         {
           if (buf[i] == '\n' || buf[i] == '\r')
             {
+              const char *this_eol_type;
               total_eols++;
               if (buf[i] == '\n')
                 this_eol_type = coding_eol_lf;
@@ -289,26 +281,16 @@ read_file (const char *filename)
           for (int i = 0; i < size; i++)
             {
               if (strncmp (get_buffer_eol (cur_bp), buf + i, eol_len) != 0)
-                astr_cat_char (get_line_text (lp), buf[i]);
+                insert_char (buf[i]);
               else
                 {
-                  lp = line_insert (lp, astr_new ());
-                  set_buffer_last_line (cur_bp,
-                                        get_buffer_last_line (cur_bp) + 1);
+                  insert_newline ();
                   i += eol_len - 1;
                 }
             }
         }
       while ((size = fread (buf, 1, BUFSIZ, fp)) > 0);
     }
-
-  set_line_next (lp, get_buffer_lines (cur_bp));
-  set_line_prev (get_buffer_lines (cur_bp), lp);
-  pt = get_buffer_pt (cur_bp);
-  pt.p = get_line_next (get_buffer_lines (cur_bp));
-  set_buffer_pt (cur_bp, pt);
-  ms = dir_name (filename);
-  set_buffer_dir (cur_bp, astr_new_cstr (ms));
 
   fclose (fp);
 }
@@ -337,6 +319,7 @@ find_file (const char *filename)
 
   switch_to_buffer (bp);
   read_file (filename);
+  set_buffer_modified (bp, false);
   set_buffer_dir (bp, astr_new_cstr (dir_name (filename)));
   if (chdir (astr_cstr (get_buffer_dir (bp)))) {
     /* Avoid compiler warning for ignoring return value. */
@@ -461,7 +444,7 @@ static void
 insert_buffer (Buffer * bp)
 {
   Line *old_next = get_line_next (get_buffer_pt (bp).p);
-  astr old_cur_line = astr_cpy (astr_new (), get_line_text (get_buffer_pt (bp).p));
+  castr old_cur_line = astr_cpy (astr_new (), get_line_text (get_buffer_pt (bp).p));
   size_t old_cur_n = get_buffer_pt (bp).n, old_lines = get_buffer_last_line (bp);
   size_t size = calculate_buffer_size (bp);
 

@@ -175,7 +175,7 @@ int insert_char_in_insert_mode (int c);
 bool fill_break_line (void);
 bool insert_newline (void);
 void insert_nstring (const char *s, size_t len);
-void insert_astr (astr as);
+void insert_astr (castr as);
 void bprintf (const char *fmt, ...);
 bool delete_char (void);
 

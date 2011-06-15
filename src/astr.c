@@ -110,7 +110,7 @@ astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
  */
 
 char
-astr_get (astr as, size_t pos)
+astr_get (castr as, size_t pos)
 {
   assert (pos <= astr_len (as));
   return (astr_cstr (as))[pos];
@@ -130,7 +130,7 @@ astr_new_cstr (const char *s)
 }
 
 astr
-astr_cpy (astr as, astr src)
+astr_cpy (astr as, castr src)
 {
   return astr_ncpy_cstr (as, astr_cstr (src), astr_len (src));
 }
@@ -160,7 +160,7 @@ astr_cat_char (astr as, int c)
 }
 
 astr
-astr_substr (astr as, size_t pos, size_t size)
+astr_substr (castr as, size_t pos, size_t size)
 {
   assert (pos + size <= astr_len (as));
   return astr_ncat_cstr (astr_new (), astr_cstr (as) + pos, size);

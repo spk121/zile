@@ -25,4 +25,4 @@
  */
 FIELD(Line *, prev)
 FIELD(Line *, next)
-FIELD(astr, text)
+FIELD(castr, text)

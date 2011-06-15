@@ -68,13 +68,13 @@ size_t astr_len (castr as);
 /*
  * Return the pos'th character of as.
  */
-char astr_get (astr as, size_t pos);
+char astr_get (castr as, size_t pos);
 
 /*
  * Return a new astr consisting of size characters from string as
  * starting from position pos.
  */
-astr astr_substr (astr as, size_t pos, size_t size);
+astr astr_substr (castr as, size_t pos, size_t size);
 
 /*
  * Compare as1 and as2; result as for memcmp.
@@ -84,7 +84,7 @@ int astr_cmp (astr as1, astr as2);
 /*
  * Assign the contents of the argument string to the string as.
  */
-astr astr_cpy (astr as, astr src);
+astr astr_cpy (astr as, castr src);
 astr astr_cpy_cstr (astr as, const char *s);
 
 /*

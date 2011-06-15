@@ -112,6 +112,26 @@ adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t de
   unchain_marker (m_pt);
 }
 
+/*
+ * Check the case of a string.
+ * Returns 2 if it is all upper case, 1 if just the first letter is,
+ * and 0 otherwise.
+ */
+static int
+check_case (const char *s, size_t len)
+{
+  size_t i;
+
+  for (i = 0; i < len && isupper ((int) s[i]); i++)
+    ;
+  if (i == len)
+    return 2;
+  else if (i == 1)
+    for (; i < len && !isupper ((int) s[i]); i++)
+      ;
+  return i == len;
+}
+
 /* Insert the character at the current position and move the text at its right
  * whatever the insert/overwrite mode is.
  * This function doesn't change the current position of the pointer.
@@ -174,6 +194,99 @@ insert_char (int c)
 }
 
 /*
+ * Insert a newline at the current position without moving the cursor.
+ * Update markers after point in the split line.
+ */
+static bool
+intercalate_newline (void)
+{
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
+
+  /* Move the text after the point into a new line. */
+  line_insert (get_buffer_pt (cur_bp).p,
+               astr_substr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o,
+                            astr_len (get_buffer_pt (cur_bp).p->text) - get_buffer_pt (cur_bp).o));
+  set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
+  astr_truncate (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o);
+  adjust_markers (get_buffer_pt (cur_bp).p->next, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 1, 0);
+
+  set_buffer_modified (cur_bp, true);
+  thisflag |= FLAG_NEED_RESYNC;
+
+  return true;
+}
+
+bool
+delete_char (void)
+{
+  deactivate_mark ();
+
+  if (eobp ())
+    {
+      minibuf_error ("End of buffer");
+      return false;
+    }
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
+
+  if (eolp ())
+    {
+      size_t oldlen = astr_len (get_buffer_pt (cur_bp).p->text);
+      Line *oldlp = get_buffer_pt (cur_bp).p->next;
+
+      /* Join the lines. */
+      astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
+      oldlp->prev->next = oldlp->next;
+      oldlp->next->prev = oldlp->prev;
+
+      adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
+      set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
+      thisflag |= FLAG_NEED_RESYNC;
+    }
+  else
+    {
+      astr_remove (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, 1);
+      adjust_markers (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 0, -1);
+    }
+
+  set_buffer_modified (cur_bp, true);
+
+  return true;
+}
+
+/*
+ * Replace text in the line `lp' with `newtext'. If `replace_case' is
+ * true then the new characters will be the same case as the old if
+ * `case-replace' is true.
+ */
+void
+line_replace_text (Line * lp, size_t offset, size_t oldlen,
+                   const char *newtext, int replace_case)
+{
+  astr as = astr_new_cstr (newtext);
+
+  replace_case = replace_case && get_variable_bool ("case-replace");
+
+  if (replace_case)
+    {
+      int case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
+
+      if (case_type != 0)
+          astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
+    }
+
+  set_buffer_modified (cur_bp, true);
+  astr_replace (lp->text, offset, oldlen, as);
+  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (astr_len (as) - oldlen));
+}
+
+/*
  * Insert a character at the current position in insert mode
  * whatever the current insert mode is.
  */
@@ -226,82 +339,10 @@ buffer.
 }
 END_DEFUN
 
-/*
- * Insert a newline at the current position without moving the cursor.
- * Update markers after point in the split line.
- */
-static bool
-intercalate_newline (void)
-{
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
-
-  /* Move the text after the point into a new line. */
-  line_insert (get_buffer_pt (cur_bp).p,
-               astr_substr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o,
-                            astr_len (get_buffer_pt (cur_bp).p->text) - get_buffer_pt (cur_bp).o));
-  set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
-  astr_truncate (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o);
-  adjust_markers (get_buffer_pt (cur_bp).p->next, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 1, 0);
-
-  set_buffer_modified (cur_bp, true);
-  thisflag |= FLAG_NEED_RESYNC;
-
-  return true;
-}
-
 bool
 insert_newline (void)
 {
   return intercalate_newline () && forward_char ();
-}
-
-/*
- * Check the case of a string.
- * Returns 2 if it is all upper case, 1 if just the first letter is,
- * and 0 otherwise.
- */
-static int
-check_case (const char *s, size_t len)
-{
-  size_t i;
-
-  for (i = 0; i < len && isupper ((int) s[i]); i++)
-    ;
-  if (i == len)
-    return 2;
-  else if (i == 1)
-    for (; i < len && !isupper ((int) s[i]); i++)
-      ;
-  return i == len;
-}
-
-/*
- * Replace text in the line `lp' with `newtext'. If `replace_case' is
- * true then the new characters will be the same case as the old if
- * `case-replace' is true.
- */
-void
-line_replace_text (Line * lp, size_t offset, size_t oldlen,
-                   const char *newtext, int replace_case)
-{
-  astr as = astr_new_cstr (newtext);
-
-  replace_case = replace_case && get_variable_bool ("case-replace");
-
-  if (replace_case)
-    {
-      int case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
-
-      if (case_type != 0)
-          astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
-    }
-
-  set_buffer_modified (cur_bp, true);
-  astr_replace (lp->text, offset, oldlen, as);
-  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (astr_len (as) - oldlen));
 }
 
 /*
@@ -338,7 +379,7 @@ fill_break_line (void)
       /* Find break point moving left from fill-column. */
       for (size_t i = get_buffer_pt (cur_bp).o; i > 0; i--)
         {
-          int c = astr_get (get_buffer_pt (cur_bp).p->text, i - 1);
+          int c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i - 1);
           if (isspace (c))
             {
               break_col = i;
@@ -351,10 +392,10 @@ fill_break_line (void)
       if (break_col == 0)
         {
           for (size_t i = get_buffer_pt (cur_bp).o + 1;
-               i < astr_len (get_buffer_pt (cur_bp).p->text);
+               i < astr_len (get_line_text (get_buffer_pt (cur_bp).p));
                i++)
             {
-              int c = astr_get (get_buffer_pt (cur_bp).p->text, i - 1);
+              int c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i - 1);
               if (isspace (c))
                 {
                   break_col = i;
@@ -441,7 +482,7 @@ Insert the argument at point.
 END_DEFUN
 
 void
-insert_astr (astr as)
+insert_astr (castr as)
 {
   insert_nstring (astr_cstr (as), astr_len (as));
 }
@@ -454,47 +495,6 @@ bprintf (const char *fmt, ...)
   va_start (ap, fmt);
   insert_astr (astr_vfmt (fmt, ap));
   va_end (ap);
-}
-
-bool
-delete_char (void)
-{
-  deactivate_mark ();
-
-  if (eobp ())
-    {
-      minibuf_error ("End of buffer");
-      return false;
-    }
-
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
-
-  if (eolp ())
-    {
-      size_t oldlen = astr_len (get_buffer_pt (cur_bp).p->text);
-      Line *oldlp = get_buffer_pt (cur_bp).p->next;
-
-      /* Join the lines. */
-      astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
-      oldlp->prev->next = oldlp->next;
-      oldlp->next->prev = oldlp->prev;
-
-      adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
-      set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
-      thisflag |= FLAG_NEED_RESYNC;
-    }
-  else
-    {
-      astr_remove (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, 1);
-      adjust_markers (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 0, -1);
-    }
-
-  set_buffer_modified (cur_bp, true);
-
-  return true;
 }
 
 static bool
