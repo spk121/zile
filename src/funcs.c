@@ -1213,13 +1213,14 @@ setcase_word (int rcase)
 
   if (astr_len (as) > 0)
     {
-      undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), astr_len (as), astr_len (as));
+      undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
       astr_recase (as, rcase);
-      astr_nreplace_cstr (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o, astr_len (as),
-                          astr_cstr (as), astr_len (as));
+      for (size_t i = 0; i < astr_len (as); i++)
+        delete_char ();
+      insert_astr (as);
+      undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
     }
 
-  forward_word ();
   set_buffer_modified (cur_bp, true);
 
   return true;
@@ -1285,33 +1286,23 @@ static le *
 setcase_region (int (*func) (int))
 {
   Region * rp = region_new ();
-  Line * lp;
-  size_t i, size;
-
   if (warn_if_readonly_buffer () || !calculate_the_region (rp))
     return leNIL;
 
-  size = get_region_size (rp);
-  undo_save (UNDO_REPLACE_BLOCK, get_region_start (rp), size, get_region_size (rp));
+  undo_save (UNDO_START_SEQUENCE, get_region_start (rp), 0, 0);
 
-  lp = get_region_start (rp).p;
-  i = get_region_start (rp).o;
-  while (size--)
+  Marker *m = point_marker ();
+  set_buffer_pt (cur_bp, get_region_start (rp));
+  for (size_t size = get_region_size (rp); size > 0; size--)
     {
-      if (i < astr_len (get_line_text (lp)))
-        {
-          char c = func (astr_get (get_line_text (lp), i));
-          astr_nreplace_cstr (get_line_text (lp), i, 1, &c, 1);
-          ++i;
-        }
-      else
-        {
-          lp = get_line_next (lp);
-          i = 0;
-        }
+      char c = func (following_char ());
+      delete_char ();
+      insert_char (c);
     }
+  set_buffer_pt (cur_bp, get_marker_pt (m));
+  unchain_marker (m);
 
-  set_buffer_modified (cur_bp, true);
+  undo_save (UNDO_END_SEQUENCE, get_region_start (rp), 0, 0);
 
   return leT;
 }
