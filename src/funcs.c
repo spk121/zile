@@ -641,14 +641,14 @@ END_DEFUN
 ***********************************************************************/
 #define ISWORDCHAR(c)	(isalnum (c) || c == '$')
 static bool
-move_word (int dir, int (*next_char) (void), bool (*move_char) (void), bool (*at_extreme) (void))
+move_word (int dir, int (*next) (void), bool (*move) (void), bool (*at_extreme) (void))
 {
   int gotword = false;
   for (;;)
     {
       while (!at_extreme ())
         {
-          int c = next_char ();
+          int c = next ();
           Point pt;
 
           if (!ISWORDCHAR (c))
@@ -664,7 +664,7 @@ move_word (int dir, int (*next_char) (void), bool (*move_char) (void), bool (*at
         }
       if (gotword)
         return true;
-      if (!move_char ())
+      if (!move ())
         break;
     }
   return false;

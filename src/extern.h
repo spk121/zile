@@ -77,6 +77,8 @@ Buffer *create_scratch_buffer (void);
 void kill_buffer (Buffer * kill_bp);
 Completion *make_buffer_completion (void);
 bool check_modified_buffer (Buffer * bp);
+bool move_char (int dir);
+bool move_line (int n);
 
 /* completion.c ----------------------------------------------------------- */
 #define FIELD(ty, field)                                        \
