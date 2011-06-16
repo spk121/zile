@@ -563,11 +563,10 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
   if (get_region_size (rp) != 0)
     {
       Marker *m = point_marker ();
-      Line * lp;
-      size_t lineno;
 
       undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
-      for (lp = get_region_start (rp).p, lineno = get_region_start (rp).n;; lp = get_line_next (lp), ++lineno)
+      size_t lineno = get_region_start (rp).n;
+      for (Line *lp = get_region_start (rp).p ;; lp = get_line_next (lp), ++lineno)
         {
           /* First line.  */
           if (lineno == get_region_start (rp).n)
