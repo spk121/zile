@@ -73,24 +73,13 @@ struct Region
 /*
  * Allocate a new buffer structure, set the default local
  * variable values, and insert it into the buffer list.
- * The allocation of the first empty line is done here to simplify
- * the code.
  */
 Buffer *
 buffer_new (void)
 {
   Buffer *bp = (Buffer *) XZALLOC (Buffer);
-
-  /* Allocate a line. */
-  bp->pt.p = line_new ();
-
-  /* Allocate the limit marker. */
-  bp->lines = bp->pt.p;
-
-  /* Set default EOL string. */
+  bp->lines = bp->pt.p = line_new ();
   bp->eol = coding_eol_lf;
-
-  /* Set directory. */
   bp->dir = agetcwd ();
 
   /* Insert into buffer list. */
