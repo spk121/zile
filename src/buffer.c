@@ -92,7 +92,7 @@ buffer_new (void)
 }
 
 /*
- * Free the buffer's allocated memory.
+ * Unchain the buffer's markers.
  */
 void
 free_buffer (Buffer * bp)
