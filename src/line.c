@@ -74,7 +74,7 @@ Line *
 line_new (void)
 {
   Line *l = XZALLOC (Line);
-  *l = (Line) {.next = l, .prev = l, .text = NULL};
+  *l = (Line) {.next = l, .prev = l, .text = astr_new ()};
   return l;
 }
 

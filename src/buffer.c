@@ -83,7 +83,6 @@ buffer_new (void)
 
   /* Allocate a line. */
   bp->pt.p = line_new ();
-  set_line_text (bp->pt.p, astr_new ());
 
   /* Allocate the limit marker. */
   bp->lines = line_new ();
