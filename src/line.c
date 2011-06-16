@@ -78,7 +78,7 @@ line_insert (const Line *lp, astr as)
  * Adjust markers (including point) when line at point is split, or
  * next line is joined on, or where a line is edited.
  *   newlp is the line to which characters were moved, oldlp the line
- *    moved from (if dir == 0, newlp == oldlp)
+ *     moved from (if dir == 0, newlp == oldlp)
  *   pointo is point at which oldlp was split (to make newlp) or
  *     joined to newlp
  *   dir is 1 for split, -1 for join or 0 for line edit (newlp == oldlp)
