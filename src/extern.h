@@ -42,6 +42,17 @@ void init_default_bindings (void);
 
 /* buffer.c --------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
+  ty get_line_ ## field (const Line *lp);
+#include "line.h"
+#undef FIELD
+Line *line_new (void);
+const Line *line_insert (const Line *l, astr i);
+bool intercalate_newline (void);
+bool delete_char (void);
+void line_replace_text (const Line * lp, size_t offset, size_t oldlen,
+                        const char *newtext, int replace_case);
+int insert_char (int c);
+#define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
   void set_buffer_ ## field (Buffer *bp, ty field);
 #define FIELD_STR(field)                                                \
@@ -163,22 +174,12 @@ gl_list_t keystrtovec (const char *key);
 astr keyvectostr (gl_list_t keys);
 
 /* line.c ----------------------------------------------------------------- */
-#define FIELD(ty, field)                                \
-  ty get_line_ ## field (const Line *lp);
-#include "line.h"
-#undef FIELD
-Line *line_new (void);
-const Line *line_insert (const Line *l, astr i);
-void line_replace_text (const Line * lp, size_t offset, size_t oldlen,
-                        const char *newtext, int replace_case);
-int insert_char (int c);
 int insert_char_in_insert_mode (int c);
 bool fill_break_line (void);
 bool insert_newline (void);
 void insert_nstring (const char *s, size_t len);
 void insert_astr (castr as);
 void bprintf (const char *fmt, ...);
-bool delete_char (void);
 
 /* lisp.c ----------------------------------------------------------------- */
 void init_lisp (void);

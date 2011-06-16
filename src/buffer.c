@@ -32,9 +32,267 @@
 
 
 /*
- * Structure
+ * Line structure
+ */
+struct Line
+{
+#define FIELD(ty, name) ty name;
+#include "line.h"
+#undef FIELD
+};
+
+#define FIELD(ty, field)                        \
+  GETTER (const Line, line, ty, field)
+
+#include "line.h"
+#undef FIELD
+
+/*
+ * Doubly-linked lists
  */
 
+/* Create an empty list, returning a pointer to the list */
+Line *
+line_new (void)
+{
+  Line *l = XZALLOC (Line);
+  l->text = astr_new ();
+  return l;
+}
+
+/* Insert a line into list after the given point, returning the new line */
+const Line *
+line_insert (const Line *lp, astr as)
+{
+  Line *n = XZALLOC (Line);
+  *n = (Line) {.next = lp->next, .prev = lp, .text = as};
+  if (get_line_next (lp))
+    ((Line *)(get_line_next (lp)))->prev = n;
+  ((Line *)lp)->next = n;
+
+  return n;
+}
+
+
+/*
+ * Adjust markers (including point) when line at point is split, or
+ * next line is joined on, or where a line is edited.
+ *   newlp is the line to which characters were moved, oldlp the line
+ *     moved from (if dir == 0, newlp == oldlp)
+ *   pointo is point at which oldlp was split (to make newlp) or
+ *     joined to newlp
+ *   dir is 1 for split, -1 for join or 0 for line edit (newlp == oldlp)
+ *   if dir == 0, delta gives the number of characters inserted (>0) or
+ *     deleted (<0)
+ */
+static void
+adjust_markers (const Line * newlp, const Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
+{
+  Marker *m_pt = point_marker ();
+
+  assert (dir >= -1 && dir <= 1);
+
+  for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
+    {
+      Point pt = get_marker_pt (m);
+
+      if (pt.p == oldlp && (dir == -1 || pt.o > pointo))
+        {
+          pt.p = newlp;
+          pt.o += delta - (pointo * dir);
+          pt.n += dir;
+        }
+      else if (pt.n > get_buffer_pt (cur_bp).n)
+        pt.n += dir;
+
+      set_marker_pt (m, pt);
+    }
+
+  /* This marker has been updated to new position. */
+  goto_point (get_marker_pt (m_pt));
+  unchain_marker (m_pt);
+}
+
+/*
+ * Check the case of a string.
+ * Returns 2 if it is all upper case, 1 if just the first letter is,
+ * and 0 otherwise.
+ */
+static int
+check_case (const char *s, size_t len)
+{
+  size_t i;
+
+  for (i = 0; i < len && isupper ((int) s[i]); i++)
+    ;
+  if (i == len)
+    return 2;
+  else if (i == 1)
+    for (; i < len && !isupper ((int) s[i]); i++)
+      ;
+  return i == len;
+}
+
+/* Insert the character at the current position and move the text at its right
+ * whatever the insert/overwrite mode is.
+ * This function doesn't change the current position of the pointer.
+ */
+static int
+intercalate_char (int c)
+{
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
+  astr_insert_char (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, c);
+  set_buffer_modified (cur_bp, true);
+
+  return true;
+}
+
+/*
+ * Insert the character `c' at the current point position
+ * into the current buffer.
+ */
+int
+insert_char (int c)
+{
+  size_t t = tab_width (cur_bp);
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  if (get_buffer_overwrite (cur_bp))
+    {
+      Point pt = get_buffer_pt (cur_bp);
+      /* Current character isn't the end of line or a \t
+         || current char is a \t && we are on the tab limit.  */
+      if ((pt.o < astr_len (pt.p->text)) && ((astr_get (pt.p->text, pt.o) != '\t')
+           ||
+           ((astr_get (pt.p->text, pt.o) == '\t') && ((get_goalc () % t) == t))))
+        {
+          /* Replace the character.  */
+          char ch = (char) c;
+          undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
+          astr_nreplace_cstr (pt.p->text, pt.o, 1, &ch, 1);
+          ++pt.o;
+          goto_point (pt);
+          set_buffer_modified (cur_bp, true);
+
+          return true;
+        }
+      /*
+       * Fall through the "insertion" mode of a character at the end
+       * of the line, since it is the same as "overwrite" mode.
+       */
+    }
+
+  intercalate_char (c);
+  forward_char ();
+  adjust_markers (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 0, 1);
+
+  return true;
+}
+
+/*
+ * Insert a newline at the current position without moving the cursor.
+ * Update markers after point in the split line.
+ */
+bool
+intercalate_newline (void)
+{
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
+
+  /* Move the text after the point into a new line. */
+  line_insert (get_buffer_pt (cur_bp).p,
+               astr_substr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o,
+                            astr_len (get_buffer_pt (cur_bp).p->text) - get_buffer_pt (cur_bp).o));
+  set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
+  astr_truncate (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o);
+  adjust_markers (get_buffer_pt (cur_bp).p->next, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 1, 0);
+
+  set_buffer_modified (cur_bp, true);
+  thisflag |= FLAG_NEED_RESYNC;
+
+  return true;
+}
+
+bool
+delete_char (void)
+{
+  deactivate_mark ();
+
+  if (eobp ())
+    {
+      minibuf_error ("End of buffer");
+      return false;
+    }
+
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
+
+  if (eolp ())
+    {
+      size_t oldlen = astr_len (get_buffer_pt (cur_bp).p->text);
+      const Line *oldlp = get_buffer_pt (cur_bp).p->next;
+
+      /* Join the lines. */
+      astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
+      if (get_line_prev (oldlp))
+        ((Line *)(get_line_prev (oldlp)))->next = get_line_next (oldlp);
+      if (get_line_next (oldlp))
+        ((Line *)(get_line_next (oldlp)))->prev = get_line_prev (oldlp);
+
+      adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
+      set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
+      thisflag |= FLAG_NEED_RESYNC;
+    }
+  else
+    {
+      astr_remove (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, 1);
+      adjust_markers (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 0, -1);
+    }
+
+  set_buffer_modified (cur_bp, true);
+
+  return true;
+}
+
+/*
+ * Replace text in the line `lp' with `newtext'. If `replace_case' is
+ * true then the new characters will be the same case as the old if
+ * `case-replace' is true.
+ */
+void
+line_replace_text (const Line * lp, size_t offset, size_t oldlen,
+                   const char *newtext, int replace_case)
+{
+  astr as = astr_new_cstr (newtext);
+
+  replace_case = replace_case && get_variable_bool ("case-replace");
+
+  if (replace_case)
+    {
+      int case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
+
+      if (case_type != 0)
+          astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
+    }
+
+  set_buffer_modified (cur_bp, true);
+  astr_replace (lp->text, offset, oldlen, as);
+  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (astr_len (as) - oldlen));
+}
+
+
+/*
+ * Buffer structure
+ */
 struct Buffer
 {
 #define FIELD(ty, name) ty name;
