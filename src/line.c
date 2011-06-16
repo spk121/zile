@@ -41,16 +41,6 @@ struct Line
 #undef FIELD
 };
 
-#undef GETTER
-#undef SETTER
-
-#define GETTER(Obj, name, ty, field)            \
-  ty                                            \
-  get_ ## name ## _ ## field (const Obj *p)     \
-  {                                             \
-    return p->field;                            \
-  }                                             \
-
 #define FIELD(ty, field)                        \
   GETTER (const Line, line, ty, field)
 
