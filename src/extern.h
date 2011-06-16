@@ -164,8 +164,7 @@ astr keyvectostr (gl_list_t keys);
 
 /* line.c ----------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
-  ty get_line_ ## field (const Line *lp);               \
-  void set_line_ ## field (const Line *lp, ty field);
+  ty get_line_ ## field (const Line *lp);
 #include "line.h"
 #undef FIELD
 Line *line_new (void);

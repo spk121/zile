@@ -51,16 +51,8 @@ struct Line
     return p->field;                            \
   }                                             \
 
-#define SETTER(Obj, name, ty, field)            \
-  void                                          \
-  set_ ## name ## _ ## field (Obj *p, ty field) \
-  {                                             \
-    ((Line *)p)->field = field;                 \
-  }
-
 #define FIELD(ty, field)                        \
-  GETTER (const Line, line, ty, field)          \
-  SETTER (const Line, line, ty, field)
+  GETTER (const Line, line, ty, field)
 
 #include "line.h"
 #undef FIELD
@@ -85,8 +77,8 @@ line_insert (const Line *lp, astr as)
   Line *n = XZALLOC (Line);
   *n = (Line) {.next = lp->next, .prev = lp, .text = as};
   if (get_line_next (lp))
-    set_line_prev (get_line_next (lp), n);
-  set_line_next (lp, n);
+    ((Line *)(get_line_next (lp)))->prev = n;
+  ((Line *)lp)->next = n;
 
   return n;
 }
@@ -262,9 +254,9 @@ delete_char (void)
       /* Join the lines. */
       astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
       if (get_line_prev (oldlp))
-        set_line_next (get_line_prev (oldlp), get_line_next (oldlp));
+        ((Line *)(get_line_prev (oldlp)))->next = get_line_next (oldlp);
       if (get_line_next (oldlp))
-        set_line_prev (get_line_next (oldlp), get_line_prev (oldlp));
+        ((Line *)(get_line_next (oldlp)))->prev = get_line_prev (oldlp);
 
       adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
