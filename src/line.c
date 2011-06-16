@@ -66,7 +66,7 @@ struct Line
 #undef FIELD
 
 /*
- * Circular doubly-linked lists
+ * Doubly-linked lists
  */
 
 /* Create an empty list, returning a pointer to the list */
@@ -74,7 +74,7 @@ Line *
 line_new (void)
 {
   Line *l = XZALLOC (Line);
-  *l = (Line) {.next = l, .prev = l, .text = astr_new ()};
+  l->text = astr_new ();
   return l;
 }
 
@@ -84,7 +84,8 @@ line_insert (const Line *lp, astr as)
 {
   Line *n = XZALLOC (Line);
   *n = (Line) {.next = lp->next, .prev = lp, .text = as};
-  set_line_prev (get_line_next (lp), n);
+  if (get_line_next (lp))
+    set_line_prev (get_line_next (lp), n);
   set_line_next (lp, n);
 
   return n;
@@ -260,8 +261,10 @@ delete_char (void)
 
       /* Join the lines. */
       astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
-      set_line_next (get_line_prev (oldlp), get_line_next (oldlp));
-      set_line_prev (get_line_next (oldlp), get_line_prev (oldlp));
+      if (get_line_prev (oldlp))
+        set_line_next (get_line_prev (oldlp), get_line_next (oldlp));
+      if (get_line_next (oldlp))
+        set_line_prev (get_line_next (oldlp), get_line_prev (oldlp));
 
       adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);

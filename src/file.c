@@ -450,7 +450,7 @@ insert_buffer (Buffer * bp)
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
   undo_nosave = true;
-  insert_lines (0, old_cur_n, old_lines, get_line_next (get_buffer_lines (bp)));
+  insert_lines (0, old_cur_n, old_lines, get_buffer_lines (bp));
   insert_astr (old_cur_line);
   if (old_cur_n < old_lines)
     insert_newline ();
@@ -659,8 +659,8 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 
   /* Save the lines. */
   int ret = 0;
-  for (const Line *lp = get_line_next (get_buffer_lines (bp));
-       lp != get_buffer_lines (bp);
+  for (const Line *lp = get_buffer_lines (bp);
+       lp != NULL;
        lp = get_line_next (lp))
     {
       ssize_t len = (ssize_t) astr_len (get_line_text (lp));
@@ -670,7 +670,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
           ret = written;
           break;
         }
-      if (get_line_next (lp) != get_buffer_lines (bp))
+      if (get_line_next (lp) != NULL)
         {
           written = write (fd, get_buffer_eol (bp), eol_len);
           if (written != eol_len)

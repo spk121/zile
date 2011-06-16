@@ -109,7 +109,7 @@ search (Point pt, const char *s, int forward, int regexp)
   while (pos < 0)
     {
       lp = (forward ? get_line_next : get_line_prev) (lp);
-      if (lp == get_buffer_lines (cur_bp))
+      if (lp == NULL)
         break;
       as = get_line_text (lp);
       pos = find_substr (as, s, ssize, 0, astr_len (as), forward, false, false, regexp, downcase);

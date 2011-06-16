@@ -85,12 +85,7 @@ buffer_new (void)
   bp->pt.p = line_new ();
 
   /* Allocate the limit marker. */
-  bp->lines = line_new ();
-
-  set_line_prev (bp->lines, bp->pt.p);
-  set_line_next (bp->lines, bp->pt.p);
-  set_line_prev (bp->pt.p, bp->lines);
-  set_line_next (bp->pt.p, bp->lines);
+  bp->lines = bp->pt.p;
 
   /* Set default EOL string. */
   bp->eol = coding_eol_lf;
@@ -407,17 +402,13 @@ set_temporary_buffer (Buffer * bp)
 size_t
 calculate_buffer_size (Buffer * bp)
 {
-  const Line *lp = get_line_next (bp->lines);
   size_t size = 0;
 
-  if (lp == bp->lines)
-    return 0;
-
-  for (;;)
+  for (const Line *lp = bp->lines; lp;)
     {
       size += astr_len (get_line_text (lp));
       lp = get_line_next (lp);
-      if (lp == bp->lines)
+      if (lp == NULL)
         break;
       ++size;
     }

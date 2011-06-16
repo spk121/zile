@@ -28,7 +28,7 @@ Point
 make_point (size_t lineno, size_t offset)
 {
   Point pt = {
-    .p = get_line_next (get_buffer_lines (cur_bp)),
+    .p = get_buffer_lines (cur_bp),
     .n = lineno,
     .o = offset
   };
@@ -51,21 +51,15 @@ cmp_point (Point pt1, Point pt2)
 Point
 point_min (void)
 {
-  return (Point) {
-    .p = get_line_next (get_buffer_lines (cur_bp)),
-    .n = 0,
-    .o = 0
-  };
+  return make_point (0, 0);
 }
 
 Point
 point_max (void)
 {
-  return (Point) {
-    .p = get_line_prev (get_buffer_lines (cur_bp)),
-    .n = get_buffer_last_line (cur_bp),
-    .o = astr_len (get_line_text (get_line_prev (get_buffer_lines (cur_bp))))
-  };
+  Point pt = make_point (get_buffer_last_line (cur_bp), 0);
+  pt.o = astr_len (get_line_text (pt.p));
+  return pt;
 }
 
 Point
