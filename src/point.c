@@ -65,8 +65,7 @@ point_max (void)
 Point
 line_beginning_position (int count)
 {
-  /* Copy current point position without offset (beginning of
-     line). */
+  /* Copy current point position without offset (beginning of line). */
   Point pt = get_buffer_pt (cur_bp);
   pt.o = 0;
 
