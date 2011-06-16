@@ -322,7 +322,6 @@ main (int argc, char **argv)
             ok = find_file (arg);
             if (ok)
               FUNCALL_ARG (goto_line, (size_t) gl_list_get_at (arg_line, i));
-            lastflag |= FLAG_NEED_RESYNC;
           }
           break;
         default:
