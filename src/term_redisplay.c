@@ -115,7 +115,7 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region * rp,
 }
 
 static void
-draw_line (size_t line, size_t startcol, Window * wp, Line * lp,
+draw_line (size_t line, size_t startcol, Window * wp, const Line * lp,
            size_t lineno, Region * rp, int highlight)
 {
   size_t x, i;
@@ -156,7 +156,7 @@ static void
 draw_window (size_t topline, Window * wp)
 {
   size_t i, lineno;
-  Line * lp;
+  const Line * lp;
   Region * rp = region_new ();
   int highlight;
   Point pt = window_pt (wp);

@@ -79,7 +79,7 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 
   if (type == UNDO_REPLACE_BLOCK)
     {
-      Line * lp = get_buffer_pt (cur_bp).p;
+      const Line * lp = get_buffer_pt (cur_bp).p;
       size_t n = get_buffer_pt (cur_bp).n;
 
       if (n > pt.n)

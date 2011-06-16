@@ -64,7 +64,7 @@ typedef struct Point Point;
 
 struct Point
 {
-  Line *p;			/* Line pointer. */
+  const Line *p;		/* Line pointer. */
   size_t n;			/* Line number. */
   size_t o;			/* Offset. */
 };

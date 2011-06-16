@@ -429,7 +429,7 @@ Select buffer @i{buffer} in the current window.
 END_DEFUN
 
 static size_t
-insert_lines (size_t n, size_t end, size_t last, Line *from_lp)
+insert_lines (size_t n, size_t end, size_t last, const Line *from_lp)
 {
   for (; n < end; n++, from_lp = get_line_next (from_lp))
     {
@@ -443,7 +443,7 @@ insert_lines (size_t n, size_t end, size_t last, Line *from_lp)
 static void
 insert_buffer (Buffer * bp)
 {
-  Line *old_next = get_line_next (get_buffer_pt (bp).p);
+  const Line *old_next = get_line_next (get_buffer_pt (bp).p);
   castr old_cur_line = astr_cpy (astr_new (), get_line_text (get_buffer_pt (bp).p));
   size_t old_cur_n = get_buffer_pt (bp).n, old_lines = get_buffer_last_line (bp);
   size_t size = calculate_buffer_size (bp);
@@ -659,7 +659,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 
   /* Save the lines. */
   int ret = 0;
-  for (Line *lp = get_line_next (get_buffer_lines (bp));
+  for (const Line *lp = get_line_next (get_buffer_lines (bp));
        lp != get_buffer_lines (bp);
        lp = get_line_next (lp))
     {

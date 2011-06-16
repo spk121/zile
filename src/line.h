@@ -23,6 +23,6 @@
  * A line is a doubly-linked list of astrs.
  * The newline at the end of each line is implicit.
  */
-FIELD(Line *, prev)
-FIELD(Line *, next)
+FIELD(const Line *, prev)
+FIELD(const Line *, next)
 FIELD(castr, text)

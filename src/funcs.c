@@ -527,7 +527,7 @@ untabify_string (astr src, size_t scol, size_t tw)
 }
 
 static void
-edit_tab_line (Line * lp, size_t lineno, size_t offset, size_t size,
+edit_tab_line (const Line * lp, size_t lineno, size_t offset, size_t size,
                astr (*action) (astr as, size_t scol, size_t tw))
 {
   size_t t = tab_width (cur_bp);
@@ -566,7 +566,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
 
       undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
       size_t lineno = get_region_start (rp).n;
-      for (Line *lp = get_region_start (rp).p ;; lp = get_line_next (lp), ++lineno)
+      for (const Line *lp = get_region_start (rp).p ;; lp = get_line_next (lp), ++lineno)
         {
           /* First line.  */
           if (lineno == get_region_start (rp).n)

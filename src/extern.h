@@ -164,13 +164,13 @@ astr keyvectostr (gl_list_t keys);
 
 /* line.c ----------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
-  ty get_line_ ## field (const Line *wp);               \
-  void set_line_ ## field (Line *wp, ty field);
+  ty get_line_ ## field (const Line *lp);               \
+  void set_line_ ## field (const Line *lp, ty field);
 #include "line.h"
 #undef FIELD
 Line *line_new (void);
-Line *line_insert (Line *l, astr i);
-void line_replace_text (Line * lp, size_t offset, size_t oldlen,
+const Line *line_insert (const Line *l, astr i);
+void line_replace_text (const Line * lp, size_t offset, size_t oldlen,
                         const char *newtext, int replace_case);
 int insert_char (int c);
 int insert_char_in_insert_mode (int c);

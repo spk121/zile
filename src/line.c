@@ -41,9 +41,26 @@ struct Line
 #undef FIELD
 };
 
+#undef GETTER
+#undef SETTER
+
+#define GETTER(Obj, name, ty, field)            \
+  ty                                            \
+  get_ ## name ## _ ## field (const Obj *p)     \
+  {                                             \
+    return p->field;                            \
+  }                                             \
+
+#define SETTER(Obj, name, ty, field)            \
+  void                                          \
+  set_ ## name ## _ ## field (Obj *p, ty field) \
+  {                                             \
+    ((Line *)p)->field = field;                 \
+  }
+
 #define FIELD(ty, field)                        \
-  GETTER (Line, line, ty, field)                \
-  SETTER (Line, line, ty, field)
+  GETTER (const Line, line, ty, field)          \
+  SETTER (const Line, line, ty, field)
 
 #include "line.h"
 #undef FIELD
@@ -62,12 +79,13 @@ line_new (void)
 }
 
 /* Insert a line into list after the given point, returning the new line */
-Line *
-line_insert (Line *lp, astr as)
+const Line *
+line_insert (const Line *lp, astr as)
 {
   Line *n = XZALLOC (Line);
   *n = (Line) {.next = lp->next, .prev = lp, .text = as};
-  lp->next = lp->next->prev = n;
+  set_line_prev (get_line_next (lp), n);
+  set_line_next (lp, n);
 
   return n;
 }
@@ -85,7 +103,7 @@ line_insert (Line *lp, astr as)
  *     deleted (<0)
  */
 static void
-adjust_markers (Line * newlp, Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
+adjust_markers (const Line * newlp, const Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
 {
   Marker *m_pt = point_marker ();
 
@@ -238,12 +256,12 @@ delete_char (void)
   if (eolp ())
     {
       size_t oldlen = astr_len (get_buffer_pt (cur_bp).p->text);
-      Line *oldlp = get_buffer_pt (cur_bp).p->next;
+      const Line *oldlp = get_buffer_pt (cur_bp).p->next;
 
       /* Join the lines. */
       astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
-      oldlp->prev->next = oldlp->next;
-      oldlp->next->prev = oldlp->prev;
+      set_line_next (get_line_prev (oldlp), get_line_next (oldlp));
+      set_line_prev (get_line_next (oldlp), get_line_prev (oldlp));
 
       adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
@@ -266,7 +284,7 @@ delete_char (void)
  * `case-replace' is true.
  */
 void
-line_replace_text (Line * lp, size_t offset, size_t oldlen,
+line_replace_text (const Line * lp, size_t offset, size_t oldlen,
                    const char *newtext, int replace_case)
 {
   astr as = astr_new_cstr (newtext);

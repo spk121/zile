@@ -327,7 +327,7 @@ calculate_the_region (Region * rp)
     Point pt1 = get_region_start (rp), pt2 = get_region_end (rp);
     int size = -pt1.o + pt2.o;
 
-    for (Line *lp = pt1.p; lp != pt2.p; lp = get_line_next (lp))
+    for (const Line *lp = pt1.p; lp != pt2.p; lp = get_line_next (lp))
       size += astr_len (get_line_text (lp)) + 1;
 
     set_region_size (rp, size);
@@ -408,7 +408,7 @@ set_temporary_buffer (Buffer * bp)
 size_t
 calculate_buffer_size (Buffer * bp)
 {
-  Line *lp = get_line_next (bp->lines);
+  const Line *lp = get_line_next (bp->lines);
   size_t size = 0;
 
   if (lp == bp->lines)
@@ -453,7 +453,7 @@ tab_width (Buffer * bp)
 astr
 copy_text_block (Point pt, size_t size)
 {
-  Line * lp = pt.p;
+  const Line * lp = pt.p;
   astr as = astr_substr (get_line_text (lp), pt.o, astr_len (get_line_text (lp)) - pt.o);
 
   astr_cat_char (as, '\n');
