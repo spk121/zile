@@ -51,15 +51,6 @@ struct Line
  * Doubly-linked lists
  */
 
-/* Create an empty list, returning a pointer to the list */
-Line *
-line_new (void)
-{
-  Line *l = XZALLOC (Line);
-  l->text = astr_new ();
-  return l;
-}
-
 /* Insert a line into list after the given point, returning the new line */
 const Line *
 line_insert (const Line *lp, astr as)
@@ -336,7 +327,10 @@ Buffer *
 buffer_new (void)
 {
   Buffer *bp = (Buffer *) XZALLOC (Buffer);
-  bp->lines = bp->pt.p = line_new ();
+  Line *l = XZALLOC (Line);
+  l->text = astr_new ();
+  bp->lines = bp->pt.p = l;
+
   bp->eol = coding_eol_lf;
   bp->dir = agetcwd ();
 
