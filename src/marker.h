@@ -20,5 +20,5 @@
    MA 02111-1301, USA.  */
 
 FIELD(Marker *, next)		/* Used to chain all markers in the buffer. */
-FIELD(Buffer *, bp)		/* Buffer that points into. */
+FIELD(Buffer *, bp)		/* Buffer that marker points into. */
 FIELD(Point, pt)		/* Point position. */
