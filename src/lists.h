@@ -35,7 +35,6 @@ struct le
 typedef struct le le;
 
 le *leNew (const char *text);
-void leWipe (le * list);
 
 le *leAddBranchElement (le * list, le * branch, int quoted);
 le *leAddDataElement (le * list, const char *data, int quoted);

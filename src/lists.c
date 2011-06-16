@@ -37,24 +37,6 @@ leNew (const char *text)
   return new;
 }
 
-static void
-leReallyWipe (le * list)
-{
-  if (list)
-    {
-      /* free descendants */
-      leWipe (list->branch);
-      leWipe (list->next);
-    }
-}
-
-void
-leWipe (le * list)
-{
-  if (list && list != leNIL && list != leT)
-    leReallyWipe (list);
-}
-
 static le *
 leAddTail (le * list, le * element)
 {
