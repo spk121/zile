@@ -77,9 +77,9 @@ line_beginning_position (int count)
   pt.o = 0;
 
   count--;
-  for (; count < 0 && get_line_prev (pt.p) != get_buffer_lines (cur_bp); pt.n--, count++)
+  for (; count < 0 && pt.n > 0; pt.n--, count++)
     pt.p = get_line_prev (pt.p);
-  for (; count > 0 && get_line_next (pt.p) != get_buffer_lines (cur_bp); pt.n++, count--)
+  for (; count > 0 && pt.n < get_buffer_last_line (cur_bp); pt.n++, count--)
     pt.p = get_line_next (pt.p);
 
   return pt;

@@ -133,7 +133,7 @@ bool
 bobp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  return (get_line_prev (pt.p) == get_buffer_lines (cur_bp) && pt.o == 0);
+  return (pt.n == 0 && pt.o == 0);
 }
 
 /* Return true if point is at the end of the buffer. */
@@ -141,7 +141,7 @@ bool
 eobp (void)
 {
   Point pt = get_buffer_pt (cur_bp);
-  return (get_line_next (pt.p) == get_buffer_lines (cur_bp) &&
+  return (pt.n == get_buffer_last_line (cur_bp) &&
           pt.o == astr_len (get_line_text (pt.p)));
 }
 

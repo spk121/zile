@@ -646,7 +646,7 @@ does nothing.
   deactivate_mark ();
 
   /* If we're on first line, set target to 0. */
-  if (get_buffer_pt (cur_bp).p->prev == get_buffer_lines (cur_bp))
+  if (get_buffer_pt (cur_bp).n == 0)
     target_goalc = 0;
   else
     { /* Find goalc in previous non-blank line. */

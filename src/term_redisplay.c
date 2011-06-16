@@ -165,7 +165,7 @@ draw_window (size_t topline, Window * wp)
 
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
-       i > 0 && get_line_prev (lp) != get_buffer_lines (get_window_bp (wp));
+       i > 0 && lineno > 0;
        lp = get_line_prev (lp), --i, --lineno)
     ;
 
@@ -179,7 +179,7 @@ draw_window (size_t topline, Window * wp)
       term_clrtoeol ();
 
       /* If at the end of the buffer, don't write any text. */
-      if (lp == get_buffer_lines (get_window_bp (wp)))
+      if (lineno >= get_buffer_last_line (get_window_bp (wp)))
         continue;
 
       draw_line (i, get_window_start_column (wp), wp, lp, lineno, rp, highlight);
