@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#include <assert.h>
+
 #include "main.h"
 #include "extern.h"
 
@@ -34,6 +36,25 @@ make_point (size_t lineno, size_t offset)
   };
   while (lineno-- > 0)
     pt.p = get_line_next (pt.p);
+  return pt;
+}
+
+Point
+offset_to_point (size_t offset)
+{
+  Point pt = {
+    .p = get_buffer_lines (cur_bp),
+    .n = 0,
+    .o = 0
+  };
+  while (offset > 0 && offset > astr_len (get_line_text (pt.p)))
+    {
+      assert (pt.p);
+      offset -= astr_len (get_line_text (pt.p)) + 1; /* FIXME: Length of EOL. */
+      pt.p = get_line_next (pt.p);
+      pt.n++;
+    }
+  pt.o = offset;
   return pt;
 }
 

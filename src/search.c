@@ -84,7 +84,7 @@ search (Point pt, const char *s, int forward, int regexp)
 {
   const Line *lp = pt.p;
   castr as = get_line_text (lp);
-  size_t ssize = strlen (s), from = 0, to = astr_len (as);
+  size_t ssize = strlen (s), from = 0, to = astr_len (as), lineno = pt.n;
   bool downcase = get_variable_bool ("case-fold-search") && no_upper (s, ssize, regexp);
   bool notbol = false, noteol = false;
   int pos;
@@ -109,6 +109,7 @@ search (Point pt, const char *s, int forward, int regexp)
   while (pos < 0)
     {
       lp = (forward ? get_line_next : get_line_prev) (lp);
+      lineno += forward ? 1 : -1;
       if (lp == NULL)
         break;
       as = get_line_text (lp);
@@ -118,7 +119,7 @@ search (Point pt, const char *s, int forward, int regexp)
   if (pos < 0)
     return false;
 
-  while (get_buffer_pt (cur_bp).p != lp)
+  while (get_buffer_pt (cur_bp).n != lineno)
     (forward ? next_line : previous_line) ();
   pt = get_buffer_pt (cur_bp);
   pt.o = pos;

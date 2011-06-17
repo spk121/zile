@@ -1558,7 +1558,7 @@ On nonblank line, delete any immediately following blank lines.
       while (is_blank_line ());
       if (forward)
         FUNCALL (forward_line);
-      if (get_buffer_pt (cur_bp).p != get_marker_pt (m).p)
+      if (get_buffer_pt (cur_bp).n != get_marker_pt (m).n)
         {
           if (!seq_started)
             {

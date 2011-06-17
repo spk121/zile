@@ -428,36 +428,6 @@ Select buffer @i{buffer} in the current window.
 }
 END_DEFUN
 
-static size_t
-insert_lines (size_t n, size_t end, size_t last, const Line *from_lp)
-{
-  for (; n < end; n++, from_lp = get_line_next (from_lp))
-    {
-      insert_astr (get_line_text (from_lp));
-      if (n < last)
-        insert_newline ();
-    }
-  return n;
-}
-
-static void
-insert_buffer (Buffer * bp)
-{
-  const Line *old_next = get_line_next (get_buffer_pt (bp).p);
-  castr old_cur_line = astr_cpy (astr_new (), get_line_text (get_buffer_pt (bp).p));
-  size_t old_cur_n = get_buffer_pt (bp).n, old_lines = get_buffer_last_line (bp);
-  size_t size = calculate_buffer_size (bp);
-
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
-  undo_nosave = true;
-  insert_lines (0, old_cur_n, old_lines, get_buffer_lines (bp));
-  insert_astr (old_cur_line);
-  if (old_cur_n < old_lines)
-    insert_newline ();
-  insert_lines (old_cur_n + 1, old_lines, old_lines, old_next);
-  undo_nosave = false;
-}
-
 DEFUN_ARGS ("insert-buffer", insert_buffer,
             STR_ARG (buf))
 /*+

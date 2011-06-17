@@ -27,77 +27,118 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "main.h"
 #include "extern.h"
 
 
 /*
- * Line structure
+ * Buffer structure
  */
-struct Line
+struct Buffer
 {
 #define FIELD(ty, name) ty name;
-#include "line.h"
+#define FIELD_STR(name) char *name;
+#include "buffer.h"
+#undef FIELD
+#undef FIELD_STR
+  astr text;
+};
+
+#define FIELD(ty, field)                         \
+  GETTER (Buffer, buffer, ty, field)             \
+  SETTER (Buffer, buffer, ty, field)
+
+#define FIELD_STR(field)                         \
+  GETTER (Buffer, buffer, char *, field)   \
+  STR_SETTER (Buffer, buffer, field)
+
+#include "buffer.h"
+#undef FIELD
+#undef FIELD_STR
+
+struct Region
+{
+#define FIELD(ty, name) ty name;
+#include "region.h"
 #undef FIELD
 };
 
-#define FIELD(ty, field)                        \
-  GETTER (const Line, line, ty, field)
+#define FIELD(ty, field)                         \
+  GETTER (Region, region, ty, field)             \
+  SETTER (Region, region, ty, field)
 
-#include "line.h"
+#include "region.h"
 #undef FIELD
 
 /*
- * Doubly-linked lists
+ * Line structure
  */
+struct Line {
+  Buffer *bp;
+  size_t o;
+};
 
-/* Insert a line into list after the given point, returning the new line */
 const Line *
-line_insert (const Line *lp, astr as)
+get_line_prev (const Line *lp)
 {
+  if (lp->o == 0)
+    return NULL;
+  /* FIXME: Search for line ending. */
+  const char *prev = memrchr (astr_cstr (lp->bp->text), '\n', lp->o - 1);
   Line *n = XZALLOC (Line);
-  *n = (Line) {.next = lp->next, .prev = lp, .text = as};
-  if (get_line_next (lp))
-    ((Line *)(get_line_next (lp)))->prev = n;
-  ((Line *)lp)->next = n;
-
+  *n = (Line) {.bp = lp->bp, .o = prev ? prev - astr_cstr (lp->bp->text) + 1 : 0};
   return n;
+}
+
+const Line *
+get_line_next (const Line *lp)
+{
+  /* FIXME: Search for line ending. */
+  const char *next = memchr (astr_cstr (lp->bp->text) + lp->o, '\n', astr_len (lp->bp->text) - lp->o);
+  if (next == NULL)
+    return NULL;
+  Line *n = XZALLOC (Line);
+  *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text) + 1};
+  return n;
+}
+
+castr
+get_line_text (const Line *lp)
+{
+  /* FIXME: Search for line ending. */
+  const char *next = memchr (astr_cstr (lp->bp->text) + lp->o, '\n', astr_len (lp->bp->text) - lp->o);
+  if (next == NULL)
+    next = astr_cstr (lp->bp->text) + astr_len (lp->bp->text);
+  return astr_substr (lp->bp->text, lp->o, next - astr_cstr (lp->bp->text) - lp->o);
 }
 
 
 /*
- * Adjust markers (including point) when line at point is split, or
- * next line is joined on, or where a line is edited.
- *   newlp is the line to which characters were moved, oldlp the line
- *     moved from (if dir == 0, newlp == oldlp)
- *   pointo is point at which oldlp was split (to make newlp) or
- *     joined to newlp
- *   dir is 1 for split, -1 for join or 0 for line edit (newlp == oldlp)
- *   if dir == 0, delta gives the number of characters inserted (>0) or
+ * Adjust markers (including point) when text is edited.
+ *   o is offset at which edit was made
+ *   delta gives the number of characters inserted (>0) or
  *     deleted (<0)
  */
 static void
-adjust_markers (const Line * newlp, const Line * oldlp, size_t pointo, int dir, ptrdiff_t delta)
+adjust_markers (size_t o, ptrdiff_t delta)
 {
   Marker *m_pt = point_marker ();
-
-  assert (dir >= -1 && dir <= 1);
 
   for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
     {
       Point pt = get_marker_pt (m);
-
-      if (pt.p == oldlp && (dir == -1 || pt.o > pointo))
+      size_t pt_o = pt.o;
+      const Line *lp = get_buffer_lines (cur_bp);
+      for (size_t i = 0; i < pt.n; i++)
         {
-          pt.p = newlp;
-          pt.o += delta - (pointo * dir);
-          pt.n += dir;
+          assert (lp);
+          pt_o += astr_len (get_line_text (lp)) + 1; /* FIXME: length of EOL */
+          lp = get_line_next (lp);
         }
-      else if (pt.n > get_buffer_pt (cur_bp).n)
-        pt.n += dir;
-
-      set_marker_pt (m, pt);
+      if (pt_o > o)
+        set_marker_pt (m, offset_to_point (pt_o + delta));
     }
 
   /* This marker has been updated to new position. */
@@ -136,7 +177,7 @@ intercalate_char (int c)
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
-  astr_insert_char (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, c);
+  astr_insert_char (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, c);
   set_buffer_modified (cur_bp, true);
 
   return true;
@@ -159,14 +200,13 @@ insert_char (int c)
       Point pt = get_buffer_pt (cur_bp);
       /* Current character isn't the end of line or a \t
          || current char is a \t && we are on the tab limit.  */
-      if ((pt.o < astr_len (pt.p->text)) && ((astr_get (pt.p->text, pt.o) != '\t')
-           ||
-           ((astr_get (pt.p->text, pt.o) == '\t') && ((get_goalc () % t) == t))))
+      if ((pt.o < astr_len (get_line_text (pt.p))) && ((astr_get (get_line_text (pt.p), pt.o) != '\t')
+                                                       || ((astr_get (get_line_text (pt.p), pt.o) == '\t') && ((get_goalc () % t) == t))))
         {
           /* Replace the character.  */
           char ch = (char) c;
           undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
-          astr_nreplace_cstr (pt.p->text, pt.o, 1, &ch, 1);
+          astr_nreplace_cstr (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1, &ch, 1);
           ++pt.o;
           goto_point (pt);
           set_buffer_modified (cur_bp, true);
@@ -181,7 +221,7 @@ insert_char (int c)
 
   intercalate_char (c);
   forward_char ();
-  adjust_markers (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 0, 1);
+  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
 
   return true;
 }
@@ -193,18 +233,13 @@ insert_char (int c)
 bool
 intercalate_newline (void)
 {
-  if (warn_if_readonly_buffer ())
+  /* FIXME: Insert line ending. */
+  if (!intercalate_char ('\n'))
     return false;
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
+  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
 
-  /* Move the text after the point into a new line. */
-  line_insert (get_buffer_pt (cur_bp).p,
-               astr_substr (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o,
-                            astr_len (get_buffer_pt (cur_bp).p->text) - get_buffer_pt (cur_bp).o));
   set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
-  astr_truncate (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o);
-  adjust_markers (get_buffer_pt (cur_bp).p->next, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 1, 0);
 
   set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
@@ -227,27 +262,18 @@ delete_char (void)
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
-
   if (eolp ())
     {
-      size_t oldlen = astr_len (get_buffer_pt (cur_bp).p->text);
-      const Line *oldlp = get_buffer_pt (cur_bp).p->next;
-
-      /* Join the lines. */
-      astr_cat (get_buffer_pt (cur_bp).p->text, oldlp->text);
-      if (get_line_prev (oldlp))
-        ((Line *)(get_line_prev (oldlp)))->next = get_line_next (oldlp);
-      if (get_line_next (oldlp))
-        ((Line *)(get_line_next (oldlp)))->prev = get_line_prev (oldlp);
-
-      adjust_markers (get_buffer_pt (cur_bp).p, oldlp, oldlen, -1, 0);
+      /* FIXME: Remove line ending's length, not just one char. */
+      adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -1);
+      astr_remove (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
     {
-      astr_remove (get_buffer_pt (cur_bp).p->text, get_buffer_pt (cur_bp).o, 1);
-      adjust_markers (get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).p, get_buffer_pt (cur_bp).o, 0, -1);
+      adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -1);
+      astr_remove (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1);
     }
 
   set_buffer_modified (cur_bp, true);
@@ -270,55 +296,25 @@ line_replace_text (const Line * lp, size_t offset, size_t oldlen,
 
   if (replace_case)
     {
-      int case_type = check_case (astr_cstr (lp->text) + offset, oldlen);
+      int case_type = check_case (astr_cstr (get_line_text (lp)) + offset, oldlen);
 
       if (case_type != 0)
           astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
     }
 
   set_buffer_modified (cur_bp, true);
-  astr_replace (lp->text, offset, oldlen, as);
-  adjust_markers (lp, lp, offset, 0, (ptrdiff_t) (astr_len (as) - oldlen));
+  astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, as);
+  adjust_markers (lp->o + offset, (ptrdiff_t) (astr_len (as) - oldlen));
 }
 
-
-/*
- * Buffer structure
- */
-struct Buffer
+void
+insert_buffer (Buffer * bp)
 {
-#define FIELD(ty, name) ty name;
-#define FIELD_STR(name) char *name;
-#include "buffer.h"
-#undef FIELD
-#undef FIELD_STR
-};
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  insert_astr (astr_cpy (astr_new (), bp->text));
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+}
 
-#define FIELD(ty, field)                         \
-  GETTER (Buffer, buffer, ty, field)             \
-  SETTER (Buffer, buffer, ty, field)
-
-#define FIELD_STR(field)                         \
-  GETTER (Buffer, buffer, char *, field)   \
-  STR_SETTER (Buffer, buffer, field)
-
-#include "buffer.h"
-#undef FIELD
-#undef FIELD_STR
-
-struct Region
-{
-#define FIELD(ty, name) ty name;
-#include "region.h"
-#undef FIELD
-};
-
-#define FIELD(ty, field)                         \
-  GETTER (Region, region, ty, field)             \
-  SETTER (Region, region, ty, field)
-
-#include "region.h"
-#undef FIELD
 
 /*
  * Allocate a new buffer structure, set the default local
@@ -329,7 +325,8 @@ buffer_new (void)
 {
   Buffer *bp = (Buffer *) XZALLOC (Buffer);
   Line *l = XZALLOC (Line);
-  l->text = astr_new ();
+  l->bp = bp;
+  bp->text = astr_new ();
   bp->lines = bp->pt.p = l;
 
   bp->eol = coding_eol_lf;
@@ -559,15 +556,14 @@ calculate_the_region (Region * rp)
       set_region_end (rp, cur_bp->pt);
     }
 
-  {
-    Point pt1 = get_region_start (rp), pt2 = get_region_end (rp);
-    int size = -pt1.o + pt2.o;
+  Point pt1 = get_region_start (rp), pt2 = get_region_end (rp);
+  int size = -pt1.o + pt2.o;
 
-    for (const Line *lp = pt1.p; lp != pt2.p; lp = get_line_next (lp))
-      size += astr_len (get_line_text (lp)) + 1;
+  const Line *lp = pt1.p;
+  for (size_t i = pt1.n; i < pt2.n; i++, lp = get_line_next (lp))
+    size += astr_len (get_line_text (lp)) + 1;
 
-    set_region_size (rp, size);
-  }
+  set_region_size (rp, size);
 
   return true;
 }
@@ -688,10 +684,12 @@ copy_text_block (Point pt, size_t size)
   const Line * lp = pt.p;
   astr as = astr_substr (get_line_text (lp), pt.o, astr_len (get_line_text (lp)) - pt.o);
 
+  /* FIXME: Insert line ending. */
   astr_cat_char (as, '\n');
   for (lp = get_line_next (lp); astr_len (as) < size; lp = get_line_next (lp))
     {
       astr_cat (as, get_line_text (lp));
+      /* FIXME: Insert line ending. */
       astr_cat_char (as, '\n');
     }
   return astr_truncate (as, size);

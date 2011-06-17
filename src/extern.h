@@ -45,8 +45,6 @@ void init_default_bindings (void);
   ty get_line_ ## field (const Line *lp);
 #include "line.h"
 #undef FIELD
-Line *line_new (void);
-const Line *line_insert (const Line *l, astr i);
 bool intercalate_newline (void);
 bool delete_char (void);
 void line_replace_text (const Line * lp, size_t offset, size_t oldlen,
@@ -68,6 +66,7 @@ int insert_char (int c);
 #undef FIELD
 void free_buffer (Buffer * bp);
 void init_buffer (Buffer * bp);
+void insert_buffer (Buffer * bp);
 Buffer * buffer_new (void);
 const char *get_buffer_filename_or_name (Buffer * bp);
 void set_buffer_names (Buffer * bp, const char *filename);
@@ -236,6 +235,7 @@ void minibuf_clear (void);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point (size_t lineno, size_t offset);
+Point offset_to_point (size_t offset);
 int cmp_point (Point pt1, Point pt2);
 Point point_min (void);
 Point point_max (void);
