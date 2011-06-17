@@ -76,7 +76,7 @@ kill_to_bol (void)
       Region * rp = region_new ();
       Point pt = get_buffer_pt (cur_bp);
 
-      set_region_size (rp, pt.o);
+      set_region_end (rp, pt);
       pt.o = 0;
       set_region_start (rp, pt);
 
@@ -120,9 +120,11 @@ kill_line (bool whole_line)
   if (!eolp ())
     {
       Region * rp = region_new ();
+      Point pt = get_buffer_pt (cur_bp);
 
-      set_region_start (rp, get_buffer_pt (cur_bp));
-      set_region_size (rp, astr_len (get_line_text (get_buffer_pt (cur_bp).p)) - get_buffer_pt (cur_bp).o);
+      set_region_start (rp, pt);
+      pt.o = astr_len (get_line_text (get_buffer_pt (cur_bp).p));
+      set_region_end (rp, pt);
 
       ok = copy_or_kill_region (true, rp);
     }

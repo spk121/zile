@@ -1,6 +1,6 @@
 /* Region fields
 
-   Copyright (c) 2009 Free Software Foundation, Inc.
+   Copyright (c) 2009, 2011 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,6 +19,4 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-FIELD(Point, start)		/* The region start. */
-FIELD(Point, end)		/* The region end. */
 FIELD(size_t, size)		/* The region size. */

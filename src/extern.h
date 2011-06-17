@@ -59,11 +59,11 @@ int insert_char (int c);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-#define FIELD(ty, field)                                \
-  ty get_region_ ## field (const Region *cp);           \
-  void set_region_ ## field (Region *cp, ty field);
-#include "region.h"
-#undef FIELD
+void set_region_start (Region *rp, Point pt);
+void set_region_end (Region *rp, Point pt);
+Point get_region_start (const Region *rp);
+Point get_region_end (const Region *rp);
+size_t get_region_size (const Region *rp);
 void free_buffer (Buffer * bp);
 void init_buffer (Buffer * bp);
 void insert_buffer (Buffer * bp);

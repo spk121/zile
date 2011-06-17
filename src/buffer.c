@@ -51,7 +51,7 @@ struct Buffer
   SETTER (Buffer, buffer, ty, field)
 
 #define FIELD_STR(field)                         \
-  GETTER (Buffer, buffer, char *, field)   \
+  GETTER (Buffer, buffer, char *, field)         \
   STR_SETTER (Buffer, buffer, field)
 
 #include "buffer.h"
@@ -60,17 +60,34 @@ struct Buffer
 
 struct Region
 {
-#define FIELD(ty, name) ty name;
-#include "region.h"
-#undef FIELD
+  size_t start;		/* The region start. */
+  size_t end;		/* The region end. */
 };
 
-#define FIELD(ty, field)                         \
-  GETTER (Region, region, ty, field)             \
-  SETTER (Region, region, ty, field)
+void set_region_start (Region *rp, Point pt)
+{
+  rp->start = point_to_offset (pt);
+}
 
-#include "region.h"
-#undef FIELD
+void set_region_end (Region *rp, Point pt)
+{
+  rp->end = point_to_offset (pt);
+}
+
+Point get_region_start (const Region *rp)
+{
+  return offset_to_point (cur_bp, rp->start);
+}
+
+Point get_region_end (const Region *rp)
+{
+  return offset_to_point (cur_bp, rp->end);
+}
+
+size_t get_region_size (const Region *rp)
+{
+  return rp->end - rp->start;
+}
 
 /*
  * Line structure
@@ -555,8 +572,6 @@ calculate_the_region (Region * rp)
   for (size_t i = pt1.n; i < pt2.n; i++, lp = get_line_next (lp))
     size += astr_len (get_line_text (lp)) + 1;
 
-  set_region_size (rp, size);
-
   return true;
 }
 
@@ -584,15 +599,8 @@ delete_region (const Region * rp)
 bool
 in_region (size_t lineno, size_t x, Region * rp)
 {
-  if (lineno < rp->start.n || lineno > rp->end.n)
-    return false;
-  else if (rp->start.n == rp->end.n)
-    return x >= rp->start.o && x < rp->end.o;
-  else if (lineno == rp->start.n)
-    return x >= rp->start.o;
-  else if (lineno == rp->end.n)
-    return x < rp->end.o;
-  return true;
+  size_t o = point_to_offset ((Point) {.n = lineno, .o = x});
+  return o >= rp->start && o <= rp->end;
 }
 
 /*
