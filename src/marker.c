@@ -21,8 +21,10 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "gl_linked_list.h"
 
 #include "main.h"
 #include "extern.h"
@@ -36,6 +38,7 @@ struct Marker
 #define FIELD(ty, name) ty name;
 #include "marker.h"
 #undef FIELD
+  Buffer * bp;		/* Buffer that marker points into. */
 };
 
 #define FIELD(ty, field)                         \
@@ -44,6 +47,12 @@ struct Marker
 
 #include "marker.h"
 #undef FIELD
+
+Point
+get_marker_pt (Marker * marker)
+{
+  return offset_to_point (marker->bp, marker->o);
+}
 
 Marker *
 marker_new (void)
@@ -75,7 +84,7 @@ unchain_marker (const Marker * marker)
 }
 
 void
-move_marker (Marker * marker, Buffer * bp, Point pt)
+move_marker (Marker * marker, Buffer * bp, size_t o)
 {
   if (bp != marker->bp)
     {
@@ -91,7 +100,7 @@ move_marker (Marker * marker, Buffer * bp, Point pt)
     }
 
   /* Change the point.  */
-  marker->pt = pt;
+  marker->o = o;
 }
 
 Marker *
@@ -101,7 +110,7 @@ copy_marker (const Marker * m)
   if (m)
     {
       marker = marker_new ();
-      move_marker (marker, m->bp, m->pt);
+      move_marker (marker, m->bp, m->o);
     }
   return marker;
 }
@@ -110,6 +119,59 @@ Marker *
 point_marker (void)
 {
   Marker *marker = marker_new ();
-  move_marker (marker, cur_bp, get_buffer_pt (cur_bp));
+  move_marker (marker, cur_bp, point_to_offset (get_buffer_pt (cur_bp)));
   return marker;
+}
+
+
+/*
+ * Mark ring
+ */
+
+static gl_list_t mark_ring = NULL;	/* Mark ring. */
+
+/* Push the current mark to the mark-ring. */
+void
+push_mark (void)
+{
+  if (!mark_ring)
+    mark_ring = gl_list_create_empty (GL_LINKED_LIST,
+                                      NULL, NULL, NULL, true);
+
+  /* Save the mark.  */
+  if (get_buffer_mark (cur_bp))
+    gl_list_add_last (mark_ring, copy_marker (get_buffer_mark (cur_bp)));
+  else
+    { /* Save an invalid mark.  */
+      Marker *m = marker_new ();
+      move_marker (m, cur_bp, 0);
+      gl_list_add_last (mark_ring, m);
+    }
+}
+
+/* Pop a mark from the mark-ring and make it the current mark. */
+void
+pop_mark (void)
+{
+  const Marker *m = (const Marker *) gl_list_get_at (mark_ring,
+                                                     gl_list_size (mark_ring) - 1);
+
+  /* Replace the mark. */
+  if (get_buffer_mark (m->bp))
+    unchain_marker (get_buffer_mark (m->bp));
+
+  set_buffer_mark (m->bp, copy_marker (m));
+
+  unchain_marker (m);
+  assert (gl_list_remove_at (mark_ring, gl_list_size (mark_ring) - 1));
+}
+
+/* Set the mark to point. */
+void
+set_mark (void)
+{
+  if (!get_buffer_mark (cur_bp))
+    set_buffer_mark (cur_bp, point_marker ());
+  else
+    move_marker (get_buffer_mark (cur_bp), cur_bp, point_to_offset (get_buffer_pt (cur_bp)));
 }

@@ -40,10 +40,10 @@ make_point (size_t lineno, size_t offset)
 }
 
 Point
-offset_to_point (size_t offset)
+offset_to_point (Buffer *bp, size_t offset)
 {
   Point pt = {
-    .p = get_buffer_lines (cur_bp),
+    .p = get_buffer_lines (bp),
     .n = 0,
     .o = 0
   };
@@ -56,6 +56,20 @@ offset_to_point (size_t offset)
     }
   pt.o = offset;
   return pt;
+}
+
+size_t
+point_to_offset (Point pt)
+{
+  size_t pt_o = pt.o;
+  const Line *lp = get_buffer_lines (cur_bp);
+  for (size_t i = 0; i < pt.n; i++)
+    {
+      assert (lp);
+      pt_o += astr_len (get_line_text (lp)) + 1; /* FIXME: length of EOL */
+      lp = get_line_next (lp);
+    }
+  return pt_o;
 }
 
 int

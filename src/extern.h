@@ -107,9 +107,6 @@ void completion_scroll_down (void);
 int completion_try (Completion * cp, astr search, int popup_when_complete);
 
 /* editfns.c -------------------------------------------------------------- */
-void push_mark (void);
-void pop_mark (void);
-void set_mark (void);
 bool is_empty_line (void);
 bool is_blank_line (void);
 int following_char (void);
@@ -206,11 +203,15 @@ extern int thisflag, lastflag, last_uniarg;
   void set_marker_ ## field (Marker *cp, ty field);
 #include "marker.h"
 #undef FIELD
+Point get_marker_pt (Marker * marker);
 Marker * marker_new (void);
 void unchain_marker (const Marker * marker);
-void move_marker (Marker * marker, Buffer * bp, Point pt);
+void move_marker (Marker * marker, Buffer * bp, size_t o);
 Marker *copy_marker (const Marker * marker);
 Marker *point_marker (void);
+void push_mark (void);
+void pop_mark (void);
+void set_mark (void);
 
 /* minibuf.c -------------------------------------------------------------- */
 void init_minibuf (void);
@@ -235,7 +236,8 @@ void minibuf_clear (void);
 
 /* point.c ---------------------------------------------------------------- */
 Point make_point (size_t lineno, size_t offset);
-Point offset_to_point (size_t offset);
+Point offset_to_point (Buffer *bp, size_t offset);
+size_t point_to_offset (Point pt);
 int cmp_point (Point pt1, Point pt2);
 Point point_min (void);
 Point point_max (void);

@@ -306,7 +306,7 @@ Put the mark where point is now, and point where the mark is now.
 
   tmp = get_buffer_pt (cur_bp);
   goto_point (get_marker_pt (get_buffer_mark (cur_bp)));
-  set_marker_pt (get_buffer_mark (cur_bp), tmp);
+  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (tmp));
 
   /* In transient-mark-mode we must reactivate the mark.  */
   if (get_variable_bool ("transient-mark-mode"))

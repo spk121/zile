@@ -302,7 +302,7 @@ isearch (int forward, int regexp)
                 {
                   /* Save mark. */
                   set_mark ();
-                  set_marker_pt (get_buffer_mark (cur_bp), start);
+                  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (start));
 
                   /* Save search string. */
                   last_search = xstrdup (astr_cstr (pattern));

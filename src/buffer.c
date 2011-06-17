@@ -128,17 +128,9 @@ adjust_markers (size_t o, ptrdiff_t delta)
 
   for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
     {
-      Point pt = get_marker_pt (m);
-      size_t pt_o = pt.o;
-      const Line *lp = get_buffer_lines (cur_bp);
-      for (size_t i = 0; i < pt.n; i++)
-        {
-          assert (lp);
-          pt_o += astr_len (get_line_text (lp)) + 1; /* FIXME: length of EOL */
-          lp = get_line_next (lp);
-        }
+      size_t pt_o = get_marker_o (m);
       if (pt_o > o)
-        set_marker_pt (m, offset_to_point (pt_o + delta));
+        set_marker_o (m, pt_o + delta);
     }
 
   /* This marker has been updated to new position. */
