@@ -305,6 +305,7 @@ line_replace_text (const Line * lp, size_t offset, size_t oldlen,
 
   set_buffer_modified (cur_bp, true);
   adjust_markers (lp->o + offset, (ptrdiff_t) (astr_len (as) - oldlen));
+  /* FIXME: Don't rely on editing at point. */
   astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, as);
 }
 
