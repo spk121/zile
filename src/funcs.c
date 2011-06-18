@@ -566,7 +566,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
 
       undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
       size_t lineno = get_region_start (r).n;
-      for (const Line *lp = get_region_start (r).p ;; lp = get_line_next (lp), ++lineno)
+      for (const Line *lp = get_region_start (r).p;; lp = get_line_next (lp), ++lineno)
         {
           /* First line.  */
           if (lineno == get_region_start (r).n)
@@ -581,13 +581,13 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
             }
           /* Last line of multi-line region. */
           else if (lineno == get_region_end (r).n)
-            edit_tab_line (lp, lineno, 0, get_region_end (r).o, action);
+            {
+              edit_tab_line (lp, lineno, 0, get_region_end (r).o, action);
+              break;
+            }
           /* Middle line of multi-line region. */
           else
             edit_tab_line (lp, lineno, 0, astr_len (get_line_text (lp)), action);
-          /* Done?  */
-          if (lineno == get_region_end (r).n)
-            break;
         }
       goto_point (get_marker_pt (m));
       undo_save (UNDO_END_SEQUENCE, get_marker_pt (m), 0, 0);

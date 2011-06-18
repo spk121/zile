@@ -141,7 +141,7 @@ adjust_markers (size_t o, ptrdiff_t delta)
     {
       size_t pt_o = get_marker_o (m);
       if (pt_o > o)
-        set_marker_o (m, pt_o + delta);
+        set_marker_o (m, MAX (o, pt_o + delta));
     }
 
   /* This marker has been updated to new position. */
@@ -295,19 +295,17 @@ line_replace_text (const Line * lp, size_t offset, size_t oldlen,
 {
   astr as = astr_new_cstr (newtext);
 
-  replace_case = replace_case && get_variable_bool ("case-replace");
-
-  if (replace_case)
+  if (replace_case && get_variable_bool ("case-replace"))
     {
       int case_type = check_case (astr_cstr (get_line_text (lp)) + offset, oldlen);
 
       if (case_type != 0)
-          astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
+        astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
     }
 
   set_buffer_modified (cur_bp, true);
-  astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, as);
   adjust_markers (lp->o + offset, (ptrdiff_t) (astr_len (as) - oldlen));
+  astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, as);
 }
 
 void
