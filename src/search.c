@@ -399,7 +399,6 @@ what to do with it.
   bool noask = false, find_no_upper;
   size_t find_len, count = 0;
   char *find = minibuf_read ("Query replace string: ", "");
-  char *repl;
 
   if (find == NULL)
     return FUNCALL (keyboard_quit);
@@ -408,9 +407,10 @@ what to do with it.
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, false);
 
-  repl = minibuf_read ("Query replace `%s' with: ", "", find);
-  if (repl == NULL)
+  char *s = minibuf_read ("Query replace `%s' with: ", "", find);
+  if (s == NULL)
     return FUNCALL (keyboard_quit);
+  astr repl = astr_new_cstr (s);
 
   while (search (get_buffer_pt (cur_bp), find, true, false))
     {
@@ -425,7 +425,7 @@ what to do with it.
             {
               minibuf_write
                 ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find,
-                 repl);
+                 astr_cstr (repl));
               c = getkey ();
               if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
                   || c == 'n' || c == 'q' || c == '.' || c == '!')
@@ -452,7 +452,7 @@ what to do with it.
       pt = get_buffer_pt (cur_bp);
       ++count;
       undo_save (UNDO_REPLACE_BLOCK,
-                 make_point (pt.n, pt.o - find_len), find_len, strlen (repl));
+                 make_point (pt.n, pt.o - find_len), find_len, astr_len (repl));
       line_replace_text (pt.p, pt.o - find_len, find_len, repl, find_no_upper);
 
       if (c == '.')		/* Replace and quit. */

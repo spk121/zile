@@ -48,7 +48,7 @@ void init_default_bindings (void);
 bool intercalate_newline (void);
 bool delete_char (void);
 void line_replace_text (const Line * lp, size_t offset, size_t oldlen,
-                        const char *newtext, int replace_case);
+                        astr newtext, int replace_case);
 int insert_char (int c);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \

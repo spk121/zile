@@ -291,22 +291,20 @@ delete_char (void)
  */
 void
 line_replace_text (const Line * lp, size_t offset, size_t oldlen,
-                   const char *newtext, int replace_case)
+                   astr newtext, int replace_case)
 {
-  astr as = astr_new_cstr (newtext);
-
   if (replace_case && get_variable_bool ("case-replace"))
     {
       int case_type = check_case (astr_cstr (get_line_text (lp)) + offset, oldlen);
 
       if (case_type != 0)
-        astr_recase (as, case_type == 1 ? case_capitalized : case_upper);
+        astr_recase (newtext, case_type == 1 ? case_capitalized : case_upper);
     }
 
   set_buffer_modified (cur_bp, true);
-  adjust_markers (lp->o + offset, (ptrdiff_t) (astr_len (as) - oldlen));
+  adjust_markers (lp->o + offset, (ptrdiff_t) (astr_len (newtext) - oldlen));
   /* FIXME: Don't rely on editing at point. */
-  astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, as);
+  astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, newtext);
 }
 
 void
