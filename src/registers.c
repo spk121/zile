@@ -50,18 +50,19 @@ Copy region into register @i{register}.
     ok = FUNCALL (keyboard_quit);
   else
     {
-      Region * rp = region_new ();
-
       minibuf_clear ();
       if (reg < 0)
         reg = 0;
       reg %= NUM_REGISTERS; /* Nice numbering relies on NUM_REGISTERS
                                being a power of 2. */
 
-      if (!calculate_the_region (rp))
+      if (warn_if_no_mark ())
         ok = leNIL;
       else
-        regs[reg] = copy_text_block (get_region_start (rp), get_region_size (rp));
+        {
+          Region r = calculate_the_region ();
+          regs[reg] = copy_text_block (get_region_start (r), get_region_size (r));
+        }
     }
 }
 END_DEFUN

@@ -555,38 +555,38 @@ edit_tab_line (const Line * lp, size_t lineno, size_t offset, size_t size,
 static le *
 edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
 {
-  Region * rp = region_new ();
 
-  if (warn_if_readonly_buffer () || !calculate_the_region (rp))
+  if (warn_if_readonly_buffer () || warn_if_no_mark ())
     return leNIL;
 
-  if (get_region_size (rp) != 0)
+  Region r = calculate_the_region ();
+  if (get_region_size (r) != 0)
     {
       Marker *m = point_marker ();
 
       undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
-      size_t lineno = get_region_start (rp).n;
-      for (const Line *lp = get_region_start (rp).p ;; lp = get_line_next (lp), ++lineno)
+      size_t lineno = get_region_start (r).n;
+      for (const Line *lp = get_region_start (r).p ;; lp = get_line_next (lp), ++lineno)
         {
           /* First line.  */
-          if (lineno == get_region_start (rp).n)
+          if (lineno == get_region_start (r).n)
             {
               /* Region on a single line. */
-              if (lineno == get_region_end (rp).n)
-                edit_tab_line (lp, lineno, get_region_start (rp).o, get_region_size (rp), action);
+              if (lineno == get_region_end (r).n)
+                edit_tab_line (lp, lineno, get_region_start (r).o, get_region_size (r), action);
               /* Region is multi-line. */
               else
-                edit_tab_line (lp, lineno, get_region_start (rp).o,
-                               astr_len (get_line_text (lp)) - get_region_start (rp).o, action);
+                edit_tab_line (lp, lineno, get_region_start (r).o,
+                               astr_len (get_line_text (lp)) - get_region_start (r).o, action);
             }
           /* Last line of multi-line region. */
-          else if (lineno == get_region_end (rp).n)
-            edit_tab_line (lp, lineno, 0, get_region_end (rp).o, action);
+          else if (lineno == get_region_end (r).n)
+            edit_tab_line (lp, lineno, 0, get_region_end (r).o, action);
           /* Middle line of multi-line region. */
           else
             edit_tab_line (lp, lineno, 0, astr_len (get_line_text (lp)), action);
           /* Done?  */
-          if (lineno == get_region_end (rp).n)
+          if (lineno == get_region_end (r).n)
             break;
         }
       goto_point (get_marker_pt (m));
@@ -857,14 +857,9 @@ END_DEFUN
 static void
 astr_append_region (astr s)
 {
-  Region * rp = region_new ();
-  astr as;
-
   activate_mark ();
-  calculate_the_region (rp);
-
-  as = copy_text_block (get_region_start (rp), get_region_size (rp));
-  astr_cat (s, as);
+  Region r = calculate_the_region ();
+  astr_cat (s, copy_text_block (get_region_start (r), get_region_size (r)));
 }
 
 static bool
@@ -1284,15 +1279,15 @@ END_DEFUN
 static le *
 setcase_region (int (*func) (int))
 {
-  Region * rp = region_new ();
-  if (warn_if_readonly_buffer () || !calculate_the_region (rp))
+  if (warn_if_readonly_buffer () || warn_if_no_mark ())
     return leNIL;
 
-  undo_save (UNDO_START_SEQUENCE, get_region_start (rp), 0, 0);
+  Region r = calculate_the_region ();
+  undo_save (UNDO_START_SEQUENCE, get_region_start (r), 0, 0);
 
   Marker *m = point_marker ();
-  goto_point (get_region_start (rp));
-  for (size_t size = get_region_size (rp); size > 0; size--)
+  goto_point (get_region_start (r));
+  for (size_t size = get_region_size (r); size > 0; size--)
     {
       char c = func (following_char ());
       delete_char ();
@@ -1301,7 +1296,7 @@ setcase_region (int (*func) (int))
   goto_point (get_marker_pt (m));
   unchain_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, get_region_start (rp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_region_start (r), 0, 0);
 
   return leT;
 }
@@ -1457,12 +1452,12 @@ The output is available in that buffer in both cases.
 
   if (cmd != NULL)
     {
-      Region * rp = region_new ();
 
-      if (!calculate_the_region (rp))
+      if (warn_if_no_mark ())
         ok = leNIL;
       else
         {
+          Region r = calculate_the_region ();
           char tempfile[] = P_tmpdir "/zileXXXXXX";
           int fd = mkstemp (tempfile);
 
@@ -1473,10 +1468,10 @@ The output is available in that buffer in both cases.
             }
           else
             {
-              astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
-              ssize_t written = write (fd, astr_cstr (as), get_region_size (rp));
+              astr as = copy_text_block (get_region_start (r), get_region_size (r));
+              ssize_t written = write (fd, astr_cstr (as), get_region_size (r));
 
-              if (written != (ssize_t) get_region_size (rp))
+              if (written != (ssize_t) get_region_size (r))
                 {
                   if (written == -1)
                     minibuf_error ("Error writing to temporary file: %s",
@@ -1501,9 +1496,7 @@ DEFUN ("delete-region", delete_region)
 Delete the text between point and mark.
 +*/
 {
-  Region * rp = region_new ();
-
-  if (!calculate_the_region (rp) || !delete_region (rp))
+  if (warn_if_no_mark () || !delete_region (calculate_the_region ()))
     ok = leNIL;
   else
     deactivate_mark ();

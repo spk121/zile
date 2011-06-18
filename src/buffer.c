@@ -58,12 +58,6 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
-struct Region
-{
-  size_t start;		/* The region start. */
-  size_t end;		/* The region end. */
-};
-
 void set_region_start (Region *rp, Point pt)
 {
   rp->start = point_to_offset (pt);
@@ -74,19 +68,19 @@ void set_region_end (Region *rp, Point pt)
   rp->end = point_to_offset (pt);
 }
 
-Point get_region_start (const Region *rp)
+Point get_region_start (const Region r)
 {
-  return offset_to_point (cur_bp, rp->start);
+  return offset_to_point (cur_bp, r.start);
 }
 
-Point get_region_end (const Region *rp)
+Point get_region_end (const Region r)
 {
-  return offset_to_point (cur_bp, rp->end);
+  return offset_to_point (cur_bp, r.end);
 }
 
-size_t get_region_size (const Region *rp)
+size_t get_region_size (const Region r)
 {
-  return rp->end - rp->start;
+  return r.end - r.start;
 }
 
 /*
@@ -518,7 +512,7 @@ warn_if_readonly_buffer (void)
   return false;
 }
 
-static int
+int
 warn_if_no_mark (void)
 {
   if (!cur_bp->mark)
@@ -536,56 +530,40 @@ warn_if_no_mark (void)
     return false;
 }
 
-Region *
-region_new (void)
-{
-  return (Region *) XZALLOC (Region);
-}
-
 /*
  * Calculate the region size between point and mark and set the region
  * structure.
  */
-int
-calculate_the_region (Region * rp)
+Region
+calculate_the_region (void)
 {
-  if (warn_if_no_mark ())
-    return false;
-
+  Region r;
   if (cmp_point (cur_bp->pt, get_marker_pt (cur_bp->mark)) < 0)
     {
       /* Point is before mark. */
-      set_region_start (rp, cur_bp->pt);
-      set_region_end (rp, get_marker_pt (cur_bp->mark));
+      set_region_start (&r, cur_bp->pt);
+      set_region_end (&r, get_marker_pt (cur_bp->mark));
     }
   else
     {
       /* Mark is before point. */
-      set_region_start (rp, get_marker_pt (cur_bp->mark));
-      set_region_end (rp, cur_bp->pt);
+      set_region_start (&r, get_marker_pt (cur_bp->mark));
+      set_region_end (&r, cur_bp->pt);
     }
-
-  Point pt1 = get_region_start (rp), pt2 = get_region_end (rp);
-  int size = -pt1.o + pt2.o;
-
-  const Line *lp = pt1.p;
-  for (size_t i = pt1.n; i < pt2.n; i++, lp = get_line_next (lp))
-    size += astr_len (get_line_text (lp)) + 1;
-
-  return true;
+  return r;
 }
 
 bool
-delete_region (const Region * rp)
+delete_region (const Region r)
 {
-  size_t size = get_region_size (rp);
+  size_t size = get_region_size (r);
   Marker *m = point_marker ();
 
   if (warn_if_readonly_buffer ())
     return false;
 
-  goto_point (get_region_start (rp));
-  undo_save (UNDO_REPLACE_BLOCK, get_region_start (rp), size, 0);
+  goto_point (get_region_start (r));
+  undo_save (UNDO_REPLACE_BLOCK, get_region_start (r), size, 0);
   undo_nosave = true;
   while (size--)
     delete_char ();
@@ -597,10 +575,10 @@ delete_region (const Region * rp)
 }
 
 bool
-in_region (size_t lineno, size_t x, Region * rp)
+in_region (size_t lineno, size_t x, Region r)
 {
   size_t o = point_to_offset ((Point) {.n = lineno, .o = x});
-  return o >= rp->start && o <= rp->end;
+  return o >= r.start && o <= r.end;
 }
 
 /*

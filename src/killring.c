@@ -46,9 +46,9 @@ kill_ring_push (astr as)
 }
 
 static bool
-copy_or_kill_region (bool kill, Region * rp)
+copy_or_kill_region (bool kill, Region r)
 {
-  astr as = copy_text_block (get_region_start (rp), get_region_size (rp));
+  astr as = copy_text_block (get_region_start (r), get_region_size (r));
 
   kill_ring_push (as);
 
@@ -57,7 +57,7 @@ copy_or_kill_region (bool kill, Region * rp)
       if (get_buffer_readonly (cur_bp))
         minibuf_error ("Read only text copied to kill ring");
       else
-        assert (delete_region (rp));
+        assert (delete_region (r));
     }
 
   set_this_command (F_kill_region);
@@ -73,14 +73,14 @@ kill_to_bol (void)
 
   if (!bolp ())
     {
-      Region * rp = region_new ();
+      Region r;
       Point pt = get_buffer_pt (cur_bp);
 
-      set_region_end (rp, pt);
+      set_region_end (&r, pt);
       pt.o = 0;
-      set_region_start (rp, pt);
+      set_region_start (&r, pt);
 
-      ok = copy_or_kill_region (true, rp);
+      ok = copy_or_kill_region (true, r);
     }
 
   return ok;
@@ -119,14 +119,14 @@ kill_line (bool whole_line)
 
   if (!eolp ())
     {
-      Region * rp = region_new ();
+      Region r;
       Point pt = get_buffer_pt (cur_bp);
 
-      set_region_start (rp, pt);
+      set_region_start (&r, pt);
       pt.o = astr_len (get_line_text (get_buffer_pt (cur_bp).p));
-      set_region_end (rp, pt);
+      set_region_end (&r, pt);
 
-      ok = copy_or_kill_region (true, rp);
+      ok = copy_or_kill_region (true, r);
     }
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
@@ -194,13 +194,13 @@ END_DEFUN
 static bool
 copy_or_kill_the_region (bool kill)
 {
-  Region * rp = region_new ();
   bool ok = false;
 
-  if (calculate_the_region (rp))
+  if (!warn_if_no_mark ())
     {
+      Region r = calculate_the_region ();
       maybe_free_kill_ring ();
-      ok = copy_or_kill_region (kill, rp);
+      ok = copy_or_kill_region (kill, r);
     }
 
   return ok;

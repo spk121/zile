@@ -49,7 +49,6 @@
 
 /* Opaque types. */
 typedef struct Line Line;
-typedef struct Region Region;
 typedef struct Marker Marker;
 typedef struct History History;
 typedef struct Undo Undo;
@@ -61,6 +60,13 @@ typedef struct Completion Completion;
 
 /* FIXME: Types which should really be opaque. */
 typedef struct Point Point;
+typedef struct Region Region;
+
+struct Region
+{
+  size_t start;		/* The region start. */
+  size_t end;		/* The region end. */
+};
 
 struct Point
 {
