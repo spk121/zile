@@ -128,7 +128,7 @@ Position 1 is the beginning of the buffer.
   else
     do
       {
-        char *ms = minibuf_read ("Goto char: ", "");
+        const char *ms = astr_cstr (minibuf_read ("Goto char: ", ""));
         if (ms == NULL)
           {
             ok = FUNCALL (keyboard_quit);

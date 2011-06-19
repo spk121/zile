@@ -752,9 +752,9 @@ With a nil argument, kill the current buffer.
         ok = FUNCALL (keyboard_quit);
     }
 
-  if (buf && buf[0] != '\0')
+  if (buf && astr_len (buf) > 0)
     {
-      bp = find_buffer (buf);
+      bp = find_buffer (astr_cstr (buf));
       if (bp == NULL)
         {
           minibuf_error ("Buffer `%s' not found", buf);

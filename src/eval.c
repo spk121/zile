@@ -232,7 +232,6 @@ DEFUN ("execute-extended-command", execute_extended_command)
 Read function name, then read its arguments and call it.
 +*/
 {
-  char *name;
   astr msg = astr_new ();
 
   if (lastflag & FLAG_SET_UNIARG)
@@ -244,11 +243,11 @@ Read function name, then read its arguments and call it.
     }
   astr_cat_cstr (msg, "M-x ");
 
-  name = minibuf_read_function_name (astr_cstr (msg));
+  castr name = minibuf_read_function_name (astr_cstr (msg));
   if (name == NULL)
     return false;
 
-  ok = execute_function (name, uniarg);
+  ok = execute_function (astr_cstr (name), uniarg);
 }
 END_DEFUN
 
@@ -256,7 +255,7 @@ END_DEFUN
  * Read a function name from the minibuffer.
  */
 static History *functions_history = NULL;
-char *
+castr
 minibuf_read_function_name (const char *fmt, ...)
 {
   va_list ap;
@@ -269,7 +268,7 @@ minibuf_read_function_name (const char *fmt, ...)
   add_macros_to_list (get_completion_completions (cp), completion_strcmp);
 
   va_start (ap, fmt);
-  char *ms = minibuf_vread_completion (fmt, "", cp, functions_history,
+  castr ms = minibuf_vread_completion (fmt, "", cp, functions_history,
                                        "No function name given",
                                        minibuf_test_in_completions,
                                        "Undefined function name `%s'", ap);

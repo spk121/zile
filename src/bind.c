@@ -448,7 +448,7 @@ sequence.
   STR_INIT (keystr);
   if (keystr != NULL)
     {
-      keys = keystrtovec (keystr);
+      keys = keystrtovec (astr_cstr (keystr));
       if (keys == NULL)
         {
           minibuf_error ("Key sequence %s is invalid", keystr);
@@ -457,12 +457,9 @@ sequence.
     }
   else
     {
-      astr as;
-
       minibuf_write ("Set key globally: ");
       keys = get_key_sequence ();
-      as = keyvectostr (keys);
-      keystr = xstrdup (astr_cstr (as));
+      keystr = keyvectostr (keys);
     }
 
   STR_INIT (name)
@@ -472,7 +469,7 @@ sequence.
   if (name == NULL)
     return leNIL;
 
-  func = get_function (name);
+  func = get_function (astr_cstr (name));
   if (func == NULL) /* Possible if called non-interactively */
     {
       minibuf_error ("No such function `%s'", name);
@@ -543,14 +540,14 @@ Argument is a command name.  If the prefix arg is non-nil, insert the
 message in the buffer.
 +*/
 {
-  char *name = minibuf_read_function_name ("Where is command: ");
+  castr name = minibuf_read_function_name ("Where is command: ");
   gather_bindings_state g;
 
   ok = leNIL;
 
   if (name)
     {
-      g.f = get_function (name);
+      g.f = get_function (astr_cstr (name));
       if (g.f)
         {
           g.bindings = astr_new ();

@@ -149,7 +149,7 @@ Such a \"function\" cannot be called from Lisp, but it is a valid editor command
 +*/
 {
   Macro *mp;
-  char *ms = minibuf_read ("Name for last kbd macro: ", "");
+  const char *ms = astr_cstr (minibuf_read ("Name for last kbd macro: ", ""));
 
   if (ms == NULL)
     {
@@ -227,7 +227,7 @@ Execute macro as string of editor command characters.
 +*/
 {
   STR_INIT (keystr);
-  gl_list_t keys = keystrtovec (keystr);
+  gl_list_t keys = keystrtovec (astr_cstr (keystr));
   if (keys)
     process_keys (keys);
   else

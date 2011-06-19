@@ -154,13 +154,14 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
   DEFUN_ARGS(zile_func, c_func, args)
 
 /* String argument. */
-#define STR_ARG(name)                   \
-  char *name = NULL;
-#define STR_INIT(name)                  \
-  if (arglist && arglist->next)         \
-    {                                   \
-      name = arglist->next->data;       \
-      arglist = arglist->next;          \
+#define STR_ARG(name)                           \
+  castr name = NULL;
+#define STR_INIT(name)                                  \
+  if (arglist && arglist->next)                         \
+    {                                                   \
+      if (arglist->next->data)                          \
+        name = astr_new_cstr (arglist->next->data);     \
+      arglist = arglist->next;                          \
     }
 
 /* Integer argument. */

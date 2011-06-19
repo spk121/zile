@@ -337,15 +337,15 @@ Switch to a buffer visiting the file,
 creating one if none already exists.
 +*/
 {
-  char *ms = minibuf_read_filename ("Find file: ",
-                                    astr_cstr (get_buffer_dir (cur_bp)), NULL);
+  castr ms = minibuf_read_filename ("Find file: ",
+                                   astr_cstr (get_buffer_dir (cur_bp)), NULL);
 
   ok = leNIL;
 
   if (ms == NULL)
     ok = FUNCALL (keyboard_quit);
-  else if (ms[0] != '\0')
-    ok = bool_to_lisp (find_file (ms));
+  else if (astr_len (ms) > 0)
+    ok = bool_to_lisp (find_file (astr_cstr (ms)));
 }
 END_DEFUN
 
@@ -371,21 +371,20 @@ If the current buffer now contains an empty file that you just visited
 {
   const char *buf = get_buffer_filename (cur_bp);
   char *base = NULL;
-  char *ms;
 
   if (buf == NULL)
     buf = astr_cstr (get_buffer_dir (cur_bp));
   else
     base = base_name (buf);
-  ms = minibuf_read_filename ("Find alternate: ", buf, base);
+  castr ms = minibuf_read_filename ("Find alternate: ", buf, base);
 
   ok = leNIL;
   if (ms == NULL)
     ok = FUNCALL (keyboard_quit);
-  else if (ms[0] != '\0' && check_modified_buffer (cur_bp))
+  else if (astr_len (ms) > 0 && check_modified_buffer (cur_bp))
     {
       kill_buffer (cur_bp);
-      ok = bool_to_lisp (find_file (ms));
+      ok = bool_to_lisp (find_file (astr_cstr (ms)));
     }
 }
 END_DEFUN
@@ -411,13 +410,13 @@ Select buffer @i{buffer} in the current window.
 
   if (ok == leT)
     {
-      if (buf && buf[0] != '\0')
+      if (buf && astr_len (buf) > 0)
         {
-          bp = find_buffer (buf);
+          bp = find_buffer (astr_cstr (buf));
           if (bp == NULL)
             {
               bp = buffer_new ();
-              set_buffer_name (bp, buf);
+              set_buffer_name (bp, astr_cstr (buf));
               set_buffer_needname (bp, true);
               set_buffer_nosave (bp, true);
             }
@@ -454,9 +453,9 @@ Puts mark after the inserted text.
     {
       Buffer *bp;
 
-      if (buf && buf[0] != '\0')
+      if (buf && astr_len (buf) > 0)
         {
-          bp = find_buffer (buf);
+          bp = find_buffer (astr_cstr (buf));
           if (bp == NULL)
             {
               minibuf_error ("Buffer `%s' not found", buf);
@@ -529,7 +528,7 @@ Set mark after the inserted text.
         ok = FUNCALL (keyboard_quit);
     }
 
-  if (file == NULL || file[0] == '\0' || !insert_file (file))
+  if (file == NULL || astr_len (file) == 0 || !insert_file (astr_cstr (file)))
     ok = leNIL;
   else
     set_mark_interactive ();
@@ -739,22 +738,22 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 {
   bool ans = true;
   le * ok = leT;
-  char *name;
+  castr name;
 
   if (!needname)
-    name = xstrdup (name0);
+    name = astr_new_cstr (name0);
 
   if (needname)
     {
       name = minibuf_read_filename (prompt, "", NULL);
       if (name == NULL)
         return FUNCALL (keyboard_quit);
-      if (name[0] == '\0')
+      if (astr_len (name) == 0)
         return leNIL;
       confirm = true;
     }
 
-  if (confirm && exist_file (name))
+  if (confirm && exist_file (astr_cstr (name)))
     {
       ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", name);
       if (ans == -1)
@@ -767,12 +766,12 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 
   if (ans == true)
     {
-      if (name != get_buffer_filename (bp))
-        set_buffer_names (bp, name);
+      if (!STREQ (astr_cstr (name), get_buffer_filename (bp)))
+        set_buffer_names (bp, astr_cstr (name));
       set_buffer_needname (bp, false);
       set_buffer_temporary (bp, false);
       set_buffer_nosave (bp, false);
-      if (write_to_disk (bp, name))
+      if (write_to_disk (bp, astr_cstr (name)))
         {
           minibuf_write ("Wrote %s", name);
           set_buffer_modified (bp, false);
@@ -962,16 +961,16 @@ Make DIR become the current buffer's default directory.
 
   if (dir == NULL)
     ok = FUNCALL (keyboard_quit);
-  else if (dir[0] != '\0')
+  else if (astr_len (dir) > 0)
     {
       struct stat st;
 
-      if (stat (dir, &st) != 0 || !S_ISDIR (st.st_mode))
+      if (stat (astr_cstr (dir), &st) != 0 || !S_ISDIR (st.st_mode))
         {
           minibuf_error ("`%s' is not a directory", dir);
           ok = leNIL;
         }
-      else if (chdir (dir) == -1)
+      else if (chdir (astr_cstr (dir)) == -1)
         {
           minibuf_write ("%s: %s", dir, strerror (errno));
           ok = leNIL;

@@ -135,7 +135,7 @@ revert_action (Undo * up)
       undo_nosave = true;
       for (size_t i = 0; i < up->block.size; ++i)
         delete_char ();
-      insert_nstring (astr_cstr (up->block.text), up->block.osize);
+      insert_astr (up->block.text);
       undo_nosave = false;
     }
 

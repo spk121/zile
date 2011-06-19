@@ -86,24 +86,22 @@ DEFUN_ARGS ("describe-function", describe_function,
 Display the full documentation of a function.
 +*/
 {
-  const char *doc;
-
   STR_INIT (func)
   else
     {
-      func = xstrdup (minibuf_read_function_name ("Describe function: "));
+      func = minibuf_read_function_name ("Describe function: ");
       if (func == NULL)
         ok = leNIL;
     }
 
   if (ok == leT)
     {
-      doc = get_function_doc (func);
+      const char *doc = get_function_doc (astr_cstr (func));
       if (doc == NULL)
         ok = leNIL;
       else
         write_temp_buffer ("*Help*", true,
-                           write_function_description, func, doc);
+                           write_function_description, astr_cstr (func), doc);
     }
 }
 END_DEFUN
@@ -134,13 +132,13 @@ Display the full documentation of a variable.
   else
     {
       const char *defval;
-      const char *doc = get_variable_doc (name, &defval);
+      const char *doc = get_variable_doc (astr_cstr (name), &defval);
       if (doc == NULL)
         ok = leNIL;
       else
         write_temp_buffer ("*Help*", true,
                            write_variable_description,
-                           name, get_variable (name), doc);
+                           astr_cstr (name), get_variable (astr_cstr (name)), doc);
     }
 }
 END_DEFUN
@@ -174,7 +172,7 @@ Display documentation of the command invoked by a key sequence.
   STR_INIT (keystr);
   if (keystr != NULL)
     {
-      gl_list_t keys = keystrtovec (keystr);
+      gl_list_t keys = keystrtovec (astr_cstr (keystr));
 
       if (keys != NULL)
         {

@@ -190,7 +190,7 @@ get_variable_bool (const char *var)
   return false;
 }
 
-char *
+castr
 minibuf_read_variable_name (const char *fmt, ...)
 {
   Completion *cp = completion_new (false);
@@ -205,7 +205,7 @@ minibuf_read_variable_name (const char *fmt, ...)
 
   va_list ap;
   va_start (ap, fmt);
-  char *ms = minibuf_vread_completion (fmt, "", cp, NULL,
+  castr ms = minibuf_vread_completion (fmt, "", cp, NULL,
                                        "No variable name given",
                                        minibuf_test_in_completions,
                                        "Undefined variable name `%s'", ap);
@@ -233,6 +233,6 @@ Set a variable value to the user-specified value.
     ok = FUNCALL (keyboard_quit);
 
   if (ok == leT)
-    set_variable (var, val);
+    set_variable (astr_cstr (var), astr_cstr (val));
 }
 END_DEFUN

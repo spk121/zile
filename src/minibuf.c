@@ -100,7 +100,7 @@ minibuf_error (const char *fmt, ...)
 /*
  * Read a string from the minibuffer.
  */
-char *
+castr
 minibuf_read (const char *fmt, const char *value, ...)
 {
   va_list ap;
@@ -129,7 +129,7 @@ minibuf_read_number (const char *fmt, ...)
 
   do
     {
-      char *ms = minibuf_read (buf, "");
+      const char *ms = astr_cstr (minibuf_read (buf, ""));
       if (ms == NULL)
         {
           n = SIZE_MAX;
@@ -151,12 +151,13 @@ minibuf_read_number (const char *fmt, ...)
 /*
  * Read a filename from the minibuffer.
  */
-char *
+castr
 minibuf_read_filename (const char *fmt, const char *value,
                        const char *file, ...)
 {
   va_list ap;
-  char *buf, *p = NULL;
+  char *buf;
+  astr p = NULL;
   Completion *cp;
   astr as;
   size_t pos;
@@ -177,16 +178,12 @@ minibuf_read_filename (const char *fmt, const char *value,
       pos = astr_len (as);
       if (file)
         pos -= strlen (file);
-      p = term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history);
+      p = astr_cpy (astr_new (), term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history));
 
       if (p != NULL)
         {
-          astr bs = astr_new_cstr (p);
-          if (expand_path (bs))
-            {
-              add_history_element (files_history, p);
-              p = xstrdup (astr_cstr (bs));
-            }
+          if (expand_path (p))
+            add_history_element (files_history, astr_cstr (p));
           else
             p = NULL;
         }
@@ -241,7 +238,6 @@ int
 minibuf_read_yesno (const char *fmt, ...)
 {
   va_list ap;
-  char *ms;
   const char *errmsg = "Please answer yes or no.";
   Completion *cp = completion_new (false);
   int ret = -1;
@@ -250,8 +246,8 @@ minibuf_read_yesno (const char *fmt, ...)
   gl_sortedlist_add (get_completion_completions (cp), completion_strcmp, xstrdup ("no"));
 
   va_start (ap, fmt);
-  ms = minibuf_vread_completion (fmt, "", cp, NULL, errmsg,
-                                 minibuf_test_in_completions, errmsg, ap);
+  castr ms = minibuf_vread_completion (fmt, "", cp, NULL, errmsg,
+                                       minibuf_test_in_completions, errmsg, ap);
   va_end (ap);
 
   if (ms != NULL)
@@ -266,7 +262,7 @@ minibuf_read_yesno (const char *fmt, ...)
   return ret;
 }
 
-char *
+castr
 minibuf_read_completion (const char *fmt, const char *value, Completion * cp,
                          History * hp, ...)
 {
@@ -283,13 +279,13 @@ minibuf_read_completion (const char *fmt, const char *value, Completion * cp,
 /*
  * Read a string from the minibuffer using a completion.
  */
-char *
+castr
 minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
                           History * hp, const char *empty_err,
                           bool (*test) (const char *s, gl_list_t completions),
                           const char *invalid_err, va_list ap)
 {
-  char *ms;
+  castr ms;
   char *buf = xvasprintf (fmt, ap);
 
   for (;;)
@@ -301,7 +297,7 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
           FUNCALL (keyboard_quit);
           break;
         }
-      else if (ms[0] == '\0')
+      else if (astr_len (ms) == 0)
         {
           minibuf_error (empty_err);
           ms = NULL;
@@ -309,16 +305,15 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
         }
       else
         {
-          astr as = astr_new ();
-          astr_cpy_cstr (as, ms);
+          astr as = astr_cpy (astr_new (), ms);
           /* Complete partial words if possible. */
           if (completion_try (cp, as, false) == COMPLETION_MATCHED)
-            ms = xstrdup (get_completion_match (cp));
+            ms = astr_new_cstr (get_completion_match (cp));
 
-          if (test (ms, get_completion_completions (cp)))
+          if (test (astr_cstr (ms), get_completion_completions (cp)))
             {
               if (hp)
-                add_history_element (hp, ms);
+                add_history_element (hp, astr_cstr (ms));
               minibuf_clear ();
               break;
             }

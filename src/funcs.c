@@ -1376,17 +1376,17 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
   return true;
 }
 
-static char *
+static castr
 minibuf_read_shell_command (void)
 {
-  char *ms = minibuf_read ("Shell command: ", "");
+  castr ms = minibuf_read ("Shell command: ", "");
 
   if (ms == NULL)
     {
       FUNCALL (keyboard_quit);
       return NULL;
     }
-  if (ms[0] == '\0')
+  if (astr_len (ms) == 0)
     return NULL;
 
   return ms;
@@ -1417,7 +1417,7 @@ says to insert the output in the current buffer.
     insert = lastflag & FLAG_SET_UNIARG;
 
   if (cmd != NULL)
-    ok = bool_to_lisp (pipe_command (cmd, "/dev/null", insert, false));
+    ok = bool_to_lisp (pipe_command (astr_cstr (cmd), "/dev/null", insert, false));
 }
 END_DEFUN
 
@@ -1481,7 +1481,7 @@ The output is available in that buffer in both cases.
                   ok = leNIL;
                 }
               else
-                ok = bool_to_lisp (pipe_command (cmd, tempfile, insert, true));
+                ok = bool_to_lisp (pipe_command (astr_cstr (cmd), tempfile, insert, true));
 
               close (fd);
               remove (tempfile);

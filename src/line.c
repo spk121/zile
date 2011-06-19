@@ -222,7 +222,7 @@ Insert the argument at point.
 +*/
 {
   STR_INIT (arg);
-  insert_nstring (arg, strlen (arg));
+  insert_astr (arg);
 }
 END_DEFUN
 

@@ -74,7 +74,7 @@ draw_minibuf_read (const char *prompt, const char *value,
   term_refresh ();
 }
 
-static astr
+static castr
 do_minibuf_read (const char *prompt, const char *value, size_t pos,
                Completion * cp, History * hp)
 {
@@ -287,20 +287,16 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
     }
 }
 
-char *
+castr
 term_minibuf_read (const char *prompt, const char *value, size_t pos,
                    Completion * cp, History * hp)
 {
   Window *wp, *old_wp = cur_wp;
-  char *s = NULL;
-  astr as;
 
   if (hp)
     prepare_history (hp);
 
-  as = do_minibuf_read (prompt, value, pos, cp, hp);
-  if (as)
-    s = xstrdup (astr_cstr (as));
+  castr as = do_minibuf_read (prompt, value, pos, cp, hp);
 
   if (cp != NULL && (get_completion_flags (cp) & CFLAG_POPPEDUP)
       && (wp = find_window ("*Completions*")) != NULL)
@@ -313,5 +309,5 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
       set_current_window (old_wp);
     }
 
-  return s;
+  return as;
 }

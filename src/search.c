@@ -134,10 +134,10 @@ static le *
 do_search (bool forward, bool regexp, const char *pattern)
 {
   le * ok = leNIL;
-  char *ms = NULL;
+  const char *ms = NULL;
 
   if (pattern == NULL)
-    pattern = ms = minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward");
+    pattern = ms = astr_cstr (minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward"));
 
   if (pattern == NULL)
     return FUNCALL (keyboard_quit);
@@ -161,7 +161,7 @@ Search forward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (true, false, pattern);
+  ok = do_search (true, false, astr_cstr (pattern));
 }
 END_DEFUN
 
@@ -172,7 +172,7 @@ Search backward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (false, false, pattern);
+  ok = do_search (false, false, astr_cstr (pattern));
 }
 END_DEFUN
 
@@ -183,7 +183,7 @@ Search forward from point for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (true, true, pattern);
+  ok = do_search (true, true, astr_cstr (pattern));
 }
 END_DEFUN
 
@@ -194,7 +194,7 @@ Search backward from point for match for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (false, true, pattern);
+  ok = do_search (false, true, astr_cstr (pattern));
 }
 END_DEFUN
 
@@ -398,7 +398,7 @@ what to do with it.
 {
   bool noask = false, find_no_upper;
   size_t find_len, count = 0;
-  char *find = minibuf_read ("Query replace string: ", "");
+  const char *find = astr_cstr (minibuf_read ("Query replace string: ", ""));
 
   if (find == NULL)
     return FUNCALL (keyboard_quit);
@@ -407,7 +407,7 @@ what to do with it.
   find_len = strlen (find);
   find_no_upper = no_upper (find, find_len, false);
 
-  char *s = minibuf_read ("Query replace `%s' with: ", "", find);
+  const char *s = astr_cstr (minibuf_read ("Query replace `%s' with: ", "", find));
   if (s == NULL)
     return FUNCALL (keyboard_quit);
   astr repl = astr_new_cstr (s);
