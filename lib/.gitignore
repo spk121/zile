@@ -253,3 +253,5 @@
 /ftell.c
 /strerror-override.c
 /strerror-override.h
+/memmem.c
+/str-two-way.h

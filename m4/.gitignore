@@ -160,3 +160,4 @@ warn-on-use.m4
 /fseek.m4
 /ftell.m4
 /sys_socket_h.m4
+/memmem.m4
