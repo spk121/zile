@@ -58,6 +58,12 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
+size_t
+get_buffer_size (Buffer * bp)
+{
+  return astr_len (bp->text);
+}
+
 void set_region_start (Region *rp, Point pt)
 {
   rp->start = point_to_offset (pt);
@@ -610,23 +616,6 @@ set_temporary_buffer (Buffer * bp)
 
   bp0->next = bp;
   bp->next = NULL;
-}
-
-size_t
-calculate_buffer_size (Buffer * bp)
-{
-  size_t size = 0;
-
-  for (const Line *lp = bp->lines; lp;)
-    {
-      size += astr_len (get_line_text (lp));
-      lp = get_line_next (lp);
-      if (lp == NULL)
-        break;
-      ++size;
-    }
-
-  return size;
 }
 
 void

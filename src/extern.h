@@ -59,6 +59,7 @@ int insert_char (int c);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
+size_t get_buffer_size (Buffer * bp);
 void set_region_start (Region *rp, Point pt);
 void set_region_end (Region *rp, Point pt);
 Point get_region_start (const Region r);
@@ -78,7 +79,6 @@ Region calculate_the_region (void);
 bool delete_region (const Region r);
 bool in_region (size_t lineno, size_t x, Region r);
 void set_temporary_buffer (Buffer * bp);
-size_t calculate_buffer_size (Buffer * bp);
 void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);

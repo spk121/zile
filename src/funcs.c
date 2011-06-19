@@ -83,7 +83,7 @@ print_buf (Buffer * old_bp, Buffer * bp)
            old_bp == bp ? '.' : ' ',
            get_buffer_readonly (bp) ? '%' : ' ',
            get_buffer_modified (bp) ? '*' : ' ',
-           get_buffer_name (bp), calculate_buffer_size (bp), "Fundamental");
+           get_buffer_name (bp), get_buffer_size (bp), "Fundamental");
   if (get_buffer_filename (bp) != NULL)
     insert_astr (compact_path (astr_new_cstr (get_buffer_filename (bp))));
   insert_newline ();
