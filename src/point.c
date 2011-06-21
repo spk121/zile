@@ -36,6 +36,7 @@ make_point (size_t lineno, size_t offset)
   };
   while (lineno-- > 0)
     pt.p = get_line_next (pt.p);
+  assert (pt.p);
   return pt;
 }
 
@@ -47,11 +48,12 @@ offset_to_point (Buffer *bp, size_t offset)
     .n = 0,
     .o = 0
   };
+  assert (pt.p);
   while (offset > 0 && offset > astr_len (get_line_text (pt.p)))
     {
-      assert (pt.p);
-      offset -= astr_len (get_line_text (pt.p)) + 1; /* FIXME: Length of EOL. */
+      offset -= astr_len (get_line_text (pt.p)) + strlen (get_buffer_eol (bp));
       pt.p = get_line_next (pt.p);
+      assert (pt.p);
       pt.n++;
     }
   pt.o = offset;
@@ -66,7 +68,7 @@ point_to_offset (Point pt)
   for (size_t i = 0; i < pt.n; i++)
     {
       assert (lp);
-      pt_o += astr_len (get_line_text (lp)) + 1; /* FIXME: length of EOL */
+      pt_o += astr_len (get_line_text (lp)) + strlen (get_buffer_eol (cur_bp)); /* FIXME: Use correct buffer's EOL! */
       lp = get_line_next (lp);
     }
   return pt_o;

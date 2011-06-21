@@ -102,33 +102,32 @@ get_line_prev (const Line *lp)
 {
   if (lp->o == 0)
     return NULL;
-  /* FIXME: Search for line ending. */
-  const char *prev = memrchr (astr_cstr (lp->bp->text), '\n', lp->o - 1);
+  /* FIXME: Write & use memrmem */
+  int found = find_substr (lp->bp->text, lp->bp->eol, strlen (lp->bp->eol),
+                           0, lp->o - 1, false, true, true, false, false);
   Line *n = XZALLOC (Line);
-  *n = (Line) {.bp = lp->bp, .o = prev ? prev - astr_cstr (lp->bp->text) + 1 : 0};
+  *n = (Line) {.bp = lp->bp, .o = found >= 0 ? found + strlen (lp->bp->eol) : 0};
   return n;
 }
 
 const Line *
 get_line_next (const Line *lp)
 {
-  /* FIXME: Search for line ending. */
-  const char *next = memchr (astr_cstr (lp->bp->text) + lp->o, '\n', astr_len (lp->bp->text) - lp->o);
+  const char *next = memmem (astr_cstr (lp->bp->text) + lp->o, astr_len (lp->bp->text) - lp->o,
+                             lp->bp->eol, strlen (lp->bp->eol));
   if (next == NULL)
     return NULL;
   Line *n = XZALLOC (Line);
-  *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text) + 1};
+  *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text) + strlen (lp->bp->eol)};
   return n;
 }
 
 castr
 get_line_text (const Line *lp)
 {
-  /* FIXME: Search for line ending. */
-  const char *next = memchr (astr_cstr (lp->bp->text) + lp->o, '\n', astr_len (lp->bp->text) - lp->o);
-  if (next == NULL)
-    next = astr_cstr (lp->bp->text) + astr_len (lp->bp->text);
-  return astr_substr (lp->bp->text, lp->o, next - astr_cstr (lp->bp->text) - lp->o);
+  const Line *next_lp = get_line_next (lp);
+  size_t next = next_lp ? next_lp->o : astr_len (lp->bp->text) + strlen (lp->bp->eol);
+  return astr_substr (lp->bp->text, lp->o, next - lp->o - strlen (lp->bp->eol));
 }
 
 
@@ -229,8 +228,8 @@ insert_char (int c)
     }
 
   intercalate_char (c);
-  forward_char ();
   adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
+  forward_char ();
 
   return true;
 }
@@ -242,14 +241,13 @@ insert_char (int c)
 bool
 intercalate_newline (void)
 {
-  /* FIXME: Insert line ending. */
-  if (!intercalate_char ('\n'))
-    return false;
+  const char *eol = cur_bp->eol;
+  while (*eol)
+    if (!intercalate_char (*eol++))
+      return false;
 
   adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
-
   set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
-
   set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
 
@@ -273,9 +271,9 @@ delete_char (void)
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
   if (eolp ())
     {
-      /* FIXME: Remove line ending's length, not just one char. */
-      adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -1);
-      astr_remove (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1);
+      size_t eol_len = strlen (cur_bp->eol);
+      adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -eol_len);
+      astr_remove (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, eol_len);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
       thisflag |= FLAG_NEED_RESYNC;
     }
@@ -648,13 +646,11 @@ copy_text_block (Point pt, size_t size)
   const Line * lp = pt.p;
   astr as = astr_substr (get_line_text (lp), pt.o, astr_len (get_line_text (lp)) - pt.o);
 
-  /* FIXME: Insert line ending. */
-  astr_cat_char (as, '\n');
+  astr_cat_cstr (as, cur_bp->eol);
   for (lp = get_line_next (lp); astr_len (as) < size; lp = get_line_next (lp))
     {
       astr_cat (as, get_line_text (lp));
-      /* FIXME: Insert line ending. */
-      astr_cat_char (as, '\n');
+      astr_cat_cstr (as, cur_bp->eol);
     }
   return astr_truncate (as, size);
 }
@@ -815,6 +811,7 @@ move_char (int dir)
     {
       thisflag |= FLAG_NEED_RESYNC;
       cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
+      assert (cur_bp->pt.p);
       cur_bp->pt.n += dir;
       if (dir > 0)
         FUNCALL (beginning_of_line);
@@ -884,6 +881,7 @@ move_line (int n)
   for (; n > 0; n--)
     {
       cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
+      assert (cur_bp->pt.p);
       cur_bp->pt.n += dir;
     }
 

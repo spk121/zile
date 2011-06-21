@@ -252,6 +252,11 @@ void recenter (Window * wp);
 
 /* search.c --------------------------------------------------------------- */
 void init_search (void);
+/* FIXME: Negate notbol and noteol */
+/* FIXME: Make haystack a char * not an astr */
+int find_substr (castr haystack, const char *needle, size_t needle_size,
+                 size_t from, size_t to,
+                 bool forward, bool notbol, bool noteol, bool regex, bool icase);
 
 /* term_curses.c ---------------------------------------------------------- */
 size_t term_buf_len (void);
