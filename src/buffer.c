@@ -103,7 +103,8 @@ get_line_prev (const Line *lp)
   if (lp->o == 0)
     return NULL;
   /* FIXME: Write & use memrmem */
-  int found = find_substr (lp->bp->text, lp->bp->eol, strlen (lp->bp->eol),
+  int found = find_substr (astr_cstr (lp->bp->text), astr_len (lp->bp->text),
+                           lp->bp->eol, strlen (lp->bp->eol),
                            0, lp->o - 1, false, true, true, false, false);
   Line *n = XZALLOC (Line);
   *n = (Line) {.bp = lp->bp, .o = found >= 0 ? found + strlen (lp->bp->eol) : 0};

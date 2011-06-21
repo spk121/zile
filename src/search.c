@@ -49,7 +49,7 @@ no_upper (const char *s, size_t len, int regex)
 static const char *re_find_err = NULL;
 
 int
-find_substr (castr as, const char *s2, size_t s2size, size_t from, size_t to,
+find_substr (const char *h, size_t hsize, const char *n, size_t nsize, size_t from, size_t to,
              bool forward, bool notbol, bool noteol, bool regex, bool icase)
 {
   int ret = -1;
@@ -66,11 +66,11 @@ find_substr (castr as, const char *s2, size_t s2size, size_t from, size_t to,
   re_set_syntax (syntax);
   search_regs.num_regs = 1;
 
-  re_find_err = re_compile_pattern (s2, (int) s2size, &pattern);
+  re_find_err = re_compile_pattern (n, (int) nsize, &pattern);
   pattern.not_bol = notbol;
   pattern.not_eol = noteol;
   if (!re_find_err)
-    ret = re_search (&pattern, astr_cstr (as), (int) astr_len (as), forward ? from : to - 1,
+    ret = re_search (&pattern, h, (int) hsize, forward ? from : to - 1,
                      forward ? (to - from) : -(to - 1 - from), &search_regs);
 
   if (ret >= 0)
@@ -103,7 +103,7 @@ search (Point pt, const char *s, int forward, int regexp)
       noteol = pt.o < to;
       to = pt.o;
     }
-  pos = find_substr (as, s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
+  pos = find_substr (astr_cstr (as), astr_len (as), s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
 
   /* Match following lines. */
   while (pos < 0)
@@ -113,7 +113,7 @@ search (Point pt, const char *s, int forward, int regexp)
       if (lp == NULL)
         break;
       as = get_line_text (lp);
-      pos = find_substr (as, s, ssize, 0, astr_len (as), forward, false, false, regexp, downcase);
+      pos = find_substr (astr_cstr (as), astr_len (as), s, ssize, 0, astr_len (as), forward, false, false, regexp, downcase);
     }
 
   if (pos < 0)
