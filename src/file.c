@@ -275,20 +275,8 @@ read_file (const char *filename)
         }
 
       /* Process this and subsequent chunks into lines. */
-      size_t eol_len = strlen (get_buffer_eol (cur_bp));
       do
-        {
-          for (int i = 0; i < size; i++)
-            {
-              if (strncmp (get_buffer_eol (cur_bp), buf + i, eol_len) != 0)
-                insert_char (buf[i]);
-              else
-                {
-                  insert_newline ();
-                  i += eol_len - 1;
-                }
-            }
-        }
+        insert_nstring (buf, size);
       while ((size = fread (buf, 1, BUFSIZ, fp)) > 0);
     }
 
