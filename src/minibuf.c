@@ -255,7 +255,7 @@ minibuf_read_yesno (const char *fmt, ...)
   if (ms != NULL)
     {
       gl_list_node_t n = gl_sortedlist_search (get_completion_completions (cp),
-                                               completion_strcmp, ms);
+                                               completion_strcmp, astr_cstr (ms));
       assert (n);
       ret = STREQ ((const char *) gl_list_node_value (get_completion_completions (cp), n),
                    "yes");
