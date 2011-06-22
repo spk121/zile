@@ -157,7 +157,7 @@ minibuf_read_filename (const char *fmt, const char *value,
 {
   va_list ap;
   char *buf;
-  astr p = NULL;
+  castr p = NULL;
   Completion *cp;
   astr as;
   size_t pos;
@@ -178,14 +178,16 @@ minibuf_read_filename (const char *fmt, const char *value,
       pos = astr_len (as);
       if (file)
         pos -= strlen (file);
-      p = astr_cpy (astr_new (), term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history));
+      p = term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history);
 
       if (p != NULL)
         {
-          if (expand_path (p))
-            add_history_element (files_history, astr_cstr (p));
+          astr q = astr_cpy (astr_new (), p);
+          if (expand_path (q))
+            add_history_element (files_history, astr_cstr (q));
           else
-            p = NULL;
+            q = NULL;
+          p = q;
         }
     }
 
