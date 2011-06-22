@@ -28,6 +28,7 @@ bin_PROGRAMS = zile
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
 zile_base_SOURCES =					\
+	memrmem.c					\
 	astr.c						\
 	astr.h						\
 	extern.h					\

@@ -252,10 +252,9 @@ void recenter (Window * wp);
 
 /* search.c --------------------------------------------------------------- */
 void init_search (void);
-int find_substr (const char *haystack, size_t haystack_size,
-                 const char *needle, size_t needle_size,
-                 size_t from, size_t to,
-                 bool forward, bool notbol, bool noteol, bool regex, bool icase);
+
+/* memrmem.c -------------------------------------------------------------- */
+const char *memrmem (const char *s, size_t slen, const char *t, size_t tlen);
 
 /* term_curses.c ---------------------------------------------------------- */
 size_t term_buf_len (void);

@@ -48,7 +48,7 @@ no_upper (const char *s, size_t len, int regex)
 
 static const char *re_find_err = NULL;
 
-int
+static int
 find_substr (const char *h, size_t hsize, const char *n, size_t nsize, size_t from, size_t to,
              bool forward, bool notbol, bool noteol, bool regex, bool icase)
 {
