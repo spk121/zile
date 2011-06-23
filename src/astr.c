@@ -57,6 +57,16 @@ astr_new (void)
   return as;
 }
 
+castr
+castr_new_nstr (const char *s, size_t n)
+{
+  astr as;
+  as = (astr) XZALLOC (struct astr);
+  as->len = n;
+  as->text = s;
+  return as;
+}
+
 const char *
 astr_cstr (castr as)
 {

@@ -210,77 +210,38 @@ const char *coding_eol_lf = "\n";
 const char *coding_eol_crlf = "\r\n";
 const char *coding_eol_cr = "\r";
 
-/* Maximum number of EOLs to check before deciding type. */
-#define MAX_EOL_CHECK_COUNT 3
-
 /*
- * Read the file contents into current buffer.
+ * Insert file contents into current buffer.
  * Return quietly if the file doesn't exist, or other error.
  */
-static void
-read_file (const char *filename)
+static int
+insert_file (const char *filename)
 {
-  FILE *fp = fopen (filename, "r");
-  if (fp == NULL)
+  if (exist_file (filename))
     {
-      if (errno != ENOENT)
+      struct stat st;
+      if (stat (filename, &st) == 0)
         {
-          minibuf_write ("%s: %s", filename, strerror (errno));
-          set_buffer_readonly (cur_bp, true);
-        }
-      return;
-    }
+          size_t size = st.st_size;
+          if (size == 0)
+            return true;
 
-  if (!check_writable (filename))
-    set_buffer_readonly (cur_bp, true);
-
-  /* Read first chunk and determine EOL type. */
-  /* FIXME: Don't assume first EOL occurs in first chunk. */
-  bool first_eol = true;
-  char buf[BUFSIZ];
-  int size = fread (buf, 1, BUFSIZ, fp);
-  if (size > 0)
-    {
-      size_t total_eols = 0;
-      for (int i = 0; i < size && total_eols < MAX_EOL_CHECK_COUNT; i++)
-        {
-          if (buf[i] == '\n' || buf[i] == '\r')
+          int fd = open (filename, O_RDONLY);
+          if (fd >= 0)
             {
-              const char *this_eol_type;
-              total_eols++;
-              if (buf[i] == '\n')
-                this_eol_type = coding_eol_lf;
-              else if (i == size - 1 || buf[i + 1] != '\n')
-                this_eol_type = coding_eol_cr;
-              else
-                {
-                  this_eol_type = coding_eol_crlf;
-                  i++;
-                }
-
-              if (first_eol)
-                {
-                  /* This is the first end-of-line. */
-                  set_buffer_eol (cur_bp, this_eol_type);
-                  first_eol = false;
-                }
-              else if (get_buffer_eol (cur_bp) != this_eol_type)
-                {
-                  /* This EOL is different from the last; arbitrarily choose
-                     LF. */
-                  set_buffer_eol (cur_bp, coding_eol_lf);
-                  break;
-                }
+              undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
+              undo_nosave = true;
+              char buf[BUFSIZ];
+              while ((size = read (fd, buf, BUFSIZ)) > 0)
+                insert_nstring (buf, size);
+              undo_nosave = false;
+              close (fd);
+              return true;
             }
         }
-
-      /* Process this and subsequent chunks into lines. */
-      do
-        insert_nstring (buf, size);
-      while ((size = fread (buf, 1, BUFSIZ, fp)) > 0);
     }
 
-  fclose (fp);
+  return false;
 }
 
 bool
@@ -306,7 +267,18 @@ find_file (const char *filename)
   set_buffer_names (bp, filename);
 
   switch_to_buffer (bp);
-  read_file (filename);
+
+  if (insert_file (filename))
+    {
+      if (!check_writable (filename))
+        set_buffer_readonly (cur_bp, true);
+      buffer_set_eol_type (cur_bp);
+
+      /* Reset undo history. */
+      set_buffer_next_undop (cur_bp, NULL);
+      set_buffer_last_undop (cur_bp, NULL);
+    }
+
   set_buffer_modified (bp, false);
   set_buffer_dir (bp, astr_new_cstr (dir_name (filename)));
   if (chdir (astr_cstr (get_buffer_dir (bp)))) {
@@ -459,44 +431,6 @@ Puts mark after the inserted text.
 }
 END_DEFUN
 
-static int
-insert_file (const char *filename)
-{
-  int fd;
-  size_t size;
-  char buf[BUFSIZ];
-
-  if (!exist_file (filename))
-    {
-      minibuf_error ("Unable to read file `%s'", filename);
-      return false;
-    }
-
-  fd = open (filename, O_RDONLY);
-  if (fd < 0)
-    {
-      minibuf_write ("%s: %s", filename, strerror (errno));
-      return false;
-    }
-
-  size = lseek (fd, 0, SEEK_END);
-  if (size < 1)
-    {
-      close (fd);
-      return true;
-    }
-
-  lseek (fd, 0, SEEK_SET);
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
-  undo_nosave = true;
-  while ((size = read (fd, buf, BUFSIZ)) > 0)
-    insert_nstring (buf, size);
-  undo_nosave = false;
-  close (fd);
-
-  return true;
-}
-
 DEFUN_ARGS ("insert-file", insert_file,
        STR_ARG (file))
 /*+
@@ -516,8 +450,17 @@ Set mark after the inserted text.
         ok = FUNCALL (keyboard_quit);
     }
 
-  if (file == NULL || astr_len (file) == 0 || !insert_file (astr_cstr (file)))
+  if (file == NULL || astr_len (file) == 0)
     ok = leNIL;
+
+  if (ok != leNIL)
+    {
+      if (!insert_file (astr_cstr (file)))
+        {
+          ok = leNIL;
+          minibuf_error ("%s: %s", file, strerror (errno));
+        }
+    }
   else
     set_mark_interactive ();
 }

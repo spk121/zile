@@ -126,9 +126,52 @@ get_line_text (const Line *lp)
 {
   const Line *next_lp = get_line_next (lp);
   size_t next = next_lp ? next_lp->o : astr_len (lp->bp->text) + strlen (lp->bp->eol);
-  return astr_substr (lp->bp->text, lp->o, next - lp->o - strlen (lp->bp->eol));
+  return castr_new_nstr (astr_cstr (lp->bp->text) + lp->o, next - lp->o - strlen (lp->bp->eol));
 }
 
+/*
+ * Determine EOL type from buffer contents.
+ */
+/* Maximum number of EOLs to check before deciding type. */
+#define MAX_EOL_CHECK_COUNT 3
+void
+buffer_set_eol_type (Buffer *bp)
+{
+  bool first_eol = true;
+  size_t total_eols = 0;
+  for (size_t i = 0; i < astr_len (bp->text) && total_eols < MAX_EOL_CHECK_COUNT; i++)
+    {
+      char c = astr_get (bp->text, i);
+      if (c == '\n' || c == '\r')
+        {
+          const char *this_eol_type;
+          total_eols++;
+          if (c == '\n')
+            this_eol_type = coding_eol_lf;
+          else if (i == astr_len (bp->text) - 1 || astr_get (bp->text, i + 1) != '\n')
+            this_eol_type = coding_eol_cr;
+          else
+            {
+              this_eol_type = coding_eol_crlf;
+              i++;
+            }
+
+          if (first_eol)
+            {
+              /* This is the first end-of-line. */
+              set_buffer_eol (cur_bp, this_eol_type);
+              first_eol = false;
+            }
+          else if (get_buffer_eol (cur_bp) != this_eol_type)
+            {
+              /* This EOL is different from the last; arbitrarily choose
+                 LF. */
+              set_buffer_eol (cur_bp, coding_eol_lf);
+              break;
+            }
+        }
+    }
+}
 
 /*
  * Adjust markers (including point) when text is edited.

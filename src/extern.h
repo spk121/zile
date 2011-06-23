@@ -60,6 +60,7 @@ int insert_char (int c);
 #undef FIELD
 #undef FIELD_STR
 size_t get_buffer_size (Buffer * bp);
+void buffer_set_eol_type (Buffer *bp);
 void set_region_start (Region *rp, Point pt);
 void set_region_end (Region *rp, Point pt);
 Point get_region_start (const Region r);
