@@ -348,21 +348,19 @@ delete_char (void)
  * `case-replace' is true.
  */
 void
-line_replace_text (const Line * lp, size_t offset, size_t oldlen,
-                   astr newtext, int replace_case)
+buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int replace_case)
 {
   if (replace_case && get_variable_bool ("case-replace"))
     {
-      int case_type = check_case (astr_cstr (get_line_text (lp)) + offset, oldlen);
+      int case_type = check_case (astr_cstr (bp->text) + offset, oldlen);
 
       if (case_type != 0)
         astr_recase (newtext, case_type == 1 ? case_capitalized : case_upper);
     }
 
   set_buffer_modified (cur_bp, true);
-  adjust_markers (lp->o + offset, (ptrdiff_t) (astr_len (newtext) - oldlen));
-  /* FIXME: Don't rely on editing at point. */
-  astr_replace (lp->bp->text, get_buffer_pt (lp->bp).p->o + offset, oldlen, newtext);
+  adjust_markers (offset, (ptrdiff_t) (astr_len (newtext) - oldlen));
+  astr_replace (bp->text, offset, oldlen, newtext);
 }
 
 void

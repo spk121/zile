@@ -548,7 +548,7 @@ edit_tab_line (const Line * lp, size_t lineno, size_t offset, size_t size,
     {
       undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
                  size, astr_len (dest));
-      line_replace_text (lp, offset, size, dest, false);
+      buffer_replace_text (cur_bp, get_line_offset (lp) + offset, size, dest, false);
     }
 }
 

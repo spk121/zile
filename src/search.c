@@ -453,7 +453,7 @@ what to do with it.
       ++count;
       undo_save (UNDO_REPLACE_BLOCK,
                  make_point (pt.n, pt.o - find_len), find_len, astr_len (repl));
-      line_replace_text (pt.p, pt.o - find_len, find_len, repl, find_no_upper);
+      buffer_replace_text (cur_bp, get_line_offset (pt.p) + pt.o - find_len, find_len, repl, find_no_upper);
 
       if (c == '.')		/* Replace and quit. */
         break;
