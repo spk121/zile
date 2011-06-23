@@ -252,13 +252,12 @@ intercalate_char (int c)
 int
 type_char (int c, bool overwrite)
 {
-  size_t t = tab_width (cur_bp);
-
   if (warn_if_readonly_buffer ())
     return false;
 
   if (overwrite)
     {
+      size_t t = tab_width (cur_bp);
       Point pt = get_buffer_pt (cur_bp);
       /* Current character isn't the end of line or a \t
          || current char is a \t && we are on the tab limit.  */
@@ -268,7 +267,7 @@ type_char (int c, bool overwrite)
           /* Replace the character.  */
           char ch = (char) c;
           undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
-          astr_nreplace_cstr (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1, &ch, 1);
+          astr_nreplace_cstr (cur_bp->text, pt.p->o + pt.o, 1, &ch, 1);
           ++pt.o;
           goto_point (pt);
           set_buffer_modified (cur_bp, true);
