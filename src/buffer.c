@@ -299,7 +299,7 @@ intercalate_newline (void)
     if (!intercalate_char (*eol++))
       return false;
 
-  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
+  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, strlen (cur_bp->eol));
   set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
   set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
