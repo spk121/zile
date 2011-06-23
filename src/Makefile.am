@@ -116,7 +116,7 @@ DISTCLEANFILES =					\
 	tbl_vars.h					\
 	zile.1
 
-CLOC = cloc --force-lang="C",h
+CLOC = cloc --force-lang="C",h --force-lang="C",in
 
 TESTSOURCES = $(LISP_TESTS) $(LISP_TESTS_ZILE_ONLY)
 
