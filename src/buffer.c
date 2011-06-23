@@ -363,6 +363,7 @@ void
 insert_buffer (Buffer * bp)
 {
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  /* Copy text to avoid problems when bp == cur_bp. */
   insert_astr (astr_cpy (astr_new (), bp->text));
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
