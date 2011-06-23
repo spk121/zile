@@ -33,12 +33,7 @@ term_minibuf_write (const char *s)
 {
   term_move (term_height () - 1, 0);
   term_clrtoeol ();
-
-  for (size_t x = 0; *s != '\0' && x < term_width (); s++)
-    {
-      term_addch (*(const unsigned char *) s);
-      ++x;
-    }
+  term_addnstr (s, MIN (term_width (), strlen (s)));
 }
 
 static void
@@ -72,6 +67,23 @@ draw_minibuf_read (const char *prompt, const char *value,
                                                  margin));
 
   term_refresh ();
+}
+
+static void
+maybe_close_popup (Completion *cp)
+{
+  Window *wp, *old_wp = cur_wp;
+  if (cp != NULL && (get_completion_flags (cp) & CFLAG_POPPEDUP)
+      && (wp = find_window ("*Completions*")) != NULL)
+    {
+      set_current_window (wp);
+      if (get_completion_flags (cp) & CFLAG_CLOSE)
+        FUNCALL (delete_window);
+      else if (get_completion_old_bp (cp))
+        switch_to_buffer (get_completion_old_bp (cp));
+      set_current_window (old_wp);
+      term_redisplay ();
+    }
 }
 
 static castr
@@ -246,6 +258,10 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
               switch (thistab)
                 {
                 case COMPLETION_MATCHED:
+                  set_completion_flags (cp, get_completion_flags (cp) | CFLAG_CLOSE);
+                  maybe_close_popup (cp);
+                  set_completion_flags (cp, get_completion_flags (cp) & ~CFLAG_POPPEDUP);
+                  /* FALLTHROUGH */
                 case COMPLETION_MATCHEDNONUNIQUE:
                 case COMPLETION_NONUNIQUE:
                   {
@@ -291,23 +307,10 @@ castr
 term_minibuf_read (const char *prompt, const char *value, size_t pos,
                    Completion * cp, History * hp)
 {
-  Window *wp, *old_wp = cur_wp;
-
   if (hp)
     prepare_history (hp);
 
   castr as = do_minibuf_read (prompt, value, pos, cp, hp);
-
-  if (cp != NULL && (get_completion_flags (cp) & CFLAG_POPPEDUP)
-      && (wp = find_window ("*Completions*")) != NULL)
-    {
-      set_current_window (wp);
-      if (get_completion_flags (cp) & CFLAG_CLOSE)
-        FUNCALL (delete_window);
-      else if (get_completion_old_bp (cp))
-        switch_to_buffer (get_completion_old_bp (cp));
-      set_current_window (old_wp);
-    }
-
+  maybe_close_popup (cp);
   return as;
 }

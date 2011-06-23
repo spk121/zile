@@ -145,11 +145,11 @@ completion_scroll_down (void)
  * Calculate the maximum length of the completions.
  */
 static size_t
-calculate_max_length (gl_list_t l, size_t size)
+calculate_max_length (gl_list_t l)
 {
   size_t maxlen = 0;
 
-  for (size_t i = 0; i < MIN (size, gl_list_size (l)); i++)
+  for (size_t i = 0; i < gl_list_size (l); i++)
     {
       size_t len = strlen ((const char *) gl_list_get_at (l, i));
       maxlen = MAX (len, maxlen);
@@ -162,51 +162,39 @@ calculate_max_length (gl_list_t l, size_t size)
  * Print the list of completions in a set of columns.
  */
 static void
-completion_print (gl_list_t l, size_t size)
+completion_print (gl_list_t l)
 {
-  size_t max = calculate_max_length (l, size) + 5;
+  size_t max = calculate_max_length (l) + 5;
   size_t numcols = (get_window_ewidth (cur_wp) - 1) / max;
 
   bprintf ("Possible completions are:\n");
-  for (size_t i = 0, col = 0; i < MIN (size, gl_list_size (l)); i++)
+  for (size_t i = 0, col = 0; i < gl_list_size (l); i++)
     {
-      const char *s = (const char *) gl_list_get_at (l, i);
-      size_t len = strlen (s);
-      if (col >= numcols)
-        {
-          col = 0;
-          insert_newline ();
-        }
-      insert_nstring (s, len, coding_eol_lf);
-      for (size_t j = max - len; j > 0; --j)
-        insert_char (' ');
-      ++col;
+      bprintf ("%-*s", max, (const char *) gl_list_get_at (l, i));
+
+      col = (col + 1) % numcols;
+      if (col == 0)
+        insert_newline ();
     }
 }
 
 static void
 write_completion (va_list ap)
 {
-  Completion *cp = va_arg (ap, Completion *);
-  int allflag = va_arg (ap, int);
-  size_t num = va_arg (ap, size_t);
-  if (allflag)
-    completion_print (cp->completions, gl_list_size (cp->completions));
-  else
-    completion_print (cp->matches, num);
+  completion_print (va_arg (ap, gl_list_t));
 }
 
 /*
  * Popup the completion window.
  */
 static void
-popup_completion (Completion * cp, int allflag, size_t num)
+popup_completion (Completion * cp, int allflag)
 {
   cp->flags |= CFLAG_POPPEDUP;
   if (get_window_next (head_wp) == NULL)
     cp->flags |= CFLAG_CLOSE;
 
-  write_temp_buffer ("*Completions*", true, write_completion, cp, allflag, num);
+  write_temp_buffer ("*Completions*", true, write_completion, allflag ? cp->completions : cp->matches);
 
   if (!(cp->flags & CFLAG_CLOSE))
     cp->old_bp = cur_bp;
@@ -292,8 +280,6 @@ completion_readdir (Completion * cp, astr as)
 int
 completion_try (Completion * cp, astr search, int popup_when_complete)
 {
-  size_t fullmatches = 0, partmatches = 0;
-
   cp->matches = gl_list_create_empty (GL_LINKED_LIST, completion_STREQ, NULL, NULL, false);
 
   if (cp->flags & CFLAG_FILENAME)
@@ -301,14 +287,13 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
       return COMPLETION_NOTMATCHED;
 
   size_t ssize = astr_len (search);
-
   if (ssize == 0)
     {
       cp->match = xstrdup ((const char *) gl_list_get_at (cp->completions, 0));
       if (gl_list_size (cp->completions) > 1)
         {
           cp->matchsize = 0;
-          popup_completion (cp, true, 0);
+          popup_completion (cp, true);
           return COMPLETION_NONUNIQUE;
         }
       else
@@ -318,45 +303,45 @@ completion_try (Completion * cp, astr search, int popup_when_complete)
         }
     }
 
+  size_t fullmatches = 0;
   for (size_t i = 0; i < gl_list_size (cp->completions); i++)
     {
       const char *s = (const char *) gl_list_get_at (cp->completions, i);
       if (!strncmp (s, astr_cstr (search), ssize))
         {
-          ++partmatches;
           gl_sortedlist_add (cp->matches, completion_strcmp, s);
           if (STREQ (s, astr_cstr (search)))
             ++fullmatches;
         }
     }
 
-  if (partmatches == 0)
+  if (gl_list_size (cp->matches) == 0)
     return COMPLETION_NOTMATCHED;
-  else if (partmatches == 1)
+  else if (gl_list_size (cp->matches) == 1)
     {
       cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
       cp->matchsize = strlen (cp->match);
       return COMPLETION_MATCHED;
     }
-  else if (partmatches > 1 && fullmatches == 1)
+  else if (gl_list_size (cp->matches) > 1 && fullmatches == 1)
     {
       cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
       cp->matchsize = strlen (cp->match);
       if (popup_when_complete)
-        popup_completion (cp, false, partmatches);
+        popup_completion (cp, false);
       return COMPLETION_MATCHEDNONUNIQUE;
     }
 
   for (size_t j = ssize;; ++j)
     {
       char c = ((const char *) gl_list_get_at (cp->matches, 0))[j];
-      for (size_t i = 1; i < partmatches; ++i)
+      for (size_t i = 1; i < gl_list_size (cp->matches); ++i)
         {
           if (((const char *)(gl_list_get_at (cp->matches, i)))[j] != c)
             {
               cp->match = xstrdup ((const char *) gl_list_get_at (cp->matches, 0));
               cp->matchsize = j;
-              popup_completion (cp, false, partmatches);
+              popup_completion (cp, false);
               return COMPLETION_NONUNIQUE;
             }
         }
