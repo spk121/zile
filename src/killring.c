@@ -48,9 +48,7 @@ kill_ring_push (astr as)
 static bool
 copy_or_kill_region (bool kill, Region r)
 {
-  astr as = copy_text_block (get_region_start (r), get_region_size (r));
-
-  kill_ring_push (as);
+  kill_ring_push (get_buffer_region (cur_bp, r));
 
   if (kill)
     {

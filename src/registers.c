@@ -59,10 +59,7 @@ Copy region into register @i{register}.
       if (warn_if_no_mark ())
         ok = leNIL;
       else
-        {
-          Region r = calculate_the_region ();
-          regs[reg] = copy_text_block (get_region_start (r), get_region_size (r));
-        }
+        regs[reg] = get_buffer_region (cur_bp, calculate_the_region ());
     }
 }
 END_DEFUN

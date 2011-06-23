@@ -91,10 +91,10 @@ undo_save (int type, Point pt, size_t osize, size_t size)
           lp = get_line_next (lp);
         while (++n < pt.n);
 
-      pt.p = lp;
       up->block.osize = osize;
       up->block.size = size;
-      up->block.text = copy_text_block (pt, osize);
+      size_t o = get_line_offset (lp);
+      up->block.text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
     }
 
   up->next = get_buffer_last_undop (cur_bp);

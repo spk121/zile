@@ -858,8 +858,7 @@ static void
 astr_append_region (astr s)
 {
   activate_mark ();
-  Region r = calculate_the_region ();
-  astr_cat (s, copy_text_block (get_region_start (r), get_region_size (r)));
+  astr_cat (s, get_buffer_region (cur_bp, calculate_the_region ()));
 }
 
 static bool
@@ -1322,9 +1321,7 @@ END_DEFUN
 static void
 write_shell_output (va_list ap)
 {
-  astr out = va_arg (ap, astr);
-
-  insert_astr (out);
+  insert_astr (va_arg (ap, astr));
 }
 
 static bool
@@ -1360,9 +1357,9 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
               undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
               FUNCALL (delete_region);
             }
-            insert_astr (out);
-            if (replace)
-              undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+          insert_astr (out);
+          if (replace)
+            undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
         }
       else
         {
@@ -1468,8 +1465,7 @@ The output is available in that buffer in both cases.
             }
           else
             {
-              astr as = copy_text_block (get_region_start (r), get_region_size (r));
-              ssize_t written = write (fd, astr_cstr (as), get_region_size (r));
+              ssize_t written = write (fd, astr_cstr (get_buffer_region (cur_bp, r)), get_region_size (r));
 
               if (written != (ssize_t) get_region_size (r))
                 {

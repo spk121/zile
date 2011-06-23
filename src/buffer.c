@@ -129,6 +129,12 @@ get_line_text (const Line *lp)
   return castr_new_nstr (astr_cstr (lp->bp->text) + lp->o, next - lp->o - strlen (lp->bp->eol));
 }
 
+size_t
+get_line_offset (const Line *lp)
+{
+  return lp->o;
+}
+
 /*
  * Determine EOL type from buffer contents.
  */
@@ -681,20 +687,12 @@ tab_width (Buffer * bp)
 
 /*
  * Copy a region of text into an allocated buffer.
+ * FIXME: Return encoding.
  */
 astr
-copy_text_block (Point pt, size_t size)
+get_buffer_region (Buffer *bp, Region r)
 {
-  const Line * lp = pt.p;
-  astr as = astr_substr (get_line_text (lp), pt.o, astr_len (get_line_text (lp)) - pt.o);
-
-  astr_cat_cstr (as, cur_bp->eol);
-  for (lp = get_line_next (lp); astr_len (as) < size; lp = get_line_next (lp))
-    {
-      astr_cat (as, get_line_text (lp));
-      astr_cat_cstr (as, cur_bp->eol);
-    }
-  return astr_truncate (as, size);
+  return astr_substr (bp->text, r.start, r.end - r.start);
 }
 
 Buffer *

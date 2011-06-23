@@ -200,6 +200,7 @@ Insert a newline and leave point before it.
 }
 END_DEFUN
 
+/* FIXME: Accept string and encoding. */
 void
 insert_nstring (const char *s, size_t len)
 {

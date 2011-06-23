@@ -45,6 +45,7 @@ void init_default_bindings (void);
   ty get_line_ ## field (const Line *lp);
 #include "line.h"
 #undef FIELD
+size_t get_line_offset (const Line *lp);
 bool intercalate_newline (void);
 bool delete_char (void);
 void line_replace_text (const Line * lp, size_t offset, size_t oldlen,
@@ -83,7 +84,7 @@ void set_temporary_buffer (Buffer * bp);
 void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);
-astr copy_text_block (Point pt, size_t size);
+astr get_buffer_region (Buffer *bp, Region r);
 Buffer *create_scratch_buffer (void);
 void kill_buffer (Buffer * kill_bp);
 Completion *make_buffer_completion (void);
