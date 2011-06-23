@@ -36,15 +36,9 @@
  * whatever the current insert mode is.
  */
 int
-insert_char_in_insert_mode (int c)
+insert_char (int c)
 {
-  bool old_overwrite = get_buffer_overwrite (cur_bp);
-
-  set_buffer_overwrite (cur_bp, false);
-  int ret = insert_char (c);
-  set_buffer_overwrite (cur_bp, old_overwrite);
-
-  return ret;
+  return type_char (c, false);
 }
 
 static void
@@ -67,9 +61,9 @@ insert_tab (void)
     return false;
 
   if (get_variable_bool ("indent-tabs-mode"))
-    insert_char_in_insert_mode ('\t');
+    insert_char ('\t');
   else
-    insert_expanded_tab (insert_char_in_insert_mode);
+    insert_expanded_tab (insert_char);
 
   return true;
 }
@@ -212,7 +206,7 @@ insert_nstring (const char *s, size_t len, const char *eol_type)
       if (next == NULL)
         next = s + len;
       for (; s < next; len--)
-        insert_char_in_insert_mode (*s++);
+        insert_char (*s++);
       if (len > 0)
         {
           insert_newline ();
@@ -334,7 +328,7 @@ Delete all spaces and tabs around point, leaving one space.
 {
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   FUNCALL (delete_horizontal_space);
-  insert_char_in_insert_mode (' ');
+  insert_char (' ');
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 END_DEFUN
@@ -421,7 +415,7 @@ does nothing.
               if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
                 ok = bool_to_lisp (insert_tab ());
               else
-                ok = bool_to_lisp (insert_char_in_insert_mode (' '));
+                ok = bool_to_lisp (insert_char (' '));
             }
           while (ok == leT && (cur_goalc = get_goalc ()) < target_goalc);
         }

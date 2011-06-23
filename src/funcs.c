@@ -336,8 +336,8 @@ quoted_insert_octal (int c1)
 
   if (!isdigit (c2) || c2 - '0' >= 8)
     {
-      insert_char_in_insert_mode (c1 - '0');
-      insert_char_in_insert_mode (c2);
+      insert_char (c1 - '0');
+      insert_char (c2);
     }
   else
     {
@@ -346,11 +346,11 @@ quoted_insert_octal (int c1)
 
       if (!isdigit (c3) || c3 - '0' >= 8)
         {
-          insert_char_in_insert_mode ((c1 - '0') * 8 + (c2 - '0'));
-          insert_char_in_insert_mode (c3);
+          insert_char ((c1 - '0') * 8 + (c2 - '0'));
+          insert_char (c3);
         }
       else
-        insert_char_in_insert_mode ((c1 - '0') * 64 + (c2 - '0') * 8 + (c3 - '0'));
+        insert_char ((c1 - '0') * 64 + (c2 - '0') * 8 + (c3 - '0'));
     }
 }
 
@@ -369,7 +369,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
   if (isdigit (c) && c - '0' < 8)
     quoted_insert_octal (c);
   else
-    insert_char_in_insert_mode (c);
+    insert_char (c);
 
   minibuf_clear ();
 }
@@ -1290,7 +1290,7 @@ setcase_region (int (*func) (int))
     {
       char c = func (following_char ());
       delete_char ();
-      insert_char (c);
+      type_char (c, get_buffer_overwrite (cur_bp));
     }
   goto_point (get_marker_pt (m));
   unchain_marker (m);

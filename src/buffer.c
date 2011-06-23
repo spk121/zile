@@ -250,14 +250,14 @@ intercalate_char (int c)
  * into the current buffer.
  */
 int
-insert_char (int c)
+type_char (int c, bool overwrite)
 {
   size_t t = tab_width (cur_bp);
 
   if (warn_if_readonly_buffer ())
     return false;
 
-  if (get_buffer_overwrite (cur_bp))
+  if (overwrite)
     {
       Point pt = get_buffer_pt (cur_bp);
       /* Current character isn't the end of line or a \t

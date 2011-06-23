@@ -219,7 +219,7 @@ self_insert_command (void)
       if (isspace (key) && get_buffer_autofill (cur_bp) &&
           get_goalc () > (size_t) get_variable_number ("fill-column"))
         fill_break_line ();
-      insert_char (key);
+      type_char (key, get_buffer_overwrite (cur_bp));
     }
   else
     {

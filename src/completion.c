@@ -179,7 +179,7 @@ completion_print (gl_list_t l, size_t size)
         }
       insert_nstring (s, len, coding_eol_lf);
       for (size_t j = max - len; j > 0; --j)
-        insert_char_in_insert_mode (' ');
+        insert_char (' ');
       ++col;
     }
 }
