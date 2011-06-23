@@ -240,6 +240,7 @@ intercalate_char (int c)
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
   astr_insert_char (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, c);
+  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
   set_buffer_modified (cur_bp, true);
 
   return true;
@@ -281,7 +282,6 @@ type_char (int c, bool overwrite)
     }
 
   intercalate_char (c);
-  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
   forward_char ();
 
   return true;
@@ -299,9 +299,7 @@ intercalate_newline (void)
     if (!intercalate_char (*eol++))
       return false;
 
-  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, strlen (cur_bp->eol));
   set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
-  set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
 
   return true;
