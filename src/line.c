@@ -200,18 +200,25 @@ Insert a newline and leave point before it.
 }
 END_DEFUN
 
-/* FIXME: Accept string and encoding. */
 void
-insert_nstring (const char *s, size_t len)
+insert_nstring (const char *s, size_t len, const char *eol_type)
 {
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, len);
   undo_nosave = true;
-  for (size_t i = 0; i < len; i++)
+  size_t eol_len = strlen (eol_type);
+  while (len > 0)
     {
-      if (s[i] == '\n')
-        insert_newline ();
-      else
-        insert_char_in_insert_mode (s[i]);
+      const char *next = memmem (s, len, eol_type, eol_len);
+      if (next == NULL)
+        next = s + len;
+      for (; s < next; len--)
+        insert_char_in_insert_mode (*s++);
+      if (len > 0)
+        {
+          insert_newline ();
+          s += eol_len;
+          len -= eol_len;
+        }
     }
   undo_nosave = false;
 }
@@ -223,14 +230,14 @@ Insert the argument at point.
 +*/
 {
   STR_INIT (arg);
-  insert_astr (arg);
+  bprintf ("%s", astr_cstr (arg));
 }
 END_DEFUN
 
 void
-insert_astr (castr as)
+insert_estr (estr es)
 {
-  insert_nstring (astr_cstr (as), astr_len (as));
+  insert_nstring (astr_cstr (es.as), astr_len (es.as), es.eol);
 }
 
 void
@@ -239,7 +246,7 @@ bprintf (const char *fmt, ...)
   va_list ap;
 
   va_start (ap, fmt);
-  insert_astr (astr_vfmt (fmt, ap));
+  insert_estr ((estr) {.as = astr_vfmt (fmt, ap), .eol = coding_eol_lf});
   va_end (ap);
 }
 

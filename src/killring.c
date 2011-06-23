@@ -28,21 +28,23 @@
 #include "main.h"
 #include "extern.h"
 
-static astr kill_ring_text;
+static estr kill_ring_text;
 
 static void
 maybe_free_kill_ring (void)
 {
   if (last_command () != F_kill_region)
-    kill_ring_text = NULL;
+    kill_ring_text.as = NULL;
 }
 
 static void
-kill_ring_push (astr as)
+kill_ring_push (estr es)
 {
-  if (kill_ring_text == NULL)
-    kill_ring_text = astr_new ();
-  astr_cat (kill_ring_text, as);
+  if (kill_ring_text.as == NULL)
+    kill_ring_text.as = astr_new ();
+  kill_ring_text.eol = coding_eol_lf;
+  /* FIXME: Convert newlines. */
+  astr_cat (kill_ring_text.as, es.as);
 }
 
 static bool
@@ -129,13 +131,11 @@ kill_line (bool whole_line)
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
     {
-      astr as;
-
       if (!FUNCALL (delete_char))
         return false;
 
-      as = astr_new_cstr ("\n");
-      kill_ring_push (as);
+      estr es = (estr) {.as = astr_new_cstr ("\n"), .eol = get_buffer_eol (cur_bp)};
+      kill_ring_push (es);
       set_this_command (F_kill_region);
     }
 
@@ -292,7 +292,7 @@ More precisely, reinsert the stretch of killed text most recently
 killed @i{or} yanked.  Put point at end, and set mark at beginning.
 +*/
 {
-  if (kill_ring_text == NULL)
+  if (kill_ring_text.as == NULL)
     {
       minibuf_error ("Kill ring is empty");
       return leNIL;
@@ -304,9 +304,9 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
   set_mark_interactive ();
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0,
-             astr_len (kill_ring_text));
+             astr_len (kill_ring_text.as));
   undo_nosave = true;
-  insert_astr (kill_ring_text);
+  insert_estr (kill_ring_text);
   undo_nosave = false;
 
   deactivate_mark ();

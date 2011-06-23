@@ -31,7 +31,7 @@
 
 #define NUM_REGISTERS	256
 
-static astr regs[NUM_REGISTERS];
+static estr regs[NUM_REGISTERS];
 
 DEFUN_ARGS ("copy-to-register", copy_to_register,
             INT_ARG (reg))
@@ -69,9 +69,9 @@ static int regnum;
 static bool
 insert_register (void)
 {
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, astr_len (regs[regnum]));
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, astr_len (regs[regnum].as));
   undo_nosave = true;
-  insert_astr (regs[regnum]);
+  insert_estr (regs[regnum]);
   undo_nosave = false;
   return true;
 }
@@ -100,7 +100,7 @@ Puts point before and mark after the inserted text.
       minibuf_clear ();
       reg %= NUM_REGISTERS;
 
-      if (regs[reg] == NULL)
+      if (regs[reg].as == NULL)
         {
           minibuf_error ("Register does not contain text");
           ok = leNIL;
@@ -121,9 +121,9 @@ static void
 write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
 {
   for (size_t i = 0; i < NUM_REGISTERS; ++i)
-    if (regs[i] != NULL)
+    if (regs[i].as != NULL)
       {
-        const char *s = astr_cstr (regs[i]);
+        const char *s = astr_cstr (regs[i].as);
         while (*s == ' ' || *s == '\t' || *s == '\n')
           s++;
         size_t len = MIN (20, MAX (0, ((int) get_window_ewidth (cur_wp)) - 6)) + 1;
@@ -131,7 +131,7 @@ write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
         bprintf ("Register %s contains ", astr_cstr (astr_fmt (isprint (i) ? "%c" : "\\%o", i)));
         if (strlen (s) > 0)
           bprintf ("text starting with\n    %.*s\n", len, s);
-        else if (s != astr_cstr (regs[i]))
+        else if (s != astr_cstr (regs[i].as))
           bprintf ("whitespace\n");
         else
           bprintf ("the empty string\n");

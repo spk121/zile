@@ -61,6 +61,7 @@ typedef struct Completion Completion;
 /* FIXME: Types which should really be opaque. */
 typedef struct Point Point;
 typedef struct Region Region;
+typedef struct estr estr;
 
 struct Region
 {
@@ -73,6 +74,13 @@ struct Point
   const Line *p;		/* Line pointer. */
   size_t n;			/* Line number. */
   size_t o;			/* Offset. */
+};
+
+/* String with encoding */
+struct estr
+{
+  astr as;			/* String. */
+  const char* eol;		/* EOL type. */
 };
 
 /* Undo delta types. */

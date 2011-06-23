@@ -228,7 +228,7 @@ insert_file (const char *filename)
               undo_nosave = true;
               char buf[BUFSIZ];
               while ((size = read (fd, buf, BUFSIZ)) > 0)
-                insert_nstring (buf, size);
+                insert_nstring (buf, size, coding_eol_lf); /* FIXME: Detect coding of file. */
               undo_nosave = false;
               close (fd);
               return true;

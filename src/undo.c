@@ -50,7 +50,7 @@ struct Undo
   /* The block to insert. */
   struct
   {
-    astr text;
+    estr text;
     size_t osize;		/* Original size. */
     size_t size;		/* New block size. */
   } block;
@@ -135,7 +135,7 @@ revert_action (Undo * up)
       undo_nosave = true;
       for (size_t i = 0; i < up->block.size; ++i)
         delete_char ();
-      insert_astr (up->block.text);
+      insert_estr (up->block.text);
       undo_nosave = false;
     }
 

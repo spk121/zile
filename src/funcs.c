@@ -85,7 +85,7 @@ print_buf (Buffer * old_bp, Buffer * bp)
            get_buffer_modified (bp) ? '*' : ' ',
            get_buffer_name (bp), get_buffer_size (bp), "Fundamental");
   if (get_buffer_filename (bp) != NULL)
-    insert_astr (compact_path (astr_new_cstr (get_buffer_filename (bp))));
+    bprintf ("%s", astr_cstr (compact_path (astr_new_cstr (get_buffer_filename (bp)))));
   insert_newline ();
 }
 
@@ -858,7 +858,7 @@ static void
 astr_append_region (astr s)
 {
   activate_mark ();
-  astr_cat (s, get_buffer_region (cur_bp, calculate_the_region ()));
+  astr_cat (s, get_buffer_region (cur_bp, calculate_the_region ()).as);
 }
 
 static bool
@@ -946,13 +946,13 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
   /* Insert the first string. */
   goto_point (get_marker_pt (m2));
   unchain_marker (m2);
-  insert_astr (as1);
+  bprintf ("%s", astr_cstr (as1));
 
   /* Insert the second string. */
   if (as2)
     {
       goto_point (get_marker_pt (m1));
-      insert_astr (as2);
+      bprintf ("%s", astr_cstr (as2));
     }
   unchain_marker (m1);
 
@@ -1210,7 +1210,7 @@ setcase_word (int rcase)
       astr_recase (as, rcase);
       for (size_t i = 0; i < astr_len (as); i++)
         delete_char ();
-      insert_astr (as);
+      bprintf ("%s", astr_cstr (as));
       undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
     }
 
@@ -1321,7 +1321,7 @@ END_DEFUN
 static void
 write_shell_output (va_list ap)
 {
-  insert_astr (va_arg (ap, astr));
+  insert_estr ((estr) {.as = va_arg (ap, astr), .eol = coding_eol_lf});
 }
 
 static bool
@@ -1357,7 +1357,7 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
               undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
               FUNCALL (delete_region);
             }
-          insert_astr (out);
+          bprintf ("%s", astr_cstr (out));
           if (replace)
             undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
         }
@@ -1465,7 +1465,7 @@ The output is available in that buffer in both cases.
             }
           else
             {
-              ssize_t written = write (fd, astr_cstr (get_buffer_region (cur_bp, r)), get_region_size (r));
+              ssize_t written = write (fd, astr_cstr (get_buffer_region (cur_bp, r).as), get_region_size (r));
 
               if (written != (ssize_t) get_region_size (r))
                 {

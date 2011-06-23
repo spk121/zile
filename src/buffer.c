@@ -368,7 +368,7 @@ insert_buffer (Buffer * bp)
 {
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
   /* Copy text to avoid problems when bp == cur_bp. */
-  insert_astr (astr_cpy (astr_new (), bp->text));
+  insert_estr ((estr) {.as = astr_cpy (astr_new (), bp->text), .eol = bp->eol});
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 
@@ -692,12 +692,11 @@ tab_width (Buffer * bp)
 
 /*
  * Copy a region of text into an allocated buffer.
- * FIXME: Return encoding.
  */
-astr
+estr
 get_buffer_region (Buffer *bp, Region r)
 {
-  return astr_substr (bp->text, r.start, r.end - r.start);
+  return (estr) {.as = astr_substr (bp->text, r.start, r.end - r.start), .eol = bp->eol};
 }
 
 Buffer *
