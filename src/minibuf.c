@@ -321,7 +321,7 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
             }
           else
             {
-              minibuf_error (invalid_err, ms);
+              minibuf_error (invalid_err, astr_cstr (ms));
               waitkey (WAITKEY_DEFAULT);
             }
         }
