@@ -58,6 +58,12 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
+castr
+get_buffer_text (Buffer * bp)
+{
+  return bp->text;
+}
+
 size_t
 get_buffer_size (Buffer * bp)
 {

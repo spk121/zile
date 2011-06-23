@@ -551,35 +551,16 @@ copy_file (const char *source, const char *dest)
 static int
 raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 {
-  ssize_t eol_len = (ssize_t) strlen (get_buffer_eol (bp));
   int fd = creat (filename, mode);
 
   if (fd < 0)
     return -1;
 
-  /* Save the lines. */
   int ret = 0;
-  for (const Line *lp = get_buffer_lines (bp);
-       lp != NULL;
-       lp = get_line_next (lp))
-    {
-      ssize_t len = (ssize_t) astr_len (get_line_text (lp));
-      ssize_t written = write (fd, astr_cstr (get_line_text (lp)), len);
-      if (written != len)
-        {
-          ret = written;
-          break;
-        }
-      if (get_line_next (lp) != NULL)
-        {
-          written = write (fd, get_buffer_eol (bp), eol_len);
-          if (written != eol_len)
-            {
-              ret = written;
-              break;
-            }
-        }
-    }
+  size_t len = get_buffer_size (bp);
+  ssize_t written = write (fd, astr_cstr (get_buffer_text (bp)), get_buffer_size (bp));
+  if (written < 0 || (size_t) written != len)
+    ret = written;
 
   if (close (fd) < 0 && ret == 0)
     ret = -1;

@@ -60,6 +60,7 @@ int insert_char (int c);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
+castr get_buffer_text (Buffer * bp);
 size_t get_buffer_size (Buffer * bp);
 void buffer_set_eol_type (Buffer *bp);
 void set_region_start (Region *rp, Point pt);
