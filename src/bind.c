@@ -536,8 +536,7 @@ gather_bindings (astr key, Binding p, void *st)
 DEFUN ("where-is", where_is)
 /*+
 Print message listing key sequences that invoke the command DEFINITION.
-Argument is a command name.  If the prefix arg is non-nil, insert the
-message in the buffer.
+Argument is a command name.
 +*/
 {
   castr name = minibuf_read_function_name ("Where is command: ");
@@ -556,13 +555,7 @@ message in the buffer.
           if (astr_len (g.bindings) == 0)
             minibuf_write ("%s is not on any key", name);
           else
-            {
-              astr as = astr_fmt ("%s is on %s", name, astr_cstr (g.bindings));
-              if (lastflag & FLAG_SET_UNIARG)
-                insert_astr (as);
-              else
-                minibuf_write ("%s", astr_cstr (as));
-            }
+            minibuf_write ("%s is on %s", name, astr_cstr (g.bindings));
           ok = leT;
         }
     }
