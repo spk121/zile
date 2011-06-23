@@ -143,11 +143,12 @@ do_binding_completion (astr as)
           arg = -arg;
         }
 
-      do {
-        astr_insert_char (bs, 0, ' ');
-        astr_insert_char (bs, 0, arg % 10 + '0');
-        arg /= 10;
-      } while (arg != 0);
+      do
+        {
+          astr_insert_char (bs, 0, ' ');
+          astr_insert_char (bs, 0, arg % 10 + '0');
+          arg /= 10;
+        } while (arg != 0);
     }
 
   minibuf_write ("%s%s%s-",
