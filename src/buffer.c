@@ -228,9 +228,8 @@ check_case (const char *s, size_t len)
   return i == len;
 }
 
-/* Insert the character at the current position and move the text at its right
- * whatever the insert/overwrite mode is.
- * This function doesn't change the current position of the pointer.
+/*
+ * Insert a character at the current position without moving point.
  */
 static int
 intercalate_char (int c)
