@@ -39,12 +39,7 @@ int
 exist_file (const char *filename)
 {
   struct stat st;
-
-  if (stat (filename, &st) == -1)
-    if (errno == ENOENT)
-      return false;
-
-  return true;
+  return !(stat (filename, &st) == -1 && errno == ENOENT);
 }
 
 static int
