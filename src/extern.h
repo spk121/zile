@@ -46,8 +46,7 @@ const Line *get_line_next (const Line *lp);
 castr get_line_text (const Line *lp);
 size_t get_line_offset (const Line *lp);
 bool delete_char (void);
-void buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int replace_case);
-bool buffer_replace (Buffer *bp, size_t del, const char *s, size_t len);
+void buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
 int type_char (int c, bool overwrite);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
@@ -174,9 +173,10 @@ astr keyvectostr (gl_list_t keys);
 
 /* line.c ----------------------------------------------------------------- */
 int insert_char (int c);
-bool fill_break_line (void);
 bool insert_newline (void);
 bool intercalate_newline (void);
+bool replace (size_t del, const char *s, size_t len);
+bool fill_break_line (void);
 void insert_nstring (const char *s, size_t len, const char *eol_type);
 void insert_estr (estr as);
 void bprintf (const char *fmt, ...);

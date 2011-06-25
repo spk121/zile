@@ -235,26 +235,6 @@ check_case (const char *s, size_t len)
 }
 
 /*
- * Replace a string at point, moving point forwards.
- */
-bool
-buffer_replace (Buffer *bp, size_t del, const char *s, size_t len)
-{
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (bp), del, 1);
-  astr_nreplace_cstr (bp->text.as, bp->pt.p->o + cur_bp->pt.o, del, s, len);
-  adjust_markers (bp->pt.p->o + bp->pt.o, len);
-  assert (bp == cur_bp); /* See FIXME below */
-  while (len--)
-    assert (move_char (1)); /* FIXME: This assumes bp == cur_bp */
-  set_buffer_modified (bp, true);
-
-  return true;
-}
-
-/*
  * Insert the character `c' at the current point position
  * into the current buffer.
  * In overwrite mode, overwrite if current character isn't the end of
@@ -266,10 +246,10 @@ type_char (int c, bool overwrite)
   char ch = (char) c;
   size_t t = tab_width (cur_bp);
 
-  return buffer_replace (cur_bp, overwrite &&
-                         ((!eolp () && following_char () != '\t')
-                          || ((following_char () == '\t') && ((get_goalc () % t) == t - 1))) ? 1 : 0,
-                         &ch, 1);
+  return replace (overwrite &&
+                  ((!eolp () && following_char () != '\t')
+                   || ((following_char () == '\t') && ((get_goalc () % t) == t - 1))) ? 1 : 0,
+                  &ch, 1);
 }
 
 bool
@@ -312,19 +292,26 @@ delete_char (void)
  * same case as the old.
  */
 void
-buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int replace_case)
+buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case)
 {
+  astr as;
+
   if (replace_case && get_variable_bool ("case-replace"))
     {
       int case_type = check_case (astr_cstr (bp->text.as) + offset, oldlen);
 
       if (case_type != 0)
-        astr_recase (newtext, case_type == 1 ? case_capitalized : case_upper);
+        {
+          as = astr_recase (astr_cpy (astr_new (), castr_new_nstr (newtext, newlen)),
+                                 case_type == 1 ? case_capitalized : case_upper);
+          newtext = astr_cstr (as);
+        }
     }
 
+  undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, newlen);
   set_buffer_modified (cur_bp, true);
-  adjust_markers (offset, (ptrdiff_t) (astr_len (newtext) - oldlen));
-  astr_replace (bp->text.as, offset, oldlen, newtext);
+  adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
+  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
 }
 
 void

@@ -451,9 +451,8 @@ what to do with it.
       /* Perform replacement. */
       pt = get_buffer_pt (cur_bp);
       ++count;
-      undo_save (UNDO_REPLACE_BLOCK,
-                 make_point (pt.n, pt.o - find_len), find_len, astr_len (repl));
-      buffer_replace_text (cur_bp, get_line_offset (pt.p) + pt.o - find_len, find_len, repl, find_no_upper);
+      buffer_replace (cur_bp, get_line_offset (pt.p) + pt.o - find_len, find_len,
+                      astr_cstr (repl), astr_len (repl), find_no_upper);
 
       if (c == '.')		/* Replace and quit. */
         break;

@@ -545,11 +545,7 @@ edit_tab_line (const Line * lp, size_t lineno, size_t offset, size_t size,
   astr src = astr_substr (get_line_text (lp), offset, size);
   astr dest = action (src, col, t);
   if (astr_cmp (src, dest) != 0)
-    {
-      undo_save (UNDO_REPLACE_BLOCK, make_point (lineno, offset),
-                 size, astr_len (dest));
-      buffer_replace_text (cur_bp, get_line_offset (lp) + offset, size, dest, false);
-    }
+    buffer_replace (cur_bp, get_line_offset (lp) + offset, size, astr_cstr (dest), astr_len (dest), false);
 }
 
 static le *
@@ -1325,7 +1321,7 @@ write_shell_output (va_list ap)
 }
 
 static bool
-pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
+pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_replace)
 {
   astr out;
   bool more_than_one_line = false;
@@ -1350,15 +1346,15 @@ pipe_command (const char *cmd, const char *tempfile, bool insert, bool replace)
     minibuf_write ("(Shell command succeeded with no output)");
   else
     {
-      if (insert)
+      if (do_insert)
         {
-          if (replace)
+          if (do_replace)
             {
               undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
               FUNCALL (delete_region);
             }
           bprintf ("%s", astr_cstr (out));
-          if (replace)
+          if (do_replace)
             undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
         }
       else

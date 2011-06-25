@@ -81,7 +81,7 @@ END_DEFUN
 bool
 insert_newline (void)
 {
-  if (!buffer_replace (cur_bp, 0, get_buffer_eol (cur_bp), strlen (get_buffer_eol (cur_bp))))
+  if (!replace (0, get_buffer_eol (cur_bp), strlen (get_buffer_eol (cur_bp))))
     return false;
 
   set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
@@ -97,6 +97,21 @@ bool
 intercalate_newline (void)
 {
   return insert_newline () && backward_char ();
+}
+
+/*
+ * Replace a string at point, moving point forwards.
+ */
+bool
+replace (size_t del, const char *s, size_t len)
+{
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), del, s, len, false);
+  while (len--)
+    assert (move_char (1));
+  return true;
 }
 
 /*
@@ -219,7 +234,7 @@ insert_nstring (const char *s, size_t len, const char *eol_type)
     {
       const char *next = memmem (s, len, eol_type, eol_len);
       size_t line_len = next ? (size_t) (next - s) : len;
-      assert (buffer_replace (cur_bp, 0, s, line_len));
+      assert (replace (0, s, line_len));
       len -= line_len;
       s = next;
       if (len > 0)
