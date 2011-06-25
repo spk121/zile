@@ -235,21 +235,21 @@ check_case (const char *s, size_t len)
 }
 
 /*
- * Insert a string at point, moving point forwards.
- * FIXME: Convert newlines.
+ * Replace a string at point, moving point forwards.
  */
 bool
-buffer_insert (Buffer *bp, const char *s, size_t len)
+buffer_replace (Buffer *bp, size_t del, const char *s, size_t len)
 {
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
-  astr_nreplace_cstr (bp->text.as, bp->pt.p->o + cur_bp->pt.o, 0, s, len);
-  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, len);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (bp), del, 1);
+  astr_nreplace_cstr (bp->text.as, bp->pt.p->o + cur_bp->pt.o, del, s, len);
+  adjust_markers (bp->pt.p->o + bp->pt.o, len);
+  assert (bp == cur_bp); /* See FIXME below */
   while (len--)
-    assert (move_char (1));
-  set_buffer_modified (cur_bp, true);
+    assert (move_char (1)); /* FIXME: This assumes bp == cur_bp */
+  set_buffer_modified (bp, true);
 
   return true;
 }
@@ -257,41 +257,19 @@ buffer_insert (Buffer *bp, const char *s, size_t len)
 /*
  * Insert the character `c' at the current point position
  * into the current buffer.
+ * In overwrite mode, overwrite if current character isn't the end of
+ * line or a \t, or current char is a \t and we are on the tab limit.
  */
 int
 type_char (int c, bool overwrite)
 {
-  if (overwrite)
-    {
-      size_t t = tab_width (cur_bp);
-      Point pt = get_buffer_pt (cur_bp);
-      /* Current character isn't the end of line or a \t
-         || current char is a \t && we are on the tab limit.  */
-      if ((pt.o < astr_len (get_line_text (pt.p))) && ((astr_get (get_line_text (pt.p), pt.o) != '\t')
-                                                       || ((astr_get (get_line_text (pt.p), pt.o) == '\t') && ((get_goalc () % t) == t))))
-        {
-          /* FIXME: Make buffer_insert into buffer_replace and use it here. */
-          if (warn_if_readonly_buffer ())
-            return false;
-
-          /* Replace the character.  */
-          char ch = (char) c;
-          undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
-          astr_nreplace_cstr (cur_bp->text.as, pt.p->o + pt.o, 1, &ch, 1);
-          ++pt.o;
-          goto_point (pt);
-          set_buffer_modified (cur_bp, true);
-
-          return true;
-        }
-      /*
-       * Fall through the "insertion" mode of a character at the end
-       * of the line, since it is the same as "overwrite" mode.
-       */
-    }
-
   char ch = (char) c;
-  return buffer_insert (cur_bp, &ch, 1);
+  size_t t = tab_width (cur_bp);
+
+  return buffer_replace (cur_bp, overwrite &&
+                         ((!eolp () && following_char () != '\t')
+                          || ((following_char () == '\t') && ((get_goalc () % t) == t - 1))) ? 1 : 0,
+                         &ch, 1);
 }
 
 bool
