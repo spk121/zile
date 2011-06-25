@@ -47,6 +47,7 @@ castr get_line_text (const Line *lp);
 size_t get_line_offset (const Line *lp);
 bool delete_char (void);
 void buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int replace_case);
+bool buffer_insert (Buffer *bp, const char *s, size_t len);
 int type_char (int c, bool overwrite);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
@@ -58,8 +59,8 @@ int type_char (int c, bool overwrite);
 #undef FIELD
 #undef FIELD_STR
 castr get_buffer_text (Buffer * bp);
-bool buffer_insert (Buffer *bp, const char *s, size_t len);
 size_t get_buffer_size (Buffer * bp);
+const char *get_buffer_eol (Buffer *bp);
 void buffer_set_eol_type (Buffer *bp);
 size_t point_to_offset (Point pt);
 void set_region_start (Region *rp, Point pt);

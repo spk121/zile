@@ -43,7 +43,7 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-  astr text; /* FIXME: Merge with eol and make an estr. */
+  estr text;
 };
 
 #define FIELD(ty, field)                         \
@@ -61,13 +61,19 @@ struct Buffer
 castr
 get_buffer_text (Buffer * bp)
 {
-  return bp->text;
+  return bp->text.as;
+}
+
+const char *
+get_buffer_eol (Buffer * bp)
+{
+  return bp->text.eol;
 }
 
 size_t
 get_buffer_size (Buffer * bp)
 {
-  return astr_len (bp->text);
+  return astr_len (bp->text.as);
 }
 
 void set_region_start (Region *rp, Point pt)
@@ -108,22 +114,22 @@ get_line_prev (const Line *lp)
 {
   if (lp->o == 0)
     return NULL;
-  const char *prev = memrmem (astr_cstr (lp->bp->text), lp->o - strlen (lp->bp->eol),
-                              lp->bp->eol, strlen (lp->bp->eol));
+  const char *prev = memrmem (astr_cstr (lp->bp->text.as), lp->o - strlen (lp->bp->text.eol),
+                              lp->bp->text.eol, strlen (lp->bp->text.eol));
   Line *n = XZALLOC (Line);
-  *n = (Line) {.bp = lp->bp, .o = prev ? prev - astr_cstr (lp->bp->text) + strlen (lp->bp->eol) : 0};
+  *n = (Line) {.bp = lp->bp, .o = prev ? prev - astr_cstr (lp->bp->text.as) + strlen (lp->bp->text.eol) : 0};
   return n;
 }
 
 const Line *
 get_line_next (const Line *lp)
 {
-  const char *next = memmem (astr_cstr (lp->bp->text) + lp->o, astr_len (lp->bp->text) - lp->o,
-                             lp->bp->eol, strlen (lp->bp->eol));
+  const char *next = memmem (astr_cstr (lp->bp->text.as) + lp->o, astr_len (lp->bp->text.as) - lp->o,
+                             lp->bp->text.eol, strlen (lp->bp->text.eol));
   if (next == NULL)
     return NULL;
   Line *n = XZALLOC (Line);
-  *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text) + strlen (lp->bp->eol)};
+  *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text.as) + strlen (lp->bp->text.eol)};
   return n;
 }
 
@@ -131,8 +137,8 @@ castr
 get_line_text (const Line *lp)
 {
   const Line *next_lp = get_line_next (lp);
-  size_t next = next_lp ? next_lp->o : astr_len (lp->bp->text) + strlen (lp->bp->eol);
-  return castr_new_nstr (astr_cstr (lp->bp->text) + lp->o, next - lp->o - strlen (lp->bp->eol));
+  size_t next = next_lp ? next_lp->o : astr_len (lp->bp->text.as) + strlen (lp->bp->text.eol);
+  return castr_new_nstr (astr_cstr (lp->bp->text.as) + lp->o, next - lp->o - strlen (lp->bp->text.eol));
 }
 
 size_t
@@ -151,16 +157,16 @@ buffer_set_eol_type (Buffer *bp)
 {
   bool first_eol = true;
   size_t total_eols = 0;
-  for (size_t i = 0; i < astr_len (bp->text) && total_eols < MAX_EOL_CHECK_COUNT; i++)
+  for (size_t i = 0; i < astr_len (bp->text.as) && total_eols < MAX_EOL_CHECK_COUNT; i++)
     {
-      char c = astr_get (bp->text, i);
+      char c = astr_get (bp->text.as, i);
       if (c == '\n' || c == '\r')
         {
           const char *this_eol_type;
           total_eols++;
           if (c == '\n')
             this_eol_type = coding_eol_lf;
-          else if (i == astr_len (bp->text) - 1 || astr_get (bp->text, i + 1) != '\n')
+          else if (i == astr_len (bp->text.as) - 1 || astr_get (bp->text.as, i + 1) != '\n')
             this_eol_type = coding_eol_cr;
           else
             {
@@ -170,12 +176,12 @@ buffer_set_eol_type (Buffer *bp)
 
           if (first_eol)
             { /* This is the first end-of-line. */
-              set_buffer_eol (cur_bp, this_eol_type);
+              cur_bp->text.eol = this_eol_type;
               first_eol = false;
             }
           else if (get_buffer_eol (cur_bp) != this_eol_type)
             { /* This EOL is different from the last; arbitrarily choose LF. */
-              set_buffer_eol (cur_bp, coding_eol_lf);
+              cur_bp->text.eol = coding_eol_lf;
               break;
             }
         }
@@ -239,7 +245,7 @@ buffer_insert (Buffer *bp, const char *s, size_t len)
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
-  astr_nreplace_cstr (bp->text, bp->pt.p->o + cur_bp->pt.o, 0, s, len);
+  astr_nreplace_cstr (bp->text.as, bp->pt.p->o + cur_bp->pt.o, 0, s, len);
   adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, len);
   while (len--)
     assert (move_char (1));
@@ -271,7 +277,7 @@ type_char (int c, bool overwrite)
           /* Replace the character.  */
           char ch = (char) c;
           undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
-          astr_nreplace_cstr (cur_bp->text, pt.p->o + pt.o, 1, &ch, 1);
+          astr_nreplace_cstr (cur_bp->text.as, pt.p->o + pt.o, 1, &ch, 1);
           ++pt.o;
           goto_point (pt);
           set_buffer_modified (cur_bp, true);
@@ -305,16 +311,16 @@ delete_char (void)
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
   if (eolp ())
     {
-      size_t eol_len = strlen (cur_bp->eol);
+      size_t eol_len = strlen (cur_bp->text.eol);
       adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -eol_len);
-      astr_remove (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, eol_len);
+      astr_remove (cur_bp->text.as, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, eol_len);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
     {
       adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -1);
-      astr_remove (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1);
+      astr_remove (cur_bp->text.as, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1);
     }
 
   set_buffer_modified (cur_bp, true);
@@ -332,7 +338,7 @@ buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int
 {
   if (replace_case && get_variable_bool ("case-replace"))
     {
-      int case_type = check_case (astr_cstr (bp->text) + offset, oldlen);
+      int case_type = check_case (astr_cstr (bp->text.as) + offset, oldlen);
 
       if (case_type != 0)
         astr_recase (newtext, case_type == 1 ? case_capitalized : case_upper);
@@ -340,15 +346,15 @@ buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int
 
   set_buffer_modified (cur_bp, true);
   adjust_markers (offset, (ptrdiff_t) (astr_len (newtext) - oldlen));
-  astr_replace (bp->text, offset, oldlen, newtext);
+  astr_replace (bp->text.as, offset, oldlen, newtext);
 }
 
 void
 insert_buffer (Buffer * bp)
 {
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
-  /* Copy text to avoid problems when bp == cur_bp. */
-  insert_estr ((estr) {.as = astr_cpy (astr_new (), bp->text), .eol = bp->eol});
+  /* Copy text to avoid problems when bp == cur_bp. FIXME: Have a way to copy an estr */
+  insert_estr ((estr) {.as = astr_cpy (astr_new (), bp->text.as), .eol = bp->text.eol});
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 
@@ -363,10 +369,9 @@ buffer_new (void)
   Buffer *bp = (Buffer *) XZALLOC (Buffer);
   Line *l = XZALLOC (Line);
   l->bp = bp;
-  bp->text = astr_new ();
+  bp->text.as = astr_new ();
+  bp->text.eol = coding_eol_lf;
   bp->lines = bp->pt.p = l;
-
-  bp->eol = coding_eol_lf;
   bp->dir = agetcwd ();
 
   /* Insert into buffer list. */
@@ -676,7 +681,7 @@ tab_width (Buffer * bp)
 estr
 get_buffer_region (Buffer *bp, Region r)
 {
-  return (estr) {.as = astr_substr (bp->text, r.start, r.end - r.start), .eol = bp->eol};
+  return (estr) {.as = astr_substr (bp->text.as, r.start, r.end - r.start), .eol = bp->text.eol};
 }
 
 Buffer *
