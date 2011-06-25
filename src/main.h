@@ -80,7 +80,7 @@ struct Point
 struct estr
 {
   astr as;			/* String. */
-  const char* eol;		/* EOL type. */
+  const char *eol;		/* EOL type. */
 };
 
 /* Undo delta types. */
