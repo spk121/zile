@@ -43,7 +43,7 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-  astr text;
+  astr text; /* FIXME: Merge with eol and make an estr. */
 };
 
 #define FIELD(ty, field)                         \
@@ -169,15 +169,12 @@ buffer_set_eol_type (Buffer *bp)
             }
 
           if (first_eol)
-            {
-              /* This is the first end-of-line. */
+            { /* This is the first end-of-line. */
               set_buffer_eol (cur_bp, this_eol_type);
               first_eol = false;
             }
           else if (get_buffer_eol (cur_bp) != this_eol_type)
-            {
-              /* This EOL is different from the last; arbitrarily choose
-                 LF. */
+            { /* This EOL is different from the last; arbitrarily choose LF. */
               set_buffer_eol (cur_bp, coding_eol_lf);
               break;
             }
@@ -185,11 +182,14 @@ buffer_set_eol_type (Buffer *bp)
     }
 }
 
+size_t
+point_to_offset (Point pt)
+{
+  return pt.p->o + pt.o;
+}
+
 /*
- * Adjust markers (including point) when text is edited.
- *   o is offset at which edit was made
- *   delta gives the number of characters inserted (>0) or
- *     deleted (<0)
+ * Adjust markers (including point) at offset `o' by offset `delta'.
  */
 static void
 adjust_markers (size_t o, ptrdiff_t delta)
@@ -229,17 +229,20 @@ check_case (const char *s, size_t len)
 }
 
 /*
- * Insert a character at the current position without moving point.
+ * Insert a string at point, moving point forwards.
+ * FIXME: Convert newlines.
  */
-static int
-intercalate_char (int c)
+bool
+buffer_insert (Buffer *bp, const char *s, size_t len)
 {
   if (warn_if_readonly_buffer ())
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, 1);
-  astr_insert_char (cur_bp->text, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, c);
-  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, 1);
+  astr_nreplace_cstr (bp->text, bp->pt.p->o + cur_bp->pt.o, 0, s, len);
+  adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, len);
+  while (len--)
+    assert (move_char (1));
   set_buffer_modified (cur_bp, true);
 
   return true;
@@ -252,9 +255,6 @@ intercalate_char (int c)
 int
 type_char (int c, bool overwrite)
 {
-  if (warn_if_readonly_buffer ())
-    return false;
-
   if (overwrite)
     {
       size_t t = tab_width (cur_bp);
@@ -264,6 +264,10 @@ type_char (int c, bool overwrite)
       if ((pt.o < astr_len (get_line_text (pt.p))) && ((astr_get (get_line_text (pt.p), pt.o) != '\t')
                                                        || ((astr_get (get_line_text (pt.p), pt.o) == '\t') && ((get_goalc () % t) == t))))
         {
+          /* FIXME: Make buffer_insert into buffer_replace and use it here. */
+          if (warn_if_readonly_buffer ())
+            return false;
+
           /* Replace the character.  */
           char ch = (char) c;
           undo_save (UNDO_REPLACE_BLOCK, pt, 1, 1);
@@ -280,28 +284,8 @@ type_char (int c, bool overwrite)
        */
     }
 
-  intercalate_char (c);
-  forward_char ();
-
-  return true;
-}
-
-/*
- * Insert a newline at the current position without moving the cursor.
- * Update markers after point in the split line.
- */
-bool
-intercalate_newline (void)
-{
-  const char *eol = cur_bp->eol;
-  while (*eol)
-    if (!intercalate_char (*eol++))
-      return false;
-
-  set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
-  thisflag |= FLAG_NEED_RESYNC;
-
-  return true;
+  char ch = (char) c;
+  return buffer_insert (cur_bp, &ch, 1);
 }
 
 bool
@@ -339,9 +323,9 @@ delete_char (void)
 }
 
 /*
- * Replace text in the line `lp' with `newtext'. If `replace_case' is
- * true then the new characters will be the same case as the old if
- * `case-replace' is true.
+ * Replace text at offset `offset' with `newtext'. If `replace_case'
+ * and `case-replace' are true then the new characters will be the
+ * same case as the old.
  */
 void
 buffer_replace_text (Buffer *bp, size_t offset, size_t oldlen, astr newtext, int replace_case)
@@ -627,7 +611,7 @@ delete_region (const Region r)
 bool
 in_region (size_t lineno, size_t x, Region r)
 {
-  size_t o = point_to_offset ((Point) {.n = lineno, .o = x});
+  size_t o = point_to_offset (make_point (lineno, x));
   return o >= r.start && o <= r.end;
 }
 

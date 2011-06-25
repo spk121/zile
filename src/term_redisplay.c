@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,7 +166,7 @@ draw_window (size_t topline, Window * wp)
   /* Find the first line to display on the first screen line. */
   for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
        i > 0 && lineno > 0;
-       lp = get_line_prev (lp), --i, --lineno)
+       assert (lp = get_line_prev (lp)), --i, --lineno)
     ;
 
   cur_tab_width = tab_width (get_window_bp (wp));

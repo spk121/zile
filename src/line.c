@@ -81,7 +81,22 @@ END_DEFUN
 bool
 insert_newline (void)
 {
-  return intercalate_newline () && forward_char ();
+  if (!buffer_insert (cur_bp, get_buffer_eol (cur_bp), strlen (get_buffer_eol (cur_bp))))
+    return false;
+
+  set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
+  thisflag |= FLAG_NEED_RESYNC;
+
+  return true;
+}
+
+/*
+ * Insert a newline at the current position without moving the cursor.
+ */
+bool
+intercalate_newline (void)
+{
+  return insert_newline () && backward_char ();
 }
 
 /*
@@ -203,10 +218,10 @@ insert_nstring (const char *s, size_t len, const char *eol_type)
   while (len > 0)
     {
       const char *next = memmem (s, len, eol_type, eol_len);
-      if (next == NULL)
-        next = s + len;
-      for (; s < next; len--)
-        insert_char (*s++);
+      size_t line_len = next ? (size_t) (next - s) : len;
+      assert (buffer_insert (cur_bp, s, line_len));
+      len -= line_len;
+      s = next;
       if (len > 0)
         {
           insert_newline ();

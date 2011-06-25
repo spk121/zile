@@ -60,20 +60,6 @@ offset_to_point (Buffer *bp, size_t offset)
   return pt;
 }
 
-size_t
-point_to_offset (Point pt)
-{
-  size_t pt_o = pt.o;
-  const Line *lp = get_buffer_lines (cur_bp);
-  for (size_t i = 0; i < pt.n; i++)
-    {
-      assert (lp);
-      pt_o += astr_len (get_line_text (lp)) + strlen (get_buffer_eol (cur_bp)); /* FIXME: Use correct buffer's EOL! */
-      lp = get_line_next (lp);
-    }
-  return pt_o;
-}
-
 int
 cmp_point (Point pt1, Point pt2)
 {
