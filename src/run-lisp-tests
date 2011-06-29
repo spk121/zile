@@ -52,10 +52,10 @@ for test in "$@"; do
     edit_file=$builddir/$name.input
     args="--no-init-file $edit_file --load $test.el"
 
-    if test -n "$EMACS"; then
+    if test -n "$EMACSPROG"; then
         cp $srcdir/lisp-tests/test.input $edit_file
         chmod +w $edit_file
-        if $EMACS --quick --batch $args; then
+        if $EMACSPROG --quick --batch $args; then
             if diff $test.output $edit_file; then
                 emacs_pass=`expr $emacs_pass + 1`
                 rm -f $edit_file $edit_file~
