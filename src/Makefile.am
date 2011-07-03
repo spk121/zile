@@ -28,9 +28,12 @@ bin_PROGRAMS = zile
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
 zile_base_SOURCES =					\
+	memrmem.h					\
 	memrmem.c					\
 	astr.c						\
 	astr.h						\
+	estr.c						\
+	estr.h						\
 	extern.h					\
 	main.h						\
 	tbl_vars.h					\
@@ -140,7 +143,7 @@ check-local:
 check_PROGRAMS = astr
 
 astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
-astr_LDADD = $(LDADD)
+astr_LDADD = $(LDADD) memrmem.o
 
 # FIXME: Find a way of making these work
 #	lisp-tests/disabled/*.el

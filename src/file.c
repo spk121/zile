@@ -200,11 +200,6 @@ check_writable (const char *filename)
   return euidaccess (filename, W_OK) >= 0;
 }
 
-/* Formats of end-of-line. */
-const char *coding_eol_lf = "\n";
-const char *coding_eol_crlf = "\r\n";
-const char *coding_eol_cr = "\r";
-
 /*
  * Insert file contents into current buffer.
  * Return quietly if the file doesn't exist, or other error.
@@ -227,8 +222,10 @@ insert_file (const char *filename)
               undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
               undo_nosave = true;
               char buf[BUFSIZ];
+              astr as = astr_new ();
               while ((size = read (fd, buf, BUFSIZ)) > 0)
-                insert_nstring (buf, size, coding_eol_lf); /* FIXME: Detect coding of file. */
+                astr_ncat_cstr (as, buf, size);
+              insert_estr (estr_new_astr (as));
               undo_nosave = false;
               close (fd);
               return true;
@@ -267,7 +264,6 @@ find_file (const char *filename)
     {
       if (!check_writable (filename))
         set_buffer_readonly (cur_bp, true);
-      buffer_set_eol_type (cur_bp);
 
       /* Reset undo history. */
       set_buffer_next_undop (cur_bp, NULL);

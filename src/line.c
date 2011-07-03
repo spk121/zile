@@ -78,18 +78,6 @@ buffer.
 }
 END_DEFUN
 
-bool
-insert_newline (void)
-{
-  if (!replace (0, get_buffer_eol (cur_bp), strlen (get_buffer_eol (cur_bp))))
-    return false;
-
-  set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
-  thisflag |= FLAG_NEED_RESYNC;
-
-  return true;
-}
-
 /*
  * Insert a newline at the current position without moving the cursor.
  */
@@ -97,21 +85,6 @@ bool
 intercalate_newline (void)
 {
   return insert_newline () && backward_char ();
-}
-
-/*
- * Replace a string at point, moving point forwards.
- */
-bool
-replace (size_t del, const char *s, size_t len)
-{
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), del, s, len, false);
-  while (len--)
-    assert (move_char (1));
-  return true;
 }
 
 /*
@@ -224,27 +197,53 @@ Insert a newline and leave point before it.
 }
 END_DEFUN
 
-void
-insert_nstring (const char *s, size_t len, const char *eol_type)
+bool
+insert_newline (void)
 {
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, len);
+  return insert_estr ((estr) {.as = astr_new_cstr ("\n"), .eol = coding_eol_lf});
+}
+
+bool
+replace_estr (size_t del, estr es)
+{
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  size_t len = astr_len (es.as);
+  const char *s = astr_cstr (es.as);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), del, len);
   undo_nosave = true;
-  size_t eol_len = strlen (eol_type);
+  buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), del, NULL, 0, false);
+  size_t eol_len = strlen (es.eol);
   while (len > 0)
     {
-      const char *next = memmem (s, len, eol_type, eol_len);
+      const char *next = memmem (s, len, es.eol, eol_len);
       size_t line_len = next ? (size_t) (next - s) : len;
-      assert (replace (0, s, line_len));
+      buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), 0, s, line_len, false);
+      assert (move_char (line_len));
       len -= line_len;
       s = next;
       if (len > 0)
         {
-          insert_newline ();
+          buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), 0,
+                          get_buffer_eol (cur_bp), strlen (get_buffer_eol (cur_bp)), false);
+          assert (move_char (1));
+
+          set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
+          thisflag |= FLAG_NEED_RESYNC;
+
           s += eol_len;
           len -= eol_len;
         }
     }
   undo_nosave = false;
+  return true;
+}
+
+bool
+insert_estr (estr es)
+{
+  return replace_estr (0, es);
 }
 
 DEFUN_NONINTERACTIVE_ARGS ("insert", insert,
@@ -257,12 +256,6 @@ Insert the argument at point.
   bprintf ("%s", astr_cstr (arg));
 }
 END_DEFUN
-
-void
-insert_estr (estr es)
-{
-  insert_nstring (astr_cstr (es.as), astr_len (es.as), es.eol);
-}
 
 void
 bprintf (const char *fmt, ...)

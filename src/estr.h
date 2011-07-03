@@ -1,11 +1,6 @@
-/* memrmem
+/* Dynamically allocated encoded strings
 
    Copyright (c) 2011 Free Software Foundation, Inc.
-
-   Based on strrstr.c:
-
-     Copyright (c) 2004 Reuben Thomas.
-     Copyright (c) Kent Irwin (kent.irwin@nist.gov).
 
    This file is part of GNU Zile.
 
@@ -24,22 +19,19 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-#include <config.h>
-
-#include <string.h>
-
-#include "memrmem.h"
-
-
-const char *memrmem (const char *s, size_t slen, const char *t, size_t tlen)
+/* String with encoding */
+typedef struct estr estr;  /* FIXME: Should really be opaque. */
+struct estr
 {
-  if (slen >= tlen)
-    {
-      size_t i = slen - tlen;
-      do
-        if (memcmp (s + i, t, tlen) == 0)
-          return s + i;
-      while (i-- != 0);
-    }
-  return NULL;
-}
+  astr as;			/* String. */
+  const char *eol;		/* EOL type. */
+};
+
+estr estr_dup (estr src);
+extern const char *coding_eol_lf;
+extern const char *coding_eol_crlf;
+extern const char *coding_eol_cr;
+estr estr_new_astr (astr as);
+size_t estr_prev_line (estr es, size_t o);
+size_t estr_next_line (estr es, size_t o);
+estr estr_cat (estr es, estr src);

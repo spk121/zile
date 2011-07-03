@@ -235,7 +235,7 @@ Move point left N characters (right if N is negative).
 On attempt to pass beginning or end of buffer, stop and signal error.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, backward_char, forward_char);
+  ok = bool_to_lisp (move_char (-uniarg));
   if (ok == leNIL)
     minibuf_error ("Beginning of buffer");
 }
@@ -247,7 +247,7 @@ Move point right N characters (left if N is negative).
 On reaching end of buffer, stop and signal error.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, forward_char, backward_char);
+  ok = bool_to_lisp (move_char (uniarg));
   if (ok == leNIL)
     minibuf_error ("End of buffer");
 }

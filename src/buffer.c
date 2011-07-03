@@ -31,6 +31,7 @@
 
 #include "main.h"
 #include "extern.h"
+#include "memrmem.h"
 
 
 /*
@@ -147,47 +148,6 @@ get_line_offset (const Line *lp)
   return lp->o;
 }
 
-/*
- * Determine EOL type from buffer contents.
- */
-/* Maximum number of EOLs to check before deciding type. */
-#define MAX_EOL_CHECK_COUNT 3
-void
-buffer_set_eol_type (Buffer *bp)
-{
-  bool first_eol = true;
-  size_t total_eols = 0;
-  for (size_t i = 0; i < astr_len (bp->text.as) && total_eols < MAX_EOL_CHECK_COUNT; i++)
-    {
-      char c = astr_get (bp->text.as, i);
-      if (c == '\n' || c == '\r')
-        {
-          const char *this_eol_type;
-          total_eols++;
-          if (c == '\n')
-            this_eol_type = coding_eol_lf;
-          else if (i == astr_len (bp->text.as) - 1 || astr_get (bp->text.as, i + 1) != '\n')
-            this_eol_type = coding_eol_cr;
-          else
-            {
-              this_eol_type = coding_eol_crlf;
-              i++;
-            }
-
-          if (first_eol)
-            { /* This is the first end-of-line. */
-              cur_bp->text.eol = this_eol_type;
-              first_eol = false;
-            }
-          else if (get_buffer_eol (cur_bp) != this_eol_type)
-            { /* This EOL is different from the last; arbitrarily choose LF. */
-              cur_bp->text.eol = coding_eol_lf;
-              break;
-            }
-        }
-    }
-}
-
 size_t
 point_to_offset (Point pt)
 {
@@ -246,10 +206,10 @@ type_char (int c, bool overwrite)
   char ch = (char) c;
   size_t t = tab_width (cur_bp);
 
-  return replace (overwrite &&
-                  ((!eolp () && following_char () != '\t')
-                   || ((following_char () == '\t') && ((get_goalc () % t) == t - 1))) ? 1 : 0,
-                  &ch, 1);
+  return replace_estr (overwrite &&
+                       ((!eolp () && following_char () != '\t')
+                        || ((following_char () == '\t') && ((get_goalc () % t) == t - 1))) ? 1 : 0,
+                       (estr) {.as = castr_new_nstr (&ch, 1), .eol = coding_eol_lf});
 }
 
 bool
@@ -294,22 +254,17 @@ delete_char (void)
 void
 buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case)
 {
-  astr as;
-
   if (replace_case && get_variable_bool ("case-replace"))
     {
       int case_type = check_case (astr_cstr (bp->text.as) + offset, oldlen);
 
       if (case_type != 0)
-        {
-          as = astr_recase (astr_cpy (astr_new (), castr_new_nstr (newtext, newlen)),
-                                 case_type == 1 ? case_capitalized : case_upper);
-          newtext = astr_cstr (as);
-        }
+        newtext = astr_cstr (astr_recase (astr_cpy (astr_new (), castr_new_nstr (newtext, newlen)),
+                                          case_type == 1 ? case_capitalized : case_upper));
     }
 
   undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, newlen);
-  set_buffer_modified (cur_bp, true);
+  set_buffer_modified (bp, true);
   adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
   astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
 }
@@ -318,8 +273,8 @@ void
 insert_buffer (Buffer * bp)
 {
   undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
-  /* Copy text to avoid problems when bp == cur_bp. FIXME: Have a way to copy an estr */
-  insert_estr ((estr) {.as = astr_cpy (astr_new (), bp->text.as), .eol = bp->text.eol});
+  /* Copy text to avoid problems when bp == cur_bp. */
+  insert_estr (estr_dup (bp->text));
   undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 
@@ -794,27 +749,29 @@ check_modified_buffer (Buffer * bp)
 /* Basic movement routines */
 
 bool
-move_char (int dir)
+move_char (int offset)
 {
-  if (dir > 0 ? !eolp () : !bolp ())
+  int dir = offset >= 0 ? 1 : -1;
+  for (size_t i = 0; i < (size_t) (abs (offset)); i++)
     {
-      cur_bp->pt.o += dir;
-      return true;
-    }
-  else if (dir > 0 ? !eobp () : !bobp ())
-    {
-      thisflag |= FLAG_NEED_RESYNC;
-      cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
-      assert (cur_bp->pt.p);
-      cur_bp->pt.n += dir;
-      if (dir > 0)
-        FUNCALL (beginning_of_line);
+      if (dir > 0 ? !eolp () : !bolp ())
+        cur_bp->pt.o += dir;
+      else if (dir > 0 ? !eobp () : !bobp ())
+        {
+          thisflag |= FLAG_NEED_RESYNC;
+          cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
+          assert (cur_bp->pt.p);
+          cur_bp->pt.n += dir;
+          if (dir > 0)
+            FUNCALL (beginning_of_line);
+          else
+            FUNCALL (end_of_line);
+        }
       else
-        FUNCALL (end_of_line);
-      return true;
+        return false;
     }
 
-  return false;
+  return true;
 }
 
 /*

@@ -60,7 +60,6 @@ int type_char (int c, bool overwrite);
 castr get_buffer_text (Buffer * bp);
 size_t get_buffer_size (Buffer * bp);
 const char *get_buffer_eol (Buffer *bp);
-void buffer_set_eol_type (Buffer *bp);
 size_t point_to_offset (Point pt);
 void set_region_start (Region *rp, Point pt);
 void set_region_end (Region *rp, Point pt);
@@ -134,9 +133,6 @@ castr minibuf_read_function_name (const char *fmt, ...);
 void init_eval (void);
 
 /* file.c ----------------------------------------------------------------- */
-extern const char *coding_eol_lf;
-extern const char *coding_eol_crlf;
-extern const char *coding_eol_cr;
 int exist_file (const char *filename);
 astr get_home_dir (void);
 astr agetcwd (void);
@@ -177,8 +173,8 @@ bool insert_newline (void);
 bool intercalate_newline (void);
 bool replace (size_t del, const char *s, size_t len);
 bool fill_break_line (void);
-void insert_nstring (const char *s, size_t len, const char *eol_type);
-void insert_estr (estr as);
+bool replace_estr (size_t del, estr es);
+bool insert_estr (estr as);
 void bprintf (const char *fmt, ...);
 
 /* lisp.c ----------------------------------------------------------------- */
@@ -255,9 +251,6 @@ void recenter (Window * wp);
 
 /* search.c --------------------------------------------------------------- */
 void init_search (void);
-
-/* memrmem.c -------------------------------------------------------------- */
-const char *memrmem (const char *s, size_t slen, const char *t, size_t tlen);
 
 /* term_curses.c ---------------------------------------------------------- */
 size_t term_buf_len (void);

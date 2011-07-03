@@ -41,10 +41,11 @@ static void
 kill_ring_push (estr es)
 {
   if (kill_ring_text.as == NULL)
-    kill_ring_text.as = astr_new ();
-  kill_ring_text.eol = coding_eol_lf;
-  /* FIXME: Convert newlines. */
-  astr_cat (kill_ring_text.as, es.as);
+    {
+      kill_ring_text.as = astr_new ();
+      kill_ring_text.eol = coding_eol_lf;
+    }
+  estr_cat (kill_ring_text, es);
 }
 
 static bool
