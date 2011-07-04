@@ -121,7 +121,7 @@ fill_break_line (void)
       /* Find break point moving left from fill-column. */
       for (size_t i = get_buffer_pt (cur_bp).o; i > 0; i--)
         {
-          int c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i - 1);
+          int c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i - 1);
           if (isspace (c))
             {
               break_col = i;
@@ -226,7 +226,7 @@ replace_estr (size_t del, estr es)
       if (len > 0)
         {
           buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), 0,
-                          get_buffer_eol (cur_bp), strlen (get_buffer_eol (cur_bp)), false);
+                          get_buffer_text (cur_bp).eol, strlen (get_buffer_text (cur_bp).eol), false);
           assert (move_char (1));
 
           set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);

@@ -21,6 +21,7 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <ctype.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -526,28 +527,6 @@ untabify_string (astr src, size_t scol, size_t tw)
   return dest;
 }
 
-static void
-edit_tab_line (const Line * lp, size_t lineno, size_t offset, size_t size,
-               astr (*action) (astr as, size_t scol, size_t tw))
-{
-  size_t t = tab_width (cur_bp);
-
-  /* Get offset's column.  */
-  size_t col = 0;
-  for (size_t i = 0; i < offset; i++)
-    {
-      if (astr_get (get_line_text (lp), i) == '\t')
-        col |= t - 1;
-      ++col;
-    }
-
-  /* Only make an edit if the line has changed. */
-  astr src = astr_substr (get_line_text (lp), offset, size);
-  astr dest = action (src, col, t);
-  if (astr_cmp (src, dest) != 0)
-    buffer_replace (cur_bp, get_line_offset (lp) + offset, size, astr_cstr (dest), astr_len (dest), false);
-}
-
 static le *
 edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
 {
@@ -558,36 +537,40 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
   Region r = calculate_the_region ();
   if (get_region_size (r) != 0)
     {
-      Marker *m = point_marker ();
+      undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+      size_t offset = get_region_start (r).o, t = tab_width (cur_bp);
 
-      undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
-      size_t lineno = get_region_start (r).n;
-      for (const Line *lp = get_region_start (r).p;; lp = get_line_next (lp), ++lineno)
+      /* Get offset's column.  */
+      size_t scol = 0;
+      for (size_t i = 0; i < offset; i++, scol++)
+        if (astr_get (get_buffer_text (cur_bp).as, r.start + i) == '\t')
+          scol |= t - 1;
+
+      for (size_t o = r.start; o < r.end; o = estr_next_line (get_buffer_text (cur_bp), o))
         {
-          /* First line.  */
-          if (lineno == get_region_start (r).n)
-            {
-              /* Region on a single line. */
-              if (lineno == get_region_end (r).n)
-                edit_tab_line (lp, lineno, get_region_start (r).o, get_region_size (r), action);
-              /* Region is multi-line. */
-              else
-                edit_tab_line (lp, lineno, get_region_start (r).o,
-                               astr_len (get_line_text (lp)) - get_region_start (r).o, action);
-            }
-          /* Last line of multi-line region. */
-          else if (lineno == get_region_end (r).n)
-            {
-              edit_tab_line (lp, lineno, 0, get_region_end (r).o, action);
-              break;
-            }
-          /* Middle line of multi-line region. */
+          size_t eo = estr_next_line (get_buffer_text (cur_bp), o);
+          if (eo == SIZE_MAX)
+            eo = astr_len (get_buffer_text (cur_bp).as);
           else
-            edit_tab_line (lp, lineno, 0, astr_len (get_line_text (lp)), action);
+            eo -= strlen (get_buffer_text (cur_bp).eol);
+          assert (eo >= o);
+          astr src = astr_substr (get_buffer_text (cur_bp).as, o, eo - o);
+
+          /* Only make an edit if the line has changed. */
+          astr dest = action (src, scol, t);
+          if (astr_cmp (src, dest) != 0)
+            {
+              fprintf (stderr, "replacing '%s' with '%s'\n", astr_cstr (src), astr_cstr (dest));
+              buffer_replace (cur_bp, o, eo - o, astr_cstr (dest), astr_len (dest), false);
+            }
+
+          /* Update the region. */
+          r = calculate_the_region ();
+
+          /* For lines after the first, scol is 0. */
+          scol = 0;
         }
-      goto_point (get_marker_pt (m));
-      undo_save (UNDO_END_SEQUENCE, get_marker_pt (m), 0, 0);
-      unchain_marker (m);
+      undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
       deactivate_mark ();
     }
 
@@ -713,13 +696,13 @@ END_DEFUN
 #define PRECEDINGQUOTEDQUOTE(c)                                         \
   (c == '\\'                                                            \
    && get_buffer_pt (cur_bp).o + 1 < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) \
-   && ((astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\"') || \
-       (astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\'')))
+   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\"') || \
+       (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\'')))
 #define FOLLOWINGQUOTEDQUOTE(c)                                         \
   (c == '\\'                                                            \
    && get_buffer_pt (cur_bp).o + 1 < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) \
-   && ((astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\"') || \
-       (astr_get (get_line_text (get_buffer_pt (cur_bp).p), get_buffer_pt (cur_bp).o + 1) == '\'')))
+   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\"') || \
+       (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\'')))
 
 static int
 move_sexp (int dir)
@@ -1196,7 +1179,7 @@ setcase_word (int rcase)
   char c;
   for (size_t i = get_buffer_pt (cur_bp).o;
        i < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) &&
-         ISWORDCHAR ((int) (c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i)));
+         ISWORDCHAR ((int) (c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i)));
        i++)
     astr_cat_char (as, c);
 

@@ -82,9 +82,7 @@ find_substr (const char *h, size_t hsize, const char *n, size_t nsize, size_t fr
 static bool
 search (Point pt, const char *s, int forward, int regexp)
 {
-  const Line *lp = pt.p;
-  castr as = get_line_text (lp);
-  size_t ssize = strlen (s), from = 0, to = astr_len (as), lineno = pt.n;
+  size_t ssize = strlen (s), from = 0, to = get_buffer_size (cur_bp);
   bool downcase = get_variable_bool ("case-fold-search") && no_upper (s, ssize, regexp);
   bool notbol = false, noteol = false;
   int pos;
@@ -92,38 +90,23 @@ search (Point pt, const char *s, int forward, int regexp)
   if (ssize < 1)
     return false;
 
-  /* Match first line. */
+  /* Attempt match. */
   if (forward)
     {
       notbol = pt.o > from;
-      from = pt.o;
+      from = get_line_offset (pt.p) + pt.o;
     }
   else
     {
       noteol = pt.o < to;
-      to = pt.o;
+      to = get_line_offset (pt.p) + pt.o;
     }
-  pos = find_substr (astr_cstr (as), astr_len (as), s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
-
-  /* Match following lines. */
-  while (pos < 0)
-    {
-      lp = (forward ? get_line_next : get_line_prev) (lp);
-      lineno += forward ? 1 : -1;
-      if (lp == NULL)
-        break;
-      as = get_line_text (lp);
-      pos = find_substr (astr_cstr (as), astr_len (as), s, ssize, 0, astr_len (as), forward, false, false, regexp, downcase);
-    }
-
+  pos = find_substr (astr_cstr (get_buffer_text (cur_bp).as), get_buffer_size (cur_bp),
+                     s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
   if (pos < 0)
     return false;
 
-  while (get_buffer_pt (cur_bp).n != lineno)
-    (forward ? next_line : previous_line) ();
-  pt = get_buffer_pt (cur_bp);
-  pt.o = pos;
-  goto_point (pt);
+  goto_point (offset_to_point (cur_bp, pos));
   thisflag |= FLAG_NEED_RESYNC;
   return true;
 }

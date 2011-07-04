@@ -287,9 +287,9 @@ draw_status_line (size_t line, Window * wp)
   for (i = 0; i < get_window_ewidth (wp); ++i)
     term_addch ('-');
 
-  if (get_buffer_eol (cur_bp) == coding_eol_cr)
+  if (get_buffer_text (cur_bp).eol == coding_eol_cr)
     eol_type = "(Mac)";
-  else if (get_buffer_eol (cur_bp) == coding_eol_crlf)
+  else if (get_buffer_text (cur_bp).eol == coding_eol_crlf)
     eol_type = "(DOS)";
   else
     eol_type = ":";

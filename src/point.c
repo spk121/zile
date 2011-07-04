@@ -26,6 +26,7 @@
 #include "main.h"
 #include "extern.h"
 
+/* FIXME: Remove p member of Point, and use estr functions directly on o member instead. */
 Point
 make_point (size_t lineno, size_t offset)
 {
@@ -51,7 +52,7 @@ offset_to_point (Buffer *bp, size_t offset)
   assert (pt.p);
   while (offset > 0 && offset > astr_len (get_line_text (pt.p)))
     {
-      offset -= astr_len (get_line_text (pt.p)) + strlen (get_buffer_eol (bp));
+      offset -= astr_len (get_line_text (pt.p)) + strlen (get_buffer_text (bp).eol);
       pt.p = get_line_next (pt.p);
       assert (pt.p);
       pt.n++;

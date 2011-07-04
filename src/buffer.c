@@ -59,16 +59,10 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
-castr
+estr
 get_buffer_text (Buffer * bp)
 {
-  return bp->text.as;
-}
-
-const char *
-get_buffer_eol (Buffer * bp)
-{
-  return bp->text.eol;
+  return bp->text;
 }
 
 size_t
@@ -109,6 +103,12 @@ struct Line {
   Buffer *bp;
   size_t o;
 };
+
+size_t
+get_buffer_o (Buffer *bp)
+{
+  return bp->pt.p->o;
+}
 
 const Line *
 get_line_prev (const Line *lp)
@@ -264,9 +264,9 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
     }
 
   undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, newlen);
+  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
   set_buffer_modified (bp, true);
   adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
-  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
 }
 
 void
@@ -775,8 +775,7 @@ move_char (int offset)
 }
 
 /*
- * Go to the column `goalc'.  Take care of expanding
- * tabulations.
+ * Go to the goal column.  Take care of expanding tabulations.
  */
 static void
 goto_goalc (void)
@@ -784,19 +783,13 @@ goto_goalc (void)
   size_t i, col = 0, t = tab_width (cur_bp);
 
   for (i = 0; i < astr_len (get_line_text (cur_bp->pt.p)); i++)
-    {
-      if (col == get_buffer_goalc (cur_bp))
-        break;
-      else if (astr_get (get_line_text (cur_bp->pt.p), i) == '\t')
-        {
-          size_t w;
-          for (w = t - col % t; w > 0; w--)
-            if (++col == get_buffer_goalc (cur_bp))
-              break;
-        }
-      else
-        ++col;
-    }
+    if (col == get_goalc ())
+      break;
+    else if (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i) == '\t')
+      for (size_t w = t - col % t; w > 0 && ++col < get_goalc (); w--)
+        ;
+    else
+      ++col;
 
   cur_bp->pt.o = i;
 }

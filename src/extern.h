@@ -57,9 +57,9 @@ int type_char (int c, bool overwrite);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-castr get_buffer_text (Buffer * bp);
+estr get_buffer_text (Buffer * bp);
+size_t get_buffer_o (Buffer *bp);
 size_t get_buffer_size (Buffer * bp);
-const char *get_buffer_eol (Buffer *bp);
 size_t point_to_offset (Point pt);
 void set_region_start (Region *rp, Point pt);
 void set_region_end (Region *rp, Point pt);

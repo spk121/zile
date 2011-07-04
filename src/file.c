@@ -549,7 +549,7 @@ raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 
   int ret = 0;
   size_t len = get_buffer_size (bp);
-  ssize_t written = write (fd, astr_cstr (get_buffer_text (bp)), get_buffer_size (bp));
+  ssize_t written = write (fd, astr_cstr (get_buffer_text (bp).as), get_buffer_size (bp));
   if (written < 0 || (size_t) written != len)
     ret = written;
 
