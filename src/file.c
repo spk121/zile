@@ -219,7 +219,7 @@ insert_file (const char *filename)
           int fd = open (filename, O_RDONLY);
           if (fd >= 0)
             {
-              undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 0, size);
+              undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 0, size);
               undo_nosave = true;
               char buf[BUFSIZ];
               astr as = astr_new ();

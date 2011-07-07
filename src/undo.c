@@ -39,9 +39,8 @@ struct Undo
   /* The type of undo delta. */
   int type;
 
-  /* Location of the undo delta. Stored as a numeric position because
-     line pointers can change. */
-  size_t n, o;
+  /* Offset of the undo delta. */
+  size_t o;
 
   /* Flag indicating that reverting this undo leaves the buffer
      in an unchanged state. */
@@ -67,13 +66,13 @@ static int doing_undo = false;
  * Save a reverse delta for doing undo.
  */
 void
-undo_save (int type, Point pt, size_t osize, size_t size)
+undo_save (int type, size_t o, size_t osize, size_t size)
 {
   if (get_buffer_noundo (cur_bp) || undo_nosave)
     return;
 
   Undo * up = (Undo *) XZALLOC (Undo);
-  *up = (Undo) {.type = type, .n = pt.n, .o = pt.o};
+  *up = (Undo) {.type = type, .o = o};
   if (!get_buffer_modified (cur_bp))
     up->unchanged = true;
 
@@ -81,7 +80,6 @@ undo_save (int type, Point pt, size_t osize, size_t size)
     {
       up->block.osize = osize;
       up->block.size = size;
-      size_t o = point_to_offset (pt);
       up->block.text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
     }
 
@@ -98,25 +96,24 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 static Undo *
 revert_action (Undo * up)
 {
-  Point pt = {.n = up->n, .o = up->o};
+  size_t o = up->o;
 
   doing_undo = true;
 
   if (up->type == UNDO_END_SEQUENCE)
     {
-      undo_save (UNDO_START_SEQUENCE, pt, 0, 0);
+      undo_save (UNDO_START_SEQUENCE, up->o, 0, 0);
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
         up = revert_action (up);
-      pt = (Point) {.n = up->n, .o = up->o};
-      undo_save (UNDO_END_SEQUENCE, pt, 0, 0);
+      undo_save (UNDO_END_SEQUENCE, up->o, 0, 0);
     }
 
-  goto_point (pt);
+  goto_point (offset_to_point (cur_bp, o));
 
   if (up->type == UNDO_REPLACE_BLOCK)
     {
-      undo_save (UNDO_REPLACE_BLOCK, pt, up->block.size, up->block.osize);
+      undo_save (UNDO_REPLACE_BLOCK, o, up->block.size, up->block.osize);
       undo_nosave = true;
       for (size_t i = 0; i < up->block.size; ++i)
         delete_char ();

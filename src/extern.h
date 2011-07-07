@@ -54,6 +54,7 @@ int type_char (int c, bool overwrite);
 #undef FIELD
 #undef FIELD_STR
 estr get_buffer_text (Buffer * bp);
+size_t get_buffer_pt_o (Buffer *bp);
 size_t get_buffer_o (Buffer *bp);
 size_t get_buffer_size (Buffer * bp);
 size_t get_buffer_line_len (Buffer *bp);
@@ -282,7 +283,7 @@ void term_addnstr (const char *s, size_t len);
 extern int undo_nosave;
 void undo_start_sequence (void);
 void undo_end_sequence (void);
-void undo_save (int type, Point pt, size_t arg1, size_t arg2);
+void undo_save (int type, size_t o, size_t osize, size_t size);
 void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */

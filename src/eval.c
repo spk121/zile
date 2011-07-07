@@ -197,12 +197,12 @@ execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backw
       uniarg = -uniarg;
     }
   if (undo)
-    undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+    undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
   bool ret = true;
   for (int uni = 0; ret && uni < uniarg; ++uni)
     ret = func ();
   if (undo)
-    undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
 
   return bool_to_lisp (ret);
 }

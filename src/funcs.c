@@ -537,7 +537,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
   Region r = calculate_the_region ();
   if (get_region_size (r) != 0)
     {
-      undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+      undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
       size_t offset = get_region_start (r).o, t = tab_width (cur_bp);
 
       /* Get offset's column.  */
@@ -566,7 +566,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
           /* For lines after the first, scol is 0. */
           scol = 0;
         }
-      undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+      undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
       deactivate_mark ();
     }
 
@@ -957,10 +957,10 @@ transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void)
     }
 
   bool ret = true;
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
   for (int uni = 0; ret && uni < uniarg; ++uni)
     ret = transpose_subr (forward_func, backward_func);
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
 
   return bool_to_lisp (ret);
 }
@@ -1130,7 +1130,7 @@ Fill paragraph at or after point.
 {
   Marker *m = point_marker ();
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
 
   FUNCALL (forward_paragraph);
   int end = get_buffer_pt (cur_bp).n;
@@ -1160,7 +1160,7 @@ Fill paragraph at or after point.
   goto_point (get_marker_pt (m));
   unchain_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
 }
 END_DEFUN
 
@@ -1181,12 +1181,12 @@ setcase_word (int rcase)
 
   if (astr_len (as) > 0)
     {
-      undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+      undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
       astr_recase (as, rcase);
       for (size_t i = 0; i < astr_len (as); i++)
         delete_char ();
       bprintf ("%s", astr_cstr (as));
-      undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+      undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
     }
 
   set_buffer_modified (cur_bp, true);
@@ -1257,7 +1257,7 @@ setcase_region (int (*func) (int))
     return leNIL;
 
   Region r = calculate_the_region ();
-  undo_save (UNDO_START_SEQUENCE, get_region_start (r), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, r.start, 0, 0);
 
   Marker *m = point_marker ();
   goto_point (get_region_start (r));
@@ -1270,7 +1270,7 @@ setcase_region (int (*func) (int))
   goto_point (get_marker_pt (m));
   unchain_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, get_region_start (r), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, r.start, 0, 0);
 
   return leT;
 }
@@ -1329,12 +1329,12 @@ pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_rep
         {
           if (do_replace)
             {
-              undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+              undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
               FUNCALL (delete_region);
             }
           bprintf ("%s", astr_cstr (out));
           if (do_replace)
-            undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+            undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
         }
       else
         {
@@ -1496,7 +1496,7 @@ On nonblank line, delete any immediately following blank lines.
           while (FUNCALL (forward_line) == leT && is_blank_line ())
             ;
           seq_started = true;
-          undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
+          undo_save (UNDO_START_SEQUENCE, point_to_offset (get_marker_pt (m)), 0, 0);
           FUNCALL (delete_region);
           pop_mark ();
         }
@@ -1527,7 +1527,7 @@ On nonblank line, delete any immediately following blank lines.
           if (!seq_started)
             {
               seq_started = true;
-              undo_save (UNDO_START_SEQUENCE, get_marker_pt (m), 0, 0);
+              undo_save (UNDO_START_SEQUENCE, point_to_offset (get_marker_pt (m)), 0, 0);
             }
           FUNCALL (delete_region);
         }
@@ -1550,7 +1550,7 @@ On nonblank line, delete any immediately following blank lines.
   goto_point (get_marker_pt (m));
 
   if (seq_started)
-    undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
 
   unchain_marker (m);
   deactivate_mark ();

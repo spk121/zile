@@ -111,6 +111,14 @@ struct Line {
 };
 
 size_t
+get_buffer_pt_o (Buffer *bp)
+{
+  Point pt = bp->pt;
+  return point_to_offset (pt);
+}
+
+/* FIXME: This should really return pt */
+size_t
 get_buffer_o (Buffer *bp)
 {
   Point pt = bp->pt;
@@ -199,7 +207,7 @@ delete_char (void)
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt (cur_bp), 1, 0);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0);
   if (eolp ())
     {
       size_t eol_len = strlen (cur_bp->text.eol);
@@ -236,7 +244,7 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
                                           case_type == 1 ? case_capitalized : case_upper));
     }
 
-  undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, newlen);
+  undo_save (UNDO_REPLACE_BLOCK, offset, oldlen, newlen);
   astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
   set_buffer_modified (bp, true);
   adjust_markers (offset, (ptrdiff_t) (newlen - oldlen)); /* FIXME: In case where buffer has shrunk and marker is now pointing off the end. */
@@ -245,10 +253,10 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
 void
 insert_buffer (Buffer * bp)
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
   /* Copy text to avoid problems when bp == cur_bp. */
   insert_estr (estr_dup (bp->text));
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
 }
 
 
@@ -492,7 +500,7 @@ delete_region (const Region r)
     return false;
 
   goto_point (get_region_start (r));
-  undo_save (UNDO_REPLACE_BLOCK, get_region_start (r), size, 0);
+  undo_save (UNDO_REPLACE_BLOCK, r.start, size, 0);
   undo_nosave = true;
   while (size--)
     delete_char ();
