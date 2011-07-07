@@ -28,7 +28,6 @@ FIELD_STR(filename)       /* The file being edited. */
 
 /* Other fields of Buffer. */
 FIELD(Buffer *, next)     /* Next buffer in buffer list. */
-FIELD(const Line *, lines)      /* The lines of text. */
 FIELD(size_t, last_line)  /* The number of the last line in the buffer. */
 FIELD(size_t, goalc)      /* Goal column for previous/next-line commands. */
 FIELD(Point, pt)          /* The point. */

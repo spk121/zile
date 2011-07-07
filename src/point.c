@@ -26,37 +26,22 @@
 #include "main.h"
 #include "extern.h"
 
-/* FIXME: Remove p member of Point, and use estr functions directly on o member instead. */
 Point
 make_point (size_t lineno, size_t offset)
 {
-  Point pt = {
-    .p = get_buffer_lines (cur_bp),
-    .n = lineno,
-    .o = offset
-  };
-  while (lineno-- > 0)
-    pt.p = get_line_next (pt.p);
-  assert (pt.p);
-  return pt;
+  return (Point) {.n = lineno, .o = offset};
 }
 
 Point
 offset_to_point (Buffer *bp, size_t offset)
 {
   Point pt = {
-    .p = get_buffer_lines (bp),
     .n = 0,
     .o = 0
   };
-  assert (pt.p);
   size_t o;
   for (o = 0; estr_end_of_line (get_buffer_text (bp), o) < offset; o = estr_next_line (get_buffer_text (bp), o))
-    {
-      pt.p = get_line_next (pt.p);
-      assert (pt.p);
-      pt.n++;
-    }
+    pt.n++;
   pt.o = offset - o;
   return pt;
 }
@@ -81,23 +66,22 @@ point_min (void)
 Point
 point_max (void)
 {
-  return offset_to_point (cur_bp, astr_len (get_buffer_text (cur_bp).as));
+  return offset_to_point (cur_bp, get_buffer_size (cur_bp));
 }
 
 Point
 line_beginning_position (int count)
 {
   /* Copy current point position without offset (beginning of line). */
-  Point pt = get_buffer_pt (cur_bp);
-  pt.o = 0;
+  size_t o = get_buffer_o (cur_bp);
 
   count--;
-  for (; count < 0 && pt.n > 0; pt.n--, count++)
-    pt.p = get_line_prev (pt.p);
-  for (; count > 0 && pt.n < get_buffer_last_line (cur_bp); pt.n++, count--)
-    pt.p = get_line_next (pt.p);
+  for (; count < 0 && o > 0; count++)
+    o = estr_prev_line (get_buffer_text (cur_bp), o);
+  for (; count > 0 && o < SIZE_MAX; count--)
+    o = estr_next_line (get_buffer_text (cur_bp), o);
 
-  return pt;
+  return offset_to_point (cur_bp, o);
 }
 
 Point
@@ -108,7 +92,7 @@ line_end_position (int count)
   return pt;
 }
 
-/* Go to coordinates described by pt (ignoring pt.p) */
+/* Go to coordinates described by pt. */
 void
 goto_point (Point pt)
 {

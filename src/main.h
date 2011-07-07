@@ -49,7 +49,6 @@
  *--------------------------------------------------------------------------*/
 
 /* Opaque types. */
-typedef struct Line Line;
 typedef struct Marker Marker;
 typedef struct History History;
 typedef struct Undo Undo;
@@ -71,7 +70,6 @@ struct Region
 
 struct Point
 {
-  const Line *p;		/* Line pointer. */
   size_t n;			/* Line number. */
   size_t o;			/* Offset. */
 };

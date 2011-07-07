@@ -113,41 +113,17 @@ struct Line {
 size_t
 get_buffer_o (Buffer *bp)
 {
-  return bp->pt.p->o;
-}
-
-const Line *
-get_line_prev (const Line *lp)
-{
-  if (lp->o == 0)
-    return NULL;
-  const char *prev = memrmem (astr_cstr (lp->bp->text.as), lp->o - strlen (lp->bp->text.eol),
-                              lp->bp->text.eol, strlen (lp->bp->text.eol));
-  Line *n = XZALLOC (Line);
-  *n = (Line) {.bp = lp->bp, .o = prev ? prev - astr_cstr (lp->bp->text.as) + strlen (lp->bp->text.eol) : 0};
-  return n;
-}
-
-const Line *
-get_line_next (const Line *lp)
-{
-  const char *next = memmem (astr_cstr (lp->bp->text.as) + lp->o, astr_len (lp->bp->text.as) - lp->o,
-                             lp->bp->text.eol, strlen (lp->bp->text.eol));
-  if (next == NULL)
-    return NULL;
-  Line *n = XZALLOC (Line);
-  *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text.as) + strlen (lp->bp->text.eol)};
-  return n;
+  Point pt = bp->pt;
+  pt.o = 0;
+  return point_to_offset (pt);
 }
 
 size_t
 point_to_offset (Point pt)
 {
-  if (pt.p)
-    return pt.p->o + pt.o;
   size_t o;
   for (o = 0; pt.n > 0; pt.n--)
-    o = estr_next_line (get_buffer_text (pt.p->bp), o);
+    o = estr_next_line (get_buffer_text (cur_bp), o);
   return o + pt.o;
 }
 
@@ -227,15 +203,15 @@ delete_char (void)
   if (eolp ())
     {
       size_t eol_len = strlen (cur_bp->text.eol);
-      adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -eol_len);
-      astr_remove (cur_bp->text.as, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, eol_len);
+      adjust_markers (point_to_offset (cur_bp->pt), -eol_len);
+      astr_remove (cur_bp->text.as, point_to_offset (cur_bp->pt), eol_len);
       set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
     {
-      adjust_markers (cur_bp->pt.p->o + cur_bp->pt.o, -1);
-      astr_remove (cur_bp->text.as, get_buffer_pt (cur_bp).p->o + get_buffer_pt (cur_bp).o, 1);
+      adjust_markers (point_to_offset (cur_bp->pt), -1);
+      astr_remove (cur_bp->text.as, point_to_offset (cur_bp->pt), 1);
     }
 
   set_buffer_modified (cur_bp, true);
@@ -263,7 +239,7 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
   undo_save (UNDO_REPLACE_BLOCK, offset_to_point (bp, offset), oldlen, newlen);
   astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
   set_buffer_modified (bp, true);
-  adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
+  adjust_markers (offset, (ptrdiff_t) (newlen - oldlen)); /* FIXME: In case where buffer has shrunk and marker is now pointing off the end. */
 }
 
 void
@@ -284,11 +260,8 @@ Buffer *
 buffer_new (void)
 {
   Buffer *bp = (Buffer *) XZALLOC (Buffer);
-  Line *l = XZALLOC (Line);
-  l->bp = bp;
   bp->text.as = astr_new ();
   bp->text.eol = coding_eol_lf;
-  bp->lines = bp->pt.p = l;
   bp->dir = agetcwd ();
 
   /* Insert into buffer list. */
@@ -756,8 +729,6 @@ move_char (int offset)
       else if (dir > 0 ? !eobp () : !bobp ())
         {
           thisflag |= FLAG_NEED_RESYNC;
-          cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
-          assert (cur_bp->pt.p);
           cur_bp->pt.n += dir;
           if (dir > 0)
             FUNCALL (beginning_of_line);
@@ -820,11 +791,7 @@ move_line (int n)
     }
 
   for (; n > 0; n--)
-    {
-      cur_bp->pt.p = (dir > 0 ? get_line_next : get_line_prev) (cur_bp->pt.p);
-      assert (cur_bp->pt.p);
-      cur_bp->pt.n += dir;
-    }
+    cur_bp->pt.n += dir;
 
   if (last_command () != F_next_line && last_command () != F_previous_line)
     set_buffer_goalc (cur_bp, get_goalc ());
