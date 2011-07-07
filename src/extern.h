@@ -43,7 +43,6 @@ void init_default_bindings (void);
 /* buffer.c --------------------------------------------------------------- */
 const Line *get_line_prev (const Line *lp);
 const Line *get_line_next (const Line *lp);
-size_t get_line_offset (const Line *lp);
 bool delete_char (void);
 void buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
 int type_char (int c, bool overwrite);

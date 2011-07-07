@@ -94,12 +94,12 @@ search (Point pt, const char *s, int forward, int regexp)
   if (forward)
     {
       notbol = pt.o > from;
-      from = get_line_offset (pt.p) + pt.o;
+      from = point_to_offset (pt);
     }
   else
     {
       noteol = pt.o < to;
-      to = get_line_offset (pt.p) + pt.o;
+      to = point_to_offset (pt);
     }
   pos = find_substr (astr_cstr (get_buffer_text (cur_bp).as), get_buffer_size (cur_bp),
                      s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
@@ -434,7 +434,7 @@ what to do with it.
       /* Perform replacement. */
       pt = get_buffer_pt (cur_bp);
       ++count;
-      buffer_replace (cur_bp, get_line_offset (pt.p) + pt.o - find_len, find_len,
+      buffer_replace (cur_bp, point_to_offset (pt) - find_len, find_len,
                       astr_cstr (repl), astr_len (repl), find_no_upper);
 
       if (c == '.')		/* Replace and quit. */

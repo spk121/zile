@@ -79,21 +79,9 @@ undo_save (int type, Point pt, size_t osize, size_t size)
 
   if (type == UNDO_REPLACE_BLOCK)
     {
-      const Line * lp = get_buffer_pt (cur_bp).p;
-      size_t n = get_buffer_pt (cur_bp).n;
-
-      if (n > pt.n)
-        do
-          lp = get_line_prev (lp);
-        while (--n > pt.n);
-      else if (n < pt.n)
-        do
-          lp = get_line_next (lp);
-        while (++n < pt.n);
-
       up->block.osize = osize;
       up->block.size = size;
-      size_t o = get_line_offset (lp);
+      size_t o = point_to_offset (pt);
       up->block.text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
     }
 
@@ -122,16 +110,13 @@ revert_action (Undo * up)
         up = revert_action (up);
       pt = (Point) {.n = up->n, .o = up->o};
       undo_save (UNDO_END_SEQUENCE, pt, 0, 0);
-      goto_point (pt);
-      return up->next;
     }
 
   goto_point (pt);
 
   if (up->type == UNDO_REPLACE_BLOCK)
     {
-      undo_save (UNDO_REPLACE_BLOCK, pt,
-                 up->block.size, up->block.osize);
+      undo_save (UNDO_REPLACE_BLOCK, pt, up->block.size, up->block.osize);
       undo_nosave = true;
       for (size_t i = 0; i < up->block.size; ++i)
         delete_char ();

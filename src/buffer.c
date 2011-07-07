@@ -141,15 +141,14 @@ get_line_next (const Line *lp)
 }
 
 size_t
-get_line_offset (const Line *lp)
-{
-  return lp->o;
-}
-
-size_t
 point_to_offset (Point pt)
 {
-  return pt.p->o + pt.o;
+  if (pt.p)
+    return pt.p->o + pt.o;
+  size_t o;
+  for (o = 0; pt.n > 0; pt.n--)
+    o = estr_next_line (get_buffer_text (pt.p->bp), o);
+  return o + pt.o;
 }
 
 /*
