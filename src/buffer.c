@@ -474,20 +474,9 @@ warn_if_no_mark (void)
 Region
 calculate_the_region (void)
 {
-  Region r;
-  if (cmp_point (cur_bp->pt, get_marker_pt (cur_bp->mark)) < 0)
-    {
-      /* Point is before mark. */
-      set_region_start (&r, cur_bp->pt);
-      set_region_end (&r, get_marker_pt (cur_bp->mark));
-    }
-  else
-    {
-      /* Mark is before point. */
-      set_region_start (&r, get_marker_pt (cur_bp->mark));
-      set_region_end (&r, cur_bp->pt);
-    }
-  return r;
+  size_t o = point_to_offset (cur_bp->pt);
+  size_t m = point_to_offset (get_marker_pt (cur_bp->mark));
+  return (Region) {.start = MIN (o, m), .end = MAX (o, m)};
 }
 
 bool

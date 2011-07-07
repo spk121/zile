@@ -235,7 +235,6 @@ void minibuf_clear (void);
 /* point.c ---------------------------------------------------------------- */
 Point make_point (size_t lineno, size_t offset);
 Point offset_to_point (Buffer *bp, size_t offset);
-int cmp_point (Point pt1, Point pt2);
 Point point_min (void);
 Point point_max (void);
 Point line_beginning_position (int count);

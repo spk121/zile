@@ -143,7 +143,7 @@ calculate_highlight_region (Window * wp, Region * rp)
 
   set_region_start (rp, window_pt (wp));
   set_region_end (rp, get_marker_pt (get_buffer_mark (get_window_bp (wp))));
-  if (cmp_point (get_region_end (*rp), get_region_start (*rp)) < 0)
+  if (rp->end < rp->start)
     {
       Point pt1 = get_region_start (*rp);
       Point pt2 = get_region_end (*rp);
