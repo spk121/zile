@@ -70,14 +70,14 @@ preceding_char (void)
 bool
 bobp (void)
 {
-  return point_to_offset (get_buffer_pt (cur_bp)) == 0;
+  return get_buffer_pt_o (cur_bp) == 0;
 }
 
 /* Return true if point is at the end of the buffer. */
 bool
 eobp (void)
 {
-  return point_to_offset (get_buffer_pt (cur_bp)) == get_buffer_size (cur_bp);
+  return get_buffer_pt_o (cur_bp) == get_buffer_size (cur_bp);
 }
 
 /* Return true if point is at the beginning of a line. */

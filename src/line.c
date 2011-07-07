@@ -213,19 +213,19 @@ replace_estr (size_t del, estr es)
   const char *s = astr_cstr (es.as);
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), del, len);
   undo_nosave = true;
-  buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), del, NULL, 0, false);
+  buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), del, NULL, 0, false);
   size_t eol_len = strlen (es.eol);
   while (len > 0)
     {
       const char *next = memmem (s, len, es.eol, eol_len);
       size_t line_len = next ? (size_t) (next - s) : len;
-      buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), 0, s, line_len, false);
+      buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), 0, s, line_len, false);
       assert (move_char (line_len));
       len -= line_len;
       s = next;
       if (len > 0)
         {
-          buffer_replace (cur_bp, point_to_offset (get_buffer_pt (cur_bp)), 0,
+          buffer_replace (cur_bp, get_buffer_pt_o (cur_bp), 0,
                           get_buffer_text (cur_bp).eol, strlen (get_buffer_text (cur_bp).eol), false);
           assert (move_char (1));
 
