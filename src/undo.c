@@ -46,13 +46,11 @@ struct Undo
      in an unchanged state. */
   bool unchanged;
 
-  /* The block to insert. */
-  struct
-  {
-    estr text;
-    size_t osize;		/* Original size. */
-    size_t size;		/* New block size. */
-  } block;
+  /* Old text. */
+  estr text;
+
+  /* Size of replacement text. */
+  size_t size;
 };
 
 /* Setting this variable to true stops undo_save saving the given
@@ -78,9 +76,8 @@ undo_save (int type, size_t o, size_t osize, size_t size)
 
   if (type == UNDO_REPLACE_BLOCK)
     {
-      up->block.osize = osize;
-      up->block.size = size;
-      up->block.text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
+      up->size = size;
+      up->text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
     }
 
   up->next = get_buffer_last_undop (cur_bp);
@@ -113,11 +110,11 @@ revert_action (Undo * up)
 
   if (up->type == UNDO_REPLACE_BLOCK)
     {
-      undo_save (UNDO_REPLACE_BLOCK, o, up->block.size, up->block.osize);
+      undo_save (UNDO_REPLACE_BLOCK, o, up->size, astr_len (up->text.as));
       undo_nosave = true;
-      for (size_t i = 0; i < up->block.size; ++i)
+      for (size_t i = 0; i < up->size; ++i)
         delete_char ();
-      insert_estr (up->block.text);
+      insert_estr (up->text);
       undo_nosave = false;
     }
 
