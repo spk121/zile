@@ -92,22 +92,19 @@ kill_line (bool whole_line)
 {
   bool ok = true;
   bool only_blanks_to_end_of_line = false;
-  Point cur_pt = get_buffer_pt (cur_bp);
-  castr cur_line = get_line_text (cur_pt.p);
+  size_t cur_line_len = estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)) - get_buffer_o (cur_bp);
 
   if (!whole_line)
     {
       size_t i;
-
-      for (i = cur_pt.o; i < astr_len (cur_line); i++)
+      for (i = get_buffer_pt (cur_bp).o; i < cur_line_len; i++)
         {
-          char c = astr_get (cur_line, i);
+          char c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i);
           if (!(c == ' ' || c == '\t'))
             break;
         }
 
-      if (i == astr_len (cur_line))
-        only_blanks_to_end_of_line = true;
+      only_blanks_to_end_of_line = i == cur_line_len;
     }
 
   if (eobp ())
@@ -124,7 +121,7 @@ kill_line (bool whole_line)
       Point pt = get_buffer_pt (cur_bp);
 
       set_region_start (&r, pt);
-      pt.o = astr_len (cur_line);
+      pt.o = cur_line_len;
       set_region_end (&r, pt);
 
       ok = copy_or_kill_region (true, r);
@@ -135,8 +132,7 @@ kill_line (bool whole_line)
       if (!FUNCALL (delete_char))
         return false;
 
-      estr es = (estr) {.as = astr_new_cstr ("\n"), .eol = get_buffer_text (cur_bp).eol};
-      kill_ring_push (es);
+      kill_ring_push ((estr) {.as = astr_new_cstr ("\n"), .eol = get_buffer_text (cur_bp).eol});
       set_this_command (F_kill_region);
     }
 

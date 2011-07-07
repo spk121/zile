@@ -133,14 +133,14 @@ fill_break_line (void)
          possible moving right. */
       if (break_col == 0)
         {
-          for (size_t i = get_buffer_pt (cur_bp).o + 1;
-               i < astr_len (get_line_text (get_buffer_pt (cur_bp).p));
+          for (size_t i = get_buffer_o (cur_bp) + get_buffer_pt (cur_bp).o + 1;
+               i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp));
                i++)
             {
-              int c = astr_get (get_line_text (get_buffer_pt (cur_bp).p), i - 1);
+              int c = astr_get (get_buffer_text (cur_bp).as, i - 1);
               if (isspace (c))
                 {
-                  break_col = i;
+                  break_col = i - get_buffer_o (cur_bp);
                   break;
                 }
             }

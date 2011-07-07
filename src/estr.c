@@ -87,20 +87,37 @@ estr_dup (estr src)
 size_t
 estr_prev_line (estr es, size_t o)
 {
-  size_t eol_len = strlen (es.eol);
-  if (o < eol_len)
-    return SIZE_MAX;
-  const char *prev = memrmem (astr_cstr (es.as), o - eol_len, es.eol, eol_len);
-  return prev ? prev - astr_cstr (es.as) + eol_len : 0;
+  size_t so = estr_start_of_line (es, o);
+  return (so == 0) ? SIZE_MAX : estr_start_of_line (es, so);
 }
 
 size_t
 estr_next_line (estr es, size_t o)
 {
+  size_t eo = estr_end_of_line (es, o);
+  return (eo == astr_len (es.as)) ? SIZE_MAX : eo + strlen (es.eol);
+}
+
+size_t
+estr_start_of_line (estr es, size_t o)
+{
   size_t eol_len = strlen (es.eol);
+  const char *prev = memrmem (astr_cstr (es.as), o, es.eol, eol_len);
+  return prev ? prev - astr_cstr (es.as) + eol_len : 0;
+}
+
+size_t
+estr_end_of_line (estr es, size_t o)
+{
   const char *next = memmem (astr_cstr (es.as) + o, astr_len (es.as) - o,
-                             es.eol, eol_len);
-  return next ? (next - astr_cstr (es.as) + eol_len) : SIZE_MAX;
+                             es.eol, strlen (es.eol));
+  return next ? (size_t) (next - astr_cstr (es.as)) : astr_len (es.as);
+}
+
+size_t
+estr_line_len (estr es, size_t o)
+{
+  return estr_end_of_line (es, o) - estr_start_of_line (es, o);
 }
 
 estr

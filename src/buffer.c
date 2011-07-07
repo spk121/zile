@@ -71,6 +71,12 @@ get_buffer_size (Buffer * bp)
   return astr_len (bp->text.as);
 }
 
+size_t
+get_buffer_line_len (Buffer *bp)
+{
+  return estr_end_of_line (get_buffer_text (bp), get_buffer_o (bp)) - get_buffer_o (bp);
+}
+
 void set_region_start (Region *rp, Point pt)
 {
   rp->start = point_to_offset (pt);
@@ -132,14 +138,6 @@ get_line_next (const Line *lp)
   Line *n = XZALLOC (Line);
   *n = (Line) {.bp = lp->bp, .o = next - astr_cstr (lp->bp->text.as) + strlen (lp->bp->text.eol)};
   return n;
-}
-
-castr
-get_line_text (const Line *lp)
-{
-  const Line *next_lp = get_line_next (lp);
-  size_t next = next_lp ? next_lp->o : astr_len (lp->bp->text.as) + strlen (lp->bp->text.eol);
-  return castr_new_nstr (astr_cstr (lp->bp->text.as) + lp->o, next - lp->o - strlen (lp->bp->text.eol));
 }
 
 size_t
@@ -782,16 +780,16 @@ goto_goalc (void)
 {
   size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = 0; i < astr_len (get_line_text (cur_bp->pt.p)); i++)
+  for (i = get_buffer_o (cur_bp); i < estr_next_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)); i++)
     if (col == get_goalc ())
       break;
-    else if (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i) == '\t')
+    else if (astr_get (get_buffer_text (cur_bp).as, i) == '\t')
       for (size_t w = t - col % t; w > 0 && ++col < get_goalc (); w--)
         ;
     else
       ++col;
 
-  cur_bp->pt.o = i;
+  cur_bp->pt.o = i - get_buffer_o (cur_bp);
 }
 
 bool

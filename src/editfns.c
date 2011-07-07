@@ -30,14 +30,14 @@
 bool
 is_empty_line (void)
 {
-  return astr_len (get_line_text (get_buffer_pt (cur_bp).p)) == 0;
+  return get_buffer_o (cur_bp) == estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp));
 }
 
 bool
 is_blank_line (void)
 {
-  for (size_t c = 0; c < astr_len (get_line_text (get_buffer_pt (cur_bp).p)); c++)
-    if (!isspace ((int) astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + c)))
+  for (size_t i = get_buffer_o (cur_bp); i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)); i++)
+    if (!isspace ((int) astr_get (get_buffer_text (cur_bp).as, i)))
       return false;
   return true;
 }
@@ -91,8 +91,7 @@ bolp (void)
 bool
 eolp (void)
 {
-  Point pt = get_buffer_pt (cur_bp);
-  return pt.o == astr_len (get_line_text (pt.p));
+  return get_buffer_pt (cur_bp).o == get_buffer_line_len (cur_bp);
 }
 
 /* Signal an error, and abort any ongoing macro definition. */

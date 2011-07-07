@@ -50,14 +50,14 @@ offset_to_point (Buffer *bp, size_t offset)
     .o = 0
   };
   assert (pt.p);
-  while (offset > 0 && offset > astr_len (get_line_text (pt.p)))
+  size_t o;
+  for (o = 0; estr_end_of_line (get_buffer_text (bp), o) < offset; o = estr_next_line (get_buffer_text (bp), o))
     {
-      offset -= astr_len (get_line_text (pt.p)) + strlen (get_buffer_text (bp).eol);
       pt.p = get_line_next (pt.p);
       assert (pt.p);
       pt.n++;
     }
-  pt.o = offset;
+  pt.o = offset - o;
   return pt;
 }
 
@@ -81,9 +81,7 @@ point_min (void)
 Point
 point_max (void)
 {
-  Point pt = make_point (get_buffer_last_line (cur_bp), 0);
-  pt.o = astr_len (get_line_text (pt.p));
-  return pt;
+  return offset_to_point (cur_bp, astr_len (get_buffer_text (cur_bp).as));
 }
 
 Point
@@ -106,7 +104,7 @@ Point
 line_end_position (int count)
 {
   Point pt = line_beginning_position (count);
-  pt.o = astr_len (get_line_text (pt.p));
+  pt.o = get_buffer_line_len (cur_bp);
   return pt;
 }
 

@@ -548,11 +548,7 @@ edit_tab_region (astr (*action) (astr as, size_t scol, size_t tw))
 
       for (size_t o = r.start; o < r.end; o = estr_next_line (get_buffer_text (cur_bp), o))
         {
-          size_t eo = estr_next_line (get_buffer_text (cur_bp), o);
-          if (eo == SIZE_MAX)
-            eo = astr_len (get_buffer_text (cur_bp).as);
-          else
-            eo -= strlen (get_buffer_text (cur_bp).eol);
+          size_t eo = estr_end_of_line (get_buffer_text (cur_bp), o);
           assert (eo >= o);
           astr src = astr_substr (get_buffer_text (cur_bp).as, o, eo - o);
 
@@ -695,12 +691,12 @@ END_DEFUN
                                ISCLOSEBRACKETCHAR (c))
 #define PRECEDINGQUOTEDQUOTE(c)                                         \
   (c == '\\'                                                            \
-   && get_buffer_pt (cur_bp).o + 1 < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) \
+   && get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp)       \
    && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\"') || \
        (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\'')))
 #define FOLLOWINGQUOTEDQUOTE(c)                                         \
   (c == '\\'                                                            \
-   && get_buffer_pt (cur_bp).o + 1 < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) \
+   && get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp)       \
    && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\"') || \
        (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\'')))
 
@@ -790,7 +786,7 @@ move_sexp (int dir)
           break;
         }
       pt = get_buffer_pt (cur_bp);
-      pt.o = dir > 0 ? 0 : astr_len (get_line_text (pt.p));
+      pt.o = dir > 0 ? 0 : get_buffer_line_len (cur_bp);
       goto_point (pt);
     }
   return false;
@@ -1178,7 +1174,7 @@ setcase_word (int rcase)
   astr as = astr_new ();
   char c;
   for (size_t i = get_buffer_pt (cur_bp).o;
-       i < astr_len (get_line_text (get_buffer_pt (cur_bp).p)) &&
+       i < get_buffer_line_len (cur_bp) &&
          ISWORDCHAR ((int) (c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i)));
        i++)
     astr_cat_char (as, c);

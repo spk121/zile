@@ -116,14 +116,14 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region r,
 }
 
 static void
-draw_line (size_t line, size_t startcol, Window * wp, const Line * lp,
+draw_line (size_t line, size_t startcol, Window * wp, size_t o,
            size_t lineno, Region r, int highlight)
 {
-  size_t x, i;
-
   term_move (line, 0);
-  for (x = 0, i = startcol; i < astr_len (get_line_text (lp)) && x < get_window_ewidth (wp); i++)
-    x = outch (astr_get (get_line_text (lp), i),
+
+  size_t x, i;
+  for (x = 0, i = startcol; i < estr_end_of_line (get_buffer_text (get_window_bp (wp)), o) - o && x < get_window_ewidth (wp); i++)
+    x = outch (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
                highlight && in_region (lineno, i, r) ? FONT_REVERSE : FONT_NORMAL,
                x);
 
@@ -156,17 +156,16 @@ calculate_highlight_region (Window * wp, Region * rp)
 static void
 draw_window (size_t topline, Window * wp)
 {
-  size_t i, lineno;
-  const Line * lp;
+  size_t i, lineno, o;
   Point pt = window_pt (wp);
 
   Region r;
   int highlight = calculate_highlight_region (wp, &r);
 
   /* Find the first line to display on the first screen line. */
-  for (lp = pt.p, lineno = pt.n, i = get_window_topdelta (wp);
+  for (o = get_buffer_o (get_window_bp (wp)), lineno = pt.n, i = get_window_topdelta (wp);
        i > 0 && lineno > 0;
-       assert (lp = get_line_prev (lp)), --i, --lineno)
+       assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i, --lineno)
     ;
 
   cur_tab_width = tab_width (get_window_bp (wp));
@@ -182,7 +181,7 @@ draw_window (size_t topline, Window * wp)
       if (lineno >= get_buffer_last_line (get_window_bp (wp)))
         continue;
 
-      draw_line (i, get_window_start_column (wp), wp, lp, lineno, r, highlight);
+      draw_line (i, get_window_start_column (wp), wp, o, lineno, r, highlight);
 
       if (get_window_start_column (wp) > 0)
         {
@@ -190,7 +189,7 @@ draw_window (size_t topline, Window * wp)
           term_addch ('$');
         }
 
-      lp = get_line_next (lp);
+      o = estr_next_line (get_buffer_text (get_window_bp (wp)), o);
     }
 }
 
@@ -213,10 +212,11 @@ make_mode_line_flags (Window * wp)
 static void
 calculate_start_column (Window * wp)
 {
-  size_t col = 0, lastcol = 0, t = tab_width (get_window_bp (wp));
+  Buffer *bp = get_window_bp (wp);
+  size_t col = 0, lastcol = 0, t = tab_width (bp);
   int rpfact, lpfact;
-  size_t rp, lp, p;
   Point pt = window_pt (wp);
+  size_t rp, lp, p, o = point_to_offset (pt) - pt.o;
 
   rp = pt.o;
   rpfact = pt.o / (get_window_ewidth (wp) / 3);
@@ -224,18 +224,21 @@ calculate_start_column (Window * wp)
   for (lp = rp; lp != SIZE_MAX; --lp)
     {
       for (col = 0, p = lp; p < rp; ++p)
-        if (astr_get (get_line_text (pt.p), p) == '\t')
-          {
-            col |= t - 1;
+        {
+          char c = astr_get (get_buffer_text (bp).as, o + p);
+          if (c == '\t')
+            {
+              col |= t - 1;
+              ++col;
+            }
+          else if (isprint ((int) c))
             ++col;
-          }
-        else if (isprint ((int) astr_get (get_line_text (pt.p), p)))
-          ++col;
-        else
-          {
-            char *buf = make_char_printable (astr_get (get_line_text (pt.p), p));
-            col += strlen (buf);
-          }
+          else
+            {
+              char *buf = make_char_printable (c);
+              col += strlen (buf);
+            }
+        }
 
       lpfact = lp / (get_window_ewidth (wp) / 3);
 
