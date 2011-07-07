@@ -233,7 +233,6 @@ castr minibuf_read_filename (const char *fmt, const char *value,
 void minibuf_clear (void);
 
 /* point.c ---------------------------------------------------------------- */
-Point make_point (size_t lineno, size_t offset);
 Point offset_to_point (Buffer *bp, size_t offset);
 Point point_min (void);
 Point point_max (void);

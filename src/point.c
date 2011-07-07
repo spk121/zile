@@ -27,12 +27,6 @@
 #include "extern.h"
 
 Point
-make_point (size_t lineno, size_t offset)
-{
-  return (Point) {.n = lineno, .o = offset};
-}
-
-Point
 offset_to_point (Buffer *bp, size_t offset)
 {
   Point pt = {
@@ -49,7 +43,7 @@ offset_to_point (Buffer *bp, size_t offset)
 Point
 point_min (void)
 {
-  return make_point (0, 0);
+  return (Point) {.n = 0, .o = 0};
 }
 
 Point

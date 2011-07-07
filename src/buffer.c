@@ -503,7 +503,7 @@ delete_region (const Region r)
 bool
 in_region (size_t lineno, size_t x, Region r)
 {
-  size_t o = point_to_offset (make_point (lineno, x));
+  size_t o = point_to_offset ((Point) {.n = lineno, .o = x});
   return o >= r.start && o <= r.end;
 }
 
