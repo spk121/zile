@@ -54,26 +54,6 @@ Cancel current command.
 }
 END_DEFUN
 
-DEFUN ("transient-mark-mode", transient_mark_mode)
-/*+
-Toggle Transient Mark mode.
-With arg, turn Transient Mark mode on if arg is positive, off otherwise.
-+*/
-{
-  if (!(lastflag & FLAG_SET_UNIARG))
-    {
-      if (get_variable_bool ("transient-mark-mode"))
-        set_variable ("transient-mark-mode", "nil");
-      else
-        set_variable ("transient-mark-mode", "t");
-    }
-  else
-    set_variable ("transient-mark-mode", uniarg > 0 ? "t" : "nil");
-
-  activate_mark ();
-}
-END_DEFUN
-
 static void
 print_buf (Buffer * old_bp, Buffer * bp)
 {
@@ -308,11 +288,7 @@ Put the mark where point is now, and point where the mark is now.
   tmp = get_buffer_pt (cur_bp);
   goto_point (get_marker_pt (get_buffer_mark (cur_bp)));
   set_marker_o (get_buffer_mark (cur_bp), point_to_offset (tmp));
-
-  /* In transient-mark-mode we must reactivate the mark.  */
-  if (get_variable_bool ("transient-mark-mode"))
-    activate_mark ();
-
+  activate_mark ();
   thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN

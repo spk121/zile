@@ -460,14 +460,12 @@ warn_if_no_mark (void)
       minibuf_error ("The mark is not set now");
       return true;
     }
-  else if (!get_buffer_mark_active (cur_bp) &&
-           get_variable_bool ("transient-mark-mode"))
+  else if (!get_buffer_mark_active (cur_bp))
     {
       minibuf_error ("The mark is not active now");
       return true;
     }
-  else
-    return false;
+  return false;
 }
 
 /*
