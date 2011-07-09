@@ -104,7 +104,6 @@ DEFUN ("start-kbd-macro", start_kbd_macro)
 Record subsequent keyboard input, defining a keyboard macro.
 The commands are recorded even as they are executed.
 Use @kbd{C-x )} to finish recording and make the macro available.
-Use @kbd{M-x name-last-kbd-macro} to give it a permanent name.
 +*/
 {
   if (thisflag & FLAG_DEFINING_MACRO)
@@ -164,9 +163,6 @@ DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
 /*+
 Call the last keyboard macro that you defined with @kbd{C-x (}.
 A prefix argument serves as a repeat count.
-
-To make a macro permanent so you can call it even after
-defining others, use @kbd{M-x name-last-kbd-macro}.
 +*/
 {
   if (cur_mp == NULL)
