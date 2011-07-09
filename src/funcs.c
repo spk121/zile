@@ -443,12 +443,8 @@ Move point to the first non-whitespace character on this line.
 +*/
 {
   goto_point (line_beginning_position (1));
-  while (!eolp ())
-    {
-      if (!isspace (following_char ()))
-        break;
-      forward_char ();
-    }
+  while (!eolp () && isspace (following_char ()))
+    forward_char ();
 }
 END_DEFUN
 
