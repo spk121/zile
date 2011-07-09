@@ -211,20 +211,11 @@ le *
 execute_function (const char *name, int uniarg)
 {
   Function func = get_function (name);
-  Macro *mp;
 
   if (func)
     return func (uniarg, true, NULL);
   else
-    {
-      mp = get_macro (name);
-      if (mp)
-        {
-          call_macro (mp);
-          return leT;
-        }
-      return leNIL;
-    }
+    return leNIL;
 }
 
 DEFUN ("execute-extended-command", execute_extended_command)
@@ -265,7 +256,6 @@ minibuf_read_function_name (const char *fmt, ...)
     if (fentry_table[i].interactive)
       gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
                          xstrdup (fentry_table[i].name));
-  add_macros_to_list (get_completion_completions (cp), completion_strcmp);
 
   va_start (ap, fmt);
   castr ms = minibuf_vread_completion (fmt, "", cp, functions_history,

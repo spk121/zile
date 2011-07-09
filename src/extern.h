@@ -187,9 +187,6 @@ void cancel_kbd_macro (void);
 void add_cmd_to_macro (void);
 void add_key_to_cmd (size_t key);
 void remove_key_from_cmd (void);
-void call_macro (Macro * mp);
-Macro *get_macro (const char *name);
-void add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f);
 
 /* main.c ----------------------------------------------------------------- */
 extern char *prog_name;

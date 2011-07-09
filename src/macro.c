@@ -38,7 +38,7 @@ struct Macro
   Macro *next;		/* Next macro in the list. */
 };
 
-static Macro *cur_mp = NULL, *cmd_mp = NULL, *head_mp = NULL;
+static Macro *cur_mp = NULL, *cmd_mp = NULL;
 
 static Macro *
 macro_new (void)
@@ -140,44 +140,6 @@ The macro is now available for use via @kbd{C-x e}.
 }
 END_DEFUN
 
-DEFUN ("name-last-kbd-macro", name_last_kbd_macro)
-/*+
-Assign a name to the last keyboard macro defined.
-Argument SYMBOL is the name to define.
-The symbol's function definition becomes the keyboard macro string.
-Such a \"function\" cannot be called from Lisp, but it is a valid editor command.
-+*/
-{
-  Macro *mp;
-  const char *ms = astr_cstr (minibuf_read ("Name for last kbd macro: ", ""));
-
-  if (ms == NULL)
-    {
-      minibuf_error ("No command name given");
-      return leNIL;
-    }
-
-  if (cur_mp == NULL)
-    {
-      minibuf_error ("No keyboard macro defined");
-      return leNIL;
-    }
-
-  mp = get_macro (ms);
-  if (mp == NULL)
-    {
-      /* Add a new macro to the list */
-      mp = macro_new ();
-      mp->next = head_mp;
-      mp->name = xstrdup (ms);
-      head_mp = mp;
-    }
-
-  /* Copy the keystrokes from cur_mp. */
-  append_key_list (mp, cur_mp);
-}
-END_DEFUN
-
 static void
 process_keys (gl_list_t keys)
 {
@@ -190,7 +152,7 @@ process_keys (gl_list_t keys)
     process_command ();
 }
 
-void
+static void
 call_macro (Macro * mp)
 {
   assert (mp);
@@ -234,26 +196,3 @@ Execute macro as string of editor command characters.
     ok = leNIL;
 }
 END_DEFUN
-
-/*
- * Find a macro given its name.
- */
-Macro *
-get_macro (const char *name)
-{
-  assert (name);
-  for (Macro *mp = head_mp; mp; mp = mp->next)
-    if (STREQ (mp->name, name))
-      return mp;
-  return NULL;
-}
-
-/*
- * Add macro names to a list.
- */
-void
-add_macros_to_list (gl_list_t l, gl_listelement_compar_fn f)
-{
-  for (Macro *mp = head_mp; mp; mp = mp->next)
-    gl_sortedlist_add (l, f, xstrdup (mp->name));
-}
