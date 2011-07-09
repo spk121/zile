@@ -56,7 +56,7 @@ Point
 line_beginning_position (int count)
 {
   /* Copy current point position without offset (beginning of line). */
-  size_t o = get_buffer_o (cur_bp);
+  size_t o = get_buffer_line_o (cur_bp);
 
   count--;
   for (; count < 0 && o > 0; count++)

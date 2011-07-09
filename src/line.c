@@ -121,7 +121,7 @@ fill_break_line (void)
       /* Find break point moving left from fill-column. */
       for (size_t i = get_buffer_pt (cur_bp).o; i > 0; i--)
         {
-          int c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i - 1);
+          int c = astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + i - 1);
           if (isspace (c))
             {
               break_col = i;
@@ -133,14 +133,14 @@ fill_break_line (void)
          possible moving right. */
       if (break_col == 0)
         {
-          for (size_t i = get_buffer_o (cur_bp) + get_buffer_pt (cur_bp).o + 1;
-               i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp));
+          for (size_t i = get_buffer_line_o (cur_bp) + get_buffer_pt (cur_bp).o + 1;
+               i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp));
                i++)
             {
               int c = astr_get (get_buffer_text (cur_bp).as, i - 1);
               if (isspace (c))
                 {
-                  break_col = i - get_buffer_o (cur_bp);
+                  break_col = i - get_buffer_line_o (cur_bp);
                   break;
                 }
             }
@@ -229,7 +229,6 @@ replace_estr (size_t del, estr es)
                           get_buffer_text (cur_bp).eol, strlen (get_buffer_text (cur_bp).eol), false);
           assert (move_char (1));
 
-          set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) + 1);
           thisflag |= FLAG_NEED_RESYNC;
 
           s += eol_len;

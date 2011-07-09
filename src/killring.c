@@ -92,14 +92,14 @@ kill_line (bool whole_line)
 {
   bool ok = true;
   bool only_blanks_to_end_of_line = false;
-  size_t cur_line_len = estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)) - get_buffer_o (cur_bp);
+  size_t cur_line_len = estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)) - get_buffer_line_o (cur_bp);
 
   if (!whole_line)
     {
       size_t i;
       for (i = get_buffer_pt (cur_bp).o; i < cur_line_len; i++)
         {
-          char c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i);
+          char c = astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + i);
           if (!(c == ' ' || c == '\t'))
             break;
         }

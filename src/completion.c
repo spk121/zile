@@ -111,7 +111,7 @@ completion_scroll_up (void)
   assert (wp != NULL);
   set_current_window (wp);
   pt = get_buffer_pt (cur_bp);
-  if (pt.n >= get_buffer_last_line (cur_bp) - get_window_eheight (cur_wp) || !FUNCALL (scroll_up))
+  if (!FUNCALL (scroll_up))
     gotobob ();
   set_current_window (old_wp);
 
@@ -131,7 +131,7 @@ completion_scroll_down (void)
   assert (wp != NULL);
   set_current_window (wp);
   pt = get_buffer_pt (cur_bp);
-  if (pt.n == 0 || !FUNCALL (scroll_down))
+  if (!FUNCALL (scroll_down))
     {
       gotoeob ();
       resync_redisplay (cur_wp);

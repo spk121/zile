@@ -59,7 +59,7 @@ get_goalc_bp (Buffer * bp, Point pt)
   size_t end = MIN (pt.o, get_buffer_line_len (bp));
 
   for (size_t i = 0; i < end; i++, col++)
-    if (astr_get (get_buffer_text (bp).as, get_buffer_o (bp) + i) == '\t')
+    if (astr_get (get_buffer_text (bp).as, get_buffer_line_o (bp) + i) == '\t')
       col |= t - 1;
 
   return col;

@@ -74,7 +74,7 @@ get_buffer_size (Buffer * bp)
 size_t
 get_buffer_line_len (Buffer *bp)
 {
-  return estr_end_of_line (get_buffer_text (bp), get_buffer_o (bp)) - get_buffer_o (bp);
+  return estr_end_of_line (get_buffer_text (bp), get_buffer_line_o (bp)) - get_buffer_line_o (bp);
 }
 
 void set_region_start (Region *rp, Point pt)
@@ -102,28 +102,28 @@ size_t get_region_size (const Region r)
   return r.end - r.start;
 }
 
-/*
- * Line structure
- */
-struct Line {
-  Buffer *bp;
-  size_t o;
-};
+void
+set_buffer_pt_o (Buffer *bp, size_t o)
+{
+  bp->o = o;
+}
 
 size_t
 get_buffer_pt_o (Buffer *bp)
 {
-  Point pt = bp->pt;
-  return point_to_offset (pt);
+  return bp->o;
 }
 
-/* FIXME: This should really return pt */
-size_t
-get_buffer_o (Buffer *bp)
+Point
+get_buffer_pt (Buffer *bp)
 {
-  Point pt = bp->pt;
-  pt.o = 0;
-  return point_to_offset (pt);
+  return offset_to_point (bp, bp->o);
+}
+
+size_t
+get_buffer_line_o (Buffer *bp)
+{
+  return estr_start_of_line (bp->text, bp->o);
 }
 
 size_t
@@ -138,7 +138,7 @@ point_to_offset (Point pt)
 /*
  * Adjust markers (including point) at offset `o' by offset `delta'.
  */
-static void
+static size_t
 adjust_markers (size_t o, ptrdiff_t delta)
 {
   Marker *m_pt = point_marker ();
@@ -151,8 +151,9 @@ adjust_markers (size_t o, ptrdiff_t delta)
     }
 
   /* This marker has been updated to new position. */
-  goto_point (get_marker_pt (m_pt));
+  size_t m = get_marker_o (m_pt);
   unchain_marker (m_pt);
+  return m;
 }
 
 /*
@@ -208,21 +209,22 @@ delete_char (void)
     return false;
 
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0);
+  size_t o;
   if (eolp ())
     {
       size_t eol_len = strlen (cur_bp->text.eol);
-      adjust_markers (point_to_offset (cur_bp->pt), -eol_len);
-      astr_remove (cur_bp->text.as, point_to_offset (cur_bp->pt), eol_len);
-      set_buffer_last_line (cur_bp, get_buffer_last_line (cur_bp) - 1);
+      o = adjust_markers (get_buffer_pt_o (cur_bp), -eol_len);
+      astr_remove (cur_bp->text.as, cur_bp->o, eol_len);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
     {
-      adjust_markers (point_to_offset (cur_bp->pt), -1);
-      astr_remove (cur_bp->text.as, point_to_offset (cur_bp->pt), 1);
+      o = adjust_markers (get_buffer_pt_o (cur_bp), -1);
+      astr_remove (cur_bp->text.as, cur_bp->o, 1);
     }
 
   set_buffer_modified (cur_bp, true);
+  goto_point (offset_to_point (cur_bp, o));
 
   return true;
 }
@@ -245,9 +247,10 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
     }
 
   undo_save (UNDO_REPLACE_BLOCK, offset, oldlen, newlen);
-  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
   set_buffer_modified (bp, true);
-  adjust_markers (offset, (ptrdiff_t) (newlen - oldlen)); /* FIXME: In case where buffer has shrunk and marker is now pointing off the end. */
+  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
+  bp->o = adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
+  thisflag |= FLAG_NEED_RESYNC;
 }
 
 void
@@ -474,7 +477,7 @@ warn_if_no_mark (void)
 Region
 calculate_the_region (void)
 {
-  size_t o = point_to_offset (cur_bp->pt);
+  size_t o = cur_bp->o;
   size_t m = point_to_offset (get_marker_pt (cur_bp->mark));
   return (Region) {.start = MIN (o, m), .end = MAX (o, m)};
 }
@@ -482,20 +485,10 @@ calculate_the_region (void)
 bool
 delete_region (const Region r)
 {
-  size_t size = get_region_size (r);
-  Marker *m = point_marker ();
-
   if (warn_if_readonly_buffer ())
     return false;
 
-  goto_point (get_region_start (r));
-  undo_save (UNDO_REPLACE_BLOCK, r.start, size, 0);
-  undo_nosave = true;
-  while (size--)
-    delete_char ();
-  undo_nosave = false;
-  goto_point (get_marker_pt (m));
-  unchain_marker (m);
+  buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0, false);
 
   return true;
 }
@@ -722,11 +715,11 @@ move_char (int offset)
   for (size_t i = 0; i < (size_t) (abs (offset)); i++)
     {
       if (dir > 0 ? !eolp () : !bolp ())
-        cur_bp->pt.o += dir;
+        cur_bp->o += dir;
       else if (dir > 0 ? !eobp () : !bobp ())
         {
           thisflag |= FLAG_NEED_RESYNC;
-          cur_bp->pt.n += dir;
+          cur_bp->o += dir * strlen (cur_bp->text.eol);
           if (dir > 0)
             FUNCALL (beginning_of_line);
           else
@@ -747,7 +740,7 @@ goto_goalc (void)
 {
   size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = get_buffer_o (cur_bp); i < estr_next_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)); i++)
+  for (i = get_buffer_line_o (cur_bp); i < estr_next_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)); i++)
     if (col == get_goalc ())
       break;
     else if (astr_get (get_buffer_text (cur_bp).as, i) == '\t')
@@ -756,39 +749,31 @@ goto_goalc (void)
     else
       ++col;
 
-  cur_bp->pt.o = i - get_buffer_o (cur_bp);
+  cur_bp->o = i;
 }
 
 bool
 move_line (int n)
 {
   bool ok = true;
-  int dir;
+  size_t o = cur_bp->o;
+  int backward = n < 0;
 
   if (n == 0)
     return false;
-  else if (n > 0)
-    {
-      dir = 1;
-      if ((size_t) n > get_buffer_last_line (cur_bp) - cur_bp->pt.n)
-        {
-          ok = false;
-          n = get_buffer_last_line (cur_bp) - cur_bp->pt.n;
-        }
-    }
-  else
-    {
-      dir = -1;
-      n = -n;
-      if ((size_t) n > cur_bp->pt.n)
-        {
-          ok = false;
-          n = cur_bp->pt.n;
-        }
-    }
+  if (backward)
+    n = -n;
 
   for (; n > 0; n--)
-    cur_bp->pt.n += dir;
+    {
+      o = (backward ? estr_prev_line : estr_next_line) (cur_bp->text, cur_bp->o);
+      if (o == SIZE_MAX)
+        {
+          ok = false;
+          break;
+        }
+      cur_bp->o = o;
+    }
 
   if (last_command () != F_next_line && last_command () != F_previous_line)
     set_buffer_goalc (cur_bp, get_goalc ());

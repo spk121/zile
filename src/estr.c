@@ -88,7 +88,7 @@ size_t
 estr_prev_line (estr es, size_t o)
 {
   size_t so = estr_start_of_line (es, o);
-  return (so == 0) ? SIZE_MAX : estr_start_of_line (es, so);
+  return (so == 0) ? SIZE_MAX : estr_start_of_line (es, so - strlen (es.eol));
 }
 
 size_t

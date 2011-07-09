@@ -692,13 +692,13 @@ END_DEFUN
 #define PRECEDINGQUOTEDQUOTE(c)                                         \
   (c == '\\'                                                            \
    && get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp)       \
-   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\"') || \
-       (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\'')))
+   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\"') || \
+       (astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\'')))
 #define FOLLOWINGQUOTEDQUOTE(c)                                         \
   (c == '\\'                                                            \
    && get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp)       \
-   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\"') || \
-       (astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + 1) == '\'')))
+   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\"') || \
+       (astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\'')))
 
 static int
 move_sexp (int dir)
@@ -1175,7 +1175,7 @@ setcase_word (int rcase)
   char c;
   for (size_t i = get_buffer_pt (cur_bp).o;
        i < get_buffer_line_len (cur_bp) &&
-         ISWORDCHAR ((int) (c = astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + i)));
+         ISWORDCHAR ((int) (c = astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + i)));
        i++)
     astr_cat_char (as, c);
 

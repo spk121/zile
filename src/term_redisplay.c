@@ -163,7 +163,7 @@ draw_window (size_t topline, Window * wp)
   int highlight = calculate_highlight_region (wp, &r);
 
   /* Find the first line to display on the first screen line. */
-  for (o = get_buffer_o (get_window_bp (wp)), lineno = pt.n, i = get_window_topdelta (wp);
+  for (o = get_buffer_line_o (get_window_bp (wp)), lineno = pt.n, i = get_window_topdelta (wp);
        i > 0 && lineno > 0;
        assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i, --lineno)
     ;
@@ -178,7 +178,7 @@ draw_window (size_t topline, Window * wp)
       term_clrtoeol ();
 
       /* If at the end of the buffer, don't write any text. */
-      if (lineno >= get_buffer_last_line (get_window_bp (wp)))
+      if (o == SIZE_MAX)
         continue;
 
       draw_line (i, get_window_start_column (wp), wp, o, lineno, r, highlight);
@@ -191,6 +191,8 @@ draw_window (size_t topline, Window * wp)
 
       o = estr_next_line (get_buffer_text (get_window_bp (wp)), o);
     }
+
+  set_window_all_displayed (wp, o >= get_buffer_size (get_window_bp (wp)));
 }
 
 static const char *
@@ -270,7 +272,7 @@ make_screen_pos (Window * wp, char **buf)
     *buf = xasprintf ("Bot");
   else
     *buf = xasprintf ("%2d%%",
-               (int) ((float) window_pt (wp).n / get_buffer_last_line (get_window_bp (wp)) * 100));
+                      (int) ((float) (window_pt (wp).n - get_window_topdelta (wp)) / offset_to_point (get_window_bp (wp), get_buffer_size (get_window_bp (wp))).n * 100));
 
   return *buf;
 }

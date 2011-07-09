@@ -30,13 +30,13 @@
 bool
 is_empty_line (void)
 {
-  return get_buffer_o (cur_bp) == estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp));
+  return get_buffer_line_o (cur_bp) == estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp));
 }
 
 bool
 is_blank_line (void)
 {
-  for (size_t i = get_buffer_o (cur_bp); i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_o (cur_bp)); i++)
+  for (size_t i = get_buffer_line_o (cur_bp); i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)); i++)
     if (!isspace ((int) astr_get (get_buffer_text (cur_bp).as, i)))
       return false;
   return true;
@@ -51,7 +51,7 @@ following_char (void)
   else if (eolp ())
     return '\n';
   else
-    return astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + get_buffer_pt (cur_bp).o);
+    return astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + get_buffer_pt (cur_bp).o);
 }
 
 /* Return the character preceding point in the current buffer. */
@@ -63,7 +63,7 @@ preceding_char (void)
   else if (bolp ())
     return '\n';
   else
-    return astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) + get_buffer_pt (cur_bp).o - 1);
+    return astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + get_buffer_pt (cur_bp).o - 1);
 }
 
 /* Return true if point is at the beginning of the buffer. */

@@ -311,6 +311,5 @@ window_top_visible (Window * wp)
 bool
 window_bottom_visible (Window * wp)
 {
-  return window_pt (wp).n + (get_window_eheight (wp) - get_window_topdelta (wp)) >
-    get_buffer_last_line (get_window_bp (wp));
+  return get_window_all_displayed (wp);
 }
