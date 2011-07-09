@@ -31,15 +31,6 @@
 #include "main.h"
 #include "extern.h"
 
-DEFUN ("zile-version", zile_version)
-/*+
-Show the version of Zile that is running.
-+*/
-{
-  minibuf_write (ZILE_VERSION_STRING " of " CONFIGURE_DATE " on " CONFIGURE_HOST);
-}
-END_DEFUN
-
 static le *
 show_file (const char *filename)
 {
