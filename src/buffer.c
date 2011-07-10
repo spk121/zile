@@ -750,6 +750,16 @@ goto_goalc (void)
   cur_bp->o = i;
 }
 
+void
+resync_goalc (void)
+{
+  if (last_command () != F_next_line && last_command () != F_previous_line)
+    set_buffer_goalc (cur_bp, get_goalc ());
+  goto_goalc ();
+
+  thisflag |= FLAG_NEED_RESYNC;
+}
+
 bool
 move_line (int n)
 {
@@ -773,11 +783,7 @@ move_line (int n)
       cur_bp->o = o;
     }
 
-  if (last_command () != F_next_line && last_command () != F_previous_line)
-    set_buffer_goalc (cur_bp, get_goalc ());
-  goto_goalc ();
-
-  thisflag |= FLAG_NEED_RESYNC;
+  resync_goalc ();
 
   return ok;
 }

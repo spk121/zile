@@ -79,21 +79,8 @@ line_end_position (int count)
 void
 goto_point (Point pt)
 {
-  if (get_buffer_pt (cur_bp).n > pt.n)
-    do
-      FUNCALL (previous_line);
-    while (get_buffer_pt (cur_bp).n > pt.n);
-  else if (get_buffer_pt (cur_bp).n < pt.n)
-    do
-      FUNCALL (next_line);
-    while (get_buffer_pt (cur_bp).n < pt.n);
-
-  if (get_buffer_pt (cur_bp).o > pt.o)
-    do
-      FUNCALL (backward_char);
-    while (get_buffer_pt (cur_bp).o > pt.o);
-  else if (get_buffer_pt (cur_bp).o < pt.o)
-    do
-      FUNCALL (forward_char);
-    while (get_buffer_pt (cur_bp).o < pt.o);
+  size_t old_n = get_buffer_pt (cur_bp).n;
+  set_buffer_pt_o (cur_bp, point_to_offset (pt));
+  if (get_buffer_pt (cur_bp).n != old_n)
+    resync_goalc ();
 }
