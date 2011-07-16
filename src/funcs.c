@@ -442,7 +442,7 @@ DEFUN ("back-to-indentation", back_to_indentation)
 Move point to the first non-whitespace character on this line.
 +*/
 {
-  goto_point (line_beginning_position (1));
+  goto_offset (get_buffer_line_o (cur_bp));
   while (!eolp () && isspace (following_char ()))
     forward_char ();
 }

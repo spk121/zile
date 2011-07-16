@@ -21,8 +21,6 @@
 
 #include <config.h>
 
-#include <assert.h>
-
 #include "main.h"
 #include "extern.h"
 
@@ -37,29 +35,6 @@ offset_to_point (Buffer *bp, size_t offset)
   for (o = 0; estr_end_of_line (get_buffer_text (bp), o) < offset; o = estr_next_line (get_buffer_text (bp), o))
     pt.n++;
   pt.o = offset - o;
-  return pt;
-}
-
-Point
-line_beginning_position (int count)
-{
-  /* Copy current point position without offset (beginning of line). */
-  size_t o = get_buffer_line_o (cur_bp);
-
-  count--;
-  for (; count < 0 && o > 0; count++)
-    o = estr_prev_line (get_buffer_text (cur_bp), o);
-  for (; count > 0 && o < SIZE_MAX; count--)
-    o = estr_next_line (get_buffer_text (cur_bp), o);
-
-  return offset_to_point (cur_bp, o);
-}
-
-Point
-line_end_position (int count)
-{
-  Point pt = line_beginning_position (count);
-  pt.o = get_buffer_line_len (cur_bp);
   return pt;
 }
 

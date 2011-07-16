@@ -34,7 +34,7 @@ DEFUN ("beginning-of-line", beginning_of_line)
 Move point to beginning of current line.
 +*/
 {
-  goto_point (line_beginning_position (uniarg));
+  goto_offset (get_buffer_line_o (cur_bp));
   set_buffer_goalc (cur_bp, 0);
 }
 END_DEFUN
@@ -44,7 +44,7 @@ DEFUN ("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  goto_point (line_end_position (uniarg));
+  goto_offset (get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp));
   set_buffer_goalc (cur_bp, SIZE_MAX);
 }
 END_DEFUN
