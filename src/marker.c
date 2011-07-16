@@ -38,7 +38,6 @@ struct Marker
 #define FIELD(ty, name) ty name;
 #include "marker.h"
 #undef FIELD
-  Buffer * bp;		/* Buffer that marker points into. */
 };
 
 #define FIELD(ty, field)                         \
@@ -47,12 +46,6 @@ struct Marker
 
 #include "marker.h"
 #undef FIELD
-
-Point
-get_marker_pt (Marker * marker)
-{
-  return offset_to_point (marker->bp, marker->o);
-}
 
 Marker *
 marker_new (void)

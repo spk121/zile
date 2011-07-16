@@ -193,7 +193,6 @@ extern int thisflag, lastflag, last_uniarg;
   void set_marker_ ## field (Marker *cp, ty field);
 #include "marker.h"
 #undef FIELD
-Point get_marker_pt (Marker * marker);
 Marker * marker_new (void);
 void unchain_marker (const Marker * marker);
 void move_marker (Marker * marker, Buffer * bp, size_t o);

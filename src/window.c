@@ -74,7 +74,7 @@ set_current_window (Window * wp)
      marker.  */
   if (cur_wp->saved_pt)
     {
-      goto_point (get_marker_pt (cur_wp->saved_pt));
+      goto_offset (get_marker_o (cur_wp->saved_pt));
       unchain_marker (cur_wp->saved_pt);
       cur_wp->saved_pt = NULL;
     }
@@ -296,9 +296,9 @@ window_pt (Window * wp)
   else
     {
       if (wp->saved_pt != NULL)
-        return get_marker_pt (wp->saved_pt);
+        return offset_to_point (wp->bp, get_marker_o (wp->saved_pt));
       else
-        return get_buffer_pt (wp->bp);
+        return offset_to_point (wp->bp, get_buffer_o (wp->bp));
     }
 }
 

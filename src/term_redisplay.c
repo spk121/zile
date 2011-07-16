@@ -140,7 +140,7 @@ calculate_highlight_region (Window * wp, Region * rp)
     return false;
 
   rp->start = point_to_offset (get_window_bp (wp), window_pt (wp));
-  rp->end = point_to_offset (get_window_bp (wp), get_marker_pt (get_buffer_mark (get_window_bp (wp))));
+  rp->end = get_marker_o (get_buffer_mark (get_window_bp (wp)));
   if (rp->end < rp->start)
     {
       size_t o = rp->start;

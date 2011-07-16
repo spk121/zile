@@ -443,8 +443,7 @@ warn_if_no_mark (void)
 Region
 calculate_the_region (void)
 {
-  size_t o = cur_bp->o;
-  size_t m = point_to_offset (cur_bp, get_marker_pt (cur_bp->mark));
+  size_t o = cur_bp->o, m = get_marker_o (cur_bp->mark);
   return (Region) {.start = MIN (o, m), .end = MAX (o, m)};
 }
 

@@ -277,17 +277,15 @@ DEFUN ("exchange-point-and-mark", exchange_point_and_mark)
 Put the mark where point is now, and point where the mark is now.
 +*/
 {
-  Point tmp;
-
   if (get_buffer_mark (cur_bp) == NULL)
     {
       minibuf_error ("No mark set in this buffer");
       return leNIL;
     }
 
-  tmp = get_buffer_pt (cur_bp);
-  goto_point (get_marker_pt (get_buffer_mark (cur_bp)));
-  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (cur_bp, tmp));
+  size_t o = get_buffer_o (cur_bp);
+  goto_offset (get_marker_o (get_buffer_mark (cur_bp)));
+  set_marker_o (get_buffer_mark (cur_bp), o);
   activate_mark ();
   thisflag |= FLAG_NEED_RESYNC;
 }
@@ -713,7 +711,7 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
       else
         {
           pop_mark ();
-          goto_point (get_marker_pt (m1));
+          goto_offset (get_marker_o (m1));
           minibuf_error ("End of buffer");
 
           unchain_marker (p0);
@@ -722,7 +720,7 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
         }
     }
 
-  goto_point (get_marker_pt (m1));
+  goto_offset (get_marker_o (m1));
 
   /* Forward. */
   forward_func ();
@@ -757,14 +755,14 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
     }
 
   /* Insert the first string. */
-  goto_point (get_marker_pt (m2));
+  goto_offset (get_marker_o (m2));
   unchain_marker (m2);
   bprintf ("%s", astr_cstr (as1));
 
   /* Insert the second string. */
   if (as2)
     {
-      goto_point (get_marker_pt (m1));
+      goto_offset (get_marker_o (m1));
       bprintf ("%s", astr_cstr (as2));
     }
   unchain_marker (m1);
@@ -995,7 +993,7 @@ Fill paragraph at or after point.
          && fill_break_line ())
     ;
 
-  goto_point (get_marker_pt (m));
+  goto_offset (get_marker_o (m));
   unchain_marker (m);
 
   undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
@@ -1105,7 +1103,7 @@ setcase_region (int (*func) (int))
       delete_char ();
       type_char (c, get_buffer_overwrite (cur_bp));
     }
-  goto_point (get_marker_pt (m));
+  goto_offset (get_marker_o (m));
   unchain_marker (m);
 
   undo_save (UNDO_END_SEQUENCE, r.start, 0, 0);
@@ -1334,7 +1332,7 @@ On nonblank line, delete any immediately following blank lines.
           while (FUNCALL (forward_line) == leT && is_blank_line ())
             ;
           seq_started = true;
-          undo_save (UNDO_START_SEQUENCE, point_to_offset (cur_bp, get_marker_pt (m)), 0, 0);
+          undo_save (UNDO_START_SEQUENCE, get_marker_o (m), 0, 0);
           FUNCALL (delete_region);
           pop_mark ();
         }
@@ -1360,12 +1358,12 @@ On nonblank line, delete any immediately following blank lines.
       while (is_blank_line ());
       if (forward)
         FUNCALL (forward_line);
-      if (get_buffer_pt (cur_bp).n != get_marker_pt (m).n)
+      if (offset_to_point (cur_bp, get_buffer_o (cur_bp)).n != offset_to_point (get_marker_bp (m), get_marker_o (m)).n)
         {
           if (!seq_started)
             {
               seq_started = true;
-              undo_save (UNDO_START_SEQUENCE, point_to_offset (cur_bp, get_marker_pt (m)), 0, 0);
+              undo_save (UNDO_START_SEQUENCE, get_marker_o (m), 0, 0);
             }
           FUNCALL (delete_region);
         }
@@ -1385,7 +1383,7 @@ On nonblank line, delete any immediately following blank lines.
       pop_mark ();
     }
 
-  goto_point (get_marker_pt (m));
+  goto_offset (get_marker_o (m));
 
   if (seq_started)
     undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);

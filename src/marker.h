@@ -21,3 +21,4 @@
 
 FIELD(Marker *, next)		/* Used to chain all markers in the buffer. */
 FIELD(size_t, o)		/* Marker offset within buffer. */
+FIELD(Buffer *, bp)		/* Buffer that marker points into. */

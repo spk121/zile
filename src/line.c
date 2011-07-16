@@ -153,7 +153,7 @@ fill_break_line (void)
           goto_point (pt);
           FUNCALL (delete_horizontal_space);
           insert_newline ();
-          goto_point (get_marker_pt (m));
+          goto_offset (get_marker_o (m));
           break_made = true;
         }
       else /* Undo fiddling with point. */
@@ -418,7 +418,7 @@ does nothing.
       if (!eolp ())
         target_goalc = get_goalc ();
 
-      goto_point (get_marker_pt (m));
+      goto_offset (get_marker_o (m));
       unchain_marker (m);
     }
 
@@ -466,7 +466,7 @@ previous_line_indent (void)
   cur_indent = get_goalc ();
 
   /* Restore point. */
-  goto_point (get_marker_pt (m));
+  goto_offset (get_marker_o (m));
   unchain_marker (m);
 
   return cur_indent;
@@ -509,7 +509,7 @@ Indentation is done using the `indent-for-tab-command' function.
       previous_nonblank_goalc ();
       size_t pos = get_goalc ();
       int indent = pos > 0 || (!eolp () && isspace (following_char ()));
-      goto_point (get_marker_pt (m));
+      goto_offset (get_marker_o (m));
       unchain_marker (m);
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
