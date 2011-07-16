@@ -31,6 +31,7 @@
 #include <unistd.h>
 #include <utime.h>
 #include "dirname.h"
+#include "xgetcwd.h"
 
 #include "main.h"
 #include "extern.h"
@@ -55,7 +56,7 @@ is_regular_file (const char *filename)
 astr
 agetcwd (void)
 {
-  char *s = getcwd (NULL, 0);
+  char *s = xgetcwd ();
   return astr_new_cstr (s ? s : "");
 }
 
