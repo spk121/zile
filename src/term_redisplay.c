@@ -155,7 +155,6 @@ draw_window (size_t topline, Window * wp)
 {
   size_t i, lineno, o;
   Point pt = window_pt (wp);
-
   Region r;
   int highlight = calculate_highlight_region (wp, &r);
 
