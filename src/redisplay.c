@@ -75,8 +75,7 @@ resize_windows (void)
     }
   else
     { /* Decrease windows' height, and close windows if necessary. */
-      int decreased = true;
-      while (decreased)
+      for (int decreased = true; decreased;)
         {
           decreased = false;
           for (wp = head_wp; wp != NULL && hdelta < 0; wp = get_window_next (wp))
