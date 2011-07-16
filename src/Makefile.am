@@ -27,7 +27,27 @@ bin_PROGRAMS = zile
 
 zile_LDADD = $(LDADD) $(LIBOBJS)
 
+zile_function_SOURCES =					\
+	basic.c						\
+	bind.c						\
+	buffer.c					\
+	eval.c						\
+	file.c						\
+	funcs.c						\
+	help.c						\
+	killring.c					\
+	line.c						\
+	lisp.c						\
+	macro.c						\
+	redisplay.c					\
+	registers.c					\
+	search.c					\
+	undo.c						\
+	variables.c					\
+	window.c
+
 zile_base_SOURCES =					\
+	$(zile_function_SOURCES)			\
 	memrmem.h					\
 	memrmem.c					\
 	astr.c						\
@@ -37,38 +57,21 @@ zile_base_SOURCES =					\
 	extern.h					\
 	main.h						\
 	tbl_vars.h					\
-	eval.c						\
 	lists.c						\
 	lists.h						\
-	lisp.c						\
-	basic.c						\
-	bind.c						\
 	buffer.h					\
-	buffer.c					\
 	completion.h					\
 	completion.c					\
 	editfns.c					\
-	file.c						\
-	funcs.c						\
 	getkey.c					\
-	help.c						\
 	history.c					\
 	keycode.c					\
-	killring.c					\
-	line.c						\
-	macro.c						\
 	main.c						\
 	marker.h					\
 	marker.c					\
 	minibuf.c					\
 	point.c						\
-	redisplay.c					\
-	registers.c					\
-	search.c					\
-	undo.c						\
-	variables.c					\
 	window.h					\
-	window.c					\
 	term_minibuf.c					\
 	term_redisplay.c				\
 	term_curses.c
@@ -92,8 +95,8 @@ PRODUCTIONSOURCES =					\
 
 $(zile_OBJECTS): tbl_funcs.h
 
-tbl_funcs.h: $(zile_base_SOURCES) mkfuncs.pl
-	PACKAGE_NAME="$(PACKAGE_NAME)" $(PERL) -I$(srcdir) $(srcdir)/mkfuncs.pl $(srcdir) $(zile_base_SOURCES)
+tbl_funcs.h: $(zile_function_SOURCES) mkfuncs.pl
+	PACKAGE_NAME="$(PACKAGE_NAME)" $(PERL) -I$(srcdir) $(srcdir)/mkfuncs.pl $(srcdir) $(zile_function_SOURCES)
 
 tbl_vars.h: tbl_vars.h.in mkvars.pl
 	PACKAGE="$(PACKAGE)" $(PERL) -I$(srcdir) $(srcdir)/mkvars.pl $(srcdir)/tbl_vars.h.in
