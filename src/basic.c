@@ -138,7 +138,7 @@ Position 1 is the beginning of the buffer.
 
   if (ok == leT && n != LONG_MAX)
     {
-      gotobob ();
+      FUNCALL (beginning_of_buffer);
       for (long count = 1; count < n; count++)
         if (!forward_char ())
           break;
@@ -171,41 +171,23 @@ Goto line arg, counting from line 1 at beginning of buffer.
 }
 END_DEFUN
 
-/*
- * Move point to the beginning of the buffer; do not touch the mark.
- */
-void
-gotobob (void)
-{
-  goto_point (point_min ());
-  thisflag |= FLAG_NEED_RESYNC;
-}
-
 DEFUN ("beginning-of-buffer", beginning_of_buffer)
 /*+
 Move point to the beginning of the buffer; leave mark at previous position.
 +*/
 {
-  gotobob ();
-}
-END_DEFUN
-
-/*
- * Move point to the end of the buffer; do not touch the mark.
- */
-void
-gotoeob (void)
-{
-  goto_point (point_max ());
+  goto_offset (0);
   thisflag |= FLAG_NEED_RESYNC;
 }
+END_DEFUN
 
 DEFUN ("end-of-buffer", end_of_buffer)
 /*+
 Move point to the end of the buffer; leave mark at previous position.
 +*/
 {
-  gotoeob ();
+  goto_offset (get_buffer_size (cur_bp));
+  thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN
 

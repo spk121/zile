@@ -41,18 +41,6 @@ offset_to_point (Buffer *bp, size_t offset)
 }
 
 Point
-point_min (void)
-{
-  return (Point) {.n = 0, .o = 0};
-}
-
-Point
-point_max (void)
-{
-  return offset_to_point (cur_bp, get_buffer_size (cur_bp));
-}
-
-Point
 line_beginning_position (int count)
 {
   /* Copy current point position without offset (beginning of line). */
@@ -75,12 +63,18 @@ line_end_position (int count)
   return pt;
 }
 
+void
+goto_offset (size_t o)
+{
+  size_t old_n = get_buffer_pt (cur_bp).n;
+  set_buffer_pt_o (cur_bp, o);
+  if (get_buffer_pt (cur_bp).n != old_n)
+    resync_goalc ();
+}
+
 /* Go to coordinates described by pt. */
 void
 goto_point (Point pt)
 {
-  size_t old_n = get_buffer_pt (cur_bp).n;
-  set_buffer_pt_o (cur_bp, point_to_offset (pt));
-  if (get_buffer_pt (cur_bp).n != old_n)
-    resync_goalc ();
+  goto_offset (point_to_offset (pt));
 }

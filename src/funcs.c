@@ -112,7 +112,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
   func (ap);
   va_end (ap);
 
-  gotobob ();
+  FUNCALL (beginning_of_buffer);
   set_buffer_readonly (cur_bp, true);
   set_buffer_modified (cur_bp, false);
 
@@ -298,9 +298,9 @@ DEFUN ("mark-whole-buffer", mark_whole_buffer)
 Put point at beginning and mark at end of buffer.
 +*/
 {
-  gotoeob ();
+  FUNCALL (end_of_buffer);
   FUNCALL (set_mark_command);
-  gotobob ();
+  FUNCALL (beginning_of_buffer);
 }
 END_DEFUN
 
@@ -1098,7 +1098,7 @@ setcase_region (int (*func) (int))
   undo_save (UNDO_START_SEQUENCE, r.start, 0, 0);
 
   Marker *m = point_marker ();
-  goto_point (get_region_start (r));
+  goto_offset (r.start);
   for (size_t size = get_region_size (r); size > 0; size--)
     {
       char c = func (following_char ());

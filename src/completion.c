@@ -112,7 +112,7 @@ completion_scroll_up (void)
   set_current_window (wp);
   pt = get_buffer_pt (cur_bp);
   if (!FUNCALL (scroll_up))
-    gotobob ();
+    FUNCALL (beginning_of_buffer);
   set_current_window (old_wp);
 
   term_redisplay ();
@@ -133,7 +133,7 @@ completion_scroll_down (void)
   pt = get_buffer_pt (cur_bp);
   if (!FUNCALL (scroll_down))
     {
-      gotoeob ();
+      FUNCALL (end_of_buffer);
       resync_redisplay (cur_wp);
     }
   set_current_window (old_wp);

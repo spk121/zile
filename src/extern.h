@@ -28,8 +28,6 @@ bool previous_line (void);
 bool next_line (void);
 bool backward_char (void);
 bool forward_char (void);
-void gotobob (void);
-void gotoeob (void);
 
 /* bind.c ----------------------------------------------------------------- */
 Function last_command (void);
@@ -234,10 +232,9 @@ void minibuf_clear (void);
 
 /* point.c ---------------------------------------------------------------- */
 Point offset_to_point (Buffer *bp, size_t offset);
-Point point_min (void);
-Point point_max (void);
 Point line_beginning_position (int count);
 Point line_end_position (int count);
+void goto_offset (size_t o);
 void goto_point (Point pt);
 
 /* redisplay.c ------------------------------------------------------------ */
