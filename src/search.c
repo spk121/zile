@@ -106,7 +106,7 @@ search (Point pt, const char *s, int forward, int regexp)
   if (pos < 0)
     return false;
 
-  goto_point (offset_to_point (cur_bp, pos));
+  goto_offset (pos);
   thisflag |= FLAG_NEED_RESYNC;
   return true;
 }

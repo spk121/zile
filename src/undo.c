@@ -106,7 +106,7 @@ revert_action (Undo * up)
       undo_save (UNDO_END_SEQUENCE, up->o, 0, 0);
     }
 
-  goto_point (offset_to_point (cur_bp, o));
+  goto_offset (o);
 
   if (up->type == UNDO_REPLACE_BLOCK)
     {

@@ -224,7 +224,7 @@ delete_char (void)
     }
 
   set_buffer_modified (cur_bp, true);
-  goto_point (offset_to_point (cur_bp, o));
+  goto_offset (o);
 
   return true;
 }
