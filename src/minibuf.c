@@ -155,27 +155,23 @@ castr
 minibuf_read_filename (const char *fmt, const char *value,
                        const char *file, ...)
 {
-  va_list ap;
-  char *buf;
   castr p = NULL;
-  Completion *cp;
-  astr as;
-  size_t pos;
 
-  as = astr_new_cstr (value);
+  astr as = astr_new_cstr (value);
   if (file == NULL && astr_len (as) > 0 && astr_get (as, astr_len (as) - 1) != '/')
     astr_cat_char (as, '/');
 
   if (expand_path (as))
     {
+      va_list ap;
       va_start (ap, file);
-      buf = xvasprintf (fmt, ap);
+      char *buf = xvasprintf (fmt, ap);
       va_end (ap);
 
       as = compact_path (as);
 
-      cp = completion_new (true);
-      pos = astr_len (as);
+      Completion *cp = completion_new (true);
+      size_t pos = astr_len (as);
       if (file)
         pos -= strlen (file);
       p = term_minibuf_read (buf, astr_cstr (as), pos, cp, files_history);
