@@ -94,12 +94,12 @@ search (Point pt, const char *s, int forward, int regexp)
   if (forward)
     {
       notbol = pt.o > from;
-      from = point_to_offset (pt);
+      from = point_to_offset (cur_bp, pt);
     }
   else
     {
       noteol = pt.o < to;
-      to = point_to_offset (pt);
+      to = point_to_offset (cur_bp, pt);
     }
   pos = find_substr (astr_cstr (get_buffer_text (cur_bp).as), get_buffer_size (cur_bp),
                      s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
@@ -285,7 +285,7 @@ isearch (int forward, int regexp)
                 {
                   /* Save mark. */
                   set_mark ();
-                  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (start));
+                  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (cur_bp, start));
 
                   /* Save search string. */
                   last_search = xstrdup (astr_cstr (pattern));
@@ -434,7 +434,7 @@ what to do with it.
       /* Perform replacement. */
       pt = get_buffer_pt (cur_bp);
       ++count;
-      buffer_replace (cur_bp, point_to_offset (pt) - find_len, find_len,
+      buffer_replace (cur_bp, point_to_offset (cur_bp, pt) - find_len, find_len,
                       astr_cstr (repl), astr_len (repl), find_no_upper);
 
       if (c == '.')		/* Replace and quit. */

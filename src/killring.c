@@ -70,21 +70,8 @@ copy_or_kill_region (bool kill, Region r)
 static bool
 kill_to_bol (void)
 {
-  bool ok = true;
-
-  if (!bolp ())
-    {
-      Region r;
-      Point pt = get_buffer_pt (cur_bp);
-
-      set_region_end (&r, pt);
-      pt.o = 0;
-      set_region_start (&r, pt);
-
-      ok = copy_or_kill_region (true, r);
-    }
-
-  return ok;
+  return bolp () ||
+    copy_or_kill_region (true, (Region) {.start = get_buffer_line_o (cur_bp), .end = get_buffer_o (cur_bp)});
 }
 
 static bool
@@ -92,7 +79,7 @@ kill_line (bool whole_line)
 {
   bool ok = true;
   bool only_blanks_to_end_of_line = false;
-  size_t cur_line_len = estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)) - get_buffer_line_o (cur_bp);
+  size_t cur_line_len = get_buffer_line_len (cur_bp);
 
   if (!whole_line)
     {
@@ -116,16 +103,7 @@ kill_line (bool whole_line)
   undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 
   if (!eolp ())
-    {
-      Region r;
-      Point pt = get_buffer_pt (cur_bp);
-
-      set_region_start (&r, pt);
-      pt.o = cur_line_len;
-      set_region_end (&r, pt);
-
-      ok = copy_or_kill_region (true, r);
-    }
+    ok = copy_or_kill_region (true, (Region) {.start = get_buffer_o (cur_bp), get_buffer_line_o (cur_bp) + cur_line_len});
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
     {

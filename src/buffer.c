@@ -77,26 +77,6 @@ get_buffer_line_len (Buffer *bp)
   return estr_end_of_line (get_buffer_text (bp), get_buffer_line_o (bp)) - get_buffer_line_o (bp);
 }
 
-void set_region_start (Region *rp, Point pt)
-{
-  rp->start = point_to_offset (pt);
-}
-
-void set_region_end (Region *rp, Point pt)
-{
-  rp->end = point_to_offset (pt);
-}
-
-Point get_region_start (const Region r)
-{
-  return offset_to_point (cur_bp, r.start);
-}
-
-Point get_region_end (const Region r)
-{
-  return offset_to_point (cur_bp, r.end);
-}
-
 size_t get_region_size (const Region r)
 {
   return r.end - r.start;
@@ -115,11 +95,11 @@ get_buffer_line_o (Buffer *bp)
 }
 
 size_t
-point_to_offset (Point pt)
+point_to_offset (Buffer *bp, Point pt)
 {
   size_t o;
   for (o = 0; pt.n > 0; pt.n--)
-    o = estr_next_line (get_buffer_text (cur_bp), o);
+    o = estr_next_line (get_buffer_text (bp), o);
   return o + pt.o;
 }
 
@@ -464,7 +444,7 @@ Region
 calculate_the_region (void)
 {
   size_t o = cur_bp->o;
-  size_t m = point_to_offset (get_marker_pt (cur_bp->mark));
+  size_t m = point_to_offset (cur_bp, get_marker_pt (cur_bp->mark));
   return (Region) {.start = MIN (o, m), .end = MAX (o, m)};
 }
 
@@ -482,7 +462,7 @@ delete_region (const Region r)
 bool
 in_region (size_t lineno, size_t x, Region r)
 {
-  size_t o = point_to_offset ((Point) {.n = lineno, .o = x});
+  size_t o = point_to_offset (cur_bp, (Point) {.n = lineno, .o = x});
   return o >= r.start && o <= r.end;
 }
 

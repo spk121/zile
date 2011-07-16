@@ -51,5 +51,5 @@ goto_offset (size_t o)
 void
 goto_point (Point pt)
 {
-  goto_offset (point_to_offset (pt));
+  goto_offset (point_to_offset (cur_bp, pt));
 }

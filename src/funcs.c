@@ -287,7 +287,7 @@ Put the mark where point is now, and point where the mark is now.
 
   tmp = get_buffer_pt (cur_bp);
   goto_point (get_marker_pt (get_buffer_mark (cur_bp)));
-  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (tmp));
+  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (cur_bp, tmp));
   activate_mark ();
   thisflag |= FLAG_NEED_RESYNC;
 }
@@ -1334,7 +1334,7 @@ On nonblank line, delete any immediately following blank lines.
           while (FUNCALL (forward_line) == leT && is_blank_line ())
             ;
           seq_started = true;
-          undo_save (UNDO_START_SEQUENCE, point_to_offset (get_marker_pt (m)), 0, 0);
+          undo_save (UNDO_START_SEQUENCE, point_to_offset (cur_bp, get_marker_pt (m)), 0, 0);
           FUNCALL (delete_region);
           pop_mark ();
         }
@@ -1365,7 +1365,7 @@ On nonblank line, delete any immediately following blank lines.
           if (!seq_started)
             {
               seq_started = true;
-              undo_save (UNDO_START_SEQUENCE, point_to_offset (get_marker_pt (m)), 0, 0);
+              undo_save (UNDO_START_SEQUENCE, point_to_offset (cur_bp, get_marker_pt (m)), 0, 0);
             }
           FUNCALL (delete_region);
         }

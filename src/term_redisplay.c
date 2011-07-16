@@ -139,14 +139,13 @@ calculate_highlight_region (Window * wp, Region * rp)
       || !get_buffer_mark_active (get_window_bp (wp)))
     return false;
 
-  set_region_start (rp, window_pt (wp));
-  set_region_end (rp, get_marker_pt (get_buffer_mark (get_window_bp (wp))));
+  rp->start = point_to_offset (get_window_bp (wp), window_pt (wp));
+  rp->end = point_to_offset (get_window_bp (wp), get_marker_pt (get_buffer_mark (get_window_bp (wp))));
   if (rp->end < rp->start)
     {
-      Point pt1 = get_region_start (*rp);
-      Point pt2 = get_region_end (*rp);
-      set_region_start (rp, pt2);
-      set_region_end (rp, pt1);
+      size_t o = rp->start;
+      rp->start = rp->end;
+      rp->start = o;
     }
   return true;
 }
@@ -216,7 +215,7 @@ calculate_start_column (Window * wp)
   size_t col = 0, lastcol = 0, t = tab_width (bp);
   int rpfact, lpfact;
   Point pt = window_pt (wp);
-  size_t rp, lp, p, o = point_to_offset (pt) - pt.o;
+  size_t rp, lp, p, o = point_to_offset (bp, pt) - pt.o;
 
   rp = pt.o;
   rpfact = pt.o / (get_window_ewidth (wp) / 3);
