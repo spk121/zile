@@ -46,12 +46,6 @@ struct Window
 #include "window.h"
 #undef FIELD
 
-static Window *
-window_new (void)
-{
-  return (Window *) XZALLOC (Window);
-}
-
 /*
  * Set the current window and his buffer as the current buffer.
  */
@@ -86,8 +80,6 @@ Split current window into two windows, one above the other.
 Both windows display the same buffer now current.
 +*/
 {
-  Window *newwp;
-
   /* Windows smaller than 4 lines cannot be split. */
   if (cur_wp->fheight < 4)
     {
@@ -96,19 +88,22 @@ Both windows display the same buffer now current.
       return leNIL;
     }
 
-  newwp = window_new ();
-  newwp->fwidth = cur_wp->fwidth;
-  newwp->ewidth = cur_wp->ewidth;
-  newwp->fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2;
+  Window *newwp = (Window *) XZALLOC (Window);
+  *newwp = (Window) {
+    .fwidth = cur_wp->fwidth,
+    .ewidth = cur_wp->ewidth,
+    .fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2,
+    .bp = cur_wp->bp,
+    .saved_pt = point_marker (),
+    .next = cur_wp->next
+  };
   newwp->eheight = newwp->fheight - 1;
+
+  cur_wp->next = newwp;
   cur_wp->fheight = cur_wp->fheight / 2;
   cur_wp->eheight = cur_wp->fheight - 1;
   if (cur_wp->topdelta >= cur_wp->eheight)
     recenter (cur_wp);
-  newwp->bp = cur_wp->bp;
-  newwp->saved_pt = point_marker ();
-  newwp->next = cur_wp->next;
-  cur_wp->next = newwp;
 }
 END_DEFUN
 
@@ -158,13 +153,11 @@ DEFUN ("enlarge-window", enlarge_window)
 Make current window one line bigger.
 +*/
 {
-  Window *wp;
-
   if (cur_wp == head_wp && (cur_wp->next == NULL ||
                             cur_wp->next->fheight < 3))
     return leNIL;
 
-  wp = cur_wp->next;
+  Window *wp = cur_wp->next;
   if (wp == NULL || wp->fheight < 3)
     for (wp = head_wp; wp != NULL; wp = wp->next)
       if (wp->next == cur_wp)
@@ -188,18 +181,15 @@ DEFUN ("shrink-window", shrink_window)
 Make current window one line smaller.
 +*/
 {
-  Window *wp;
 
   if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
     return leNIL;
 
-  wp = cur_wp->next;
+  Window *wp = cur_wp->next;
   if (wp == NULL)
-    {
-      for (wp = head_wp; wp != NULL; wp = wp->next)
-        if (wp->next == cur_wp)
-          break;
-    }
+    for (wp = head_wp; wp != NULL; wp = wp->next)
+      if (wp->next == cur_wp)
+        break;
 
   ++wp->fheight;
   ++wp->eheight;
@@ -256,10 +246,8 @@ END_DEFUN
 void
 create_scratch_window (void)
 {
-  Window *wp;
   Buffer *bp = create_scratch_buffer ();
-
-  wp = window_new ();
+  Window *wp = (Window *) XZALLOC (Window);
   cur_wp = head_wp = wp;
   wp->fwidth = wp->ewidth = term_width ();
   /* Save space for minibuffer. */
