@@ -795,10 +795,10 @@ transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void)
     }
 
   bool ret = true;
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
   for (int uni = 0; ret && uni < uniarg; ++uni)
     ret = transpose_subr (forward_func, backward_func);
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 
   return bool_to_lisp (ret);
 }
@@ -968,7 +968,7 @@ Fill paragraph at or after point.
 {
   Marker *m = point_marker ();
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 
   FUNCALL (forward_paragraph);
   int end = get_buffer_pt (cur_bp).n;
@@ -998,7 +998,7 @@ Fill paragraph at or after point.
   goto_point (get_marker_pt (m));
   unchain_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 }
 END_DEFUN
 
@@ -1019,12 +1019,12 @@ setcase_word (int rcase)
 
   if (astr_len (as) > 0)
     {
-      undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+      undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
       astr_recase (as, rcase);
       for (size_t i = 0; i < astr_len (as); i++)
         delete_char ();
       bprintf ("%s", astr_cstr (as));
-      undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+      undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
     }
 
   set_buffer_modified (cur_bp, true);
@@ -1167,12 +1167,12 @@ pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_rep
         {
           if (do_replace)
             {
-              undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+              undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
               FUNCALL (delete_region);
             }
           bprintf ("%s", astr_cstr (out));
           if (do_replace)
-            undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+            undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
         }
       else
         {
@@ -1388,7 +1388,7 @@ On nonblank line, delete any immediately following blank lines.
   goto_point (get_marker_pt (m));
 
   if (seq_started)
-    undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 
   unchain_marker (m);
   deactivate_mark ();

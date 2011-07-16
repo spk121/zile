@@ -42,7 +42,7 @@ void
 goto_offset (size_t o)
 {
   size_t old_n = get_buffer_pt (cur_bp).n;
-  set_buffer_pt_o (cur_bp, o);
+  set_buffer_o (cur_bp, o);
   if (get_buffer_pt (cur_bp).n != old_n)
     resync_goalc ();
 }

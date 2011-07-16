@@ -102,18 +102,6 @@ size_t get_region_size (const Region r)
   return r.end - r.start;
 }
 
-void
-set_buffer_pt_o (Buffer *bp, size_t o)
-{
-  bp->o = o;
-}
-
-size_t
-get_buffer_pt_o (Buffer *bp)
-{
-  return bp->o;
-}
-
 Point
 get_buffer_pt (Buffer *bp)
 {
@@ -208,18 +196,18 @@ delete_char (void)
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_pt_o (cur_bp), 1, 0);
+  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 1, 0);
   size_t o;
   if (eolp ())
     {
       size_t eol_len = strlen (cur_bp->text.eol);
-      o = adjust_markers (get_buffer_pt_o (cur_bp), -eol_len);
+      o = adjust_markers (get_buffer_o (cur_bp), -eol_len);
       astr_remove (cur_bp->text.as, cur_bp->o, eol_len);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
     {
-      o = adjust_markers (get_buffer_pt_o (cur_bp), -1);
+      o = adjust_markers (get_buffer_o (cur_bp), -1);
       astr_remove (cur_bp->text.as, cur_bp->o, 1);
     }
 
@@ -256,10 +244,10 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
 void
 insert_buffer (Buffer * bp)
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
   /* Copy text to avoid problems when bp == cur_bp. */
   insert_estr (estr_dup (bp->text));
-  undo_save (UNDO_END_SEQUENCE, get_buffer_pt_o (cur_bp), 0, 0);
+  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 }
 
 
