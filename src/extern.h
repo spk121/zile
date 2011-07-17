@@ -70,7 +70,6 @@ int warn_if_no_mark (void);
 int warn_if_readonly_buffer (void);
 Region calculate_the_region (void);
 bool delete_region (const Region r);
-bool in_region (size_t lineno, size_t x, Region r);
 void set_temporary_buffer (Buffer * bp);
 void activate_mark (void);
 void deactivate_mark (void);

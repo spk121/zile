@@ -94,8 +94,14 @@ outch (int c, size_t font, size_t x)
   return x;
 }
 
+static bool
+in_region (size_t o, size_t x, Region r)
+{
+  return o + x >= r.start && o + x <= r.end;
+}
+
 static void
-draw_end_of_line (size_t line, Window * wp, size_t lineno, Region r,
+draw_end_of_line (size_t line, Window * wp, size_t o, Region r,
                   int highlight, size_t x, size_t i)
 {
   if (x >= term_width ())
@@ -107,7 +113,7 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region r,
     {
       for (; x < get_window_ewidth (wp); ++i)
         {
-          if (in_region (lineno, i, r))
+          if (in_region (o, i, r))
             x = outch (' ', FONT_REVERSE, x);
           else
             x++;
@@ -116,18 +122,18 @@ draw_end_of_line (size_t line, Window * wp, size_t lineno, Region r,
 }
 
 static void
-draw_line (size_t line, size_t startcol, Window * wp, size_t o,
-           size_t lineno, Region r, int highlight)
+draw_line (size_t line, size_t startcol, Window * wp,
+           size_t o, Region r, int highlight)
 {
   term_move (line, 0);
 
   size_t x, i;
   for (x = 0, i = startcol; i < estr_end_of_line (get_buffer_text (get_window_bp (wp)), o) - o && x < get_window_ewidth (wp); i++)
     x = outch (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
-               highlight && in_region (lineno, i, r) ? FONT_REVERSE : FONT_NORMAL,
+               highlight && in_region (o, i, r) ? FONT_REVERSE : FONT_NORMAL,
                x);
 
-  draw_end_of_line (line, wp, lineno, r, highlight, x, i);
+  draw_end_of_line (line, wp, o, r, highlight, x, i);
 }
 
 static int
@@ -153,21 +159,20 @@ calculate_highlight_region (Window * wp, Region * rp)
 static void
 draw_window (size_t topline, Window * wp)
 {
-  size_t i, lineno, o;
-  Point pt = window_pt (wp);
+  size_t i, o;
   Region r;
   int highlight = calculate_highlight_region (wp, &r);
 
   /* Find the first line to display on the first screen line. */
-  for (o = get_buffer_line_o (get_window_bp (wp)), lineno = pt.n, i = get_window_topdelta (wp);
-       i > 0 && lineno > 0;
-       assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i, --lineno)
+  for (o = get_buffer_line_o (get_window_bp (wp)), i = get_window_topdelta (wp);
+       i > 0 && o > 0;
+       assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i)
     ;
 
   cur_tab_width = tab_width (get_window_bp (wp));
 
   /* Draw the window lines. */
-  for (i = topline; i < get_window_eheight (wp) + topline; ++i, ++lineno)
+  for (i = topline; i < get_window_eheight (wp) + topline; ++i)
     {
       /* Clear the line. */
       term_move (i, 0);
@@ -177,7 +182,7 @@ draw_window (size_t topline, Window * wp)
       if (o == SIZE_MAX)
         continue;
 
-      draw_line (i, get_window_start_column (wp), wp, o, lineno, r, highlight);
+      draw_line (i, get_window_start_column (wp), wp, o, r, highlight);
 
       if (get_window_start_column (wp) > 0)
         {

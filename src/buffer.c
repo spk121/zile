@@ -458,13 +458,6 @@ delete_region (const Region r)
   return true;
 }
 
-bool
-in_region (size_t lineno, size_t x, Region r)
-{
-  size_t o = point_to_offset (cur_bp, (Point) {.n = lineno, .o = x});
-  return o >= r.start && o <= r.end;
-}
-
 /*
  * Set the specified buffer temporary flag and move the buffer
  * to the end of the buffer list.
