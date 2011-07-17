@@ -79,7 +79,7 @@ zile_base_SOURCES =					\
 zile_SOURCES =						\
 	$(zile_base_SOURCES)				\
 	tbl_funcs.h					\
-	tbl_opts.h.in
+	tbl_opts.h
 
 PERL_BUILDTIME =					\
 	Zile.pm						\
@@ -92,8 +92,6 @@ PRODUCTIONSOURCES =					\
 	$(PERL_BUILDTIME)				\
 	Makefile.am ../Makefile.am ../configure.ac	\
 	*.el
-
-$(zile_OBJECTS): tbl_funcs.h
 
 tbl_funcs.h: $(zile_function_SOURCES) mkfuncs.pl
 	PACKAGE_NAME="$(PACKAGE_NAME)" $(PERL) -I$(srcdir) $(srcdir)/mkfuncs.pl $(srcdir) $(zile_function_SOURCES)
