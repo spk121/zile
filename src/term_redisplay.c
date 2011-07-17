@@ -255,39 +255,32 @@ calculate_start_column (Window * wp)
 }
 
 static char *
-make_screen_pos (Window * wp, char **buf)
+make_screen_pos (Window * wp)
 {
   bool tv = window_top_visible (wp);
   bool bv = window_bottom_visible (wp);
 
   if (tv && bv)
-    *buf = xasprintf ("All");
+    return xasprintf ("All");
   else if (tv)
-    *buf = xasprintf ("Top");
+    return xasprintf ("Top");
   else if (bv)
-    *buf = xasprintf ("Bot");
+    return xasprintf ("Bot");
   else
-    *buf = xasprintf ("%2d%%",
+    return xasprintf ("%2d%%",
                       (int) ((float) (window_pt (wp).n - get_window_topdelta (wp)) / offset_to_point (get_window_bp (wp), get_buffer_size (get_window_bp (wp))).n * 100));
-
-  return *buf;
 }
 
 static void
 draw_status_line (size_t line, Window * wp)
 {
-  size_t i;
-  char *buf;
-  const char *eol_type;
-  Point pt = window_pt (wp);
-  astr as, bs;
-
   term_attrset (FONT_REVERSE);
 
   term_move (line, 0);
-  for (i = 0; i < get_window_ewidth (wp); ++i)
+  for (size_t i = 0; i < get_window_ewidth (wp); ++i)
     term_addch ('-');
 
+  const char *eol_type;
   if (get_buffer_text (cur_bp).eol == coding_eol_cr)
     eol_type = "(Mac)";
   else if (get_buffer_text (cur_bp).eol == coding_eol_crlf)
@@ -296,11 +289,11 @@ draw_status_line (size_t line, Window * wp)
     eol_type = ":";
 
   term_move (line, 0);
-  bs = astr_fmt ("(%d,%d)", pt.n + 1,
-                 get_goalc_bp (get_window_bp (wp), window_pt (wp)));
-  as = astr_fmt ("--%s%2s  %-15s   %s %-9s (Fundamental",
-                 eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
-                 make_screen_pos (wp, &buf), astr_cstr (bs));
+  Point pt = window_pt (wp);
+  astr bs = astr_fmt ("(%d,%d)", pt.n + 1, get_goalc_bp (get_window_bp (wp), pt));
+  astr as = astr_fmt ("--%s%2s  %-15s   %s %-9s (Fundamental",
+                      eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
+                      make_screen_pos (wp), astr_cstr (bs));
 
   if (get_buffer_autofill (get_window_bp (wp)))
     astr_cat_cstr (as, " Fill");
@@ -320,14 +313,10 @@ draw_status_line (size_t line, Window * wp)
 void
 term_redisplay (void)
 {
-  size_t topline;
-  Window *wp;
-
-  cur_topline = topline = 0;
-
   calculate_start_column (cur_wp);
 
-  for (wp = head_wp; wp != NULL; wp = get_window_next (wp))
+  size_t topline = cur_topline = 0;
+  for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
     {
       if (wp == cur_wp)
         cur_topline = topline;
