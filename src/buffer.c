@@ -437,14 +437,21 @@ warn_if_no_mark (void)
 }
 
 /*
- * Calculate the region size between point and mark and set the region
- * structure.
+ * Make a region from two offsets.
+ */
+Region
+region_new (size_t o1, size_t o2)
+{
+  return (Region) {.start = MIN (o1, o2), .end = MAX (o1, o2)};
+}
+
+/*
+ * Return the region between point and mark.
  */
 Region
 calculate_the_region (void)
 {
-  size_t o = cur_bp->o, m = get_marker_o (cur_bp->mark);
-  return (Region) {.start = MIN (o, m), .end = MAX (o, m)};
+  return region_new (cur_bp->o, get_marker_o (cur_bp->mark));
 }
 
 bool

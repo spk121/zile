@@ -68,6 +68,7 @@ Buffer * find_buffer (const char *name);
 void switch_to_buffer (Buffer * bp);
 int warn_if_no_mark (void);
 int warn_if_readonly_buffer (void);
+Region region_new (size_t o1, size_t o2);
 Region calculate_the_region (void);
 bool delete_region (const Region r);
 void set_temporary_buffer (Buffer * bp);

@@ -141,18 +141,12 @@ calculate_highlight_region (Window * wp, Region * rp)
 {
   if ((wp != cur_wp
        && !get_variable_bool ("highlight-nonselected-windows"))
-      || (get_buffer_mark (get_window_bp (wp)) == NULL)
+      || get_buffer_mark (get_window_bp (wp)) == NULL
       || !get_buffer_mark_active (get_window_bp (wp)))
     return false;
 
-  rp->start = point_to_offset (get_window_bp (wp), window_pt (wp));
-  rp->end = get_marker_o (get_buffer_mark (get_window_bp (wp)));
-  if (rp->end < rp->start)
-    {
-      size_t o = rp->start;
-      rp->start = rp->end;
-      rp->start = o;
-    }
+  *rp = region_new (point_to_offset (get_window_bp (wp), window_pt (wp)),
+                    get_marker_o (get_buffer_mark (get_window_bp (wp))));
   return true;
 }
 
