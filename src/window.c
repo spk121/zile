@@ -95,7 +95,8 @@ Both windows display the same buffer now current.
     .fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2,
     .bp = cur_wp->bp,
     .saved_pt = point_marker (),
-    .next = cur_wp->next
+    .next = cur_wp->next,
+    .topdelta = cur_wp->topdelta
   };
   newwp->eheight = newwp->fheight - 1;
 
