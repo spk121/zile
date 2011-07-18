@@ -255,3 +255,4 @@
 /strerror-override.h
 /memmem.c
 /str-two-way.h
+/float.c
