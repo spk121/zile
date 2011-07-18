@@ -158,7 +158,7 @@ draw_window (size_t topline, Window * wp)
   int highlight = calculate_highlight_region (wp, &r);
 
   /* Find the first line to display on the first screen line. */
-  for (o = get_buffer_line_o (get_window_bp (wp)), i = get_window_topdelta (wp);
+  for (o = estr_start_of_line (get_buffer_text (get_window_bp (wp)), window_o (wp)), i = get_window_topdelta (wp);
        i > 0 && o > 0;
        assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i)
     ;

@@ -86,15 +86,10 @@ Both windows display the same buffer now current.
     }
 
   Window *newwp = (Window *) XZALLOC (Window);
-  *newwp = (Window) {
-    .fwidth = cur_wp->fwidth,
-    .ewidth = cur_wp->ewidth,
-    .fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2,
-    .bp = cur_wp->bp,
-    .saved_pt = point_marker (),
-    .next = cur_wp->next
-  };
+  *newwp = *cur_wp;
+  newwp->fheight = cur_wp->fheight / 2 + cur_wp->fheight % 2;
   newwp->eheight = newwp->fheight - 1;
+  newwp->saved_pt = point_marker ();
 
   cur_wp->next = newwp;
   cur_wp->fheight = cur_wp->fheight / 2;
@@ -264,8 +259,8 @@ find_window (const char *name)
   return NULL;
 }
 
-Point
-window_pt (Window * wp)
+size_t
+window_o (Window * wp)
 {
   /* The current window uses the current buffer point; all other
      windows have a saved point, except that if a window has just been
@@ -276,15 +271,21 @@ window_pt (Window * wp)
       assert (wp->bp == cur_bp);
       assert (wp->saved_pt == NULL);
       assert (cur_bp);
-      return get_buffer_pt (cur_bp);
+      return get_buffer_o (cur_bp);
     }
   else
     {
       if (wp->saved_pt != NULL)
-        return offset_to_point (wp->bp, get_marker_o (wp->saved_pt));
+        return get_marker_o (wp->saved_pt);
       else
-        return offset_to_point (wp->bp, get_buffer_o (wp->bp));
+        return get_buffer_o (wp->bp);
     }
+}
+
+Point
+window_pt (Window *wp)
+{
+  return offset_to_point (wp->bp, window_o (wp));
 }
 
 bool

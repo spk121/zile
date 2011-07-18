@@ -293,6 +293,7 @@ Window *find_window (const char *name);
 Window *popup_window (void);
 void set_current_window (Window * wp);
 void delete_window (Window * del_wp);
+size_t window_o (Window * wp);
 Point window_pt (Window * wp);
 bool window_top_visible (Window * wp);
 bool window_bottom_visible (Window * wp);
