@@ -730,18 +730,21 @@ resync_goalc (void)
 bool
 move_line (int n)
 {
-  bool ok = true;
-  size_t o = cur_bp->o;
-  int backward = n < 0;
-
   if (n == 0)
     return false;
-  if (backward)
-    n = -n;
+
+  bool ok = true;
+
+  size_t (*func) (estr es, size_t o) = estr_next_line;
+  if (n < 0)
+    {
+      n = -n;
+      func = estr_prev_line;
+    }
 
   for (; n > 0; n--)
     {
-      o = (backward ? estr_prev_line : estr_next_line) (cur_bp->text, cur_bp->o);
+      size_t o = func (cur_bp->text, cur_bp->o);
       if (o == SIZE_MAX)
         {
           ok = false;
