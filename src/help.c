@@ -31,33 +31,6 @@
 #include "main.h"
 #include "extern.h"
 
-static le *
-show_file (const char *filename)
-{
-  if (!exist_file (filename))
-    {
-      minibuf_error ("Unable to read file `%s'", filename);
-      return leNIL;
-    }
-
-  find_file (filename);
-  set_buffer_readonly (cur_bp, true);
-  set_buffer_noundo (cur_bp, true);
-  set_buffer_needname (cur_bp, true);
-  set_buffer_nosave (cur_bp, true);
-
-  return leT;
-}
-
-DEFUN ("view-emacs-FAQ", view_emacs_FAQ)
-/*+
-Display the Zile Frequently Asked Questions (FAQ) file.
-+*/
-{
-  ok = show_file (PATH_DATA "/FAQ");
-}
-END_DEFUN
-
 static void
 write_function_description (va_list ap)
 {

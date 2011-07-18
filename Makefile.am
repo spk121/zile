@@ -23,9 +23,7 @@ SUBDIRS = lib src
 
 ACLOCAL_AMFLAGS = -I m4
 
-EXTRA_DIST = BUGS
-
-dist_pkgdata_DATA = FAQ
+EXTRA_DIST = BUGS FAQ
 
 ChangeLog:
 	git2cl > ChangeLog

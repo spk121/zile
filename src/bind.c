@@ -424,8 +424,6 @@ init_default_bindings (void)
 (global-set-key \"\\C-u\" 'universal-argument)\
 (global-set-key \"\\C-x\\C-u\" 'upcase-region)\
 (global-set-key \"\\M-u\" 'upcase-word)\
-(global-set-key \"\\C-h\\C-f\" 'view-emacs-FAQ)\
-(global-set-key \"\\F1\\C-f\" 'view-emacs-FAQ)\
 (global-set-key \"\\C-hw\" 'where-is)\
 (global-set-key \"\\F1w\" 'where-is)\
 (global-set-key \"\\C-x\\C-w\" 'write-file)\
