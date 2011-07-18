@@ -145,8 +145,7 @@ calculate_highlight_region (Window * wp, Region * rp)
       || !get_buffer_mark_active (get_window_bp (wp)))
     return false;
 
-  *rp = region_new (point_to_offset (get_window_bp (wp), window_pt (wp)),
-                    get_marker_o (get_buffer_mark (get_window_bp (wp))));
+  *rp = region_new (window_o (wp), get_marker_o (get_buffer_mark (get_window_bp (wp))));
   return true;
 }
 
@@ -212,8 +211,8 @@ calculate_start_column (Window * wp)
   Buffer *bp = get_window_bp (wp);
   size_t col = 0, lastcol = 0, t = tab_width (bp);
   int rpfact, lpfact;
-  Point pt = window_pt (wp);
-  size_t rp, lp, p, o = point_to_offset (bp, pt) - pt.o;
+  Point pt = offset_to_point (get_window_bp (wp), window_o (wp));
+  size_t rp, lp, p, o = window_o (wp) - pt.o;
 
   rp = pt.o;
   rpfact = pt.o / (get_window_ewidth (wp) / 3);
@@ -267,7 +266,7 @@ make_screen_pos (Window * wp)
     return xasprintf ("Bot");
   else
     return xasprintf ("%2d%%",
-                      (int) ((float) (window_pt (wp).n - get_window_topdelta (wp)) / offset_to_point (get_window_bp (wp), get_buffer_size (get_window_bp (wp))).n * 100));
+                      (int) ((float) (window_o (wp) / get_buffer_size (get_window_bp (wp))) * 100.0));
 }
 
 static void
@@ -288,7 +287,7 @@ draw_status_line (size_t line, Window * wp)
     eol_type = ":";
 
   term_move (line, 0);
-  Point pt = window_pt (wp);
+  Point pt = offset_to_point (get_window_bp (wp), window_o (wp));
   astr bs = astr_fmt ("(%d,%d)", pt.n + 1, get_goalc_bp (get_window_bp (wp), pt));
   astr as = astr_fmt ("--%s%2s  %-15s   %s %-9s (Fundamental",
                       eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),

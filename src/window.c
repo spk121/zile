@@ -282,16 +282,10 @@ window_o (Window * wp)
     }
 }
 
-Point
-window_pt (Window *wp)
-{
-  return offset_to_point (wp->bp, window_o (wp));
-}
-
 bool
 window_top_visible (Window * wp)
 {
-  return window_pt (wp).n == get_window_topdelta (wp);
+  return offset_to_point (get_window_bp (wp), window_o (wp)).n == get_window_topdelta (wp);
 }
 
 bool
