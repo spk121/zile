@@ -214,7 +214,7 @@ replace_estr (size_t del, estr es)
   undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), del, len);
   undo_nosave = true;
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, NULL, 0, false);
-  size_t eol_len = strlen (es.eol);
+  size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_text (cur_bp).eol);
   while (len > 0)
     {
       const char *next = memmem (s, len, es.eol, eol_len);
@@ -226,8 +226,8 @@ replace_estr (size_t del, estr es)
       if (len > 0)
         {
           buffer_replace (cur_bp, get_buffer_o (cur_bp), 0,
-                          get_buffer_text (cur_bp).eol, strlen (get_buffer_text (cur_bp).eol), false);
-          set_buffer_o (cur_bp, get_buffer_o (cur_bp) + strlen (get_buffer_text (cur_bp).eol));
+                          get_buffer_text (cur_bp).eol, buf_eol_len, false);
+          set_buffer_o (cur_bp, get_buffer_o (cur_bp) + buf_eol_len);
 
           thisflag |= FLAG_NEED_RESYNC;
 
