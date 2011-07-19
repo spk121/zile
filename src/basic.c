@@ -149,7 +149,6 @@ Move point to the beginning of the buffer; leave mark at previous position.
 +*/
 {
   goto_offset (0);
-  thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN
 
@@ -159,7 +158,6 @@ Move point to the end of the buffer; leave mark at previous position.
 +*/
 {
   goto_offset (get_buffer_size (cur_bp));
-  thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN
 
