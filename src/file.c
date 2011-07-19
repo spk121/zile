@@ -677,7 +677,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
       set_buffer_nosave (bp, false);
       if (write_to_disk (bp, astr_cstr (name)))
         {
-          minibuf_write ("Wrote %s", name);
+          minibuf_write ("Wrote %s", astr_cstr (name));
           set_buffer_modified (bp, false);
           undo_set_unchanged (get_buffer_last_undop (bp));
         }
