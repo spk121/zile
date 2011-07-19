@@ -139,7 +139,7 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
   if (ok == leNIL || n >= LONG_MAX - 1)
     return leNIL;
 
-  move_line ((size_t) (MAX (n, 1) - 1) - get_buffer_pt (cur_bp).n);
+  move_line ((MAX (n, 1) - 1) - get_buffer_pt (cur_bp).n);
   FUNCALL (beginning_of_line);
 }
 END_DEFUN
