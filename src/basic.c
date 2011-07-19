@@ -110,58 +110,37 @@ END_DEFUN
 DEFUN_ARGS ("goto-char", goto_char,
             INT_ARG (n))
 /*+
-Read a number N and move the cursor to character number N.
-Position 1 is the beginning of the buffer.
+Set point to @i{position}, a number.
+Beginning of buffer is position 1.
 +*/
 {
   INT_INIT (n)
   else
-    do
-      {
-        const char *ms = astr_cstr (minibuf_read ("Goto char: ", ""));
-        if (ms == NULL)
-          {
-            ok = FUNCALL (keyboard_quit);
-            break;
-          }
-        n = strtoul (ms, NULL, 10);
-        if (n == LONG_MAX)
-          ding ();
-      }
-    while (n == LONG_MAX);
+    n = minibuf_read_number ("Goto char: ");
 
-  if (ok == leT && n != LONG_MAX)
-    {
-      FUNCALL (beginning_of_buffer);
-      for (long count = 1; count < n; count++)
-        if (!forward_char ())
-          break;
-    }
+  if (ok == leNIL || n >= LONG_MAX - 1)
+    return leNIL;
+
+  set_buffer_o (cur_bp, MAX (n, 1) - 1);
+  thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN
 
 DEFUN_ARGS ("goto-line", goto_line,
             INT_OR_UNIARG (n))
 /*+
-Goto line arg, counting from line 1 at beginning of buffer.
+Goto @i{line}, counting from line 1 at beginning of buffer.
 +*/
 {
   INT_OR_UNIARG_INIT (n);
   if (noarg)
-    {
-      n = minibuf_read_number ("Goto line: ");
-      if (n == LONG_MAX - 1)
-        minibuf_error ("End of file during parsing");
-    }
+    n = minibuf_read_number ("Goto line: ");
 
-  if (n >= LONG_MAX - 1)
-    ok = leNIL;
-  else
-    {
-      Point pt = get_buffer_pt (cur_bp);
-      move_line ((size_t) (MAX (n, 1) - 1) - pt.n);
-      FUNCALL (beginning_of_line);
-    }
+  if (ok == leNIL || n >= LONG_MAX - 1)
+    return leNIL;
+
+  move_line ((size_t) (MAX (n, 1) - 1) - get_buffer_pt (cur_bp).n);
+  FUNCALL (beginning_of_line);
 }
 END_DEFUN
 

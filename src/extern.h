@@ -208,7 +208,7 @@ void minibuf_refresh (void);
 void minibuf_write (const char *fmt, ...);
 void minibuf_error (const char *fmt, ...);
 castr minibuf_read (const char *fmt, const char *value, ...);
-unsigned long minibuf_read_number (const char *fmt, ...);
+long minibuf_read_number (const char *fmt, ...);
 bool minibuf_test_in_completions (const char *ms, gl_list_t completions);
 int minibuf_read_yn (const char *fmt, ...);
 int minibuf_read_yesno (const char *fmt, ...);

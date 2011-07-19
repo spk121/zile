@@ -116,7 +116,7 @@ minibuf_read (const char *fmt, const char *value, ...)
 /*
  * Read a non-negative number from the minibuffer.
  */
-unsigned long
+long
 minibuf_read_number (const char *fmt, ...)
 {
   va_list ap;
@@ -132,18 +132,21 @@ minibuf_read_number (const char *fmt, ...)
       const char *ms = astr_cstr (minibuf_read (buf, ""));
       if (ms == NULL)
         {
-          n = SIZE_MAX;
+          n = LONG_MAX;
           FUNCALL (keyboard_quit);
           break;
         }
       if (strlen (ms) == 0)
-        n = ULONG_MAX - 1;
+        n = LONG_MAX - 1;
       else
         n = strtoul (ms, NULL, 10);
-      if (n == ULONG_MAX)
-        minibuf_write ("Please enter a number.");
+      if (n == LONG_MAX)
+        {
+          minibuf_write ("Please enter a number.");
+          ding ();
+        }
     }
-  while (n == ULONG_MAX);
+  while (n == LONG_MAX);
 
   return n;
 }
