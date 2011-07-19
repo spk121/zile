@@ -121,7 +121,7 @@ Beginning of buffer is position 1.
   if (ok == leNIL || n >= LONG_MAX - 1)
     return leNIL;
 
-  set_buffer_o (cur_bp, MAX (n, 1) - 1);
+  goto_offset (MAX (n, 1) - 1);
   thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN
