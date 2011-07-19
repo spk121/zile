@@ -705,26 +705,16 @@ goto_goalc (void)
 {
   size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = get_buffer_line_o (cur_bp); i < estr_next_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)); i++)
-    if (col == get_goalc ())
+  for (i = get_buffer_line_o (cur_bp); i < get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp); i++)
+    if (col == get_buffer_goalc (cur_bp))
       break;
     else if (astr_get (get_buffer_text (cur_bp).as, i) == '\t')
-      for (size_t w = t - col % t; w > 0 && ++col < get_goalc (); w--)
+      for (size_t w = t - col % t; w > 0 && ++col < get_buffer_goalc (cur_bp); w--)
         ;
     else
       ++col;
 
   cur_bp->o = i;
-}
-
-void
-resync_goalc (void)
-{
-  if (last_command () != F_next_line && last_command () != F_previous_line)
-    set_buffer_goalc (cur_bp, get_goalc ());
-  goto_goalc ();
-
-  thisflag |= FLAG_NEED_RESYNC;
 }
 
 bool
@@ -734,13 +724,15 @@ move_line (int n)
     return false;
 
   bool ok = true;
-
   size_t (*func) (estr es, size_t o) = estr_next_line;
   if (n < 0)
     {
       n = -n;
       func = estr_prev_line;
     }
+
+  if (last_command () != F_next_line && last_command () != F_previous_line)
+    set_buffer_goalc (cur_bp, get_goalc ());
 
   for (; n > 0; n--)
     {
@@ -753,7 +745,8 @@ move_line (int n)
       cur_bp->o = o;
     }
 
-  resync_goalc ();
+  goto_goalc ();
+  thisflag |= FLAG_NEED_RESYNC;
 
   return ok;
 }

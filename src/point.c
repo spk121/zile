@@ -44,7 +44,10 @@ goto_offset (size_t o)
   size_t old_n = get_buffer_pt (cur_bp).n;
   set_buffer_o (cur_bp, o);
   if (get_buffer_pt (cur_bp).n != old_n)
-    resync_goalc ();
+    {
+      set_buffer_goalc (cur_bp, get_goalc ());
+      thisflag |= FLAG_NEED_RESYNC;
+    }
 }
 
 /* Go to coordinates described by pt. */
