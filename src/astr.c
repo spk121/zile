@@ -28,7 +28,6 @@
 #include <ctype.h>
 #include "xalloc.h"
 #include "xvasprintf.h"
-#include "memcmp2.h"
 #include "minmax.h"
 
 #include "astr.h"
@@ -174,12 +173,6 @@ astr_substr (castr as, size_t pos, size_t size)
 {
   assert (pos + size <= astr_len (as));
   return astr_ncat_cstr (astr_new (), astr_cstr (as) + pos, size);
-}
-
-int
-astr_cmp (astr as1, astr as2)
-{
-  return memcmp2 (astr_cstr (as1), astr_len (as1), astr_cstr (as2), astr_len (as2));
 }
 
 astr
