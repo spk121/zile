@@ -108,21 +108,20 @@ column, or at the end of the line if it is not long enough.
 END_DEFUN
 
 DEFUN_ARGS ("goto-char", goto_char,
-            INT_ARG (n))
+            INT_OR_UNIARG (n))
 /*+
 Set point to @i{position}, a number.
 Beginning of buffer is position 1.
 +*/
 {
-  INT_INIT (n)
-  else
+  INT_OR_UNIARG_INIT (n);
+  if (noarg)
     n = minibuf_read_number ("Goto char: ");
 
   if (ok == leNIL || n >= LONG_MAX - 1)
     return leNIL;
 
   goto_offset (MAX (n, 1) - 1);
-  thisflag |= FLAG_NEED_RESYNC;
 }
 END_DEFUN
 
