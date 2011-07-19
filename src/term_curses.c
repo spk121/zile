@@ -73,7 +73,12 @@ term_addch (int c)
 void
 term_attrset (size_t attr)
 {
-  attrset (attr == FONT_REVERSE ? A_REVERSE : 0);
+  int attrs = 0;
+  if (attr & FONT_REVERSE)
+    attrs |= A_REVERSE;
+  if (attr & FONT_UNDERLINE)
+    attrs |= A_UNDERLINE;
+  attrset (attrs);
 }
 
 void

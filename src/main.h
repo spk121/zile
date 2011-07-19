@@ -269,6 +269,7 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 /* Zile font codes */
 #define FONT_NORMAL		0000
 #define FONT_REVERSE		0001
+#define FONT_UNDERLINE		0002
 
 /* Custom exit code */
 #define EXIT_CRASH	2
