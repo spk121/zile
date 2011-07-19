@@ -889,7 +889,7 @@ Precisely, if point is on line I, move to the start of line I + N.
   if (ok == leT)
     {
       FUNCALL (beginning_of_line);
-      ok = execute_with_uniarg (false, n, next_line, previous_line);
+      ok = bool_to_lisp (move_line (n));
     }
 }
 END_DEFUN

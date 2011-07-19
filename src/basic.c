@@ -91,7 +91,7 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, previous_line, next_line);
+  return bool_to_lisp (move_line (-uniarg));
 }
 END_DEFUN
 
@@ -103,7 +103,7 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, next_line, previous_line);
+  return bool_to_lisp (move_line (uniarg));
 }
 END_DEFUN
 
