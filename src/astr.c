@@ -183,12 +183,6 @@ astr_cmp (astr as1, astr as2)
 }
 
 astr
-astr_replace (astr as, size_t pos, size_t size, astr bs)
-{
-  return astr_nreplace_cstr (as, pos, size, astr_cstr (bs), astr_len (bs));
-}
-
-astr
 astr_insert_char (astr as, size_t pos, int c)
 {
   char ch = (char) c;
@@ -318,15 +312,15 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   assert_eq (as1, "y123x45z");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace (as1, astr_len (as1) - 4, 2, astr_new_cstr ("foo"));
+  astr_nreplace_cstr (as1, astr_len (as1) - 4, 2, "foo", 3);
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace (as1, 1, 3, astr_new_cstr ("foo"));
+  astr_nreplace_cstr (as1, 1, 3, "foo", 3);
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace (as1, astr_len (as1) - 1, 5, astr_new_cstr ("foo"));
+  astr_nreplace_cstr (as1, astr_len (as1) - 1, 5, "foo", 3);
   assert_eq (as1, "123456foo");
 
   astr_cpy_cstr (as1, "1234567");
@@ -342,15 +336,15 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   assert_eq (as2, "12345");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace (as1, astr_len (as1) - 4, 2, astr_new_cstr ("foo"));
+  astr_nreplace_cstr (as1, astr_len (as1) - 4, 2, "foo", 3);
   assert_eq (as1, "123foo67");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace (as1, 1, 3, astr_new_cstr ("foo"));
+  astr_nreplace_cstr (as1, 1, 3, "foo", 3);
   assert_eq (as1, "1foo567");
 
   astr_cpy_cstr (as1, "1234567");
-  astr_replace (as1, astr_len (as1) - 1, 5, astr_new_cstr ("foo"));
+  astr_nreplace_cstr (as1, astr_len (as1) - 1, 5, "foo", 3);
   assert_eq (as1, "123456foo");
 
   as1 = astr_fmt ("%s * %d = ", "5", 3);

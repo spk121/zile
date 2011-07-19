@@ -104,7 +104,6 @@ astr astr_cat_char (astr as, int c);
  * Replace size characters of as, starting at pos, with the argument
  * string.
  */
-astr astr_replace (astr as, size_t pos, size_t size, astr bs);
 astr astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
                          size_t csize);
 
