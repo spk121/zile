@@ -220,14 +220,14 @@ replace_estr (size_t del, estr es)
       const char *next = memmem (s, len, es.eol, eol_len);
       size_t line_len = next ? (size_t) (next - s) : len;
       buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, s, line_len, false);
-      assert (move_char (line_len));
+      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + line_len);
       len -= line_len;
       s = next;
       if (len > 0)
         {
           buffer_replace (cur_bp, get_buffer_o (cur_bp), 0,
                           get_buffer_text (cur_bp).eol, strlen (get_buffer_text (cur_bp).eol), false);
-          assert (move_char (1));
+          set_buffer_o (cur_bp, get_buffer_o (cur_bp) + strlen (get_buffer_text (cur_bp).eol));
 
           thisflag |= FLAG_NEED_RESYNC;
 
