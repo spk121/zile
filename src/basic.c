@@ -91,10 +91,7 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (uniarg < 0 || !bobp ())
-    ok = execute_with_uniarg (false, uniarg, previous_line, next_line);
-  if (ok == leNIL)
-    FUNCALL (beginning_of_line);
+  ok = execute_with_uniarg (false, uniarg, previous_line, next_line);
 }
 END_DEFUN
 
@@ -106,10 +103,7 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  if (uniarg < 0 || !eobp ())
-    ok = execute_with_uniarg (false, uniarg, next_line, previous_line);
-  if (ok == leNIL)
-    FUNCALL (end_of_line);
+  ok = execute_with_uniarg (false, uniarg, next_line, previous_line);
 }
 END_DEFUN
 
