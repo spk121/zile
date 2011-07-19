@@ -7,7 +7,7 @@ footprint systems (a typical binary is about 100Kb) and quick editing
 sessions (it starts up and shuts down instantly).
 
 Zile is written in ISO C99 using POSIX.1-2008 APIs, and requires
-libgc. It can be built on many other platforms by using libposix from
+libgc. It can be built on many other platforms thanks to its use of
 gnulib.
 
 Zile is free software, licensed under the GNU GPL.
