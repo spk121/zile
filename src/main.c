@@ -306,12 +306,13 @@ main (int argc, char **argv)
       switch ((ptrdiff_t) gl_list_get_at (arg_type, i))
         {
         case ARG_FUNCTION:
-          ok = get_function (arg) != NULL;
-          if (ok)
-            ok = execute_function (arg, 1) != leNIL;
-          else
-            minibuf_error ("Function `%s' not defined", arg);
-          break;
+          {
+            le *res = execute_function (arg, 1);
+            if (res == NULL)
+              minibuf_error ("Function `%s' not defined", arg);
+            ok = res == leT;
+            break;
+          }
         case ARG_LOADFILE:
           ok = lisp_loadfile (arg);
           if (!ok)

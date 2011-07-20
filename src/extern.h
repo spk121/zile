@@ -35,6 +35,7 @@ void set_this_command (Function cmd);
 size_t do_binding_completion (astr as);
 gl_list_t get_key_sequence (void);
 Function get_function_by_keys (gl_list_t keys);
+le *call_command (Function f, int uniarg, bool uniflag, le *branch);
 void process_command (void);
 void init_default_bindings (void);
 

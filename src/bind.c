@@ -255,6 +255,15 @@ set_this_command (Function cmd)
   _this_command = cmd;
 }
 
+le *
+call_command (Function f, int uniarg, bool uniflag, le *branch)
+{
+  _this_command = f;
+  le *ok = f (uniarg, uniflag, branch);
+  _last_command = _this_command;
+  return ok;
+}
+
 void
 process_command (void)
 {
@@ -265,16 +274,9 @@ process_command (void)
   minibuf_clear ();
 
   if (f != NULL)
-    {
-      _this_command = f;
-      f (last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
-      _last_command = _this_command;
-    }
+    call_command (f, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
   else
-    {
-      astr as = keyvectostr (keys);
-      minibuf_error ("%s is undefined", astr_cstr (as));
-    }
+    minibuf_error ("%s is undefined", astr_cstr (keyvectostr (keys)));
 
   /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */

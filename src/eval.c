@@ -123,7 +123,7 @@ evaluateBranch (le * trybranch)
 
   func = get_fentry (keyword->data);
   if (func)
-    return func->func (1, false, trybranch);
+    return call_command (func->func, 1, false, trybranch);
 
   return NULL;
 }
@@ -211,11 +211,7 @@ le *
 execute_function (const char *name, int uniarg)
 {
   Function func = get_function (name);
-
-  if (func)
-    return func (uniarg, true, NULL);
-  else
-    return leNIL;
+  return func ? call_command (func, uniarg, true, NULL) : NULL;
 }
 
 DEFUN ("execute-extended-command", execute_extended_command)
@@ -238,7 +234,7 @@ Read function name, then read its arguments and call it.
   if (name == NULL)
     return false;
 
-  ok = execute_function (astr_cstr (name), uniarg);
+  ok = bool_to_lisp (execute_function (astr_cstr (name), uniarg) == leT);
 }
 END_DEFUN
 
