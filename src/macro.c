@@ -151,14 +151,6 @@ process_keys (gl_list_t keys)
     process_command ();
 }
 
-static void
-call_macro (Macro * mp)
-{
-  assert (mp);
-  assert (mp->keys);
-  process_keys (mp->keys);
-}
-
 DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
 /*+
 Call the last keyboard macro that you defined with @kbd{C-x (}.
@@ -173,7 +165,7 @@ A prefix argument serves as a repeat count.
 
   undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
   for (int uni = 0; uni < uniarg; ++uni)
-    call_macro (cur_mp);
+    process_keys (cur_mp->keys);
   undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 }
 END_DEFUN
