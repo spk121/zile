@@ -258,25 +258,12 @@ set_this_command (Function cmd)
 le *
 call_command (Function f, int uniarg, bool uniflag, le *branch)
 {
+  thisflag = lastflag & FLAG_DEFINING_MACRO;
+
+  /* Execute the command. */
   _this_command = f;
   le *ok = f (uniarg, uniflag, branch);
   _last_command = _this_command;
-  return ok;
-}
-
-void
-process_command (void)
-{
-  gl_list_t keys = get_key_sequence ();
-  Function f = get_function_by_keys (keys);
-
-  thisflag = lastflag & FLAG_DEFINING_MACRO;
-  minibuf_clear ();
-
-  if (f != NULL)
-    call_command (f, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
-  else
-    minibuf_error ("%s is undefined", astr_cstr (keyvectostr (keys)));
 
   /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
@@ -286,10 +273,26 @@ process_command (void)
   if (!(thisflag & FLAG_SET_UNIARG))
     last_uniarg = 1;
 
-  if (last_command () != F_undo)
+  if (cur_bp && last_command () != F_undo)
     set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
 
   lastflag = thisflag;
+
+  return ok;
+}
+
+void
+process_command (void)
+{
+  gl_list_t keys = get_key_sequence ();
+  Function f = get_function_by_keys (keys);
+
+  minibuf_clear ();
+
+  if (f != NULL)
+    call_command (f, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
+  else
+    minibuf_error ("%s is undefined", astr_cstr (keyvectostr (keys)));
 }
 
 static Binding
