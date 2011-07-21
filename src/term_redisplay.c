@@ -31,9 +31,6 @@
 #include "extern.h"
 
 static size_t width = 0, height = 0;
-static size_t cur_tab_width;
-static size_t cur_topline;
-static size_t point_screen_column;
 
 size_t
 term_width (void)
@@ -66,7 +63,7 @@ make_char_printable (int c)
 }
 
 static size_t
-outch (int c, size_t font, size_t x)
+outch (int c, size_t font, size_t x, size_t cur_tab_width)
 {
   int w;
 
@@ -101,9 +98,19 @@ in_region (size_t o, size_t x, Region r)
 }
 
 static void
-draw_end_of_line (size_t line, Window * wp, size_t o, Region r,
-                  int highlight, size_t x, size_t i)
+draw_line (size_t line, size_t startcol, Window * wp,
+           size_t o, Region r, int highlight, size_t w)
 {
+  term_move (line, 0);
+
+  /* Draw body of line. */
+  size_t x, i;
+  for (x = 0, i = startcol; i < estr_end_of_line (get_buffer_text (get_window_bp (wp)), o) - o && x < get_window_ewidth (wp); i++)
+    x = outch (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
+               highlight && in_region (o, i, r) ? FONT_REVERSE : FONT_NORMAL,
+               x, w);
+
+  /* Draw end of line. */
   if (x >= term_width ())
     {
       term_move (line, term_width () - 1);
@@ -114,26 +121,11 @@ draw_end_of_line (size_t line, Window * wp, size_t o, Region r,
       for (; x < get_window_ewidth (wp); ++i)
         {
           if (in_region (o, i, r))
-            x = outch (' ', FONT_REVERSE, x);
+            x = outch (' ', FONT_REVERSE, x, w);
           else
             x++;
         }
     }
-}
-
-static void
-draw_line (size_t line, size_t startcol, Window * wp,
-           size_t o, Region r, int highlight)
-{
-  term_move (line, 0);
-
-  size_t x, i;
-  for (x = 0, i = startcol; i < estr_end_of_line (get_buffer_text (get_window_bp (wp)), o) - o && x < get_window_ewidth (wp); i++)
-    x = outch (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
-               highlight && in_region (o, i, r) ? FONT_REVERSE : FONT_NORMAL,
-               x);
-
-  draw_end_of_line (line, wp, o, r, highlight, x, i);
 }
 
 static int
@@ -162,9 +154,8 @@ draw_window (size_t topline, Window * wp)
        assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i)
     ;
 
-  cur_tab_width = tab_width (get_window_bp (wp));
-
   /* Draw the window lines. */
+  size_t cur_tab_width = tab_width (get_window_bp (wp));
   for (i = topline; i < get_window_eheight (wp) + topline; ++i)
     {
       /* Clear the line. */
@@ -175,7 +166,7 @@ draw_window (size_t topline, Window * wp)
       if (o == SIZE_MAX)
         continue;
 
-      draw_line (i, get_window_start_column (wp), wp, o, r, highlight);
+      draw_line (i, get_window_start_column (wp), wp, o, r, highlight, cur_tab_width);
 
       if (get_window_start_column (wp) > 0)
         {
@@ -199,57 +190,6 @@ make_mode_line_flags (Window * wp)
   else if (get_buffer_readonly (get_window_bp (wp)))
     return "%%";
   return "--";
-}
-
-/*
- * This function calculates the best start column to draw if the line
- * at point has to be truncated.
- */
-static void
-calculate_start_column (Window * wp)
-{
-  Buffer *bp = get_window_bp (wp);
-  size_t col = 0, lastcol = 0, t = tab_width (bp);
-  int rpfact, lpfact;
-  Point pt = offset_to_point (get_window_bp (wp), window_o (wp));
-  size_t rp, lp, p, o = window_o (wp) - pt.o;
-
-  rp = pt.o;
-  rpfact = pt.o / (get_window_ewidth (wp) / 3);
-
-  for (lp = rp; lp != SIZE_MAX; --lp)
-    {
-      for (col = 0, p = lp; p < rp; ++p)
-        {
-          char c = astr_get (get_buffer_text (bp).as, o + p);
-          if (c == '\t')
-            {
-              col |= t - 1;
-              ++col;
-            }
-          else if (isprint ((int) c))
-            ++col;
-          else
-            {
-              char *buf = make_char_printable (c);
-              col += strlen (buf);
-            }
-        }
-
-      lpfact = lp / (get_window_ewidth (wp) / 3);
-
-      if (col >= get_window_ewidth (wp) - 1 || lpfact < rpfact - 2)
-        {
-          set_window_start_column (wp, lp + 1);
-          point_screen_column = lastcol;
-          return;
-        }
-
-      lastcol = col;
-    }
-
-  set_window_start_column (wp, 0);
-  point_screen_column = col;
 }
 
 static char *
@@ -310,9 +250,50 @@ draw_status_line (size_t line, Window * wp)
 void
 term_redisplay (void)
 {
-  calculate_start_column (cur_wp);
+  /* Calculate the start column if the line at point has to be truncated. */
+  Buffer *bp = get_window_bp (cur_wp);
+  size_t col = 0, lastcol = 0, t = tab_width (bp);
+  int rpfact, lpfact;
+  Point pt = offset_to_point (bp, window_o (cur_wp));
+  size_t rp, lp, p, o = window_o (cur_wp) - pt.o;
 
-  size_t topline = cur_topline = 0;
+  set_window_start_column (cur_wp, 0);
+  rp = pt.o;
+  rpfact = pt.o / (get_window_ewidth (cur_wp) / 3);
+
+  for (lp = rp; lp != SIZE_MAX; --lp)
+    {
+      for (col = 0, p = lp; p < rp; ++p)
+        {
+          char c = astr_get (get_buffer_text (bp).as, o + p);
+          if (c == '\t')
+            {
+              col |= t - 1;
+              ++col;
+            }
+          else if (isprint ((int) c))
+            ++col;
+          else
+            {
+              char *buf = make_char_printable (c);
+              col += strlen (buf);
+            }
+        }
+
+      lpfact = lp / (get_window_ewidth (cur_wp) / 3);
+
+      if (col >= get_window_ewidth (cur_wp) - 1 || lpfact < rpfact - 2)
+        {
+          set_window_start_column (cur_wp, lp + 1);
+          col = lastcol;
+          break;
+        }
+
+      lastcol = col;
+    }
+
+  /* Draw the window. */
+  size_t cur_topline = 0, topline = 0;
   for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
     {
       if (wp == cur_wp)
@@ -329,7 +310,7 @@ term_redisplay (void)
     }
 
   /* Redraw cursor. */
-  term_move (cur_topline + get_window_topdelta (cur_wp), point_screen_column);
+  term_move (cur_topline + get_window_topdelta (cur_wp), col);
 }
 
 void
