@@ -44,14 +44,14 @@ insert_char (int c)
 static void
 insert_expanded_tab (int (*inschr) (int chr))
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
 
   int c = get_goalc ();
   int t = tab_width (cur_bp);
   for (c = t - c % t; c > 0; --c)
     (*inschr) (' ');
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 
 static bool
@@ -211,7 +211,7 @@ replace_estr (size_t del, estr es)
 
   size_t len = astr_len (es.as);
   const char *s = astr_cstr (es.as);
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), del, len);
+  undo_save_block (get_buffer_o (cur_bp), del, len);
   undo_nosave = true;
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, NULL, 0, false);
   size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_text (cur_bp).eol);
@@ -331,7 +331,7 @@ DEFUN ("delete-horizontal-space", delete_horizontal_space)
 Delete all spaces and tabs around point.
 +*/
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
 
   while (!eolp () && isspace (following_char ()))
     delete_char ();
@@ -339,7 +339,7 @@ Delete all spaces and tabs around point.
   while (!bolp () && isspace (preceding_char ()))
     backward_delete_char ();
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 END_DEFUN
 
@@ -348,10 +348,10 @@ DEFUN ("just-one-space", just_one_space)
 Delete all spaces and tabs around point, leaving one space.
 +*/
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
   FUNCALL (delete_horizontal_space);
   insert_char (' ');
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 END_DEFUN
 
@@ -423,7 +423,7 @@ does nothing.
     }
 
   /* Insert indentation.  */
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
   if (target_goalc > 0)
     {
       /* If not at EOL on target line, insert spaces & tabs up to
@@ -446,7 +446,7 @@ does nothing.
     }
   else
     ok = bool_to_lisp (insert_tab ());
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 END_DEFUN
 
@@ -500,7 +500,7 @@ Indentation is done using the `indent-for-tab-command' function.
 
   deactivate_mark ();
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
   if (insert_newline ())
     {
       Marker *m = point_marker ();
@@ -517,6 +517,6 @@ Indentation is done using the `indent-for-tab-command' function.
         FUNCALL (indent_for_tab_command);
       ok = leT;
     }
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 END_DEFUN

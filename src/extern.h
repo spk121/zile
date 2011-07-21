@@ -268,7 +268,7 @@ void term_finish (void);
 extern int undo_nosave;
 void undo_start_sequence (void);
 void undo_end_sequence (void);
-void undo_save (int type, size_t o, size_t osize, size_t size);
+void undo_save_block (size_t o, size_t osize, size_t size);
 void undo_set_unchanged (Undo *up);
 
 /* variables.c ------------------------------------------------------------ */

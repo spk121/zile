@@ -100,7 +100,7 @@ kill_line (bool whole_line)
       return false;
     }
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
 
   if (!eolp ())
     ok = copy_or_kill_region (true, (Region) {.start = get_buffer_o (cur_bp), get_buffer_line_o (cur_bp) + cur_line_len});
@@ -114,7 +114,7 @@ kill_line (bool whole_line)
       set_this_command (F_kill_region);
     }
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 
   return ok;
 }
@@ -152,12 +152,12 @@ with no argument.
     ok = bool_to_lisp (kill_line (bolp () && get_variable_bool ("kill-whole-line")));
   else
     {
-      undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+      undo_start_sequence ();
       if (arg <= 0)
         ok = bool_to_lisp (kill_to_bol ());
       if (arg != 0 && ok == leT)
         ok = execute_with_uniarg (true, arg, kill_whole_line, kill_line_backward);
-      undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+      undo_end_sequence ();
     }
 
   deactivate_mark ();
@@ -214,10 +214,10 @@ kill_text (int uniarg, Function mark_func)
     return leNIL;
 
   push_mark ();
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
   mark_func (uniarg, true, NULL);
   FUNCALL (kill_region);
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
   pop_mark ();
 
   set_this_command (F_kill_region);
@@ -278,8 +278,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
 
   set_mark_interactive ();
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 0,
-             astr_len (kill_ring_text.as));
+  undo_save_block (get_buffer_o (cur_bp), 0, astr_len (kill_ring_text.as));
   undo_nosave = true;
   insert_estr (kill_ring_text);
   undo_nosave = false;

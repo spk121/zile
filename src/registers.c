@@ -69,7 +69,7 @@ static int regnum;
 static bool
 insert_register (void)
 {
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 0, astr_len (regs[regnum].as));
+  undo_save_block (get_buffer_o (cur_bp), 0, astr_len (regs[regnum].as));
   undo_nosave = true;
   insert_estr (regs[regnum]);
   undo_nosave = false;

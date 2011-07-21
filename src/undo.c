@@ -33,24 +33,21 @@
  */
 struct Undo
 {
-  /* Next undo delta in list. */
-  Undo *next;
+  Undo *next;      /* Next undo delta in list. */
+  int type;        /* The type of undo delta. */
+  size_t o;        /* Buffer offset of the undo delta. */
+  bool unchanged;  /* Flag indicating that reverting this undo leaves
+                      the buffer in an unchanged state. */
+  estr text;       /* Old text. */
+  size_t size;     /* Size of replacement text. */
+};
 
-  /* The type of undo delta. */
-  int type;
-
-  /* Offset of the undo delta. */
-  size_t o;
-
-  /* Flag indicating that reverting this undo leaves the buffer
-     in an unchanged state. */
-  bool unchanged;
-
-  /* Old text. */
-  estr text;
-
-  /* Size of replacement text. */
-  size_t size;
+/* Undo delta types. */
+enum
+{
+  UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
+  UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
+  UNDO_END_SEQUENCE		/* End a multi operation sequence. */
 };
 
 /* Setting this variable to true stops undo_save saving the given
@@ -63,28 +60,48 @@ static int doing_undo = false;
 /*
  * Save a reverse delta for doing undo.
  */
-void
+static void
 undo_save (int type, size_t o, size_t osize, size_t size)
 {
   if (get_buffer_noundo (cur_bp) || undo_nosave)
     return;
 
   Undo * up = (Undo *) XZALLOC (Undo);
-  *up = (Undo) {.type = type, .o = o};
-  if (!get_buffer_modified (cur_bp))
-    up->unchanged = true;
+  *up = (Undo) {
+    .next = get_buffer_last_undop (cur_bp),
+    .type = type,
+  };
 
   if (type == UNDO_REPLACE_BLOCK)
     {
+      up->o = o;
       up->size = size;
       up->text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
+      up->unchanged = !get_buffer_modified (cur_bp);
     }
 
-  up->next = get_buffer_last_undop (cur_bp);
   set_buffer_last_undop (cur_bp, up);
 
   if (!doing_undo)
     set_buffer_next_undop (cur_bp, up);
+}
+
+void
+undo_start_sequence (void)
+{
+  undo_save (UNDO_START_SEQUENCE, 0, 0, 0);
+}
+
+void
+undo_end_sequence (void)
+{
+  undo_save (UNDO_END_SEQUENCE, 0, 0, 0);
+}
+
+void
+undo_save_block (size_t o, size_t osize, size_t size)
+{
+  undo_save (UNDO_REPLACE_BLOCK, o, osize, size);
 }
 
 /*
@@ -93,29 +110,21 @@ undo_save (int type, size_t o, size_t osize, size_t size)
 static Undo *
 revert_action (Undo * up)
 {
-  size_t o = up->o;
-
   doing_undo = true;
 
   if (up->type == UNDO_END_SEQUENCE)
     {
-      undo_save (UNDO_START_SEQUENCE, up->o, 0, 0);
+      undo_save (UNDO_START_SEQUENCE, 0, 0, 0);
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
         up = revert_action (up);
-      undo_save (UNDO_END_SEQUENCE, up->o, 0, 0);
+      undo_end_sequence ();
     }
-
-  goto_offset (o);
 
   if (up->type == UNDO_REPLACE_BLOCK)
     {
-      undo_save (UNDO_REPLACE_BLOCK, o, up->size, astr_len (up->text.as));
-      undo_nosave = true;
-      for (size_t i = 0; i < up->size; ++i)
-        delete_char ();
-      insert_estr (up->text);
-      undo_nosave = false;
+      goto_offset (up->o);
+      replace_estr (up->size, up->text);
     }
 
   doing_undo = false;

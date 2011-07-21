@@ -74,14 +74,6 @@ struct Point
   size_t o;			/* Offset. */
 };
 
-/* Undo delta types. */
-enum
-{
-  UNDO_REPLACE_BLOCK,		/* Replace a block of characters. */
-  UNDO_START_SEQUENCE,		/* Start a multi operation sequence. */
-  UNDO_END_SEQUENCE		/* End a multi operation sequence. */
-};
-
 enum
 {
   COMPLETION_NOTMATCHED,

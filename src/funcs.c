@@ -772,10 +772,10 @@ transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void)
     }
 
   bool ret = true;
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
   for (int uni = 0; ret && uni < uniarg; ++uni)
     ret = transpose_subr (forward_func, backward_func);
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 
   return bool_to_lisp (ret);
 }
@@ -945,7 +945,7 @@ Fill paragraph at or after point.
 {
   Marker *m = point_marker ();
 
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
 
   FUNCALL (forward_paragraph);
   int end = get_buffer_pt (cur_bp).n;
@@ -975,7 +975,7 @@ Fill paragraph at or after point.
   goto_offset (get_marker_o (m));
   unchain_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 END_DEFUN
 
@@ -996,12 +996,12 @@ setcase_word (int rcase)
 
   if (astr_len (as) > 0)
     {
-      undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+      undo_start_sequence ();
       astr_recase (as, rcase);
       for (size_t i = 0; i < astr_len (as); i++)
         delete_char ();
       bprintf ("%s", astr_cstr (as));
-      undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+      undo_end_sequence ();
     }
 
   set_buffer_modified (cur_bp, true);
@@ -1072,7 +1072,7 @@ setcase_region (int (*func) (int))
     return leNIL;
 
   Region r = calculate_the_region ();
-  undo_save (UNDO_START_SEQUENCE, r.start, 0, 0);
+  undo_start_sequence ();
 
   Marker *m = point_marker ();
   goto_offset (r.start);
@@ -1085,7 +1085,7 @@ setcase_region (int (*func) (int))
   goto_offset (get_marker_o (m));
   unchain_marker (m);
 
-  undo_save (UNDO_END_SEQUENCE, r.start, 0, 0);
+  undo_end_sequence ();
 
   return leT;
 }
@@ -1144,12 +1144,12 @@ pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_rep
         {
           if (do_replace)
             {
-              undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+              undo_start_sequence ();
               FUNCALL (delete_region);
             }
           bprintf ("%s", astr_cstr (out));
           if (do_replace)
-            undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+            undo_end_sequence ();
         }
       else
         {
@@ -1297,7 +1297,7 @@ On nonblank line, delete any immediately following blank lines.
 +*/
 {
   Marker *m = point_marker ();
-  int seq_started = false;
+  bool seq_started = false;
 
   /* Delete any immediately following blank lines.  */
   if (next_line ())
@@ -1311,7 +1311,7 @@ On nonblank line, delete any immediately following blank lines.
           while (FUNCALL (forward_line) == leT && is_blank_line ())
             ;
           seq_started = true;
-          undo_save (UNDO_START_SEQUENCE, get_marker_o (m), 0, 0);
+          undo_start_sequence ();
           FUNCALL (delete_region);
           pop_mark ();
         }
@@ -1342,7 +1342,7 @@ On nonblank line, delete any immediately following blank lines.
           if (!seq_started)
             {
               seq_started = true;
-              undo_save (UNDO_START_SEQUENCE, get_marker_o (m), 0, 0);
+              undo_start_sequence ();
             }
           FUNCALL (delete_region);
         }
@@ -1365,7 +1365,7 @@ On nonblank line, delete any immediately following blank lines.
   goto_offset (get_marker_o (m));
 
   if (seq_started)
-    undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+    undo_end_sequence ();
 
   unchain_marker (m);
   deactivate_mark ();

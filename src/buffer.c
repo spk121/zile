@@ -176,7 +176,7 @@ delete_char (void)
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save (UNDO_REPLACE_BLOCK, get_buffer_o (cur_bp), 1, 0);
+  undo_save_block (get_buffer_o (cur_bp), 1, 0);
   size_t o;
   if (eolp ())
     {
@@ -214,7 +214,7 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
                                           case_type == 1 ? case_capitalized : case_upper));
     }
 
-  undo_save (UNDO_REPLACE_BLOCK, offset, oldlen, newlen);
+  undo_save_block (offset, oldlen, newlen);
   set_buffer_modified (bp, true);
   astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
   bp->o = adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
@@ -224,10 +224,10 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
 void
 insert_buffer (Buffer * bp)
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_start_sequence ();
   /* Copy text to avoid problems when bp == cur_bp. */
   insert_estr (estr_dup (bp->text));
-  undo_save (UNDO_END_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_end_sequence ();
 }
 
 
