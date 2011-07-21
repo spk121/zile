@@ -30,27 +30,6 @@
 #include <config.h>
 #include "extern.h"
 
-static size_t width = 0, height = 0;
-
-size_t
-term_width (void)
-{
-  return width;
-}
-
-size_t
-term_height (void)
-{
-  return height;
-}
-
-void
-term_set_size (size_t cols, size_t rows)
-{
-  width = cols;
-  height = rows;
-}
-
 static char *
 make_char_printable (int c)
 {

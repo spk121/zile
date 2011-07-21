@@ -87,11 +87,22 @@ term_beep (void)
   beep ();
 }
 
+size_t
+term_width (void)
+{
+  return (size_t) COLS;
+}
+
+size_t
+term_height (void)
+{
+  return (size_t) LINES;
+}
+
 void
 term_init (void)
 {
   initscr ();
-  term_set_size ((size_t) COLS, (size_t) LINES);
   noecho ();
   nonl ();
   raw ();
@@ -374,7 +385,6 @@ term_xgetkey (int mode, size_t delay)
 #ifdef KEY_RESIZE
       if (c == KEY_RESIZE)
         {
-          term_set_size ((size_t) COLS, (size_t) LINES);
           resize_windows ();
           continue;
         }

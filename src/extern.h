@@ -247,6 +247,8 @@ void term_clear (void);
 void term_addch (int c);
 void term_attrset (size_t attr);
 void term_beep (void);
+size_t term_width (void);
+size_t term_height (void);
 size_t term_xgetkey (int mode, size_t timeout);
 void term_ungetkey (size_t key);
 
@@ -256,9 +258,6 @@ castr term_minibuf_read (const char *prompt, const char *value, size_t pos,
                          Completion * cp, History * hp);
 
 /* term_redisplay.c ------------------------------------------------------- */
-size_t term_width (void);
-size_t term_height (void);
-void term_set_size (size_t cols, size_t rows);
 void term_redisplay (void);
 void term_full_redisplay (void);
 void show_splash_screen (const char *splash);
