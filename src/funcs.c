@@ -514,51 +514,35 @@ With argument, do this that many times.
 END_DEFUN
 
 /***********************************************************************
-               Move through balanced expressions (sexp)
+               Move through balanced expressions (sexps)
 ***********************************************************************/
-#define ISSEXPCHAR(c)         (isalnum (c) || c == '$' || c == '_')
 #define ISOPENBRACKETCHAR(c)  ((c == '(') || (c == '[') || ( c== '{') ||\
                                ((c == '\"') && !double_quote) ||	\
                                ((c == '\'') && !single_quote))
 #define ISCLOSEBRACKETCHAR(c) ((c == ')') || (c == ']') || (c == '}') ||\
                                ((c == '\"') && double_quote) ||		\
                                ((c == '\'') && single_quote))
-#define ISSEXPSEPARATOR(c)    (ISOPENBRACKETCHAR (c) ||	\
-                               ISCLOSEBRACKETCHAR (c))
-#define PRECEDINGQUOTEDQUOTE(c)                                         \
-  (c == '\\'                                                            \
-   && get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp)       \
-   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\"') || \
-       (astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\'')))
-#define FOLLOWINGQUOTEDQUOTE(c)                                         \
-  (c == '\\'                                                            \
-   && get_buffer_pt (cur_bp).o + 1 < get_buffer_line_len (cur_bp)       \
-   && ((astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\"') || \
-       (astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + 1) == '\'')))
 
 static int
 move_sexp (int dir)
 {
-  int gotsexp = false;
-  int level = 0;
-  int double_quote = dir < 0;
-  int single_quote = dir < 0;
+  int gotsexp = false, level = 0;
+  int single_quote = dir < 0, double_quote = single_quote;
 
   for (;;)
     {
-      Point pt;
-
       while (dir > 0 ? !eolp () : !bolp ())
         {
-          int c = dir > 0 ? following_char () : preceding_char ();
+          size_t o = get_buffer_o (cur_bp) - (dir < 0 ? 1 : 0);
+          char c = astr_get (get_buffer_text (cur_bp).as, o);
 
-          /* Jump quotes that aren't sexp separators. */
-          if (dir > 0 ? PRECEDINGQUOTEDQUOTE (c) : FOLLOWINGQUOTEDQUOTE (c))
+          /* Skip escaped quotes. */
+          if ((c == '\"' || c == '\'') && o > get_buffer_line_o (cur_bp) &&
+              astr_get (get_buffer_text (cur_bp).as, o - 1) == '\\')
             {
-              pt = get_buffer_pt (cur_bp);
-              pt.o += dir;
-              goto_point (pt);
-              c = 'a';		/* Treat ' and " like word chars. */
+              move_char (dir);
+              /* Treat escaped ' and " like word chars. */
+              c = 'a';
             }
 
           if (dir > 0 ? ISOPENBRACKETCHAR (c) : ISCLOSEBRACKETCHAR (c))
@@ -593,20 +577,14 @@ move_sexp (int dir)
                 }
             }
 
-          pt = get_buffer_pt (cur_bp);
-          pt.o += dir;
-          goto_point (pt);
+          move_char (dir);
 
-          if (!ISSEXPCHAR (c))
+          if (!(isalnum (c) || c == '$' || c == '_'))
             {
               if (gotsexp && level == 0)
                 {
-                  if (!ISSEXPSEPARATOR (c))
-                    {
-                      pt = get_buffer_pt (cur_bp);
-                      pt.o -= dir;
-                      goto_point (pt);
-                    }
+                  if (!(ISOPENBRACKETCHAR (c) || ISCLOSEBRACKETCHAR (c)))
+                    move_char (-dir);
                   return true;
                 }
             }
@@ -621,9 +599,10 @@ move_sexp (int dir)
             minibuf_error ("Scan error: \"Unbalanced parentheses\"");
           break;
         }
-      pt = get_buffer_pt (cur_bp);
-      pt.o = dir > 0 ? 0 : get_buffer_line_len (cur_bp);
-      goto_point (pt);
+      if (dir > 0)
+        FUNCALL (beginning_of_line);
+      else
+        FUNCALL (end_of_line);
     }
   return false;
 }

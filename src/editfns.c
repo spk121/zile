@@ -51,7 +51,7 @@ following_char (void)
   else if (eolp ())
     return '\n';
   else
-    return astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + get_buffer_pt (cur_bp).o);
+    return astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp));
 }
 
 /* Return the character preceding point in the current buffer. */
@@ -63,7 +63,7 @@ preceding_char (void)
   else if (bolp ())
     return '\n';
   else
-    return astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + get_buffer_pt (cur_bp).o - 1);
+    return astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) - 1);
 }
 
 /* Return true if point is at the beginning of the buffer. */
