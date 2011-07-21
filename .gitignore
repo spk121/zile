@@ -3,6 +3,7 @@
 .deps
 .sc-start*
 /GNUmakefile
+/INSTALL
 /README-release
 /README-release.in
 /doc
