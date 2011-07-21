@@ -31,43 +31,18 @@
 #include "extern.h"
 
 static char *
-make_char_printable (int c)
+make_char_printable (int c, int x, int cur_tab_width)
 {
+  if (c == '\t')
+    return xasprintf ("%*s", cur_tab_width - x % cur_tab_width, "");
+  if (isprint (c))
+    return xasprintf ("%c", c);
   if (c == '\0')
     return xasprintf ("^@");
   else if (c > 0 && c <= '\32')
     return xasprintf ("^%c", 'A' + c - 1);
   else
     return xasprintf ("\\%o", c & 0xff);
-}
-
-static size_t
-outch (int c, size_t font, size_t x, size_t cur_tab_width)
-{
-  int w;
-
-  if (x >= term_width ())
-    return x;
-
-  term_attrset (font);
-
-  if (c == '\t')
-    for (w = cur_tab_width - x % cur_tab_width; w > 0 && x < term_width ();
-         w--)
-      term_addch (' '), ++x;
-  else if (isprint (c))
-    term_addch (c), ++x;
-  else
-    {
-      char *buf = make_char_printable (c);
-      int j = strlen (buf);
-      for (w = 0; w < j && x < term_width (); ++w)
-        term_addch (buf[w]), ++x;
-    }
-
-  term_attrset (FONT_NORMAL);
-
-  return x;
 }
 
 static bool
@@ -78,33 +53,34 @@ in_region (size_t o, size_t x, Region r)
 
 static void
 draw_line (size_t line, size_t startcol, Window * wp,
-           size_t o, Region r, int highlight, size_t w)
+           size_t o, Region r, int highlight, size_t cur_tab_width)
 {
   term_move (line, 0);
 
   /* Draw body of line. */
   size_t x, i;
-  for (x = 0, i = startcol; i < estr_end_of_line (get_buffer_text (get_window_bp (wp)), o) - o && x < get_window_ewidth (wp); i++)
-    x = outch (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
-               highlight && in_region (o, i, r) ? FONT_REVERSE : FONT_NORMAL,
-               x, w);
+  for (x = 0, i = startcol;; i++)
+    {
+      term_attrset (highlight && in_region (o, i, r) ? FONT_REVERSE : FONT_NORMAL);
+      if (i >= estr_line_len (get_buffer_text (get_window_bp (wp)), o) ||
+          x >= get_window_ewidth (wp))
+        break;
+      char *s = make_char_printable (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
+                                     x, cur_tab_width);
+      term_addstr (s);
+      x += strlen (s);
+    }
 
   /* Draw end of line. */
   if (x >= term_width ())
     {
       term_move (line, term_width () - 1);
-      term_addch ('$');
+      term_attrset (FONT_NORMAL);
+      term_addstr ("$");
     }
-  else if (highlight)
-    {
-      for (; x < get_window_ewidth (wp); ++i)
-        {
-          if (in_region (o, i, r))
-            x = outch (' ', FONT_REVERSE, x, w);
-          else
-            x++;
-        }
-    }
+  else
+    term_addstr (xasprintf ("%*s", (int) (get_window_ewidth (wp) - x), ""));
+  term_attrset (FONT_NORMAL);
 }
 
 static int
@@ -150,7 +126,7 @@ draw_window (size_t topline, Window * wp)
       if (get_window_start_column (wp) > 0)
         {
           term_move (i, 0);
-          term_addch ('$');
+          term_addstr("$");
         }
 
       o = estr_next_line (get_buffer_text (get_window_bp (wp)), o);
@@ -195,7 +171,7 @@ draw_status_line (size_t line, Window * wp)
 
   term_move (line, 0);
   for (size_t i = 0; i < get_window_ewidth (wp); ++i)
-    term_addch ('-');
+    term_addstr ("-");
 
   const char *eol_type;
   if (get_buffer_text (cur_bp).eol == coding_eol_cr)
@@ -221,7 +197,7 @@ draw_status_line (size_t line, Window * wp)
     astr_cat_cstr (as, " Isearch");
 
   astr_cat_char (as, ')');
-  term_addnstr (astr_cstr (as), MIN (term_width (), astr_len (as)));
+  term_addstr (astr_cstr (as));
 
   term_attrset (FONT_NORMAL);
 }
@@ -231,37 +207,21 @@ term_redisplay (void)
 {
   /* Calculate the start column if the line at point has to be truncated. */
   Buffer *bp = get_window_bp (cur_wp);
-  size_t col = 0, lastcol = 0, t = tab_width (bp);
-  int rpfact, lpfact;
-  Point pt = offset_to_point (bp, window_o (cur_wp));
-  size_t rp, lp, p, o = window_o (cur_wp) - pt.o;
+  size_t col, lastcol = 0, t = tab_width (bp);
+  size_t o = window_o (cur_wp);
+  size_t lineo = o - estr_start_of_line (get_buffer_text (bp), o);
 
+  o -= lineo;
   set_window_start_column (cur_wp, 0);
-  rp = pt.o;
-  rpfact = pt.o / (get_window_ewidth (cur_wp) / 3);
 
-  for (lp = rp; lp != SIZE_MAX; --lp)
+  size_t ew = get_window_ewidth (cur_wp);
+  for (size_t lp = lineo; lp != SIZE_MAX; --lp)
     {
-      for (col = 0, p = lp; p < rp; ++p)
-        {
-          char c = astr_get (get_buffer_text (bp).as, o + p);
-          if (c == '\t')
-            {
-              col |= t - 1;
-              ++col;
-            }
-          else if (isprint ((int) c))
-            ++col;
-          else
-            {
-              char *buf = make_char_printable (c);
-              col += strlen (buf);
-            }
-        }
+      col = 0;
+      for (size_t p = lp; p < lineo; ++p)
+        col += strlen (make_char_printable (astr_get (get_buffer_text (bp).as, o + p), col, t));
 
-      lpfact = lp / (get_window_ewidth (cur_wp) / 3);
-
-      if (col >= get_window_ewidth (cur_wp) - 1 || lpfact < rpfact - 2)
+      if (col >= ew - 1 || (lp / (ew / 3)) + 2 < lineo / (ew / 3))
         {
           set_window_start_column (cur_wp, lp + 1);
           col = lastcol;
@@ -299,24 +259,6 @@ term_full_redisplay (void)
   term_redisplay ();
 }
 
-void
-show_splash_screen (const char *splash)
-{
-  for (size_t i = 0; i < term_height () - 2; ++i)
-    {
-      term_move (i, 0);
-      term_clrtoeol ();
-    }
-
-  term_move (0, 0);
-  const char *p = splash;
-  for (size_t i = 0; *p != '\0' && i < term_height () - 2; ++p)
-    if (*p == '\n')
-      term_move (++i, 0);
-    else
-      term_addch (*p);
-}
-
 /*
  * Tidy and close the terminal ready to leave Zile.
  */
@@ -328,14 +270,4 @@ term_finish (void)
   term_attrset (FONT_NORMAL);
   term_refresh ();
   term_close ();
-}
-
-/*
- * Add a string to the terminal
- */
-void
-term_addnstr (const char *s, size_t len)
-{
-  for (size_t i = 0; i < len; i++)
-    term_addch (*s++);
 }

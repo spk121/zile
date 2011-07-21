@@ -65,9 +65,9 @@ term_clear (void)
 }
 
 void
-term_addch (int c)
+term_addstr (const char *s)
 {
-  addch ((chtype) (c & ~A_ATTRIBUTES));
+  addstr (s);
 }
 
 void

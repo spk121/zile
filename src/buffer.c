@@ -530,14 +530,20 @@ get_buffer_region (Buffer *bp, Region r)
 }
 
 Buffer *
-create_scratch_buffer (void)
+create_auto_buffer (const char *name)
 {
   Buffer *bp = buffer_new ();
-  set_buffer_name (bp, "*scratch*");
+  set_buffer_name (bp, name);
   set_buffer_needname (bp, true);
   set_buffer_temporary (bp, true);
   set_buffer_nosave (bp, true);
   return bp;
+}
+
+Buffer *
+create_scratch_buffer (void)
+{
+  return create_auto_buffer ("*scratch*");
 }
 
 /*

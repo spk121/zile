@@ -33,7 +33,7 @@ term_minibuf_write (const char *s)
 {
   term_move (term_height () - 1, 0);
   term_clrtoeol ();
-  term_addnstr (s, MIN (term_width (), strlen (s)));
+  term_addstr (s);
 }
 
 static void
@@ -47,19 +47,17 @@ draw_minibuf_read (const char *prompt, const char *value,
   if (prompt_len + pointo + 1 >= term_width ())
     {
       margin++;
-      term_addch ('$');
+      term_addstr ("$");
       n = pointo - pointo % (term_width () - prompt_len - 2);
     }
 
-  term_addnstr (value + n,
-                MIN (term_width () - prompt_len - margin,
-                     strlen (value) - n));
-  term_addnstr (match, strlen (match));
+  term_addstr (value + n);
+  term_addstr (match);
 
   if (strlen (value + n) >= term_width () - prompt_len - margin)
     {
       term_move (term_height () - 1, term_width () - 1);
-      term_addch ('$');
+      term_addstr ("$");
     }
 
   term_move (term_height () - 1,

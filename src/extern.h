@@ -77,6 +77,7 @@ void activate_mark (void);
 void deactivate_mark (void);
 size_t tab_width (Buffer * bp);
 estr get_buffer_region (Buffer *bp, Region r);
+Buffer *create_auto_buffer (const char *name);
 Buffer *create_scratch_buffer (void);
 void kill_buffer (Buffer * kill_bp);
 Completion *make_buffer_completion (void);
@@ -244,7 +245,7 @@ void term_move (size_t y, size_t x);
 void term_clrtoeol (void);
 void term_refresh (void);
 void term_clear (void);
-void term_addch (int c);
+void term_addstr (const char *s);
 void term_attrset (size_t attr);
 void term_beep (void);
 size_t term_width (void);
@@ -262,7 +263,6 @@ void term_redisplay (void);
 void term_full_redisplay (void);
 void show_splash_screen (const char *splash);
 void term_finish (void);
-void term_addnstr (const char *s, size_t len);
 
 /* undo.c ----------------------------------------------------------------- */
 extern int undo_nosave;

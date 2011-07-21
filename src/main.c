@@ -49,35 +49,17 @@ int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
 
-static char about_splash_str[] = "\
-" ZILE_VERSION_STRING "\n\
+static const char splash_str[] = "\
+Welcome to " PACKAGE_NAME ".\n\
 \n\
-" ZILE_COPYRIGHT_STRING "\n\
-\n\
-Type `C-x C-c' to exit " PACKAGE_NAME ".\n\
-Type `C-x u' to undo changes.\n\
-Type `C-g' at any time to quit the current operation.\n\
-\n\
-`C-x' means hold the CTRL key while typing the character `x'.\n\
-`M-x' means hold the META or ALT key down while typing `x'.\n\
-If there is no META or ALT key, instead press and release\n\
-the ESC key and then type `x'.\n\
+Undo changes       C-x u        Exit " PACKAGE_NAME "         C-x C-c\n\
+(`C-' means use the CTRL key.  `M-' means hold the Meta (or Alt) key.\n\
+If you have no Meta key, you may type ESC followed by the character.)\n\
 Combinations like `C-x u' mean first press `C-x', then `u'.\n\
+\n\
+" ZILE_VERSION_STRING "\n\
+" ZILE_COPYRIGHT_STRING "\n\
 ";
-
-static char about_minibuf_str[] = "Welcome to " PACKAGE_NAME "!";
-
-static void
-about_screen (void)
-{
-  minibuf_write (about_minibuf_str);
-  if (!get_variable_bool ("inhibit-splash-screen"))
-    {
-      show_splash_screen (about_splash_str);
-      term_refresh ();
-      waitkey (20 * 10);
-    }
-}
 
 static void
 setup_main_screen (void)
@@ -285,16 +267,21 @@ main (int argc, char **argv)
     {
       astr as = get_home_dir ();
       if (as)
-        {
-          astr_cat_cstr (as, "/." PACKAGE);
-          lisp_loadfile (astr_cstr (as));
-        }
+        lisp_loadfile (astr_cstr (astr_cat_cstr (as, "/." PACKAGE)));
     }
 
-  /* Show the splash screen only if no files, function or load file is
-     specified on the command line, and there has been no error. */
-  if (gl_list_size (arg_arg) == 0 && minibuf_no_error ())
-    about_screen ();
+  /* Create the splash buffer & message only if no files, function or
+     load file is specified on the command line, and there has been no
+     error. */
+  if (gl_list_size (arg_arg) == 0 && minibuf_no_error () &&
+      !get_variable_bool ("inhibit-splash-screen"))
+    {
+      Buffer *bp = create_auto_buffer ("*GNU " PACKAGE_NAME "*");
+      switch_to_buffer (bp);
+      bprintf ("%s", splash_str);
+      set_buffer_readonly (bp, true);
+      FUNCALL (beginning_of_buffer);
+    }
 
   /* Load files and load files and run functions given on the command
      line. */
