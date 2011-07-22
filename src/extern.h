@@ -165,7 +165,6 @@ astr keyvectostr (gl_list_t keys);
 int insert_char (int c);
 bool insert_newline (void);
 bool intercalate_newline (void);
-bool replace (size_t del, const char *s, size_t len);
 bool fill_break_line (void);
 bool replace_estr (size_t del, estr es);
 bool insert_estr (estr as);
