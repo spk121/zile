@@ -118,7 +118,7 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
 
       thistab = -1;
 
-      switch (c = getkey ())
+      switch (c = getkey (GETKEY_DEFAULT))
         {
         case KBD_NOKEY:
           break;

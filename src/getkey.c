@@ -38,14 +38,14 @@ lastkey (void)
 }
 
 /*
- * Get a keystroke, waiting for up to timeout 10ths of a second if
- * mode contains GETKEY_DELAYED, and translating it into a
+ * Get a keystroke, waiting for up to WAITKEY_DEFAULT 10ths of a
+ * second if mode contains GETKEY_DELAYED, and translating it into a
  * keycode unless mode contains GETKEY_UNFILTERED.
  */
 size_t
-xgetkey (int mode, size_t timeout)
+getkey (int mode)
 {
-  _last_key = term_xgetkey (mode, timeout);
+  _last_key = term_getkey (mode);
 
   if (thisflag & FLAG_DEFINING_MACRO)
     add_key_to_cmd (_last_key);
@@ -54,23 +54,13 @@ xgetkey (int mode, size_t timeout)
 }
 
 /*
- * Wait for a keystroke indefinitely, and return the
- * corresponding keycode.
- */
-size_t
-getkey (void)
-{
-  return xgetkey (0, 0);
-}
-
-/*
- * Wait for timeout 10ths if a second or until a key is pressed.
- * The key is then available with [x]getkey.
+ * Wait for WAITKEY_DEFAULT 10ths if a second or until a key is
+ * pressed. The key is then available with [x]getkey.
  */
 void
-waitkey (size_t timeout)
+waitkey (void)
 {
-  ungetkey (xgetkey (GETKEY_DELAYED, timeout));
+  ungetkey (getkey (GETKEY_DELAYED));
 }
 
 /*

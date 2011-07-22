@@ -143,9 +143,8 @@ void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), 
 void pushkey (size_t key);
 void ungetkey (size_t key);
 size_t lastkey (void);
-size_t xgetkey (int mode, size_t timeout);
-size_t getkey (void);
-void waitkey (size_t delay);
+size_t getkey (int mode);
+void waitkey (void);
 void init_getkey (void);
 void free_getkey (void);
 
@@ -249,7 +248,7 @@ void term_attrset (size_t attr);
 void term_beep (void);
 size_t term_width (void);
 size_t term_height (void);
-size_t term_xgetkey (int mode, size_t timeout);
+size_t term_getkey (int mode);
 void term_ungetkey (size_t key);
 
 /* term_minibuf.c --------------------------------------------------------- */

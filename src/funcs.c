@@ -307,7 +307,7 @@ quoted_insert_octal (int c1)
 {
   int c2, c3;
   minibuf_write ("C-q %c-", c1);
-  c2 = getkey ();
+  c2 = getkey (GETKEY_DEFAULT);
 
   if (!isdigit (c2) || c2 - '0' >= 8)
     {
@@ -317,7 +317,7 @@ quoted_insert_octal (int c1)
   else
     {
       minibuf_write ("C-q %c %c-", c1, c2);
-      c3 = getkey ();
+      c3 = getkey (GETKEY_DEFAULT);
 
       if (!isdigit (c3) || c3 - '0' >= 8)
         {
@@ -339,7 +339,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
   int c;
 
   minibuf_write ("C-q-");
-  c = xgetkey (GETKEY_UNFILTERED, 0);
+  c = getkey (GETKEY_UNFILTERED);
 
   if (isdigit (c) && c - '0' < 8)
     quoted_insert_octal (c);

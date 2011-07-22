@@ -615,7 +615,7 @@ write_to_disk (Buffer * bp, const char *filename)
       else
         {
           minibuf_error ("Cannot make backup file: %s", strerror (errno));
-          waitkey (WAITKEY_DEFAULT);
+          waitkey ();
         }
     }
 
@@ -744,7 +744,7 @@ save_some_buffers (void)
                 int c;
 
                 minibuf_write ("Save file %s? (y, n, !, ., q) ", fname);
-                c = getkey ();
+                c = getkey (GETKEY_DEFAULT);
                 minibuf_clear ();
 
                 switch (c)
@@ -770,7 +770,7 @@ save_some_buffers (void)
                     goto exitloop;
                   default:
                     minibuf_error ("Please answer y, n, !, . or q.");
-                    waitkey (WAITKEY_DEFAULT);
+                    waitkey ();
                     break;
                   }
               }

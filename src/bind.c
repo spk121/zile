@@ -155,7 +155,7 @@ do_binding_completion (astr as)
                  lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
                  astr_cstr (bs),
                  astr_cstr (as));
-  key = getkey ();
+  key = getkey (GETKEY_DEFAULT);
   minibuf_clear ();
 
   return key;
@@ -171,7 +171,7 @@ get_key_sequence (void)
   size_t key;
 
   do
-    key = getkey ();
+    key = getkey (GETKEY_DEFAULT);
   while (key == KBD_NOKEY);
   gl_list_add_last (keys, (void *) key);
   for (;;)

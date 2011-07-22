@@ -367,40 +367,30 @@ get_char (void)
 }
 
 size_t
-term_xgetkey (int mode, size_t delay)
+term_getkey (int mode)
 {
-  size_t key;
+  if (mode & GETKEY_DELAYED)
+    timeout ((int) WAITKEY_DEFAULT * 100);
 
-  for (;;)
-    {
-      int c;
-
-      if (mode & GETKEY_DELAYED)
-        wtimeout (stdscr, (int) delay * 100);
-
-      c = get_char ();
-      if (mode & GETKEY_DELAYED)
-        wtimeout (stdscr, -1);
-
+  int c;
 #ifdef KEY_RESIZE
-      if (c == KEY_RESIZE)
-        {
-          resize_windows ();
-          continue;
-        }
+  do {
 #endif
+    c = get_char ();
+#ifdef KEY_RESIZE
+    if (c == KEY_RESIZE)
+      resize_windows ();
+  } while (c == KEY_RESIZE);
+#endif
+  if (mode & GETKEY_DELAYED)
+    timeout (-1);
 
-      if (mode & GETKEY_UNFILTERED)
-        key = (size_t) c;
-      else
-        {
-          key = codetokey (c);
-          while (key == KBD_META)
-            key = codetokey (get_char ()) | KBD_META;
-        }
-      break;
-    }
+  if (mode & GETKEY_UNFILTERED)
+    return (size_t) c;
 
+  size_t key = codetokey (c);
+  while (key == KBD_META)
+    key = codetokey (get_char ()) | KBD_META;
   return key;
 }
 

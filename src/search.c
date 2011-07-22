@@ -224,7 +224,7 @@ isearch (int forward, int regexp)
 
       minibuf_write ("%s", astr_cstr (buf));
 
-      c = getkey ();
+      c = getkey (GETKEY_DEFAULT);
 
       if (c == KBD_CANCEL)
         {
@@ -256,7 +256,7 @@ isearch (int forward, int regexp)
       else if (c & KBD_CTRL && (c & 0xff) == 'q')
         {
           minibuf_write ("%s^Q-", astr_cstr (buf));
-          astr_cat_char (pattern, xgetkey (GETKEY_UNFILTERED, 0));
+          astr_cat_char (pattern, getkey (GETKEY_UNFILTERED));
         }
       else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's'))
         {
@@ -409,12 +409,12 @@ what to do with it.
               minibuf_write
                 ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find,
                  astr_cstr (repl));
-              c = getkey ();
+              c = getkey (GETKEY_DEFAULT);
               if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
                   || c == 'n' || c == 'q' || c == '.' || c == '!')
                 break;
               minibuf_error ("Please answer y, n, !, . or q.");
-              waitkey (WAITKEY_DEFAULT);
+              waitkey ();
             }
           minibuf_clear ();
 

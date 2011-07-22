@@ -43,7 +43,7 @@ Copy region into register @i{register}.
   else
     {
       minibuf_write ("Copy to register: ");
-      reg = getkey ();
+      reg = getkey (GETKEY_DEFAULT);
     }
 
   if (reg == KBD_CANCEL)
@@ -87,7 +87,7 @@ Puts point before and mark after the inserted text.
   else
     {
       minibuf_write ("Insert register: ");
-      reg = getkey ();
+      reg = getkey (GETKEY_DEFAULT);
     }
 
   if (reg == KBD_CANCEL)

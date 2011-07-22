@@ -207,6 +207,7 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
 
+#define GETKEY_DEFAULT                  0000
 #define GETKEY_DELAYED                  0001
 #define GETKEY_UNFILTERED               0002
 
