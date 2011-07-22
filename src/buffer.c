@@ -305,9 +305,7 @@ set_buffer_names (Buffer * bp, const char *filename)
 Buffer *
 find_buffer (const char *name)
 {
-  Buffer *bp;
-
-  for (bp = head_bp; bp != NULL; bp = bp->next)
+  for (Buffer *bp = head_bp; bp != NULL; bp = bp->next)
     {
       const char *bname = get_buffer_name (bp);
       if (bname && STREQ (bname, name))
@@ -318,25 +316,19 @@ find_buffer (const char *name)
 }
 
 /*
- * Move the selected buffer to head.
+ * Move the given buffer to head.
  */
 static void
 move_buffer_to_head (Buffer * bp)
 {
-  Buffer *it, *prev = NULL;
-
-  for (it = head_bp; it; prev = it, it = it->next)
+  Buffer *prev = NULL;
+  for (Buffer *it = head_bp; it != bp; prev = it, it = it->next)
+    ;
+  if (prev)
     {
-      if (bp == it)
-        {
-          if (prev)
-            {
-              prev->next = bp->next;
-              bp->next = head_bp;
-              head_bp = bp;
-            }
-          break;
-        }
+      prev->next = bp->next;
+      bp->next = head_bp;
+      head_bp = bp;
     }
 }
 
