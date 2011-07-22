@@ -48,7 +48,7 @@ make_char_printable (int c, int x, int cur_tab_width)
 static bool
 in_region (size_t o, size_t x, Region r)
 {
-  return o + x >= r.start && o + x <= r.end;
+  return o + x >= r.start && o + x < r.end;
 }
 
 static void
