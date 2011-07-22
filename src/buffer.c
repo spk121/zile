@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "dirname.h"
 
 #include "main.h"
 #include "extern.h"
@@ -281,57 +282,21 @@ get_buffer_filename_or_name (Buffer * bp)
 }
 
 /*
- * Create a buffer name using the file name.
- */
-static char *
-make_buffer_name (const char *filename)
-{
-  const char *p = strrchr (filename, '/');
-
-  if (p == NULL)
-    p = filename;
-  else
-    ++p;
-
-  if (find_buffer (p) == NULL)
-    return xstrdup (p);
-  else
-    {
-      char *name;
-      size_t i;
-
-      /* Note: there can't be more than SIZE_MAX buffers. */
-      for (i = 2; true; i++)
-        {
-          name = xasprintf ("%s<%ld>", p, (unsigned long) i);
-          if (find_buffer (name) == NULL)
-            return name;
-        }
-    }
-}
-
-/*
  * Set a new filename, and from it a name, for the buffer.
  */
 void
 set_buffer_names (Buffer * bp, const char *filename)
 {
-  astr as = NULL;
-  char *oldname;
-
   if (filename[0] != '/')
-    {
-      as = agetcwd ();
-      astr_cat_char (as, '/');
-      astr_cat_cstr (as, filename);
-      set_buffer_filename (bp, astr_cstr (as));
-      filename = astr_cstr (as);
-    }
-  else
-    set_buffer_filename (bp, filename);
+    filename = astr_cstr (astr_fmt ("%s/%s", astr_cstr (agetcwd ()), filename));
+  set_buffer_filename (bp, filename);
 
-  oldname = bp->name;
-  bp->name = make_buffer_name (filename);
+  char *s = base_name (filename);
+  char *name = xstrdup (s);
+  /* Note: there can't be more than SIZE_MAX buffers. */
+  for (size_t i = 2; find_buffer (name) != NULL; i++)
+    name = xasprintf ("%s<%zd>", s, i);
+  set_buffer_name (bp, name);
 }
 
 /*
