@@ -21,7 +21,6 @@
 
 #include <config.h>
 
-#include <assert.h>
 #include <ctype.h>
 #include <signal.h>
 #include <stdarg.h>
