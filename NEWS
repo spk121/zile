@@ -1,7 +1,23 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 2.4.0.60 (2011-07-22) [alpha]
 
+  This release is a major update, upping the dependencies from C89 to
+  C99, from POSIX-1.2001 to POSIX-1.2008 (though in fact Zile will
+  still build on many other POSIX and non-POSIX systems thanks to
+  gnulib), and adding a dependency on libgc. Together these changes
+  have allowed the removal of hundreds of lines of code and the
+  elimination of whole classes of bug (in particular, classic
+  memory-management bugs); overall, combined with continued
+  simplification, Zile 2.4.0.60 is well over 1,000 lines of code, or
+  10%, shorter than the previous stable release, 2.3.24.
+
+  Several old bugs have been fixed, a few more esoteric features
+  removed, and Emacs-compliance has been improved. However, the major
+  rewrite has almost certainly introduced new bugs which have not yet
+  been found and fixed, hence the alpha status of this release.
+  Distribution packagers are encouraged to try packaging this version
+  to find any problems with the updated build system and dependencies.
 
 * Noteworthy changes in release 2.3.24 (2011-04-29) [stable]
 
