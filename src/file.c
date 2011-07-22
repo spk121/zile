@@ -667,7 +667,8 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 
   if (ans == true)
     {
-      if (!STREQ (astr_cstr (name), get_buffer_filename (bp)))
+      if (get_buffer_filename (bp) == NULL ||
+          !STREQ (astr_cstr (name), get_buffer_filename (bp)))
         set_buffer_names (bp, astr_cstr (name));
       set_buffer_needname (bp, false);
       set_buffer_temporary (bp, false);
