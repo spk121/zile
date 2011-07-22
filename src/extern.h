@@ -258,8 +258,6 @@ castr term_minibuf_read (const char *prompt, const char *value, size_t pos,
 
 /* term_redisplay.c ------------------------------------------------------- */
 void term_redisplay (void);
-void term_full_redisplay (void);
-void show_splash_screen (const char *splash);
 void term_finish (void);
 
 /* undo.c ----------------------------------------------------------------- */

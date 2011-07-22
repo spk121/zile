@@ -252,13 +252,6 @@ term_redisplay (void)
   term_move (cur_topline + get_window_topdelta (cur_wp), col);
 }
 
-void
-term_full_redisplay (void)
-{
-  term_clear ();
-  term_redisplay ();
-}
-
 /*
  * Tidy and close the terminal ready to leave Zile.
  */
