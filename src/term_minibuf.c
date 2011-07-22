@@ -84,22 +84,24 @@ maybe_close_popup (Completion *cp)
     }
 }
 
-static castr
-do_minibuf_read (const char *prompt, const char *value, size_t pos,
+castr
+term_minibuf_read (const char *prompt, const char *value, size_t pos,
                Completion * cp, History * hp)
 {
+  if (hp)
+    prepare_history (hp);
+
   static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
-  size_t prompt_len;
-  const char *s;
   astr as = astr_new_cstr (value), saved = NULL;
 
-  prompt_len = strlen (prompt);
+  size_t prompt_len = strlen (prompt);
   if (pos == SIZE_MAX)
     pos = astr_len (as);
 
-  for (;;)
+  do
     {
+      const char *s;
       switch (lasttab)
         {
         case COMPLETION_MATCHEDNONUNIQUE:
@@ -125,14 +127,9 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
         case KBD_CTRL | 'z':
           FUNCALL (suspend_emacs);
           break;
-        case KBD_RET:
-          term_move (term_height () - 1, 0);
-          term_clrtoeol ();
-          return as;
         case KBD_CANCEL:
-          term_move (term_height () - 1, 0);
-          term_clrtoeol ();
-          return NULL;
+          as = NULL;
+          break;
         case KBD_CTRL | 'a':
         case KBD_HOME:
           pos = 0;
@@ -288,27 +285,19 @@ do_minibuf_read (const char *prompt, const char *value, size_t pos,
           /* FALLTHROUGH */
         default:
           if (c > 255 || !isprint (c))
+            ding ();
+          else
             {
-              ding ();
-              break;
+              astr_insert_char (as, pos++, c);
+              if (overwrite_mode && pos != astr_len (as))
+                astr_remove (as, pos, 1);
             }
-          astr_insert_char (as, pos++, c);
-          if (overwrite_mode && pos != astr_len (as))
-            astr_remove (as, pos, 1);
         }
 
       lasttab = thistab;
-    }
-}
+    } while (c != KBD_RET && c != KBD_CANCEL);
 
-castr
-term_minibuf_read (const char *prompt, const char *value, size_t pos,
-                   Completion * cp, History * hp)
-{
-  if (hp)
-    prepare_history (hp);
-
-  castr as = do_minibuf_read (prompt, value, pos, cp, hp);
+  minibuf_clear ();
   maybe_close_popup (cp);
   return as;
 }
