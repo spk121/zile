@@ -45,7 +45,6 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-  estr text;
 };
 
 #define FIELD(ty, field)                         \
@@ -59,12 +58,6 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-
-estr
-get_buffer_text (Buffer * bp)
-{
-  return bp->text;
-}
 
 size_t
 get_buffer_size (Buffer * bp)

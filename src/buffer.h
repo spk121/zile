@@ -28,6 +28,7 @@ FIELD_STR(filename)       /* The file being edited. */
 
 /* Other fields of Buffer. */
 FIELD(Buffer *, next)     /* Next buffer in buffer list. */
+FIELD(estr, text)         /* The text. */
 FIELD(size_t, goalc)      /* Goal column for previous/next-line commands. */
 FIELD(size_t, o)          /* The point. FIXME: Rename to pt when get_buffer_pt removed. */
 FIELD(Marker *, mark)     /* The mark. */

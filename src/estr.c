@@ -23,6 +23,9 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "size_max.h"
 
 #include "astr.h"
@@ -135,5 +138,19 @@ estr_cat (estr es, estr src)
         astr_cat_cstr (es.as, es.eol);
     }
 
+  return es;
+}
+
+/*
+ * Read file contents into an estr.
+ * The `as' member is NULL if the file doesn't exist, or other error.
+ */
+estr
+estr_readf (const char *filename)
+{
+  estr es = (estr) {.as = NULL};
+  astr as = astr_readf (filename);
+  if (as)
+    es = estr_new_astr (as);
   return es;
 }

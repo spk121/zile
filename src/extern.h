@@ -52,7 +52,6 @@ int type_char (int c, bool overwrite);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-estr get_buffer_text (Buffer * bp);
 Point get_buffer_pt (Buffer *bp);
 size_t get_buffer_line_o (Buffer *bp);
 size_t get_buffer_size (Buffer * bp);

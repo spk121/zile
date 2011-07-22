@@ -1234,36 +1234,7 @@ The output is available in that buffer in both cases.
       if (warn_if_no_mark ())
         ok = leNIL;
       else
-        {
-          Region r = calculate_the_region ();
-          char tempfile[] = P_tmpdir "/zileXXXXXX";
-          int fd = mkstemp (tempfile);
-
-          if (fd == -1)
-            {
-              minibuf_error ("Cannot open temporary file");
-              ok = leNIL;
-            }
-          else
-            {
-              ssize_t written = write (fd, astr_cstr (get_buffer_region (cur_bp, r).as), get_region_size (r));
-
-              if (written != (ssize_t) get_region_size (r))
-                {
-                  if (written == -1)
-                    minibuf_error ("Error writing to temporary file: %s",
-                                   strerror (errno));
-                  else
-                    minibuf_error ("Error writing to temporary file");
-                  ok = leNIL;
-                }
-              else
-                ok = bool_to_lisp (pipe_command (astr_cstr (cmd), tempfile, insert, true));
-
-              close (fd);
-              remove (tempfile);
-            }
-        }
+        ok = pipe_command (cmd, get_buffer_region (cur_bp, calculate_the_region ()).as, insert, true);
     }
 }
 END_DEFUN

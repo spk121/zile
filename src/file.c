@@ -201,39 +201,6 @@ check_writable (const char *filename)
   return euidaccess (filename, W_OK) >= 0;
 }
 
-/*
- * Insert file contents into current buffer.
- * Return quietly if the file doesn't exist, or other error.
- */
-static int
-insert_file (const char *filename)
-{
-  if (exist_file (filename))
-    {
-      struct stat st;
-      if (stat (filename, &st) == 0)
-        {
-          size_t size = st.st_size;
-          if (size == 0)
-            return true;
-
-          int fd = open (filename, O_RDONLY);
-          if (fd >= 0)
-            {
-              char buf[BUFSIZ];
-              astr as = astr_new ();
-              while ((size = read (fd, buf, BUFSIZ)) > 0)
-                astr_ncat_cstr (as, buf, size);
-              insert_estr (estr_new_astr (as));
-              close (fd);
-              return true;
-            }
-        }
-    }
-
-  return false;
-}
-
 bool
 find_file (const char *filename)
 {
@@ -258,15 +225,20 @@ find_file (const char *filename)
 
   switch_to_buffer (bp);
 
-  if (insert_file (filename))
+  estr es = estr_readf (filename);
+  if (es.as)
     {
       if (!check_writable (filename))
         set_buffer_readonly (cur_bp, true);
-
-      /* Reset undo history. */
-      set_buffer_next_undop (cur_bp, NULL);
-      set_buffer_last_undop (cur_bp, NULL);
     }
+  else
+    es = estr_new_astr (astr_new ());
+
+  set_buffer_text (cur_bp, es);
+
+  /* Reset undo history. */
+  set_buffer_next_undop (cur_bp, NULL);
+  set_buffer_last_undop (cur_bp, NULL);
 
   set_buffer_modified (bp, false);
   set_buffer_dir (bp, astr_new_cstr (dir_name (filename)));
@@ -444,7 +416,10 @@ Set mark after the inserted text.
 
   if (ok != leNIL)
     {
-      if (!insert_file (astr_cstr (file)))
+      estr es = estr_readf (astr_cstr (file));
+      if (es.as != NULL)
+        insert_estr (es);
+      else
         {
           ok = leNIL;
           minibuf_error ("%s: %s", file, strerror (errno));
