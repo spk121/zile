@@ -701,7 +701,7 @@ save_buffer (Buffer * bp)
 
 DEFUN ("save-buffer", save_buffer)
 /*+
-Save current buffer in visited file if modified. By default, makes the
+Save current buffer in visited file if modified.  By default, makes the
 previous version into a backup file if this is the first save.
 +*/
 {
