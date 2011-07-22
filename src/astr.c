@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include "xalloc.h"
 #include "xvasprintf.h"
 #include "minmax.h"
@@ -202,6 +205,27 @@ astr astr_fread (FILE * fp)
   while ((c = getc (fp)) != EOF)
     astr_cat_char (as, c);
 
+  return as;
+}
+
+astr
+astr_readf (const char *filename)
+{
+  astr as = NULL;
+  struct stat st;
+  if (stat (filename, &st) == 0)
+    {
+      size_t size = st.st_size;
+      int fd = open (filename, O_RDONLY);
+      if (fd >= 0)
+        {
+          char buf[BUFSIZ];
+          as = astr_new ();
+          while ((size = read (fd, buf, BUFSIZ)) > 0)
+            astr_ncat_cstr (as, buf, size);
+          close (fd);
+        }
+    }
   return as;
 }
 

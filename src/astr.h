@@ -123,6 +123,12 @@ astr astr_truncate (astr as, size_t pos);
 astr astr_fread (FILE * fp);
 
 /*
+ * Read file contents into an astr.
+ * Returns NULL if the file doesn't exist, or other error.
+ */
+astr astr_readf (const char *filename);
+
+/*
  * Format text into a string and return it.
  */
 astr astr_vfmt (const char *fmt, va_list ap);

@@ -153,37 +153,35 @@ read_token (enum tokenname *tokenid, astr as, size_t * pos)
 static le *
 lisp_read (le * list, astr as, size_t * pos)
 {
-  astr tok;
-  enum tokenname tokenid;
-  int quoted = 0;
+  int quoted = false;
 
   for (;;)
     {
-      tok = read_token (&tokenid, as, pos);
+      enum tokenname tokenid;
+      astr tok = read_token (&tokenid, as, pos);
 
       switch (tokenid)
         {
         case T_QUOTE:
-          quoted = 1;
+          quoted = true;
           break;
 
         case T_OPENPAREN:
           list = leAddBranchElement (list, lisp_read (NULL, as, pos), quoted);
-          quoted = 0;
+          quoted = false;
           break;
 
         case T_NEWLINE:
-          quoted = 0;
+          quoted = false;
           break;
 
         case T_WORD:
           list = leAddDataElement (list, astr_cstr (tok), quoted);
-          quoted = 0;
+          quoted = false;
           break;
 
         case T_CLOSEPAREN:
         case T_EOF:
-          quoted = 0;
           return list;
 
         default:
@@ -196,25 +194,17 @@ void
 lisp_loadstring (astr as)
 {
   size_t pos = 0;
-  le * list = lisp_read (NULL, as, &pos);
-
-  leEval (list);
+  leEval (lisp_read (NULL, as, &pos));
 }
 
 bool
 lisp_loadfile (const char *file)
 {
-  FILE *fp = fopen (file, "r");
-
-  if (fp != NULL)
-    {
-      astr bs = astr_fread (fp);
-      lisp_loadstring (bs);
-      fclose (fp);
-      return true;
-    }
-
+  astr bs = astr_readf (file);
+  if (bs == NULL)
     return false;
+  lisp_loadstring (bs);
+  return true;
 }
 
 DEFUN ("load", load)
