@@ -209,10 +209,10 @@ replace_estr (size_t del, estr es)
   if (warn_if_readonly_buffer ())
     return false;
 
-  size_t len = astr_len (es.as);
-  const char *s = astr_cstr (es.as);
   undo_start_sequence ();
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, NULL, 0, false);
+  size_t len = astr_len (es.as);
+  const char *s = astr_cstr (es.as);
   size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_text (cur_bp).eol);
   while (len > 0)
     {

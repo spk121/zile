@@ -102,7 +102,7 @@ revert_action (Undo * up)
 {
   if (up->type == UNDO_END_SEQUENCE)
     {
-      undo_save (UNDO_START_SEQUENCE, 0, 0, 0);
+      undo_start_sequence ();
       up = up->next;
       while (up->type != UNDO_START_SEQUENCE)
         up = revert_action (up);

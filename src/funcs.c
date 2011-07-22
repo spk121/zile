@@ -996,12 +996,8 @@ setcase_word (int rcase)
 
   if (astr_len (as) > 0)
     {
-      undo_start_sequence ();
       astr_recase (as, rcase);
-      for (size_t i = 0; i < astr_len (as); i++)
-        delete_char ();
-      bprintf ("%s", astr_cstr (as));
-      undo_end_sequence ();
+      replace_estr (astr_len (as), estr_new_astr (as));
     }
 
   set_buffer_modified (cur_bp, true);
@@ -1117,24 +1113,17 @@ write_shell_output (va_list ap)
 static bool
 pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_replace)
 {
-  astr out;
-  bool more_than_one_line = false;
-  char *cmdline, *eol;
-  FILE * fh;
-
-  cmdline = xasprintf ("%s 2>&1 <%s", cmd, tempfile);
-  fh = popen (cmdline, "r");
+  char *cmdline = xasprintf ("%s 2>&1 <%s", cmd, tempfile);
+  FILE *fh = popen (cmdline, "r");
   if (fh == NULL)
     {
       minibuf_error ("Cannot open pipe to process");
       return false;
     }
 
-  out = astr_fread (fh);
+  astr out = astr_fread (fh);
   pclose (fh);
-  eol = strchr (astr_cstr (out), '\n');
-  if (eol && eol != astr_cstr (out) + astr_len (out) - 1)
-    more_than_one_line = true;
+  char *eol = strchr (astr_cstr (out), '\n');
 
   if (astr_len (out) == 0)
     minibuf_write ("(Shell command succeeded with no output)");
@@ -1142,17 +1131,20 @@ pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_rep
     {
       if (do_insert)
         {
-          if (do_replace)
+          size_t del = 0;
+          if (do_replace && !warn_if_no_mark ())
             {
-              undo_start_sequence ();
-              FUNCALL (delete_region);
+              Region r = calculate_the_region ();
+              goto_offset (r.start);
+              del = get_region_size (r);
             }
-          bprintf ("%s", astr_cstr (out));
-          if (do_replace)
-            undo_end_sequence ();
+          replace_estr (del, estr_new_astr (out));
         }
       else
         {
+          bool more_than_one_line = eol == NULL ||
+            eol == astr_cstr (out) + astr_len (out) - 1;
+
           write_temp_buffer ("*Shell Command Output*", more_than_one_line,
                              write_shell_output, out);
           if (!more_than_one_line)

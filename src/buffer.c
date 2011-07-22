@@ -224,10 +224,8 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
 void
 insert_buffer (Buffer * bp)
 {
-  undo_start_sequence ();
   /* Copy text to avoid problems when bp == cur_bp. */
   insert_estr (estr_dup (bp->text));
-  undo_end_sequence ();
 }
 
 

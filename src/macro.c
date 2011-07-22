@@ -163,10 +163,8 @@ A prefix argument serves as a repeat count.
       return leNIL;
     }
 
-  undo_start_sequence ();
   for (int uni = 0; uni < uniarg; ++uni)
     process_keys (cur_mp->keys);
-  undo_end_sequence ();
 }
 END_DEFUN
 
