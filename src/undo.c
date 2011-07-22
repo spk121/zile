@@ -54,9 +54,6 @@ enum
    information. */
 int undo_nosave = false;
 
-/* This variable is set to true when an undo is in execution. */
-static int doing_undo = false;
-
 /*
  * Save a reverse delta for doing undo.
  */
@@ -81,9 +78,6 @@ undo_save (int type, size_t o, size_t osize, size_t size)
     }
 
   set_buffer_last_undop (cur_bp, up);
-
-  if (!doing_undo)
-    set_buffer_next_undop (cur_bp, up);
 }
 
 void
@@ -110,8 +104,6 @@ undo_save_block (size_t o, size_t osize, size_t size)
 static Undo *
 revert_action (Undo * up)
 {
-  doing_undo = true;
-
   if (up->type == UNDO_END_SEQUENCE)
     {
       undo_save (UNDO_START_SEQUENCE, 0, 0, 0);
@@ -126,8 +118,6 @@ revert_action (Undo * up)
       goto_offset (up->o);
       replace_estr (up->size, up->text);
     }
-
-  doing_undo = false;
 
   if (up->unchanged)
     set_buffer_modified (cur_bp, false);
