@@ -211,8 +211,7 @@ replace_estr (size_t del, estr es)
 
   size_t len = astr_len (es.as);
   const char *s = astr_cstr (es.as);
-  undo_save_block (get_buffer_o (cur_bp), del, len);
-  undo_nosave = true;
+  undo_start_sequence ();
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, NULL, 0, false);
   size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_text (cur_bp).eol);
   while (len > 0)
@@ -235,7 +234,7 @@ replace_estr (size_t del, estr es)
           len -= eol_len;
         }
     }
-  undo_nosave = false;
+  undo_end_sequence ();
   return true;
 }
 

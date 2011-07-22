@@ -50,17 +50,13 @@ enum
   UNDO_END_SEQUENCE		/* End a multi operation sequence. */
 };
 
-/* Setting this variable to true stops undo_save saving the given
-   information. */
-int undo_nosave = false;
-
 /*
  * Save a reverse delta for doing undo.
  */
 static void
 undo_save (int type, size_t o, size_t osize, size_t size)
 {
-  if (get_buffer_noundo (cur_bp) || undo_nosave)
+  if (get_buffer_noundo (cur_bp))
     return;
 
   Undo * up = (Undo *) XZALLOC (Undo);

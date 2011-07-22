@@ -220,14 +220,11 @@ insert_file (const char *filename)
           int fd = open (filename, O_RDONLY);
           if (fd >= 0)
             {
-              undo_save_block (get_buffer_o (cur_bp), 0, size);
-              undo_nosave = true;
               char buf[BUFSIZ];
               astr as = astr_new ();
               while ((size = read (fd, buf, BUFSIZ)) > 0)
                 astr_ncat_cstr (as, buf, size);
               insert_estr (estr_new_astr (as));
-              undo_nosave = false;
               close (fd);
               return true;
             }

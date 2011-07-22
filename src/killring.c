@@ -277,12 +277,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
     return leNIL;
 
   set_mark_interactive ();
-
-  undo_save_block (get_buffer_o (cur_bp), 0, astr_len (kill_ring_text.as));
-  undo_nosave = true;
   insert_estr (kill_ring_text);
-  undo_nosave = false;
-
   deactivate_mark ();
 }
 END_DEFUN
