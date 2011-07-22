@@ -45,7 +45,7 @@ estr_new_astr (astr as)
 {
   bool first_eol = true;
   size_t total_eols = 0;
-  estr es = (estr) {.as = as};
+  estr es = (estr) {.as = as, .eol = coding_eol_lf};
   for (size_t i = 0; i < astr_len (as) && total_eols < MAX_EOL_CHECK_COUNT; i++)
     {
       char c = astr_get (as, i);
