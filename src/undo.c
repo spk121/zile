@@ -61,9 +61,10 @@ undo_save (int type, size_t o, size_t osize, size_t size)
     .type = type,
   };
 
+  up->o = o;
+
   if (type == UNDO_REPLACE_BLOCK)
     {
-      up->o = o;
       up->size = size;
       up->text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
       up->unchanged = !get_buffer_modified (cur_bp);
@@ -75,7 +76,7 @@ undo_save (int type, size_t o, size_t osize, size_t size)
 void
 undo_start_sequence (void)
 {
-  undo_save (UNDO_START_SEQUENCE, 0, 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
 }
 
 void
@@ -105,12 +106,10 @@ revert_action (Undo * up)
       undo_end_sequence ();
     }
 
+  if (up->type != UNDO_END_SEQUENCE)
+    goto_offset (up->o);
   if (up->type == UNDO_REPLACE_BLOCK)
-    {
-      goto_offset (up->o);
-      replace_estr (up->size, up->text);
-    }
-
+    replace_estr (up->size, up->text);
   if (up->unchanged)
     set_buffer_modified (cur_bp, false);
 

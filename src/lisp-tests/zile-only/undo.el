@@ -1,3 +1,4 @@
+; undo in Emacs undoes everything from the start of the script (cf. fill_paragraph_2.el)
 (delete-char 1)
 (delete-char 1)
 (delete-char 1)
