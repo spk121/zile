@@ -73,12 +73,10 @@ print_buf (Buffer * old_bp, Buffer * bp)
 void
 write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
 {
-  Window *wp, *old_wp = cur_wp;
-  Buffer *new_bp, *old_bp = cur_bp;
-  va_list ap;
-
   /* Popup a window with the buffer "name". */
-  wp = find_window (name);
+  Window *old_wp = cur_wp;
+  Buffer *old_bp = cur_bp;
+  Window *wp = find_window (name);
   if (show && wp)
     set_current_window (wp);
   else
@@ -95,7 +93,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
     }
 
   /* Remove the contents of that buffer. */
-  new_bp = buffer_new ();
+  Buffer *new_bp = buffer_new ();
   set_buffer_name (new_bp, get_buffer_name (cur_bp));
   kill_buffer (cur_bp);
   cur_bp = new_bp;
@@ -108,6 +106,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
   set_temporary_buffer (cur_bp);
 
   /* Use the "callback" routine. */
+  va_list ap;
   va_start (ap, func);
   func (ap);
   va_end (ap);
@@ -1172,9 +1171,8 @@ pipe_command (castr cmd, astr input, bool do_insert, bool do_replace)
         }
       else
         {
-          bool more_than_one_line = eol == NULL ||
-            eol == astr_cstr (inout.out) + astr_len (inout.out) - 1;
-
+          bool more_than_one_line = eol != NULL &&
+            eol != astr_cstr (inout.out) + astr_len (inout.out) - 1;
           write_temp_buffer ("*Shell Command Output*", more_than_one_line,
                              write_shell_output, inout.out);
           if (!more_than_one_line)
