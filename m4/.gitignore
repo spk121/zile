@@ -16,6 +16,7 @@
 /double-slash-root.m4
 /dup2.m4
 /eealloc.m4
+/environ.m4
 /errno_h.m4
 /error.m4
 /euidaccess.m4
@@ -23,6 +24,7 @@
 /exponentf.m4
 /exponentl.m4
 /extensions.m4
+/fatal-signal.m4
 /fchdir.m4
 /fclose.m4
 /fcntl-o.m4
@@ -101,9 +103,12 @@
 /open.m4
 /openat.m4
 /pathmax.m4
+/pipe2.m4
+/posix_spawn.m4
 /printf-frexp.m4
 /printf-frexpl.m4
 /printf.m4
+/rawmemchr.m4
 /read-file.m4
 /readlink.m4
 /realloc.m4
@@ -111,8 +116,15 @@
 /rmdir.m4
 /same.m4
 /save-cwd.m4
+/sched_h.m4
+/sig_atomic_t.m4
+/sigaction.m4
+/signal_h.m4
+/signalblocking.m4
 /signbit.m4
 /size_max.m4
+/spawn-pipe.m4
+/spawn_h.m4
 /ssize_t.m4
 /stat.m4
 /stdarg.m4
@@ -122,6 +134,7 @@
 /stdint_h.m4
 /stdio_h.m4
 /stdlib_h.m4
+/strchrnul.m4
 /strdup.m4
 /strerror.m4
 /strerror_r.m4
@@ -129,6 +142,7 @@
 /strndup.m4
 /strnlen.m4
 /strstr.m4
+/sys_select_h.m4
 /sys_socket_h.m4
 /sys_stat_h.m4
 /sys_time_h.m4
@@ -144,6 +158,8 @@
 /vasprintf-posix.m4
 /vasprintf.m4
 /version-etc.m4
+/wait-process.m4
+/waitpid.m4
 /warn-on-use.m4
 /warnings.m4
 /wchar_h.m4

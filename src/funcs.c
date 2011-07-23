@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include "pipe-filter.h"
 
 #include "main.h"
 #include "extern.h"
@@ -1109,22 +1110,52 @@ write_shell_output (va_list ap)
   insert_estr ((estr) {.as = va_arg (ap, astr), .eol = coding_eol_lf});
 }
 
-static bool
-pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_replace)
+typedef struct {
+  astr in;
+  astr out;
+  size_t done;
+  char buf[BUFSIZ];
+} pipe_data;
+
+static const void *
+prepare_write (size_t *n, void *priv)
 {
-  char *cmdline = xasprintf ("%s 2>&1 <%s", cmd, tempfile);
-  FILE *fh = popen (cmdline, "r");
-  if (fh == NULL)
-    {
-      minibuf_error ("Cannot open pipe to process");
-      return false;
-    }
+  *n = astr_len (((pipe_data *) priv)->in) - ((pipe_data *) priv)->done;
+  return *n ? astr_cstr (((pipe_data *) priv)->in) + ((pipe_data *) priv)->done : NULL;
+}
 
-  astr out = astr_fread (fh);
-  pclose (fh);
-  char *eol = strchr (astr_cstr (out), '\n');
+static void
+done_write (void *data _GL_UNUSED_PARAMETER, size_t n, void *priv)
+{
+  ((pipe_data *) priv)->done += n;
+}
 
-  if (astr_len (out) == 0)
+static void *
+prepare_read (size_t *n, void *priv)
+{
+  *n = BUFSIZ;
+  return ((pipe_data *) priv)->buf;
+}
+
+static void
+done_read (void *data, size_t n, void *priv)
+{
+  astr_ncat_cstr (((pipe_data *) priv)->out, (const char *)data, n);
+}
+
+static le *
+pipe_command (castr cmd, astr input, bool do_insert, bool do_replace)
+{
+  const char *prog_argv[] = { "/bin/sh", "-c", astr_cstr (cmd), NULL };
+  pipe_data inout = { .in = input, .out = astr_new (), .done = 0 };
+  if (pipe_filter_ii_execute (PACKAGE_NAME, "/bin/sh", prog_argv, true, false,
+                              prepare_write, done_write, prepare_read, done_read,
+                              &inout) != 0)
+    return leNIL;
+
+  char *eol = strchr (astr_cstr (inout.out), '\n');
+
+  if (astr_len (inout.out) == 0)
     minibuf_write ("(Shell command succeeded with no output)");
   else
     {
@@ -1137,21 +1168,21 @@ pipe_command (const char *cmd, const char *tempfile, bool do_insert, bool do_rep
               goto_offset (r.start);
               del = get_region_size (r);
             }
-          replace_estr (del, estr_new_astr (out));
+          replace_estr (del, estr_new_astr (inout.out));
         }
       else
         {
           bool more_than_one_line = eol == NULL ||
-            eol == astr_cstr (out) + astr_len (out) - 1;
+            eol == astr_cstr (inout.out) + astr_len (inout.out) - 1;
 
           write_temp_buffer ("*Shell Command Output*", more_than_one_line,
-                             write_shell_output, out);
+                             write_shell_output, inout.out);
           if (!more_than_one_line)
-            minibuf_write ("%s", astr_cstr (out));
+            minibuf_write ("%s", astr_cstr (inout.out));
         }
     }
 
-  return true;
+  return leT;
 }
 
 static castr
@@ -1195,7 +1226,7 @@ says to insert the output in the current buffer.
     insert = lastflag & FLAG_SET_UNIARG;
 
   if (cmd != NULL)
-    ok = bool_to_lisp (pipe_command (astr_cstr (cmd), "/dev/null", insert, false));
+    ok = pipe_command (cmd, astr_new (), insert, false);
 }
 END_DEFUN
 
@@ -1230,7 +1261,6 @@ The output is available in that buffer in both cases.
 
   if (cmd != NULL)
     {
-
       if (warn_if_no_mark ())
         ok = leNIL;
       else

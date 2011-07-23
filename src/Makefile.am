@@ -21,7 +21,7 @@
 
 AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(top_builddir)/lib -I$(top_srcdir)/lib $(LIBGC_CPPFLAGS)
-LDADD = $(top_builddir)/lib/libgnu.a $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB)
+LDADD = $(top_builddir)/lib/lib$(PACKAGE).a $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB)
 
 bin_PROGRAMS = zile
 

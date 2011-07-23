@@ -197,17 +197,6 @@ astr_truncate (astr as, size_t pos)
   return astr_remove (as, pos, astr_len (as) - pos);
 }
 
-astr astr_fread (FILE * fp)
-{
-  int c;
-  astr as = astr_new ();
-
-  while ((c = getc (fp)) != EOF)
-    astr_cat_char (as, c);
-
-  return as;
-}
-
 astr
 astr_readf (const char *filename)
 {

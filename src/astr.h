@@ -118,11 +118,6 @@ astr astr_remove (astr as, size_t pos, size_t size);
 astr astr_truncate (astr as, size_t pos);
 
 /*
- * Read the stream fp into a string and return it.
- */
-astr astr_fread (FILE * fp);
-
-/*
  * Read file contents into an astr.
  * Returns NULL if the file doesn't exist, or other error.
  */
