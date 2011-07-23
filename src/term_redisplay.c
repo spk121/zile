@@ -207,7 +207,7 @@ term_redisplay (void)
 {
   /* Calculate the start column if the line at point has to be truncated. */
   Buffer *bp = get_window_bp (cur_wp);
-  size_t col, lastcol = 0, t = tab_width (bp);
+  size_t col = 0, lastcol = 0, t = tab_width (bp);
   size_t o = window_o (cur_wp);
   size_t lineo = o - estr_start_of_line (get_buffer_text (bp), o);
 
