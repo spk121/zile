@@ -148,12 +148,6 @@ fi
 dnl Perl
 AX_WITH_PROG(PERL, perl)
 
-dnl Extra definitions for config.h
-AC_DEFINE_UNQUOTED([CONFIGURE_DATE], ["`date '+%a %b %d %Y'`"],
-                   [The date of compilation.])
-AC_DEFINE_UNQUOTED([CONFIGURE_HOST], ["${ac_hostname}"],
-                   [The compilation host.])
-
 dnl Generate output
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_FILES(Makefile lib/Makefile src/Makefile src/tbl_opts.h)
