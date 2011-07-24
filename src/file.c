@@ -465,19 +465,14 @@ create_backup_filename (const char *filename, const char *backupdir)
   /* Prepend the backup directory path to the filename */
   if (backupdir)
     {
-      astr buf = astr_new ();
-
-      astr_cpy_cstr (buf, backupdir);
+      astr buf = astr_new_cstr (backupdir);
       if (astr_get (buf, astr_len (buf) - 1) != '/')
         astr_cat_char (buf, '/');
-      while (*filename)
-        {
-          if (*filename == '/')
-            astr_cat_char (buf, '!');
-          else
-            astr_cat_char (buf, *filename);
-          ++filename;
-        }
+      for (; *filename; filename++)
+        if (*filename == '/')
+          astr_cat_char (buf, '!');
+        else
+          astr_cat_char (buf, *filename);
 
       if (!expand_path (buf))
         buf = NULL;
@@ -504,9 +499,8 @@ write_to_disk (Buffer * bp, const char *filename)
   if (!get_buffer_backup (bp) && backup
       && (fd = open (filename, O_RDWR, 0)) != -1)
     {
-      astr bfilename;
       close (fd);
-      bfilename = create_backup_filename (filename, backupdir);
+      astr bfilename = create_backup_filename (filename, backupdir);
       if (bfilename)
         {
           /* FIXME: Use error-code-returning copy_file_preserving. */
