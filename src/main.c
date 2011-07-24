@@ -62,32 +62,6 @@ Combinations like `C-x u' mean first press `C-x', then `u'.\n\
 ";
 
 static void
-setup_main_screen (void)
-{
-  Buffer *last_bp = NULL;
-  int c = 0;
-
-  for (Buffer *bp = head_bp; bp; bp = get_buffer_next (bp))
-    {
-      /* Last buffer that isn't *scratch*. */
-      if (get_buffer_next (bp) && !get_buffer_next (get_buffer_next (bp)))
-        last_bp = bp;
-      c++;
-    }
-
-  /* *scratch* and two files. */
-  if (c == 3)
-    {
-      FUNCALL (split_window);
-      switch_to_buffer (last_bp);
-      FUNCALL (other_window);
-    }
-  /* More than two files. */
-  else if (c > 3)
-    FUNCALL (list_buffers);
-}
-
-static void
 _GL_ATTRIBUTE_NORETURN segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr,
@@ -321,7 +295,23 @@ main (int argc, char **argv)
   lastflag |= FLAG_NEED_RESYNC;
 
   /* Set up screen according to number of files loaded. */
-  setup_main_screen ();
+  Buffer *last_bp = NULL;
+  int c = 0;
+  for (Buffer *bp = head_bp; bp; bp = get_buffer_next (bp))
+    {
+      /* Last buffer that isn't *scratch*. */
+      if (get_buffer_next (bp) && !get_buffer_next (get_buffer_next (bp)))
+        last_bp = bp;
+      c++;
+    }
+  if (c == 3)
+    { /* *scratch* and two files. */
+      FUNCALL (split_window);
+      switch_to_buffer (last_bp);
+      FUNCALL (other_window);
+    }
+  else if (c > 3) /* More than two files. */
+    FUNCALL (list_buffers);
 
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (scratch_bp);
