@@ -1,3 +1,6 @@
+/acl-internal.h
+/acl.h
+/acl_entries.c
 /alloca.c
 /alloca.h
 /alloca.in.h
@@ -29,6 +32,9 @@
 /close.c
 /config.charset
 /configmake.h
+/copy-acl.c
+/copy-file.c
+/copy-file.h
 /creat-safer.c
 /diffseq.h
 /dirent.h
@@ -68,6 +74,7 @@
 /fd-safer.c
 /fdopendir.c
 /fflush.c
+/file-has-acl.c
 /file-set.c
 /file-set.h
 /filenamecat-lgpl.c
@@ -90,6 +97,8 @@
 /fstrcmp.h
 /ftell.c
 /ftello.c
+/full-write.c
+/full-write.h
 /fwriteerror.c
 /fwriteerror.h
 /getcwd-lgpl.c
@@ -206,10 +215,15 @@
 /printf-parse.h
 /progname.c
 /progname.h
+/quote.c
+/quote.h
+/quotearg.c
+/quotearg.h
 /rawmemchr.c
 /rawmemchr.valgrind
 /read-file.c
 /read-file.h
+/read.c
 /readlink.c
 /realloc.c
 /ref-add.sed
@@ -223,6 +237,10 @@
 /regex_internal.h
 /regexec.c
 /rmdir.c
+/safe-read.c
+/safe-read.h
+/safe-write.c
+/safe-write.h
 /same-inode.h
 /same.c
 /same.h
@@ -230,6 +248,7 @@
 /save-cwd.h
 /sched.h
 /sched.in.h
+/set-mode-acl.c
 /sig-handler.h
 /sigaction.c
 /signal.h
@@ -324,6 +343,7 @@
 /wcrtomb.c
 /wctype.h
 /wctype.in.h
+/write.c
 /xalloc-die.c
 /xalloc-oversized.h
 /xalloc.h

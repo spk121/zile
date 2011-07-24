@@ -32,6 +32,7 @@
 #include <utime.h>
 #include "dirname.h"
 #include "xgetcwd.h"
+#include "copy-file.h"
 
 #include "main.h"
 #include "extern.h"
@@ -431,85 +432,6 @@ Set mark after the inserted text.
 END_DEFUN
 
 /*
- * Copy a file.
- */
-static int
-copy_file (const char *source, const char *dest)
-{
-  char buf[BUFSIZ];
-  int ifd, ofd, stat_valid, serrno;
-  size_t len;
-  struct stat st;
-  char *tname;
-
-  ifd = open (source, O_RDONLY, 0);
-  if (ifd < 0)
-    {
-      minibuf_error ("%s: unable to backup", source);
-      return false;
-    }
-
-  tname = xasprintf ("%s_XXXXXX", dest);
-  ofd = mkstemp (tname);
-  if (ofd == -1)
-    {
-      serrno = errno;
-      close (ifd);
-      minibuf_error ("%s: unable to create backup", dest);
-      errno = serrno;
-      return false;
-    }
-
-  while ((len = read (ifd, buf, sizeof buf)) > 0)
-    if (write (ofd, buf, len) < 0)
-      {
-        minibuf_error ("Unable to write to backup file `%s'", dest);
-        close (ifd);
-        close (ofd);
-        return false;
-      }
-
-  serrno = errno;
-  stat_valid = fstat (ifd, &st) != -1;
-
-  /* Recover file permissions and ownership. */
-  if (stat_valid &&
-      (fchmod (ofd, st.st_mode) || fchown (ofd, st.st_uid, st.st_gid)))
-    {
-      /* Avoid compiler warning for ignoring return values. */
-    }
-
-  close (ifd);
-  close (ofd);
-
-  if (stat_valid)
-    {
-      if (rename (tname, dest) == -1)
-        {
-          minibuf_error ("Cannot rename temporary file `%s'",
-                         strerror (errno));
-          unlink (tname);
-          stat_valid = false;
-        }
-    }
-  else if (unlink (tname) == -1)
-    minibuf_error ("Cannot remove temporary file `%s'", strerror (errno));
-
-  errno = serrno;
-
-  /* Recover file modification time. */
-  if (stat_valid)
-    {
-      struct utimbuf t;
-      t.actime = st.st_atime;
-      t.modtime = st.st_mtime;
-      utime (dest, &t);
-    }
-
-  return stat_valid;
-}
-
-/*
  * Write buffer to given file name with given mode.
  */
 static int
@@ -585,8 +507,12 @@ write_to_disk (Buffer * bp, const char *filename)
       astr bfilename;
       close (fd);
       bfilename = create_backup_filename (filename, backupdir);
-      if (bfilename && copy_file (filename, astr_cstr (bfilename)))
-        set_buffer_backup (bp, true);
+      if (bfilename)
+        {
+          /* FIXME: Use error-code-returning copy_file_preserving. */
+          copy_file_preserving (filename, astr_cstr (bfilename));
+          set_buffer_backup (bp, true);
+        }
       else
         {
           minibuf_error ("Cannot make backup file: %s", strerror (errno));
