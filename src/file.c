@@ -584,14 +584,12 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 static le *
 save_buffer (Buffer * bp)
 {
-  if (!get_buffer_modified (bp))
-    {
-      minibuf_write ("(No changes need to be saved)");
-      return leT;
-    }
-  else
+  if (get_buffer_modified (bp))
     return write_buffer (bp, get_buffer_needname (bp), false, get_buffer_filename (bp),
                          "File to save in: ");
+
+  minibuf_write ("(No changes need to be saved)");
+  return leT;
 }
 
 DEFUN ("save-buffer", save_buffer)
