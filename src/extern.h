@@ -71,6 +71,7 @@ int warn_if_readonly_buffer (void);
 Region region_new (size_t o1, size_t o2);
 Region calculate_the_region (void);
 bool delete_region (const Region r);
+bool in_region (size_t o, size_t x, Region r);
 void set_temporary_buffer (Buffer * bp);
 void activate_mark (void);
 void deactivate_mark (void);

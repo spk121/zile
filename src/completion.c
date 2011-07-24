@@ -148,13 +148,8 @@ static size_t
 calculate_max_length (gl_list_t l)
 {
   size_t maxlen = 0;
-
   for (size_t i = 0; i < gl_list_size (l); i++)
-    {
-      size_t len = strlen ((const char *) gl_list_get_at (l, i));
-      maxlen = MAX (len, maxlen);
-    }
-
+    maxlen = MAX (strlen ((const char *) gl_list_get_at (l, i)), maxlen);
   return maxlen;
 }
 
@@ -162,8 +157,9 @@ calculate_max_length (gl_list_t l)
  * Print the list of completions in a set of columns.
  */
 static void
-completion_print (gl_list_t l)
+write_completion (va_list ap)
 {
+  gl_list_t l = va_arg (ap, gl_list_t);
   size_t max = calculate_max_length (l) + 5;
   size_t numcols = (get_window_ewidth (cur_wp) - 1) / max;
 
@@ -176,12 +172,6 @@ completion_print (gl_list_t l)
       if (col == 0)
         insert_newline ();
     }
-}
-
-static void
-write_completion (va_list ap)
-{
-  completion_print (va_arg (ap, gl_list_t));
 }
 
 /*
@@ -206,69 +196,47 @@ popup_completion (Completion * cp, int allflag)
  * Reread directory for completions.
  */
 static int
-completion_readdir (Completion * cp, astr as)
+completion_readdir (Completion * cp, astr path)
 {
-  DIR *dir;
-  char *s1, *s2;
-  const char *pdir;
-  char *base;
-  struct dirent *d;
-  struct stat st;
-  astr bs;
-
   cp->completions = gl_list_create_empty (GL_LINKED_LIST,
                                           completion_STREQ, NULL,
                                           NULL, false);
 
-  if (!expand_path (as))
+  if (!expand_path (path))
     return false;
 
-  bs = astr_new ();
-
   /* Split up path with dirname and basename, unless it ends in `/',
-     in which case it's considered to be entirely dirname */
-  s1 = xstrdup (astr_cstr (as));
-  s2 = xstrdup (astr_cstr (as));
-  if (astr_get (as, astr_len (as) - 1) != '/')
+     in which case it's considered to be entirely dirname. */
+  astr pdir, base;
+  if (astr_get (path, astr_len (path) - 1) != '/')
     {
-      char *s = dir_name (s1);
-      /* Append `/' to dir */
-      astr_cat_cstr (bs, s);
-      if (astr_get (bs, astr_len (bs) - 1) != '/')
-        astr_cat_char (bs, '/');
-      pdir = astr_cstr (bs);
-      base = base_name (s2);
+      pdir = astr_new_cstr (dir_name (astr_cstr (path)));
+      if (!STREQ (astr_cstr (pdir), "/"))
+        astr_cat_char (pdir, '/');
+      base = astr_new_cstr (base_name (astr_cstr (path)));
     }
   else
     {
-      pdir = s1;
-      base = xstrdup ("");
+      pdir = path;
+      base = astr_new ();
     }
 
-  astr_cpy_cstr (as, base);
-
-  dir = opendir (pdir);
+  DIR *dir = opendir (astr_cstr (pdir));
   if (dir != NULL)
     {
-      astr buf = astr_new ();
-      while ((d = readdir (dir)) != NULL)
+      for (struct dirent *d = readdir (dir); d != NULL; d = readdir (dir))
         {
-          astr_cpy_cstr (buf, pdir);
-          astr_cat_cstr (buf, d->d_name);
-          if (stat (astr_cstr (buf), &st) != -1)
-            {
-              astr_cpy_cstr (buf, d->d_name);
-              if (S_ISDIR (st.st_mode))
-                astr_cat_char (buf, '/');
-            }
-          else
-            astr_cpy_cstr (buf, d->d_name);
+          struct stat st;
+          astr as = astr_new_cstr (d->d_name);
+          if (stat (astr_cstr (astr_cat_cstr (astr_cpy (astr_new (), pdir), d->d_name)), &st) != -1 &&
+              S_ISDIR (st.st_mode))
+            astr_cat_char (as, '/');
           gl_sortedlist_add (cp->completions, completion_strcmp,
-                             xstrdup (astr_cstr (buf)));
+                             xstrdup (astr_cstr (as)));
         }
       closedir (dir);
 
-      cp->path = compact_path (astr_new_cstr (pdir));
+      cp->path = compact_path (pdir);
     }
 
   return dir != NULL;

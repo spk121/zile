@@ -119,26 +119,6 @@ adjust_markers (size_t o, ptrdiff_t delta)
 }
 
 /*
- * Check the case of a string.
- * Returns 2 if it is all upper case, 1 if just the first letter is,
- * and 0 otherwise.
- */
-static int
-check_case (const char *s, size_t len)
-{
-  size_t i;
-
-  for (i = 0; i < len && isupper ((int) s[i]); i++)
-    ;
-  if (i == len)
-    return 2;
-  else if (i == 1)
-    for (; i < len && !isupper ((int) s[i]); i++)
-      ;
-  return i == len;
-}
-
-/*
  * Insert the character `c' at the current point position
  * into the current buffer.
  * In overwrite mode, overwrite if current character isn't the end of
@@ -189,6 +169,25 @@ delete_char (void)
   goto_offset (o);
 
   return true;
+}
+
+/*
+ * Check the case of a string.
+ * Returns 2 if it is all upper case, 1 if just the first letter is,
+ * and 0 otherwise.
+ */
+static int
+check_case (const char *s, size_t len)
+{
+  size_t i;
+  for (i = 0; i < len && isupper ((int) s[i]); i++)
+    ;
+  if (i == len)
+    return 2;
+  else if (i == 1)
+    for (; i < len && !isupper ((int) s[i]); i++)
+      ;
+  return i == len;
 }
 
 /*
@@ -411,6 +410,12 @@ delete_region (const Region r)
   buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0, false);
 
   return true;
+}
+
+bool
+in_region (size_t o, size_t x, Region r)
+{
+  return o + x >= r.start && o + x < r.end;
 }
 
 /*

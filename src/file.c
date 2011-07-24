@@ -223,7 +223,6 @@ find_file (const char *filename)
 
   Buffer *bp = buffer_new ();
   set_buffer_names (bp, filename);
-
   switch_to_buffer (bp);
 
   estr es = estr_readf (filename);
@@ -435,7 +434,7 @@ END_DEFUN
  * Write buffer to given file name with given mode.
  */
 static int
-raw_write_to_disk (Buffer * bp, const char *filename, mode_t mode)
+write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 {
   int fd = creat (filename, mode);
 
@@ -489,17 +488,17 @@ create_backup_filename (const char *filename, const char *backupdir)
  * Create a backup file if specified by the user variables.
  */
 static int
-write_to_disk (Buffer * bp, const char *filename)
+backup_and_write (Buffer * bp, const char *filename)
 {
-  int fd, backup = get_variable_bool ("make-backup-files"), ret;
-  const char *backupdir = get_variable_bool ("backup-directory") ?
-    get_variable ("backup-directory") : NULL;
-
   /* Make backup of original file. */
+  int fd, backup = get_variable_bool ("make-backup-files");
   if (!get_buffer_backup (bp) && backup
       && (fd = open (filename, O_RDWR, 0)) != -1)
     {
       close (fd);
+
+      const char *backupdir = get_variable_bool ("backup-directory") ?
+        get_variable ("backup-directory") : NULL;
       astr bfilename = create_backup_filename (filename, backupdir);
       if (bfilename)
         {
@@ -514,18 +513,16 @@ write_to_disk (Buffer * bp, const char *filename)
         }
     }
 
-  ret = raw_write_to_disk (bp, filename, S_IRUSR | S_IWUSR |
+  int ret = write_to_disk (bp, filename, S_IRUSR | S_IWUSR |
                            S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-  if (ret != 0)
-    {
-      if (ret == -1)
-        minibuf_error ("Error writing `%s': %s", filename, strerror (errno));
-      else
-        minibuf_error ("Error writing `%s'", filename);
-      return false;
-    }
+  if (ret == 0)
+    return true;
 
-  return true;
+  if (ret == -1)
+    minibuf_error ("Error writing `%s': %s", filename, strerror (errno));
+  else
+    minibuf_error ("Error writing `%s'", filename);
+  return false;
 }
 
 static le *
@@ -568,7 +565,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
       set_buffer_needname (bp, false);
       set_buffer_temporary (bp, false);
       set_buffer_nosave (bp, false);
-      if (write_to_disk (bp, astr_cstr (name)))
+      if (backup_and_write (bp, astr_cstr (name)))
         {
           minibuf_write ("Wrote %s", astr_cstr (name));
           set_buffer_modified (bp, false);
@@ -735,7 +732,7 @@ zile_exit (int doabort)
                              get_buffer_filename_or_name (bp),
                              astr_cstr (astr_recase (astr_new_cstr (PACKAGE), case_upper)));
         fprintf (stderr, "Saving %s...\r\n", astr_cstr (buf));
-        raw_write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
+        write_to_disk (bp, astr_cstr (buf), S_IRUSR | S_IWUSR);
       }
 
   if (doabort)

@@ -41,16 +41,10 @@ insert_char (int c)
 }
 
 static void
-insert_expanded_tab (int (*inschr) (int chr))
+insert_expanded_tab (void)
 {
-  undo_start_sequence ();
-
-  int c = get_goalc ();
-  int t = tab_width (cur_bp);
-  for (c = t - c % t; c > 0; --c)
-    (*inschr) (' ');
-
-  undo_end_sequence ();
+  size_t t = tab_width (cur_bp);
+  bprintf ("%*s", t - get_goalc () % t);
 }
 
 static bool
@@ -62,7 +56,7 @@ insert_tab (void)
   if (get_variable_bool ("indent-tabs-mode"))
     insert_char ('\t');
   else
-    insert_expanded_tab (insert_char);
+    insert_expanded_tab ();
 
   return true;
 }
@@ -292,7 +286,7 @@ backward_delete_char_overwrite (void)
 
   backward_char ();
   if (following_char () == '\t')
-    insert_expanded_tab (insert_char);
+    insert_expanded_tab ();
   else
     insert_char (' ');
   backward_char ();

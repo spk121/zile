@@ -45,12 +45,6 @@ make_char_printable (int c, int x, int cur_tab_width)
     return xasprintf ("\\%o", c & 0xff);
 }
 
-static bool
-in_region (size_t o, size_t x, Region r)
-{
-  return o + x >= r.start && o + x < r.end;
-}
-
 static void
 draw_line (size_t line, size_t startcol, Window * wp,
            size_t o, Region r, int highlight, size_t cur_tab_width)
@@ -94,45 +88,6 @@ calculate_highlight_region (Window * wp, Region * rp)
 
   *rp = region_new (window_o (wp), get_marker_o (get_buffer_mark (get_window_bp (wp))));
   return true;
-}
-
-static void
-draw_window (size_t topline, Window * wp)
-{
-  size_t i, o;
-  Region r;
-  int highlight = calculate_highlight_region (wp, &r);
-
-  /* Find the first line to display on the first screen line. */
-  for (o = estr_start_of_line (get_buffer_text (get_window_bp (wp)), window_o (wp)), i = get_window_topdelta (wp);
-       i > 0 && o > 0;
-       assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i)
-    ;
-
-  /* Draw the window lines. */
-  size_t cur_tab_width = tab_width (get_window_bp (wp));
-  for (i = topline; i < get_window_eheight (wp) + topline; ++i)
-    {
-      /* Clear the line. */
-      term_move (i, 0);
-      term_clrtoeol ();
-
-      /* If at the end of the buffer, don't write any text. */
-      if (o == SIZE_MAX)
-        continue;
-
-      draw_line (i, get_window_start_column (wp), wp, o, r, highlight, cur_tab_width);
-
-      if (get_window_start_column (wp) > 0)
-        {
-          term_move (i, 0);
-          term_addstr("$");
-        }
-
-      o = estr_next_line (get_buffer_text (get_window_bp (wp)), o);
-    }
-
-  set_window_all_displayed (wp, o >= get_buffer_size (get_window_bp (wp)));
 }
 
 static const char *
@@ -202,6 +157,50 @@ draw_status_line (size_t line, Window * wp)
   term_attrset (FONT_NORMAL);
 }
 
+static void
+draw_window (size_t topline, Window * wp)
+{
+  size_t i, o;
+  Region r;
+  int highlight = calculate_highlight_region (wp, &r);
+
+  /* Find the first line to display on the first screen line. */
+  for (o = estr_start_of_line (get_buffer_text (get_window_bp (wp)), window_o (wp)), i = get_window_topdelta (wp);
+       i > 0 && o > 0;
+       assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i)
+    ;
+
+  /* Draw the window lines. */
+  size_t cur_tab_width = tab_width (get_window_bp (wp));
+  for (i = topline; i < get_window_eheight (wp) + topline; ++i)
+    {
+      /* Clear the line. */
+      term_move (i, 0);
+      term_clrtoeol ();
+
+      /* If at the end of the buffer, don't write any text. */
+      if (o == SIZE_MAX)
+        continue;
+
+      draw_line (i, get_window_start_column (wp), wp, o, r, highlight, cur_tab_width);
+
+      if (get_window_start_column (wp) > 0)
+        {
+          term_move (i, 0);
+          term_addstr("$");
+        }
+
+      o = estr_next_line (get_buffer_text (get_window_bp (wp)), o);
+    }
+
+  set_window_all_displayed (wp, o >= get_buffer_size (get_window_bp (wp)));
+
+  /* Draw the status line only if there is available space after the
+     buffer text space. */
+  if (get_window_fheight (wp) - get_window_eheight (wp) > 0)
+    draw_status_line (topline + get_window_eheight (wp), wp);
+}
+
 void
 term_redisplay (void)
 {
@@ -239,11 +238,6 @@ term_redisplay (void)
         cur_topline = topline;
 
       draw_window (topline, wp);
-
-      /* Draw the status line only if there is available space after the
-         buffer text space. */
-      if (get_window_fheight (wp) - get_window_eheight (wp) > 0)
-        draw_status_line (topline + get_window_eheight (wp), wp);
 
       topline += get_window_fheight (wp);
     }

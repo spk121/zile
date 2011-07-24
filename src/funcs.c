@@ -54,22 +54,6 @@ Cancel current command.
 }
 END_DEFUN
 
-static void
-print_buf (Buffer * old_bp, Buffer * bp)
-{
-  if (get_buffer_name (bp)[0] == ' ')
-    return;
-
-  bprintf ("%c%c%c %-19s %6u  %-17s",
-           old_bp == bp ? '.' : ' ',
-           get_buffer_readonly (bp) ? '%' : ' ',
-           get_buffer_modified (bp) ? '*' : ' ',
-           get_buffer_name (bp), get_buffer_size (bp), "Fundamental");
-  if (get_buffer_filename (bp) != NULL)
-    bprintf ("%s", astr_cstr (compact_path (astr_new_cstr (get_buffer_filename (bp)))));
-  insert_newline ();
-}
-
 void
 write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
 {
@@ -137,9 +121,19 @@ write_buffers_list (va_list ap)
   bp = get_window_bp (old_wp);
   do
     {
-      /* Print all buffers except this one (the *Buffer List*). */
-      if (cur_bp != bp)
-        print_buf (get_window_bp (old_wp), bp);
+      /* Print all buffers whose names don't start with space except
+         this one (the *Buffer List*). */
+      if (cur_bp != bp && get_buffer_name (bp)[0] == ' ')
+        {
+          bprintf ("%c%c%c %-19s %6u  %-17s",
+                   get_window_bp (old_wp) == bp ? '.' : ' ',
+                   get_buffer_readonly (bp) ? '%' : ' ',
+                   get_buffer_modified (bp) ? '*' : ' ',
+                   get_buffer_name (bp), get_buffer_size (bp), "Fundamental");
+          if (get_buffer_filename (bp) != NULL)
+            bprintf ("%s", astr_cstr (compact_path (astr_new_cstr (get_buffer_filename (bp)))));
+          insert_newline ();
+        }
       bp = get_buffer_next (bp);
       if (bp == NULL)
         bp = head_bp;
