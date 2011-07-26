@@ -191,23 +191,15 @@ delete_char (void)
   if (warn_if_readonly_buffer ())
     return false;
 
-  undo_save_block (get_buffer_o (cur_bp), 1, 0);
-  size_t o;
   if (eolp ())
     {
-      size_t eol_len = strlen (cur_bp->text.eol);
-      o = adjust_markers (get_buffer_o (cur_bp), -eol_len);
-      astr_remove (cur_bp->text.as, cur_bp->o, eol_len);
+      buffer_replace (cur_bp, cur_bp->o, strlen (get_buffer_eol (cur_bp)), NULL, 0, false);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
-    {
-      o = adjust_markers (get_buffer_o (cur_bp), -1);
-      astr_remove (cur_bp->text.as, cur_bp->o, 1);
-    }
+    buffer_replace (cur_bp, cur_bp->o, 1, NULL, 0, false);
 
   set_buffer_modified (cur_bp, true);
-  goto_offset (o);
 
   return true;
 }
@@ -218,17 +210,17 @@ delete_char (void)
  * and 0 otherwise.
  */
 static int
-check_case (const char *s, size_t len)
+check_case (astr as)
 {
   size_t i;
-  for (i = 0; i < len && isupper ((int) s[i]); i++)
+  for (i = 0; i < astr_len (as) && isupper ((int) astr_get (as, i)); i++)
     ;
-  if (i == len)
+  if (i == astr_len (as))
     return 2;
   else if (i == 1)
-    for (; i < len && !isupper ((int) s[i]); i++)
+    for (; i < astr_len (as) && !isupper ((int) astr_get (as, i)); i++)
       ;
-  return i == len;
+  return i == astr_len (as);
 }
 
 /*
@@ -241,7 +233,7 @@ buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, s
 {
   if (replace_case && get_variable_bool ("case-replace"))
     {
-      int case_type = check_case (astr_cstr (bp->text.as) + offset, oldlen);
+      int case_type = check_case (get_buffer_region (bp, (Region) {.start = offset, .end = offset + oldlen}).as);
 
       if (case_type != 0)
         newtext = astr_cstr (astr_recase (astr_cpy (astr_new (), castr_new_nstr (newtext, newlen)),
@@ -259,7 +251,25 @@ void
 insert_buffer (Buffer * bp)
 {
   /* Copy text to avoid problems when bp == cur_bp. */
-  insert_estr (estr_dup (bp->text));
+  insert_estr ((estr) {.as = astr_cpy (astr_new (), get_buffer_pre_point (bp)), .eol = get_buffer_eol (bp)});
+  insert_estr ((estr) {.as = astr_cpy (astr_new (), get_buffer_post_point (bp)), .eol = get_buffer_eol (bp)});
+}
+
+/*
+ * Copy a region of text into an allocated buffer.
+ */
+estr
+get_buffer_region (Buffer *bp, Region r)
+{
+  astr as = astr_new ();
+  if (r.start < get_buffer_o (bp))
+    astr_cat (as, astr_substr (get_buffer_pre_point (bp), r.start, MIN (r.end, get_buffer_o (bp)) - r.start));
+  if (r.end > get_buffer_o (bp))
+    {
+      size_t from = MAX (r.start, get_buffer_o (bp)) - get_buffer_o (bp);
+      astr_cat (as, astr_substr (get_buffer_post_point (bp), from, r.end - get_buffer_o (bp)));
+    }
+  return (estr) {.as = as, .eol = get_buffer_eol (bp)};
 }
 
 
@@ -514,15 +524,6 @@ tab_width (Buffer * bp)
   return MAX (get_variable_number_bp (bp, "tab-width"), 1);
 }
 
-/*
- * Copy a region of text into an allocated buffer.
- */
-estr
-get_buffer_region (Buffer *bp, Region r)
-{
-  return (estr) {.as = astr_substr (bp->text.as, r.start, r.end - r.start), .eol = bp->text.eol};
-}
-
 Buffer *
 create_auto_buffer (const char *name)
 {
@@ -684,7 +685,7 @@ move_char (int offset)
       else if (dir > 0 ? !eobp () : !bobp ())
         {
           thisflag |= FLAG_NEED_RESYNC;
-          cur_bp->o += dir * strlen (cur_bp->text.eol);
+          cur_bp->o += dir * strlen (get_buffer_eol (cur_bp));
           if (dir > 0)
             FUNCALL (beginning_of_line);
           else
@@ -726,11 +727,11 @@ move_line (int n)
     return false;
 
   bool ok = true;
-  size_t (*func) (estr es, size_t o) = estr_next_line;
+  size_t (*func) (Buffer *bp, size_t o) = buffer_next_line;
   if (n < 0)
     {
       n = -n;
-      func = estr_prev_line;
+      func = buffer_prev_line;
     }
 
   if (last_command () != F_next_line && last_command () != F_previous_line)
@@ -738,7 +739,7 @@ move_line (int n)
 
   for (; n > 0; n--)
     {
-      size_t o = func (cur_bp->text, cur_bp->o);
+      size_t o = func (cur_bp, cur_bp->o);
       if (o == SIZE_MAX)
         {
           ok = false;
