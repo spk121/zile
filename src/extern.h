@@ -22,7 +22,7 @@
 #include "gl_xlist.h"
 
 /* basic.c ---------------------------------------------------------------- */
-size_t get_goalc_bp (Buffer * bp, Point pt);
+size_t get_goalc_bp (Buffer * bp, size_t o);
 size_t get_goalc (void);
 bool previous_line (void);
 bool next_line (void);
@@ -52,12 +52,20 @@ int type_char (int c, bool overwrite);
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
+void set_buffer_text (Buffer *bp, estr es);
+size_t get_buffer_size (Buffer * bp);
+const char *get_buffer_eol (Buffer *bp);
+size_t buffer_prev_line (Buffer *bp, size_t o);
+size_t buffer_next_line (Buffer *bp, size_t o);
+size_t buffer_start_of_line (Buffer *bp, size_t o);
+size_t buffer_end_of_line (Buffer *bp, size_t o);
+size_t get_buffer_line_len (Buffer *bp, size_t o);
+size_t get_region_size (const Region r);
 Point get_buffer_pt (Buffer *bp);
 size_t get_buffer_line_o (Buffer *bp);
-size_t get_buffer_size (Buffer * bp);
-size_t get_buffer_line_len (Buffer *bp);
-size_t point_to_offset (Buffer *bp, Point pt);
-size_t get_region_size (const Region r);
+char get_buffer_char (Buffer *bp, size_t o);
+castr get_buffer_pre_point (Buffer *bp);
+castr get_buffer_post_point (Buffer *bp);
 void free_buffer (Buffer * bp);
 void init_buffer (Buffer * bp);
 void insert_buffer (Buffer * bp);
@@ -225,7 +233,6 @@ void minibuf_clear (void);
 /* point.c ---------------------------------------------------------------- */
 Point offset_to_point (Buffer *bp, size_t offset);
 void goto_offset (size_t o);
-void goto_point (Point pt);
 
 /* redisplay.c ------------------------------------------------------------ */
 void resync_redisplay (Window * wp);

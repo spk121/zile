@@ -387,7 +387,7 @@ Puts mark after the inserted text.
         bp = def_bp;
 
       insert_buffer (bp);
-      set_mark_interactive ();
+      FUNCALL (set_mark_command);
     }
 }
 END_DEFUN
@@ -426,7 +426,7 @@ Set mark after the inserted text.
         }
     }
   else
-    set_mark_interactive ();
+    FUNCALL (set_mark_command);
 }
 END_DEFUN
 
@@ -437,15 +437,21 @@ static int
 write_to_disk (Buffer * bp, const char *filename, mode_t mode)
 {
   int fd = creat (filename, mode);
-
   if (fd < 0)
     return -1;
 
   int ret = 0;
-  size_t len = get_buffer_size (bp);
-  ssize_t written = write (fd, astr_cstr (get_buffer_text (bp).as), get_buffer_size (bp));
-  if (written < 0 || (size_t) written != len)
+  castr as = get_buffer_pre_point (bp);
+  ssize_t written = write (fd, astr_cstr (as), astr_len (as));
+  if (written < 0 || (size_t) written != astr_len (as))
     ret = written;
+  else
+    {
+      as = get_buffer_post_point (bp);
+      written = write (fd, astr_cstr (as), astr_len (as));
+      if (written < 0 || (size_t) written != astr_len (as))
+        ret = written;
+    }
 
   if (close (fd) < 0 && ret == 0)
     ret = -1;

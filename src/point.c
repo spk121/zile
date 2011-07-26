@@ -32,7 +32,7 @@ offset_to_point (Buffer *bp, size_t offset)
     .o = 0
   };
   size_t o;
-  for (o = 0; estr_end_of_line (get_buffer_text (bp), o) < offset; o = estr_next_line (get_buffer_text (bp), o))
+  for (o = 0; buffer_end_of_line (bp, o) < offset; o = buffer_next_line (bp, o))
     pt.n++;
   pt.o = offset - o;
   return pt;
@@ -48,11 +48,4 @@ goto_offset (size_t o)
       set_buffer_goalc (cur_bp, get_goalc ());
       thisflag |= FLAG_NEED_RESYNC;
     }
-}
-
-/* Go to coordinates described by pt. */
-void
-goto_point (Point pt)
-{
-  goto_offset (point_to_offset (cur_bp, pt));
 }

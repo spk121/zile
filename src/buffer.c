@@ -45,6 +45,7 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
+  estr text;         /* The text. */
 };
 
 #define FIELD(ty, field)                         \
@@ -59,16 +60,47 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
+void
+set_buffer_text (Buffer *bp, estr es)
+{
+  bp->text = es;
+}
+
 size_t
 get_buffer_size (Buffer * bp)
 {
   return astr_len (bp->text.as);
 }
 
-size_t
-get_buffer_line_len (Buffer *bp)
+const char *get_buffer_eol (Buffer *bp)
 {
-  return estr_line_len (get_buffer_text (bp), get_buffer_o (bp));
+  return bp->text.eol;
+}
+
+size_t buffer_prev_line (Buffer *bp, size_t o)
+{
+  return estr_prev_line (bp->text, o);
+}
+
+size_t buffer_next_line (Buffer *bp, size_t o)
+{
+  return estr_next_line (bp->text, o);
+}
+
+size_t buffer_start_of_line (Buffer *bp, size_t o)
+{
+  return estr_start_of_line (bp->text, o);
+}
+
+size_t buffer_end_of_line (Buffer *bp, size_t o)
+{
+  return estr_end_of_line (bp->text, o);
+}
+
+size_t
+get_buffer_line_len (Buffer *bp, size_t o)
+{
+  return estr_line_len (bp->text, o);
 }
 
 size_t get_region_size (const Region r)
@@ -88,13 +120,22 @@ get_buffer_line_o (Buffer *bp)
   return estr_start_of_line (bp->text, bp->o);
 }
 
-size_t
-point_to_offset (Buffer *bp, Point pt)
+char
+get_buffer_char (Buffer *bp, size_t o)
 {
-  size_t o;
-  for (o = 0; pt.n > 0; pt.n--)
-    o = estr_next_line (get_buffer_text (bp), o);
-  return o + pt.o;
+  return astr_get (bp->text.as, o);
+}
+
+castr
+get_buffer_pre_point (Buffer *bp)
+{
+  return astr_substr (bp->text.as, 0, get_buffer_o (bp));
+}
+
+castr
+get_buffer_post_point (Buffer *bp)
+{
+  return astr_substr (bp->text.as, get_buffer_o (bp), get_buffer_size (bp) - get_buffer_o (bp));
 }
 
 /*
@@ -109,7 +150,7 @@ adjust_markers (size_t o, ptrdiff_t delta)
     {
       size_t pt_o = get_marker_o (m);
       if (pt_o > o)
-        set_marker_o (m, MAX (o, pt_o + delta));
+        set_marker_o (m, MAX ((ptrdiff_t) o, (ptrdiff_t) pt_o + delta));
     }
 
   /* This marker has been updated to new position. */
@@ -664,10 +705,12 @@ goto_goalc (void)
 {
   size_t i, col = 0, t = tab_width (cur_bp);
 
-  for (i = get_buffer_line_o (cur_bp); i < get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp); i++)
+  for (i = get_buffer_line_o (cur_bp);
+       i < get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp, get_buffer_o (cur_bp));
+       i++)
     if (col == get_buffer_goalc (cur_bp))
       break;
-    else if (astr_get (get_buffer_text (cur_bp).as, i) == '\t')
+    else if (get_buffer_char (cur_bp, i) == '\t')
       for (size_t w = t - col % t; w > 0 && ++col < get_buffer_goalc (cur_bp); w--)
         ;
     else

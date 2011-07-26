@@ -103,19 +103,14 @@ fill_break_line (void)
       Marker *m = point_marker ();
 
       /* Move cursor back to fill column */
-      size_t old_col = get_buffer_pt (cur_bp).o;
+      size_t old_col = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp);
       while (get_goalc () > fillcol + 1)
-        {
-          Point pt = get_buffer_pt (cur_bp);
-          pt.o--;
-          goto_point (pt);
-        }
+        move_char (-1);
 
       /* Find break point moving left from fill-column. */
-      for (size_t i = get_buffer_pt (cur_bp).o; i > 0; i--)
+      for (size_t i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp); i > 0; i--)
         {
-          int c = astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + i - 1);
-          if (isspace (c))
+          if (isspace (get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i - 1)))
             {
               break_col = i;
               break;
@@ -125,36 +120,25 @@ fill_break_line (void)
       /* If no break point moving left from fill-column, find first
          possible moving right. */
       if (break_col == 0)
-        {
-          for (size_t i = get_buffer_line_o (cur_bp) + get_buffer_pt (cur_bp).o + 1;
-               i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp));
-               i++)
+        for (size_t i = get_buffer_o (cur_bp) + 1;
+             i < buffer_end_of_line (cur_bp, get_buffer_line_o (cur_bp));
+             i++)
+          if (isspace (get_buffer_char (cur_bp, i - 1)))
             {
-              int c = astr_get (get_buffer_text (cur_bp).as, i - 1);
-              if (isspace (c))
-                {
-                  break_col = i - get_buffer_line_o (cur_bp);
-                  break;
-                }
+              break_col = i - get_buffer_line_o (cur_bp);
+              break;
             }
-        }
 
       if (break_col >= 1) /* Break line. */
         {
-          Point pt = get_buffer_pt (cur_bp);
-          pt.o = break_col;
-          goto_point (pt);
+          goto_offset (get_buffer_line_o (cur_bp) + break_col);
           FUNCALL (delete_horizontal_space);
           insert_newline ();
           goto_offset (get_marker_o (m));
           break_made = true;
         }
       else /* Undo fiddling with point. */
-        {
-          Point pt = get_buffer_pt (cur_bp);
-          pt.o = old_col;
-          goto_point (pt);
-        }
+        goto_offset (get_buffer_line_o (cur_bp) + old_col);
 
       unchain_marker (m);
     }
@@ -206,7 +190,7 @@ replace_estr (size_t del, estr es)
   buffer_replace (cur_bp, get_buffer_o (cur_bp), del, NULL, 0, false);
   size_t len = astr_len (es.as);
   const char *s = astr_cstr (es.as);
-  size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_text (cur_bp).eol);
+  size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_eol (cur_bp));
   while (len > 0)
     {
       const char *next = memmem (s, len, es.eol, eol_len);
@@ -218,7 +202,7 @@ replace_estr (size_t del, estr es)
       if (len > 0)
         {
           buffer_replace (cur_bp, get_buffer_o (cur_bp), 0,
-                          get_buffer_text (cur_bp).eol, buf_eol_len, false);
+                          get_buffer_eol (cur_bp), buf_eol_len, false);
           set_buffer_o (cur_bp, get_buffer_o (cur_bp) + buf_eol_len);
 
           thisflag |= FLAG_NEED_RESYNC;

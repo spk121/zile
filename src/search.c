@@ -49,7 +49,7 @@ no_upper (const char *s, size_t len, int regex)
 static const char *re_find_err = NULL;
 
 static int
-find_substr (const char *h, size_t hsize, const char *n, size_t nsize, size_t from, size_t to,
+find_substr (castr as1, castr as2, const char *n, size_t nsize, size_t from, size_t to,
              bool forward, bool notbol, bool noteol, bool regex, bool icase)
 {
   int ret = -1;
@@ -70,8 +70,13 @@ find_substr (const char *h, size_t hsize, const char *n, size_t nsize, size_t fr
   pattern.not_bol = notbol;
   pattern.not_eol = noteol;
   if (!re_find_err)
-    ret = re_search (&pattern, h, (int) hsize, forward ? from : to - 1,
-                     forward ? (to - from) : -(to - 1 - from), &search_regs);
+    ret = re_search_2 (&pattern,
+                       astr_cstr (as1), (int) astr_len (as1),
+                       astr_cstr (as2), (int) astr_len (as2),
+                       forward ? from : to - 1,
+                       forward ? (to - from) : -(to - 1 - from),
+                       &search_regs,
+                       (int) astr_len (as1) + astr_len (as2));
 
   if (ret >= 0)
     ret = forward ? search_regs.end[0] : ret;
@@ -80,29 +85,20 @@ find_substr (const char *h, size_t hsize, const char *n, size_t nsize, size_t fr
 }
 
 static bool
-search (Point pt, const char *s, int forward, int regexp)
+search (size_t o, const char *s, int forward, int regexp)
 {
-  size_t ssize = strlen (s), from = 0, to = get_buffer_size (cur_bp);
-  bool downcase = get_variable_bool ("case-fold-search") && no_upper (s, ssize, regexp);
-  bool notbol = false, noteol = false;
-  int pos;
-
+  size_t ssize = strlen (s);
   if (ssize < 1)
     return false;
 
   /* Attempt match. */
-  if (forward)
-    {
-      notbol = pt.o > from;
-      from = point_to_offset (cur_bp, pt);
-    }
-  else
-    {
-      noteol = pt.o < to;
-      to = point_to_offset (cur_bp, pt);
-    }
-  pos = find_substr (astr_cstr (get_buffer_text (cur_bp).as), get_buffer_size (cur_bp),
-                     s, ssize, from, to, forward, notbol, noteol, regexp, downcase);
+  bool notbol = forward ? o > 0 : false;
+  bool noteol = forward ? false : o < get_buffer_size (cur_bp);
+  size_t from = forward ? o : 0;
+  size_t to = forward ? get_buffer_size (cur_bp) : o;
+  int pos = find_substr (get_buffer_pre_point (cur_bp), get_buffer_post_point (cur_bp),
+                         s, ssize, from, to, forward, notbol, noteol, regexp,
+                         get_variable_bool ("case-fold-search") && no_upper (s, ssize, regexp));
   if (pos < 0)
     return false;
 
@@ -128,7 +124,7 @@ do_search (bool forward, bool regexp, const char *pattern)
     {
       last_search = xstrdup (pattern);
 
-      if (!search (get_buffer_pt (cur_bp), pattern, forward, regexp))
+      if (!search (get_buffer_o (cur_bp), pattern, forward, regexp))
         minibuf_error ("Search failed: \"%s\"", pattern);
       else
         ok = leT;
@@ -187,27 +183,22 @@ END_DEFUN
 static le *
 isearch (int forward, int regexp)
 {
-  int c;
-  int last = true;
-  astr buf = astr_new ();
-  astr pattern = astr_new ();
-  Point start, cur;
   Marker *old_mark = copy_marker (get_buffer_mark (get_window_bp (cur_wp)));
 
-  start = cur = get_buffer_pt (cur_bp);
-
-  /* I-search mode. */
   set_buffer_isearch (get_window_bp (cur_wp), true);
 
+  int last = true;
+  astr pattern = astr_new ();
+  size_t start = get_buffer_o (cur_bp), cur = start;
   for (;;)
     {
       /* Make the minibuf message. */
-      buf = astr_fmt ("%sI-search%s: %s",
-                      (last ?
-                       (regexp ? "Regexp " : "") :
-                       (regexp ? "Failing regexp " : "Failing ")),
-                      forward ? "" : " backward",
-                      astr_cstr (pattern));
+      astr buf = astr_fmt ("%sI-search%s: %s",
+                           (last ?
+                            (regexp ? "Regexp " : "") :
+                            (regexp ? "Failing regexp " : "Failing ")),
+                           forward ? "" : " backward",
+                           astr_cstr (pattern));
 
       /* Regex error. */
       if (re_find_err)
@@ -224,11 +215,11 @@ isearch (int forward, int regexp)
 
       minibuf_write ("%s", astr_cstr (buf));
 
-      c = getkey (GETKEY_DEFAULT);
+      int c = getkey (GETKEY_DEFAULT);
 
       if (c == KBD_CANCEL)
         {
-          goto_point (start);
+          goto_offset (start);
           thisflag |= FLAG_NEED_RESYNC;
 
           /* Quit. */
@@ -247,7 +238,7 @@ isearch (int forward, int regexp)
             {
               astr_truncate (pattern, astr_len (pattern) - 1);
               cur = start;
-              goto_point (start);
+              goto_offset (start);
               thisflag |= FLAG_NEED_RESYNC;
             }
           else
@@ -268,7 +259,7 @@ isearch (int forward, int regexp)
           if (astr_len (pattern) > 0)
             {
               /* Find next match. */
-              cur = get_buffer_pt (cur_bp);
+              cur = get_buffer_o (cur_bp);
               /* Save search string. */
               last_search = xstrdup (astr_cstr (pattern));
             }
@@ -285,7 +276,7 @@ isearch (int forward, int regexp)
                 {
                   /* Save mark. */
                   set_mark ();
-                  set_marker_o (get_buffer_mark (cur_bp), point_to_offset (cur_bp, start));
+                  set_marker_o (get_buffer_mark (cur_bp), start);
 
                   /* Save search string. */
                   last_search = xstrdup (astr_cstr (pattern));
@@ -379,25 +370,21 @@ As each match is found, the user must type a character saying
 what to do with it.
 +*/
 {
-  bool noask = false, find_no_upper;
-  size_t find_len, count = 0;
-  const char *find = astr_cstr (minibuf_read ("Query replace string: ", ""));
-
+  castr find = minibuf_read ("Query replace string: ", "");
   if (find == NULL)
     return FUNCALL (keyboard_quit);
-  if (*find == '\0')
+  if (astr_len (find) == 0)
     return leNIL;
-  find_len = strlen (find);
-  find_no_upper = no_upper (find, find_len, false);
+  bool find_no_upper = no_upper (astr_cstr (find), astr_len (find), false);
 
-  const char *s = astr_cstr (minibuf_read ("Query replace `%s' with: ", "", find));
-  if (s == NULL)
+  castr repl = minibuf_read ("Query replace `%s' with: ", "", find);
+  if (repl == NULL)
     return FUNCALL (keyboard_quit);
-  astr repl = astr_new_cstr (s);
 
-  while (search (get_buffer_pt (cur_bp), find, true, false))
+  bool noask = false;
+  size_t count = 0;
+  while (search (get_buffer_o (cur_bp), astr_cstr (find), true, false))
     {
-      Point pt;
       int c = ' ';
 
       if (!noask)
@@ -432,9 +419,8 @@ what to do with it.
         }
 
       /* Perform replacement. */
-      pt = get_buffer_pt (cur_bp);
       ++count;
-      buffer_replace (cur_bp, point_to_offset (cur_bp, pt) - find_len, find_len,
+      buffer_replace (cur_bp, get_buffer_o (cur_bp) - astr_len (find), astr_len (find),
                       astr_cstr (repl), astr_len (repl), find_no_upper);
 
       if (c == '.')		/* Replace and quit. */

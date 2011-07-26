@@ -79,14 +79,14 @@ kill_line (bool whole_line)
 {
   bool ok = true;
   bool only_blanks_to_end_of_line = false;
-  size_t cur_line_len = get_buffer_line_len (cur_bp);
+  size_t cur_line_len = get_buffer_line_len (cur_bp, get_buffer_o (cur_bp));
 
   if (!whole_line)
     {
       size_t i;
-      for (i = get_buffer_pt (cur_bp).o; i < cur_line_len; i++)
+      for (i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp); i < cur_line_len; i++)
         {
-          char c = astr_get (get_buffer_text (cur_bp).as, get_buffer_line_o (cur_bp) + i);
+          char c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i);
           if (!(c == ' ' || c == '\t'))
             break;
         }
@@ -107,10 +107,10 @@ kill_line (bool whole_line)
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
     {
-      if (!FUNCALL (delete_char))
+      if (FUNCALL (delete_char) == leNIL)
         return false;
 
-      kill_ring_push ((estr) {.as = astr_new_cstr ("\n"), .eol = get_buffer_text (cur_bp).eol});
+      kill_ring_push ((estr) {.as = astr_new_cstr ("\n"), .eol = get_buffer_eol (cur_bp)});
       set_this_command (F_kill_region);
     }
 
@@ -274,7 +274,7 @@ killed @i{or} yanked.  Put point at end, and set mark at beginning.
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  set_mark_interactive ();
+  FUNCALL (set_mark_command);
   insert_estr (kill_ring_text);
   deactivate_mark ();
 }

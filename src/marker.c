@@ -140,6 +140,8 @@ push_mark (void)
       move_marker (m, cur_bp, 0);
       gl_list_add_last (mark_ring, m);
     }
+
+  FUNCALL (set_mark);
 }
 
 /* Pop a mark from the mark-ring and make it the current mark. */

@@ -21,24 +21,24 @@
 
 #include <config.h>
 
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "main.h"
 #include "extern.h"
 
 bool
 is_empty_line (void)
 {
-  return get_buffer_line_o (cur_bp) == estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp));
+  return get_buffer_line_len (cur_bp, get_buffer_o (cur_bp)) == 0;
 }
 
 bool
 is_blank_line (void)
 {
-  for (size_t i = get_buffer_line_o (cur_bp); i < estr_end_of_line (get_buffer_text (cur_bp), get_buffer_line_o (cur_bp)); i++)
-    if (!isspace ((int) astr_get (get_buffer_text (cur_bp).as, i)))
-      return false;
+  for (size_t i = 0; i < get_buffer_line_len (cur_bp, get_buffer_o (cur_bp)); i++)
+    {
+      char c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i);
+      if (c != ' ' && c != '\t')
+        return false;
+    }
   return true;
 }
 
@@ -51,7 +51,7 @@ following_char (void)
   else if (eolp ())
     return '\n';
   else
-    return astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp));
+    return get_buffer_char (cur_bp, get_buffer_o (cur_bp));
 }
 
 /* Return the character preceding point in the current buffer. */
@@ -63,7 +63,7 @@ preceding_char (void)
   else if (bolp ())
     return '\n';
   else
-    return astr_get (get_buffer_text (cur_bp).as, get_buffer_o (cur_bp) - 1);
+    return get_buffer_char (cur_bp, get_buffer_o (cur_bp) - 1);
 }
 
 /* Return true if point is at the beginning of the buffer. */
@@ -84,14 +84,15 @@ eobp (void)
 bool
 bolp (void)
 {
-  return get_buffer_pt (cur_bp).o == 0;
+  return get_buffer_o (cur_bp) == get_buffer_line_o (cur_bp);
 }
 
 /* Return true if point is at the end of a line. */
 bool
 eolp (void)
 {
-  return get_buffer_pt (cur_bp).o == get_buffer_line_len (cur_bp);
+  return get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp) ==
+    get_buffer_line_len (cur_bp, get_buffer_o (cur_bp));
 }
 
 /* Signal an error, and abort any ongoing macro definition. */

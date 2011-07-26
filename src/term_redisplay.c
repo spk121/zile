@@ -56,10 +56,10 @@ draw_line (size_t line, size_t startcol, Window * wp,
   for (x = 0, i = startcol;; i++)
     {
       term_attrset (highlight && in_region (o, i, r) ? FONT_REVERSE : FONT_NORMAL);
-      if (i >= estr_line_len (get_buffer_text (get_window_bp (wp)), o) ||
+      if (i >= get_buffer_line_len (get_window_bp (wp), o) ||
           x >= get_window_ewidth (wp))
         break;
-      char *s = make_char_printable (astr_get (get_buffer_text (get_window_bp (wp)).as, o + i),
+      char *s = make_char_printable (get_buffer_char (get_window_bp (wp), o + i),
                                      x, cur_tab_width);
       term_addstr (s);
       x += strlen (s);
@@ -129,9 +129,9 @@ draw_status_line (size_t line, Window * wp)
     term_addstr ("-");
 
   const char *eol_type;
-  if (get_buffer_text (cur_bp).eol == coding_eol_cr)
+  if (get_buffer_eol (cur_bp) == coding_eol_cr)
     eol_type = "(Mac)";
-  else if (get_buffer_text (cur_bp).eol == coding_eol_crlf)
+  else if (get_buffer_eol (cur_bp) == coding_eol_crlf)
     eol_type = "(DOS)";
   else
     eol_type = ":";
@@ -140,7 +140,8 @@ draw_status_line (size_t line, Window * wp)
   Point pt = offset_to_point (get_window_bp (wp), window_o (wp));
   astr as = astr_fmt ("--%s%2s  %-15s   %s %-9s (Fundamental",
                       eol_type, make_mode_line_flags (wp), get_buffer_name (get_window_bp (wp)),
-                      make_screen_pos (wp), astr_cstr (astr_fmt ("(%d,%d)", pt.n + 1, get_goalc_bp (get_window_bp (wp), pt))));
+                      make_screen_pos (wp), astr_cstr (astr_fmt ("(%d,%d)", pt.n + 1,
+                                                                 get_goalc_bp (get_window_bp (wp), window_o (wp)))));
 
   if (get_buffer_autofill (get_window_bp (wp)))
     astr_cat_cstr (as, " Fill");
@@ -165,9 +166,9 @@ draw_window (size_t topline, Window * wp)
   int highlight = calculate_highlight_region (wp, &r);
 
   /* Find the first line to display on the first screen line. */
-  for (o = estr_start_of_line (get_buffer_text (get_window_bp (wp)), window_o (wp)), i = get_window_topdelta (wp);
+  for (o = buffer_start_of_line (get_window_bp (wp), window_o (wp)), i = get_window_topdelta (wp);
        i > 0 && o > 0;
-       assert ((o = estr_prev_line (get_buffer_text (get_window_bp (wp)), o)) != SIZE_MAX), --i)
+       assert ((o = buffer_prev_line (get_window_bp (wp), o)) != SIZE_MAX), --i)
     ;
 
   /* Draw the window lines. */
@@ -190,7 +191,7 @@ draw_window (size_t topline, Window * wp)
           term_addstr("$");
         }
 
-      o = estr_next_line (get_buffer_text (get_window_bp (wp)), o);
+      o = buffer_next_line (get_window_bp (wp), o);
     }
 
   set_window_all_displayed (wp, o >= get_buffer_size (get_window_bp (wp)));
@@ -208,7 +209,7 @@ term_redisplay (void)
   Buffer *bp = get_window_bp (cur_wp);
   size_t col = 0, lastcol = 0, t = tab_width (bp);
   size_t o = window_o (cur_wp);
-  size_t lineo = o - estr_start_of_line (get_buffer_text (bp), o);
+  size_t lineo = o - get_buffer_line_o (bp);
 
   o -= lineo;
   set_window_start_column (cur_wp, 0);
@@ -218,7 +219,7 @@ term_redisplay (void)
     {
       col = 0;
       for (size_t p = lp; p < lineo; ++p)
-        col += strlen (make_char_printable (astr_get (get_buffer_text (bp).as, o + p), col, t));
+        col += strlen (make_char_printable (get_buffer_char (bp, o + p), col, t));
 
       if (col >= ew - 1 || (lp / (ew / 3)) + 2 < lineo / (ew / 3))
         {
@@ -230,7 +231,7 @@ term_redisplay (void)
       lastcol = col;
     }
 
-  /* Draw the window. */
+  /* Draw the windows. */
   size_t cur_topline = 0, topline = 0;
   for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
     {

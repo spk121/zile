@@ -104,15 +104,15 @@ completion_new (int fileflag)
 void
 completion_scroll_up (void)
 {
-  Window *wp, *old_wp = cur_wp;
-  Point pt;
-
-  wp = find_window ("*Completions*");
+  Window *old_wp = cur_wp;
+  Window *wp = find_window ("*Completions*");
   assert (wp != NULL);
   set_current_window (wp);
-  pt = get_buffer_pt (cur_bp);
-  if (!FUNCALL (scroll_up))
-    FUNCALL (beginning_of_buffer);
+  if (FUNCALL (scroll_up) == leNIL)
+    {
+      FUNCALL (beginning_of_buffer);
+      resync_redisplay (cur_wp);
+    }
   set_current_window (old_wp);
 
   term_redisplay ();
@@ -124,14 +124,11 @@ completion_scroll_up (void)
 void
 completion_scroll_down (void)
 {
-  Window *wp, *old_wp = cur_wp;
-  Point pt;
-
-  wp = find_window ("*Completions*");
+  Window *old_wp = cur_wp;
+  Window *wp = find_window ("*Completions*");
   assert (wp != NULL);
   set_current_window (wp);
-  pt = get_buffer_pt (cur_bp);
-  if (!FUNCALL (scroll_down))
+  if (FUNCALL (scroll_down) == leNIL)
     {
       FUNCALL (end_of_buffer);
       resync_redisplay (cur_wp);
