@@ -78,12 +78,6 @@ estr_new_astr (astr as)
   return es;
 }
 
-estr
-estr_dup (estr src)
-{
-  return (estr) {.as = astr_cpy (astr_new (), src.as), .eol = src.eol};
-}
-
 size_t
 estr_prev_line (estr es, size_t o)
 {
@@ -120,6 +114,7 @@ estr_line_len (estr es, size_t o)
   return estr_end_of_line (es, o) - estr_start_of_line (es, o);
 }
 
+/* FIXME: Replace the following with estr_replace, taken from replace_estr. */
 estr
 estr_cat (estr es, estr src)
 {

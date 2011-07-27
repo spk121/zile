@@ -27,7 +27,6 @@ struct estr
   const char *eol;		/* EOL type. */
 };
 
-estr estr_dup (estr src);
 extern const char *coding_eol_lf;
 extern const char *coding_eol_crlf;
 extern const char *coding_eol_cr;
