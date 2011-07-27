@@ -27,13 +27,13 @@
 bool
 is_empty_line (void)
 {
-  return get_buffer_line_len (cur_bp, get_buffer_o (cur_bp)) == 0;
+  return buffer_line_len (cur_bp, get_buffer_o (cur_bp)) == 0;
 }
 
 bool
 is_blank_line (void)
 {
-  for (size_t i = 0; i < get_buffer_line_len (cur_bp, get_buffer_o (cur_bp)); i++)
+  for (size_t i = 0; i < buffer_line_len (cur_bp, get_buffer_o (cur_bp)); i++)
     {
       char c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i);
       if (c != ' ' && c != '\t')
@@ -92,7 +92,7 @@ bool
 eolp (void)
 {
   return get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp) ==
-    get_buffer_line_len (cur_bp, get_buffer_o (cur_bp));
+    buffer_line_len (cur_bp, get_buffer_o (cur_bp));
 }
 
 /* Signal an error, and abort any ongoing macro definition. */

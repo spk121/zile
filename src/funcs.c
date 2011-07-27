@@ -970,7 +970,7 @@ setcase_word (int rcase)
   astr as = astr_new ();
   char c;
   for (size_t i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp);
-       i < get_buffer_line_len (cur_bp, get_buffer_o (cur_bp)) &&
+       i < buffer_line_len (cur_bp, get_buffer_o (cur_bp)) &&
          ISWORDCHAR ((int) (c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)));
        i++)
     astr_cat_char (as, c);

@@ -72,38 +72,44 @@ get_buffer_size (Buffer * bp)
   return astr_len (bp->text.as);
 }
 
-const char *get_buffer_eol (Buffer *bp)
+const char *
+get_buffer_eol (Buffer *bp)
 {
   return bp->text.eol;
 }
 
-size_t buffer_prev_line (Buffer *bp, size_t o)
+size_t
+buffer_prev_line (Buffer *bp, size_t o)
 {
   return estr_prev_line (bp->text, o);
 }
 
-size_t buffer_next_line (Buffer *bp, size_t o)
+size_t
+buffer_next_line (Buffer *bp, size_t o)
 {
   return estr_next_line (bp->text, o);
 }
 
-size_t buffer_start_of_line (Buffer *bp, size_t o)
+size_t
+buffer_start_of_line (Buffer *bp, size_t o)
 {
   return estr_start_of_line (bp->text, o);
 }
 
-size_t buffer_end_of_line (Buffer *bp, size_t o)
+size_t
+buffer_end_of_line (Buffer *bp, size_t o)
 {
   return estr_end_of_line (bp->text, o);
 }
 
 size_t
-get_buffer_line_len (Buffer *bp, size_t o)
+buffer_line_len (Buffer *bp, size_t o)
 {
   return estr_line_len (bp->text, o);
 }
 
-size_t get_region_size (const Region r)
+size_t
+get_region_size (const Region r)
 {
   return r.end - r.start;
 }
@@ -707,7 +713,7 @@ goto_goalc (void)
   size_t i, col = 0, t = tab_width (cur_bp);
 
   for (i = get_buffer_line_o (cur_bp);
-       i < get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp, get_buffer_o (cur_bp));
+       i < get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp, get_buffer_o (cur_bp));
        i++)
     if (col == get_buffer_goalc (cur_bp))
       break;

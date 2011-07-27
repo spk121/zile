@@ -41,10 +41,7 @@ static void
 kill_ring_push (estr es)
 {
   if (kill_ring_text.as == NULL)
-    {
-      kill_ring_text.as = astr_new ();
-      kill_ring_text.eol = coding_eol_lf;
-    }
+    kill_ring_text = estr_new_astr (astr_new ());
   estr_cat (kill_ring_text, es);
 }
 
@@ -79,7 +76,7 @@ kill_line (bool whole_line)
 {
   bool ok = true;
   bool only_blanks_to_end_of_line = false;
-  size_t cur_line_len = get_buffer_line_len (cur_bp, get_buffer_o (cur_bp));
+  size_t cur_line_len = buffer_line_len (cur_bp, get_buffer_o (cur_bp));
 
   if (!whole_line)
     {

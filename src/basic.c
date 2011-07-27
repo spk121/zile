@@ -44,23 +44,22 @@ DEFUN ("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  goto_offset (get_buffer_line_o (cur_bp) + get_buffer_line_len (cur_bp, get_buffer_o (cur_bp)));
+  goto_offset (get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp, get_buffer_o (cur_bp)));
   set_buffer_goalc (cur_bp, SIZE_MAX);
 }
 END_DEFUN
 
 /*
  * Get the goal column.  Take care of expanding tabulations.
- * FIXME: Get start of line from o, not from get_buffer_line_o.
  */
 size_t
 get_goalc_bp (Buffer * bp, size_t o)
 {
   size_t col = 0, t = tab_width (bp);
-  size_t end = o - get_buffer_line_o (bp);
+  size_t end = o - buffer_start_of_line (bp, o);
 
   for (size_t i = 0; i < end; i++, col++)
-    if (get_buffer_char (bp, get_buffer_line_o (bp) + i) == '\t')
+    if (get_buffer_char (bp, buffer_start_of_line (bp, o) + i) == '\t')
       col |= t - 1;
 
   return col;
