@@ -77,7 +77,7 @@ END_DEFUN
 bool
 intercalate_newline (void)
 {
-  return insert_newline () && backward_char ();
+  return insert_newline () && move_char (-1);
 }
 
 /*
@@ -247,7 +247,7 @@ backward_delete_char (void)
 {
   deactivate_mark ();
 
-  if (!backward_char ())
+  if (!move_char (-1))
     {
       minibuf_error ("Beginning of buffer");
       return false;
@@ -268,12 +268,12 @@ backward_delete_char_overwrite (void)
   if (warn_if_readonly_buffer ())
     return false;
 
-  backward_char ();
+  move_char (-1);
   if (following_char () == '\t')
     insert_expanded_tab ();
   else
     insert_char (' ');
-  backward_char ();
+  move_char (-1);
 
   return true;
 }
@@ -347,7 +347,7 @@ previous_nonblank_goalc (void)
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp () && get_goalc () < cur_goalc)
-    forward_char ();
+    move_char (1);
 }
 
 DEFUN ("indent-relative", indent_relative)
@@ -384,11 +384,11 @@ does nothing.
       /* Now find the next blank char. */
       if (!(preceding_char () == '\t' && get_goalc () > cur_goalc))
         while (!eolp () && (!isspace (following_char ())))
-          forward_char ();
+          move_char (1);
 
       /* Find next non-blank char. */
       while (!eolp () && (isspace (following_char ())))
-        forward_char ();
+        move_char (1);
 
       /* Target column. */
       if (!eolp ())
@@ -437,7 +437,7 @@ previous_line_indent (void)
 
   /* Find first non-blank char. */
   while (!eolp () && (isspace (following_char ())))
-    forward_char ();
+    move_char (1);
 
   cur_indent = get_goalc ();
 

@@ -429,7 +429,7 @@ Move point to the first non-whitespace character on this line.
 {
   goto_offset (get_buffer_line_o (cur_bp));
   while (!eolp () && isspace (following_char ()))
-    forward_char ();
+    move_char (1);
 }
 END_DEFUN
 
@@ -438,14 +438,14 @@ END_DEFUN
 ***********************************************************************/
 #define ISWORDCHAR(c)	(isalnum (c) || c == '$')
 static bool
-move_word (int dir, int (*next) (void), bool (*move) (void), bool (*at_extreme) (void))
+move_word (int dir)
 {
   int gotword = false;
   for (;;)
     {
-      while (!at_extreme ())
+      while (!(dir > 0 ? eolp () : bolp ()))
         {
-          int c = next ();
+          int c = dir > 0 ? following_char () : preceding_char ();
 
           if (!ISWORDCHAR (c))
             {
@@ -458,7 +458,7 @@ move_word (int dir, int (*next) (void), bool (*move) (void), bool (*at_extreme) 
         }
       if (gotword)
         return true;
-      if (!move ())
+      if (!move_char (dir))
         break;
     }
   return false;
@@ -467,13 +467,13 @@ move_word (int dir, int (*next) (void), bool (*move) (void), bool (*at_extreme) 
 static bool
 forward_word (void)
 {
-  return move_word (1, following_char, forward_char, eolp);
+  return move_word (1);
 }
 
 static bool
 backward_word (void)
 {
-  return move_word (-1, preceding_char, backward_char, bolp);
+  return move_word (-1);
 }
 
 DEFUN ("forward-word", forward_word)
@@ -507,7 +507,7 @@ END_DEFUN
                                ((c == '\"') && double_quote) ||		\
                                ((c == '\'') && single_quote))
 
-static int
+static bool
 move_sexp (int dir)
 {
   int gotsexp = false, level = 0;
@@ -636,34 +636,31 @@ astr_append_region (astr s)
 }
 
 static bool
-transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
+transpose_subr (bool (*move_func) (int dir))
 {
-  Marker *p0 = point_marker (), *m1, *m2;
-  astr as1, as2 = NULL;
-
   /* For transpose-chars. */
-  if (forward_func == forward_char && eolp ())
-    backward_func ();
+  if (move_func == move_char && eolp ())
+    move_func (-1);
+
   /* For transpose-lines. */
-  if (forward_func == next_line && get_buffer_line_o (cur_bp) == 0)
-    forward_func ();
+  if (move_func == move_line && get_buffer_line_o (cur_bp) == 0)
+    move_func (1);
 
   /* Backward. */
-  if (!backward_func ())
+  if (!move_func (-1))
     {
       minibuf_error ("Beginning of buffer");
-      unchain_marker (p0);
       return false;
     }
 
   /* Mark the beginning of first string. */
   push_mark ();
-  m1 = point_marker ();
+  Marker *m1 = point_marker ();
 
   /* Check to make sure we can go forwards twice. */
-  if (!forward_func () || !forward_func ())
+  if (!move_func (1) || !move_func (1))
     {
-      if (forward_func == next_line)
+      if (move_func == move_line)
         { /* Add an empty line. */
           FUNCALL (end_of_line);
           FUNCALL (newline);
@@ -674,7 +671,6 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
           goto_offset (get_marker_o (m1));
           minibuf_error ("End of buffer");
 
-          unchain_marker (p0);
           unchain_marker (m1);
           return false;
         }
@@ -683,21 +679,21 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
   goto_offset (get_marker_o (m1));
 
   /* Forward. */
-  forward_func ();
+  move_func (1);
 
   /* Save and delete 1st marked region. */
-  as1 = astr_new ();
+  astr as1 = astr_new ();
   astr_append_region (as1);
-
-  unchain_marker (p0);
 
   FUNCALL (delete_region);
 
   /* Forward. */
-  forward_func ();
+  move_func (1);
 
   /* For transpose-lines. */
-  if (forward_func == next_line)
+  astr as2 = NULL;
+  Marker *m2;
+  if (move_func == move_line)
     m2 = point_marker ();
   else
     {
@@ -705,7 +701,7 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
       set_mark ();
 
       /* Backward. */
-      backward_func ();
+      move_func (-1);
       m2 = point_marker ();
 
       /* Save and delete 2nd marked region. */
@@ -732,30 +728,22 @@ transpose_subr (bool (*forward_func) (void), bool (*backward_func) (void))
   deactivate_mark ();
 
   /* Move forward if necessary. */
-  if (forward_func != next_line)
-    forward_func ();
+  if (move_func != move_line)
+    move_func (1);
 
   return true;
 }
 
 static le *
-transpose (int uniarg, bool (*forward_func) (void), bool (*backward_func) (void))
+transpose (int uniarg, bool (*move) (int dir))
 {
   if (warn_if_readonly_buffer ())
     return leNIL;
 
-  if (uniarg < 0)
-    {
-      bool (*tmp_func) (void) = forward_func;
-      forward_func = backward_func;
-      backward_func = tmp_func;
-      uniarg = -uniarg;
-    }
-
   bool ret = true;
   undo_start_sequence ();
-  for (int uni = 0; ret && uni < uniarg; ++uni)
-    ret = transpose_subr (forward_func, backward_func);
+  for (int uni = 0; ret && uni < abs (uniarg); ++uni)
+    ret = transpose_subr (move);
   undo_end_sequence ();
 
   return bool_to_lisp (ret);
@@ -769,7 +757,7 @@ and drag it forward past ARG other characters (backward if ARG negative).
 If no argument and at end of line, the previous two chars are exchanged.
 +*/
 {
-  ok = transpose (uniarg, forward_char, backward_char);
+  ok = transpose (uniarg, move_char);
 }
 END_DEFUN
 
@@ -782,7 +770,7 @@ If ARG is zero, the words around or after point and around or after mark
 are interchanged.
 +*/
 {
-  ok = transpose (uniarg, forward_word, backward_word);
+  ok = transpose (uniarg, move_word);
 }
 END_DEFUN
 
@@ -791,7 +779,7 @@ DEFUN ("transpose-sexps", transpose_sexps)
 Like @kbd{M-x transpose-words} but applies to sexps.
 +*/
 {
-  ok = transpose (uniarg, forward_sexp, backward_sexp);
+  ok = transpose (uniarg, move_sexp);
 }
 END_DEFUN
 
@@ -802,7 +790,7 @@ With argument ARG, takes previous line and moves it past ARG lines.
 With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
-  ok = transpose (uniarg, next_line, previous_line);
+  ok = transpose (uniarg, move_line);
 }
 END_DEFUN
 
@@ -962,7 +950,7 @@ static bool
 setcase_word (int rcase)
 {
   if (!ISWORDCHAR (following_char ()))
-    if (!forward_word () || !backward_word ())
+    if (!move_word (1) || !move_word (-1))
       return false;
 
   astr as = astr_new ();

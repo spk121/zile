@@ -26,8 +26,6 @@ size_t get_goalc_bp (Buffer * bp, size_t o);
 size_t get_goalc (void);
 bool previous_line (void);
 bool next_line (void);
-bool backward_char (void);
-bool forward_char (void);
 
 /* bind.c ----------------------------------------------------------------- */
 Function last_command (void);

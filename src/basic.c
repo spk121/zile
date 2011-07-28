@@ -161,18 +161,6 @@ Move point to the end of the buffer; leave mark at previous position.
 }
 END_DEFUN
 
-bool
-backward_char (void)
-{
-  return move_char (-1);
-}
-
-bool
-forward_char (void)
-{
-  return move_char (1);
-}
-
 DEFUN ("backward-char", backward_char)
 /*+
 Move point left N characters (right if N is negative).
