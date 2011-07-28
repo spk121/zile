@@ -1307,7 +1307,7 @@ On nonblank line, delete any immediately following blank lines.
 
   /* Delete any blank lines found. */
   if (r.start < r.end)
-    buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0, false);
+    buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0);
 
   /* If we found more than one blank line, leave one. */
   if (!singleblank)

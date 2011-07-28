@@ -363,6 +363,25 @@ is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
 }
 END_DEFUN
 
+/*
+ * Check the case of a string.
+ * Returns 2 if it is all upper case, 1 if just the first letter is,
+ * and 0 otherwise.
+ */
+static int
+check_case (astr as)
+{
+  size_t i;
+  for (i = 0; i < astr_len (as) && isupper ((int) astr_get (as, i)); i++)
+    ;
+  if (i == astr_len (as))
+    return 2;
+  else if (i == 1)
+    for (; i < astr_len (as) && !isupper ((int) astr_get (as, i)); i++)
+      ;
+  return i == astr_len (as);
+}
+
 DEFUN ("query-replace", query_replace)
 /*+
 Replace occurrences of a string with other text.
@@ -420,8 +439,19 @@ what to do with it.
 
       /* Perform replacement. */
       ++count;
-      buffer_replace (cur_bp, get_buffer_o (cur_bp) - astr_len (find), astr_len (find),
-                      astr_cstr (repl), astr_len (repl), find_no_upper);
+      castr case_repl = repl;
+      Region r = (Region) {.start = get_buffer_o (cur_bp) - astr_len (find), .end = get_buffer_o (cur_bp)};
+      if (find_no_upper && get_variable_bool ("case-replace"))
+        {
+          int case_type = check_case (get_buffer_region (cur_bp, r).as);
+
+          if (case_type != 0)
+            case_repl = astr_recase (astr_cpy (astr_new (), repl),
+                                     case_type == 1 ? case_capitalized : case_upper);
+        }
+
+      buffer_replace (cur_bp, r.start, astr_len (find),
+                      astr_cstr (case_repl), astr_len (case_repl));
 
       if (c == '.')		/* Replace and quit. */
         break;

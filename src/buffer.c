@@ -199,34 +199,15 @@ delete_char (void)
 
   if (eolp ())
     {
-      buffer_replace (cur_bp, cur_bp->o, strlen (get_buffer_eol (cur_bp)), NULL, 0, false);
+      buffer_replace (cur_bp, cur_bp->o, strlen (get_buffer_eol (cur_bp)), NULL, 0);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
-    buffer_replace (cur_bp, cur_bp->o, 1, NULL, 0, false);
+    buffer_replace (cur_bp, cur_bp->o, 1, NULL, 0);
 
   set_buffer_modified (cur_bp, true);
 
   return true;
-}
-
-/*
- * Check the case of a string.
- * Returns 2 if it is all upper case, 1 if just the first letter is,
- * and 0 otherwise.
- */
-static int
-check_case (astr as)
-{
-  size_t i;
-  for (i = 0; i < astr_len (as) && isupper ((int) astr_get (as, i)); i++)
-    ;
-  if (i == astr_len (as))
-    return 2;
-  else if (i == 1)
-    for (; i < astr_len (as) && !isupper ((int) astr_get (as, i)); i++)
-      ;
-  return i == astr_len (as);
 }
 
 /*
@@ -235,17 +216,8 @@ check_case (astr as)
  * same case as the old.
  */
 void
-buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case)
+buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen)
 {
-  if (replace_case && get_variable_bool ("case-replace"))
-    {
-      int case_type = check_case (get_buffer_region (bp, (Region) {.start = offset, .end = offset + oldlen}).as);
-
-      if (case_type != 0)
-        newtext = astr_cstr (astr_recase (astr_cpy (astr_new (), castr_new_nstr (newtext, newlen)),
-                                          case_type == 1 ? case_capitalized : case_upper));
-    }
-
   undo_save_block (offset, oldlen, newlen);
   set_buffer_modified (bp, true);
   astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
@@ -464,8 +436,7 @@ delete_region (const Region r)
   if (warn_if_readonly_buffer ())
     return false;
 
-  buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0, false);
-
+  buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0);
   return true;
 }
 

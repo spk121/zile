@@ -41,7 +41,7 @@ void init_default_bindings (void);
 
 /* buffer.c --------------------------------------------------------------- */
 bool delete_char (void);
-void buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen, int replace_case);
+void buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen);
 int type_char (int c, bool overwrite);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
