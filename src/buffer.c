@@ -45,6 +45,7 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
+  size_t o;          /* The point. FIXME: Rename to pt when get_buffer_pt removed. */
   estr text;         /* The text. */
   size_t gap;        /* Size of gap after point. */
 };
@@ -63,38 +64,59 @@ struct Buffer
 
 /* Buffer methods that know about the gap. */
 
-size_t
-get_buffer_size (Buffer * bp)
+void
+set_buffer_text (Buffer *bp, estr es)
 {
-  return astr_len (bp->text.as);
-}
-
-size_t
-buffer_line_len (Buffer *bp, size_t o)
-{
-  return estr_line_len (bp->text, o);
-}
-
-size_t
-get_region_size (const Region r)
-{
-  return r.end - r.start;
+  bp->text = es;
 }
 
 castr
 get_buffer_pre_point (Buffer *bp)
 {
-  return astr_substr (bp->text.as, 0, get_buffer_o (bp));
+  return castr_new_nstr (astr_cstr (bp->text.as), get_buffer_o (bp));
 }
 
 castr
 get_buffer_post_point (Buffer *bp)
 {
-  return astr_substr (bp->text.as, get_buffer_o (bp), get_buffer_size (bp) - get_buffer_o (bp));
+  return castr_new_nstr (astr_cstr (bp->text.as) + bp->o + bp->gap,
+                         astr_len (bp->text.as) - (bp->o + bp->gap));
+}
+
+size_t
+get_buffer_o (Buffer *bp)
+{
+  return bp->o;
+}
+
+void
+set_buffer_o (Buffer *bp, size_t o)
+{
+  bp->o = o;
+}
+
+static size_t
+buffer_o_to_realo (Buffer *bp, size_t o)
+{
+  return o <= bp->o ? o : o - bp->gap;
+}
+
+size_t
+get_buffer_size (Buffer * bp)
+{
+  return buffer_o_to_realo (bp, astr_len (bp->text.as));
+}
+
+size_t
+buffer_line_len (Buffer *bp, size_t o)
+{
+  return buffer_o_to_realo (bp, estr_end_of_line (bp->text, o)) -
+    buffer_o_to_realo (bp, estr_start_of_line (bp->text, o));
 }
 
 /*
  * Adjust markers (including point) at offset `o' by offset `delta'.
+ * (Don't need to take the gap into account here.)
  */
 static size_t
 adjust_markers (size_t o, ptrdiff_t delta)
@@ -120,22 +142,16 @@ void
 buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen)
 {
   undo_save_block (offset, oldlen, newlen);
-  set_buffer_modified (bp, true);
   astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
-  bp->o = adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
+  set_buffer_o (bp, adjust_markers (offset, (ptrdiff_t) (newlen - oldlen)));
+  set_buffer_modified (bp, true);
   thisflag |= FLAG_NEED_RESYNC;
-}
-
-void
-set_buffer_text (Buffer *bp, estr es)
-{
-  bp->text = es;
 }
 
 char
 get_buffer_char (Buffer *bp, size_t o)
 {
-  return astr_get (bp->text.as, o);
+  return astr_get (bp->text.as, buffer_o_to_realo (bp, o));
 }
 
 
@@ -169,12 +185,6 @@ size_t
 buffer_end_of_line (Buffer *bp, size_t o)
 {
   return estr_end_of_line (bp->text, o);
-}
-
-Point
-get_buffer_pt (Buffer *bp)
-{
-  return offset_to_point (bp, bp->o);
 }
 
 size_t
@@ -421,6 +431,12 @@ Region
 region_new (size_t o1, size_t o2)
 {
   return (Region) {.start = MIN (o1, o2), .end = MAX (o1, o2)};
+}
+
+size_t
+get_region_size (const Region r)
+{
+  return r.end - r.start;
 }
 
 /*

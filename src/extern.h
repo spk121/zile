@@ -53,6 +53,10 @@ int type_char (int c, bool overwrite);
 #undef FIELD
 #undef FIELD_STR
 void set_buffer_text (Buffer *bp, estr es);
+castr get_buffer_pre_point (Buffer *bp);
+castr get_buffer_post_point (Buffer *bp);
+size_t get_buffer_o (Buffer *bp);
+void set_buffer_o (Buffer *bp, size_t o);
 size_t get_buffer_size (Buffer * bp);
 const char *get_buffer_eol (Buffer *bp);
 size_t buffer_prev_line (Buffer *bp, size_t o);
@@ -61,11 +65,8 @@ size_t buffer_start_of_line (Buffer *bp, size_t o);
 size_t buffer_end_of_line (Buffer *bp, size_t o);
 size_t buffer_line_len (Buffer *bp, size_t o);
 size_t get_region_size (const Region r);
-Point get_buffer_pt (Buffer *bp);
 size_t get_buffer_line_o (Buffer *bp);
 char get_buffer_char (Buffer *bp, size_t o);
-castr get_buffer_pre_point (Buffer *bp);
-castr get_buffer_post_point (Buffer *bp);
 void free_buffer (Buffer * bp);
 void init_buffer (Buffer * bp);
 void insert_buffer (Buffer * bp);

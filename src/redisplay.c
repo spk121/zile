@@ -29,19 +29,20 @@
 void
 resync_redisplay (Window * wp)
 {
-  int delta = get_buffer_pt (get_window_bp (wp)).n - get_window_lastpointn (wp);
+  size_t n = offset_to_point (get_window_bp (wp), get_buffer_o (get_window_bp (wp))).n;
+  ptrdiff_t delta = n - get_window_lastpointn (wp);
 
   if (delta)
     {
       if ((delta > 0 && get_window_topdelta (wp) + delta < get_window_eheight (wp)) ||
           (delta < 0 && get_window_topdelta (wp) >= (size_t) (-delta)))
         set_window_topdelta (wp, get_window_topdelta (wp) + delta);
-      else if (get_buffer_pt (get_window_bp (wp)).n > get_window_eheight (wp) / 2)
+      else if (n > get_window_eheight (wp) / 2)
         set_window_topdelta (wp, get_window_eheight (wp) / 2);
       else
-        set_window_topdelta (wp, get_buffer_pt (get_window_bp (wp)).n);
+        set_window_topdelta (wp, n);
     }
-  set_window_lastpointn (wp, get_buffer_pt (get_window_bp (wp)).n);
+  set_window_lastpointn (wp, n);
 }
 
 void

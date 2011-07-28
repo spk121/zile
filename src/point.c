@@ -41,9 +41,9 @@ offset_to_point (Buffer *bp, size_t offset)
 void
 goto_offset (size_t o)
 {
-  size_t old_n = get_buffer_pt (cur_bp).n;
+  size_t old_lineo = get_buffer_line_o (cur_bp);
   set_buffer_o (cur_bp, o);
-  if (get_buffer_pt (cur_bp).n != old_n)
+  if (get_buffer_line_o (cur_bp) != old_lineo)
     {
       set_buffer_goalc (cur_bp, get_goalc ());
       thisflag |= FLAG_NEED_RESYNC;
