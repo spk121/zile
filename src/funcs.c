@@ -929,24 +929,22 @@ Fill paragraph at or after point.
   undo_start_sequence ();
 
   FUNCALL (forward_paragraph);
-  int end = get_buffer_pt (cur_bp).n;
   if (is_empty_line ())
-    end--;
+    previous_line ();
+  Marker *m_end = point_marker ();
 
   FUNCALL (backward_paragraph);
-  int start = get_buffer_pt (cur_bp).n;
   if (is_empty_line ())
-    { /* Move to next line if between two paragraphs. */
-      next_line ();
-      start++;
-    }
+    /* Move to next line if between two paragraphs. */
+    next_line ();
 
-  for (int i = start; i < end; i++)
+  while (buffer_end_of_line (cur_bp, get_buffer_o (cur_bp)) < get_marker_o (m_end))
     {
       FUNCALL (end_of_line);
       delete_char ();
       FUNCALL (just_one_space);
     }
+  unchain_marker (m_end);
 
   FUNCALL (end_of_line);
   while (get_goalc () > (size_t) get_variable_number ("fill-column") + 1
