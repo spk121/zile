@@ -46,6 +46,7 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
   estr text;         /* The text. */
+  size_t gap;        /* Size of gap after point. */
 };
 
 #define FIELD(ty, field)                         \
@@ -60,17 +61,85 @@ struct Buffer
 #undef FIELD
 #undef FIELD_STR
 
-void
-set_buffer_text (Buffer *bp, estr es)
-{
-  bp->text = es;
-}
+/* Buffer methods that know about the gap. */
 
 size_t
 get_buffer_size (Buffer * bp)
 {
   return astr_len (bp->text.as);
 }
+
+size_t
+buffer_line_len (Buffer *bp, size_t o)
+{
+  return estr_line_len (bp->text, o);
+}
+
+size_t
+get_region_size (const Region r)
+{
+  return r.end - r.start;
+}
+
+castr
+get_buffer_pre_point (Buffer *bp)
+{
+  return astr_substr (bp->text.as, 0, get_buffer_o (bp));
+}
+
+castr
+get_buffer_post_point (Buffer *bp)
+{
+  return astr_substr (bp->text.as, get_buffer_o (bp), get_buffer_size (bp) - get_buffer_o (bp));
+}
+
+/*
+ * Adjust markers (including point) at offset `o' by offset `delta'.
+ */
+static size_t
+adjust_markers (size_t o, ptrdiff_t delta)
+{
+  Marker *m_pt = point_marker ();
+
+  for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
+    if (get_marker_o (m) > o)
+      set_marker_o (m, MAX ((ptrdiff_t) o, (ptrdiff_t) get_marker_o (m) + delta));
+
+  /* This marker has been updated to new position. */
+  size_t m_o = get_marker_o (m_pt);
+  unchain_marker (m_pt);
+  return m_o;
+}
+
+/*
+ * Replace text at offset `offset' with `newtext'. If `replace_case'
+ * and `case-replace' are true then the new characters will be the
+ * same case as the old.
+ */
+void
+buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen)
+{
+  undo_save_block (offset, oldlen, newlen);
+  set_buffer_modified (bp, true);
+  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
+  bp->o = adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
+  thisflag |= FLAG_NEED_RESYNC;
+}
+
+void
+set_buffer_text (Buffer *bp, estr es)
+{
+  bp->text = es;
+}
+
+char
+get_buffer_char (Buffer *bp, size_t o)
+{
+  return astr_get (bp->text.as, o);
+}
+
+
+/* Buffer methods that don't know about the gap. */
 
 const char *
 get_buffer_eol (Buffer *bp)
@@ -102,18 +171,6 @@ buffer_end_of_line (Buffer *bp, size_t o)
   return estr_end_of_line (bp->text, o);
 }
 
-size_t
-buffer_line_len (Buffer *bp, size_t o)
-{
-  return estr_line_len (bp->text, o);
-}
-
-size_t
-get_region_size (const Region r)
-{
-  return r.end - r.start;
-}
-
 Point
 get_buffer_pt (Buffer *bp)
 {
@@ -126,43 +183,21 @@ get_buffer_line_o (Buffer *bp)
   return estr_start_of_line (bp->text, bp->o);
 }
 
-char
-get_buffer_char (Buffer *bp, size_t o)
-{
-  return astr_get (bp->text.as, o);
-}
-
-castr
-get_buffer_pre_point (Buffer *bp)
-{
-  return astr_substr (bp->text.as, 0, get_buffer_o (bp));
-}
-
-castr
-get_buffer_post_point (Buffer *bp)
-{
-  return astr_substr (bp->text.as, get_buffer_o (bp), get_buffer_size (bp) - get_buffer_o (bp));
-}
-
 /*
- * Adjust markers (including point) at offset `o' by offset `delta'.
+ * Copy a region of text into an allocated buffer.
  */
-static size_t
-adjust_markers (size_t o, ptrdiff_t delta)
+estr
+get_buffer_region (Buffer *bp, Region r)
 {
-  Marker *m_pt = point_marker ();
-
-  for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
+  astr as = astr_new ();
+  if (r.start < get_buffer_o (bp))
+    astr_cat (as, astr_substr (get_buffer_pre_point (bp), r.start, MIN (r.end, get_buffer_o (bp)) - r.start));
+  if (r.end > get_buffer_o (bp))
     {
-      size_t pt_o = get_marker_o (m);
-      if (pt_o > o)
-        set_marker_o (m, MAX ((ptrdiff_t) o, (ptrdiff_t) pt_o + delta));
+      size_t from = MAX (r.start, get_buffer_o (bp)) - get_buffer_o (bp);
+      astr_cat (as, astr_substr (get_buffer_post_point (bp), from, r.end - get_buffer_o (bp)));
     }
-
-  /* This marker has been updated to new position. */
-  size_t m = get_marker_o (m_pt);
-  unchain_marker (m_pt);
-  return m;
+  return (estr) {.as = as, .eol = get_buffer_eol (bp)};
 }
 
 /*
@@ -210,21 +245,6 @@ delete_char (void)
   return true;
 }
 
-/*
- * Replace text at offset `offset' with `newtext'. If `replace_case'
- * and `case-replace' are true then the new characters will be the
- * same case as the old.
- */
-void
-buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen)
-{
-  undo_save_block (offset, oldlen, newlen);
-  set_buffer_modified (bp, true);
-  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
-  bp->o = adjust_markers (offset, (ptrdiff_t) (newlen - oldlen));
-  thisflag |= FLAG_NEED_RESYNC;
-}
-
 void
 insert_buffer (Buffer * bp)
 {
@@ -232,24 +252,6 @@ insert_buffer (Buffer * bp)
   insert_estr ((estr) {.as = astr_cpy (astr_new (), get_buffer_pre_point (bp)), .eol = get_buffer_eol (bp)});
   insert_estr ((estr) {.as = astr_cpy (astr_new (), get_buffer_post_point (bp)), .eol = get_buffer_eol (bp)});
 }
-
-/*
- * Copy a region of text into an allocated buffer.
- */
-estr
-get_buffer_region (Buffer *bp, Region r)
-{
-  astr as = astr_new ();
-  if (r.start < get_buffer_o (bp))
-    astr_cat (as, astr_substr (get_buffer_pre_point (bp), r.start, MIN (r.end, get_buffer_o (bp)) - r.start));
-  if (r.end > get_buffer_o (bp))
-    {
-      size_t from = MAX (r.start, get_buffer_o (bp)) - get_buffer_o (bp);
-      astr_cat (as, astr_substr (get_buffer_post_point (bp), from, r.end - get_buffer_o (bp)));
-    }
-  return (estr) {.as = as, .eol = get_buffer_eol (bp)};
-}
-
 
 /*
  * Allocate a new buffer structure, set the default local
