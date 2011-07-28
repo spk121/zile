@@ -440,7 +440,7 @@ what to do with it.
       /* Perform replacement. */
       ++count;
       castr case_repl = repl;
-      Region r = (Region) {.start = get_buffer_o (cur_bp) - astr_len (find), .end = get_buffer_o (cur_bp)};
+      Region r = region_new (get_buffer_o (cur_bp) - astr_len (find), get_buffer_o (cur_bp));
       if (find_no_upper && get_variable_bool ("case-replace"))
         {
           int case_type = check_case (get_buffer_region (cur_bp, r).as);

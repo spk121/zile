@@ -68,7 +68,7 @@ static bool
 kill_to_bol (void)
 {
   return bolp () ||
-    copy_or_kill_region (true, (Region) {.start = get_buffer_line_o (cur_bp), .end = get_buffer_o (cur_bp)});
+    copy_or_kill_region (true, region_new (get_buffer_line_o (cur_bp), get_buffer_o (cur_bp)));
 }
 
 static bool
@@ -100,7 +100,7 @@ kill_line (bool whole_line)
   undo_start_sequence ();
 
   if (!eolp ())
-    ok = copy_or_kill_region (true, (Region) {.start = get_buffer_o (cur_bp), get_buffer_line_o (cur_bp) + cur_line_len});
+    ok = copy_or_kill_region (true, region_new (get_buffer_o (cur_bp), get_buffer_line_o (cur_bp) + cur_line_len));
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
     {

@@ -66,7 +66,7 @@ undo_save (int type, size_t o, size_t osize, size_t size)
   if (type == UNDO_REPLACE_BLOCK)
     {
       up->size = size;
-      up->text = get_buffer_region (cur_bp, (Region) {.start = o, .end = o + osize});
+      up->text = get_buffer_region (cur_bp, region_new (o, o + osize));
       up->unchanged = !get_buffer_modified (cur_bp);
     }
 
