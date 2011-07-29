@@ -279,11 +279,4 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 #define STREQ(a, b) (strcmp (a, b) == 0)
 #define STRNEQ(a, b) (strcmp (a, b) != 0)
 
-/* Avoid warnings about functions that don't return. */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 8)
-# define _GL_ATTRIBUTE_NORETURN __attribute__ ((__noreturn__))
-#else
-# define _GL_ATTRIBUTE_NORETURN /* empty */
-#endif
-
 #endif /* !ZILE_H */

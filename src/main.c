@@ -61,8 +61,8 @@ Combinations like `C-x u' mean first press `C-x', then `u'.\n\
 " ZILE_COPYRIGHT_STRING "\n\
 ";
 
-static void
-_GL_ATTRIBUTE_NORETURN segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
+static void _Noreturn
+segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr,
            "%s: " PACKAGE_NAME
@@ -72,8 +72,8 @@ _GL_ATTRIBUTE_NORETURN segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
   zile_exit (true);
 }
 
-static void
-_GL_ATTRIBUTE_NORETURN other_sig_handler (int signo _GL_UNUSED_PARAMETER)
+static void _Noreturn
+other_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
            program_name, signo);

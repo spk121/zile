@@ -276,7 +276,7 @@ assert_eq (astr as, const char *s)
 }
 
 /* Stub to make xalloc_die happy. */
-void zile_exit (int doabort) _GL_ATTRIBUTE_NORETURN;
+void _Noreturn zile_exit (int doabort);
 
 void
 zile_exit (int doabort _GL_UNUSED_PARAMETER)
