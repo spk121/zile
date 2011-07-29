@@ -436,32 +436,28 @@ END_DEFUN
 /***********************************************************************
                           Move through words
 ***********************************************************************/
-#define ISWORDCHAR(c)	(isalnum (c) || c == '$')
+static inline bool
+iswordchar (int c)
+{
+  return isalnum (c) || c == '$';
+}
+
 static bool
 move_word (int dir)
 {
-  int gotword = false;
-  for (;;)
+  bool gotword = false;
+  do
     {
-      while (!(dir > 0 ? eolp () : bolp ()))
+      for (; !(dir > 0 ? eolp () : bolp ()); move_char (dir))
         {
-          int c = dir > 0 ? following_char () : preceding_char ();
-
-          if (!ISWORDCHAR (c))
-            {
-              if (gotword)
-                return true;
-            }
-          else
+          if (iswordchar (get_buffer_char (cur_bp, get_buffer_o (cur_bp) - (dir < 0))))
             gotword = true;
-          move_char (dir);
+          else if (gotword)
+            break;
         }
-      if (gotword)
-        return true;
-      if (!move_char (dir))
-        break;
     }
-  return false;
+  while (!gotword && move_char (dir));
+  return gotword;
 }
 
 static bool
@@ -500,12 +496,21 @@ END_DEFUN
 /***********************************************************************
                Move through balanced expressions (sexps)
 ***********************************************************************/
-#define ISOPENBRACKETCHAR(c)  ((c == '(') || (c == '[') || ( c== '{') ||\
-                               ((c == '\"') && !double_quote) ||	\
-                               ((c == '\'') && !single_quote))
-#define ISCLOSEBRACKETCHAR(c) ((c == ')') || (c == ']') || (c == '}') ||\
-                               ((c == '\"') && double_quote) ||		\
-                               ((c == '\'') && single_quote))
+static inline bool
+isopenbracketchar (int c, bool single_quote, bool double_quote)
+{
+  return ((c == '(') || (c == '[') || ( c== '{') ||
+          ((c == '\"') && !double_quote) ||
+          ((c == '\'') && !single_quote));
+}
+
+static inline bool
+isclosebracketchar (int c, bool single_quote, bool double_quote)
+{
+  return ((c == ')') || (c == ']') || (c == '}') ||
+          ((c == '\"') && double_quote) ||
+          ((c == '\'') && single_quote));
+}
 
 static bool
 move_sexp (int dir)
@@ -529,7 +534,7 @@ move_sexp (int dir)
               c = 'a';
             }
 
-          if (dir > 0 ? ISOPENBRACKETCHAR (c) : ISCLOSEBRACKETCHAR (c))
+          if ((dir > 0 ? isopenbracketchar : isclosebracketchar) (c, single_quote, double_quote))
             {
               if (level == 0 && gotsexp)
                 return true;
@@ -541,7 +546,7 @@ move_sexp (int dir)
               if (c == '\'')
                 single_quote = !double_quote;
             }
-          else if (dir > 0 ? ISCLOSEBRACKETCHAR (c) : ISOPENBRACKETCHAR (c))
+          else if ((dir > 0 ? isclosebracketchar : isopenbracketchar) (c, single_quote, double_quote))
             {
               if (level == 0 && gotsexp)
                 return true;
@@ -567,7 +572,8 @@ move_sexp (int dir)
             {
               if (gotsexp && level == 0)
                 {
-                  if (!(ISOPENBRACKETCHAR (c) || ISCLOSEBRACKETCHAR (c)))
+                  if (!(isopenbracketchar (c, single_quote, double_quote) ||
+                        isclosebracketchar (c, single_quote, double_quote)))
                     move_char (-dir);
                   return true;
                 }
@@ -949,7 +955,7 @@ END_DEFUN
 static bool
 setcase_word (int rcase)
 {
-  if (!ISWORDCHAR (following_char ()))
+  if (!iswordchar (following_char ()))
     if (!move_word (1) || !move_word (-1))
       return false;
 
@@ -957,7 +963,7 @@ setcase_word (int rcase)
   char c;
   for (size_t i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp);
        i < buffer_line_len (cur_bp, get_buffer_o (cur_bp)) &&
-         ISWORDCHAR ((int) (c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)));
+         iswordchar ((int) (c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)));
        i++)
     astr_cat_char (as, c);
 
