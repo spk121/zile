@@ -125,6 +125,7 @@ size_t countNodes (le * branch);
 void leEval (le * list);
 le *execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void),
                          bool (*backward) (void));
+le *move_with_uniarg (int uniarg, bool (*move) (int dir));
 le *execute_function (const char *name, int uniarg);
 Function get_function (const char *name);
 const char *get_function_doc (const char *name);

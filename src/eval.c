@@ -189,21 +189,28 @@ leEval (le * list)
 le *
 execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backward) (void))
 {
-  bool (*func) (void) = forward;
-
   if (backward && uniarg < 0)
     {
-      func = backward;
+      forward = backward;
       uniarg = -uniarg;
     }
   if (undo)
     undo_start_sequence ();
   bool ret = true;
   for (int uni = 0; ret && uni < uniarg; ++uni)
-    ret = func ();
+    ret = forward ();
   if (undo)
     undo_end_sequence ();
 
+  return bool_to_lisp (ret);
+}
+
+le *
+move_with_uniarg (int uniarg, bool (*move) (int dir))
+{
+  bool ret = true;
+  for (unsigned long uni = 0; ret && uni < abs (uniarg); ++uni)
+    ret = move (uniarg < 0 ? - 1 : 1);
   return bool_to_lisp (ret);
 }
 

@@ -460,25 +460,13 @@ move_word (int dir)
   return gotword;
 }
 
-static bool
-forward_word (void)
-{
-  return move_word (1);
-}
-
-static bool
-backward_word (void)
-{
-  return move_word (-1);
-}
-
 DEFUN ("forward-word", forward_word)
 /*+
 Move point forward one word (backward if the argument is negative).
 With argument, do this that many times.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, forward_word, backward_word);
+  ok = move_with_uniarg (uniarg, move_word);
 }
 END_DEFUN
 
@@ -489,7 +477,7 @@ argument is negative).
 With argument, do this that many times.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, backward_word, forward_word);
+  ok = move_with_uniarg (-uniarg, move_word);
 }
 END_DEFUN
 
@@ -597,18 +585,6 @@ move_sexp (int dir)
   return false;
 }
 
-static bool
-forward_sexp (void)
-{
-  return move_sexp (1);
-}
-
-static bool
-backward_sexp (void)
-{
-  return move_sexp (-1);
-}
-
 DEFUN ("forward-sexp", forward_sexp)
 /*+
 Move forward across one balanced expression (sexp).
@@ -616,7 +592,7 @@ With argument, do it that many times.  Negative arg -N means
 move backward across N balanced expressions.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, forward_sexp, backward_sexp);
+  ok = move_with_uniarg (uniarg, move_sexp);
 }
 END_DEFUN
 
@@ -627,7 +603,7 @@ With argument, do it that many times.  Negative arg -N means
 move forward across N balanced expressions.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, backward_sexp, forward_sexp);
+  ok = move_with_uniarg (-uniarg, move_sexp);
 }
 END_DEFUN
 
@@ -748,7 +724,7 @@ transpose (int uniarg, bool (*move) (int dir))
 
   bool ret = true;
   undo_start_sequence ();
-  for (int uni = 0; ret && uni < abs (uniarg); ++uni)
+  for (unsigned long uni = 0; ret && uni < abs (uniarg); ++uni)
     ret = transpose_subr (move);
   undo_end_sequence ();
 
