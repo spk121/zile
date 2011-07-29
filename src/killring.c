@@ -153,7 +153,7 @@ with no argument.
       if (arg <= 0)
         ok = bool_to_lisp (kill_to_bol ());
       if (arg != 0 && ok == leT)
-        ok = execute_with_uniarg (true, arg, kill_whole_line, kill_line_backward);
+        ok = execute_with_uniarg (false, arg, kill_whole_line, kill_line_backward);
       undo_end_sequence ();
     }
 
