@@ -295,10 +295,10 @@ DEFUN_ARGS ("backward-delete-char", backward_delete_char,
 Delete the previous @i{n} characters (following if @i{n} is negative).
 +*/
 {
-  bool (*forward) (void) = get_buffer_overwrite (cur_bp) ?
-    backward_delete_char_overwrite : backward_delete_char;
   INT_OR_UNIARG_INIT (n);
-  ok = execute_with_uniarg (true, n, forward, delete_char);
+  ok = execute_with_uniarg (true, n, get_buffer_overwrite (cur_bp) ?
+                            backward_delete_char_overwrite : backward_delete_char,
+                            delete_char);
 }
 END_DEFUN
 
