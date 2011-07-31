@@ -20,11 +20,10 @@ INDEX
    1.7. Zile has a bug!
 
 2. Functionality
-   2.1. How do I quit Zile?
-   2.2. Why are my settings being ignored?
-   2.3. How do I handle non-ASCII characters?
-   2.4. The META/ALT key doesn't work.
-   2.5. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+   2.1. Why are my settings being ignored?
+   2.2. How do I handle non-ASCII characters?
+   2.3. The META/ALT key doesn't work.
+   2.4. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
 ------------------------------------------------------------------------------
 
@@ -81,24 +80,19 @@ INDEX
 
 2. Functionality
 
-2.1. How do I quit Zile?
-
-    Type `C-x C-c' (that means holding CONTROL while typing X,
-    releasing them, then holding CONTROL while typing C)
-
-2.2. Why are my settings in ~/.zile being ignored?
+2.1. Why are my settings in ~/.zile being ignored?
 
     Since Zile 2.2.16, booleans are, as in Emacs, `t' and `nil' rather
     than `true' and `false'. If you haven't yet updated your .zile,
     you should do so.
 
-2.3. How do I handle non-ASCII characters?
+2.2. How do I handle non-ASCII characters?
 
     Zile uses the operating system's locale support, so you need to
     set an appropriate locale; how you do this depends on your OS.
     However, Zile only works with 8-bit locales.
 
-2.4. The META/ALT key doesn't work.
+2.3. The META/ALT key doesn't work.
 
     This is probably because you are using "8-bit input".  Using the
     following X resources should make things work:
@@ -109,7 +103,7 @@ INDEX
     Typically you'll want to put these lines in your ~/.Xresources
     file.
 
-2.5. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
+2.4. The `C-h' key is bound to <BS>/<DEL>; help doesn't work.
 
     Search for "Better bindings" in the sample configuration file, and
     uncomment the lines that follow.
