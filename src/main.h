@@ -277,6 +277,5 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 
 /* String comparison */
 #define STREQ(a, b) (strcmp (a, b) == 0)
-#define STRNEQ(a, b) (strcmp (a, b) != 0)
 
 #endif /* !ZILE_H */

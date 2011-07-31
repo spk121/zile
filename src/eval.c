@@ -209,7 +209,7 @@ le *
 move_with_uniarg (int uniarg, bool (*move) (int dir))
 {
   bool ret = true;
-  for (unsigned long uni = 0; ret && uni < abs (uniarg); ++uni)
+  for (unsigned long uni = 0; ret && uni < (unsigned) abs (uniarg); ++uni)
     ret = move (uniarg < 0 ? - 1 : 1);
   return bool_to_lisp (ret);
 }

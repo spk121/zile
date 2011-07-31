@@ -92,25 +92,34 @@ astr astr_cpy_cstr (astr as, const char *s);
  */
 astr astr_cat (astr as, castr src);
 astr astr_cat_cstr (astr as, const char *s);
-astr astr_ncat_cstr (astr as, const char *s, size_t len);
+astr astr_cat_nstr (astr as, const char *s, size_t len);
 astr astr_cat_char (astr as, int c);
 
 /*
- * Replace size characters of as, starting at pos, with the argument
+ * Overwrite size characters of as, starting at pos, with the argument
  * string.
  */
-astr astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
-                         size_t csize);
-
-/*
- * Insert the contents of the character in as.
- */
-astr astr_insert_char (astr as, size_t pos, int c);
+astr astr_replace_nstr (astr as, size_t pos, const char *s, size_t size);
 
 /*
  * Remove size chars from as at position pos.
  */
 astr astr_remove (astr as, size_t pos, size_t size);
+
+/*
+ * Insert gap of size characters in as at position pos.
+ */
+astr astr_insert (astr as, size_t pos, size_t size);
+
+/*
+ * Move n chars in as from position from to to.
+ */
+astr astr_move (astr as, size_t to, size_t from, size_t n);
+
+/*
+ * Set n chars in as at position pos to c
+ */
+astr astr_set (astr as, size_t pos, int c, size_t n);
 
 /*
  * Truncate as to given position.

@@ -123,7 +123,7 @@ estr_cat (estr es, estr src)
   for (size_t o = 0; o < astr_len (src.as);)
     {
       size_t nexto = estr_next_line (src, o);
-      astr_ncat_cstr (es.as, astr_cstr (src.as) + o,
+      astr_cat_nstr (es.as, astr_cstr (src.as) + o,
                       ((nexto != SIZE_MAX) ? (size_t) (nexto - eol_len) : len) - o);
       o = nexto;
       if (o != SIZE_MAX)

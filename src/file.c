@@ -115,7 +115,7 @@ expand_path (astr path)
                   ok = false;
                   break;
                 }
-              if (STRNEQ (pw->pw_dir, "/"))
+              if (!STREQ (pw->pw_dir, "/"))
                 astr_cat_cstr (epath, pw->pw_dir);
             }
           else
@@ -554,7 +554,7 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
 
   if (confirm && exist_file (astr_cstr (name)))
     {
-      ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", name);
+      ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", astr_cstr (name));
       if (ans == -1)
         FUNCALL (keyboard_quit);
       else if (ans == false)

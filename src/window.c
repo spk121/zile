@@ -271,14 +271,14 @@ window_o (Window * wp)
       assert (wp->bp == cur_bp);
       assert (wp->saved_pt == NULL);
       assert (cur_bp);
-      return get_buffer_o (cur_bp);
+      return get_buffer_pt (cur_bp);
     }
   else
     {
       if (wp->saved_pt != NULL)
         return get_marker_o (wp->saved_pt);
       else
-        return get_buffer_o (wp->bp);
+        return get_buffer_pt (wp->bp);
     }
 }
 

@@ -263,7 +263,7 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
                     bs = astr_new ();
                     if (get_completion_flags (cp) & CFLAG_FILENAME)
                       astr_cat (bs, get_completion_path (cp));
-                    astr_ncat_cstr (bs, get_completion_match (cp), get_completion_matchsize (cp));
+                    astr_cat_nstr (bs, get_completion_match (cp), get_completion_matchsize (cp));
                     if (strncmp (astr_cstr (as), astr_cstr (bs),
                                  astr_len (bs)) != 0)
                       thistab = -1;
@@ -288,7 +288,8 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
             ding ();
           else
             {
-              astr_insert_char (as, pos++, c);
+              astr_cpy (as, astr_fmt ("%s%c%s", astr_cstr (astr_substr (as, 0, pos)), c, astr_cstr (astr_substr (as, pos, astr_len (as) - pos))));
+              pos++;
               if (overwrite_mode && pos != astr_len (as))
                 astr_remove (as, pos, 1);
             }

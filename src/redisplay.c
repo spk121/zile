@@ -29,7 +29,7 @@
 void
 resync_redisplay (Window * wp)
 {
-  size_t n = offset_to_point (get_window_bp (wp), get_buffer_o (get_window_bp (wp))).n;
+  size_t n = offset_to_point (get_window_bp (wp), get_buffer_pt (get_window_bp (wp))).n;
   ptrdiff_t delta = n - get_window_lastpointn (wp);
 
   if (delta)

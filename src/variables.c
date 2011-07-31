@@ -185,7 +185,7 @@ get_variable_bool (const char *var)
 {
   const char *p = get_variable (var);
   if (p != NULL)
-    return STRNEQ (p, "nil");
+    return !STREQ (p, "nil");
 
   return false;
 }

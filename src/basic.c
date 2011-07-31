@@ -44,7 +44,7 @@ DEFUN ("end-of-line", end_of_line)
 Move point to end of current line.
 +*/
 {
-  goto_offset (get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp, get_buffer_o (cur_bp)));
+  goto_offset (get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp, get_buffer_pt (cur_bp)));
   set_buffer_goalc (cur_bp, SIZE_MAX);
 }
 END_DEFUN
@@ -68,7 +68,7 @@ get_goalc_bp (Buffer * bp, size_t o)
 size_t
 get_goalc (void)
 {
-  return get_goalc_bp (cur_bp, get_buffer_o (cur_bp));
+  return get_goalc_bp (cur_bp, get_buffer_pt (cur_bp));
 }
 
 bool
@@ -138,7 +138,7 @@ Goto @i{line}, counting from line 1 at beginning of buffer.
   if (ok == leNIL || n >= LONG_MAX - 1)
     return leNIL;
 
-  move_line ((MAX (n, 1) - 1) - offset_to_point (cur_bp, get_buffer_o (cur_bp)).n);
+  move_line ((MAX (n, 1) - 1) - offset_to_point (cur_bp, get_buffer_pt (cur_bp)).n);
   FUNCALL (beginning_of_line);
 }
 END_DEFUN

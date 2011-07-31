@@ -48,7 +48,7 @@ add_history_element (History * hp, const char *string)
                                          NULL, NULL, NULL, true);
   else
     last = (const char *) gl_list_get_at (hp->elements, gl_list_size (hp->elements) - 1);
-  if (!last || STRNEQ (last, string))
+  if (!last || !STREQ (last, string))
     gl_list_add_last (hp->elements, xstrdup (string));
 }
 

@@ -203,7 +203,7 @@ Use C-u followed by a number to specify a column.
 Just C-u as argument means to use the current column.
 +*/
 {
-  size_t o = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp);
+  size_t o = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp);
   long fill_col = (lastflag & FLAG_UNIARG_EMPTY) ? o : (unsigned long) uniarg;
   char *buf = NULL;
 
@@ -270,7 +270,7 @@ Put the mark where point is now, and point where the mark is now.
       return leNIL;
     }
 
-  size_t o = get_buffer_o (cur_bp);
+  size_t o = get_buffer_pt (cur_bp);
   goto_offset (get_marker_o (get_buffer_mark (cur_bp)));
   set_marker_o (get_buffer_mark (cur_bp), o);
   activate_mark ();
@@ -396,6 +396,7 @@ by 4 each time.
             break;
         }
       else if (key == '-' && i == 0)
+        /* FIXME: Negative arguments currently broken. */
         {
           if (sgn > 0)
             {
@@ -450,7 +451,7 @@ move_word (int dir)
     {
       for (; !(dir > 0 ? eolp () : bolp ()); move_char (dir))
         {
-          if (iswordchar (get_buffer_char (cur_bp, get_buffer_o (cur_bp) - (dir < 0))))
+          if (iswordchar (get_buffer_char (cur_bp, get_buffer_pt (cur_bp) - (dir < 0))))
             gotword = true;
           else if (gotword)
             break;
@@ -510,7 +511,7 @@ move_sexp (int dir)
     {
       while (dir > 0 ? !eolp () : !bolp ())
         {
-          size_t o = get_buffer_o (cur_bp) - (dir < 0 ? 1 : 0);
+          size_t o = get_buffer_pt (cur_bp) - (dir < 0 ? 1 : 0);
           char c = get_buffer_char (cur_bp, o);
 
           /* Skip escaped quotes. */
@@ -724,7 +725,7 @@ transpose (int uniarg, bool (*move) (int dir))
 
   bool ret = true;
   undo_start_sequence ();
-  for (unsigned long uni = 0; ret && uni < abs (uniarg); ++uni)
+  for (unsigned long uni = 0; ret && uni < (unsigned) abs (uniarg); ++uni)
     ret = transpose_subr (move);
   undo_end_sequence ();
 
@@ -908,7 +909,7 @@ Fill paragraph at or after point.
     /* Move to next line if between two paragraphs. */
     next_line ();
 
-  while (buffer_end_of_line (cur_bp, get_buffer_o (cur_bp)) < get_marker_o (m_end))
+  while (buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < get_marker_o (m_end))
     {
       FUNCALL (end_of_line);
       delete_char ();
@@ -937,8 +938,8 @@ setcase_word (int rcase)
 
   astr as = astr_new ();
   char c;
-  for (size_t i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp);
-       i < buffer_line_len (cur_bp, get_buffer_o (cur_bp)) &&
+  for (size_t i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp);
+       i < buffer_line_len (cur_bp, get_buffer_pt (cur_bp)) &&
          iswordchar ((int) (c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i)));
        i++)
     astr_cat_char (as, c);
@@ -1089,7 +1090,7 @@ prepare_read (size_t *n, void *priv)
 static void
 done_read (void *data, size_t n, void *priv)
 {
-  astr_ncat_cstr (((pipe_data *) priv)->out, (const char *)data, n);
+  astr_cat_nstr (((pipe_data *) priv)->out, (const char *)data, n);
 }
 
 static le *
@@ -1245,9 +1246,9 @@ On nonblank line, delete any immediately following blank lines.
   /* Find following blank lines.  */
   if (FUNCALL (forward_line) == leT && is_blank_line ())
     {
-      r.start = get_buffer_o (cur_bp);
+      r.start = get_buffer_pt (cur_bp);
       do
-        r.end = buffer_next_line (cur_bp, get_buffer_o (cur_bp));
+        r.end = buffer_next_line (cur_bp, get_buffer_pt (cur_bp));
       while (FUNCALL (forward_line) == leT && is_blank_line ());
       r.end = MIN (r.end, get_buffer_size (cur_bp));
     }
@@ -1257,13 +1258,13 @@ On nonblank line, delete any immediately following blank lines.
   bool singleblank = true;
   if (is_blank_line ())
     {
-      r.end = MAX (r.end, buffer_next_line (cur_bp, get_buffer_o (cur_bp)));
+      r.end = MAX (r.end, buffer_next_line (cur_bp, get_buffer_pt (cur_bp)));
       do
         r.start = get_buffer_line_o (cur_bp);
       while (FUNCALL_ARG (forward_line, -1) == leT && is_blank_line ());
       goto_offset (get_marker_o (m));
       if (r.start != get_buffer_line_o (cur_bp) ||
-          r.end > buffer_next_line (cur_bp, get_buffer_o (cur_bp)))
+          r.end > buffer_next_line (cur_bp, get_buffer_pt (cur_bp)))
         singleblank = false;
       r.end = MIN (r.end, get_buffer_size (cur_bp));
     }
@@ -1275,7 +1276,7 @@ On nonblank line, delete any immediately following blank lines.
 
   /* Delete any blank lines found. */
   if (r.start < r.end)
-    buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0);
+    delete_region (r);
 
   /* If we found more than one blank line, leave one. */
   if (!singleblank)

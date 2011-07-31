@@ -76,7 +76,7 @@ undo_save (int type, size_t o, size_t osize, size_t size)
 void
 undo_start_sequence (void)
 {
-  undo_save (UNDO_START_SEQUENCE, get_buffer_o (cur_bp), 0, 0);
+  undo_save (UNDO_START_SEQUENCE, get_buffer_pt (cur_bp), 0, 0);
 }
 
 void

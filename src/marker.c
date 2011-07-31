@@ -112,7 +112,7 @@ Marker *
 point_marker (void)
 {
   Marker *marker = marker_new ();
-  move_marker (marker, cur_bp, get_buffer_o (cur_bp));
+  move_marker (marker, cur_bp, get_buffer_pt (cur_bp));
   return marker;
 }
 
@@ -168,5 +168,5 @@ set_mark (void)
   if (!get_buffer_mark (cur_bp))
     set_buffer_mark (cur_bp, point_marker ());
   else
-    move_marker (get_buffer_mark (cur_bp), cur_bp, get_buffer_o (cur_bp));
+    move_marker (get_buffer_mark (cur_bp), cur_bp, get_buffer_pt (cur_bp));
 }

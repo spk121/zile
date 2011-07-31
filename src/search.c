@@ -124,7 +124,7 @@ do_search (bool forward, bool regexp, const char *pattern)
     {
       last_search = xstrdup (pattern);
 
-      if (!search (get_buffer_o (cur_bp), pattern, forward, regexp))
+      if (!search (get_buffer_pt (cur_bp), pattern, forward, regexp))
         minibuf_error ("Search failed: \"%s\"", pattern);
       else
         ok = leT;
@@ -189,7 +189,7 @@ isearch (int forward, int regexp)
 
   int last = true;
   astr pattern = astr_new ();
-  size_t start = get_buffer_o (cur_bp), cur = start;
+  size_t start = get_buffer_pt (cur_bp), cur = start;
   for (;;)
     {
       /* Make the minibuf message. */
@@ -259,7 +259,7 @@ isearch (int forward, int regexp)
           if (astr_len (pattern) > 0)
             {
               /* Find next match. */
-              cur = get_buffer_o (cur_bp);
+              cur = get_buffer_pt (cur_bp);
               /* Save search string. */
               last_search = xstrdup (astr_cstr (pattern));
             }
@@ -402,7 +402,7 @@ what to do with it.
 
   bool noask = false;
   size_t count = 0;
-  while (search (get_buffer_o (cur_bp), astr_cstr (find), true, false))
+  while (search (get_buffer_pt (cur_bp), astr_cstr (find), true, false))
     {
       int c = ' ';
 
@@ -440,7 +440,7 @@ what to do with it.
       /* Perform replacement. */
       ++count;
       castr case_repl = repl;
-      Region r = region_new (get_buffer_o (cur_bp) - astr_len (find), get_buffer_o (cur_bp));
+      Region r = region_new (get_buffer_pt (cur_bp) - astr_len (find), get_buffer_pt (cur_bp));
       if (find_no_upper && get_variable_bool ("case-replace"))
         {
           int case_type = check_case (get_buffer_region (cur_bp, r).as);
@@ -450,8 +450,11 @@ what to do with it.
                                      case_type == 1 ? case_capitalized : case_upper);
         }
 
-      buffer_replace (cur_bp, r.start, astr_len (find),
-                      astr_cstr (case_repl), astr_len (case_repl));
+      Marker *m = point_marker ();
+      goto_offset (r.start);
+      replace (astr_len (find), astr_cstr (case_repl), astr_len (case_repl));
+      goto_offset (get_marker_o (m));
+      unchain_marker (m);
 
       if (c == '.')		/* Replace and quit. */
         break;

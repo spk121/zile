@@ -130,32 +130,27 @@ search_key (Binding tree, gl_list_t keys, size_t from)
 size_t
 do_binding_completion (astr as)
 {
-  size_t key;
   astr bs = astr_new ();
 
   if (lastflag & FLAG_SET_UNIARG)
     {
-      int arg = last_uniarg;
-
-      if (arg < 0)
-        {
-          astr_cat_cstr (bs, "- ");
-          arg = -arg;
-        }
-
+      unsigned arg = abs (last_uniarg);
       do
         {
-          astr_insert_char (bs, 0, ' ');
-          astr_insert_char (bs, 0, arg % 10 + '0');
+          bs = astr_fmt ("%c %s", arg % 10 + '0', astr_cstr (bs));
           arg /= 10;
-        } while (arg != 0);
+        }
+      while (arg != 0);
+
+      if (last_uniarg < 0)
+        bs = astr_fmt ("- %s", astr_cstr (bs));
     }
 
   minibuf_write ("%s%s%s-",
                  lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
                  astr_cstr (bs),
                  astr_cstr (as));
-  key = getkey (GETKEY_DEFAULT);
+  size_t key = getkey (GETKEY_DEFAULT);
   minibuf_clear ();
 
   return key;

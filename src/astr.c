@@ -55,7 +55,6 @@ astr_new (void)
   as->maxlen = ALLOCATION_CHUNK_SIZE;
   as->len = 0;
   as->text = (char *) xzalloc (as->maxlen + 1);
-  memset (as->text, 0, as->maxlen + 1);
   return as;
 }
 
@@ -81,38 +80,79 @@ astr_len (castr as)
   return as->len;
 }
 
-astr
-astr_ncat_cstr (astr as, const char *s, size_t csize)
+static
+void astr_set_len (astr as, size_t len)
 {
-  assert (as != NULL);
-  if (as->len + csize > as->maxlen)
+  /* FIXME: Realloc if shrunk by a factor of more than 2. */
+  if (len > as->maxlen)
     {
-      as->maxlen = as->len + csize + ALLOCATION_CHUNK_SIZE;
+      as->maxlen = len + ALLOCATION_CHUNK_SIZE;
       as->text = xrealloc (as->text, as->maxlen + 1);
     }
-  memcpy (as->text + as->len, s, csize);
-  as->len += csize;
+  as->len = len;
   as->text[as->len] = '\0';
+}
+
+astr
+astr_cat_nstr (astr as, const char *s, size_t csize)
+{
+  assert (as != NULL);
+  size_t oldlen = as->len;
+  astr_set_len (as, as->len + csize);
+  memmove (as->text + oldlen, s, csize);
   return as;
 }
 
 astr
-astr_nreplace_cstr (astr as, size_t pos, size_t size, const char *s,
-                    size_t csize)
+astr_replace_nstr (astr as, size_t pos, const char *s, size_t size)
 {
-  astr tail;
-
   assert (as != NULL);
   assert (pos <= as->len);
-  if (as->len - pos < size)
-    size = as->len - pos;
-  tail = astr_substr (as, pos + (size_t) size,
-                      astr_len (as) - (pos + size));
-  as->len = pos;
-  as->text[pos] = '\0';
-  astr_ncat_cstr (as, s, csize);
-  astr_cat (as, tail);
+  assert (size <= as->len - pos);
+  memmove (as->text + pos, s, size);
+  return as;
+}
 
+astr
+astr_remove (astr as, size_t pos, size_t size)
+{
+  assert (as != NULL);
+  assert (pos <= as->len);
+  assert (size <= as->len - pos);
+  memmove (as->text + pos, as->text + pos + size, as->len - (pos + size));
+  astr_set_len (as, as->len - size);
+  return as;
+}
+
+astr
+astr_insert (astr as, size_t pos, size_t size)
+{
+  assert (as != NULL);
+  assert (pos <= as->len);
+  astr_set_len (as, as->len + size);
+  memmove (as->text + pos + size, as->text + pos, as->len - (pos + size));
+  memset (as->text + pos, '\0', size);
+  return as;
+}
+
+astr
+astr_move (astr as, size_t to, size_t from, size_t n)
+{
+  assert (as != NULL);
+  assert (to <= as->len);
+  assert (from <= as->len);
+  assert (n <= as->len - MAX (from, to));
+  memmove (as->text + to, as->text + from, n);
+  return as;
+}
+
+astr
+astr_set (astr as, size_t pos, int c, size_t n)
+{
+  assert (as != NULL);
+  assert (pos <= as->len);
+  assert (n <= as->len - pos);
+  memset (as->text + pos, c, n);
   return as;
 }
 
@@ -132,7 +172,7 @@ static astr
 astr_ncpy_cstr (astr as, const char *s, size_t len)
 {
   astr_truncate (as, 0);
-  return astr_ncat_cstr (as, s, len);
+  return astr_cat_nstr (as, s, len);
 }
 
 astr
@@ -156,39 +196,27 @@ astr_cpy_cstr (astr as, const char *s)
 astr
 astr_cat (astr as, castr src)
 {
-  return astr_ncat_cstr (as, astr_cstr (src), astr_len (src));
+  return astr_cat_nstr (as, astr_cstr (src), astr_len (src));
 }
 
 astr
 astr_cat_cstr (astr as, const char *s)
 {
-  return astr_ncat_cstr (as, s, strlen (s));
+  return astr_cat_nstr (as, s, strlen (s));
 }
 
 astr
 astr_cat_char (astr as, int c)
 {
-  return astr_insert_char (as, astr_len (as), c);
+  char c2 = c;
+  return astr_cat_nstr (as, &c2, 1);
 }
 
 astr
 astr_substr (castr as, size_t pos, size_t size)
 {
   assert (pos + size <= astr_len (as));
-  return astr_ncat_cstr (astr_new (), astr_cstr (as) + pos, size);
-}
-
-astr
-astr_insert_char (astr as, size_t pos, int c)
-{
-  char ch = (char) c;
-  return astr_nreplace_cstr (as, pos, (size_t) 0, &ch, (size_t) 1);
-}
-
-astr
-astr_remove (astr as, size_t pos, size_t size)
-{
-  return astr_nreplace_cstr (as, pos, size, "", (size_t) 0);
+  return astr_cat_nstr (astr_new (), astr_cstr (as) + pos, size);
 }
 
 astr
@@ -211,7 +239,7 @@ astr_readf (const char *filename)
           char buf[BUFSIZ];
           as = astr_new ();
           while ((size = read (fd, buf, BUFSIZ)) > 0)
-            astr_ncat_cstr (as, buf, size);
+            astr_cat_nstr (as, buf, size);
           close (fd);
         }
     }
@@ -234,9 +262,6 @@ astr_fmt (const char *fmt, ...)
   return as;
 }
 
-/*
- * Recase str according to newcase.
- */
 astr
 astr_recase (astr as, enum casing newcase)
 {
@@ -250,9 +275,7 @@ astr_recase (astr as, enum casing newcase)
   for (size_t i = 1, len = astr_len (as); i < len; i++)
     astr_cat_char (bs, ((newcase == case_upper) ? toupper : tolower) (astr_get (as, i)));
 
-  astr_cpy (as, bs);
-
-  return as;
+  return astr_cpy (as, bs);
 }
 
 
@@ -268,7 +291,7 @@ astr_recase (astr as, enum casing newcase)
 static void
 assert_eq (astr as, const char *s)
 {
-  if (STRNEQ (astr_cstr (as), s))
+  if (!STREQ (astr_cstr (as), s))
     {
       printf ("test failed: \"%s\" != \"%s\"\n", astr_cstr (as), s);
       exit (EXIT_FAILURE);
@@ -309,29 +332,9 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   as3 = astr_substr (as1, astr_len (as1) - 6, 5);
   assert_eq (as3, "world");
 
-  astr_cpy_cstr (as1, "12345");
-
-  astr_cpy_cstr (as1, "12345");
-  astr_insert_char (as1, astr_len (as1) - 2, 'x');
-  astr_insert_char (as1, astr_len (as1) - 6, 'y');
-  astr_insert_char (as1, 7, 'z');
-  assert_eq (as1, "y123x45z");
-
   astr_cpy_cstr (as1, "1234567");
-  astr_nreplace_cstr (as1, astr_len (as1) - 4, 2, "foo", 3);
-  assert_eq (as1, "123foo67");
-
-  astr_cpy_cstr (as1, "1234567");
-  astr_nreplace_cstr (as1, 1, 3, "foo", 3);
+  astr_replace_nstr (as1, 1, "foo", 3);
   assert_eq (as1, "1foo567");
-
-  astr_cpy_cstr (as1, "1234567");
-  astr_nreplace_cstr (as1, astr_len (as1) - 1, 5, "foo", 3);
-  assert_eq (as1, "123456foo");
-
-  astr_cpy_cstr (as1, "1234567");
-  astr_remove (as1, 4, 10);
-  assert_eq (as1, "1234");
 
   astr_cpy_cstr (as1, "12345");
   as2 = astr_substr (as1, astr_len (as1) - 2, 2);
@@ -340,18 +343,6 @@ main (int argc _GL_UNUSED_PARAMETER, char **argv)
   astr_cpy_cstr (as1, "12345");
   as2 = astr_substr (as1, astr_len (as1) - 5, 5);
   assert_eq (as2, "12345");
-
-  astr_cpy_cstr (as1, "1234567");
-  astr_nreplace_cstr (as1, astr_len (as1) - 4, 2, "foo", 3);
-  assert_eq (as1, "123foo67");
-
-  astr_cpy_cstr (as1, "1234567");
-  astr_nreplace_cstr (as1, 1, 3, "foo", 3);
-  assert_eq (as1, "1foo567");
-
-  astr_cpy_cstr (as1, "1234567");
-  astr_nreplace_cstr (as1, astr_len (as1) - 1, 5, "foo", 3);
-  assert_eq (as1, "123456foo");
 
   as1 = astr_fmt ("%s * %d = ", "5", 3);
   astr_cat (as1, astr_fmt ("%d", 15));

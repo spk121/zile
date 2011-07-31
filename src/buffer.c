@@ -45,7 +45,7 @@ struct Buffer
 #include "buffer.h"
 #undef FIELD
 #undef FIELD_STR
-  size_t o;          /* The point. FIXME: Rename to pt when get_buffer_pt removed. */
+  size_t pt;         /* The point. */
   estr text;         /* The text. */
   size_t gap;        /* Size of gap after point. */
 };
@@ -73,85 +73,145 @@ set_buffer_text (Buffer *bp, estr es)
 castr
 get_buffer_pre_point (Buffer *bp)
 {
-  return castr_new_nstr (astr_cstr (bp->text.as), get_buffer_o (bp));
+  return castr_new_nstr (astr_cstr (bp->text.as), get_buffer_pt (bp));
 }
 
 castr
 get_buffer_post_point (Buffer *bp)
 {
-  return castr_new_nstr (astr_cstr (bp->text.as) + bp->o + bp->gap,
-                         astr_len (bp->text.as) - (bp->o + bp->gap));
+  return castr_new_nstr (astr_cstr (bp->text.as) + bp->pt + bp->gap,
+                         astr_len (bp->text.as) - (bp->pt + bp->gap));
 }
 
 size_t
-get_buffer_o (Buffer *bp)
+get_buffer_pt (Buffer *bp)
 {
-  return bp->o;
+  return bp->pt;
 }
 
 void
-set_buffer_o (Buffer *bp, size_t o)
+set_buffer_pt (Buffer *bp, size_t o)
 {
-  bp->o = o;
+  if (o < bp->pt)
+    {
+      astr_move (bp->text.as, o + bp->gap, o, bp->pt - o);
+      astr_set (bp->text.as, o, '\0', MIN (bp->pt - o, bp->gap));
+    }
+  else if (o > bp->pt)
+    {
+      astr_move (bp->text.as, bp->pt, bp->pt + bp->gap, o - bp->pt);
+      astr_set (bp->text.as, o + bp->gap - MIN (o - bp->pt, bp->gap), '\0', MIN (o - bp->pt, bp->gap));
+    }
+  bp->pt = o;
 }
 
-static size_t
-buffer_o_to_realo (Buffer *bp, size_t o)
+static inline size_t
+realo_to_o (Buffer *bp, size_t o)
 {
-  return o <= bp->o ? o : o - bp->gap;
+  if (o == SIZE_MAX)
+    return o;
+  else if (o < bp->pt + bp->gap)
+    return MIN (o, bp->pt);
+  else
+    return o - bp->gap;
+}
+
+static inline size_t
+o_to_realo (Buffer *bp, size_t o)
+{
+  return o < bp->pt ? o : o + bp->gap;
 }
 
 size_t
 get_buffer_size (Buffer * bp)
 {
-  return buffer_o_to_realo (bp, astr_len (bp->text.as));
+  return realo_to_o (bp, astr_len (bp->text.as));
 }
 
 size_t
 buffer_line_len (Buffer *bp, size_t o)
 {
-  return buffer_o_to_realo (bp, estr_end_of_line (bp->text, o)) -
-    buffer_o_to_realo (bp, estr_start_of_line (bp->text, o));
+  return realo_to_o (bp, estr_end_of_line (bp->text, o_to_realo (bp, o))) -
+    realo_to_o (bp, estr_start_of_line (bp->text, o_to_realo (bp, o)));
 }
 
 /*
- * Adjust markers (including point) at offset `o' by offset `delta'.
- * (Don't need to take the gap into account here.)
+ * Replace `oldlen' chars after point with `newlen' chars from `newtext'.
+ * FIXME: Deal with overflow (total length getting bigger than SIZE_MAX).
  */
-static size_t
-adjust_markers (size_t o, ptrdiff_t delta)
-{
-  Marker *m_pt = point_marker ();
-
-  for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
-    if (get_marker_o (m) > o)
-      set_marker_o (m, MAX ((ptrdiff_t) o, (ptrdiff_t) get_marker_o (m) + delta));
-
-  /* This marker has been updated to new position. */
-  size_t m_o = get_marker_o (m_pt);
-  unchain_marker (m_pt);
-  return m_o;
-}
-
-/*
- * Replace text at offset `offset' with `newtext'. If `replace_case'
- * and `case-replace' are true then the new characters will be the
- * same case as the old.
- */
+#define MIN_GAP 1024 /* Minimum gap size after resize. */
+#define MAX_GAP 4096 /* Maximum permitted gap size. */
 void
-buffer_replace (Buffer *bp, size_t offset, size_t oldlen, const char *newtext, size_t newlen)
+replace (size_t oldlen, const char *newtext, size_t newlen)
 {
-  undo_save_block (offset, oldlen, newlen);
-  astr_nreplace_cstr (bp->text.as, offset, oldlen, newtext, newlen);
-  set_buffer_o (bp, adjust_markers (offset, (ptrdiff_t) (newlen - oldlen)));
-  set_buffer_modified (bp, true);
+  undo_save_block (cur_bp->pt, oldlen, newlen);
+
+  /* Ensure gap fits newlen; if gap becomes zero, set to MIN_GAP. */
+  if (cur_bp->gap + oldlen < newlen)
+    {
+      astr_insert (cur_bp->text.as, cur_bp->pt, (newlen + MIN_GAP) - (cur_bp->gap + oldlen));
+      cur_bp->gap = newlen + MIN_GAP - oldlen;
+    }
+
+  /* Remove oldlen chars, zeroing some if necessary. */
+  if (oldlen > newlen)
+    astr_set (cur_bp->text.as, cur_bp->pt + cur_bp->gap, '\0', oldlen - newlen);
+  cur_bp->gap += oldlen;
+
+  /* Insert newlen chars. */
+  astr_replace_nstr (cur_bp->text.as, cur_bp->pt + cur_bp->gap - newlen, newtext, newlen);
+  cur_bp->gap -= newlen;
+
+  /* Ensure gap doesn't get too big. */
+  if (cur_bp->gap > MAX_GAP)
+    {
+      astr_remove (cur_bp->text.as, cur_bp->pt, cur_bp->gap - MAX_GAP);
+      cur_bp->gap = MAX_GAP;
+    }
+
+  /* Adjust markers. */
+  for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
+    if (get_marker_o (m) > cur_bp->pt)
+      set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt, (ptrdiff_t) (get_marker_o (m) + newlen - oldlen)));
+
+  set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
 }
 
 char
 get_buffer_char (Buffer *bp, size_t o)
 {
-  return astr_get (bp->text.as, buffer_o_to_realo (bp, o));
+  return astr_get (bp->text.as, o_to_realo (bp, o));
+}
+
+size_t
+buffer_prev_line (Buffer *bp, size_t o)
+{
+  return realo_to_o (bp, estr_prev_line (bp->text, o_to_realo (bp, o)));
+}
+
+size_t
+buffer_next_line (Buffer *bp, size_t o)
+{
+  return realo_to_o (bp, estr_next_line (bp->text, o_to_realo (bp, o)));
+}
+
+size_t
+buffer_start_of_line (Buffer *bp, size_t o)
+{
+  return realo_to_o (bp, estr_start_of_line (bp->text, o_to_realo (bp, o)));
+}
+
+size_t
+buffer_end_of_line (Buffer *bp, size_t o)
+{
+  return realo_to_o (bp, estr_end_of_line (bp->text, o_to_realo (bp, o)));
+}
+
+size_t
+get_buffer_line_o (Buffer *bp)
+{
+  return realo_to_o (bp, estr_start_of_line (bp->text, o_to_realo (bp, bp->pt)));
 }
 
 
@@ -163,36 +223,6 @@ get_buffer_eol (Buffer *bp)
   return bp->text.eol;
 }
 
-size_t
-buffer_prev_line (Buffer *bp, size_t o)
-{
-  return estr_prev_line (bp->text, o);
-}
-
-size_t
-buffer_next_line (Buffer *bp, size_t o)
-{
-  return estr_next_line (bp->text, o);
-}
-
-size_t
-buffer_start_of_line (Buffer *bp, size_t o)
-{
-  return estr_start_of_line (bp->text, o);
-}
-
-size_t
-buffer_end_of_line (Buffer *bp, size_t o)
-{
-  return estr_end_of_line (bp->text, o);
-}
-
-size_t
-get_buffer_line_o (Buffer *bp)
-{
-  return estr_start_of_line (bp->text, bp->o);
-}
-
 /*
  * Copy a region of text into an allocated buffer.
  */
@@ -200,12 +230,12 @@ estr
 get_buffer_region (Buffer *bp, Region r)
 {
   astr as = astr_new ();
-  if (r.start < get_buffer_o (bp))
-    astr_cat (as, astr_substr (get_buffer_pre_point (bp), r.start, MIN (r.end, get_buffer_o (bp)) - r.start));
-  if (r.end > get_buffer_o (bp))
+  if (r.start < get_buffer_pt (bp))
+    astr_cat (as, astr_substr (get_buffer_pre_point (bp), r.start, MIN (r.end, get_buffer_pt (bp)) - r.start));
+  if (r.end > get_buffer_pt (bp))
     {
-      size_t from = MAX (r.start, get_buffer_o (bp)) - get_buffer_o (bp);
-      astr_cat (as, astr_substr (get_buffer_post_point (bp), from, r.end - get_buffer_o (bp)));
+      size_t from = MAX (r.start, get_buffer_pt (bp)) - get_buffer_pt (bp);
+      astr_cat (as, astr_substr (get_buffer_post_point (bp), from, r.end - get_buffer_pt (bp)));
     }
   return (estr) {.as = as, .eol = get_buffer_eol (bp)};
 }
@@ -244,11 +274,11 @@ delete_char (void)
 
   if (eolp ())
     {
-      buffer_replace (cur_bp, cur_bp->o, strlen (get_buffer_eol (cur_bp)), NULL, 0);
+      replace (strlen (get_buffer_eol (cur_bp)), NULL, 0);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
-    buffer_replace (cur_bp, cur_bp->o, 1, NULL, 0);
+    replace (1, NULL, 0);
 
   set_buffer_modified (cur_bp, true);
 
@@ -445,7 +475,7 @@ get_region_size (const Region r)
 Region
 calculate_the_region (void)
 {
-  return region_new (cur_bp->o, get_marker_o (cur_bp->mark));
+  return region_new (cur_bp->pt, get_marker_o (cur_bp->mark));
 }
 
 bool
@@ -454,7 +484,11 @@ delete_region (const Region r)
   if (warn_if_readonly_buffer ())
     return false;
 
-  buffer_replace (cur_bp, r.start, get_region_size (r), NULL, 0);
+  Marker *m = point_marker ();
+  goto_offset (r.start);
+  replace (get_region_size (r), NULL, 0);
+  goto_offset (get_marker_o (m));
+  unchain_marker (m);
   return true;
 }
 
@@ -676,11 +710,11 @@ move_char (int offset)
   for (size_t i = 0; i < (size_t) (abs (offset)); i++)
     {
       if (dir > 0 ? !eolp () : !bolp ())
-        cur_bp->o += dir;
+        set_buffer_pt (cur_bp, cur_bp->pt + dir);
       else if (dir > 0 ? !eobp () : !bobp ())
         {
           thisflag |= FLAG_NEED_RESYNC;
-          cur_bp->o += dir * strlen (get_buffer_eol (cur_bp));
+          set_buffer_pt (cur_bp, cur_bp->pt + dir * strlen (get_buffer_eol (cur_bp)));
           if (dir > 0)
             FUNCALL (beginning_of_line);
           else
@@ -702,7 +736,7 @@ goto_goalc (void)
   size_t i, col = 0, t = tab_width (cur_bp);
 
   for (i = get_buffer_line_o (cur_bp);
-       i < get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp, get_buffer_o (cur_bp));
+       i < get_buffer_line_o (cur_bp) + buffer_line_len (cur_bp, get_buffer_pt (cur_bp));
        i++)
     if (col == get_buffer_goalc (cur_bp))
       break;
@@ -712,7 +746,7 @@ goto_goalc (void)
     else
       ++col;
 
-  cur_bp->o = i;
+  set_buffer_pt (cur_bp, i);
 }
 
 bool
@@ -734,13 +768,13 @@ move_line (int n)
 
   for (; n > 0; n--)
     {
-      size_t o = func (cur_bp, cur_bp->o);
+      size_t o = func (cur_bp, cur_bp->pt);
       if (o == SIZE_MAX)
         {
           ok = false;
           break;
         }
-      cur_bp->o = o;
+      set_buffer_pt (cur_bp, o);
     }
 
   goto_goalc ();

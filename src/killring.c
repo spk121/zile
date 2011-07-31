@@ -65,23 +65,16 @@ copy_or_kill_region (bool kill, Region r)
 }
 
 static bool
-kill_to_bol (void)
-{
-  return bolp () ||
-    copy_or_kill_region (true, region_new (get_buffer_line_o (cur_bp), get_buffer_o (cur_bp)));
-}
-
-static bool
 kill_line (bool whole_line)
 {
   bool ok = true;
   bool only_blanks_to_end_of_line = false;
-  size_t cur_line_len = buffer_line_len (cur_bp, get_buffer_o (cur_bp));
+  size_t cur_line_len = buffer_line_len (cur_bp, get_buffer_pt (cur_bp));
 
   if (!whole_line)
     {
       size_t i;
-      for (i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp); i < cur_line_len; i++)
+      for (i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp); i < cur_line_len; i++)
         {
           char c = get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i);
           if (!(c == ' ' || c == '\t'))
@@ -100,7 +93,7 @@ kill_line (bool whole_line)
   undo_start_sequence ();
 
   if (!eolp ())
-    ok = copy_or_kill_region (true, region_new (get_buffer_o (cur_bp), get_buffer_line_o (cur_bp) + cur_line_len));
+    ok = copy_or_kill_region (true, region_new (get_buffer_pt (cur_bp), get_buffer_line_o (cur_bp) + cur_line_len));
 
   if (ok && (whole_line || only_blanks_to_end_of_line) && !eobp ())
     {
@@ -151,7 +144,8 @@ with no argument.
     {
       undo_start_sequence ();
       if (arg <= 0)
-        ok = bool_to_lisp (kill_to_bol ());
+        ok = bool_to_lisp (bolp () ||
+                           copy_or_kill_region (true, region_new (get_buffer_line_o (cur_bp), get_buffer_pt (cur_bp))));
       if (arg != 0 && ok == leT)
         ok = execute_with_uniarg (false, arg, kill_whole_line, kill_line_backward);
       undo_end_sequence ();

@@ -103,12 +103,12 @@ fill_break_line (void)
       Marker *m = point_marker ();
 
       /* Move cursor back to fill column */
-      size_t old_col = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp);
+      size_t old_col = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp);
       while (get_goalc () > fillcol + 1)
         move_char (-1);
 
       /* Find break point moving left from fill-column. */
-      for (size_t i = get_buffer_o (cur_bp) - get_buffer_line_o (cur_bp); i > 0; i--)
+      for (size_t i = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp); i > 0; i--)
         {
           if (isspace (get_buffer_char (cur_bp, get_buffer_line_o (cur_bp) + i - 1)))
             {
@@ -120,7 +120,7 @@ fill_break_line (void)
       /* If no break point moving left from fill-column, find first
          possible moving right. */
       if (break_col == 0)
-        for (size_t i = get_buffer_o (cur_bp) + 1;
+        for (size_t i = get_buffer_pt (cur_bp) + 1;
              i < buffer_end_of_line (cur_bp, get_buffer_line_o (cur_bp));
              i++)
           if (isspace (get_buffer_char (cur_bp, i - 1)))
@@ -187,7 +187,7 @@ replace_estr (size_t del, estr es)
     return false;
 
   undo_start_sequence ();
-  buffer_replace (cur_bp, get_buffer_o (cur_bp), del, NULL, 0);
+  replace (del, NULL, 0);
   size_t len = astr_len (es.as);
   const char *s = astr_cstr (es.as);
   size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_eol (cur_bp));
@@ -195,15 +195,14 @@ replace_estr (size_t del, estr es)
     {
       const char *next = memmem (s, len, es.eol, eol_len);
       size_t line_len = next ? (size_t) (next - s) : len;
-      buffer_replace (cur_bp, get_buffer_o (cur_bp), 0, s, line_len);
-      set_buffer_o (cur_bp, get_buffer_o (cur_bp) + line_len);
+      replace (0, s, line_len);
+      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + line_len);
       len -= line_len;
       s = next;
       if (len > 0)
         {
-          buffer_replace (cur_bp, get_buffer_o (cur_bp), 0,
-                          get_buffer_eol (cur_bp), buf_eol_len);
-          set_buffer_o (cur_bp, get_buffer_o (cur_bp) + buf_eol_len);
+          replace (0, get_buffer_eol (cur_bp), buf_eol_len);
+          set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + buf_eol_len);
 
           thisflag |= FLAG_NEED_RESYNC;
 
