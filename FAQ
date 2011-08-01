@@ -109,7 +109,7 @@ INDEX
     uncomment the lines that follow.
 
     This might also be an operating system bug; for example, versions
-    of Mac OS X up to and including 10.4 (at least) have conflicting
+    of Mac OS X up to and including 10.7 (at least) have conflicting
     settings for the terminal and terminfo. A good solution is to use
     a terminfo file that matches the default terminal settings, as
     explained at:
