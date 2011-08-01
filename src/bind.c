@@ -214,7 +214,7 @@ self_insert_command (void)
       if (isspace (key) && get_buffer_autofill (cur_bp) &&
           get_goalc () > (size_t) get_variable_number ("fill-column"))
         fill_break_line ();
-      type_char (key, get_buffer_overwrite (cur_bp));
+      insert_char (key);
     }
   else
     {
@@ -391,7 +391,6 @@ init_default_bindings (void)
 (global-set-key \"\\C-n\" 'next-line)\
 (global-set-key \"\\C-o\" 'open-line)\
 (global-set-key \"\\C-xo\" 'other-window)\
-(global-set-key \"\\INSERT\" 'overwrite-mode)\
 (global-set-key \"\\UP\" 'previous-line)\
 (global-set-key \"\\C-p\" 'previous-line)\
 (global-set-key \"\\M-%\" 'query-replace)\

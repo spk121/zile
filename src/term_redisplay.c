@@ -145,8 +145,6 @@ draw_status_line (size_t line, Window * wp)
 
   if (get_buffer_autofill (get_window_bp (wp)))
     astr_cat_cstr (as, " Fill");
-  if (get_buffer_overwrite (get_window_bp (wp)))
-    astr_cat_cstr (as, " Ovwrt");
   if (thisflag & FLAG_DEFINING_MACRO)
     astr_cat_cstr (as, " Def");
   if (get_buffer_isearch (get_window_bp (wp)))

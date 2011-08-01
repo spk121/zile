@@ -157,25 +157,6 @@ The @samp{R} column contains a @samp{%} for buffers that are read-only.
 }
 END_DEFUN
 
-DEFUN_ARGS ("overwrite-mode", overwrite_mode,
-            INT_OR_UNIARG (arg))
-/*+
-Toggle overwrite mode.
-With prefix argument @i{arg}, turn overwrite mode on if @i{arg} is positive,
-otherwise turn it off.  In overwrite mode, printing characters typed
-in replace existing text on a one-for-one basis, rather than pushing
-it to the right.  At the end of a line, such characters extend the line.
-Before a tab, such characters insert until the tab is filled in.
-@kbd{C-q} still inserts characters in overwrite mode; this
-is supposed to make it easier to insert characters when necessary.
-+*/
-{
-  INT_OR_UNIARG_INIT (arg);
-  set_buffer_overwrite (cur_bp, noarg ? !get_buffer_overwrite (cur_bp) :
-                        uniarg > 0);
-}
-END_DEFUN
-
 DEFUN ("toggle-read-only", toggle_read_only)
 /*+
 Change whether this buffer is visiting its file read-only.
@@ -1026,7 +1007,7 @@ setcase_region (int (*func) (int))
     {
       char c = func (following_char ());
       delete_char ();
-      type_char (c, get_buffer_overwrite (cur_bp));
+      insert_char (c);
     }
   goto_offset (get_marker_o (m));
   unchain_marker (m);

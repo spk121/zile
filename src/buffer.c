@@ -241,21 +241,13 @@ get_buffer_region (Buffer *bp, Region r)
 }
 
 /*
- * Insert the character `c' at the current point position
- * into the current buffer.
- * In overwrite mode, overwrite if current character isn't the end of
- * line or a \t, or current char is a \t and we are on the tab limit.
+ * Insert the character `c' at point in the current buffer.
  */
 int
-type_char (int c, bool overwrite)
+insert_char (int c)
 {
-  char ch = (char) c;
-  size_t t = tab_width (cur_bp);
-
-  return replace_estr (overwrite &&
-                       ((!eolp () && following_char () != '\t')
-                        || ((following_char () == '\t') && ((get_goalc () % t) == t - 1))) ? 1 : 0,
-                       (estr) {.as = castr_new_nstr (&ch, 1), .eol = coding_eol_lf});
+  const char ch = (char) c;
+  return replace_estr (false, (estr) {.as = castr_new_nstr (&ch, 1), .eol = coding_eol_lf});
 }
 
 bool

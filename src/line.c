@@ -30,16 +30,6 @@
 #include "extern.h"
 
 
-/*
- * Insert a character at the current position in insert mode
- * whatever the current insert mode is.
- */
-int
-insert_char (int c)
-{
-  return type_char (c, false);
-}
-
 static void
 insert_expanded_tab (void)
 {
@@ -256,27 +246,6 @@ backward_delete_char (void)
   return true;
 }
 
-static bool
-backward_delete_char_overwrite (void)
-{
-  if (bolp () || eolp ())
-    return backward_delete_char ();
-
-  deactivate_mark ();
-
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  move_char (-1);
-  if (following_char () == '\t')
-    insert_expanded_tab ();
-  else
-    insert_char (' ');
-  move_char (-1);
-
-  return true;
-}
-
 DEFUN_ARGS ("delete-char", delete_char,
             INT_OR_UNIARG (n))
 /*+
@@ -295,9 +264,7 @@ Delete the previous @i{n} characters (following if @i{n} is negative).
 +*/
 {
   INT_OR_UNIARG_INIT (n);
-  ok = execute_with_uniarg (true, n, get_buffer_overwrite (cur_bp) ?
-                            backward_delete_char_overwrite : backward_delete_char,
-                            delete_char);
+  ok = execute_with_uniarg (true, n, backward_delete_char, delete_char);
 }
 END_DEFUN
 

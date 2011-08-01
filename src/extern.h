@@ -38,9 +38,9 @@ void process_command (void);
 void init_default_bindings (void);
 
 /* buffer.c --------------------------------------------------------------- */
+int insert_char (int c);
 bool delete_char (void);
 void replace (size_t oldlen, const char *newtext, size_t newlen);
-int type_char (int c, bool overwrite);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
   void set_buffer_ ## field (Buffer *bp, ty field);
@@ -169,7 +169,6 @@ gl_list_t keystrtovec (const char *key);
 astr keyvectostr (gl_list_t keys);
 
 /* line.c ----------------------------------------------------------------- */
-int insert_char (int c);
 bool insert_newline (void);
 bool intercalate_newline (void);
 bool fill_break_line (void);

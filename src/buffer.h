@@ -39,7 +39,6 @@ FIELD(bool, nosave)       /* The buffer need not be saved. */
 FIELD(bool, needname)     /* On save, ask for a file name. */
 FIELD(bool, temporary)    /* The buffer is a temporary buffer. */
 FIELD(bool, readonly)     /* The buffer cannot be modified. */
-FIELD(bool, overwrite)    /* The buffer is in overwrite mode. */
 FIELD(bool, backup)       /* The old file has already been backed up. */
 FIELD(bool, noundo)       /* Do not record undo informations. */
 FIELD(bool, autofill)     /* The buffer is in Auto Fill mode. */

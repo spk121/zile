@@ -91,7 +91,6 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
   if (hp)
     prepare_history (hp);
 
-  static int overwrite_mode = 0;
   int c, thistab, lasttab = -1;
   astr as = astr_new_cstr (value), saved = NULL;
 
@@ -171,9 +170,6 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
             astr_remove (as, pos, 1);
           else
             ding ();
-          break;
-        case KBD_INS:
-          overwrite_mode = overwrite_mode ? 0 : 1;
           break;
         case KBD_META | 'v':
         case KBD_PGUP:
@@ -290,8 +286,6 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
             {
               astr_cpy (as, astr_fmt ("%s%c%s", astr_cstr (astr_substr (as, 0, pos)), c, astr_cstr (astr_substr (as, pos, astr_len (as) - pos))));
               pos++;
-              if (overwrite_mode && pos != astr_len (as))
-                astr_remove (as, pos, 1);
             }
         }
 
