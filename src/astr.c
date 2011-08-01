@@ -83,8 +83,7 @@ astr_len (castr as)
 static
 void astr_set_len (astr as, size_t len)
 {
-  /* FIXME: Realloc if shrunk by a factor of more than 2. */
-  if (len > as->maxlen)
+  if (len > as->maxlen || len < as->maxlen / 2)
     {
       as->maxlen = len + ALLOCATION_CHUNK_SIZE;
       as->text = xrealloc (as->text, as->maxlen + 1);
