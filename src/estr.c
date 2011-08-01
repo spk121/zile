@@ -35,9 +35,6 @@ const char *coding_eol_lf = "\n";
 const char *coding_eol_crlf = "\r\n";
 const char *coding_eol_cr = "\r";
 
-/*
- * Determine EOL type from buffer contents.
- */
 /* Maximum number of EOLs to check before deciding type. */
 #define MAX_EOL_CHECK_COUNT 3
 estr
@@ -133,10 +130,6 @@ estr_cat (estr es, estr src)
   return es;
 }
 
-/*
- * Read file contents into an estr.
- * The `as' member is NULL if the file doesn't exist, or other error.
- */
 estr
 estr_readf (const char *filename)
 {
