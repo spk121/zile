@@ -551,9 +551,9 @@ Argument is a command name.
           walk_bindings (root_bindings, gather_bindings, &g);
 
           if (astr_len (g.bindings) == 0)
-            minibuf_write ("%s is not on any key", name);
+            minibuf_write ("%s is not on any key", astr_cstr (name));
           else
-            minibuf_write ("%s is on %s", name, astr_cstr (g.bindings));
+            minibuf_write ("%s is on %s", astr_cstr (name), astr_cstr (g.bindings));
           ok = leT;
         }
     }
