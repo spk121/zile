@@ -91,7 +91,8 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
   if (hp)
     prepare_history (hp);
 
-  int c, thistab, lasttab = -1;
+  size_t c;
+  int thistab, lasttab = -1;
   astr as = astr_new_cstr (value), saved = NULL;
 
   size_t prompt_len = strlen (prompt);

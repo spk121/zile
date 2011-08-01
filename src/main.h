@@ -209,10 +209,9 @@ typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 
 #define GETKEY_DEFAULT                  0000
 #define GETKEY_DELAYED                  0001
-#define GETKEY_UNFILTERED               0002
 
 /* Special value returned for invalid key codes, or when no key is pressed. */
-#define KBD_NOKEY                       UINT_MAX
+#define KBD_NOKEY                       SIZE_MAX
 
 /* Key modifiers. */
 #define KBD_CTRL                        01000

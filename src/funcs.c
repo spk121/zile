@@ -304,15 +304,18 @@ This is useful for inserting control characters.
 You may also type up to 3 octal digits, to insert a character with that code.
 +*/
 {
-  int c;
-
   minibuf_write ("C-q-");
-  c = getkey (GETKEY_UNFILTERED);
+  int *codes;
+  size_t n = getkey_unfiltered (GETKEY_DEFAULT, &codes);
 
-  if (isdigit (c) && c - '0' < 8)
-    quoted_insert_octal (c);
+  if (n == 1 && isdigit (*codes) && *codes - '0' < 8)
+    quoted_insert_octal (*codes);
   else
-    insert_char (c);
+    for (size_t i = 0; i < n; i++)
+      {
+        fprintf (stderr, "inserting code %d\n", codes[i]);
+        insert_char (codes[i]);
+      }
 
   minibuf_clear ();
 }

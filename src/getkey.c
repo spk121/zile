@@ -21,6 +21,8 @@
 
 #include <config.h>
 
+#include <assert.h>
+
 #include "main.h"
 #include "extern.h"
 
@@ -36,7 +38,7 @@ lastkey (void)
 /*
  * Get a keystroke, waiting for up to WAITKEY_DEFAULT 10ths of a
  * second if mode contains GETKEY_DELAYED, and translating it into a
- * keycode unless mode contains GETKEY_UNFILTERED.
+ * keycode.
  */
 size_t
 getkey (int mode)
@@ -47,6 +49,20 @@ getkey (int mode)
     add_key_to_cmd (_last_key);
 
   return _last_key;
+}
+
+size_t
+getkey_unfiltered (int mode, int **codes)
+{
+  size_t n = term_getkey_unfiltered (mode, codes);
+
+  assert (n > 0);
+  _last_key = *codes[n - 1];
+  if (thisflag & FLAG_DEFINING_MACRO)
+    for (size_t i = 0; i < n; i++)
+      add_key_to_cmd (*codes[i]);
+
+  return n;
 }
 
 /*

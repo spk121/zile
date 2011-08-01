@@ -152,6 +152,7 @@ void pushkey (size_t key);
 void ungetkey (size_t key);
 size_t lastkey (void);
 size_t getkey (int mode);
+size_t getkey_unfiltered (int mode, int **codes);
 void waitkey (void);
 void init_getkey (void);
 void free_getkey (void);
@@ -255,6 +256,7 @@ void term_beep (void);
 size_t term_width (void);
 size_t term_height (void);
 size_t term_getkey (int mode);
+size_t term_getkey_unfiltered (int mode, int **codes);
 void term_ungetkey (size_t key);
 
 /* term_minibuf.c --------------------------------------------------------- */
