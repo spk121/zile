@@ -128,6 +128,7 @@ astr_insert (astr as, size_t pos, size_t size)
 {
   assert (as != NULL);
   assert (pos <= as->len);
+  assert (pos + size >= MAX (pos, size));    /* Check for overflow. */
   astr_set_len (as, as->len + size);
   memmove (as->text + pos + size, as->text + pos, as->len - (pos + size));
   memset (as->text + pos, '\0', size);

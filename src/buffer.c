@@ -137,7 +137,6 @@ buffer_line_len (Buffer *bp, size_t o)
 
 /*
  * Replace `oldlen' chars after point with `newlen' chars from `newtext'.
- * FIXME: Deal with overflow (total length getting bigger than SIZE_MAX).
  */
 #define MIN_GAP 1024 /* Minimum gap size after resize. */
 #define MAX_GAP 4096 /* Maximum permitted gap size. */
