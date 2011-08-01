@@ -455,7 +455,7 @@ what to do with it.
 
       Marker *m = point_marker ();
       goto_offset (r.start);
-      replace (astr_len (find), astr_cstr (case_repl), astr_len (case_repl));
+      replace_estr (astr_len (find), estr_new_astr (case_repl));
       goto_offset (get_marker_o (m));
       unchain_marker (m);
 

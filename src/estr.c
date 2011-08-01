@@ -38,7 +38,7 @@ const char *coding_eol_cr = "\r";
 /* Maximum number of EOLs to check before deciding type. */
 #define MAX_EOL_CHECK_COUNT 3
 estr
-estr_new_astr (astr as)
+estr_new_astr (castr as)
 {
   bool first_eol = true;
   size_t total_eols = 0;
@@ -111,23 +111,38 @@ estr_line_len (estr es, size_t o)
   return estr_end_of_line (es, o) - estr_start_of_line (es, o);
 }
 
-/* FIXME: Replace the following with estr_replace, taken from replace_estr. */
+estr
+estr_replace (estr es, size_t pos, size_t del, estr ins)
+{
+  astr_remove (es.as, pos, del);
+
+  const char *s = astr_cstr (ins.as);
+  size_t ins_eol_len = strlen (ins.eol), es_eol_len = strlen (es.eol);
+  for (size_t len = astr_len (ins.as); len > 0;)
+    {
+      const char *next = memmem (s, len, ins.eol, ins_eol_len);
+      size_t line_len = next ? (size_t) (next - s) : len;
+      astr_insert (es.as, pos, line_len);
+      astr_replace_nstr (es.as, pos, s, line_len);
+      pos += line_len;
+      len -= line_len;
+      s = next;
+      if (len > 0)
+        {
+          astr_insert (es.as, pos, es_eol_len);
+          astr_replace_nstr (es.as, pos, es.eol, es_eol_len);
+          s += ins_eol_len;
+          len -= ins_eol_len;
+          pos += es_eol_len;
+        }
+    }
+  return es;
+}
+
 estr
 estr_cat (estr es, estr src)
 {
-  size_t len = astr_len (src.as), eol_len = strlen (src.eol);
-
-  for (size_t o = 0; o < astr_len (src.as);)
-    {
-      size_t nexto = estr_next_line (src, o);
-      astr_cat_nstr (es.as, astr_cstr (src.as) + o,
-                      ((nexto != SIZE_MAX) ? (size_t) (nexto - eol_len) : len) - o);
-      o = nexto;
-      if (o != SIZE_MAX)
-        astr_cat_cstr (es.as, es.eol);
-    }
-
-  return es;
+  return estr_replace (es, astr_len (es.as), 0, src);
 }
 
 estr

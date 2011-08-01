@@ -170,46 +170,6 @@ insert_newline (void)
   return insert_estr ((estr) {.as = astr_new_cstr ("\n"), .eol = coding_eol_lf});
 }
 
-bool
-replace_estr (size_t del, estr es)
-{
-  if (warn_if_readonly_buffer ())
-    return false;
-
-  undo_start_sequence ();
-  replace (del, NULL, 0);
-  size_t len = astr_len (es.as);
-  const char *s = astr_cstr (es.as);
-  size_t eol_len = strlen (es.eol), buf_eol_len = strlen (get_buffer_eol (cur_bp));
-  while (len > 0)
-    {
-      const char *next = memmem (s, len, es.eol, eol_len);
-      size_t line_len = next ? (size_t) (next - s) : len;
-      replace (0, s, line_len);
-      set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + line_len);
-      len -= line_len;
-      s = next;
-      if (len > 0)
-        {
-          replace (0, get_buffer_eol (cur_bp), buf_eol_len);
-          set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + buf_eol_len);
-
-          thisflag |= FLAG_NEED_RESYNC;
-
-          s += eol_len;
-          len -= eol_len;
-        }
-    }
-  undo_end_sequence ();
-  return true;
-}
-
-bool
-insert_estr (estr es)
-{
-  return replace_estr (0, es);
-}
-
 DEFUN_NONINTERACTIVE_ARGS ("insert", insert,
                            STR_ARG (arg))
 /*+

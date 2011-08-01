@@ -140,25 +140,34 @@ buffer_line_len (Buffer *bp, size_t o)
  */
 #define MIN_GAP 1024 /* Minimum gap size after resize. */
 #define MAX_GAP 4096 /* Maximum permitted gap size. */
-void
-replace (size_t oldlen, const char *newtext, size_t newlen)
+bool
+replace_estr (size_t del, estr es)
 {
-  undo_save_block (cur_bp->pt, oldlen, newlen);
+  if (warn_if_readonly_buffer ())
+    return false;
+
+  /* Convert inserted string to correct line ending. */
+  estr es2 = es;
+  if (es.eol != get_buffer_eol (cur_bp))
+    es2 = estr_cat ((estr) {.as = astr_new (), .eol = get_buffer_eol (cur_bp)}, es);
+  size_t newlen = astr_len (es2.as);
+
+  undo_save_block (cur_bp->pt, del, newlen);
 
   /* Ensure gap fits newlen; if gap becomes zero, set to MIN_GAP. */
-  if (cur_bp->gap + oldlen < newlen)
+  if (cur_bp->gap + del < newlen)
     {
-      astr_insert (cur_bp->text.as, cur_bp->pt, (newlen + MIN_GAP) - (cur_bp->gap + oldlen));
-      cur_bp->gap = newlen + MIN_GAP - oldlen;
+      astr_insert (cur_bp->text.as, cur_bp->pt, (newlen + MIN_GAP) - (cur_bp->gap + del));
+      cur_bp->gap = newlen + MIN_GAP - del;
     }
 
-  /* Remove oldlen chars, zeroing some if necessary. */
-  if (oldlen > newlen)
-    astr_set (cur_bp->text.as, cur_bp->pt + cur_bp->gap, '\0', oldlen - newlen);
-  cur_bp->gap += oldlen;
+  /* Remove del chars, zeroing some if necessary. */
+  if (del > newlen)
+    astr_set (cur_bp->text.as, cur_bp->pt + cur_bp->gap, '\0', del - newlen);
+  cur_bp->gap += del;
 
   /* Insert newlen chars. */
-  astr_replace_nstr (cur_bp->text.as, cur_bp->pt + cur_bp->gap - newlen, newtext, newlen);
+  astr_replace_nstr (cur_bp->text.as, cur_bp->pt + cur_bp->gap - newlen, astr_cstr (es2.as), newlen);
   cur_bp->gap -= newlen;
 
   /* Ensure gap doesn't get too big. */
@@ -171,10 +180,21 @@ replace (size_t oldlen, const char *newtext, size_t newlen)
   /* Adjust markers. */
   for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
     if (get_marker_o (m) > cur_bp->pt)
-      set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt, (ptrdiff_t) (get_marker_o (m) + newlen - oldlen)));
+      set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt, (ptrdiff_t) (get_marker_o (m) + newlen - del)));
 
   set_buffer_modified (cur_bp, true);
   thisflag |= FLAG_NEED_RESYNC;
+
+  set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + astr_len (es2.as));
+  if (estr_next_line (es2, 0) != SIZE_MAX)
+    thisflag |= FLAG_NEED_RESYNC;
+  return true;
+}
+
+bool
+insert_estr (estr es)
+{
+  return replace_estr (0, es);
 }
 
 char
@@ -265,11 +285,11 @@ delete_char (void)
 
   if (eolp ())
     {
-      replace (strlen (get_buffer_eol (cur_bp)), NULL, 0);
+      replace_estr (strlen (get_buffer_eol (cur_bp)), estr_new_astr (astr_new ()));
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
-    replace (1, NULL, 0);
+    replace_estr (1, estr_new_astr (astr_new ()));
 
   set_buffer_modified (cur_bp, true);
 
@@ -477,7 +497,7 @@ delete_region (const Region r)
 
   Marker *m = point_marker ();
   goto_offset (r.start);
-  replace (get_region_size (r), NULL, 0);
+  replace_estr (get_region_size (r), estr_new_astr (astr_new ()));
   goto_offset (get_marker_o (m));
   unchain_marker (m);
   return true;

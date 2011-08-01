@@ -40,7 +40,8 @@ void init_default_bindings (void);
 /* buffer.c --------------------------------------------------------------- */
 int insert_char (int c);
 bool delete_char (void);
-void replace (size_t oldlen, const char *newtext, size_t newlen);
+bool replace_estr (size_t del, estr es);
+bool insert_estr (estr as);
 #define FIELD(ty, field)                                \
   ty get_buffer_ ## field (const Buffer *bp);           \
   void set_buffer_ ## field (Buffer *bp, ty field);
@@ -173,8 +174,6 @@ astr keyvectostr (gl_list_t keys);
 bool insert_newline (void);
 bool intercalate_newline (void);
 bool fill_break_line (void);
-bool replace_estr (size_t del, estr es);
-bool insert_estr (estr as);
 void bprintf (const char *fmt, ...);
 
 /* lisp.c ----------------------------------------------------------------- */

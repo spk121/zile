@@ -34,13 +34,14 @@ extern const char *coding_eol_cr;
 /*
  * Make estr from astr, determining EOL type from astr's contents.
  */
-estr estr_new_astr (astr as);
+estr estr_new_astr (castr as);
 
 size_t estr_prev_line (estr es, size_t o);
 size_t estr_next_line (estr es, size_t o);
 size_t estr_start_of_line (estr es, size_t o);
 size_t estr_end_of_line (estr es, size_t o);
 size_t estr_line_len (estr es, size_t o);
+estr estr_replace (estr es, size_t pos, size_t del, estr ins);
 estr estr_cat (estr es, estr src);
 
 /*
