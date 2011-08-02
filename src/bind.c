@@ -470,7 +470,7 @@ sequence.
   func = get_function (astr_cstr (name));
   if (func == NULL) /* Possible if called non-interactively */
     {
-      minibuf_error ("No such function `%s'", name);
+      minibuf_error ("No such function `%s'", astr_cstr (name));
       return leNIL;
     }
   bind_key_vec (root_bindings, keys, 0, func);
