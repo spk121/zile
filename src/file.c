@@ -379,7 +379,7 @@ Puts mark after the inserted text.
           bp = find_buffer (astr_cstr (buf));
           if (bp == NULL)
             {
-              minibuf_error ("Buffer `%s' not found", buf);
+              minibuf_error ("Buffer `%s' not found", astr_cstr (buf));
               ok = leNIL;
             }
         }
@@ -422,7 +422,7 @@ Set mark after the inserted text.
       else
         {
           ok = leNIL;
-          minibuf_error ("%s: %s", file, strerror (errno));
+          minibuf_error ("%s: %s", astr_cstr (file), strerror (errno));
         }
     }
   else
@@ -761,7 +761,7 @@ Make DIR become the current buffer's default directory.
 
       if (stat (astr_cstr (dir), &st) != 0 || !S_ISDIR (st.st_mode))
         {
-          minibuf_error ("`%s' is not a directory", dir);
+          minibuf_error ("`%s' is not a directory", astr_cstr (dir));
           ok = leNIL;
         }
       else if (chdir (astr_cstr (dir)) == -1)

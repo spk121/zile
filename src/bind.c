@@ -449,7 +449,7 @@ sequence.
       keys = keystrtovec (astr_cstr (keystr));
       if (keys == NULL)
         {
-          minibuf_error ("Key sequence %s is invalid", keystr);
+          minibuf_error ("Key sequence %s is invalid", astr_cstr (keystr));
           return leNIL;
         }
     }

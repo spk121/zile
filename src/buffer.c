@@ -657,7 +657,7 @@ With a nil argument, kill the current buffer.
       bp = find_buffer (astr_cstr (buf));
       if (bp == NULL)
         {
-          minibuf_error ("Buffer `%s' not found", buf);
+          minibuf_error ("Buffer `%s' not found", astr_cstr (buf));
           ok = leNIL;
         }
     }
