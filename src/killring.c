@@ -205,8 +205,10 @@ kill_text (int uniarg, Function mark_func)
     return leNIL;
 
   push_mark ();
+  undo_start_sequence ();
   mark_func (uniarg, true, NULL);
   FUNCALL (kill_region);
+  undo_end_sequence ();
   pop_mark ();
 
   set_this_command (F_kill_region);
