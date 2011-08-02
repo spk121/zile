@@ -386,8 +386,11 @@ Puts mark after the inserted text.
       else
         bp = def_bp;
 
-      insert_buffer (bp);
-      FUNCALL (set_mark_command);
+      if (ok != leNIL)
+        {
+          insert_buffer (bp);
+          FUNCALL (set_mark_command);
+        }
     }
 }
 END_DEFUN
