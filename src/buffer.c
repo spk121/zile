@@ -266,7 +266,7 @@ int
 insert_char (int c)
 {
   const char ch = (char) c;
-  return replace_estr (false, (estr) {.as = castr_new_nstr (&ch, 1), .eol = coding_eol_lf});
+  return replace_estr (false, (estr) {.as = astr_cat_nstr (astr_new (), &ch, 1), .eol = coding_eol_lf});
 }
 
 bool

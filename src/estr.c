@@ -42,7 +42,7 @@ estr_new_astr (castr as)
 {
   bool first_eol = true;
   size_t total_eols = 0;
-  estr es = (estr) {.as = as, .eol = coding_eol_lf};
+  estr es = (estr) {.as = astr_cpy (astr_new (), as), .eol = coding_eol_lf};
   for (size_t i = 0; i < astr_len (as) && total_eols < MAX_EOL_CHECK_COUNT; i++)
     {
       char c = astr_get (as, i);
