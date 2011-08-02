@@ -312,10 +312,7 @@ You may also type up to 3 octal digits, to insert a character with that code.
     quoted_insert_octal (*codes);
   else
     for (size_t i = 0; i < n; i++)
-      {
-        fprintf (stderr, "inserting code %d\n", codes[i]);
-        insert_char (codes[i]);
-      }
+      insert_char (codes[i]);
 
   minibuf_clear ();
 }
