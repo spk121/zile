@@ -223,9 +223,9 @@ completion_readdir (Completion * cp, astr path)
     {
       for (struct dirent *d = readdir (dir); d != NULL; d = readdir (dir))
         {
-          struct stat st;
           astr as = astr_new_cstr (d->d_name);
-          if (stat (astr_cstr (astr_cat_cstr (astr_cpy (astr_new (), pdir), d->d_name)), &st) != -1 &&
+          struct stat st;
+          if (stat (xasprintf ("%s%s", astr_cstr (pdir), d->d_name), &st) == 0 &&
               S_ISDIR (st.st_mode))
             astr_cat_char (as, '/');
           gl_sortedlist_add (cp->completions, completion_strcmp,
