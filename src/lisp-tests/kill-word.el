@@ -1,3 +1,5 @@
-(kill-word 3)
+(kill-word 1)
+(kill-word 1)
+(kill-word 1)
 (save-buffer)
 (save-buffers-kill-emacs)

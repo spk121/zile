@@ -130,29 +130,9 @@ search_key (Binding tree, gl_list_t keys, size_t from)
 size_t
 do_binding_completion (astr as)
 {
-  astr bs = astr_new ();
-
-  if (lastflag & FLAG_SET_UNIARG)
-    {
-      unsigned arg = abs (last_uniarg);
-      do
-        {
-          bs = astr_fmt ("%c %s", arg % 10 + '0', astr_cstr (bs));
-          arg /= 10;
-        }
-      while (arg != 0);
-
-      if (last_uniarg < 0)
-        bs = astr_fmt ("- %s", astr_cstr (bs));
-    }
-
-  minibuf_write ("%s%s%s-",
-                 lastflag & (FLAG_SET_UNIARG | FLAG_UNIARG_EMPTY) ? "C-u " : "",
-                 astr_cstr (bs),
-                 astr_cstr (as));
+  minibuf_write ("%s-", astr_cstr (as));
   size_t key = getkey (GETKEY_DEFAULT);
   minibuf_clear ();
-
   return key;
 }
 
@@ -185,20 +165,7 @@ get_key_sequence (void)
 Function
 get_function_by_keys (gl_list_t keys)
 {
-  Binding p;
-
-  /* Detect Meta-digit */
-  if (gl_list_size (keys) == 1)
-    {
-      size_t key = (size_t) gl_list_get_at (keys, 0);
-      if (key & KBD_META &&
-          (isdigit ((int) (key & 0xff)) || (int) (key & 0xff) == '-'))
-        return F_universal_argument;
-    }
-
-  /* See if we've got a valid key sequence */
-  p = search_key (root_bindings, keys, 0);
-
+  Binding p = search_key (root_bindings, keys, 0);
   return p ? p->func : NULL;
 }
 
@@ -231,7 +198,7 @@ Insert the character you type.
 Whichever character you type to run this command is inserted.
 +*/
 {
-  ok = execute_with_uniarg (true, uniarg, self_insert_command, NULL);
+  ok = bool_to_lisp (self_insert_command ());
 }
 END_DEFUN
 
@@ -251,22 +218,19 @@ set_this_command (Function cmd)
 }
 
 le *
-call_command (Function f, int uniarg, bool uniflag, le *branch)
+call_command (Function f, le *branch)
 {
   thisflag = lastflag & FLAG_DEFINING_MACRO;
 
   /* Execute the command. */
   _this_command = f;
-  le *ok = f (uniarg, uniflag, branch);
+  le *ok = f (branch);
   _last_command = _this_command;
 
   /* Only add keystrokes if we were already in macro defining mode
      before the function call, to cope with start-kbd-macro. */
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro ();
-
-  if (!(thisflag & FLAG_SET_UNIARG))
-    last_uniarg = 1;
 
   if (cur_bp && last_command () != F_undo)
     set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
@@ -285,7 +249,7 @@ process_command (void)
   minibuf_clear ();
 
   if (f != NULL)
-    call_command (f, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
+    call_command (f, NULL);
   else
     minibuf_error ("%s is undefined", astr_cstr (keyvectostr (keys)));
 }
@@ -420,7 +384,6 @@ init_default_bindings (void)
 (global-set-key \"\\M-t\" 'transpose-words)\
 (global-set-key \"\\C-xu\" 'undo)\
 (global-set-key \"\\C-_\" 'undo)\
-(global-set-key \"\\C-u\" 'universal-argument)\
 (global-set-key \"\\C-x\\C-u\" 'upcase-region)\
 (global-set-key \"\\M-u\" 'upcase-word)\
 (global-set-key \"\\C-hw\" 'where-is)\

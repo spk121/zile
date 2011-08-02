@@ -377,6 +377,7 @@ Puts mark after the inserted text.
       if (buf && astr_len (buf) > 0)
         {
           bp = find_buffer (astr_cstr (buf));
+          fprintf (stderr, "found %p\n", bp);
           if (bp == NULL)
             {
               minibuf_error ("Buffer `%s' not found", astr_cstr (buf));
@@ -609,12 +610,10 @@ DEFUN ("write-file", write_file)
 Write current buffer into file @i{filename}.
 This makes the buffer visit that file, and marks it as not modified.
 
-Interactively, confirmation is required unless you supply a prefix argument.
+Interactively, confirmation is required.
 +*/
 {
-  ok = write_buffer (cur_bp, true,
-                     arglist && !(lastflag & FLAG_SET_UNIARG),
-                     NULL, "Write file: ");
+  ok = write_buffer (cur_bp, true, arglist, NULL, "Write file: ");
 }
 END_DEFUN
 

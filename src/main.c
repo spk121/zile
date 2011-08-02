@@ -46,8 +46,6 @@ Buffer *cur_bp = NULL, *head_bp = NULL;
 
 /* The global editor flags. */
 int thisflag = 0, lastflag = 0;
-/* The universal argument repeat count. */
-int last_uniarg = 1;
 
 static const char splash_str[] = "\
 Welcome to " PACKAGE_NAME ".\n\
@@ -268,7 +266,7 @@ main (int argc, char **argv)
         {
         case ARG_FUNCTION:
           {
-            le *res = execute_function (arg, 1);
+            le *res = execute_function (arg);
             if (res == NULL)
               minibuf_error ("Function `%s' not defined", arg);
             ok = res == leT;

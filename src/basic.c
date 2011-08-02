@@ -91,7 +91,7 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  return bool_to_lisp (move_line (-uniarg));
+  return bool_to_lisp (move_line (-1));
 }
 END_DEFUN
 
@@ -103,19 +103,19 @@ the cursor is positioned after the character in that line which spans this
 column, or at the end of the line if it is not long enough.
 +*/
 {
-  return bool_to_lisp (move_line (uniarg));
+  return bool_to_lisp (move_line (1));
 }
 END_DEFUN
 
 DEFUN_ARGS ("goto-char", goto_char,
-            INT_OR_UNIARG (n))
+            INT_ARG (n))
 /*+
 Set point to @i{position}, a number.
 Beginning of buffer is position 1.
 +*/
 {
-  INT_OR_UNIARG_INIT (n);
-  if (noarg)
+  INT_INIT (n);
+  if (arglist == NULL)
     n = minibuf_read_number ("Goto char: ");
 
   if (ok == leNIL || n >= LONG_MAX - 1)
@@ -126,13 +126,13 @@ Beginning of buffer is position 1.
 END_DEFUN
 
 DEFUN_ARGS ("goto-line", goto_line,
-            INT_OR_UNIARG (n))
+            INT_ARG (n))
 /*+
 Goto @i{line}, counting from line 1 at beginning of buffer.
 +*/
 {
-  INT_OR_UNIARG_INIT (n);
-  if (noarg)
+  INT_INIT (n);
+  if (arglist == NULL)
     n = minibuf_read_number ("Goto line: ");
 
   if (ok == leNIL || n >= LONG_MAX - 1)
@@ -163,11 +163,11 @@ END_DEFUN
 
 DEFUN ("backward-char", backward_char)
 /*+
-Move point left N characters (right if N is negative).
+Move point left 1 character.
 On attempt to pass beginning or end of buffer, stop and signal error.
 +*/
 {
-  ok = bool_to_lisp (move_char (-uniarg));
+  ok = bool_to_lisp (move_char (-1));
   if (ok == leNIL)
     minibuf_error ("Beginning of buffer");
 }
@@ -175,11 +175,11 @@ END_DEFUN
 
 DEFUN ("forward-char", forward_char)
 /*+
-Move point right N characters (left if N is negative).
+Move point right 1 character.
 On reaching end of buffer, stop and signal error.
 +*/
 {
-  ok = bool_to_lisp (move_char (uniarg));
+  ok = bool_to_lisp (move_char (1));
   if (ok == leNIL)
     minibuf_error ("End of buffer");
 }
@@ -210,7 +210,7 @@ DEFUN ("scroll-down", scroll_down)
 Scroll text of current window downward near full screen.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, scroll_down, scroll_up);
+  ok = bool_to_lisp (scroll_down ());
 }
 END_DEFUN
 
@@ -219,6 +219,6 @@ DEFUN ("scroll-up", scroll_up)
 Scroll text of current window upward near full screen.
 +*/
 {
-  ok = execute_with_uniarg (false, uniarg, scroll_up, scroll_down);
+  ok = bool_to_lisp (scroll_up ());
 }
 END_DEFUN

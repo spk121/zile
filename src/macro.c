@@ -151,8 +151,7 @@ A prefix argument serves as a repeat count.
       return leNIL;
     }
 
-  for (int uni = 0; uni < uniarg; ++uni)
-    process_keys (cur_mp->keys);
+  process_keys (cur_mp->keys);
 }
 END_DEFUN
 
