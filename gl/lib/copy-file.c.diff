@@ -29,7 +29,7 @@ index f9cd9c0..b5b8447 100644
    if (dest_fd < 0)
 -    error (EXIT_FAILURE, errno, _("cannot open backup file \"%s\" for writing"),
 -           dest_filename);
-+    return -1;
++    goto error_exit_2;
  
    /* Copy the file contents.  */
    for (;;)
