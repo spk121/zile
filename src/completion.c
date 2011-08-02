@@ -204,18 +204,18 @@ completion_readdir (Completion * cp, astr path)
 
   /* Split up path with dirname and basename, unless it ends in `/',
      in which case it's considered to be entirely dirname. */
-  astr pdir, base;
+  astr pdir;
   if (astr_get (path, astr_len (path) - 1) != '/')
     {
       pdir = astr_new_cstr (dir_name (astr_cstr (path)));
       if (!STREQ (astr_cstr (pdir), "/"))
         astr_cat_char (pdir, '/');
-      base = astr_new_cstr (base_name (astr_cstr (path)));
+      astr_cpy_cstr (path, base_name (astr_cstr (path)));
     }
   else
     {
-      pdir = path;
-      base = astr_new ();
+      pdir = astr_cpy (astr_new (), path);
+      astr_truncate (path, 0);
     }
 
   DIR *dir = opendir (astr_cstr (pdir));
