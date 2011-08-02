@@ -184,8 +184,9 @@ typedef le * (*Function) (le * list);
  * Keyboard handling.
  *--------------------------------------------------------------------------*/
 
-#define GETKEY_DEFAULT                  0000
-#define GETKEY_DELAYED                  0001
+/* Standard pauses in ds */
+#define GETKEY_DEFAULT                  -1
+#define GETKEY_DELAYED                  2000
 
 /* Special value returned for invalid key codes, or when no key is pressed. */
 #define KBD_NOKEY                       SIZE_MAX
@@ -238,9 +239,6 @@ typedef le * (*Function) (le * list);
 
 /* Custom exit code */
 #define EXIT_CRASH	2
-
-/* Default waitkey pause in ds */
-#define WAITKEY_DEFAULT 20
 
 
 /*--------------------------------------------------------------------------

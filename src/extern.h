@@ -154,8 +154,8 @@ void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), 
 void pushkey (size_t key);
 void ungetkey (size_t key);
 size_t lastkey (void);
-size_t getkey (int mode);
-size_t getkey_unfiltered (int mode, int **codes);
+size_t getkey (int delay);
+size_t getkey_unfiltered (int delay, int **codes);
 void waitkey (void);
 void init_getkey (void);
 void free_getkey (void);
@@ -252,8 +252,8 @@ void term_attrset (size_t attr);
 void term_beep (void);
 size_t term_width (void);
 size_t term_height (void);
-size_t term_getkey (int mode);
-size_t term_getkey_unfiltered (int mode, int **codes);
+size_t term_getkey (int delay);
+size_t term_getkey_unfiltered (int delay, int **codes);
 void term_ungetkey (size_t key);
 
 /* term_minibuf.c --------------------------------------------------------- */

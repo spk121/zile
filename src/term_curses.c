@@ -348,58 +348,51 @@ keytocodes (size_t key, int ** codevec)
 }
 
 static int
-get_char (void)
+get_char (int delay)
 {
   size_t size = term_buf_len ();
 
-  if (size > 0)
-    {
-      int c = (ptrdiff_t) gl_list_get_at (key_buf, size - 1);
-      gl_list_remove_at (key_buf, size - 1);
-      return c;
-    }
-  else
-    return getch ();
-}
-
-static int
-get_char_delayed (int mode)
-{
-  if (mode & GETKEY_DELAYED)
-    timeout ((int) WAITKEY_DEFAULT * 100);
+  timeout (delay);
 
   int c;
 #ifdef KEY_RESIZE
   do {
 #endif
-    c = get_char ();
-#ifdef KEY_RESIZE
+    if (size > 0)
+      {
+        c = (ptrdiff_t) gl_list_get_at (key_buf, size - 1);
+        gl_list_remove_at (key_buf, size - 1);
+      }
+    else
+      c = getch ();
+
+    #ifdef KEY_RESIZE
     if (c == KEY_RESIZE)
       resize_windows ();
   } while (c == KEY_RESIZE);
 #endif
-  if (mode & GETKEY_DELAYED)
-    timeout (-1);
+
+  timeout (-1);
 
   return c;
 }
 
 size_t
-term_getkey (int mode)
+term_getkey (int delay)
 {
-  size_t key = codetokey (get_char_delayed (mode));
+  size_t key = codetokey (get_char (delay));
   while (key == KBD_META)
-    key = codetokey (get_char ()) | KBD_META;
+    key = codetokey (get_char (GETKEY_DEFAULT)) | KBD_META;
   return key;
 }
 
 size_t
-term_getkey_unfiltered (int mode, int **codes)
+term_getkey_unfiltered (int delay, int **codes)
 {
-  *codes = XCALLOC (2, int);
+  *codes = XCALLOC (16, int);
   size_t n = 0;
   keypad (stdscr, false);
-  for (*codes[n] = get_char_delayed (mode); *codes[n++] == KBD_META; *codes[n] = get_char ())
+  for ((*codes)[n] = get_char (delay); (*codes)[n] != ERR; (*codes)[++n] = get_char (0))
     ;
   keypad (stdscr, true);
   return n;

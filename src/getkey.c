@@ -36,9 +36,8 @@ lastkey (void)
 }
 
 /*
- * Get a keystroke, waiting for up to WAITKEY_DEFAULT 10ths of a
- * second if mode contains GETKEY_DELAYED, and translating it into a
- * keycode.
+ * Get a keystroke, waiting for up to GETKEY_DELAYED ms, and translate
+ * it into a keycode.
  */
 size_t
 getkey (int mode)
@@ -66,8 +65,8 @@ getkey_unfiltered (int mode, int **codes)
 }
 
 /*
- * Wait for WAITKEY_DEFAULT 10ths if a second or until a key is
- * pressed. The key is then available with [x]getkey.
+ * Wait for GETKEY_DELAYED ms or until a key is pressed.  The key is
+ * then available with [x]getkey.
  */
 void
 waitkey (void)
