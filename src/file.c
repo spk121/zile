@@ -506,12 +506,8 @@ backup_and_write (Buffer * bp, const char *filename)
       const char *backupdir = get_variable_bool ("backup-directory") ?
         get_variable ("backup-directory") : NULL;
       astr bfilename = create_backup_filename (filename, backupdir);
-      if (bfilename)
-        {
-          /* FIXME: Use error-code-returning copy_file_preserving. */
-          copy_file_preserving (filename, astr_cstr (bfilename));
-          set_buffer_backup (bp, true);
-        }
+      if (bfilename && copy_file_preserving (filename, astr_cstr (bfilename)))
+        set_buffer_backup (bp, true);
       else
         {
           minibuf_error ("Cannot make backup file: %s", strerror (errno));

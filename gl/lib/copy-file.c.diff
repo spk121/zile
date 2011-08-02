@@ -1,0 +1,87 @@
+diff --git a/lib/copy-file.c b/lib/copy-file.c
+index f9cd9c0..b5b8447 100644
+--- a/lib/copy-file.c
++++ b/lib/copy-file.c
+@@ -53,7 +53,7 @@
+ 
+ enum { IO_SIZE = 32 * 1024 };
+ 
+-void
++int
+ copy_file_preserving (const char *src_filename, const char *dest_filename)
+ {
+   int src_fd;
+@@ -63,37 +63,37 @@ copy_file_preserving (const char *src_filename, const char *dest_filename)
+   char *buf = xmalloc (IO_SIZE);
+ 
+   src_fd = open (src_filename, O_RDONLY | O_BINARY);
+-  if (src_fd < 0 || fstat (src_fd, &statbuf) < 0)
+-    error (EXIT_FAILURE, errno, _("error while opening \"%s\" for reading"),
+-           src_filename);
++  if (src_fd < 0)
++    return -1;
++  if (fstat (src_fd, &statbuf) < 0)
++    goto error_exit_2;
+ 
+   mode = statbuf.st_mode & 07777;
+ 
+   dest_fd = open (dest_filename, O_WRONLY | O_CREAT | O_TRUNC | O_BINARY, 0600);
+   if (dest_fd < 0)
+-    error (EXIT_FAILURE, errno, _("cannot open backup file \"%s\" for writing"),
+-           dest_filename);
++    return -1;
+ 
+   /* Copy the file contents.  */
+   for (;;)
+     {
+       size_t n_read = safe_read (src_fd, buf, IO_SIZE);
+       if (n_read == SAFE_READ_ERROR)
+-        error (EXIT_FAILURE, errno, _("error reading \"%s\""), src_filename);
++        goto error_exit;
+       if (n_read == 0)
+         break;
+ 
+       if (full_write (dest_fd, buf, n_read) < n_read)
+-        error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
++        goto error_exit;
+     }
+ 
+   free (buf);
+ 
+ #if !USE_ACL
+   if (close (dest_fd) < 0)
+-    error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
++    goto error_exit_2;
+   if (close (src_fd) < 0)
+-    error (EXIT_FAILURE, errno, _("error after reading \"%s\""), src_filename);
++    return -1;
+ #endif
+ 
+   /* Preserve the access and modification times.  */
+@@ -123,15 +123,23 @@ copy_file_preserving (const char *src_filename, const char *dest_filename)
+   /* Preserve the access permissions.  */
+ #if USE_ACL
+   if (copy_acl (src_filename, src_fd, dest_filename, dest_fd, mode))
+-    exit (EXIT_FAILURE);
++    goto error_exit;
+ #else
+   chmod (dest_filename, mode);
+ #endif
+ 
+ #if USE_ACL
+   if (close (dest_fd) < 0)
+-    error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
++    goto error_exit_2;
+   if (close (src_fd) < 0)
+-    error (EXIT_FAILURE, errno, _("error after reading \"%s\""), src_filename);
++    return -1;
+ #endif
++
++  return 0;
++
++ error_exit:
++  close (dest_fd);
++ error_exit_2:
++  close (src_fd);
++  return -1;
+ }
