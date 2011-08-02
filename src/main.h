@@ -59,19 +59,12 @@ typedef struct Window Window;
 typedef struct Completion Completion;
 
 /* FIXME: Types which should really be opaque. */
-typedef struct Point Point;
 typedef struct Region Region;
 
 struct Region
 {
   size_t start;		/* The region start. */
   size_t end;		/* The region end. */
-};
-
-struct Point
-{
-  size_t n;			/* Line number. */
-  size_t o;			/* Offset. */
 };
 
 enum

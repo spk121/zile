@@ -92,6 +92,8 @@ Completion *make_buffer_completion (void);
 bool check_modified_buffer (Buffer * bp);
 bool move_char (int dir);
 bool move_line (int n);
+size_t offset_to_line (Buffer *bp, size_t offset);
+void goto_offset (size_t o);
 
 /* completion.c ----------------------------------------------------------- */
 #define FIELD(ty, field)                                        \
@@ -228,10 +230,6 @@ castr minibuf_vread_completion (const char *fmt, const char *value, Completion *
 castr minibuf_read_filename (const char *fmt, const char *value,
                              const char *file, ...);
 void minibuf_clear (void);
-
-/* point.c ---------------------------------------------------------------- */
-Point offset_to_point (Buffer *bp, size_t offset);
-void goto_offset (size_t o);
 
 /* redisplay.c ------------------------------------------------------------ */
 void resync_redisplay (Window * wp);

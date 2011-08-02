@@ -70,7 +70,6 @@ zile_base_SOURCES =					\
 	marker.h					\
 	marker.c					\
 	minibuf.c					\
-	point.c						\
 	window.h					\
 	term_minibuf.c					\
 	term_redisplay.c				\

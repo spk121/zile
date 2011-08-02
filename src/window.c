@@ -285,7 +285,7 @@ window_o (Window * wp)
 bool
 window_top_visible (Window * wp)
 {
-  return offset_to_point (get_window_bp (wp), window_o (wp)).n == get_window_topdelta (wp);
+  return offset_to_line (get_window_bp (wp), window_o (wp)) == get_window_topdelta (wp);
 }
 
 bool

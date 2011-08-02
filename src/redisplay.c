@@ -29,7 +29,7 @@
 void
 resync_redisplay (Window * wp)
 {
-  size_t n = offset_to_point (get_window_bp (wp), get_buffer_pt (get_window_bp (wp))).n;
+  size_t n = offset_to_line (get_window_bp (wp), get_buffer_pt (get_window_bp (wp)));
   ptrdiff_t delta = n - get_window_lastpointn (wp);
 
   if (delta)
@@ -105,12 +105,12 @@ resize_windows (void)
 void
 recenter (Window * wp)
 {
-  Point pt = offset_to_point (get_window_bp (wp), window_o (wp));
+  size_t n = offset_to_line (get_window_bp (wp), window_o (wp));
 
-  if (pt.n > get_window_eheight (wp) / 2)
+  if (n > get_window_eheight (wp) / 2)
     set_window_topdelta (wp, get_window_eheight (wp) / 2);
   else
-    set_window_topdelta (wp, pt.n);
+    set_window_topdelta (wp, n);
 }
 
 DEFUN ("recenter", recenter)
