@@ -506,7 +506,7 @@ backup_and_write (Buffer * bp, const char *filename)
       const char *backupdir = get_variable_bool ("backup-directory") ?
         get_variable ("backup-directory") : NULL;
       astr bfilename = create_backup_filename (filename, backupdir);
-      if (bfilename && copy_file_preserving (filename, astr_cstr (bfilename)))
+      if (bfilename && copy_file_preserving (filename, astr_cstr (bfilename)) == 0)
         set_buffer_backup (bp, true);
       else
         {
