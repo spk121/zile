@@ -348,23 +348,15 @@ keytocodes (size_t key, int ** codevec)
 }
 
 static int
-get_char (int delay)
+get_char_unfiltered (int delay)
 {
-  size_t size = term_buf_len ();
-
   timeout (delay);
 
   int c;
 #ifdef KEY_RESIZE
   do {
 #endif
-    if (size > 0)
-      {
-        c = (ptrdiff_t) gl_list_get_at (key_buf, size - 1);
-        gl_list_remove_at (key_buf, size - 1);
-      }
-    else
-      c = getch ();
+    c = getch ();
 
     #ifdef KEY_RESIZE
     if (c == KEY_RESIZE)
@@ -375,6 +367,21 @@ get_char (int delay)
   timeout (-1);
 
   return c;
+}
+
+static int
+get_char (int delay)
+{
+  size_t size = term_buf_len ();
+
+  if (size > 0)
+    {
+      int c = (ptrdiff_t) gl_list_get_at (key_buf, size - 1);
+      gl_list_remove_at (key_buf, size - 1);
+      return c;
+    }
+  else
+    return get_char_unfiltered (delay);
 }
 
 size_t
@@ -392,7 +399,7 @@ term_getkey_unfiltered (int delay, int **codes)
   *codes = XCALLOC (16, int);
   size_t n = 0;
   keypad (stdscr, false);
-  for ((*codes)[n] = get_char (delay); (*codes)[n] != ERR; (*codes)[++n] = get_char (0))
+  for ((*codes)[n] = get_char (delay); (*codes)[n] != ERR; (*codes)[++n] = get_char_unfiltered (0))
     ;
   keypad (stdscr, true);
   return n;
