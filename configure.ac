@@ -60,13 +60,13 @@ gl_WARN_ADD([-D_FORTIFY_SOURCE=2], [WARN_FLAGS])
 gl_WARN_ADD([-fmudflap], [WARN_FLAGS])
 
 dnl help2man
-AX_WITH_PROG(HELP2MAN, help2man)
+AX_WITH_PROG([HELP2MAN], [help2man])
 
 dnl Code complexity reports
 AC_PATH_PROG([PMCCABE], [pmccabe], [false])
 
 dnl Valgrind
-AX_WITH_PROG(VALGRIND, valgrind)
+AX_WITH_PROG([VALGRIND], [valgrind])
 if test -n "$VALGRIND"; then
   VALGRIND="$VALGRIND -q --error-exitcode=1"
 fi
@@ -105,22 +105,22 @@ if test "x$enable_debug" != "yes"; then
     dnl The "break" will exit from the top level
     dnl AC_CHECK_HEADERS.
     gc_libs=""
-    AC_CHECK_LIB(gc, GC_init, [
+    AC_CHECK_LIB([gc], [GC_init], [
       gc_ok=yes;
       LIBS="-lgc $gc_libs $LIBS";
       break], [gc_ok=no], [$gc_libs])
     gc_libs="-lpthread"
-    AC_CHECK_LIB(gc, GC_malloc, [
+    AC_CHECK_LIB([gc], [GC_malloc], [
       gc_ok=yes;
       LIBS="-lgc $gc_libs $LIBS";
       break], [gc_ok=no], [$gc_libs])
     gc_libs="-ldl"
-    AC_CHECK_LIB(gc, GC_realloc, [
+    AC_CHECK_LIB([gc], [GC_realloc], [
       gc_ok=yes;
       LIBS="-lgc $gc_libs $LIBS";
       break], [gc_ok=no], [$gc_libs])
     gc_libs="-lpthread -ldl"
-    AC_CHECK_LIB(gc, GC_free, [
+    AC_CHECK_LIB([gc], [GC_free], [
       gc_ok=yes;
       LIBS="-lgc $gc_libs $LIBS";
       break], [gc_ok=no], [$gc_libs])
@@ -130,25 +130,25 @@ if test "x$enable_debug" != "yes"; then
     AC_MSG_FAILURE([cannot find libgc])
   fi
   LIBGC_CPPFLAGS="-DREDIRECT_MALLOC=GC_malloc -DIGNORE_FREE"
-  AC_SUBST(LIBGC_CPPFLAGS)
+  AC_SUBST([LIBGC_CPPFLAGS])
 fi
 
 dnl Emacs
-AX_WITH_PROG(EMACSPROG, emacs)
+AX_WITH_PROG([EMACSPROG], [emacs])
 if test -n "$EMACSPROG"; then
   emacs_min_version=23.1
-  emacs_version=$($EMACSPROG --version 2>&1 | head -n 1 | cut -d' ' -f3)
+  emacs_version=`$EMACSPROG --version 2>&1 | head -n 1 | cut -d' ' -f3`
   AC_MSG_CHECKING([Emacs version $emacs_version >= $emacs_min_version])
-  AX_COMPARE_VERSION("$emacs_version", ge, $emacs_min_version,
-    AC_MSG_RESULT([yes]),
+  AX_COMPARE_VERSION(["$emacs_version"], [ge], [$emacs_min_version],
+    [AC_MSG_RESULT([yes])],
     [AC_MSG_RESULT([no])
     unset EMACSPROG])
 fi
 
 dnl Perl
-AX_WITH_PROG(PERL, perl)
+AX_WITH_PROG([PERL], [perl])
 
 dnl Generate output
-AC_CONFIG_HEADERS(config.h)
-AC_CONFIG_FILES(Makefile lib/Makefile src/Makefile src/tbl_opts.h)
+AC_CONFIG_HEADERS([config.h])
+AC_CONFIG_FILES([Makefile lib/Makefile src/Makefile src/tbl_opts.h])
 AC_OUTPUT
