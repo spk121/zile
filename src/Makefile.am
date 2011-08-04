@@ -92,6 +92,11 @@ PRODUCTIONSOURCES =					\
 	Makefile.am ../Makefile.am ../configure.ac	\
 	*.el
 
+BUILT_SOURCES = 					\
+	tbl_funcs.h					\
+	tbl_opts.h					\
+	tbl_vars.h
+
 tbl_funcs.h: $(zile_function_SOURCES) mkfuncs.pl
 	PACKAGE_NAME="$(PACKAGE_NAME)" $(PERL) -I$(srcdir) $(srcdir)/mkfuncs.pl $(srcdir) $(zile_function_SOURCES)
 
