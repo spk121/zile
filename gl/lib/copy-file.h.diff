@@ -1,13 +1,14 @@
 diff --git a/lib/copy-file.h b/lib/copy-file.h
-index cb8b1f7..b0c29e0 100644
+index cb8b1f7..0f0931c 100644
 --- a/lib/copy-file.h
 +++ b/lib/copy-file.h
-@@ -26,7 +26,7 @@ extern "C" {
-    Modification times, owner, group and access permissions are preserved as
-    far as possible.
+@@ -28,6 +28,9 @@ extern "C" {
     Exit upon failure.  */
--extern void copy_file_preserving (const char *src_filename, const char *dest_filename);
-+extern int copy_file_preserving (const char *src_filename, const char *dest_filename);
+ extern void copy_file_preserving (const char *src_filename, const char *dest_filename);
  
++/* Error-returning version of copy_file_preserving. */
++extern int copy_file_preserving_error (const char *src_filename, const char *dest_filename);
++
  
  #ifdef __cplusplus
+ }

@@ -1,17 +1,31 @@
 diff --git a/lib/copy-file.c b/lib/copy-file.c
-index f9cd9c0..b5b8447 100644
+index f9cd9c0..4ae8427 100644
 --- a/lib/copy-file.c
 +++ b/lib/copy-file.c
-@@ -53,7 +53,7 @@
+@@ -53,47 +53,79 @@
  
  enum { IO_SIZE = 32 * 1024 };
  
 -void
+-copy_file_preserving (const char *src_filename, const char *dest_filename)
++enum {
++  ERR_OPEN_READ = 1,
++  ERR_OPEN_BACKUP_WRITE,
++  ERR_READ,
++  ERR_WRITE,
++  ERR_AFTER_READ,
++  ERR_ACL
++};
++
++
 +int
- copy_file_preserving (const char *src_filename, const char *dest_filename)
++_copy_file_preserving (const char *src_filename, const char *dest_filename)
  {
    int src_fd;
-@@ -63,37 +63,37 @@ copy_file_preserving (const char *src_filename, const char *dest_filename)
+   struct stat statbuf;
+   int mode;
+   int dest_fd;
++  int err = 0;
    char *buf = xmalloc (IO_SIZE);
  
    src_fd = open (src_filename, O_RDONLY | O_BINARY);
@@ -19,9 +33,15 @@ index f9cd9c0..b5b8447 100644
 -    error (EXIT_FAILURE, errno, _("error while opening \"%s\" for reading"),
 -           src_filename);
 +  if (src_fd < 0)
-+    return -1;
++    {
++      err = ERR_OPEN_READ;
++      goto error;
++    }
 +  if (fstat (src_fd, &statbuf) < 0)
-+    goto error_exit_2;
++    {
++      err = ERR_OPEN_READ;
++      goto error_src;
++    }
  
    mode = statbuf.st_mode & 07777;
  
@@ -29,7 +49,10 @@ index f9cd9c0..b5b8447 100644
    if (dest_fd < 0)
 -    error (EXIT_FAILURE, errno, _("cannot open backup file \"%s\" for writing"),
 -           dest_filename);
-+    goto error_exit_2;
++    {
++      err = ERR_OPEN_BACKUP_WRITE;
++      goto error_src;
++    }
  
    /* Copy the file contents.  */
    for (;;)
@@ -37,13 +60,19 @@ index f9cd9c0..b5b8447 100644
        size_t n_read = safe_read (src_fd, buf, IO_SIZE);
        if (n_read == SAFE_READ_ERROR)
 -        error (EXIT_FAILURE, errno, _("error reading \"%s\""), src_filename);
-+        goto error_exit;
++        {
++          err = ERR_READ;
++          goto error_src_dest;
++        }
        if (n_read == 0)
          break;
  
        if (full_write (dest_fd, buf, n_read) < n_read)
 -        error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
-+        goto error_exit;
++        {
++          err = ERR_WRITE;
++          goto error_src_dest;
++        }
      }
  
    free (buf);
@@ -51,19 +80,28 @@ index f9cd9c0..b5b8447 100644
  #if !USE_ACL
    if (close (dest_fd) < 0)
 -    error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
-+    goto error_exit_2;
++    {
++      err = ERR_WRITE;
++      goto error_src;
++    }
    if (close (src_fd) < 0)
 -    error (EXIT_FAILURE, errno, _("error after reading \"%s\""), src_filename);
-+    return -1;
++    {
++      err = ERR_AFTER_READ;
++      goto error;
++    }
  #endif
  
    /* Preserve the access and modification times.  */
-@@ -123,15 +123,23 @@ copy_file_preserving (const char *src_filename, const char *dest_filename)
+@@ -123,15 +155,73 @@ copy_file_preserving (const char *src_filename, const char *dest_filename)
    /* Preserve the access permissions.  */
  #if USE_ACL
    if (copy_acl (src_filename, src_fd, dest_filename, dest_fd, mode))
 -    exit (EXIT_FAILURE);
-+    goto error_exit;
++    {
++      err = ERR_ACL;
++      goto error_src_dest;
++    }
  #else
    chmod (dest_filename, mode);
  #endif
@@ -71,17 +109,64 @@ index f9cd9c0..b5b8447 100644
  #if USE_ACL
    if (close (dest_fd) < 0)
 -    error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
-+    goto error_exit_2;
++    {
++      err = ERR_WRITE;
++      goto error_src;
++    }
    if (close (src_fd) < 0)
 -    error (EXIT_FAILURE, errno, _("error after reading \"%s\""), src_filename);
-+    return -1;
++    {
++      err = ERR_AFTER_READ;
++      goto error;
++    }
  #endif
 +
 +  return 0;
 +
-+ error_exit:
++ error_src_dest:
 +  close (dest_fd);
-+ error_exit_2:
++ error_src:
 +  close (src_fd);
-+  return -1;
++ error:
++  return -err;
++}
++
++void
++copy_file_preserving (const char *src_filename, const char *dest_filename)
++{
++  switch (_copy_file_preserving (src_filename, dest_filename))
++    {
++    case 0:
++      return;
++
++    case ERR_OPEN_READ:
++      error (EXIT_FAILURE, errno, _("error while opening \"%s\" for reading"),
++             src_filename);
++
++    case ERR_OPEN_BACKUP_WRITE:
++      error (EXIT_FAILURE, errno, _("cannot open backup file \"%s\" for writing"),
++             dest_filename);
++
++    case ERR_READ:
++      error (EXIT_FAILURE, errno, _("error reading \"%s\""), src_filename);
++
++    case ERR_WRITE:
++      error (EXIT_FAILURE, errno, _("error writing \"%s\""), dest_filename);
++
++    case ERR_AFTER_READ:
++      error (EXIT_FAILURE, errno, _("error after reading \"%s\""), src_filename);
++
++    case ERR_ACL:
++      exit (EXIT_FAILURE);
++
++    default:
++      exit (EXIT_FAILURE);
++    }
++}
++
++
++int
++copy_file_preserving_error (const char *src_filename, const char *dest_filename)
++{
++  return _copy_file_preserving (src_filename, dest_filename) < 0 ? - 1 : 0;
  }
