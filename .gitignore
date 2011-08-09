@@ -8,6 +8,7 @@
 /README-release
 /README-release.in
 /doc
+/gnulib
 /lib
 /maint.mk
 ChangeLog
