@@ -369,6 +369,8 @@ init_default_bindings (void)
 (global-set-key \"\\C-v\" 'scroll-up)\
 (global-set-key \"\\C-xf\" 'set-fill-column)\
 (global-set-key \"\\C-@\" 'set-mark-command)\
+(global-set-key \"\\M-!\" 'shell-command)\
+(global-set-key \"\\M-|\" 'shell-command-on-region)\
 (global-set-key \"\\C-x2\" 'split-window)\
 (global-set-key \"\\C-x(\" 'start-kbd-macro)\
 (global-set-key \"\\C-x\\C-z\" 'suspend-emacs)\
