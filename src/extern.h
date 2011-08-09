@@ -33,7 +33,7 @@ void set_this_command (Function cmd);
 size_t do_binding_completion (astr as);
 gl_list_t get_key_sequence (void);
 Function get_function_by_keys (gl_list_t keys);
-le *call_command (Function f, le *branch);
+le *call_command (Function f, int uniarg, bool uniflag, le *branch);
 void process_command (void);
 void init_default_bindings (void);
 
@@ -126,7 +126,10 @@ void ding (void);
 extern le *leNIL, *leT;
 size_t countNodes (le * branch);
 void leEval (le * list);
-le *execute_function (const char *name);
+le *execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void),
+                         bool (*backward) (void));
+le *move_with_uniarg (int uniarg, bool (*move) (int dir));
+le *execute_function (const char *name, int uniarg);
 Function get_function (const char *name);
 const char *get_function_doc (const char *name);
 int get_function_interactive (const char *name);
@@ -144,9 +147,6 @@ bool find_file (const char *filename);
 _Noreturn void zile_exit (int doabort);
 
 /* funcs.c ---------------------------------------------------------------- */
-bool move_and_mark (int dir, bool (*func) (int dir));
-bool move_word (int dir);
-bool move_sexp (int dir);
 void set_mark_interactive (void);
 void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...);
 
@@ -193,7 +193,7 @@ void remove_key_from_cmd (void);
 extern char *prog_name;
 extern Window *cur_wp, *head_wp;
 extern Buffer *cur_bp, *head_bp;
-extern int thisflag, lastflag;
+extern int thisflag, lastflag, last_uniarg;
 
 /* marker.c --------------------------------------------------------------- */
 #define FIELD(ty, field)                                \
@@ -302,6 +302,6 @@ bool window_bottom_visible (Window * wp);
  * Declare external Zile functions.
  */
 #define X(zile_name, c_name, interactive, doc)   \
-  le *F_ ## c_name (le * l);
+  le *F_ ## c_name (long uniarg, bool is_uniarg, le * l);
 #include "tbl_funcs.h"
 #undef X

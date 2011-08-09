@@ -109,10 +109,23 @@ kill_line (bool whole_line)
   return ok;
 }
 
-DEFUN ("kill-line", kill_line)
+static bool
+kill_whole_line (void)
+{
+  return kill_line (true);
+}
+
+static bool
+kill_line_backward (void)
+{
+  return previous_line () && kill_whole_line ();
+}
+
+DEFUN_ARGS ("kill-line", kill_line,
+            INT_OR_UNIARG (arg))
 /*+
 Kill the rest of the current line; if no nonblanks there, kill thru newline.
-With argument @i{arg}, kill that many lines from point.
+With prefix argument @i{arg}, kill that many lines from point.
 Negative arguments kill lines backward.
 With zero argument, kills the text before point on the current line.
 
@@ -122,7 +135,22 @@ with no argument.
 +*/
 {
   maybe_free_kill_ring ();
-  ok = bool_to_lisp (kill_line (bolp () && get_variable_bool ("kill-whole-line")));
+
+  INT_OR_UNIARG_INIT (arg);
+
+  if (noarg)
+    ok = bool_to_lisp (kill_line (bolp () && get_variable_bool ("kill-whole-line")));
+  else
+    {
+      undo_start_sequence ();
+      if (arg <= 0)
+        ok = bool_to_lisp (bolp () ||
+                           copy_or_kill_region (true, region_new (get_buffer_line_o (cur_bp), get_buffer_pt (cur_bp))));
+      if (arg != 0 && ok == leT)
+        ok = execute_with_uniarg (false, arg, kill_whole_line, kill_line_backward);
+      undo_end_sequence ();
+    }
+
   deactivate_mark ();
 }
 END_DEFUN
@@ -169,7 +197,7 @@ Save the region as if killed, but don't kill it.
 END_DEFUN
 
 static le *
-kill_text (int arg, bool func (int dir))
+kill_text (int uniarg, Function mark_func)
 {
   maybe_free_kill_ring ();
 
@@ -178,7 +206,7 @@ kill_text (int arg, bool func (int dir))
 
   push_mark ();
   undo_start_sequence ();
-  move_and_mark (arg, func);
+  mark_func (uniarg, true, NULL);
   FUNCALL (kill_region);
   undo_end_sequence ();
   pop_mark ();
@@ -188,21 +216,27 @@ kill_text (int arg, bool func (int dir))
   return leT;
 }
 
-DEFUN ("kill-word", kill_word)
+DEFUN_ARGS ("kill-word", kill_word,
+            INT_OR_UNIARG (arg))
 /*+
 Kill characters forward until encountering the end of a word.
+With argument @i{arg}, do this that many times.
 +*/
 {
-  ok = kill_text (1, move_word);
+  INT_OR_UNIARG_INIT (arg);
+  ok = kill_text (arg, F_mark_word);
 }
 END_DEFUN
 
-DEFUN ("backward-kill-word", backward_kill_word)
+DEFUN_ARGS ("backward-kill-word", backward_kill_word,
+            INT_OR_UNIARG (arg))
 /*+
 Kill characters backward until encountering the end of a word.
+With argument @i{arg}, do this that many times.
 +*/
 {
-  ok = kill_text (-1, move_word);
+  INT_OR_UNIARG_INIT (arg);
+  ok = kill_text (-arg, F_mark_word);
 }
 END_DEFUN
 
@@ -213,7 +247,7 @@ With @i{arg}, kill that many sexps after the cursor.
 Negative arg -N means kill N sexps before the cursor.
 +*/
 {
-  ok = kill_text (1, move_sexp);
+  ok = kill_text (uniarg, F_mark_sexp);
 }
 END_DEFUN
 

@@ -64,10 +64,19 @@ Copy region into register @i{register}.
 }
 END_DEFUN
 
+static int regnum;
+
+static bool
+insert_register (void)
+{
+  insert_estr (regs[regnum]);
+  return true;
+}
+
 DEFUN_ARGS ("insert-register", insert_register,
             INT_ARG (reg))
 /*+
-Insert contents of register @i{register}.
+Insert contents of the user specified register.
 Puts point before and mark after the inserted text.
 +*/
 {
@@ -96,7 +105,8 @@ Puts point before and mark after the inserted text.
       else
         {
           FUNCALL (set_mark_command);
-          insert_estr (regs[reg]);
+          regnum = reg;
+          execute_with_uniarg (true, uniarg, insert_register, NULL);
           FUNCALL (exchange_point_and_mark);
           deactivate_mark ();
         }

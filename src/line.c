@@ -57,7 +57,7 @@ Insert a tabulation at the current point position into the current
 buffer.
 +*/
 {
-  ok = bool_to_lisp (insert_tab ());
+  ok = execute_with_uniarg (true, uniarg, insert_tab, NULL);
 }
 END_DEFUN
 
@@ -151,7 +151,7 @@ Insert a newline at the current point position into
 the current buffer.
 +*/
 {
-  ok = bool_to_lisp (newline ());
+  ok = execute_with_uniarg (true, uniarg, newline, NULL);
 }
 END_DEFUN
 
@@ -160,7 +160,7 @@ DEFUN ("open-line", open_line)
 Insert a newline and leave point before it.
 +*/
 {
-  ok = bool_to_lisp (intercalate_newline ());
+  ok = execute_with_uniarg (true, uniarg, intercalate_newline, NULL);
 }
 END_DEFUN
 
@@ -206,21 +206,25 @@ backward_delete_char (void)
   return true;
 }
 
-DEFUN ("delete-char", delete_char)
+DEFUN_ARGS ("delete-char", delete_char,
+            INT_OR_UNIARG (n))
 /*+
-Delete the following character.
+Delete the following @i{n} characters (previous if @i{n} is negative).
 +*/
 {
-  ok = bool_to_lisp (delete_char ());
+  INT_OR_UNIARG_INIT (n);
+  ok = execute_with_uniarg (true, n, delete_char, backward_delete_char);
 }
 END_DEFUN
 
-DEFUN ("backward-delete-char", backward_delete_char)
+DEFUN_ARGS ("backward-delete-char", backward_delete_char,
+            INT_OR_UNIARG (n))
 /*+
-Delete the previous character.
+Delete the previous @i{n} characters (following if @i{n} is negative).
 +*/
 {
-  ok = bool_to_lisp (backward_delete_char ());
+  INT_OR_UNIARG_INIT (n);
+  ok = execute_with_uniarg (true, n, backward_delete_char, delete_char);
 }
 END_DEFUN
 
@@ -265,7 +269,7 @@ previous_nonblank_goalc (void)
   size_t cur_goalc = get_goalc ();
 
   /* Find previous non-blank line. */
-  while (FUNCALL_ARG (forward_line, -1L) == leT && is_blank_line ());
+  while (FUNCALL_ARG (forward_line, -1) == leT && is_blank_line ());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp () && get_goalc () < cur_goalc)

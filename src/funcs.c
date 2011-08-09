@@ -180,13 +180,15 @@ END_DEFUN
 DEFUN ("set-fill-column", set_fill_column)
 /*+
 Set `fill-column' to specified argument.
+Use C-u followed by a number to specify a column.
+Just C-u as argument means to use the current column.
 +*/
 {
   size_t o = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp);
-  long fill_col = o;
+  long fill_col = (lastflag & FLAG_UNIARG_EMPTY) ? o : (unsigned long) uniarg;
   char *buf = NULL;
 
-  if (arglist == NULL)
+  if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)
     {
       fill_col = minibuf_read_number ("Set fill-column to (default %d): ", o);
       if (fill_col == LONG_MAX)
@@ -316,6 +318,92 @@ You may also type up to 3 octal digits, to insert a character with that code.
 }
 END_DEFUN
 
+DEFUN ("universal-argument", universal_argument)
+/*+
+Begin a numeric argument for the following command.
+Digits or minus sign following @kbd{C-u} make up the numeric argument.
+@kbd{C-u} following the digits or minus sign ends the argument.
+@kbd{C-u} without digits or minus sign provides 4 as argument.
+Repeating @kbd{C-u} without digits or minus sign multiplies the argument
+by 4 each time.
++*/
+{
+  int i = 0, arg = 1, sgn = 1;
+  astr as = astr_new ();
+
+  /* Need to process key used to invoke universal-argument. */
+  pushkey (lastkey ());
+
+  thisflag |= FLAG_UNIARG_EMPTY;
+
+  for (;;)
+    {
+      size_t key = do_binding_completion (as);
+
+      /* Cancelled. */
+      if (key == KBD_CANCEL)
+        {
+          ok = FUNCALL (keyboard_quit);
+          break;
+        }
+      /* Digit pressed. */
+      else if (isdigit (key & 0xff))
+        {
+          int digit = (key & 0xff) - '0';
+          thisflag &= ~FLAG_UNIARG_EMPTY;
+
+          if (key & KBD_META)
+            {
+              if (astr_len (as) > 0)
+                astr_cat_char (as, ' ');
+              astr_cat_cstr (as, "ESC");
+            }
+
+          astr_cat (as, astr_fmt (" %d", digit));
+
+          if (i == 0)
+            arg = digit;
+          else
+            arg = arg * 10 + digit;
+
+          i++;
+        }
+      else if (key == (KBD_CTRL | 'u'))
+        {
+          astr_cat_cstr (as, "C-u");
+          if (i == 0)
+            arg *= 4;
+          else
+            break;
+        }
+      else if (key == '-' && i == 0)
+        /* FIXME: Negative arguments currently broken. */
+        {
+          if (sgn > 0)
+            {
+              sgn = -sgn;
+              astr_cat_cstr (as, " -");
+              /* The default negative arg is -1, not -4. */
+              arg = 1;
+              thisflag &= ~FLAG_UNIARG_EMPTY;
+            }
+        }
+      else
+        {
+          ungetkey (key);
+          break;
+        }
+    }
+
+  if (ok == leT)
+    {
+      last_uniarg = arg * sgn;
+      thisflag |= FLAG_SET_UNIARG;
+      minibuf_clear ();
+    }
+}
+END_DEFUN
+
 DEFUN ("back-to-indentation", back_to_indentation)
 /*+
 Move point to the first non-whitespace character on this line.
@@ -336,7 +424,7 @@ iswordchar (int c)
   return isalnum (c) || c == '$';
 }
 
-bool
+static bool
 move_word (int dir)
 {
   bool gotword = false;
@@ -360,7 +448,7 @@ Move point forward one word (backward if the argument is negative).
 With argument, do this that many times.
 +*/
 {
-  ok = bool_to_lisp (move_word (1));
+  ok = move_with_uniarg (uniarg, move_word);
 }
 END_DEFUN
 
@@ -371,7 +459,7 @@ argument is negative).
 With argument, do this that many times.
 +*/
 {
-  ok = bool_to_lisp (move_word (-1));
+  ok = move_with_uniarg (-uniarg, move_word);
 }
 END_DEFUN
 
@@ -394,7 +482,7 @@ isclosebracketchar (int c, bool single_quote, bool double_quote)
           ((c == '\'') && single_quote));
 }
 
-bool
+static bool
 move_sexp (int dir)
 {
   int gotsexp = false, level = 0;
@@ -486,7 +574,7 @@ With argument, do it that many times.  Negative arg -N means
 move backward across N balanced expressions.
 +*/
 {
-  ok = bool_to_lisp (move_sexp (1));
+  ok = move_with_uniarg (uniarg, move_sexp);
 }
 END_DEFUN
 
@@ -497,7 +585,7 @@ With argument, do it that many times.  Negative arg -N means
 move forward across N balanced expressions.
 +*/
 {
-  ok = bool_to_lisp (move_sexp (-1));
+  ok = move_with_uniarg (-uniarg, move_sexp);
 }
 END_DEFUN
 
@@ -511,12 +599,9 @@ astr_append_region (astr s)
   astr_cat (s, get_buffer_region (cur_bp, calculate_the_region ()).as);
 }
 
-static le *
-transpose (bool (*move_func) (int dir))
+static bool
+transpose_subr (bool (*move_func) (int dir))
 {
-  if (warn_if_readonly_buffer ())
-    return leNIL;
-
   /* For transpose-chars. */
   if (move_func == move_char && eolp ())
     move_func (-1);
@@ -529,7 +614,7 @@ transpose (bool (*move_func) (int dir))
   if (!move_func (-1))
     {
       minibuf_error ("Beginning of buffer");
-      return leNIL;
+      return false;
     }
 
   /* Mark the beginning of first string. */
@@ -551,7 +636,7 @@ transpose (bool (*move_func) (int dir))
           minibuf_error ("End of buffer");
 
           unchain_marker (m1);
-          return leNIL;
+          return false;
         }
     }
 
@@ -610,24 +695,46 @@ transpose (bool (*move_func) (int dir))
   if (move_func != move_line)
     move_func (1);
 
-  return leT;
+  return true;
+}
+
+static le *
+transpose (int uniarg, bool (*move) (int dir))
+{
+  if (warn_if_readonly_buffer ())
+    return leNIL;
+
+  bool ret = true;
+  undo_start_sequence ();
+  for (unsigned long uni = 0; ret && uni < (unsigned) abs (uniarg); ++uni)
+    ret = transpose_subr (move);
+  undo_end_sequence ();
+
+  return bool_to_lisp (ret);
 }
 
 DEFUN ("transpose-chars", transpose_chars)
 /*+
 Interchange characters around point, moving forward one character.
+With prefix arg ARG, effect is to take character before point
+and drag it forward past ARG other characters (backward if ARG negative).
+If no argument and at end of line, the previous two chars are exchanged.
 +*/
 {
-  ok = transpose (move_char);
+  ok = transpose (uniarg, move_char);
 }
 END_DEFUN
 
 DEFUN ("transpose-words", transpose_words)
 /*+
 Interchange words around point, leaving point at end of them.
+With prefix arg ARG, effect is to take word before or around point
+and drag it forward past ARG other words (backward if ARG negative).
+If ARG is zero, the words around or after point and around or after mark
+are interchanged.
 +*/
 {
-  ok = transpose (move_word);
+  ok = transpose (uniarg, move_word);
 }
 END_DEFUN
 
@@ -636,25 +743,28 @@ DEFUN ("transpose-sexps", transpose_sexps)
 Like @kbd{M-x transpose-words} but applies to sexps.
 +*/
 {
-  ok = transpose (move_sexp);
+  ok = transpose (uniarg, move_sexp);
 }
 END_DEFUN
 
 DEFUN ("transpose-lines", transpose_lines)
 /*+
 Exchange current line and previous line, leaving point after both.
+With argument ARG, takes previous line and moves it past ARG lines.
+With argument 0, interchanges line point is in with line mark is in.
 +*/
 {
-  ok = transpose (move_line);
+  ok = transpose (uniarg, move_line);
 }
 END_DEFUN
 
 
-bool
-move_and_mark (int dir, bool (*func) (int dir))
+static le *
+mark (int uniarg, Function func)
 {
+  le * ret;
   FUNCALL (set_mark_command);
-  bool ret = func (dir);
+  ret = func (uniarg, true, NULL);
   if (ret)
     FUNCALL (exchange_point_and_mark);
   return ret;
@@ -665,7 +775,7 @@ DEFUN ("mark-word", mark_word)
 Set mark argument words away from point.
 +*/
 {
-  ok = bool_to_lisp (move_and_mark (1, move_word));
+  ok = mark (uniarg, F_forward_word);
 }
 END_DEFUN
 
@@ -676,18 +786,18 @@ The place mark goes is the same place @kbd{C-M-f} would
 move to with the same argument.
 +*/
 {
-  ok = bool_to_lisp (move_and_mark (1, move_sexp));
+  ok = mark (uniarg, F_forward_sexp);
 }
 END_DEFUN
 
 DEFUN_ARGS ("forward-line", forward_line,
-            INT_ARG (n))
+            INT_OR_UNIARG (n))
 /*+
 Move N lines forward (backward if N is negative).
 Precisely, if point is on line I, move to the start of line I + N.
 +*/
 {
-  INT_INIT (n);
+  INT_OR_UNIARG_INIT (n);
   if (ok == leT)
     {
       FUNCALL (beginning_of_line);
@@ -697,17 +807,27 @@ Precisely, if point is on line I, move to the start of line I + N.
 END_DEFUN
 
 static le *
-move_paragraph (bool (*forward) (void), Function line_extremum)
+move_paragraph (int uniarg, bool (*forward) (void), bool (*backward) (void),
+                     Function line_extremum)
 {
-  while (is_empty_line () && forward ())
-    ;
-  while (!is_empty_line () && forward ())
-    ;
+  if (uniarg < 0)
+    {
+      uniarg = -uniarg;
+      forward = backward;
+    }
+
+  while (uniarg-- > 0)
+    {
+      while (is_empty_line () && forward ())
+        ;
+      while (!is_empty_line () && forward ())
+        ;
+    }
 
   if (is_empty_line ())
     FUNCALL (beginning_of_line);
   else
-    line_extremum (NULL);
+    line_extremum (1, false, NULL);
 
   return leT;
 }
@@ -717,7 +837,7 @@ DEFUN ("backward-paragraph", backward_paragraph)
 Move backward to start of paragraph.  With argument N, do it N times.
 +*/
 {
-  ok = move_paragraph (previous_line, F_beginning_of_line);
+  ok = move_paragraph (uniarg, previous_line, next_line, F_beginning_of_line);
 }
 END_DEFUN
 
@@ -726,7 +846,7 @@ DEFUN ("forward-paragraph", forward_paragraph)
 Move forward to end of paragraph.  With argument N, do it N times.
 +*/
 {
-  ok = move_paragraph (next_line, F_end_of_line);
+  ok = move_paragraph (uniarg, next_line, previous_line, F_end_of_line);
 }
 END_DEFUN
 
@@ -739,14 +859,14 @@ The paragraph marked is the one that contains point or follows point.
   if (last_command () == F_mark_paragraph)
     {
       FUNCALL (exchange_point_and_mark);
-      FUNCALL (forward_paragraph);
+      FUNCALL_ARG (forward_paragraph, uniarg);
       FUNCALL (exchange_point_and_mark);
     }
   else
     {
-      FUNCALL (forward_paragraph);
+      FUNCALL_ARG (forward_paragraph, uniarg);
       FUNCALL (set_mark_command);
-      FUNCALL (backward_paragraph);
+      FUNCALL_ARG (backward_paragraph, uniarg);
     }
 }
 END_DEFUN
@@ -822,12 +942,14 @@ setcase_word_lowercase (void)
   return setcase_word (case_lower);
 }
 
-DEFUN ("downcase-word", downcase_word)
+DEFUN_ARGS ("downcase-word", downcase_word,
+            INT_OR_UNIARG (arg))
 /*+
-Convert following word to lower case, moving over.
+Convert following word (or @i{arg} words) to lower case, moving over.
 +*/
 {
-  ok = bool_to_lisp (setcase_word_lowercase ());
+  INT_OR_UNIARG_INIT (arg);
+  ok = execute_with_uniarg (true, arg, setcase_word_lowercase, NULL);
 }
 END_DEFUN
 
@@ -837,12 +959,14 @@ setcase_word_uppercase (void)
   return setcase_word (case_upper);
 }
 
-DEFUN ("upcase-word", upcase_word)
+DEFUN_ARGS ("upcase-word", upcase_word,
+            INT_OR_UNIARG (arg))
 /*+
-Convert following word to upper case, moving over.
+Convert following word (or @i{arg} words) to upper case, moving over.
 +*/
 {
-  ok = bool_to_lisp (setcase_word_uppercase ());
+  INT_OR_UNIARG_INIT (arg);
+  ok = execute_with_uniarg (true, arg, setcase_word_uppercase, NULL);
 }
 END_DEFUN
 
@@ -852,14 +976,16 @@ setcase_word_capitalize (void)
   return setcase_word (case_capitalized);
 }
 
-DEFUN ("capitalize-word", capitalize_word)
+DEFUN_ARGS ("capitalize-word", capitalize_word,
+            INT_OR_UNIARG (arg))
 /*+
-Capitalize the following word moving over.
+Capitalize the following word (or @i{arg} words), moving over.
 This gives the word(s) a first character in upper case
 and the rest lower case.
 +*/
 {
-  ok = bool_to_lisp (setcase_word_capitalize ());
+  INT_OR_UNIARG_INIT (arg);
+  ok = execute_with_uniarg (true, arg, setcase_word_capitalize, NULL);
 }
 END_DEFUN
 
@@ -909,6 +1035,170 @@ Convert the region to lower case.
 }
 END_DEFUN
 
+static void
+write_shell_output (va_list ap)
+{
+  insert_estr ((estr) {.as = va_arg (ap, astr), .eol = coding_eol_lf});
+}
+
+typedef struct {
+  astr in;
+  astr out;
+  size_t done;
+  char buf[BUFSIZ];
+} pipe_data;
+
+static const void *
+prepare_write (size_t *n, void *priv)
+{
+  *n = astr_len (((pipe_data *) priv)->in) - ((pipe_data *) priv)->done;
+  return *n ? astr_cstr (((pipe_data *) priv)->in) + ((pipe_data *) priv)->done : NULL;
+}
+
+static void
+done_write (void *data _GL_UNUSED_PARAMETER, size_t n, void *priv)
+{
+  ((pipe_data *) priv)->done += n;
+}
+
+static void *
+prepare_read (size_t *n, void *priv)
+{
+  *n = BUFSIZ;
+  return ((pipe_data *) priv)->buf;
+}
+
+static void
+done_read (void *data, size_t n, void *priv)
+{
+  astr_cat_nstr (((pipe_data *) priv)->out, (const char *)data, n);
+}
+
+static le *
+pipe_command (castr cmd, astr input, bool do_insert, bool do_replace)
+{
+  const char *prog_argv[] = { "/bin/sh", "-c", astr_cstr (cmd), NULL };
+  pipe_data inout = { .in = input, .out = astr_new (), .done = 0 };
+  if (pipe_filter_ii_execute (PACKAGE_NAME, "/bin/sh", prog_argv, true, false,
+                              prepare_write, done_write, prepare_read, done_read,
+                              &inout) != 0)
+    return leNIL;
+
+  char *eol = strchr (astr_cstr (inout.out), '\n');
+
+  if (astr_len (inout.out) == 0)
+    minibuf_write ("(Shell command succeeded with no output)");
+  else
+    {
+      if (do_insert)
+        {
+          size_t del = 0;
+          if (do_replace && !warn_if_no_mark ())
+            {
+              Region r = calculate_the_region ();
+              goto_offset (r.start);
+              del = get_region_size (r);
+            }
+          replace_estr (del, estr_new_astr (inout.out));
+        }
+      else
+        {
+          bool more_than_one_line = eol != NULL &&
+            eol != astr_cstr (inout.out) + astr_len (inout.out) - 1;
+          write_temp_buffer ("*Shell Command Output*", more_than_one_line,
+                             write_shell_output, inout.out);
+          if (!more_than_one_line)
+            minibuf_write ("%s", astr_cstr (inout.out));
+        }
+    }
+
+  return leT;
+}
+
+static castr
+minibuf_read_shell_command (void)
+{
+  castr ms = minibuf_read ("Shell command: ", "");
+
+  if (ms == NULL)
+    {
+      FUNCALL (keyboard_quit);
+      return NULL;
+    }
+  if (astr_len (ms) == 0)
+    return NULL;
+
+  return ms;
+}
+
+DEFUN_ARGS ("shell-command", shell_command,
+            STR_ARG (cmd)
+            BOOL_ARG (insert))
+/*+
+Execute string @i{command} in inferior shell; display output, if any.
+With prefix argument, insert the command's output at point.
+
+Command is executed synchronously.  The output appears in the buffer
+`*Shell Command Output*'.  If the output is short enough to display
+in the echo area, it is shown there, but it is nonetheless available
+in buffer `*Shell Command Output*' even though that buffer is not
+automatically displayed.
+
+The optional second argument @i{output-buffer}, if non-nil,
+says to insert the output in the current buffer.
++*/
+{
+  STR_INIT (cmd)
+  else
+    cmd = minibuf_read_shell_command ();
+  BOOL_INIT (insert)
+  else
+    insert = lastflag & FLAG_SET_UNIARG;
+
+  if (cmd != NULL)
+    ok = pipe_command (cmd, astr_new (), insert, false);
+}
+END_DEFUN
+
+/* The `start' and `end' arguments are fake, hence their string type,
+   so they can be ignored. */
+DEFUN_ARGS ("shell-command-on-region", shell_command_on_region,
+            STR_ARG (start)
+            STR_ARG (end)
+            STR_ARG (cmd)
+            BOOL_ARG (insert))
+/*+
+Execute string command in inferior shell with region as input.
+Normally display output (if any) in temp buffer `*Shell Command Output*';
+Prefix arg means replace the region with it.  Return the exit code of
+command.
+
+If the command generates output, the output may be displayed
+in the echo area or in a buffer.
+If the output is short enough to display in the echo area, it is shown
+there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
+The output is available in that buffer in both cases.
++*/
+{
+  STR_INIT (start);
+  STR_INIT (end);
+  STR_INIT (cmd)
+  else
+    cmd = minibuf_read_shell_command ();
+  BOOL_INIT (insert)
+  else
+    insert = lastflag & FLAG_SET_UNIARG;
+
+  if (cmd != NULL)
+    {
+      if (warn_if_no_mark ())
+        ok = leNIL;
+      else
+        ok = pipe_command (cmd, get_buffer_region (cur_bp, calculate_the_region ()).as, insert, true);
+    }
+}
+END_DEFUN
+
 DEFUN ("delete-region", delete_region)
 /*+
 Delete the text between point and mark.
@@ -952,7 +1242,7 @@ On nonblank line, delete any immediately following blank lines.
       r.end = MAX (r.end, buffer_next_line (cur_bp, get_buffer_pt (cur_bp)));
       do
         r.start = get_buffer_line_o (cur_bp);
-      while (FUNCALL_ARG (forward_line, -1L) == leT && is_blank_line ());
+      while (FUNCALL_ARG (forward_line, -1) == leT && is_blank_line ());
       goto_offset (get_marker_o (m));
       if (r.start != get_buffer_line_o (cur_bp) ||
           r.end > buffer_next_line (cur_bp, get_buffer_pt (cur_bp)))

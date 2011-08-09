@@ -111,8 +111,10 @@ enum
 
 /*
  * The type of a Zile exported function.
+ * `uniarg' is the universal argument, if any, whose presence is
+ * indicated by `is_uniarg'.
  */
-typedef le * (*Function) (le * list);
+typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
 
 /* Turn a bool into a Lisp boolean */
 #define bool_to_lisp(b) ((b) ? leT : leNIL)
@@ -120,8 +122,8 @@ typedef le * (*Function) (le * list);
 /* Define an interactive function. */
 #define DEFUN(zile_func, c_func) \
   DEFUN_ARGS(zile_func, c_func, )
-#define DEFUN_ARGS(zile_func, c_func, args)                             \
-  le * F_ ## c_func (le *arglist _GL_UNUSED_PARAMETER)                  \
+#define DEFUN_ARGS(zile_func, c_func, args) \
+  le * F_ ## c_func (long uniarg _GL_UNUSED_PARAMETER, bool is_uniarg _GL_UNUSED_PARAMETER, le *arglist _GL_UNUSED_PARAMETER) \
   {                                                                     \
     le * ok = leT;                                                      \
     args
@@ -160,6 +162,20 @@ typedef le * (*Function) (le * list);
         ok = leNIL;                             \
     }
 
+/* Integer argument which can either be argument or uniarg. */
+#define INT_OR_UNIARG(name) \
+  long name = 1;            \
+  bool noarg = false;
+#define INT_OR_UNIARG_INIT(name)                             \
+  INT_INIT (name)                                            \
+  else                                                       \
+    {                                                        \
+      if (!(lastflag & FLAG_SET_UNIARG) && !is_uniarg &&     \
+          (arglist == NULL || arglist->next == NULL))        \
+        noarg = true;                                        \
+      name = uniarg;                                         \
+    }
+
 /* Boolean argument. */
 #define BOOL_ARG(name)                          \
   bool name = true;
@@ -174,11 +190,11 @@ typedef le * (*Function) (le * list);
 
 /* Call an interactive function. */
 #define FUNCALL(c_func)                         \
-  F_ ## c_func (leNIL)
+  F_ ## c_func (1, false, leNIL)
 
-/* Call an interactive function with an argument. */
-#define FUNCALL_ARG(c_func, arg)                \
-  F_ ## c_func (leAddDataElement (leNew (NULL), xasprintf ("%ld", arg), false))
+/* Call an interactive function with a universal argument. */
+#define FUNCALL_ARG(c_func, uniarg)             \
+  F_ ## c_func (uniarg, true, leNIL)
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.
@@ -230,7 +246,11 @@ typedef le * (*Function) (le * list);
 /* Global flags, stored in thisflag and lastflag. */
 #define FLAG_NEED_RESYNC	0001	/* A resync is required. */
 #define FLAG_QUIT		0002	/* The user has asked to quit. */
-#define FLAG_DEFINING_MACRO	0004	/* We are defining a macro. */
+#define FLAG_SET_UNIARG		0004	/* The last command modified the
+                                           universal arg variable `uniarg'. */
+#define FLAG_UNIARG_EMPTY	0010	/* Current universal arg is just C-u's
+                                           with no number. */
+#define FLAG_DEFINING_MACRO	0020	/* We are defining a macro. */
 
 /* Zile font codes */
 #define FONT_NORMAL		0000

@@ -123,7 +123,7 @@ evaluateBranch (le * trybranch)
 
   func = get_fentry (keyword->data);
   if (func)
-    return call_command (func->func, trybranch);
+    return call_command (func->func, 1, false, trybranch);
 
   return NULL;
 }
@@ -187,10 +187,38 @@ leEval (le * list)
 }
 
 le *
-execute_function (const char *name)
+execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backward) (void))
+{
+  if (backward && uniarg < 0)
+    {
+      forward = backward;
+      uniarg = -uniarg;
+    }
+  if (undo)
+    undo_start_sequence ();
+  bool ret = true;
+  for (int uni = 0; ret && uni < uniarg; ++uni)
+    ret = forward ();
+  if (undo)
+    undo_end_sequence ();
+
+  return bool_to_lisp (ret);
+}
+
+le *
+move_with_uniarg (int uniarg, bool (*move) (int dir))
+{
+  bool ret = true;
+  for (unsigned long uni = 0; ret && uni < (unsigned) abs (uniarg); ++uni)
+    ret = move (uniarg < 0 ? - 1 : 1);
+  return bool_to_lisp (ret);
+}
+
+le *
+execute_function (const char *name, int uniarg)
 {
   Function func = get_function (name);
-  return func ? call_command (func, NULL) : NULL;
+  return func ? call_command (func, uniarg, true, NULL) : NULL;
 }
 
 DEFUN ("execute-extended-command", execute_extended_command)
@@ -198,11 +226,22 @@ DEFUN ("execute-extended-command", execute_extended_command)
 Read function name, then read its arguments and call it.
 +*/
 {
-  castr name = minibuf_read_function_name ("M-x ");
+  astr msg = astr_new ();
+
+  if (lastflag & FLAG_SET_UNIARG)
+    {
+      if (lastflag & FLAG_UNIARG_EMPTY)
+        msg = astr_fmt ("C-u ");
+      else
+        msg = astr_fmt ("%d ", uniarg);
+    }
+  astr_cat_cstr (msg, "M-x ");
+
+  castr name = minibuf_read_function_name (astr_cstr (msg));
   if (name == NULL)
     return false;
 
-  ok = bool_to_lisp (execute_function (astr_cstr (name)) == leT);
+  ok = bool_to_lisp (execute_function (astr_cstr (name), uniarg) == leT);
 }
 END_DEFUN
 
