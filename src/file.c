@@ -168,16 +168,14 @@ compact_path (astr path)
     {
       /* Replace `/userhome/' (if found) with `~/'. */
       size_t homelen = strlen (pw->pw_dir);
+      if (homelen > 0 && pw->pw_dir[homelen - 1] == '/')
+        homelen--;
+
       if (astr_len (path) >= homelen &&
-          !strncmp (pw->pw_dir, astr_cstr (path), homelen))
-        {
-          astr buf = astr_new_cstr ("~/");
-          if (STREQ (pw->pw_dir, "/"))
-            astr_cat_cstr (buf, astr_cstr (path) + 1);
-          else
-            astr_cat_cstr (buf, astr_cstr (path) + homelen + 1);
-          astr_cpy (path, buf);
-        }
+          !strncmp (pw->pw_dir, astr_cstr (path), homelen) &&
+          astr_get (path, homelen) == '/')
+        astr_cpy (path, astr_cat_cstr (astr_new_cstr ("~/"),
+                                       astr_cstr (path) + homelen + 1));
     }
 
   return path;
