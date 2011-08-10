@@ -27,12 +27,9 @@
 # is only evaluated once the script has finished running.
 
 # srcdir and builddir are defined in the environment for a build
-if test -z "$srcdir"; then
-    srcdir=.
-fi
-if test -z "$builddir"; then
-    builddir=.
-fi
+: ${abs_srcdir="`pwd`"}
+: ${srcdir="."}
+: ${builddir="."}
 
 zile_pass=0
 zile_fail=0
@@ -45,15 +42,16 @@ if test -z "$TERM" || test "$TERM" = "unknown"; then
     export TERM
 fi
 
-for test in "$@"; do
-    test=`echo $test | sed -e 's/\.el$//'`
-    name=`basename $test`
+for test in "$@"; do								# ../tests/zile-only/backward_delete_char.el
+    test=`echo $test | sed -e 's/\.el$//'`					# ../tests/zile-only/backward_delete_char
+    name=`basename $test`							# backward_delete_char
+    edit_file=`echo $test.input | sed -e "s|$srcdir|$builddir|"`		# ./tests/zile-only/backward_delete_char.input
+    lisp_file=`echo $test.el | sed -e "s|$srcdir|$abs_srcdir|"`
 
-    edit_file=$builddir/$name.input
-    args="--no-init-file $edit_file --load $test.el"
+    args="--no-init-file $edit_file --load $lisp_file"
 
     if test -n "$EMACSPROG"; then
-        cp $srcdir/lisp-tests/test.input $edit_file
+        cp $srcdir/tests/test.input $edit_file
         chmod +w $edit_file
         if $EMACSPROG --quick --batch $args; then
             if diff $test.output $edit_file; then
@@ -69,9 +67,9 @@ for test in "$@"; do
         fi
     fi
 
-    cp $srcdir/lisp-tests/test.input $edit_file
+    cp $srcdir/tests/test.input $edit_file
     chmod +w $edit_file
-    if $VALGRIND $builddir/zile $args; then
+    if $VALGRIND $builddir/src/zile $args; then
         if diff $test.output $edit_file; then
             zile_pass=`expr $zile_pass + 1`
             rm -f $edit_file $edit_file~

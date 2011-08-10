@@ -23,7 +23,7 @@ use Zile;
 
 my $dir = shift;
 
-open OUT, ">tbl_funcs.h" or die;
+open OUT, ">src/tbl_funcs.h" or die;
 
 print OUT <<END;
 /*

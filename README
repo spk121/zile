@@ -12,9 +12,29 @@ gnulib.
 
 Zile is free software, licensed under the GNU GPL.
 
-See INSTALL for installation instructions.
+Zile's home page is:
 
-Zile's home page at http://www.gnu.org/software/zile/
+    http://www.gnu.org/software/zile/
+
+See file `AUTHORS' for the names of maintainers past and present.
+See file `BUGS' for instructions on reporting bugs in Zile.
+See file `COPYING' for copying conditions.
+See file `FAQ' for a selection of a Frequently Answered Questions.
+See file `INSTALL' for compilation and installation instructions.
+See file `NEWS' for a list of major changes in each Zile release.
+See file `THANKS' for a list of important contributors.
+
+The rest of the files in the top-level directory are part of the
+Autotools build system used to compile and install Zile.
+
+Directory `build-aux' contains helper scripts used to build Zile.
+Directory `doc' contains files used to create Zile's documentation.
+Directory `gl' contains Zile specific patches to standard `gnulib'.
+Directory `lib' contains `gnulib' source modules used by Zile.
+Directory `m4' contains a mixture of `gnulib' supplied and Zile
+specific macros for rebuilding the `configure' script.
+Directory `src' contains the source code used to build Zile.
+Directory `tests' contains a small suite of tests used by `make
+check' to sanity check a newly built `src/zile' binary.
 
 Questions, comments and requests should be sent to <help-zile@gnu.org>.
-For instructions on reporting bugs, see the file BUGS.

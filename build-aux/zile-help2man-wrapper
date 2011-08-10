@@ -3,7 +3,7 @@
 # Add two spaces before options so they will be processed properly.
 
 if test "$1" = "--help"; then
-  $builddir/zile $1 | sed 's/^\([-+F]\)/  \1/'
+  src/zile $1 | sed 's/^\([-+F]\)/  \1/'
 else
-  $builddir/zile $1
+  src/zile $1
 fi

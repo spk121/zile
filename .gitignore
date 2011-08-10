@@ -8,7 +8,6 @@
 /INSTALL
 /README-release
 /README-release.in
-/doc
 /gnulib
 /lib
 /maint.mk
@@ -26,6 +25,7 @@ config.status.lineno
 configure
 configure.lineno
 cyclo-zile.html
+dotzile.sample
 release-notes
 stamp-h
 stamp-h.in
