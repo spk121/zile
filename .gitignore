@@ -3,6 +3,7 @@
 .deps
 .sc-start*
 /.gitmodules
+/COPYING
 /GNUmakefile
 /INSTALL
 /README-release
