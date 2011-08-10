@@ -107,28 +107,24 @@ search (size_t o, const char *s, int forward, int regexp)
   return true;
 }
 
-static char *last_search = NULL;
+static castr last_search = NULL;
 
 static le *
-do_search (bool forward, bool regexp, const char *pattern)
+do_search (bool forward, bool regexp, castr pattern)
 {
   le * ok = leNIL;
-  castr as = NULL;
 
   if (pattern == NULL)
-    {
-      as = minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward");
-      if (as)
-        pattern = astr_cstr (as);
-    }
+    pattern = minibuf_read ("%s%s: ", astr_cstr (last_search),
+                            regexp ? "RE search" : "Search", forward ? "" : " backward");
 
   if (pattern == NULL)
     return FUNCALL (keyboard_quit);
-  if (pattern[0] != '\0')
+  if (astr_len (pattern) != 0)
     {
-      last_search = xstrdup (pattern);
+      last_search = pattern;
 
-      if (!search (get_buffer_pt (cur_bp), pattern, forward, regexp))
+      if (!search (get_buffer_pt (cur_bp), astr_cstr (pattern), forward, regexp))
         minibuf_error ("Search failed: \"%s\"", pattern);
       else
         ok = leT;
@@ -144,7 +140,7 @@ Search forward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (true, false, astr_cstr (pattern));
+  ok = do_search (true, false, pattern);
 }
 END_DEFUN
 
@@ -155,7 +151,7 @@ Search backward from point for the user specified text.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (false, false, astr_cstr (pattern));
+  ok = do_search (false, false, pattern);
 }
 END_DEFUN
 
@@ -166,7 +162,7 @@ Search forward from point for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (true, true, astr_cstr (pattern));
+  ok = do_search (true, true, pattern);
 }
 END_DEFUN
 
@@ -177,7 +173,7 @@ Search backward from point for match for regular expression REGEXP.
 +*/
 {
   STR_INIT (pattern);
-  ok = do_search (false, true, astr_cstr (pattern));
+  ok = do_search (false, true, pattern);
 }
 END_DEFUN
 
@@ -268,10 +264,10 @@ isearch (int forward, int regexp)
               /* Find next match. */
               cur = get_buffer_pt (cur_bp);
               /* Save search string. */
-              last_search = xstrdup (astr_cstr (pattern));
+              last_search = astr_cpy (astr_new (), pattern);
             }
           else if (last_search != NULL)
-            astr_cpy_cstr (pattern, last_search);
+            astr_cpy (pattern, last_search);
         }
       else if (c & KBD_META || c & KBD_CTRL || c > KBD_TAB)
         {
@@ -286,7 +282,7 @@ isearch (int forward, int regexp)
                   set_marker_o (get_buffer_mark (cur_bp), start);
 
                   /* Save search string. */
-                  last_search = xstrdup (astr_cstr (pattern));
+                  last_search = astr_cpy (astr_new (), pattern);
 
                   minibuf_write ("Mark saved when search started");
                 }
