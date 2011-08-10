@@ -113,10 +113,14 @@ static le *
 do_search (bool forward, bool regexp, const char *pattern)
 {
   le * ok = leNIL;
-  const char *ms = NULL;
+  castr as = NULL;
 
   if (pattern == NULL)
-    pattern = ms = astr_cstr (minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward"));
+    {
+      as = minibuf_read ("%s%s: ", last_search, regexp ? "RE search" : "Search", forward ? "" : " backward");
+      if (as)
+        pattern = astr_cstr (as);
+    }
 
   if (pattern == NULL)
     return FUNCALL (keyboard_quit);
