@@ -171,7 +171,7 @@ compact_path (astr path)
       if (homelen > 0 && pw->pw_dir[homelen - 1] == '/')
         homelen--;
 
-      if (astr_len (path) >= homelen &&
+      if (astr_len (path) > homelen &&
           !strncmp (pw->pw_dir, astr_cstr (path), homelen) &&
           astr_get (path, homelen) == '/')
         astr_cpy (path, astr_cat_cstr (astr_new_cstr ("~/"),
