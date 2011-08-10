@@ -129,7 +129,7 @@ void leEval (le * list);
 le *execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void),
                          bool (*backward) (void));
 le *move_with_uniarg (int uniarg, bool (*move) (int dir));
-le *execute_function (const char *name, int uniarg);
+le *execute_function (const char *name, int uniarg, bool is_uniarg);
 Function get_function (const char *name);
 const char *get_function_doc (const char *name);
 int get_function_interactive (const char *name);

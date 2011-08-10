@@ -215,10 +215,10 @@ move_with_uniarg (int uniarg, bool (*move) (int dir))
 }
 
 le *
-execute_function (const char *name, int uniarg)
+execute_function (const char *name, int uniarg, bool is_uniarg)
 {
   Function func = get_function (name);
-  return func ? call_command (func, uniarg, true, NULL) : NULL;
+  return func ? call_command (func, uniarg, is_uniarg, NULL) : NULL;
 }
 
 DEFUN ("execute-extended-command", execute_extended_command)
@@ -241,7 +241,7 @@ Read function name, then read its arguments and call it.
   if (name == NULL)
     return false;
 
-  ok = bool_to_lisp (execute_function (astr_cstr (name), uniarg) == leT);
+  ok = bool_to_lisp (execute_function (astr_cstr (name), uniarg, lastflag & FLAG_SET_UNIARG) == leT);
 }
 END_DEFUN
 

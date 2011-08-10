@@ -268,7 +268,7 @@ main (int argc, char **argv)
         {
         case ARG_FUNCTION:
           {
-            le *res = execute_function (arg, 1);
+            le *res = execute_function (arg, 1, false);
             if (res == NULL)
               minibuf_error ("Function `%s' not defined", arg);
             ok = res == leT;
