@@ -129,17 +129,17 @@ minibuf_read_number (const char *fmt, ...)
 
   do
     {
-      const char *ms = astr_cstr (minibuf_read (buf, ""));
-      if (ms == NULL)
+      castr as = minibuf_read (buf, "");
+      if (as == NULL || astr_cstr (as) == NULL)
         {
           n = LONG_MAX;
           FUNCALL (keyboard_quit);
           break;
         }
-      if (strlen (ms) == 0)
+      if (strlen (astr_cstr (as)) == 0)
         n = LONG_MAX - 1;
       else
-        n = strtoul (ms, NULL, 10);
+        n = strtoul (astr_cstr (as), NULL, 10);
       if (n == LONG_MAX)
         {
           minibuf_write ("Please enter a number.");
