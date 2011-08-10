@@ -211,6 +211,7 @@ having being retargeted to the submodule in ./gnulib.
 : "${AUTORECONF=autoreconf}"
 : "${CMP=cmp}"
 : "${CONFIG_SHELL=/bin/sh}"
+: "${DIFF=diff}"
 : "${EGREP=egrep}"
 : "${FGREP=fgrep}"
 : "${GIT=git}"
@@ -1092,6 +1093,7 @@ func_install_gnulib_non_module_files ()
 
         for file in $gnulib_non_module_files; do
           case $file in
+            */COPYING*) dest=COPYING;;
             */INSTALL) dest=INSTALL;;
             build-aux/*) dest=$build_aux/`expr "$file" : 'build-aux/\(.*\)'`;;
             *) dest=$file;;
