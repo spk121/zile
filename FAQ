@@ -78,7 +78,9 @@ INDEX
 2.3 How small does Zile get?
 
     On Ubuntu 11.04 i386, Zile 2.4.0.60 built with gcc 4.5.2 -O2
-    weighs in at Kb when stripped.
+    weighs in at 200Kb when stripped.  (This is much larger than it
+    used to be, owing to gnulib portability code; we hope to get it
+    down again eventually by linking gnulib dynamically.)
 
 2.5 I like the xyz function of Emacs but it's not in Zile!
 
