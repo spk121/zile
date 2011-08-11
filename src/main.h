@@ -36,7 +36,11 @@
 #include "gl_xlist.h"
 #include "unused-parameter.h"
 
+#ifdef HAVE_GC_H
 #include <gc.h>
+#else
+#include <gc/gc.h>
+#endif
 
 #include "astr.h"
 #include "estr.h"
