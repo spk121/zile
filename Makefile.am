@@ -34,12 +34,11 @@ PERL_BUILDTIME =					\
 	build-aux/mkvars.pl
 
 EXTRA_DIST = 						\
-	BUGS						\
 	FAQ						\
 	build-aux/zile-help2man-wrapper			\
 	$(PERL_BUILDTIME)
 
-doc_DATA = AUTHORS BUGS FAQ NEWS
+doc_DATA = AUTHORS FAQ NEWS
 
 include doc/Makefile.am
 include src/Makefile.am

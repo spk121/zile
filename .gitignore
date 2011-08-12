@@ -5,9 +5,8 @@
 /.gitmodules
 /COPYING
 /GNUmakefile
+/HACKING
 /INSTALL
-/README-release
-/README-release.in
 /gnulib
 /lib
 /maint.mk

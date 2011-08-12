@@ -8,25 +8,12 @@
      provided the copyright notice and this notice are preserved.
 
 
-Building from git
------------------
-
-Extra prerequisites: see “Build prerequisites” at the start of
-`bootstrap.conf'; also recent gnulib (at time of reading!). The
-bootstrap script will also complain if it can't find the tools it
-needs, and tell you where to fetch the sources.
-
-Check out Zile and bootstrap the build system:
-
-        git clone git://git.sv.gnu.org/zile.git
-        ./bootstrap
-
-Then follow the instructions for building from a release tarball (see
-INSTALL).
-
-
 Automated releases
 ------------------
 
 To make a release automatically, you need ncftp, and woger, from
 http://rrt.sc3d.org/Software/woger
+
+GNU Style releases
+------------------
+

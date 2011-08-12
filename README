@@ -1,40 +1,237 @@
-                               GNU Zile
-                               --------
+GNU Zile
+========
 
-GNU Zile (Zile Is Lossy Emacs) is a lightweight Emacs clone.  Every
-Emacs user should feel at home with Zile.  Zile is aimed at small
+GNU Zile is free software, licensed under the GNU GPL.
+
+Copyright (c) 1997-2011 Free Software Foundation, Inc.
+
+**Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.**
+
+_This file is marked up in [MultiMarkdown][] syntax_.
+
+  [MultiMarkdown]: http://fletcherpenney.net/multimarkdown
+
+------------------------------------------------------------------------
+
+Contents
+========
+
+1. [INTRODUCTION][]
+   * [Source Layout][]
+   * [Web Pages][]
+   * [Mailing Lists][]
+2. [OBTAINING THE LATEST SOURCES][]
+   * [Official Release][]
+   * [Development Sources][]
+3. [REPORTING BUGS][]
+
+------------------------------------------------------------------------
+
+INTRODUCTION
+============
+
+GNU Zile (_Zile Is Lossy Emacs_) is a lightweight [Emacs][] clone. Every
+Emacs user should feel at home with Zile. Zile is aimed at small
 footprint systems (a typical binary is about 100Kb) and quick editing
 sessions (it starts up and shuts down instantly).
 
-Zile is written in ISO C99 using POSIX.1-2008 APIs, and requires
-libgc. It can be built on many other platforms thanks to its use of
-gnulib.
+Zile is written in **ISO C99** using **POSIX.1-2008** APIs, using
+[ncurses][] and [libgc][]. It can be built on many other platforms
+thanks to its use of [gnulib][].
 
-Zile is free software, licensed under the GNU GPL.
+  [Emacs]:   http://www.gnu.org/s/emacs
+  [ncurses]: http://invisible-island.net/ncurses
+  [libgc]:   http://www.hpl.hp.com/personal/Hans_Boehm/gc
+  [gnulib]:  http://www.gnu.org/s/gnulib
 
-Zile's home page is:
 
-    http://www.gnu.org/software/zile/
+Source Layout
+-------------
 
-See file `AUTHORS' for the names of maintainers past and present.
-See file `BUGS' for instructions on reporting bugs in Zile.
-See file `COPYING' for copying conditions.
-See file `FAQ' for a selection of a Frequently Answered Questions.
-See file `INSTALL' for compilation and installation instructions.
-See file `NEWS' for a list of major changes in each Zile release.
-See file `THANKS' for a list of important contributors.
+ * See file `AUTHORS` for the names of maintainers past and present.
+ * See file `COPYING` for copying conditions.
+ * See file `FAQ` for a selection of a Frequently Answered Questions.
+ * See file `INSTALL` for generic compilation and installation
+   instructions.
+ * See file `NEWS` for a list of major changes in each Zile release.
+ * See file `THANKS` for a list of important contributors.
 
 The rest of the files in the top-level directory are part of the
-Autotools build system used to compile and install Zile.
+[Autotools]() build system used to compile and install Zile.
 
-Directory `build-aux' contains helper scripts used to build Zile.
-Directory `doc' contains files used to create Zile's documentation.
-Directory `gl' contains Zile specific patches to standard `gnulib'.
-Directory `lib' contains `gnulib' source modules used by Zile.
-Directory `m4' contains a mixture of `gnulib' supplied and Zile
-specific macros for rebuilding the `configure' script.
-Directory `src' contains the source code used to build Zile.
-Directory `tests' contains a small suite of tests used by `make
-check' to sanity check a newly built `src/zile' binary.
+ * Directory `build-aux` contains helper scripts used to build Zile.
+ * Directory `doc` contains files used to create Zile's documentation.
+ * Directory `gl` contains Zile specific patches to standard [gnulib]().
+ * Directory `lib` contains [gnulib]() source modules used by Zile.
+ * Directory `m4` contains a mixture of [gnulib]() supplied and Zile
+   specific macros for rebuilding the `configure' script. 
+ * Directory `src` contains the source code used to build Zile.
+ * Directory `tests` contains a small suite of tests used by
+   `make check` to sanity check a newly built `src/zile` binary.
 
-Questions, comments and requests should be sent to <help-zile@gnu.org>.
+  [Autotools]: http://sourceware.org/autobook/
+
+
+Web Pages
+---------
+
+GNU Zile's home page is at:
+
+  > <http://www.gnu.org/s/zile/>
+
+GNU Zile Development is co-ordinated from Ziles's project page at GNU
+Savannah:
+
+  > <http://savannah.gnu.org/projects/zile/>
+
+An archive of past releases is also archived at:
+
+  > <http://ftp.gnu.org/gnu/zile/>
+
+But please use a mirror for faster downloads and to reduce stress on the
+main gnu machine. The following link will automatically redirect to a
+nearest mirror:
+
+  > <http://ftpmirror.gnu.org/zile/>
+
+Or you can manually select a mirror from the list at:
+
+  > <http://www.gnu.org/order/ftp.html>
+
+
+Mailing Lists
+-------------
+
+Questions, comments and requests should be sent to the Zile user's list
+at <help-zile@gnu.org>.
+
+See [REPORTING BUGS][] for the bug reporting mailing list address.
+
+
+OBTAINING THE LATEST SOURCES
+============================
+
+If you are just building GNU Zile from an [Official Release][], you
+should not normally need to run `./bootstrap` or `autoreconf`; just go
+ahead and start with `./configure`.
+
+If you are trying to build GNU Zile from the [Development Sources][],
+`./configure` will not work until the `./bootstrap` script has completed successfully.
+
+
+Official Release
+----------------
+
+Compressed tarballs of all recent GNU Zile releases are available from:
+
+  > <http://ftpmirror.gnu.org/zile>
+
+Compressed tarballs of unstable prereleases are sometimes made available
+from:
+
+  > <ftp://alpha.gnu.org/gnu/zile>
+
+Official tarballs are supplied with a [GnuPG][] detached signature file
+so that you can verify that the corresponding tarball is still the same
+file that was released by the owner of its GPG key ID. First, be sure to
+download both the .sig file and the corresponding release:
+
+    wget http://ftpmirror.gnu.org/zile/zile-2.3.24.tar.gz
+    wget http://ftpmirror.gnu.org/zile/zile-2.3.24.tar.gz.sig
+
+then run a command like this:
+
+    gpg --verify zile-2.3.24.tar.gz.sig
+
+If that command fails because you don't have the required public key,
+then run this command to import it:
+
+    gpg --keyserver keys.gnupg.net --recv-keys 80EE4A00
+
+and then rerun the `gpg --verify' command.
+
+Generic instructions for how to build GNU Zile from a release tarball
+are contained in the file `INSTALL`. Additionally, If you wish to use a
+non-standard curses library name, this can be specified using
+`CURSES_LIB` and `CPPFLAGS`. For example, to use the X version of
+[PDcurses][]:
+
+    CPPFLAGS=/usr/local/include/xcurses CURSES_LIB=-lXCurses ./configure
+
+If you are missing any of the prerequisite libraries needed to
+successfully build GNU Zile, the `configure` script will abort itself
+and tell you right away.
+
+  [GnuPG]:    http://www.gnupg.org/
+  [PDcurses]: http://pdcurses.sf.ne
+
+
+Development Sources
+-------------------
+
+Zile development sources are maintained at the GNU Savannah git server:
+
+  > [git://git.sv.gnu.org/zile.git][gitbrowser]
+
+You can fetch a read-only copy with either:
+
+    git clone git://git.sv.gnu.org/zile.git
+
+or using the CVS pserver protocol:
+
+    cvs -d:pserver:anonymous@pserver.git.sv.gnu.org:/srv/git/zile.git \
+        co -d zile HEAD
+
+If you are behind a firewall that blocks the git protocol, you can force git to transparently rewrite all savannah references to use http:
+
+    git config --global url.http://git.sv.gnu.org/r/.insteadof \
+	git://git.sv.gnu.org/
+
+When you are building GNU Zile from a git checkout, you first need to
+run the `bootstrap` script to generate various files that are shipped in
+release tarballs, but not checked in to git.
+
+Normally, you just need to run `./bootstrap`, and it will either get
+everything ready so that you can then run `./configure` as would for a
+release tarball, or else tell you if your machine is missing some
+packages that it needs in order to do that. One of the first things that
+`bootstrap` will do the first time you run it in a freshly cloned git
+tree is to clone a copy of [gnulib][] as a submodule. If you already
+have an up-to-date [gnulib][] clone on your machine, you can save the
+time and bandwidth of downloading it again by using `--gnulib-srcdir` to point at your existing gnulib directory:
+
+    ./bootstrap --gnulib-srcdir=/path/to/existing/gnulib/checkout/
+
+With a copy of gnulib now installed as a submodule, if you wish, you can continue to work off-line by passing `--skip-git` to rerun the `bootstrap` script, otherwise subsequent `bootstrap` runs will refresh the contents of the submodule:
+
+    ./bootstrap --skip-git
+
+  [gitbrowser]: http://git.sv.gnu.org/cgit/zile.git
+
+
+REPORTING BUGS
+==============
+
+If this distribution doesn't work for you, before you report the
+problem, please try upgrading to the latest released version first, to
+see whether your issue has been fixed already. If you can, please also
+check whether the latest development sources for the next release still
+exhibit the problem (see [OBTAINING THE LATEST SOURCES][] above).
+
+Please send bug reports, feature requests and patches to
+<bug-zile@gnu.org> or, preferably, file them directly in the relevant
+tracker at <http://savannah.gnu.org/projects/zile/>.
+
+When you are ready to submit a report, first, please read this:
+
+  > <http://www.chiark.greenend.org.uk/~sgtatham/bugs.html>
+
+Zile has a suite of Lisp tests in the tests directory of the source
+distribution, which you can run with:
+
+    make check
+
+If, when you report a bug, you can create a similar test
+that demonstrates it, the maintainers will be most grateful, and it will prevent them from accidentally reintroducing the bug in a subsequent release.
