@@ -1,6 +1,6 @@
 #! /bin/sh
 # Print a version string.
-scriptversion=2011-08-11.13; # UTC
+scriptversion=2011-08-12.11; # UTC
 
 # Bootstrap this package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
@@ -794,6 +794,7 @@ func_prep ()
 
     $require_bootstrap_uptodate
     $require_buildtools_uptodate
+    $require_checkout_only_file
 
     $require_gnulib_merge_changelog
 
@@ -1112,7 +1113,7 @@ func_install_gnulib_non_module_files ()
       else
         func_warning recommend "\
 Unable to link \`\$gnulib_non_module_files', please provide the
-locationof a complete \`gnulib' tree by setting \`gnulib_path' in
+location of a complete \`gnulib' tree by setting \`gnulib_path' in
 your \`bootstrap.conf' or with the \`--gnulib-srcdir' option - or
 else specify the location of your \`git' binary by setting \`GIT'
 in the environment so that a fresh \`gnulib' submodule can be cloned."
@@ -1238,6 +1239,23 @@ as \`$progname --skip-po' to avoid redownloading."
 # most, once.
 
 
+# require_checkout_only_file
+# --------------------------
+# Bail out  if this package only bootstraps properly from a repository
+# checkout.
+require_checkout_only_file=func_require_checkout_only_file
+func_require_checkout_only_file ()
+{
+    $debug_cmd
+
+    test -n "$checkout_only_file" && test ! -f "$checkout_only_file" \
+       && func_fatal_error "\
+Error: Bootstrapping from a non-checked-out distribution is risky."
+
+    require_checkout_only_file=:
+}
+
+
 # require_aclocal_amflags
 # -----------------------
 # Ensure `$aclocal_amflags' has a sensible default, extracted from
@@ -1320,7 +1338,7 @@ for tool in autoconf libtoolize gettext; do
       my_version="$func_extract_trace_result"
       test -n "$my_version" && {
         func_append buildreq "\
-            '$tool' $my_version http://www.gnu.org/software/'$b'
+            '$tool' $my_version http://www.gnu.org/s/'$b'
 "
         func_verbose \
             "auto-adding \`'$tool'-$my_version'\'' to build requirements"
@@ -1378,7 +1396,7 @@ func_require_automake_buildreq ()
         test -n "$automake_version" || automake_version="-"
 
         func_append buildreq "\
-            automake $automake_version http://www.gnu.org/software/automake
+            automake $automake_version http://www.gnu.org/s/automake
 "
         func_verbose \
             "auto-adding \`automake-$automake_version' to build requirements"
@@ -1685,7 +1703,7 @@ func_require_gnulib_files_already_present ()
     my_gnulib_files_already_present="
         $build_aux/install-sh
         $macro_dir/00gnulib.m4
-        $source_base/$gnulib_mk
+        $source_base/${gnulib_mk:-Makefile.am}
     "
 
     $opt_dry_run || {
@@ -2911,7 +2929,8 @@ func_get_version ()
 
     app=$1
 
-    $app --version >/dev/null 2>&1 || return 1
+    { $app --version || $app --version </dev/null; } >/dev/null 2>&1 \
+      || return 1
 
     $app --version 2>&1 |
     $SED -n '# extract version within line
@@ -3199,12 +3218,6 @@ case "$0" in
   */*) test -r "$0.conf" && . "$0.conf" ;;
   *) test -r "$0.conf" && . ./"$0.conf" ;;
 esac
-
-# Bail out  if this package only bootstraps properly from a repository
-# checkout.
-test -n "$checkout_only_file" && test ! -f "$checkout_only_file" \
-  && func_fatal_error "\
-Error: Bootstrapping from a non-checked-out distribution is risky."
 
 
 ## ------------------------------- ##
