@@ -1443,7 +1443,7 @@ func_require_dotgitmodules ()
         } >> .gitmodules
 
         test -n "$vc_ignore_files" \
-          || func_instert_sorted_if_absent ".gitmodules" $vc_ignore_files
+          || func_insert_sorted_if_absent ".gitmodules" $vc_ignore_files
       }
     }
 
