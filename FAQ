@@ -11,7 +11,7 @@
 INDEX
 
 1 Functionality
-   1.1 `C-h' does backspace, or the function keys don't work.
+   1.1 Some keys don't work (e.g. `C-h' does backspace).
    1.2 The META/ALT key doesn't work in xterm.
    1.3 How do I handle non-ASCII characters?
    1.4 Why are my settings being ignored?
@@ -29,13 +29,10 @@ INDEX
 
 1 Functionality
 
-1.1 `C-h' does backspace, or the function keys don't work.
+1.1 Some keys don't work (e.g. `C-h' does backspace).
 
-    Your terminal settings are probably wrong.
-
-    On Mac OS X up to and including at least 10.7, Terminal fails to
-    set the correct terminal type.  In the Advanced tab of the
-    Preferences dialog, set "Declare terminal as" to "nsterm".
+    The terminfo entry for your terminal type is probably incorrect.
+    Rebuilding Zile against the latest ncurses may help.
 
 1.2 The META/ALT key doesn't work in xterm.
 
@@ -67,7 +64,8 @@ INDEX
 2.1 What does `Zile' mean?
 
     It stands for `Zile Is Lossy Emacs'. It is just another recursive
-    acronym like `GNU'.
+    acronym like `GNU'.  The reason that it's not written in all caps
+    is because Emacs (which is also an acronym) isn't either.
 
 2.2 Why another clone of Emacs?  Why not just use Emacs?
 
@@ -82,7 +80,7 @@ INDEX
     used to be, owing to gnulib portability code; we hope to get it
     down again eventually by linking gnulib dynamically.)
 
-2.5 I like the xyz function of Emacs but it's not in Zile!
+2.4 I like the xyz function of Emacs but it's not in Zile!
 
     Zile was written to be small but fast and powerful enough.
 
@@ -95,20 +93,21 @@ INDEX
     in Zile, please send a message to the developers (see question
     1.7).
 
-2.6 Does Zile support Unicode/UTF-8?
+2.5 Does Zile support Unicode/UTF-8?
 
     No.
 
-2.7 Zile doesn't compile, or its tests don't pass.
+2.6 Zile doesn't compile, or its tests don't pass.
 
-    Zile has been successfully built on a wide range of POSIX systems.
-    If you have problems building Zile on a POSIX system, please
-    report your difficulties to the maintainers in as much detail as
-    possible.  If you manage to get Zile working on a non-POSIX system,
-    the maintainers would be delighted to know, and receive any patches
-    you found necessary.
+    If you have problems getting Zile to work on a POSIX system,
+    please report your difficulties to the maintainers in as much
+    detail as possible.  If you are keen to get Zile working on a
+    non-POSIX system, please do so by improving gnulib; the
+    maintainers will not accept non-POSIX compatibility patches to
+    Zile.  This helps everyone: a wider range of systems get to run
+    more POSIX code, and Zile is not burdened with special-case code.
 
-2.8 Zile has a bug!
+2.7 Zile has a bug!
 
-    For instructions on reporting bugs, see the file BUGS, or send email to
-    <bug-zile@gnu.org>.
+    For instructions on reporting bugs, see the REPORTING BUGS
+    section in the README file, or send email to <bug-zile@gnu.org>.
