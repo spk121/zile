@@ -60,11 +60,11 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
     chmod 0644, $edit_file;
     if (system($ENV{EMACSPROG}, "--quick", "--batch", @args) == 0) {
       if (system("diff", "$test.output", $edit_file) == 0) {
-	$emacs_pass++;
-	unlink $edit_file, "$edit_file~";
+        $emacs_pass++;
+        unlink $edit_file, "$edit_file~";
       } else {
-	print STDERR "Emacs $name failed to produce correct output\n";
-	$emacs_fail++;
+        print STDERR "Emacs $name failed to produce correct output\n";
+        $emacs_fail++;
       }
     } else {
       print STDERR "Emacs $name failed to run with error code $?\n";
@@ -75,7 +75,7 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   copy("$srcdir/tests/test.input", $edit_file);
   chmod 0644, $edit_file;
   my @zile_cmd = ("$builddir/src/zile");
-  unshift @zile_cmd, $ENV{VALGRIND} if $ENV{VALGRIND};
+  unshift @zile_cmd, (split ' ', $ENV{VALGRIND}) if $ENV{VALGRIND};
   if (system(@zile_cmd, @args) == 0) {
     if (system("diff", "$test.output", $edit_file) == 0) {
       $zile_pass++;

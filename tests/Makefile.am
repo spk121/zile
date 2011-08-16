@@ -41,7 +41,7 @@ EXTRA_DIST +=						\
 	$(LISP_ALL_TESTS)				\
 	$(LISP_TESTS_OUTPUTS)				\
 	tests/test.input				\
-	tests/run-lisp-tests				\
+	tests/run-lisp-tests.pl				\
 	tests/test-bad-argument
 
 LISP_TESTS_ENVIRONMENT =				\
