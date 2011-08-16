@@ -27,6 +27,7 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = subdir-objects
 
 DISTCLEANFILES =
+MAINTAINERCLEANFILES =
 
 PERL_BUILDTIME =					\
 	build-aux/Zile.pm				\
