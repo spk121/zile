@@ -376,8 +376,7 @@ by 4 each time.
           else
             break;
         }
-      else if (key == '-' && i == 0)
-        /* FIXME: Negative arguments currently broken. */
+      else if ((key & ~KBD_META) == '-' && i == 0)
         {
           if (sgn > 0)
             {
