@@ -706,17 +706,15 @@ func_reconfigure ()
 # func_gnulib_tool
 # ----------------
 # Run `gnulib-tool' to fetch gnulib modules into the current package.
-# To avoid conflics between `autopoint', `libtoolize' and `gnulib-tool',
-# this default implementation first tricks `gnulib-tool' into copying
-# the modules into a temporary directory, and then mangles the contents
-# as they copied to their final destination.
 #
 # It's assumed that since you are using gnulib's `bootstrap' script,
 # you're also using gnulib elsewhere in your package.  If not, then
-# replace this function in `bootstrap.conf' with:
+# you can replace this function in `bootstrap.conf' with:
 #
 #   func_gnulib_tool () { :; }
 #
+# (although the function returns immediately if $gnulib_tool is set to
+# true in any case).
 func_hookable func_gnulib_tool
 func_gnulib_tool ()
 {
@@ -779,7 +777,7 @@ func_gnulib_tool ()
       func_append_u gnulib_tool_options " $gnulib_mode"
       func_append gnulib_tool_options " $gnulib_modules"
 
-      # The embeded echo is to squash whitespace before display.
+      # The embedded echo is to squash whitespace before display.
       gnulib_cmd=`echo $gnulib_tool $gnulib_tool_options`
 
       func_show_eval "$gnulib_cmd" 'exit $?'
