@@ -19,7 +19,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-RUNLISPTESTS = $(srcdir)/tests/run-lisp-tests
+RUNLISPTESTS = $(PERL) $(srcdir)/tests/run-lisp-tests.pl
 
 LISP_TESTS = $(srcdir)/tests/*.el
 
