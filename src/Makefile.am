@@ -20,7 +20,6 @@
 # MA 02111-1301, USA.
 
 doc_DATA += src/dotzile.sample
-dist_pkgdata_DATA = src/dotzile-extra.el
 
 AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src -I$(builddir)/lib -I$(srcdir)/lib $(LIBGC_CPPFLAGS)
