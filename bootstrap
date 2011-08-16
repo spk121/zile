@@ -1,6 +1,6 @@
 #! /bin/sh
 # Print a version string.
-scriptversion=2011-08-14.19; # UTC
+scriptversion=2011-08-16.09; # UTC
 
 # Bootstrap this package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
@@ -1675,7 +1675,7 @@ func_require_gnulib_submodule ()
     $require_gnulib_path
     $require_gnulib_url
 
-    if test -f "$gnulib_path/gnulib-tool"; then
+    if test -f .gitmodules && test -f "$gnulib_path/gnulib-tool"; then
       func_show_eval "$GIT submodule update" \
           'func_fatal_error "Error: Unable to update gnulib submodule."'
 
