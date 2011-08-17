@@ -1639,15 +1639,23 @@ func_require_dotgitmodules_parameters ()
       test -n "$gnulib_path" \
           || test ! -x "$opt_gnulib_srcdir/gnulib-tool" \
           || gnulib_path="$opt_gnulib_srcdir"
-    else
-      $require_dotgitmodules
-
-      # Extract the parameters with calls to git config.
-      test -n "$gnulib_path" \
-        || gnulib_path="`$GIT config --file .gitmodules submodule.gnulib.path`"
-      test -n "$gnulib_url" \
-        || gnulib_url="`$GIT config --file .gitmodules submodule.gnulib.url`"
     fi
+
+    $require_dotgitmodules
+
+    # Extract the parameters with sed, since git may be missing
+    test -n "$gnulib_path" \
+      || gnulib_path=`sed -e '/^.submodule "gnulib".$/,${
+                                /[	 ]*path *= */{
+			          s,[   ]*,,g;s,^[^=]*=,,;p
+			        }
+		              };d' .gitmodules | sed 1q`
+    test -n "$gnulib_url" \
+      || gnulib_url=`sed -e '/^.submodule "gnulib".$/,${
+                                /[	 ]*url *= */{
+			          s,[   ]*,,g;s,^[^=]*=,,;p
+			        }
+		              };d' .gitmodules | sed 1q`
 
     func_verbose "gnulib_path='$gnulib_path'"
     func_verbose "gnulib_url='$gnulib_url'"
@@ -1670,37 +1678,37 @@ func_require_gnulib_submodule ()
     if test true = "$GIT"; then
       func_warning recommend \
           "No \`git' found; imported gnulib modules may be outdated."
-    fi
-    
-    $require_gnulib_path
-    $require_gnulib_url
-
-    if test -f .gitmodules && test -f "$gnulib_path/gnulib-tool"; then
-      func_show_eval "$GIT submodule update" \
-          'func_fatal_error "Error: Unable to update gnulib submodule."'
-
-    elif test -n "$opt_gnulib_srcdir"; then
-      # Older git can't clone into an empty directory.
-      rmdir "$gnulib_path" 2>/dev/null
-      func_show_eval "$GIT clone --reference '$opt_gnulib_srcdir' \
-              '$gnulib_url' '$gnulib_path'" \
-          && func_show_eval "$GIT submodule init" \
-          && func_show_eval "$GIT submodule update" \
-          || func_fatal_error "Error: Unable to fetch gnulib submodule."
-
-    # Without --gnulib-srcdir, and no existing checked out submodule, we
-    # create a new shallow clone of the remote gnulib repository.
     else
-      trap func_cleanup_gnulib 1 2 13 15
+      $require_gnulib_path
+      $require_gnulib_url
 
-      shallow=
-      $GIT clone -h 2>&1 |func_grep_q -- --depth \
-          && shallow='--depth 2'
+      if test -f .gitmodules && test -f "$gnulib_path/gnulib-tool"; then
+        func_show_eval "$GIT submodule update" \
+            'func_fatal_error "Error: Unable to update gnulib submodule."'
 
-      func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
+      elif test -n "$opt_gnulib_srcdir"; then
+        # Older git can't clone into an empty directory.
+        rmdir "$gnulib_path" 2>/dev/null
+        func_show_eval "$GIT clone --reference '$opt_gnulib_srcdir' \
+                '$gnulib_url' '$gnulib_path'" \
+            && func_show_eval "$GIT submodule init" \
+            && func_show_eval "$GIT submodule update" \
+            || func_fatal_error "Error: Unable to fetch gnulib submodule."
+
+      # Without --gnulib-srcdir, and no existing checked out submodule, we
+      # create a new shallow clone of the remote gnulib repository.
+      else
+        trap func_cleanup_gnulib 1 2 13 15
+
+        shallow=
+        $GIT clone -h 2>&1 |func_grep_q -- --depth \
+            && shallow='--depth 2'
+
+        func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
           func_cleanup_gnulib
 
-      trap - 1 2 13 15
+        trap - 1 2 13 15
+      fi
     fi
 
     require_gnulib_submodule=:
@@ -1720,6 +1728,8 @@ func_require_gnulib_tool ()
     $require_gnulib_submodule
 
     test true = "$gnulib_tool" || {
+      $require_gnulib_path
+
       test -n "$gnulib_tool" \
         || gnulib_tool="$gnulib_path/gnulib-tool"
 
