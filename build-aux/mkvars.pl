@@ -24,7 +24,14 @@ use Zile;
 open VARS, ">src/tbl_vars.h" or die;
 open SAMPLE, ">src/dotzile.sample" or die;
 
-print SAMPLE "; .$ENV{PACKAGE} configuration\n\n";
+print SAMPLE <<EOF;
+;;;; .$ENV{PACKAGE} configuration
+
+;; Rebind keys with:
+;; (global-set-key "key" 'func)
+
+EOF
+
 # Don't note where the contents of this file comes from or that it's
 # auto-generated, because it's ugly in a user configuration file.
 
@@ -32,6 +39,12 @@ sub escape_for_C {
   my ($s) = @_;
   $s =~ s/\n/\\n/g;
   $s =~ s/\"/\\\"/g;
+  return $s;
+}
+
+sub comment_for_lisp {
+  my ($s) = @_;
+  $s =~ s/\n/\n; /g;
   return $s;
 }
 
@@ -47,7 +60,7 @@ while (<IN>) {
                        escape_for_C($doc) . "\")\n";
 
     $doc =~ s/\(\n/\n; /g;
-    print SAMPLE "; $doc\n" .
+    print SAMPLE "; " . comment_for_lisp($doc) . "\n" .
       "; Default value is $defval.\n" .
         "(setq $name $defval)\n\n";
   }
