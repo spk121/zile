@@ -1578,19 +1578,21 @@ func_require_gnulib_merge_changelog ()
 {
     $debug_cmd
 
-    $require_git
+    test -f ChangeLog && {   
+      $require_git
 
-    test true = "$GIT" || {
-      if $GIT config merge.merge-changelog.driver >/dev/null ; then
-        :
-      elif (git-merge-changelog --version) >/dev/null 2>&1 ; then
-        func_echo "initializing git-merge-changelog driver"
-        $GIT config merge.merge-changelog.name 'GNU-style ChangeLog merge driver'
-        $GIT config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
-      else
-        func_warning recommend \
-            "Consider installing git-merge-changelog from gnulib."
-      fi
+      test true = "$GIT" || {
+        if $GIT config merge.merge-changelog.driver >/dev/null ; then
+          :
+        elif (git-merge-changelog --version) >/dev/null 2>&1 ; then
+          func_echo "initializing git-merge-changelog driver"
+          $GIT config merge.merge-changelog.name 'GNU-style ChangeLog merge driver'
+          $GIT config merge.merge-changelog.driver 'git-merge-changelog %O %A %B'
+        else
+          func_warning recommend \
+              "Consider installing git-merge-changelog from gnulib."
+        fi
+      }
     }
 
     require_gnulib_merge_changelog=:
