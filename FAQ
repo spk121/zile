@@ -34,6 +34,13 @@ INDEX
     The terminfo entry for your terminal type is probably incorrect.
     Rebuilding Zile against the latest ncurses may help.
 
+    With Mac OS X, Terminal.app outputs different escape sequences
+    than described by the xterm-color terminfo entry. Make sure you
+    have the default terminal type preference set to xterm-256color,
+    or else run Zile with:
+
+        TERM=xterm-256color zile
+
 1.2 The META/ALT key doesn't work in xterm.
 
     This is probably because you are using "8-bit input".
