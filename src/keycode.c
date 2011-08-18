@@ -142,6 +142,7 @@ static const char *keyname[] = {
   "\\C-",
   "\\DELETE",
   "\\DOWN",
+  "\\e", /* FIXME: Kludge to make keystrings work in both Emacs and Zile. */
   "\\END",
   "\\F1",
   "\\F10",
@@ -181,6 +182,7 @@ static int keycode[] = {
   KBD_CTRL,
   KBD_DEL,
   KBD_DOWN,
+  '\033',
   KBD_END,
   KBD_F1,
   KBD_F10,
