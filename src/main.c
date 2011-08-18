@@ -169,14 +169,18 @@ main (int argc, char **argv)
           break;
         case 1:
           gl_list_add_last (arg_type, (void *) ARG_FUNCTION);
-          gl_list_add_last (arg_arg, (void *) optarg);
+          gl_list_add_last (arg_arg, (const void *) astr_new_cstr (optarg));
           gl_list_add_last (arg_line, (void *) 0);
           break;
         case 2:
-          gl_list_add_last (arg_type, (void *) ARG_LOADFILE);
-          gl_list_add_last (arg_arg, (void *) optarg);
-          gl_list_add_last (arg_line, (void *) 0);
-          break;
+          {
+            gl_list_add_last (arg_type, (void *) ARG_LOADFILE);
+            astr as = astr_new_cstr (optarg);
+            expand_path (as);
+            gl_list_add_last (arg_arg, (const void *) astr_cstr (as));
+            gl_list_add_last (arg_line, (void *) 0);
+            break;
+          }
         case 3:
           printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
                   "\n"
@@ -212,7 +216,9 @@ main (int argc, char **argv)
           else
             {
               gl_list_add_last (arg_type, (void *) ARG_FILE);
-              gl_list_add_last (arg_arg, (void *) optarg);
+              astr as = astr_new_cstr (optarg);
+              expand_path (as);
+              gl_list_add_last (arg_arg, (const void *) astr_cstr (as));
               gl_list_add_last (arg_line, (void *) line);
               line = 1;
             }
