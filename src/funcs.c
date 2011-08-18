@@ -277,12 +277,7 @@ This is useful for inserting control characters.
 +*/
 {
   minibuf_write ("C-q-");
-
-  int *codes;
-  size_t n = getkey_unfiltered (GETKEY_DEFAULT, &codes);
-  for (size_t i = 0; i < n; i++)
-    insert_char (codes[i]);
-
+  insert_char (getkey_unfiltered (GETKEY_DEFAULT));
   minibuf_clear ();
 }
 END_DEFUN

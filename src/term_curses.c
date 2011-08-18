@@ -393,16 +393,13 @@ term_getkey (int delay)
   return key;
 }
 
-size_t
-term_getkey_unfiltered (int delay, int **codes)
+int
+term_getkey_unfiltered (int delay)
 {
-  *codes = XCALLOC (16, int);
-  size_t n = 0;
   keypad (stdscr, false);
-  for ((*codes)[n] = get_char (delay); (*codes)[n] != ERR; (*codes)[++n] = get_char_unfiltered (0))
-    ;
+  int key = get_char (delay);
   keypad (stdscr, true);
-  return n;
+  return key;
 }
 
 void

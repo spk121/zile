@@ -247,10 +247,7 @@ isearch (int forward, int regexp)
       else if (c & KBD_CTRL && (c & 0xff) == 'q')
         {
           minibuf_write ("%s^Q-", astr_cstr (buf));
-          int *codes;
-          size_t n = getkey_unfiltered (GETKEY_DEFAULT, &codes);
-          for (size_t i = 0; i < n; i++)
-            astr_cat_char (pattern, codes[i]);
+          astr_cat_char (pattern, getkey_unfiltered (GETKEY_DEFAULT));
         }
       else if (c & KBD_CTRL && ((c & 0xff) == 'r' || (c & 0xff) == 's'))
         {

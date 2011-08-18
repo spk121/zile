@@ -51,17 +51,16 @@ getkey (int mode)
 }
 
 size_t
-getkey_unfiltered (int mode, int **codes)
+getkey_unfiltered (int mode)
 {
-  size_t n = term_getkey_unfiltered (mode, codes);
+  int key = term_getkey_unfiltered (mode);
+  assert (key >= 0);
 
-  assert (n > 0);
-  _last_key = *codes[n - 1];
+  _last_key = (size_t) key;
   if (thisflag & FLAG_DEFINING_MACRO)
-    for (size_t i = 0; i < n; i++)
-      add_key_to_cmd (*codes[i]);
+    add_key_to_cmd (key);
 
-  return n;
+  return key;
 }
 
 /*
