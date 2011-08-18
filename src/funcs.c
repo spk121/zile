@@ -270,49 +270,18 @@ Put point at beginning and mark at end of buffer.
 }
 END_DEFUN
 
-static void
-quoted_insert_octal (int c1)
-{
-  int c2, c3;
-  minibuf_write ("C-q %c-", c1);
-  c2 = getkey (GETKEY_DEFAULT);
-
-  if (!isdigit (c2) || c2 - '0' >= 8)
-    {
-      insert_char (c1 - '0');
-      insert_char (c2);
-    }
-  else
-    {
-      minibuf_write ("C-q %c %c-", c1, c2);
-      c3 = getkey (GETKEY_DEFAULT);
-
-      if (!isdigit (c3) || c3 - '0' >= 8)
-        {
-          insert_char ((c1 - '0') * 8 + (c2 - '0'));
-          insert_char (c3);
-        }
-      else
-        insert_char ((c1 - '0') * 64 + (c2 - '0') * 8 + (c3 - '0'));
-    }
-}
-
 DEFUN ("quoted-insert", quoted_insert)
 /*+
 Read next input character and insert it.
 This is useful for inserting control characters.
-You may also type up to 3 octal digits, to insert a character with that code.
 +*/
 {
   minibuf_write ("C-q-");
+
   int *codes;
   size_t n = getkey_unfiltered (GETKEY_DEFAULT, &codes);
-
-  if (n == 1 && isdigit (*codes) && *codes - '0' < 8)
-    quoted_insert_octal (*codes);
-  else
-    for (size_t i = 0; i < n; i++)
-      insert_char (codes[i]);
+  for (size_t i = 0; i < n; i++)
+    insert_char (codes[i]);
 
   minibuf_clear ();
 }
