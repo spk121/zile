@@ -193,8 +193,8 @@ get_home_dir (void)
   return NULL;
 }
 
-/* Return nonzero if file exists and can be written. */
-static int
+/* Return true if file exists and can be written. */
+static bool
 check_writable (const char *filename)
 {
   return euidaccess (filename, W_OK) >= 0;
@@ -203,49 +203,41 @@ check_writable (const char *filename)
 bool
 find_file (const char *filename)
 {
-  for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+  Buffer *bp;
+  for (bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
+    if (get_buffer_filename (bp) != NULL &&
+        STREQ (get_buffer_filename (bp), filename))
+      break;
+
+  if (bp == NULL)
     {
-      if (get_buffer_filename (bp) != NULL &&
-          STREQ (get_buffer_filename (bp), filename))
+      if (exist_file (filename) && !is_regular_file (filename))
+        minibuf_error ("File exists but could not be read");
+      else
         {
-          switch_to_buffer (bp);
-          return true;
+          bp = buffer_new ();
+          set_buffer_names (bp, filename);
+          set_buffer_dir (bp, astr_new_cstr (dir_name (filename)));
+
+          estr es = estr_readf (filename);
+          if (es.as)
+            set_buffer_readonly (bp, !check_writable (filename));
+          else
+            es = estr_new_astr (astr_new ());
+          set_buffer_text (bp, es);
+
+          /* Reset undo history. */
+          set_buffer_next_undop (bp, NULL);
+          set_buffer_last_undop (bp, NULL);
+          set_buffer_modified (bp, false);
         }
     }
 
-  if (exist_file (filename) && !is_regular_file (filename))
-    {
-      minibuf_error ("File exists but could not be read");
-      return false;
-    }
+  if (bp == NULL)
+    return false;
 
-  Buffer *bp = buffer_new ();
-  set_buffer_names (bp, filename);
   switch_to_buffer (bp);
-
-  estr es = estr_readf (filename);
-  if (es.as)
-    {
-      if (!check_writable (filename))
-        set_buffer_readonly (cur_bp, true);
-    }
-  else
-    es = estr_new_astr (astr_new ());
-
-  set_buffer_text (cur_bp, es);
-
-  /* Reset undo history. */
-  set_buffer_next_undop (cur_bp, NULL);
-  set_buffer_last_undop (cur_bp, NULL);
-
-  set_buffer_modified (bp, false);
-  set_buffer_dir (bp, astr_new_cstr (dir_name (filename)));
-  if (chdir (astr_cstr (get_buffer_dir (bp)))) {
-    /* Avoid compiler warning for ignoring return value. */
-  }
-
   thisflag |= FLAG_NEED_RESYNC;
-
   return true;
 }
 
