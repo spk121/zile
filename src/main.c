@@ -56,6 +56,7 @@ Undo changes       C-x u        Exit " PACKAGE_NAME "         C-x C-c\n\
 (`C-' means use the CTRL key.  `M-' means hold the Meta (or Alt) key.\n\
 If you have no Meta key, you may type ESC followed by the character.)\n\
 Combinations like `C-x u' mean first press `C-x', then `u'.\n\
+Keys not working properly?  See " PATH_DATA "/FAQ\n\
 \n\
 " ZILE_VERSION_STRING "\n\
 " ZILE_COPYRIGHT_STRING "\n\
