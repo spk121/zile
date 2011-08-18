@@ -348,40 +348,35 @@ keytocodes (size_t key, int ** codevec)
 }
 
 static int
-get_char_unfiltered (int delay)
-{
-  timeout (delay);
-
-  int c;
-#ifdef KEY_RESIZE
-  do {
-#endif
-    c = getch ();
-
-    #ifdef KEY_RESIZE
-    if (c == KEY_RESIZE)
-      resize_windows ();
-  } while (c == KEY_RESIZE);
-#endif
-
-  timeout (-1);
-
-  return c;
-}
-
-static int
 get_char (int delay)
 {
-  size_t size = term_buf_len ();
+  int c;
 
+  size_t size = term_buf_len ();
   if (size > 0)
     {
-      int c = (ptrdiff_t) gl_list_get_at (key_buf, size - 1);
+      c = (ptrdiff_t) gl_list_get_at (key_buf, size - 1);
       gl_list_remove_at (key_buf, size - 1);
-      return c;
     }
   else
-    return get_char_unfiltered (delay);
+    {
+      timeout (delay);
+
+#ifdef KEY_RESIZE
+      do {
+#endif
+        c = getch ();
+
+#ifdef KEY_RESIZE
+        if (c == KEY_RESIZE)
+          resize_windows ();
+      } while (c == KEY_RESIZE);
+#endif
+
+      timeout (-1);
+    }
+
+  return c;
 }
 
 size_t
