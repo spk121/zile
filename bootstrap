@@ -1,6 +1,6 @@
 #! /bin/sh
 # Print a version string.
-scriptversion=2011-08-16.09; # UTC
+scriptversion=2011-08-19.18; # UTC
 
 # Bootstrap this package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
@@ -1578,7 +1578,7 @@ func_require_gnulib_merge_changelog ()
 {
     $debug_cmd
 
-    test -f ChangeLog && {   
+    test -f ChangeLog && {
       $require_git
 
       test true = "$GIT" || {
@@ -1892,7 +1892,7 @@ func_require_package_bugreport ()
     func_check_configuration package_bugreport \
       "AC_INIT([$package_name], [$package_version], [bug-$package@gnu.org])"
     func_verbose "package_bugreport='$package_bugreport'"
- 
+
     require_package_bugreport=:
 }
 
@@ -2522,7 +2522,7 @@ func_quote_for_eval ()
 
       case $my_unquoted_arg in
         # Double-quote args containing shell metacharacters to delay
-        # word splitting, command substitution and and variable
+        # word splitting, command substitution and variable
         # expansion for a subsequent eval.
         # Many Bourne shells cannot handle close brackets correctly
         # in scan sets, so we specify it separately.

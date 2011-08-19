@@ -66,7 +66,7 @@ The rest of the files in the top-level directory are part of the
  * Directory `gl` contains Zile specific patches to standard [gnulib]().
  * Directory `lib` contains [gnulib]() source modules used by Zile.
  * Directory `m4` contains a mixture of [gnulib]() supplied and Zile
-   specific macros for rebuilding the `configure' script. 
+   specific macros for rebuilding the `configure' script.
  * Directory `src` contains the source code used to build Zile.
  * Directory `tests` contains a small suite of tests used by
    `make check` to sanity check a newly built `src/zile` binary.

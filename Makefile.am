@@ -34,7 +34,7 @@ PERL_BUILDTIME =					\
 	build-aux/mkfuncs.pl				\
 	build-aux/mkvars.pl
 
-EXTRA_DIST = 						\
+EXTRA_DIST =						\
 	FAQ						\
 	build-aux/zile-help2man-wrapper			\
 	$(PERL_BUILDTIME)

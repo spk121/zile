@@ -25,7 +25,7 @@ AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src -I$(builddir)/lib -I$(srcdir)/lib -DPATH_DATA="\"$(pkgdatadir)\"" $(LIBGC_CPPFLAGS)
 LDADD = $(builddir)/lib/lib$(PACKAGE).a $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB)
 
-BUILT_SOURCES = 					\
+BUILT_SOURCES =						\
 	src/tbl_funcs.h					\
 	src/tbl_vars.h
 
