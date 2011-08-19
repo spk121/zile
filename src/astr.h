@@ -66,29 +66,29 @@ castr castr_new_nstr (const char *s, size_t n);
 const char *astr_cstr (castr as);
 
 /*
- * Return the length of the argument string as.
+ * Return the length of the argument string `as'.
  */
 size_t astr_len (castr as);
 
 /*
- * Return the pos'th character of as.
+ * Return the `pos'th character of `as'.
  */
 char astr_get (castr as, size_t pos);
 
 /*
- * Return a new astr consisting of size characters from string as
- * starting from position pos.
+ * Return a new astr consisting of `size' characters from string `as'
+ * starting from position `pos'.
  */
 astr astr_substr (castr as, size_t pos, size_t size);
 
 /*
- * Assign the contents of the argument string to the string as.
+ * Assign the contents of the argument string to the string `as'.
  */
 astr astr_cpy (astr as, castr src);
 astr astr_cpy_cstr (astr as, const char *s);
 
 /*
- * Append the contents of the argument string or character to as.
+ * Append the contents of the argument string or character to `as'.
  */
 astr astr_cat (astr as, castr src);
 astr astr_cat_cstr (astr as, const char *s);
@@ -96,33 +96,33 @@ astr astr_cat_nstr (astr as, const char *s, size_t len);
 astr astr_cat_char (astr as, int c);
 
 /*
- * Overwrite size characters of as, starting at pos, with the argument
- * string.
+ * Overwrite `size' characters of `as', starting at `pos', with the
+ * argument string.
  */
 astr astr_replace_nstr (astr as, size_t pos, const char *s, size_t size);
 
 /*
- * Remove size chars from as at position pos.
+ * Remove `size' chars from `as' at position `pos'.
  */
 astr astr_remove (astr as, size_t pos, size_t size);
 
 /*
- * Insert gap of size characters in as at position pos.
+ * Insert gap of `size' characters in `as' at position `pos'.
  */
 astr astr_insert (astr as, size_t pos, size_t size);
 
 /*
- * Move n chars in as from position from to to.
+ * Move `n' chars in `as' from position `from' to `to'.
  */
 astr astr_move (astr as, size_t to, size_t from, size_t n);
 
 /*
- * Set n chars in as at position pos to c
+ * Set `n' chars in `as' at position `pos' to `c'.
  */
 astr astr_set (astr as, size_t pos, int c, size_t n);
 
 /*
- * Truncate as to given position.
+ * Truncate `as' to position `pos'.
  */
 astr astr_truncate (astr as, size_t pos);
 
