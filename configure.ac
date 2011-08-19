@@ -149,6 +149,9 @@ fi
 
 dnl Perl
 AX_WITH_PROG([PERL], [perl])
+if test -z "$PERL"; then
+  AC_MSG_FAILURE([cannot find perl])
+fi
 
 dnl Generate output
 AC_CONFIG_HEADERS([config.h])
