@@ -56,12 +56,13 @@ Undo changes       C-x u        Exit " PACKAGE_NAME "         C-x C-c\n\
 (`C-' means use the CTRL key.  `M-' means hold the Meta (or Alt) key.\n\
 If you have no Meta key, you may type ESC followed by the character.)\n\
 Combinations like `C-x u' mean first press `C-x', then `u'.\n\
-Keys not working properly?  See file://" PATH_DATA "/FAQ\n\
+\n\
+Keys not working properly?  See file://" PATH_DOCDIR "/FAQ\n\
 \n\
 " ZILE_VERSION_STRING "\n\
 " ZILE_COPYRIGHT_STRING "\n\
 \n\
-GNU " PACKAGE_NAME " Zile comes with ABSOLUTELY NO WARRANTY.\n\
+GNU " PACKAGE_NAME " comes with ABSOLUTELY NO WARRANTY.\n\
 " PACKAGE_NAME " is Free Software--Free as in Freedom--so you can redistribute copies\n\
 of " PACKAGE_NAME " and modify it; see the file COPYING.  Otherwise, a copy can be\n\
 downloaded from http://www.gnu.org/licenses/gpl.html.\n\
