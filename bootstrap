@@ -2522,8 +2522,8 @@ func_quote_for_eval ()
 
       case $my_unquoted_arg in
         # Double-quote args containing shell metacharacters to delay
-        # word splitting, command substitution and variable
-        # expansion for a subsequent eval.
+        # word splitting, command substitution and variable expansion
+        # for a subsequent eval.
         # Many Bourne shells cannot handle close brackets correctly
         # in scan sets, so we specify it separately.
         *[\[\~\#\^\&\*\(\)\{\}\|\;\<\>\?\'\ \	]*|*]*|"")
