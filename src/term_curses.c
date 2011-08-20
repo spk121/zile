@@ -174,6 +174,7 @@ codetokey (int c)
     case KEY_DC:		/* DEL */
       return KBD_DEL;
     case KEY_BACKSPACE:		/* BS */
+      return KBD_CTRL | 'h';
     case 0177:			/* BS */
       return KBD_BS;
     case KEY_IC:		/* INSERT */
