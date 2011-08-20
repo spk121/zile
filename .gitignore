@@ -6,6 +6,7 @@
 /GNUmakefile
 /HACKING
 /INSTALL
+/README-release
 /lib
 /maint.mk
 ChangeLog

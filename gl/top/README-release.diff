@@ -1,0 +1,27 @@
+diff -u a/README-release b/README-release
+--- a/README-release	2011-08-16 23:26:02.000000000 +0700
++++ b/README-release	2011-08-20 18:40:13.000000000 +0700
+@@ -1,3 +1,23 @@
++                      GNU Zile developers’ notes
++                      --------------------------
++
++     Copyright (c) 2011 Free Software Foundation, Inc.
++
++     Copying and distribution of this file, with or without
++     modification, are permitted in any medium without royalty
++     provided the copyright notice and this notice are preserved.
++
++
++Automated releases
++------------------
++
++To make a release automatically, you need ncftp, and woger, from
++http://rrt.sc3d.org/Software/woger
++
++
++GNU Style releases
++------------------
++
+ Here are most of the steps we (maintainers) follow when making a release.
+ 
+ * start from a clean, up-to-date git directory.

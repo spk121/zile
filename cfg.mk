@@ -28,9 +28,6 @@ old_NEWS_hash := e268d11c0bd0f05545e98f7933a697ac
 # Don't check test outputs or diff patches
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
-# HACKING.in ends in a blank line intentionally
-exclude_file_name_regexp--sc_prohibit_empty_lines_at_EOF = HACKING
-
 local-checks-to-skip = \
 	sc_bindtextdomain \
 	sc_error_message_period \
