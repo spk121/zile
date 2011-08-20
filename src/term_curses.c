@@ -21,18 +21,22 @@
 
 #include <config.h>
 
+#include <assert.h>
 #include <stdlib.h>
 #ifdef HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
 #endif
+#include <term.h>
 #include "gl_array_list.h"
 
 #include "main.h"
 #include "extern.h"
 
 static gl_list_t key_buf;
+
+static char backspace_code;
 
 size_t
 term_buf_len (void)
@@ -110,6 +114,9 @@ term_init (void)
   intrflush (stdscr, false);
   keypad (stdscr, true);
   key_buf = gl_list_create_empty (GL_ARRAY_LIST, NULL, NULL, NULL, true);
+  char *kbs = tigetstr("kbs");
+  assert (strlen (kbs) == 1);
+  backspace_code = *kbs;
 }
 
 void
@@ -173,8 +180,8 @@ codetokey (int c)
       return KBD_END;
     case KEY_DC:		/* DEL */
       return KBD_DEL;
-    case KEY_BACKSPACE:		/* BS */
-      return KBD_CTRL | 'h';
+    case KEY_BACKSPACE:		/* Backspace or Ctrl-H */
+      return codetokey (backspace_code);
     case 0177:			/* BS */
       return KBD_BS;
     case KEY_IC:		/* INSERT */
@@ -286,7 +293,7 @@ keytocodes (size_t key, int ** codevec)
       *p++ = KEY_DC;
       break;
     case KBD_BS:		/* BS */
-      *p++ = KEY_BACKSPACE;
+      *p++ = 0177;
       break;
     case KBD_INS:		/* INSERT */
       *p++ = KEY_IC;
