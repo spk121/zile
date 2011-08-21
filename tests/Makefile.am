@@ -25,6 +25,7 @@ LISP_TESTS =						\
 	$(srcdir)/tests/*.el				\
 	$(srcdir)/tests/interactive/*.el
 LISP_TESTS_ZILE_ONLY =					\
+	$(srcdir)/tests/regression/*.el			\
 	$(srcdir)/tests/zile-only/*.el
 
 # FIXME: Find a way of making these work too
@@ -33,6 +34,7 @@ LISP_TESTS_ZILE_ONLY =					\
 LISP_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
+	$(srcdir)/tests/regression/*.output		\
 	$(srcdir)/tests/zile-only/*.output
 
 LISP_ALL_TESTS =					\
