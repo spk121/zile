@@ -1,4 +1,4 @@
-# Source Makefile.am
+# Tests Makefile.am
 #
 # Copyright (c) 1997-2011 Free Software Foundation, Inc.
 #
@@ -21,16 +21,18 @@
 
 RUNLISPTESTS = $(PERL) $(srcdir)/tests/run-lisp-tests.pl
 
-LISP_TESTS = $(srcdir)/tests/*.el
-
-# FIXME: Make these work in Emacs too
-LISP_TESTS_ZILE_ONLY = $(srcdir)/tests/zile-only/*.el
+LISP_TESTS =						\
+	$(srcdir)/tests/*.el				\
+	$(srcdir)/tests/interactive/*.el
+LISP_TESTS_ZILE_ONLY =					\
+	$(srcdir)/tests/zile-only/*.el
 
 # FIXME: Find a way of making these work too
 #	tests/disabled/*.el
 
 LISP_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
+	$(srcdir)/tests/interactive/*.output		\
 	$(srcdir)/tests/zile-only/*.output
 
 LISP_ALL_TESTS =					\
@@ -50,7 +52,5 @@ LISP_TESTS_ENVIRONMENT =				\
 	VALGRIND="$(VALGRIND)"
 
 check-local: src/zile
-	@test -d tests || mkdir tests
 	echo $(LISP_TESTS) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG="$(EMACSPROG)" xargs $(RUNLISPTESTS)
-	@test -d tests/zile-only || mkdir tests/zile-only
 	echo $(LISP_TESTS_ZILE_ONLY) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG= xargs $(RUNLISPTESTS)

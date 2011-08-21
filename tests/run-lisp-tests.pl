@@ -24,6 +24,7 @@ use warnings;
 
 use File::Basename;
 use File::Copy;
+use File::Path;
 
 
 # N.B. Tests that use execute-kbd-macro must note that keyboard input
@@ -52,6 +53,8 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   $edit_file =~ s/$srcdir/$builddir/e;		# ./tests/zile-only/backward_delete_char.input
   my $lisp_file = "$test.el";
   $lisp_file =~ s/$srcdir/$abs_srcdir/e;
+
+  mkpath(dirname($edit_file));
 
   my @args = ("--no-init-file", $edit_file, "--load", $lisp_file);
 
