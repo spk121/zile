@@ -115,6 +115,7 @@ if test "$ax_cv_curses" != "yes"; then
 fi
 AC_ARG_VAR(CURSES_LIB, [linker flags for curses library])
 
+dnl FIXME: Put this in autoconf-archive
 dnl libgc (BDW garbage collector)
 if test "x$enable_debug" != "yes"; then
   AC_CHECK_HEADERS([gc.h gc/gc.h], [
