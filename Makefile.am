@@ -55,8 +55,7 @@ PRODUCTIONSOURCES =					\
 	doc/Makefile.am					\
 	src/Makefile.am					\
 	$(src_zile_base_SOURCE_FILES)			\
-	src/tbl_opts.h.in				\
-	src/dotzile-extra.el
+	src/tbl_opts.h.in
 
 loc:
 	cd $(srcdir) &&					\
