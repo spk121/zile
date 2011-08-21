@@ -1,6 +1,6 @@
 # Generate tbl_funcs.h
 #
-# Copyright (c) 2010 Free Software Foundation, Inc.
+# Copyright (c) 2010-2011 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -19,11 +19,14 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
+use File::Copy;
+
 use Zile;
 
 my $dir = shift;
 
-open OUT, ">src/tbl_funcs.h" or die;
+my $output = "src/tbl_funcs.h";
+open OUT, ">$output.new" or die;
 
 print OUT <<END;
 /*
@@ -44,7 +47,8 @@ foreach my $file (@ARGV) {
 
       my $interactive = !/^DEFUN_NONINTERACTIVE/;
       my $doc = "";
-      for (my $state = 0; <IN>;) {
+      my $state = 0;
+      while (<IN>) {
         if ($state == 1) {
           if (m|^\+\*/|) {
             $state = 0;
@@ -66,4 +70,12 @@ foreach my $file (@ARGV) {
       print OUT "X(\"$name\", $cname, " . ($interactive ? "true" : "false") . ", \"\\\n$doc\")\n";
     }
   }
+}
+
+# Only replace the output file if it changed, to avoid pointless rebuilds
+open STDERR, ">", "/dev/null";
+if ((system "diff", $output, "$output.new") != 0) {
+  move("$output.new", $output);
+} else {
+  unlink "$output.new";
 }
