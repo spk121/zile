@@ -106,6 +106,9 @@ term_height (void)
 void
 term_init (void)
 {
+  /* tigetstr takes a non-const string, provoking a compiler warning! */
+  static char capname[] = "kbs";
+
   initscr ();
   noecho ();
   nonl ();
@@ -114,7 +117,7 @@ term_init (void)
   intrflush (stdscr, false);
   keypad (stdscr, true);
   key_buf = gl_list_create_empty (GL_ARRAY_LIST, NULL, NULL, NULL, true);
-  char *kbs = tigetstr("kbs");
+  char *kbs = tigetstr(capname);
   assert (strlen (kbs) == 1);
   backspace_code = *kbs;
 }
