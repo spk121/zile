@@ -2700,12 +2700,18 @@ func_extract_trace ()
     |$M4 -daq --prefix --trace="$my_macro" - "$@" 2>&1 1>/dev/null \
     |$SED -n 's|#.*$||
         /^m4trace: -1- '"$my_macro"'/ {
-          s|^m4trace: -1- '"$my_macro"'([[]|func_extract_trace_result='\''|
+          s|^m4trace: -1- '"$my_macro"'[([]*|func_extract_trace_result='\''|
           s|], [[]|:|g
-          s|])$|'\''|
+          s|[])]*$|:'\''|
           s|[^'\'']$|\&'\''|
           p
         }'`
+
+    # Leave the ':' sentinel in place for successfully traced macros
+    # without arguments, otherwise remove it so that the results of
+    # single-argument macros can be used without additional parsing.
+    test : = "$func_extract_trace_result" \
+        || func_extract_trace_result=`echo "$func_extract_trace_result" |$SED 's|:$||'`
 }
 
 
