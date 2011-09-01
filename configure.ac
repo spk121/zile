@@ -28,8 +28,6 @@ AM_INIT_AUTOMAKE([-Wall -Werror std-options check-news])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Checks for programs
-AC_GNU_SOURCE
-AC_PROG_CC_C99
 gl_EARLY
 AM_PROG_CC_C_O
 
