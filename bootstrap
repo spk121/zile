@@ -764,7 +764,7 @@ func_gnulib_tool ()
       # Add a sensible default libtool option to gnulib_tool_options.
       case " $gnulib_tool_options " in
         *" --no-libtool "*|*" --libtool "*) ;;
-        *)  if true = "$LIBTOOLIZE"; then
+        *)  if test true = "$LIBTOOLIZE"; then
               func_append_u gnulib_tool_options " --no-libtool"
             else
               func_append_u gnulib_tool_options " --libtool"
