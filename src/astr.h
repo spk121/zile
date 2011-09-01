@@ -57,13 +57,13 @@ astr astr_new_cstr (const char *s);
 /*
  * Make a new constant string from a counted C string.
  */
-castr castr_new_nstr (const char *s, size_t n);
+castr castr_new_nstr (char *s, size_t n);
 
 /*
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_len (as) - 1] inclusive may be read.
  */
-const char *astr_cstr (castr as);
+char *astr_cstr (castr as);
 
 /*
  * Return the length of the argument string `as'.
