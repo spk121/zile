@@ -1208,6 +1208,8 @@ func_require_autoheader ()
 
     test true = "$AUTOHEADER" || {
       func_extract_trace AC_CONFIG_HEADERS
+      test -n "$func_extract_trace_result" \
+	  || func_extract_trace AC_CONFIG_HEADER
 
       test -n "$func_extract_trace_result" || {
         AUTOHEADER=true
