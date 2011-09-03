@@ -118,7 +118,7 @@ make_screen_pos (Window * wp)
     return xasprintf ("Bot");
   else
     return xasprintf ("%2d%%",
-                      (int) ((float) (window_o (wp) / get_buffer_size (get_window_bp (wp))) * 100.0));
+                      (int) ((float) 100.0 * window_o (wp) / get_buffer_size (get_window_bp (wp))));
 }
 
 static void
