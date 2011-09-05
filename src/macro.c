@@ -151,8 +151,10 @@ A prefix argument serves as a repeat count.
       return leNIL;
     }
 
+  undo_start_sequence ();
   for (int uni = 0; uni < uniarg; ++uni)
     process_keys (cur_mp->keys);
+  undo_end_sequence ();
 }
 END_DEFUN
 
@@ -165,7 +167,11 @@ Execute macro as string of editor command characters.
   STR_INIT (keystr);
   gl_list_t keys = keystrtovec (astr_cstr (keystr));
   if (keys)
-    process_keys (keys);
+    {
+      undo_start_sequence ();
+      process_keys (keys);
+      undo_end_sequence ();
+    }
   else
     ok = leNIL;
 }
