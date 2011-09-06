@@ -135,8 +135,17 @@ process_keys (gl_list_t keys)
   for (size_t i = 0; i < len; i++)
     pushkey ((size_t) gl_list_get_at (keys, len - i - 1));
 
+  undo_start_sequence ();
   while (term_buf_len () > cur)
     process_command ();
+  undo_end_sequence ();
+}
+
+static bool
+call_last_kbd_macro (void)
+{
+  process_keys (cur_mp->keys);
+  return true;
 }
 
 DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
@@ -151,10 +160,7 @@ A prefix argument serves as a repeat count.
       return leNIL;
     }
 
-  undo_start_sequence ();
-  for (int uni = 0; uni < uniarg; ++uni)
-    process_keys (cur_mp->keys);
-  undo_end_sequence ();
+  execute_with_uniarg (true, uniarg, call_last_kbd_macro, NULL);
 }
 END_DEFUN
 
@@ -167,11 +173,7 @@ Execute macro as string of editor command characters.
   STR_INIT (keystr);
   gl_list_t keys = keystrtovec (astr_cstr (keystr));
   if (keys)
-    {
-      undo_start_sequence ();
-      process_keys (keys);
-      undo_end_sequence ();
-    }
+    process_keys (keys);
   else
     ok = leNIL;
 }
