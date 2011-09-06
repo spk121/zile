@@ -33,7 +33,6 @@ LISP_TESTS_ZILE_ONLY =					\
 LISP_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
-	$(srcdir)/tests/regression/*.output		\
 	$(srcdir)/tests/zile-only/*.output
 
 LISP_ALL_TESTS =					\
