@@ -294,10 +294,10 @@ keystrtovec (const char *key)
 }
 
 /*
- * Convert a key code sequence into a key code sequence string.
+ * Convert a key code sequence into a descriptive string.
  */
 astr
-keyvectostr (gl_list_t keys)
+keyvectodesc (gl_list_t keys)
 {
   astr as = astr_new ();
 

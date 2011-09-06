@@ -175,7 +175,7 @@ get_key_sequence (void)
       Binding p = search_key (root_bindings, keys, 0);
       if (p == NULL || p->func != NULL)
         break;
-      as = keyvectostr (keys);
+      as = keyvectodesc (keys);
       gl_list_add_last (keys, (void *) do_binding_completion (as));
     }
 
@@ -287,7 +287,7 @@ process_command (void)
   if (f != NULL)
     call_command (f, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
   else
-    minibuf_error ("%s is undefined", astr_cstr (keyvectostr (keys)));
+    minibuf_error ("%s is undefined", astr_cstr (keyvectodesc (keys)));
 }
 
 static Binding
@@ -457,7 +457,7 @@ sequence.
     {
       minibuf_write ("Set key globally: ");
       keys = get_key_sequence ();
-      keystr = keyvectostr (keys);
+      keystr = keyvectodesc (keys);
     }
 
   STR_INIT (name)

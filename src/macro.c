@@ -135,16 +135,22 @@ process_keys (gl_list_t keys)
   for (size_t i = 0; i < len; i++)
     pushkey ((size_t) gl_list_get_at (keys, len - i - 1));
 
+  /* We handle the uniarg at a higher level. */
+  last_uniarg = 1;
+  lastflag &= ~FLAG_SET_UNIARG;
+
   undo_start_sequence ();
   while (term_buf_len () > cur)
     process_command ();
   undo_end_sequence ();
 }
 
+static gl_list_t macro_keys;
+
 static bool
-call_last_kbd_macro (void)
+call_macro (void)
 {
-  process_keys (cur_mp->keys);
+  process_keys (macro_keys);
   return true;
 }
 
@@ -160,7 +166,10 @@ A prefix argument serves as a repeat count.
       return leNIL;
     }
 
-  execute_with_uniarg (true, uniarg, call_last_kbd_macro, NULL);
+  /* FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec. */
+  /* F_execute_kbd_macro (uniarg, true, leAddDataElement (leNew (NULL), astr_cstr (keyvectostr (cur_mp->keys)), false)); */
+  macro_keys = cur_mp->keys;
+  execute_with_uniarg (true, uniarg, call_macro, NULL);
 }
 END_DEFUN
 
@@ -173,7 +182,10 @@ Execute macro as string of editor command characters.
   STR_INIT (keystr);
   gl_list_t keys = keystrtovec (astr_cstr (keystr));
   if (keys)
-    process_keys (keys);
+    {
+      macro_keys = keys;
+      execute_with_uniarg (true, uniarg, call_macro, NULL);
+    }
   else
     ok = leNIL;
 }

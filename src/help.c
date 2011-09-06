@@ -141,7 +141,7 @@ Display documentation of the command invoked by a key sequence.
       if (keys != NULL)
         {
           name = get_function_name (get_function_by_keys (keys));
-          binding = keyvectostr (keys);
+          binding = keyvectodesc (keys);
         }
       else
         ok = leNIL;
@@ -153,7 +153,7 @@ Display documentation of the command invoked by a key sequence.
       minibuf_write ("Describe key:");
       keys = get_key_sequence ();
       name = get_function_name (get_function_by_keys (keys));
-      binding = keyvectostr (keys);
+      binding = keyvectodesc (keys);
 
       if (name == NULL)
         {

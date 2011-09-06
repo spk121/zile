@@ -170,7 +170,7 @@ const char *next_history_element (History * hp);
 /* keycode.c -------------------------------------------------------------- */
 astr chordtostr (size_t key);
 gl_list_t keystrtovec (const char *key);
-astr keyvectostr (gl_list_t keys);
+astr keyvectodesc (gl_list_t keys);
 
 /* line.c ----------------------------------------------------------------- */
 bool insert_newline (void);
