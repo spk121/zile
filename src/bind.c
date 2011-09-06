@@ -492,12 +492,12 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
               astr_cat (key, (castr) gl_list_get_at (keys, j));
               astr_cat_char (key, ' ');
             }
-          astr_cat (key, chordtostr (p->key));
+          astr_cat (key, chordtodesc (p->key));
           process (key, p, st);
         }
       else
         {
-          gl_list_add_last (keys, chordtostr (p->key));
+          gl_list_add_last (keys, chordtodesc (p->key));
           walk_bindings_tree (p, keys, process, st);
           assert (gl_list_remove_at (keys, gl_list_size (keys) - 1));
         }

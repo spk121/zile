@@ -168,7 +168,7 @@ const char *previous_history_element (History * hp);
 const char *next_history_element (History * hp);
 
 /* keycode.c -------------------------------------------------------------- */
-astr chordtostr (size_t key);
+astr chordtodesc (size_t key);
 gl_list_t keystrtovec (const char *key);
 astr keyvectodesc (gl_list_t keys);
 

@@ -34,7 +34,7 @@
  * Convert a key chord into its ASCII representation
  */
 astr
-chordtostr (size_t key)
+chordtodesc (size_t key)
 {
   astr as = astr_new ();
 
@@ -303,7 +303,7 @@ keyvectodesc (gl_list_t keys)
 
   for (size_t i = 0; i < gl_list_size (keys); i++)
     {
-      astr key = chordtostr ((size_t) gl_list_get_at (keys, i));
+      astr key = chordtodesc ((size_t) gl_list_get_at (keys, i));
       astr_cat (as, key);
       if (i < gl_list_size (keys) - 1)
         astr_cat_char (as, ' ');
