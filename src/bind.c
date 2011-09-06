@@ -255,6 +255,11 @@ call_command (Function f, int uniarg, bool uniflag, le *branch)
 {
   thisflag = lastflag & FLAG_DEFINING_MACRO;
 
+  /* Reset last_uniarg before function call, so recursion (e.g. in
+     macros) works. */
+  if (!(thisflag & FLAG_SET_UNIARG))
+    last_uniarg = 1;
+
   /* Execute the command. */
   _this_command = f;
   le *ok = f (uniarg, uniflag, branch);
@@ -265,9 +270,6 @@ call_command (Function f, int uniarg, bool uniflag, le *branch)
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro ();
 
-  if (!(thisflag & FLAG_SET_UNIARG))
-    last_uniarg = 1;
-
   if (cur_bp && last_command () != F_undo)
     set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
 
@@ -277,7 +279,7 @@ call_command (Function f, int uniarg, bool uniflag, le *branch)
 }
 
 void
-process_command (void)
+get_and_run_command (void)
 {
   gl_list_t keys = get_key_sequence ();
   Function f = get_function_by_keys (keys);

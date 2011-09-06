@@ -340,7 +340,7 @@ main (int argc, char **argv)
         resync_redisplay (cur_wp);
       term_redisplay ();
       term_refresh ();
-      process_command ();
+      get_and_run_command ();
     }
 
   /* Tidy and close the terminal. */

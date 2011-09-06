@@ -135,13 +135,9 @@ process_keys (gl_list_t keys)
   for (size_t i = 0; i < len; i++)
     pushkey ((size_t) gl_list_get_at (keys, len - i - 1));
 
-  /* We handle the uniarg at a higher level. */
-  last_uniarg = 1;
-  lastflag &= ~FLAG_SET_UNIARG;
-
   undo_start_sequence ();
   while (term_buf_len () > cur)
-    process_command ();
+    get_and_run_command ();
   undo_end_sequence ();
 }
 
