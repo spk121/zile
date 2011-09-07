@@ -67,7 +67,7 @@ loc-all:
 
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
-	woger freshmeat,gnu $(PACKAGE) "$(PACKAGE_NAME)" $(VERSION) "the tiny Emacs clone" release-notes && \
+	woger freshmeat,gnu package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) description="the tiny Emacs clone" notes=release-notes && \
 	rm -f release-notes
 
 CYCLO_SRCS = $(srcdir)/src/*.[ch]
