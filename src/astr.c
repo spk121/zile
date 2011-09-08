@@ -59,7 +59,7 @@ astr_new (void)
 }
 
 castr
-castr_new_nstr (char *s, size_t n)
+castr_new_nstr (const char *s, size_t n)
 {
   astr as;
   as = (astr) XZALLOC (struct astr);
@@ -68,10 +68,10 @@ castr_new_nstr (char *s, size_t n)
   return as;
 }
 
-char *
+const char *
 astr_cstr (castr as)
 {
-  return as->text;
+  return (const char *) (as->text);
 }
 
 size_t
