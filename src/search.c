@@ -396,7 +396,7 @@ what to do with it.
     return leNIL;
   bool find_no_upper = no_upper (astr_cstr (find), astr_len (find), false);
 
-  castr repl = minibuf_read ("Query replace `%s' with: ", "", find);
+  castr repl = minibuf_read ("Query replace `%s' with: ", "", astr_cstr (find));
   if (repl == NULL)
     return FUNCALL (keyboard_quit);
 
@@ -413,7 +413,7 @@ what to do with it.
           for (;;)
             {
               minibuf_write
-                ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", find,
+                ("Query replacing `%s' with `%s' (y, n, !, ., q)? ", astr_cstr (find),
                  astr_cstr (repl));
               c = getkey (GETKEY_DEFAULT);
               if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
