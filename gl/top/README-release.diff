@@ -1,6 +1,5 @@
-diff -u a/README-release b/README-release
---- a/README-release	2011-08-16 23:26:02.000000000 +0700
-+++ b/README-release	2011-08-20 18:40:13.000000000 +0700
+--- gnulib/top/README-release	2011-09-16 23:41:58.248941581 +0100
++++ README-release	2011-09-19 23:14:50.543344958 +0100
 @@ -1,3 +1,23 @@
 +                      GNU Zile developers’ notes
 +                      --------------------------
@@ -25,3 +24,14 @@ diff -u a/README-release b/README-release
  Here are most of the steps we (maintainers) follow when making a release.
  
  * start from a clean, up-to-date git directory.
+@@ -18,10 +38,6 @@
+ 
+       http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
+ 
+-* Run bootstrap one last time.  This downloads any new translations:
+-
+-    ./bootstrap
+-
+ * Pre-release testing:
+   Ensure that make check syntax-check succeeds.
+ 
