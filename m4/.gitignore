@@ -173,3 +173,6 @@
 /tempname.m4
 /threadlib.m4
 /tls.m4
+/strcase.m4
+/strings_h.m4
+/sys_types_h.m4
