@@ -23,7 +23,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#ifdef HAVE_NCURSES_H
+#ifdef HAVE_NCURSES_CURSES_H
+#include <ncurses/curses.h>
+#elif HAVE_NCURSES_H
 #include <ncurses.h>
 #else
 #include <curses.h>
