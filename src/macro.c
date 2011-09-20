@@ -162,7 +162,7 @@ A prefix argument serves as a repeat count.
       return leNIL;
     }
 
-  /* FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec. */
+  /* FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec) */
   /* F_execute_kbd_macro (uniarg, true, leAddDataElement (leNew (NULL), astr_cstr (keyvectostr (cur_mp->keys)), false)); */
   macro_keys = cur_mp->keys;
   execute_with_uniarg (true, uniarg, call_macro, NULL);
