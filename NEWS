@@ -1,5 +1,22 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+  This is the first release in a new stable series. 
+
+** Bug fixes
+
+  Fix a long-standing bug in uniarg handling in macros.
+
+  Fix display of percentage position in buffer.
+
+  Fix display of search string in query-replace.
+
+  Fix poor performance of fill-paragraph.
+
+  Fix handling of Backspace/^H by looking at termcap kbs setting.
+
+** Build-related
+
+  Several fixes and improvements were made to the build system.
 
 * Noteworthy changes in release 2.4.0.60 (2011-08-19) [beta]
 
