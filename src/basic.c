@@ -56,10 +56,10 @@ size_t
 get_goalc_bp (Buffer * bp, size_t o)
 {
   size_t col = 0, t = tab_width (bp);
-  size_t end = o - buffer_start_of_line (bp, o);
+  size_t start = buffer_start_of_line (bp, o), end = o - start;
 
   for (size_t i = 0; i < end; i++, col++)
-    if (get_buffer_char (bp, buffer_start_of_line (bp, o) + i) == '\t')
+    if (get_buffer_char (bp, start + i) == '\t')
       col |= t - 1;
 
   return col;
