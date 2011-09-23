@@ -33,7 +33,7 @@ AM_PROG_CC_C_O
 
 AC_ARG_ENABLE([gcc-warnings],
   [AS_HELP_STRING([--enable-gcc-warnings],
-		  [turn on lots of GCC warnings (for developers)])],
+                  [turn on lots of GCC warnings (for developers)])],
   [case $enableval in
      yes|no) ;;
      *)      AC_MSG_ERROR([bad value $enableval for gcc-warnings option]) ;;
@@ -85,9 +85,22 @@ dnl Code complexity reports
 AC_PATH_PROG([PMCCABE], [pmccabe], [false])
 
 dnl Valgrind
-AX_WITH_PROG([VALGRIND], [valgrind])
-if test -n "$VALGRIND"; then
-  VALGRIND="$VALGRIND -q --error-exitcode=1"
+AC_ARG_ENABLE([valgrind],
+  [AS_HELP_STRING([--enable-valgrind],
+                  [use Valgrind to run tests])],
+  [case $enableval in
+     yes|no) ;;
+     *)      AC_MSG_ERROR([bad value $enableval for Valgrind option]) ;;
+   esac
+   ],
+  [])
+if test "$enable_valgrind" = "yes"; then
+  AX_WITH_PROG([VALGRIND], [valgrind])
+  if test -n "$VALGRIND"; then
+    VALGRIND="$VALGRIND -q --error-exitcode=1"
+  else
+    AC_MSG_ERROR([can't find valgrind])
+  fi
 fi
 
 dnl Checks for functions and headers

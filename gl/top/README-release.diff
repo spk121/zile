@@ -1,5 +1,5 @@
 --- gnulib/top/README-release	2011-09-16 23:41:58.248941581 +0100
-+++ README-release	2011-09-19 23:14:50.543344958 +0100
++++ HACKING	2011-09-23 20:38:42.200729419 +0100
 @@ -1,3 +1,23 @@
 +                      GNU Zile developers’ notes
 +                      --------------------------
@@ -24,14 +24,29 @@
  Here are most of the steps we (maintainers) follow when making a release.
  
  * start from a clean, up-to-date git directory.
-@@ -18,10 +38,6 @@
+@@ -16,16 +36,19 @@
+ * Ensure that you've pushed all changes that belong in the release
+   and that the NixOS/Hydra autobuilder is reporting all is well:
  
-       http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
+-      http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
++    http://hydra.nixos.org/jobset/gnu/zile-master
++
++* Pre-release testing: ensure that
++
++    make check syntax-check
  
 -* Run bootstrap one last time.  This downloads any new translations:
--
--    ./bootstrap
--
- * Pre-release testing:
-   Ensure that make check syntax-check succeeds.
++  succeeds.
  
+-    ./bootstrap
++* Run
+ 
+-* Pre-release testing:
+-  Ensure that make check syntax-check succeeds.
++    make "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" distcheck
+ 
+-* Run "make distcheck"
++  (Make sure you have any needed Valgrind suppressions files.)
+ 
+ * Set the date, version number, and release type [stable/alpha/beta] on
+   line 3 of NEWS, commit that, and tag the release by running e.g.,
