@@ -1,6 +1,6 @@
 #! /bin/sh
 # Print a version string.
-scriptversion=2011-09-26.06; # UTC
+scriptversion=2011-09-26.11; # UTC
 
 # Bootstrap this package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
@@ -274,6 +274,9 @@ export LC_ALL
 # CDPATH.
 (unset CDPATH) >/dev/null 2>&1 && unset CDPATH
 
+# FIXME: check that $SED accepts comments, or bail out with a pointer
+#        to GNU sed
+
 
 ## ------------------------- ##
 ## Hook function management. ##
@@ -350,6 +353,10 @@ func_remove_hook ()
 # func_run_hooks FUNC_NAME [ARG]...
 # ---------------------------------
 # Run all hook functions registered to FUNC_NAME.
+# It is assumed that the list of hook functions contains nothing more
+# than a whitespace-delimited list of legal shell function names, and
+# no effort is wasted trying to catch shell meta-characters or preserve
+# whitespace.
 func_run_hooks ()
 {
     $debug_cmd
@@ -363,14 +370,14 @@ func_run_hooks ()
 
     # shift away the first argument (FUNC_NAME)
     shift
-    func_run_hooks_result=${1+"$@"}
+    func_run_hooks_result=$*
 
     for hook_func in $hook_funcs; do
       eval $hook_func '"$@"'
 
       # store returned options list back into positional
       # parameters for next `cmd' execution.
-      eval set dummy "$func_run_hooks_result"; shift
+      set dummy $func_run_hooks_result; shift
     done
 }
 
@@ -1725,6 +1732,8 @@ func_require_gnulib_submodule ()
         func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
           func_cleanup_gnulib
 
+	# FIXME: Solaris /bin/sh will try to execute '-' if any of
+	#        these signals are caught after this.
         trap - 1 2 13 15
       fi
     fi
@@ -2053,6 +2062,11 @@ fi
 # func_unset VAR
 # --------------
 # Portably unset VAR.
+# In some shells, an `unset VAR' statement leaves a non-zero return
+# status if VAR is already unset, which might be problematic if the
+# statement is used at the end of a function (thus poisoning its return
+# value) or when `set -e' is active (causing even a spurious abort of
+# the script in this case).
 func_unset ()
 {
     { eval $1=; unset $1; }
@@ -2063,7 +2077,7 @@ unset=func_unset
 # func_cmp_s FILE1 FILE2
 # ----------------------
 # Return non-zero exit status unless FILE1 and FILE2 are identical, without
-# output.
+# any output at all, even error messages.
 func_cmp_s ()
 {
     $debug_cmd
@@ -2077,7 +2091,7 @@ func_cmp_s ()
 # func_grep_q EXPRESSION [FILENAME..].
 # ------------------------------------
 # Check whether EXPRESSION matches any line of any listed FILENAME,
-# without output.
+# without any output at all, even error messages.
 func_grep_q ()
 {
     $debug_cmd
