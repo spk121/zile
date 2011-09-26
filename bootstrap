@@ -1,11 +1,11 @@
 #! /bin/sh
 # Print a version string.
-scriptversion=2011-08-19.18; # UTC
+scriptversion=2011-09-26.06; # UTC
 
 # Bootstrap this package from checked-out sources.
 # Written by Gary V. Vaughan, 2010
 
-# Copyright (C) 2010 Free Software Foundation, Inc.
+# Copyright (C) 2010, 2011 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
@@ -80,6 +80,7 @@ export AUTOHEADER
 export AUTOMAKE
 export AUTOPOINT
 export AUTORECONF
+export CONFIG_SHELL
 
 
 ## -------------- ##
@@ -249,6 +250,19 @@ vc_ignore=
 ## Shell normalisation. ##
 ## -------------------- ##
 
+# Be more Bourne compatible
+DUALCASE=1; export DUALCASE # for MKS sh
+if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then :
+  emulate sh
+  NULLCMD=:
+  # Pre-4.2 versions of Zsh do word splitting on ${1+"$@"}, which
+  # is contrary to our usage.  Disable this feature.
+  alias -g '${1+"$@"}'='"$@"'
+  setopt NO_GLOB_SUBST
+else
+  case `(set -o) 2>/dev/null` in *posix*) set -o posix ;; esac
+fi
+
 # NLS nuisances.
 LANGUAGE=C
 export LANGUAGE
@@ -315,7 +329,7 @@ func_add_hook ()
 
     case " $hookable_funcs " in
       *" $1 "*) ;;
-      *) func_fatal_error "Error: \`$1' does not accept hook functions." ;;
+      *) func_fatal_error "error: \`$1' does not accept hook functions." ;;
     esac
 
     eval func_append ${1}_hooks '" $2"'
@@ -342,7 +356,7 @@ func_run_hooks ()
 
     case " $hookable_funcs " in
       *" $1 "*) ;;
-      *) func_fatal_error "Error: \`$1' does not support hook funcions.n" ;;
+      *) func_fatal_error "error: \`$1' does not support hook funcions.n" ;;
     esac
 
     eval hook_funcs="\$$1_hooks"
@@ -555,7 +569,7 @@ func_parse_options ()
                           ;;
                         *)
                           func_fatal_error \
-                             "Error: unsupported warning category: \`$1'"
+                             "error: unsupported warning category: \`$1'"
                           ;;
                       esac
                       shift
@@ -951,7 +965,7 @@ func_install_gnulib_non_module_files ()
           if test -f "$gnulib_path/$file"; then
             func_symlink_to_dir "$gnulib_path" $file $dest
           else
-            func_error "Error: \`$gnulib_path/$file' does not exist"
+            func_error "error: \`$gnulib_path/$file' does not exist"
             maybe_exit_cmd="exit $EXIT_FAILURE"
           fi
         done
@@ -978,7 +992,7 @@ func_check_configuration ()
     $require_configure_ac
 
     eval 'test -n "$'$1'"' || {
-      my_error_msg="Error: please set \`$1' in \`bootstrap.conf'"
+      my_error_msg="error: please set \`$1' in \`bootstrap.conf'"
       test -n "$2" \
           && func_append my_error_msg "
        or add the following (or similar) to your \`$configure_ac':
@@ -1097,7 +1111,7 @@ func_require_checkout_only_file ()
 
     test -n "$checkout_only_file" && test ! -f "$checkout_only_file" \
        && func_fatal_error "\
-Error: Bootstrapping from a non-checked-out distribution is risky."
+error: Bootstrapping from a non-checked-out distribution is risky."
 
     require_checkout_only_file=:
 }
@@ -1138,7 +1152,7 @@ func_require_autobuild_buildreq ()
 {
     $debug_cmd
 
-    printf "$buildreq"| func_grep_q '^[	 ]*autobuild' || {
+    printf '%s\n' "$buildreq" |func_grep_q '^[	 ]*autobuild' || {
       $require_configure_ac
 
       func_extract_trace AB_INIT
@@ -1178,7 +1192,7 @@ for tool in autoconf libtoolize gettext; do
     # in order for `func_find_tool` to run.
     ${require_'$tool'-:}
 
-    printf "$buildreq" | func_grep_q '\''^[	 ]*'$tool\'' || {
+    printf '%s\n' "$buildreq" |func_grep_q '\''^[	 ]*'$tool\'' || {
       $require_configure_ac
 
       func_extract_trace '$m'
@@ -1235,7 +1249,7 @@ func_require_automake_buildreq ()
     $debug_cmd
 
     # if automake is not already listed in $buildreq...
-    printf "$buildreq"| func_grep_q automake || {
+    printf '%s\n' "$buildreq" |func_grep_q automake || {
       func_extract_trace AM_INIT_AUTOMAKE
 
       # ...and AM_INIT_AUTOMAKE is declared...
@@ -1358,7 +1372,7 @@ func_require_buildtools_uptodate ()
         test -n "$buildreq_readme" \
             && test -f "$buildreq_readme" \
             && func_error "\
-Error: $buildreq_readme explains how to obtain these prerequisite programs:
+error: $buildreq_readme explains how to obtain these prerequisite programs:
 "
         func_strtable 7 11 12 36 \
             "Program" "Min_version" "Homepage" $buildreq
@@ -1501,7 +1515,7 @@ func_require_gnu_m4 ()
     }
 
     test -n "$M4" || func_fatal_error "\
-Error: Please install GNU M4, or \`export M4=/path/to/gnu/m4'."
+error: Please install GNU M4, or \`export M4=/path/to/gnu/m4'."
 
     func_verbose "export M4='$M4'"
 
@@ -1558,7 +1572,7 @@ func_require_gnulib_files_already_present ()
     $opt_dry_run || {
       for my_file in $my_gnulib_files_already_present; do
         test -f "$my_file" || func_fatal_error "\
-Error: Can't find, copy or download required gnulib files,
+error: Can't find, copy or download required gnulib files,
        please provide the location of a complete \`gnulib' tree
        by setting \`gnulib_path' in your \`bootstrap.conf' or
        with the \`--gnulib-srcdir' option - or else specify the
@@ -1653,13 +1667,13 @@ func_require_dotgitmodules_parameters ()
                                 /[	 ]*path *= */{
 			          s,[   ]*,,g;s,^[^=]*=,,;p
 			        }
-		              };d' .gitmodules | sed 1q`
+		              };d' .gitmodules |sed 1q`
     test -n "$gnulib_url" \
       || gnulib_url=`sed -e '/^.submodule "gnulib".$/,${
                                 /[	 ]*url *= */{
 			          s,[   ]*,,g;s,^[^=]*=,,;p
 			        }
-		              };d' .gitmodules | sed 1q`
+		              };d' .gitmodules |sed 1q`
 
     func_verbose "gnulib_path='$gnulib_path'"
     func_verbose "gnulib_url='$gnulib_url'"
@@ -1688,7 +1702,7 @@ func_require_gnulib_submodule ()
 
       if test -f .gitmodules && test -f "$gnulib_path/gnulib-tool"; then
         func_show_eval "$GIT submodule update" \
-            'func_fatal_error "Error: Unable to update gnulib submodule."'
+            'func_fatal_error "error: Unable to update gnulib submodule."'
 
       elif test -n "$opt_gnulib_srcdir"; then
         # Older git can't clone into an empty directory.
@@ -1697,7 +1711,7 @@ func_require_gnulib_submodule ()
                 '$gnulib_url' '$gnulib_path'" \
             && func_show_eval "$GIT submodule init" \
             && func_show_eval "$GIT submodule update" \
-            || func_fatal_error "Error: Unable to fetch gnulib submodule."
+            || func_fatal_error "error: Unable to fetch gnulib submodule."
 
       # Without --gnulib-srcdir, and no existing checked out submodule, we
       # create a new shallow clone of the remote gnulib repository.
@@ -1766,9 +1780,9 @@ func_require_libtoolize ()
     # `AM_PROG_LIBTOOL' are used in configure.
     test true = "$LIBTOOLIZE" || {
       func_extract_trace LT_INIT
-      test -n "$func_extract_trace_result"||func_extract_trace AC_PROG_LIBTOOL
-      test -n "$func_extract_trace_result"||func_extract_trace AM_PROG_LIBTOOL
-      test -n "$func_extract_trace_result"||LIBTOOLIZE=true
+      test -n "$func_extract_trace_result" || func_extract_trace AC_PROG_LIBTOOL
+      test -n "$func_extract_trace_result" || func_extract_trace AM_PROG_LIBTOOL
+      test -n "$func_extract_trace_result" || LIBTOOLIZE=true
     }
 
     test -n "$LIBTOOLIZE" || {
@@ -2323,7 +2337,7 @@ func_permissions_error ()
 {
     $debug_cmd
 
-    func_fatal_error "Error: Failed to create \`$1', check permissions."
+    func_fatal_error "error: Failed to create \`$1', check permissions."
 }
 
 
@@ -2370,9 +2384,7 @@ func_version ()
 {
     $debug_cmd
 
-    cat <<EOF
-$progname $scriptversion
-EOF
+    printf '%s\n' "$progname $scriptversion"
     $SED -n '/(C)/!b go
         :more
         /\./!{
@@ -2396,38 +2408,42 @@ EOF
 }
 
 
-# func_usage [NOEXIT]
-# -------------------
-# Echo short help message to standard output and exit.
-func_usage ()
+# func_usage_message
+# ------------------
+# Echo short help message to standard output.
+func_usage_message ()
 {
     $debug_cmd
 
     echo "$progpath [OPTION]..."
     echo ""
     echo "$usage_message"
-
-    my_ret=$?
-    test -n "$1" || {
-      echo "Run \`$progname --help | more' for full usage"
-      exit $my_ret
-    }
 }
 
 
-# func_help [NOEXIT]
-# ------------------
-# Echo long help message to standard output and exit,
-# unless 'noexit' is passed as argument.
+# func_usage
+# ----------
+# Echo short help message to standard output and exit.
+func_usage ()
+{
+    $debug_cmd
+
+    func_usage_message
+    echo "Run \`$progname --help |more' for full usage"
+    exit 0
+}
+
+
+# func_help
+# ---------
+# Echo long help message to standard output and exit.
 func_help ()
 {
     $debug_cmd
 
-    func_usage noexit
+    func_usage_message
     echo "$long_help_message"
-
-    my_ret=$?
-    test -n "$1" || exit $my_ret
+    exit 0
 }
 
 
@@ -2439,7 +2455,7 @@ func_missing_arg ()
 {
     $debug_cmd
 
-    func_error "Error: Missing argument for \`$1'."
+    func_error "error: Missing argument for \`$1'."
     exit_cmd=exit
 }
 
@@ -2517,7 +2533,7 @@ func_quote_for_eval ()
     while test $# -gt 0; do
       case $1 in
         *[\\\`\"\$]*)
-          my_unquoted_arg=`printf "$1" | $SED "$sed_quote_subst"` ;;
+          my_unquoted_arg=`printf '%s\n' "$1" |$SED "$sed_quote_subst"` ;;
         *)
           my_unquoted_arg="$1" ;;
       esac
@@ -2560,13 +2576,11 @@ func_show_eval ()
       func_echo "running: $func_truncate_cmd_result"
     }
 
-    if ${opt_dry_run-false}; then :; else
+    ${opt_dry_run-false} || {
       eval "$my_cmd"
       my_status=$?
-      if test "$my_status" -eq 0; then :; else
-        eval "(exit $my_status); $my_fail_exp"
-      fi
-    fi
+      test "$my_status" -eq 0 || eval "(exit $my_status); $my_fail_exp"
+    }
 }
 
 
@@ -2733,8 +2747,8 @@ func_insert_sorted_if_absent ()
       func_grep_q "$str" "$file" \
           && func_verbose "inserting \`$str' into \`$file'"
 
-      echo "$str" | sort -u - $file | func_cmp_s - $file \
-        || echo "$str" | sort -u - $file -o $file \
+      echo "$str" |sort -u - $file |func_cmp_s - $file \
+        || echo "$str" |sort -u - $file -o $file \
         || func_permissions_error "$file"
     done
 }
@@ -2755,11 +2769,11 @@ func_sort_ver ()  # sort -V is not generally available
     ver1="$1"
     ver2="$2"
 
-    # split on '.' and compare each component
+    # Split on '.' and compare each component.
     i=1
     while : ; do
-      p1=`echo "$ver1" | cut -d. -f$i`
-      p2=`echo "$ver2" | cut -d. -f$i`
+      p1=`echo "$ver1" |cut -d. -f$i`
+      p2=`echo "$ver2" |cut -d. -f$i`
       if test ! "$p1"; then
         echo "$1 $2"
         break
@@ -2772,7 +2786,7 @@ func_sort_ver ()  # sort -V is not generally available
         elif test "$p2" -gt "$p1" 2>/dev/null; then # numeric comparison
           echo "$1 $2"
         else # numeric, then lexicographic comparison
-          lp=`printf "$p1\n$p2\n" | sort -n | tail -n1`
+          lp=`printf "$p1\n$p2\n" |sort -n |tail -n1`
           if test "$lp" = "$p2"; then
             echo "$1 $2"
           else
@@ -2799,8 +2813,8 @@ func_get_version ()
     { $app --version || $app --version </dev/null; } >/dev/null 2>&1 \
       || return 1
 
-    $app --version 2>&1 |
-    $SED -n '# extract version within line
+    $app --version 2>&1 \
+    |$SED -n '# extract version within line
           s|.*[v ]\{1,\}\([0-9]\{1,\}\.[.a-z0-9-]*\).*|\1|
           t done
 
@@ -2832,25 +2846,25 @@ func_check_versions ()
       my_url="$1"; shift
 
       # Honor $APP variables ($TAR, $AUTOCONF, etc.)
-      my_appvar=`echo $my_app | tr '[a-z]' '[A-Z]'`
+      my_appvar=`echo $my_app |tr '[a-z]' '[A-Z]'`
       test "$my_appvar" = TAR && my_appvar=AMTAR
       eval "my_app=\${$my_appvar-$my_app}"
       my_instver=`func_get_version $my_app`
 
-      test ! "$my_instver" \
+      test -z "$my_instver" \
           || func_verbose "found \`$my_app' version $my_instver"
 
       # Fail if --version didn't work.
-      if test ! "$my_instver"; then
-        func_error "Error: \`$my_app' not found"
+      if test -z "$my_instver"; then
+        func_error "error: \`$my_app' not found"
         func_check_versions_result=false
 
       # Fail if a new version than what we have is required.
-      elif test ! "$my_reqver" = "-"; then
-        my_newer=`func_sort_ver $my_reqver $my_instver | cut -d' ' -f2`
-        test ! "$my_newer" = "$my_instver" && {
+      elif test "$my_reqver" != "-"; then
+        my_newer=`func_sort_ver $my_reqver $my_instver |cut -d' ' -f2`
+        test "$my_newer" != "$my_instver" && {
           func_error "\
-Error: \`$my_app' version == $my_instver is too old
+error: \`$my_app' version == $my_instver is too old
        \`$my_app' version >= $my_reqver is required"
           func_check_versions_result=false
         }
@@ -2867,9 +2881,9 @@ func_cleanup_gnulib ()
 {
     $debug_cmd
 
-    status=$?
+    my_status=$?
     $RM -fr "$gnulib_path"
-    exit $status
+    exit $my_status
 }
 
 
@@ -2929,7 +2943,7 @@ func_symlink_to_dir ()
                     case /$dst/ in
                       *//* | */../* | */./* | /*/*/*/*/*/)
                         func_fatal_error "\
-Error: Invalid symlink calculation: $src -> $dst"
+error: Invalid symlink calculation: $src -> $dst"
                         ;;
                       /*/*/*/*/) dot_dots=../../../;;
                       /*/*/*/) dot_dots=../../;;
@@ -2984,12 +2998,12 @@ func_find_tool ()
       find_tool_error_prefix="\$$find_tool_envvar: "
     fi
     test x"$find_tool_res" = x && func_fatal_error "\
-Error: One of these is required:
+error: One of these is required:
        $find_tool_names"
 
     ($find_tool_res --version </dev/null) >/dev/null 2>&1 \
       || func_fatal_error "\
-Error: ${find_tool_error_prefix}Cannot run \`$find_tool_res --version'"
+error: ${find_tool_error_prefix}Cannot run \`$find_tool_res --version'"
 
     eval "$find_tool_envvar=\$find_tool_res"
     eval "export $find_tool_envvar"
@@ -3017,8 +3031,8 @@ func_update_po_files ()
 
     test -d $ref_po_dir || mkdir $ref_po_dir || return
     func_download_po_files $ref_po_dir $domain \
-      && ls "$ref_po_dir"/*.po 2>/dev/null |
-        $SED 's|.*/||; s|\.po$||' > "$po_dir/LINGUAS" || return
+      && ls "$ref_po_dir"/*.po 2>/dev/null \
+         |$SED 's|.*/||; s|\.po$||' > "$po_dir/LINGUAS" || return
 
     # Find sha1sum, named gsha1sum on MacPorts, and shasum on MacOS 10.6.
     func_find_tool SHA1SUM sha1sum gsha1sum shasum
@@ -3071,7 +3085,7 @@ nl='
 # function.
 progpath="$0"
 
-# The name of this program:
+# The name of this program.
 progname=`echo "$progpath" |$SED "$basename"`
 
 ## -------------------------------------------------- ##
@@ -3081,7 +3095,7 @@ progname=`echo "$progpath" |$SED "$basename"`
 # Override the default configuration, if necessary.
 # Make sure that bootstrap.conf is sourced from the current directory
 # if we were invoked as "sh bootstrap".
-case "$0" in
+case $0 in
   */*) test -r "$0.conf" && . "$0.conf" ;;
   *) test -r "$0.conf" && . ./"$0.conf" ;;
 esac
