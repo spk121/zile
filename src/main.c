@@ -68,7 +68,7 @@ of " PACKAGE_NAME " and modify it; see the file COPYING.  Otherwise, a copy can 
 downloaded from http://www.gnu.org/licenses/gpl.html.\n\
 ";
 
-static void _Noreturn
+static _Noreturn void
 segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr,
@@ -79,7 +79,7 @@ segv_sig_handler (int signo _GL_UNUSED_PARAMETER)
   zile_exit (true);
 }
 
-static void _Noreturn
+static _Noreturn void
 other_sig_handler (int signo _GL_UNUSED_PARAMETER)
 {
   fprintf (stderr, "%s: terminated with signal %d.\r\n",
