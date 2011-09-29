@@ -176,3 +176,10 @@
 /strcase.m4
 /strings_h.m4
 /sys_types_h.m4
+/closedir.m4
+/dup.m4
+/fstat.m4
+/msvc-inval.m4
+/msvc-nothrow.m4
+/opendir.m4
+/raise.m4
