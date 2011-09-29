@@ -51,6 +51,6 @@ LISP_TESTS_ENVIRONMENT =				\
 	srcdir=$(srcdir)				\
 	VALGRIND="$(VALGRIND)"
 
-check-local: src/zile
+check-local: src/zile$(EXEEXT)
 	echo $(LISP_TESTS) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG="$(EMACSPROG)" xargs $(RUNLISPTESTS)
 	echo $(LISP_TESTS_ZILE_ONLY) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG= xargs $(RUNLISPTESTS)
