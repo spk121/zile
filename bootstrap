@@ -53,24 +53,24 @@ scriptversion=2011-09-26.11; # UTC
 # result for child processes, but they are handled by the function
 # `func_find_tool' and not defaulted in this section.
 
-: "${ACLOCAL=aclocal}"
-: "${AUTOCONF=autoconf}"
-: "${AUTOHEADER=autoheader}"
-: "${AUTOM4TE=autom4te}"
-: "${AUTOHEADER=autoheader}"
-: "${AUTOMAKE=automake}"
-: "${AUTOPOINT=autopoint}"
-: "${AUTORECONF=autoreconf}"
-: "${CMP=cmp}"
-: "${CONFIG_SHELL=/bin/sh}"
-: "${DIFF=diff}"
-: "${EGREP=egrep}"
-: "${FGREP=fgrep}"
-: "${GIT=git}"
-: "${GREP=grep}"
-: "${LN_S=ln -s}"
-: "${RM=rm}"
-: "${SED=sed}"
+: ${ACLOCAL="aclocal"}
+: ${AUTOCONF="autoconf"}
+: ${AUTOHEADER="autoheader"}
+: ${AUTOM4TE="autom4te"}
+: ${AUTOHEADER="autoheader"}
+: ${AUTOMAKE="automake"}
+: ${AUTOPOINT="autopoint"}
+: ${AUTORECONF="autoreconf"}
+: ${CMP="cmp"}
+: ${CONFIG_SHELL="/bin/sh"}
+: ${DIFF="diff"}
+: ${EGREP="grep -E"}
+: ${FGREP="grep -F"}
+: ${GIT="git"}
+: ${GREP="grep"}
+: ${LN_S="ln -s"}
+: ${RM="rm"}
+: ${SED="sed"}
 
 export ACLOCAL
 export AUTOCONF
