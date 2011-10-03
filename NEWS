@@ -1,6 +1,15 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 2.4.2 (2011-10-03) [stable]
+
+** Bug fixes
+
+  Fix a basic performance bug introduced in 2.4.0.60.
+
+** Build-related
+
+  Don't enable Valgrind by default, and explain that correct
+  suppressions are needed to use it successfully.
 
 
 * Noteworthy changes in release 2.4.1 (2011-09-20) [stable]
