@@ -30,19 +30,17 @@
 #include <config.h>
 #include "extern.h"
 
-static char *
-make_char_printable (int c, int x, int cur_tab_width)
+static const char *
+make_char_printable (char c, int x, int cur_tab_width)
 {
   if (c == '\t')
     return xasprintf ("%*s", cur_tab_width - x % cur_tab_width, "");
-  if (isprint (c))
-    return xasprintf ("%c", c);
   if (c == '\0')
-    return xasprintf ("^@");
+    return "^@";
   else if (c > 0 && c <= '\32')
     return xasprintf ("^%c", 'A' + c - 1);
   else if (c == '\33')
-    return xasprintf ("^[");
+    return "^[";
   else
     return xasprintf ("\\%o", c & 0xff);
 }
@@ -61,10 +59,18 @@ draw_line (size_t line, size_t startcol, Window * wp,
       if (i >= buffer_line_len (get_window_bp (wp), o) ||
           x >= get_window_ewidth (wp))
         break;
-      char *s = make_char_printable (get_buffer_char (get_window_bp (wp), o + i),
-                                     x, cur_tab_width);
-      term_addstr (s);
-      x += strlen (s);
+      char c = get_buffer_char (get_window_bp (wp), o + i);
+      if (isprint (c))
+        {
+          term_addch (c);
+          x++;
+        }
+      else
+        {
+          const char *s = make_char_printable (c, x, cur_tab_width);
+          term_addstr (s);
+          x += strlen (s);
+        }
     }
 
   /* Draw end of line. */
@@ -219,7 +225,13 @@ term_redisplay (void)
     {
       col = 0;
       for (size_t p = lp; p < lineo; ++p)
-        col += strlen (make_char_printable (get_buffer_char (bp, o + p), col, t));
+        {
+          char c = get_buffer_char (bp, o + p);
+          if (isprint (c))
+            col++;
+          else
+            col += strlen (make_char_printable (get_buffer_char (bp, o + p), col, t));
+        }
 
       if (col >= ew - 1 || (lp / (ew / 3)) + 2 < lineo / (ew / 3))
         {

@@ -247,6 +247,7 @@ void term_move (size_t y, size_t x);
 void term_clrtoeol (void);
 void term_refresh (void);
 void term_clear (void);
+void term_addch (char c);
 void term_addstr (const char *s);
 void term_attrset (size_t attr);
 void term_beep (void);

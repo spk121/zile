@@ -71,6 +71,12 @@ term_clear (void)
 }
 
 void
+term_addch (char c)
+{
+  addch (c);
+}
+
+void
 term_addstr (const char *s)
 {
   addstr (s);
