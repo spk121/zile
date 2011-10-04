@@ -4,7 +4,7 @@
 
 ** Bug fixes
 
-  Fix a basic performance bug introduced in 2.4.0.60.
+  Fix some serious display performance bugs introduced in 2.4.0.60.
 
 ** Build-related
 
