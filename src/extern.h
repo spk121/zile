@@ -263,6 +263,7 @@ castr term_minibuf_read (const char *prompt, const char *value, size_t pos,
                          Completion * cp, History * hp);
 
 /* term_redisplay.c ------------------------------------------------------- */
+void term_redraw_cursor (void);
 void term_redisplay (void);
 void term_finish (void);
 

@@ -207,15 +207,18 @@ draw_window (size_t topline, Window * wp)
     draw_status_line (topline + get_window_eheight (wp), wp);
 }
 
+static size_t col, cur_topline = 0;
+
 void
 term_redisplay (void)
 {
   /* Calculate the start column if the line at point has to be truncated. */
   Buffer *bp = get_window_bp (cur_wp);
-  size_t col = 0, lastcol = 0, t = tab_width (bp);
+  size_t lastcol = 0, t = tab_width (bp);
   size_t o = window_o (cur_wp);
   size_t lineo = o - get_buffer_line_o (bp);
 
+  col = 0;
   o -= lineo;
   set_window_start_column (cur_wp, 0);
 
@@ -243,7 +246,8 @@ term_redisplay (void)
     }
 
   /* Draw the windows. */
-  size_t cur_topline = 0, topline = 0;
+  cur_topline = 0;
+  size_t topline = 0;
   for (Window *wp = head_wp; wp != NULL; wp = get_window_next (wp))
     {
       if (wp == cur_wp)
@@ -254,7 +258,12 @@ term_redisplay (void)
       topline += get_window_fheight (wp);
     }
 
-  /* Redraw cursor. */
+  term_redraw_cursor ();
+}
+
+void
+term_redraw_cursor (void)
+{
   term_move (cur_topline + get_window_topdelta (cur_wp), col);
 }
 

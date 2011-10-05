@@ -57,7 +57,7 @@ minibuf_refresh (void)
         term_minibuf_write (minibuf_contents);
 
       /* Redisplay (and leave the cursor in the correct position). */
-      term_redisplay ();
+      term_redraw_cursor ();
       term_refresh ();
     }
 }
