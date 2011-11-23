@@ -38,7 +38,7 @@
 
 static gl_list_t key_buf;
 
-static char backspace_code;
+static char backspace_code = 0177;
 
 size_t
 term_buf_len (void)
@@ -114,9 +114,6 @@ term_height (void)
 void
 term_init (void)
 {
-  /* tigetstr takes a non-const string, provoking a compiler warning! */
-  static char capname[] = "kbs";
-
   initscr ();
   noecho ();
   nonl ();
@@ -125,9 +122,9 @@ term_init (void)
   intrflush (stdscr, false);
   keypad (stdscr, true);
   key_buf = gl_list_create_empty (GL_ARRAY_LIST, NULL, NULL, NULL, true);
-  char *kbs = tigetstr(capname);
-  assert (strlen (kbs) == 1);
-  backspace_code = *kbs;
+  char *kbs = tigetstr("kbs");
+  if (kbs && strlen (kbs) == 1)
+    backspace_code = *kbs;
 }
 
 void
