@@ -35,12 +35,8 @@ make_char_printable (char c, int x, int cur_tab_width)
 {
   if (c == '\t')
     return xasprintf ("%*s", cur_tab_width - x % cur_tab_width, "");
-  if (c == '\0')
-    return "^@";
-  else if (c > 0 && c <= '\32')
-    return xasprintf ("^%c", 'A' + c - 1);
-  else if (c == '\33')
-    return "^[";
+  if (c >= 0 && c <= '\33')
+    return xasprintf ("^%c", '@' + c);
   else
     return xasprintf ("\\%o", c & 0xff);
 }
