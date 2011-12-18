@@ -183,3 +183,6 @@
 /msvc-nothrow.m4
 /opendir.m4
 /raise.m4
+/fstatat.m4
+/readdir.m4
+/rewinddir.m4
