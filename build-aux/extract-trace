@@ -254,8 +254,8 @@ func_extract_trace ()
     $require_configure_ac
     $require_gnu_m4
 
-    _G_m4_traces=`echo "--trace=$1" |$SED 's%,% --trace=%g'`
-    _G_re_macros=`echo "($1)" |$SED 's%,%|%g'`
+    _G_m4_traces=`$bs_echo "--trace=$1" |$SED 's%,% --trace=%g'`
+    _G_re_macros=`$bs_echo "($1)" |$SED 's%,%|%g'`
     _G_macros="$1"; shift
     test $# -gt 0 || {
       set dummy $configure_ac
@@ -357,7 +357,7 @@ func_extract_trace ()
 
     # Save the command pipeline results for further use by callers of
     # this function.
-    func_extract_trace_result=`echo "$_G_mini" \
+    func_extract_trace_result=`$bs_echo "$_G_mini" \
       |$M4 -daq --prefix $_G_m4_traces - "$@" 2>&1 1>/dev/null \
       |$SED -n -e "$_G_transform"`
 }
@@ -382,7 +382,7 @@ func_main ()
 
     # Display results.
     test -n "$func_extract_trace_result" \
-        && echo "$func_extract_trace_result"
+        && $bs_echo "$func_extract_trace_result"
 
     # The End.
     exit $EXIT_SUCCESS

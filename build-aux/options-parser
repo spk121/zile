@@ -173,6 +173,46 @@ basename='s|^.*/||'
 nl='
 '
 
+# There are still modern systems that have problems with `echo' mis-
+# handling backslashes, among others, so make sure $bs_echo is set to a
+# command that correctly interprets backslashes.
+# (this code from Autoconf 2.68)
+
+# Printing a long string crashes Solaris 7 /usr/bin/printf.
+bs_echo='\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\'
+bs_echo=$bs_echo$bs_echo$bs_echo$bs_echo$bs_echo
+bs_echo=$bs_echo$bs_echo$bs_echo$bs_echo$bs_echo$bs_echo
+# Prefer a ksh shell builtin over an external printf program on Solaris,
+# but without wasting forks for bash or zsh.
+if test -z "$BASH_VERSION$ZSH_VERSION" \
+    && (test "X`print -r -- $bs_echo`" = "X$bs_echo") 2>/dev/null; then
+  bs_echo='print -r --'
+  bs_echo_n='print -rn --'
+elif (test "X`printf %s $bs_echo`" = "X$bs_echo") 2>/dev/null; then
+  bs_echo='printf %s\n'
+  bs_echo_n='printf %s'
+else
+  if test "X`(/usr/ucb/echo -n -n $bs_echo) 2>/dev/null`" = "X-n $bs_echo"; then
+    bs_echo_body='eval /usr/ucb/echo -n "$1$nl"'
+    bs_echo_n='/usr/ucb/echo -n'
+  else
+    bs_echo_body='eval expr "X$1" : "X\\(.*\\)"'
+    bs_echo_n_body='eval
+      arg=$1;
+      case $arg in #(
+      *"$nl"*)
+	expr "X$arg" : "X\\(.*\\)$nl";
+	arg=`expr "X$arg" : ".*$nl\\(.*\\)"`;;
+      esac;
+      expr "X$arg" : "X\\(.*\\)" | tr -d "$nl"
+    '
+    export bs_echo_n_body
+    bs_echo_n='sh -c $bs_echo_n_body bs_echo'
+  fi
+  export bs_echo_body
+  bs_echo='sh -c $bs_echo_body bs_echo'
+fi
+
 # Work around backward compatibility issue on IRIX 6.5. On IRIX 6.4+, sh
 # is ksh but when the shell is invoked as "sh" and the current value of
 # the _XPG environment variable is not equal to 1 (one), the special
@@ -181,7 +221,7 @@ nl='
 progpath=$0
 
 # The name of this program.
-progname=`echo "$progpath" |$SED "$basename"`
+progname=`$bs_echo "$progpath" |$SED "$basename"`
 
 
 ## ------------------------- ##
@@ -252,7 +292,7 @@ func_remove_hook ()
 {
     $debug_cmd
 
-    eval ${1}_hooks='`echo "\$'$1'_hooks" |$SED "s| '$2'||"`'
+    eval ${1}_hooks='`$bs_echo "\$'$1'_hooks" |$SED "s| '$2'||"`'
 }
 
 
@@ -541,7 +581,7 @@ func_echo ()
     IFS=$nl
     for _G_line in $_G_message; do
       IFS=$save_IFS
-      echo "$progname: $_G_line"
+      $bs_echo "$progname: $_G_line"
     done
     IFS=$save_IFS
 }
@@ -561,7 +601,7 @@ func_error ()
     IFS=$nl
     for _G_line in $_G_message; do
       IFS=$save_IFS
-      echo "$_G_prefix$tc_bold$_G_line$tc_reset" 1>&2
+      $bs_echo "$_G_prefix$tc_bold$_G_line$tc_reset" 1>&2
       _G_prefix="$progname:        "
     done
     IFS=$save_IFS
@@ -586,8 +626,8 @@ func_fatal_help ()
 {
     $debug_cmd
 
-    eval echo \""Usage: $usage"\"
-    eval echo \""$fatal_help"\"
+    eval $bs_echo \""Usage: $usage"\"
+    eval $bs_echo \""$fatal_help"\"
     func_error ${1+"$@"}
     exit $EXIT_FAILURE
 }
@@ -601,7 +641,7 @@ func_help ()
     $debug_cmd
 
     func_usage_message
-    echo "$long_help_message"
+    $bs_echo "$long_help_message"
     exit 0
 }
 
@@ -725,7 +765,7 @@ func_usage ()
     $debug_cmd
 
     func_usage_message
-    echo "Run \`$progname --help |${PAGER-more}' for full usage"
+    $bs_echo "Run \`$progname --help |${PAGER-more}' for full usage"
     exit 0
 }
 
@@ -737,11 +777,11 @@ func_usage_message ()
 {
     $debug_cmd
 
-    eval echo \""$usage"\"
+    eval $bs_echo \""$usage"\"
     echo
     $SED -n 's|^# ||;/^Written by/{x;p;x;};h' < "$progpath"
     echo
-    eval echo \""$usage_message"\"
+    eval $bs_echo \""$usage_message"\"
 }
 
 
