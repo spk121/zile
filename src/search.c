@@ -299,7 +299,10 @@ isearch (int forward, int regexp)
         last = true;
 
       if (thisflag & FLAG_NEED_RESYNC)
-        resync_redisplay (cur_wp);
+        {
+          resync_redisplay (cur_wp);
+          term_redisplay ();
+        }
     }
 
   /* done */
