@@ -192,6 +192,8 @@ Make current window one line smaller.
 }
 END_DEFUN
 
+static Buffer *popup_bp;
+
 Window *
 popup_window (void)
 {
@@ -199,11 +201,23 @@ popup_window (void)
     {
       /* There is only one window on the screen, so split it. */
       FUNCALL (split_window);
+      popup_bp = NULL;
       return cur_wp->next;
     }
 
   /* Use the window after the current one, or first window if none. */
-  return cur_wp->next ? cur_wp->next : head_wp;
+  Window *wp = cur_wp->next ? cur_wp->next : head_wp;
+  popup_bp = get_window_bp (wp);
+  return wp;
+}
+
+void
+popdown_window (void)
+{
+  if (popup_bp)
+    set_window_bp (cur_wp, popup_bp);
+  else
+    FUNCALL (delete_window);
 }
 
 DEFUN ("delete-other-windows", delete_other_windows)

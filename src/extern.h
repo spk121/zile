@@ -293,6 +293,7 @@ bool get_variable_bool (const char *var);
 void create_scratch_window (void);
 Window *find_window (const char *name);
 Window *popup_window (void);
+void popdown_window (void);
 void set_current_window (Window * wp);
 void delete_window (Window * del_wp);
 size_t window_o (Window * wp);

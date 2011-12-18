@@ -76,7 +76,7 @@ maybe_close_popup (Completion *cp)
     {
       set_current_window (wp);
       if (get_completion_flags (cp) & CFLAG_CLOSE)
-        FUNCALL (delete_window);
+        popdown_window ();
       else if (get_completion_old_bp (cp))
         switch_to_buffer (get_completion_old_bp (cp));
       set_current_window (old_wp);
