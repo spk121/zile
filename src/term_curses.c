@@ -21,7 +21,6 @@
 
 #include <config.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #ifdef HAVE_NCURSES_CURSES_H
 #include <ncurses/curses.h>
