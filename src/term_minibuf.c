@@ -76,7 +76,7 @@ maybe_close_popup (Completion *cp)
     {
       set_current_window (wp);
       if (get_completion_flags (cp) & CFLAG_CLOSE)
-        popdown_window ();
+        FUNCALL (delete_window);
       else if (get_completion_old_bp (cp))
         switch_to_buffer (get_completion_old_bp (cp));
       set_current_window (old_wp);
@@ -251,7 +251,6 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
               switch (thistab)
                 {
                 case COMPLETION_MATCHED:
-                  set_completion_flags (cp, get_completion_flags (cp) | CFLAG_CLOSE);
                   maybe_close_popup (cp);
                   set_completion_flags (cp, get_completion_flags (cp) & ~CFLAG_POPPEDUP);
                   /* FALLTHROUGH */
