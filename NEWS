@@ -1,5 +1,12 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+* Noteworthy changes in release ?.? (????-??-??) [?]
+
+** Bug fixes
+
+  Fix a crash on certain terminals.
+
+  Fix a recently-introduced display bug in isearch.
 
 * Noteworthy changes in release 2.4.2 (2011-10-05) [stable]
 
