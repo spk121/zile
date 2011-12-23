@@ -128,7 +128,7 @@ AC_ARG_VAR(CURSES_LIB, [linker flags for curses library])
 
 dnl FIXME: Put this in autoconf-archive
 dnl libgc (BDW garbage collector)
-if test "x$enable_debug" != "yes"; then
+if test "$enable_debug" != "yes"; then
   AC_CHECK_HEADERS([gc.h gc/gc.h], [
     dnl To test for the different required libs, we have to
     dnl overcome autoconf's caching system, so we change the
