@@ -100,7 +100,7 @@ kill_line (bool whole_line)
       if (FUNCALL (delete_char) == leNIL)
         return false;
 
-      kill_ring_push ((estr) {.as = astr_new_cstr ("\n"), .eol = get_buffer_eol (cur_bp)});
+      kill_ring_push ((estr) {.as = astr_new_cstr ("\n"), .eol = coding_eol_lf});
       set_this_command (F_kill_region);
     }
 
