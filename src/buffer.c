@@ -1,6 +1,6 @@
 /* Buffer-oriented functions
 
-   Copyright (c) 1997-2006, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2006, 2008-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -763,10 +763,6 @@ goto_goalc (void)
 bool
 move_line (int n)
 {
-  if (n == 0)
-    return false;
-
-  bool ok = true;
   size_t (*func) (Buffer *bp, size_t o) = buffer_next_line;
   if (n < 0)
     {
@@ -781,17 +777,14 @@ move_line (int n)
     {
       size_t o = func (cur_bp, cur_bp->pt);
       if (o == SIZE_MAX)
-        {
-          ok = false;
-          break;
-        }
+        break;
       set_buffer_pt (cur_bp, o);
     }
 
   goto_goalc ();
   thisflag |= FLAG_NEED_RESYNC;
 
-  return ok;
+  return n == 0;
 }
 
 size_t
