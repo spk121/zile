@@ -253,8 +253,8 @@ get_buffer_region (Buffer *bp, Region r)
     astr_cat (as, astr_substr (get_buffer_pre_point (bp), r.start, MIN (r.end, get_buffer_pt (bp)) - r.start));
   if (r.end > get_buffer_pt (bp))
     {
-      size_t from = MAX (r.start, get_buffer_pt (bp)) - get_buffer_pt (bp);
-      astr_cat (as, astr_substr (get_buffer_post_point (bp), from, r.end - get_buffer_pt (bp)));
+      size_t from = MAX (r.start, get_buffer_pt (bp));
+      astr_cat (as, astr_substr (get_buffer_post_point (bp), from - get_buffer_pt (bp), r.end - from));
     }
   return (estr) {.as = as, .eol = get_buffer_eol (bp)};
 }
