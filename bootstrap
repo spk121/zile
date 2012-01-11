@@ -428,10 +428,10 @@ func_gnulib_tool ()
       gnulib_cmd=`echo $gnulib_tool $gnulib_tool_options`
 
       func_show_eval "$gnulib_cmd" 'exit $?'
-    }
 
-    # Use `gnulib-tool --copy-file' to install non-module files.
-    func_install_gnulib_non_module_files
+      # Use `gnulib-tool --copy-file' to install non-module files.
+      func_install_gnulib_non_module_files
+    }
 
     func_run_hooks func_gnulib_tool
 }
