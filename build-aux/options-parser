@@ -462,6 +462,9 @@ func_parse_options ()
       # Adjust func_parse_options positional parameters to match
       eval set dummy $func_run_hooks_result; shift
 
+      # Break out of the loop if we already parsed every option.
+      test $# -gt 0 || break
+
       _G_opt=$1
       shift
       case $_G_opt in
