@@ -2495,6 +2495,7 @@ bootstrap_validate_options ()
     func_quote_for_eval ${1+"$@"}
     bootstrap_validate_options_result=$func_quote_for_eval_result
 }
+func_add_hook func_validate_options bootstrap_validate_options
 
 
 ## -------------------------------------------------- ##
