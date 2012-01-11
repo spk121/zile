@@ -626,8 +626,8 @@ func_fatal_help ()
 {
     $debug_cmd
 
-    eval $bs_echo \""Usage: $usage"\"
-    eval $bs_echo \""$fatal_help"\"
+    eval \$bs_echo \""Usage: $usage"\"
+    eval \$bs_echo \""$fatal_help"\"
     func_error ${1+"$@"}
     exit $EXIT_FAILURE
 }
@@ -777,11 +777,11 @@ func_usage_message ()
 {
     $debug_cmd
 
-    eval $bs_echo \""$usage"\"
+    eval \$bs_echo \""$usage"\"
     echo
     $SED -n 's|^# ||;/^Written by/{x;p;x;};h' < "$progpath"
     echo
-    eval $bs_echo \""$usage_message"\"
+    eval \$bs_echo \""$usage_message"\"
 }
 
 
