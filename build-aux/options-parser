@@ -476,7 +476,7 @@ func_parse_options ()
         --help)       func_help ;;
 
 	# Separate optargs to long options (plugins may need this):
-	--*=*)        func_split_equals "$opt"
+	--*=*)        func_split_equals "$_G_opt"
 	              set dummy "$func_split_equals_lhs" \
                           "$func_split_equals_rhs" ${1+"$@"}
                       shift
