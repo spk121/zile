@@ -180,8 +180,6 @@ replace_estr (size_t del, estr es)
       set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt, (ptrdiff_t) (get_marker_o (m) + newlen - del)));
 
   set_buffer_modified (cur_bp, true);
-  thisflag |= FLAG_NEED_RESYNC;
-
   set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + astr_len (es2.as));
   if (estr_next_line (es2, 0) != SIZE_MAX)
     thisflag |= FLAG_NEED_RESYNC;
