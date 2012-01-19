@@ -298,7 +298,7 @@ does nothing.
 
   deactivate_mark ();
 
-  /* If we're on first line, set target to 0. */
+  /* If we're on the first line, set target to 0. */
   if (get_buffer_line_o (cur_bp) == 0)
     target_goalc = 0;
   else
