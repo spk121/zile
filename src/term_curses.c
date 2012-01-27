@@ -22,12 +22,18 @@
 #include <config.h>
 
 #include <stdlib.h>
-#ifdef HAVE_NCURSES_CURSES_H
-#include <ncurses/curses.h>
-#elif HAVE_NCURSES_H
-#include <ncurses.h>
+#if defined(HAVE_NCURSESW_CURSES_H)
+#  include <ncursesw/curses.h>
+#elif defined(HAVE_NCURSESW_H)
+#  include <ncursesw.h>
+#elif defined(HAVE_NCURSES_CURSES_H)
+#  include <ncurses/curses.h>
+#elif defined(HAVE_NCURSES_H)
+#  include <ncurses.h>
+#elif defined(HAVE_CURSES_H)
+#  include <curses.h>
 #else
-#include <curses.h>
+#  error "SysV or X/Open-compatible Curses header file required"
 #endif
 #include <term.h>
 #include "gl_array_list.h"
