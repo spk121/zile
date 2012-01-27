@@ -59,7 +59,6 @@ while (<IN>) {
                      ($local_when_set ? "true" : "false") . ", \"" .
                        escape_for_C($doc) . "\")\n";
 
-    $doc =~ s/\(\n/\n; /g;
     print SAMPLE "; " . comment_for_lisp($doc) . "\n" .
       "; Default value is $defval.\n" .
         "(setq $name $defval)\n\n";
