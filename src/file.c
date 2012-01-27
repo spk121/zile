@@ -212,7 +212,10 @@ find_file (const char *filename)
   if (bp == NULL)
     {
       if (exist_file (filename) && !is_regular_file (filename))
-        minibuf_error ("File exists but could not be read");
+        {
+          minibuf_error ("File exists but could not be read");
+          return false;
+        }
       else
         {
           bp = buffer_new ();
@@ -232,9 +235,6 @@ find_file (const char *filename)
           set_buffer_modified (bp, false);
         }
     }
-
-  if (bp == NULL)
-    return false;
 
   switch_to_buffer (bp);
   thisflag |= FLAG_NEED_RESYNC;
