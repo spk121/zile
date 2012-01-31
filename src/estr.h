@@ -41,8 +41,11 @@ size_t estr_next_line (estr es, size_t o);
 size_t estr_start_of_line (estr es, size_t o);
 size_t estr_end_of_line (estr es, size_t o);
 size_t estr_line_len (estr es, size_t o);
-estr estr_replace (estr es, size_t pos, size_t del, estr ins);
+size_t estr_lines (estr es);
+estr estr_replace_estr (estr es, size_t pos, estr src);
 estr estr_cat (estr es, estr src);
+
+#define estr_len(es, eol_type) astr_len (es.as) +  estr_lines (es) * (strlen (eol_type) - strlen (es.eol))
 
 /*
  * Read file contents into an estr.

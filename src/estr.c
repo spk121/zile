@@ -111,28 +111,37 @@ estr_line_len (estr es, size_t o)
   return estr_end_of_line (es, o) - estr_start_of_line (es, o);
 }
 
-estr
-estr_replace (estr es, size_t pos, size_t del, estr ins)
+size_t
+estr_lines (estr es)
 {
-  astr_remove (es.as, pos, del);
+  size_t es_eol_len = strlen (es.eol);
+  const char *s = astr_cstr (es.as), *next;
+  size_t lines = 0;
+  for (size_t len = astr_len (es.as);
+       next = memmem (s, len, es.eol, es_eol_len);
+       lines++, len -= (size_t) (next - s) + es_eol_len, s = next + es_eol_len)
+    ;
+  return lines;
+}
 
-  const char *s = astr_cstr (ins.as);
-  size_t ins_eol_len = strlen (ins.eol), es_eol_len = strlen (es.eol);
-  for (size_t len = astr_len (ins.as); len > 0;)
+estr
+estr_replace_estr (estr es, size_t pos, estr src)
+{
+  const char *s = astr_cstr (src.as);
+  size_t src_eol_len = strlen (src.eol), es_eol_len = strlen (es.eol);
+  for (size_t len = astr_len (src.as); len > 0;)
     {
-      const char *next = memmem (s, len, ins.eol, ins_eol_len);
+      const char *next = memmem (s, len, src.eol, src_eol_len);
       size_t line_len = next ? (size_t) (next - s) : len;
-      astr_insert (es.as, pos, line_len);
       astr_replace_nstr (es.as, pos, s, line_len);
       pos += line_len;
       len -= line_len;
       s = next;
       if (len > 0)
         {
-          astr_insert (es.as, pos, es_eol_len);
           astr_replace_nstr (es.as, pos, es.eol, es_eol_len);
-          s += ins_eol_len;
-          len -= ins_eol_len;
+          s += src_eol_len;
+          len -= src_eol_len;
           pos += es_eol_len;
         }
     }
@@ -142,7 +151,9 @@ estr_replace (estr es, size_t pos, size_t del, estr ins)
 estr
 estr_cat (estr es, estr src)
 {
-  return estr_replace (es, astr_len (es.as), 0, src);
+  size_t oldlen = astr_len (es.as);
+  astr_insert (es.as, oldlen, estr_len (src, es.eol));
+  return estr_replace_estr (es, oldlen, src);
 }
 
 estr

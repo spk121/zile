@@ -1,6 +1,6 @@
 /* Global function prototypes
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -55,7 +55,6 @@ void set_buffer_text (Buffer *bp, estr es);
 castr get_buffer_pre_point (Buffer *bp);
 castr get_buffer_post_point (Buffer *bp);
 size_t get_buffer_pt (Buffer *bp);
-void set_buffer_pt (Buffer *bp, size_t o);
 size_t get_buffer_size (Buffer * bp);
 const char *get_buffer_eol (Buffer *bp);
 size_t buffer_prev_line (Buffer *bp, size_t o);

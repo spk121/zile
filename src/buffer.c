@@ -86,7 +86,7 @@ get_buffer_pt (Buffer *bp)
   return bp->pt;
 }
 
-void
+static void
 set_buffer_pt (Buffer *bp, size_t o)
 {
   if (o < bp->pt)
@@ -133,7 +133,7 @@ buffer_line_len (Buffer *bp, size_t o)
 }
 
 /*
- * Replace `oldlen' chars after point with `newlen' chars from `newtext'.
+ * Replace `del' chars after point with `newtext'.
  */
 #define MIN_GAP 1024 /* Minimum gap size after resize. */
 #define MAX_GAP 4096 /* Maximum permitted gap size. */
@@ -143,45 +143,39 @@ replace_estr (size_t del, estr es)
   if (warn_if_readonly_buffer ())
     return false;
 
-  /* Convert inserted string to correct line ending. */
-  estr es2 = es;
-  if (es.eol != get_buffer_eol (cur_bp))
-    es2 = estr_cat ((estr) {.as = astr_new (), .eol = get_buffer_eol (cur_bp)}, es);
-  size_t newlen = astr_len (es2.as);
-
+  size_t newlen = estr_len (es, get_buffer_eol (cur_bp));
   undo_save_block (cur_bp->pt, del, newlen);
 
-  /* Ensure gap fits newlen; if gap becomes zero, set to MIN_GAP. */
+  /* Adjust gap. */
+  size_t oldgap = cur_bp->gap;
   if (cur_bp->gap + del < newlen)
-    {
+    { /* If gap would vanish, open it to MIN_GAP. */
       astr_insert (cur_bp->text.as, cur_bp->pt, (newlen + MIN_GAP) - (cur_bp->gap + del));
-      cur_bp->gap = newlen + MIN_GAP - del;
+      cur_bp->gap = MIN_GAP;
     }
-
-  /* Remove del chars, zeroing some if necessary. */
-  if (del > newlen)
-    astr_set (cur_bp->text.as, cur_bp->pt + cur_bp->gap, '\0', del - newlen);
-  cur_bp->gap += del;
-
-  /* Insert newlen chars. */
-  astr_replace_nstr (cur_bp->text.as, cur_bp->pt + cur_bp->gap - newlen, astr_cstr (es2.as), newlen);
-  cur_bp->gap -= newlen;
-
-  /* Ensure gap doesn't get too big. */
-  if (cur_bp->gap > MAX_GAP)
-    {
-      astr_remove (cur_bp->text.as, cur_bp->pt, cur_bp->gap - MAX_GAP);
+  else if (cur_bp->gap + del > MAX_GAP + newlen)
+    { /* If gap would be larger than MAX_GAP, restrict it to MAX_GAP. */
+      astr_remove (cur_bp->text.as, cur_bp->pt + newlen + MAX_GAP, (cur_bp->gap + del) - (MAX_GAP + newlen));
       cur_bp->gap = MAX_GAP;
     }
+  else
+    cur_bp->gap = cur_bp->gap + del - newlen;
+
+  /* Zero any new bit of gap not produced by astr_insert. */
+  if (MAX (oldgap, newlen) < cur_bp->gap)
+    astr_set (cur_bp->text.as, cur_bp->pt + MAX (oldgap, newlen), '\0', cur_bp->gap - MAX (oldgap, newlen));
+
+  /* Insert `newlen' chars. */
+  estr_replace_estr (cur_bp->text, cur_bp->pt, es);
+  cur_bp->pt += newlen;
 
   /* Adjust markers. */
   for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
-    if (get_marker_o (m) > cur_bp->pt)
-      set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt, (ptrdiff_t) (get_marker_o (m) + newlen - del)));
+    if (get_marker_o (m) > cur_bp->pt - newlen)
+      set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt - newlen, (ptrdiff_t) (get_marker_o (m) + newlen - del)));
 
   set_buffer_modified (cur_bp, true);
-  set_buffer_pt (cur_bp, get_buffer_pt (cur_bp) + astr_len (es2.as));
-  if (estr_next_line (es2, 0) != SIZE_MAX)
+  if (estr_next_line (es, 0) != SIZE_MAX)
     thisflag |= FLAG_NEED_RESYNC;
   return true;
 }

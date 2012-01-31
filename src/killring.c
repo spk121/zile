@@ -41,7 +41,7 @@ static void
 kill_ring_push (estr es)
 {
   if (kill_ring_text.as == NULL)
-    kill_ring_text = estr_new_astr (astr_new ());
+    kill_ring_text = (estr) {.as = astr_new (), .eol = coding_eol_lf};
   estr_cat (kill_ring_text, es);
 }
 
