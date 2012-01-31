@@ -274,11 +274,11 @@ delete_char (void)
 
   if (eolp ())
     {
-      replace_estr (strlen (get_buffer_eol (cur_bp)), estr_new_astr (astr_new ()));
+      replace_estr (strlen (get_buffer_eol (cur_bp)), estr_empty);
       thisflag |= FLAG_NEED_RESYNC;
     }
   else
-    replace_estr (1, estr_new_astr (astr_new ()));
+    replace_estr (1, estr_empty);
 
   set_buffer_modified (cur_bp, true);
 
@@ -486,7 +486,7 @@ delete_region (const Region r)
 
   Marker *m = point_marker ();
   goto_offset (r.start);
-  replace_estr (get_region_size (r), estr_new_astr (astr_new ()));
+  replace_estr (get_region_size (r), estr_empty);
   goto_offset (get_marker_o (m));
   unchain_marker (m);
   return true;

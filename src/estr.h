@@ -27,9 +27,13 @@ struct estr
   const char *eol;		/* EOL type. */
 };
 
+extern estr estr_empty;
+
 extern const char *coding_eol_lf;
 extern const char *coding_eol_crlf;
 extern const char *coding_eol_cr;
+
+void estr_init (void);
 
 /*
  * Make estr from astr, determining EOL type from astr's contents.

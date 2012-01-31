@@ -127,6 +127,7 @@ main (int argc, char **argv)
 
   GC_INIT ();
   set_program_name (argv[0]);
+  estr_init ();
 
   /* Set up Lisp environment now so it's available to files and
      expressions specified on the command-line. */

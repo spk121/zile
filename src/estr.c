@@ -35,6 +35,14 @@ const char *coding_eol_lf = "\n";
 const char *coding_eol_crlf = "\r\n";
 const char *coding_eol_cr = "\r";
 
+estr estr_empty;
+
+void
+estr_init (void)
+{
+  estr_empty = estr_new_astr (astr_new ());
+}
+
 /* Maximum number of EOLs to check before deciding type. */
 #define MAX_EOL_CHECK_COUNT 3
 estr
