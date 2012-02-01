@@ -241,33 +241,40 @@ find_file (const char *filename)
   return true;
 }
 
-DEFUN ("find-file", find_file)
+DEFUN_ARGS ("find-file", find_file,
+            STR_ARG (filename))
 /*+
-Edit the specified file.
-Switch to a buffer visiting the file,
+Edit file @i{filename}.
+Switch to a buffer visiting file @i{filename},
 creating one if none already exists.
 +*/
 {
-  castr ms = minibuf_read_filename ("Find file: ",
-                                   astr_cstr (get_buffer_dir (cur_bp)), NULL);
+  STR_INIT (filename)
+  else
+    {
+      filename = minibuf_read_filename ("Find file: ",
+                                        astr_cstr (get_buffer_dir (cur_bp)), NULL);
 
-  ok = leNIL;
+      if (filename == NULL)
+        ok = FUNCALL (keyboard_quit);
+    }
 
-  if (ms == NULL)
-    ok = FUNCALL (keyboard_quit);
-  else if (astr_len (ms) > 0)
-    ok = bool_to_lisp (find_file (astr_cstr (ms)));
+  if (filename == NULL || astr_len (filename) == 0)
+    ok = leNIL;
+
+  if (ok != leNIL)
+    ok = bool_to_lisp (find_file (astr_cstr (filename)));
 }
 END_DEFUN
 
 DEFUN ("find-file-read-only", find_file_read_only)
 /*+
-Edit the specified file but don't allow changes.
+Edit file @i{filename} but don't allow changes.
 Like `find-file' but marks buffer as read-only.
 Use @kbd{M-x toggle-read-only} to permit editing.
 +*/
 {
-  ok = FUNCALL (find_file);
+  ok = F_find_file (uniarg, is_uniarg, arglist);
   if (ok == leT)
     set_buffer_readonly (cur_bp, true);
 }
@@ -386,7 +393,7 @@ Puts mark after the inserted text.
 END_DEFUN
 
 DEFUN_ARGS ("insert-file", insert_file,
-       STR_ARG (file))
+            STR_ARG (file))
 /*+
 Insert contents of file FILENAME into buffer after point.
 Set mark after the inserted text.
