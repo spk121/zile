@@ -21,6 +21,8 @@
 
 RUNLISPTESTS = $(PERL) $(srcdir)/tests/run-lisp-tests.pl
 
+TERM ?= vt100
+
 LISP_TESTS =						\
 	$(srcdir)/tests/*.el				\
 	$(srcdir)/tests/interactive/*.el
@@ -44,18 +46,19 @@ LISP_ALL_TESTS =					\
 	$(LISP_TESTS)					\
 	$(LISP_TESTS_ZILE_ONLY)
 
+LISP_TESTS_ENVIRONMENT =				\
+	abs_srcdir=$(abs_srcdir)			\
+	srcdir=$(srcdir)				\
+	TERM=$(TERM)					\
+	VALGRIND="$(VALGRIND)"
+
 EXTRA_DIST +=						\
 	$(LISP_ALL_TESTS)				\
 	$(LISP_TESTS_OUTPUTS)				\
 	tests/test.input				\
-	tests/run-lisp-tests.pl				\
-	tests/test-bad-argument
+	tests/run-lisp-tests.pl
 
-LISP_TESTS_ENVIRONMENT =				\
-	abs_srcdir=$(abs_srcdir)			\
-	srcdir=$(srcdir)				\
-	VALGRIND="$(VALGRIND)"
-
-check-local: src/zile$(EXEEXT)
+check-local: $(builddir)/src/zile$(EXEEXT)
+	$(LISP_TESTS_ENVIRONMENT) $(builddir)/src/zile$(EXEEXT) --unknown-flag --load $(srcdir)/tests/quit.el
 	echo $(LISP_TESTS) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG="$(EMACSPROG)" xargs $(RUNLISPTESTS)
 	echo $(LISP_TESTS_ZILE_ONLY) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG= xargs $(RUNLISPTESTS)

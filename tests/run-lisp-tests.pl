@@ -1,6 +1,6 @@
 # run-lisp-tests
 #
-# Copyright (c) 2009-2011 Free Software Foundation, Inc.
+# Copyright (c) 2009-2012 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -30,7 +30,7 @@ use File::Path;
 # N.B. Tests that use execute-kbd-macro must note that keyboard input
 # is only evaluated once the script has finished running.
 
-# srcdir and builddir are defined in the environment for a build
+# The following are defined in the environment for a build
 my $abs_srcdir = $ENV{abs_srcdir} || `pwd`;
 chomp $abs_srcdir;
 my $srcdir = $ENV{srcdir} || ".";
@@ -40,11 +40,6 @@ my $zile_pass = 0;
 my $zile_fail = 0;
 my $emacs_pass = 0;
 my $emacs_fail = 0;
-
-# If TERM is not set to a terminal type, choose a default
-if (-z $ENV{TERM} || $ENV{TERM} eq "unknown") {
-  $ENV{TERM} = "vt100";
-}
 
 for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   $test =~ s/\.el$//;				# ../tests/zile-only/backward_delete_char
