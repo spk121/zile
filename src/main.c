@@ -138,7 +138,7 @@ main (int argc, char **argv)
   opterr = 0; /* Don't display errors for unknown options */
   for (;;)
     {
-      int this_optind = optind ? optind : 1, longindex, c;
+      int this_optind = optind ? optind : 1, longindex = -1, c;
       char *buf, *shortopt;
 
       /* Leading `-' means process all arguments in order, treating
