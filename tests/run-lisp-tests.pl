@@ -89,7 +89,6 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   } else {
     $zile_fail++;
   }
-
 }
 
 print STDERR "Zile: $zile_pass pass(es) and $zile_fail failure(s)\n";
