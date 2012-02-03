@@ -69,10 +69,9 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   $edit_file =~ s/^\Q$srcdir/$builddir/e;	# ./tests/zile-only/backward_delete_char.input
   my $lisp_file = "$test.el";
   $lisp_file =~ s/^\Q$srcdir/$abs_srcdir/e;
+  my @args = ("--quick", "--batch", "--no-init-file", $edit_file, "--load", $lisp_file);
 
   mkpath(dirname($edit_file));
-
-  my @args = ("--quick", "--batch", "--no-init-file", $edit_file, "--load", $lisp_file);
 
   if ($ENV{EMACSPROG}) {
     if (run_test($test, $name, "Emacs", $edit_file, $ENV{EMACSPROG}, @args)) {
