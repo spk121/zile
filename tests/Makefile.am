@@ -32,19 +32,21 @@ LISP_TESTS_ZILE_ONLY =					\
 	$(srcdir)/tests/zile-only/*.el			\
 	$(srcdir)/tests/zile-only/interactive/*.el
 
-# FIXME: Find a way of making these work too
-#	tests/disabled/*.el
+LISP_TESTS_ZILE_ONLY_FIXED_SCREEN =			\
+	$(srcdir)/tests/zile-only/fixed-screen/*.el
 
 LISP_TESTS_OUTPUTS =					\
 	$(srcdir)/tests/*.output			\
 	$(srcdir)/tests/interactive/*.output		\
 	$(srcdir)/tests/regression/*.output		\
 	$(srcdir)/tests/zile-only/*.output		\
-	$(srcdir)/tests/zile-only/interactive/*.output
+	$(srcdir)/tests/zile-only/interactive/*.output	\
+	$(srcdir)/tests/zile-only/fixed-screen/*.output
 
 LISP_ALL_TESTS =					\
 	$(LISP_TESTS)					\
-	$(LISP_TESTS_ZILE_ONLY)
+	$(LISP_TESTS_ZILE_ONLY)				\
+	$(LISP_TESTS_ZILE_ONLY_FIXED_SCREEN)
 
 LISP_TESTS_ENVIRONMENT =				\
 	abs_srcdir=$(abs_srcdir)			\
@@ -62,3 +64,4 @@ check-local: $(builddir)/src/zile$(EXEEXT)
 	$(LISP_TESTS_ENVIRONMENT) $(builddir)/src/zile$(EXEEXT) --unknown-flag --load $(srcdir)/tests/quit.el
 	echo $(LISP_TESTS) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG="$(EMACSPROG)" xargs $(RUNLISPTESTS)
 	echo $(LISP_TESTS_ZILE_ONLY) | $(LISP_TESTS_ENVIRONMENT) EMACSPROG= xargs $(RUNLISPTESTS)
+	echo $(LISP_TESTS_ZILE_ONLY_FIXED_SCREEN) | COLUMNS=80 LINES=24 $(LISP_TESTS_ENVIRONMENT) EMACSPROG= xargs $(RUNLISPTESTS)

@@ -41,6 +41,27 @@ my $zile_fail = 0;
 my $emacs_pass = 0;
 my $emacs_fail = 0;
 
+my @zile_cmd = ("$builddir/src/zile");
+unshift @zile_cmd, (split ' ', $ENV{VALGRIND}) if $ENV{VALGRIND};
+
+sub run_test {
+  my ($test, $name, $editor_name, $edit_file, @args) = @_;
+  copy("$srcdir/tests/test.input", $edit_file);
+  chmod 0644, $edit_file;
+  if (system(@args) == 0) {
+    if (system("diff", "$test.output", $edit_file) == 0) {
+      unlink $edit_file, "$edit_file~";
+      return 1;
+    } else {
+      print STDERR "$editor_name failed to produce correct output for test `$name'\n";
+      return 0;
+    }
+  } else {
+    print STDERR "$editor_name failed to run test `$name' with error code $?\n";
+    return 0;
+  }
+}
+
 for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   $test =~ s/\.el$//;				# ../tests/zile-only/backward_delete_char
   my $name = basename($test);			# backward_delete_char
@@ -51,41 +72,24 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
 
   mkpath(dirname($edit_file));
 
-  my @args = ("--no-init-file", $edit_file, "--load", $lisp_file);
+  my @args = ("--quick", "--batch", "--no-init-file", $edit_file, "--load", $lisp_file);
 
   if ($ENV{EMACSPROG}) {
-    copy("$srcdir/tests/test.input", $edit_file);
-    chmod 0644, $edit_file;
-    if (system($ENV{EMACSPROG}, "--quick", "--batch", @args) == 0) {
-      if (system("diff", "$test.output", $edit_file) == 0) {
-        $emacs_pass++;
-        unlink $edit_file, "$edit_file~";
-      } else {
-        print STDERR "Emacs $name failed to produce correct output\n";
-        $emacs_fail++;
-      }
+    if (run_test($test, $name, "Emacs", $edit_file, $ENV{EMACSPROG}, @args)) {
+      $emacs_pass++;
     } else {
-      print STDERR "Emacs $name failed to run with error code $?\n";
       $emacs_fail++;
+      rename $edit_file, "$edit_file-emacs";
+      rename "$edit_file~", "$edit_file-emacs~";
     }
   }
 
-  copy("$srcdir/tests/test.input", $edit_file);
-  chmod 0644, $edit_file;
-  my @zile_cmd = ("$builddir/src/zile");
-  unshift @zile_cmd, (split ' ', $ENV{VALGRIND}) if $ENV{VALGRIND};
-  if (system(@zile_cmd, @args) == 0) {
-    if (system("diff", "$test.output", $edit_file) == 0) {
-      $zile_pass++;
-      unlink $edit_file, "$edit_file~";
-    } else {
-      print STDERR "Zile $name failed to produce correct output\n";
-      $zile_fail++;
-    }
+  if (run_test($test, $name, "Zile", $edit_file, @zile_cmd, @args)) {
+    $zile_pass++;
   } else {
-    print STDERR "Zile $name failed to run with error code $?\n";
-    $zile_fail++
+    $zile_fail++;
   }
+
 }
 
 print STDERR "Zile: $zile_pass pass(es) and $zile_fail failure(s)\n";
