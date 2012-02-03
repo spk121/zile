@@ -24,6 +24,8 @@ edit = sed \
 
 MAINTAINERCLEANFILES += doc/zile.1.in doc/zile.1
 
+DISTCLEANFILES += doc/zile.1
+
 EXTRA_DIST +=						\
 	doc/man-extras					\
 	doc/zile.1.in
@@ -33,7 +35,7 @@ dist_man_MANS = doc/zile.1
 doc/zile.1: doc/zile.1.in doc/Makefile.am config.status
 	@test -d doc || mkdir doc
 	rm -f $@ $@.tmp
-	$(edit) $@.in >$@.tmp
+	$(edit) $(abs_srcdir)/doc/zile.1.in >$@.tmp
 	mv $@.tmp $@
 
 doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac
