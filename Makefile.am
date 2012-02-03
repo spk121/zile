@@ -63,7 +63,7 @@ loc:
 
 loc-all:
 	cd $(srcdir) &&					\
-	$(CLOC) $(PRODUCTIONSOURCES) $(LISP_ALL_TESTS)
+	$(CLOC) $(PRODUCTIONSOURCES) $(LISP_ALL_TESTS) $(srcdir)/tests/run-lisp-tests.pl
 
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
