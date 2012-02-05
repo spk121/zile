@@ -133,7 +133,7 @@ buffer_line_len (Buffer *bp, size_t o)
 }
 
 /*
- * Replace `del' chars after point with `newtext'.
+ * Replace `del' chars after point with `es'.
  */
 #define MIN_GAP 1024 /* Minimum gap size after resize. */
 #define MAX_GAP 4096 /* Maximum permitted gap size. */
