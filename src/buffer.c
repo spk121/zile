@@ -148,22 +148,23 @@ replace_estr (size_t del, estr es)
 
   /* Adjust gap. */
   size_t oldgap = cur_bp->gap;
-  if (cur_bp->gap + del < newlen)
+  size_t added_gap = oldgap + del < newlen ? MIN_GAP : 0;
+  if (added_gap > 0)
     { /* If gap would vanish, open it to MIN_GAP. */
-      astr_insert (cur_bp->text.as, cur_bp->pt, (newlen + MIN_GAP) - (cur_bp->gap + del));
+      astr_insert (cur_bp->text.as, cur_bp->pt, (newlen + MIN_GAP) - (oldgap + del));
       cur_bp->gap = MIN_GAP;
     }
-  else if (cur_bp->gap + del > MAX_GAP + newlen)
+  else if (oldgap + del > MAX_GAP + newlen)
     { /* If gap would be larger than MAX_GAP, restrict it to MAX_GAP. */
-      astr_remove (cur_bp->text.as, cur_bp->pt + newlen + MAX_GAP, (cur_bp->gap + del) - (MAX_GAP + newlen));
+      astr_remove (cur_bp->text.as, cur_bp->pt + newlen + MAX_GAP, (oldgap + del) - (MAX_GAP + newlen));
       cur_bp->gap = MAX_GAP;
     }
   else
-    cur_bp->gap = cur_bp->gap + del - newlen;
+    cur_bp->gap = oldgap + del - newlen;
 
   /* Zero any new bit of gap not produced by astr_insert. */
-  if (MAX (oldgap, newlen) < cur_bp->gap)
-    astr_set (cur_bp->text.as, cur_bp->pt + MAX (oldgap, newlen), '\0', cur_bp->gap - MAX (oldgap, newlen));
+  if (MAX (oldgap, newlen) + added_gap < cur_bp->gap + newlen)
+    astr_set (cur_bp->text.as, cur_bp->pt + MAX (oldgap, newlen) + added_gap, '\0', newlen + cur_bp->gap - MAX (oldgap, newlen) - added_gap);
 
   /* Insert `newlen' chars. */
   estr_replace_estr (cur_bp->text, cur_bp->pt, es);
@@ -172,7 +173,7 @@ replace_estr (size_t del, estr es)
   /* Adjust markers. */
   for (Marker *m = get_buffer_markers (cur_bp); m != NULL; m = get_marker_next (m))
     if (get_marker_o (m) > cur_bp->pt - newlen)
-      set_marker_o (m, MAX ((ptrdiff_t) cur_bp->pt - newlen, (ptrdiff_t) (get_marker_o (m) + newlen - del)));
+      set_marker_o (m, MAX (cur_bp->pt - newlen, get_marker_o (m) + newlen - del));
 
   set_buffer_modified (cur_bp, true);
   if (estr_next_line (es, 0) != SIZE_MAX)
