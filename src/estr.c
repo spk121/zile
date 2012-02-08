@@ -167,7 +167,7 @@ estr_cat (estr es, estr src)
 estr
 estr_readf (const char *filename)
 {
-  estr es = (estr) {.as = NULL};
+  estr es = (estr) {.as = NULL, .eol = coding_eol_lf};
   astr as = astr_readf (filename);
   if (as)
     es = estr_new_astr (as);

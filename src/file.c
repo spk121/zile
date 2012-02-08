@@ -226,7 +226,7 @@ find_file (const char *filename)
           if (es.as)
             set_buffer_readonly (bp, !check_writable (filename));
           else
-            es = estr_empty;
+            es.as = astr_new ();
           set_buffer_text (bp, es);
 
           /* Reset undo history. */
