@@ -2,6 +2,14 @@
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Bug fixes
+
+  Fix an egregious bug resulting in a crash whenever a non-existent
+  file was edited.
+
+  Fix other potential crash bugs in the low-level text-handling
+  routine estr_replace.
+
 
 * Noteworthy changes in release 2.4.4 (2012-02-03) [stable]
 
