@@ -1,8 +1,9 @@
 /* Self documentation facility functions
 
    Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork ok GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@
 
 #include <assert.h>
 #include <limits.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,39 +38,46 @@ write_function_description (va_list ap)
 {
   const char *name = va_arg (ap, const char *);
   const char *doc = va_arg (ap, const char *);
-  int interactive = get_function_interactive (name);
+  int interactive = guile_get_procedure_interactive_by_name (name);
 
-  bprintf ("%s is %s built-in function in `C source code'.\n\n%s",
+  bprintf ("%s is %s procedure.\n\n%s",
            name,
            interactive ? "an interactive" : "a",
            doc);
 }
 
-DEFUN_ARGS ("describe-function", describe_function,
-            STR_ARG (func))
-/*+
-Display the full documentation of a function.
-+*/
+
+SCM_DEFINE (G_describe_function, "describe-function", 0, 1, 0,
+	    (SCM gfunc), "\
+Display the full documentation of a function.  The optional argument\n\
+is a string containing the name of the function.")
 {
-  STR_INIT (func)
-  else
+  char *str = NULL;
+  astr func = NULL;
+  SCM ok = SCM_BOOL_T;
+
+  // FIXME: interactive logic
+  str = guile_to_locale_string_safe (gfunc);
+  if (str != NULL)
+    func = astr_new_cstr (str);
+  if (func == NULL)
     {
       func = minibuf_read_function_name ("Describe function: ");
       if (func == NULL)
-        ok = leNIL;
+        ok = SCM_BOOL_F;
     }
 
-  if (ok == leT)
+  if (ok == SCM_BOOL_T)
     {
-      const char *doc = get_function_doc (astr_cstr (func));
+      const char *doc = guile_get_procedure_documentation_by_name (astr_cstr (func));
       if (doc == NULL)
-        ok = leNIL;
+        minibuf_error ("undocumented function: %s", astr_cstr (func));
       else
         write_temp_buffer ("*Help*", true,
                            write_function_description, astr_cstr (func), doc);
     }
+  return ok;
 }
-END_DEFUN
 
 static void
 write_variable_description (va_list ap)
@@ -81,31 +90,13 @@ write_variable_description (va_list ap)
            name, curval, doc);
 }
 
-DEFUN_ARGS ("describe-variable", describe_variable,
-            STR_ARG (name))
-/*+
-Display the full documentation of a variable.
-+*/
+SCM_DEFINE (G_describe_variable, "describe-variable", 0, 1, 0,
+	    (SCM gname), "\
+Display the full documentation of a variable.")
 {
-  STR_INIT (name)
-  else
-    name = minibuf_read_variable_name ("Describe variable: ");
-
-  if (name == NULL)
-    ok = leNIL;
-  else
-    {
-      const char *defval;
-      const char *doc = get_variable_doc (astr_cstr (name), &defval);
-      if (doc == NULL)
-        ok = leNIL;
-      else
-        write_temp_buffer ("*Help*", true,
-                           write_variable_description,
-                           astr_cstr (name), get_variable (astr_cstr (name)), doc);
-    }
+  // GUILE variables don't have documentation
+  return SCM_BOOL_F;
 }
-END_DEFUN
 
 static void
 write_key_description (va_list ap)
@@ -113,38 +104,43 @@ write_key_description (va_list ap)
   const char *name = va_arg (ap, const char *);
   const char *doc = va_arg (ap, const char *);
   const char *binding = va_arg (ap, const char *);
-  int interactive = get_function_interactive (name);
+  int interactive = guile_get_procedure_interactive_by_name (name);
 
   assert (interactive != -1);
 
   bprintf ("%s runs the command %s, which is %s built-in\n"
-           "function in `C source code'.\n\n%s",
+           "function.\n\n%s",
            binding, name,
            interactive ? "an interactive" : "a",
            doc);
 }
 
-DEFUN_ARGS ("describe-key", describe_key,
-            STR_ARG (keystr))
-/*+
-Display documentation of the command invoked by a key sequence.
-+*/
+SCM_DEFINE (G_describe_key, "describe-key", 0, 1, 0,
+	    (SCM gkeystr), "\
+Display documentation of the command invoked by a key sequence.")
 {
+  SCM ok = SCM_BOOL_T;
+  SCM gname;
   const char *name = NULL, *doc;
   astr binding = NULL;
+  char *str = NULL;
+  astr keystr = NULL;
 
-  STR_INIT (keystr);
+  // FIXME: need interactive logic
+  str = guile_to_locale_string_safe (gkeystr);
+  if (str != NULL)
+    keystr = astr_new_cstr (str);
   if (keystr != NULL)
     {
       gl_list_t keys = keystrtovec (astr_cstr (keystr));
 
       if (keys != NULL)
         {
-          name = get_function_name (get_function_by_keys (keys));
+          gname = guile_procedure_name_safe (get_function_by_keys (keys));
           binding = keyvectodesc (keys);
         }
       else
-        ok = leNIL;
+        ok = SCM_BOOL_F;
     }
   else
     {
@@ -152,26 +148,36 @@ Display documentation of the command invoked by a key sequence.
 
       minibuf_write ("Describe key:");
       keys = get_key_sequence ();
-      name = get_function_name (get_function_by_keys (keys));
+      gname = guile_procedure_name_safe (get_function_by_keys (keys));
       binding = keyvectodesc (keys);
 
-      if (name == NULL)
+      if (scm_is_true (gname))
         {
           minibuf_error ("%s is undefined", astr_cstr (binding));
-          ok = leNIL;
+          ok = SCM_BOOL_F;
         }
     }
 
-  if (ok == leT)
+  if (ok == SCM_BOOL_T)
     {
-      minibuf_write ("%s runs the command `%s'", astr_cstr (binding), name);
+      minibuf_write ("%s runs the command `%s'", astr_cstr (binding), scm_to_locale_string (scm_symbol_to_string (gname)));
 
-      doc = get_function_doc (name);
+      doc = NULL;
       if (doc == NULL)
-        ok = leNIL;
+        ok = SCM_BOOL_F;
       else
         write_temp_buffer ("*Help*", true,
                            write_key_description, name, doc, astr_cstr (binding));
     }
+  return ok;
 }
-END_DEFUN
+
+void
+init_guile_help_procedures (void)
+{
+#include "help.x"
+  scm_c_export ("describe-function",
+		"describe-variable",
+		"describe-key",
+		0);
+}

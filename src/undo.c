@@ -1,8 +1,9 @@
 /* Undo facility functions
 
    Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -20,6 +21,8 @@
    MA 02111-1301, USA.  */
 
 #include <config.h>
+
+#include <libguile.h>
 
 #include "main.h"
 #include "extern.h"
@@ -116,32 +119,30 @@ revert_action (Undo * up)
   return up->next;
 }
 
-DEFUN ("undo", undo)
-/*+
-Undo some previous changes.
-Repeat this command to undo more changes.
-+*/
+SCM_DEFINE (G_undo, "undo", 0, 0, 0, (void), "\
+Undo some previous changes.\n\
+Repeat this command to undo more changes.")
 {
   if (get_buffer_noundo (cur_bp))
     {
       minibuf_error ("Undo disabled in this buffer");
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;
 
   if (get_buffer_next_undop (cur_bp) == NULL)
     {
       minibuf_error ("No further undo information");
       set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   set_buffer_next_undop (cur_bp, revert_action (get_buffer_next_undop (cur_bp)));
   minibuf_write ("Undo!");
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 /*
  * Set unchanged flags to false.
@@ -151,4 +152,12 @@ undo_set_unchanged (Undo *up)
 {
   for (; up; up = up->next)
     up->unchanged = false;
+}
+
+void
+init_guile_undo_procedures (void)
+{
+#include "undo.x"
+  scm_c_export ("undo",
+		0);
 }

@@ -1,8 +1,9 @@
 /* Search and replace functions
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@
 
 #include <config.h>
 
+#include <libguile.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <regex.h>
@@ -59,8 +61,8 @@ find_substr (castr as1, castr as2, const char *n, size_t nsize, size_t from, siz
 
   memset (&pattern, 0, sizeof (pattern));
 
-  if (!regex)
-    syntax |= RE_PLAIN;
+  /* if (!regex)
+     syntax |= RE_PLAIN; */
   if (icase)
     syntax |= RE_ICASE;
   re_set_syntax (syntax);
@@ -109,17 +111,17 @@ search (size_t o, const char *s, int forward, int regexp)
 
 static castr last_search = NULL;
 
-static le *
+static SCM
 do_search (bool forward, bool regexp, castr pattern)
 {
-  le * ok = leNIL;
+  SCM ok = SCM_BOOL_F;
 
   if (pattern == NULL)
     pattern = minibuf_read ("%s%s: ", astr_cstr (last_search),
                             regexp ? "RE search" : "Search", forward ? "" : " backward");
 
   if (pattern == NULL)
-    return FUNCALL (keyboard_quit);
+    return G_keyboard_quit ();
   if (astr_len (pattern) != 0)
     {
       last_search = pattern;
@@ -127,60 +129,48 @@ do_search (bool forward, bool regexp, castr pattern)
       if (!search (get_buffer_pt (cur_bp), astr_cstr (pattern), forward, regexp))
         minibuf_error ("Search failed: \"%s\"", pattern);
       else
-        ok = leT;
+        ok = SCM_BOOL_T;
     }
 
   return ok;
 }
 
-DEFUN_ARGS ("search-forward", search_forward,
-            STR_ARG (pattern))
-/*+
-Search forward from point for the user specified text.
-+*/
+SCM_DEFINE (G_search_forward, "search-forward", 1, 0, 0,
+	    (SCM gpattern), "\
+Search forward from point for the user specified text.")
 {
-  STR_INIT (pattern);
-  ok = do_search (true, false, pattern);
+  char *pattern = guile_to_locale_string_safe (gpattern);
+  return do_search (true, false, astr_new_cstr (pattern));
 }
-END_DEFUN
 
-DEFUN_ARGS ("search-backward", search_backward,
-            STR_ARG (pattern))
-/*+
-Search backward from point for the user specified text.
-+*/
+SCM_DEFINE (G_search_backward, "search-backward", 1, 0, 0,
+	    (SCM gpattern), "\
+Search backward from point for the user specified text.")
 {
-  STR_INIT (pattern);
-  ok = do_search (false, false, pattern);
+  char *pattern = guile_to_locale_string_safe (gpattern);
+  return do_search (false, false, astr_new_cstr (pattern));
 }
-END_DEFUN
 
-DEFUN_ARGS ("search-forward-regexp", search_forward_regexp,
-            STR_ARG (pattern))
-/*+
-Search forward from point for regular expression REGEXP.
-+*/
+SCM_DEFINE (G_search_forward_regexp, "search-forward-regexp", 1, 0, 0,
+	    (SCM gpattern), "\
+Search forward from point for regular expression REGEXP.")
 {
-  STR_INIT (pattern);
-  ok = do_search (true, true, pattern);
+  char *pattern = guile_to_locale_string_safe (gpattern);
+  return do_search (true, true, astr_new_cstr (pattern));
 }
-END_DEFUN
 
-DEFUN_ARGS ("search-backward-regexp", search_backward_regexp,
-            STR_ARG (pattern))
-/*+
-Search backward from point for match for regular expression REGEXP.
-+*/
+SCM_DEFINE (G_search_backward_regexp, "search-backward-regexp", 1, 0, 0,
+	    (SCM gpattern), "\
+Search backward from point for match for regular expression REGEXP.")
 {
-  STR_INIT (pattern);
-  ok = do_search (false, true, pattern);
+  char *pattern = guile_to_locale_string_safe (gpattern);
+  return do_search (false, true, astr_new_cstr(pattern));
 }
-END_DEFUN
 
 /*
  * Incremental search engine.
  */
-static le *
+static SCM
 isearch (int forward, int regexp)
 {
   Marker *old_mark = copy_marker (get_buffer_mark (get_window_bp (cur_wp)));
@@ -223,7 +213,7 @@ isearch (int forward, int regexp)
           thisflag |= FLAG_NEED_RESYNC;
 
           /* Quit. */
-          FUNCALL (keyboard_quit);
+          G_keyboard_quit ();
 
           /* Restore old mark position. */
           if (get_buffer_mark (cur_bp))
@@ -311,60 +301,48 @@ isearch (int forward, int regexp)
   if (old_mark)
     unchain_marker (old_mark);
 
-  return leT;
+  return SCM_BOOL_T;
 }
 
-DEFUN ("isearch-forward", isearch_forward)
-/*+
-Do incremental search forward.
-With a prefix argument, do an incremental regular expression search instead.
-As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
-Type @kbd{C-s} to search again forward, @kbd{C-r} to search again backward.
-@kbd{C-g} when search is successful aborts and moves point to starting point.
-+*/
+SCM_DEFINE (G_isearch_forward, "isearch-forward", 0, 0, 0, (void), "\
+Do incremental search forward.\n\
+With a prefix argument, do an incremental regular expression search instead.\n\
+As you type characters, they add to the search string and are found.\n\
+Type return to exit, leaving point at location found.\n\
+Type C-s to search again forward, C-r to search again backward.\n\
+C-g when search is successful aborts and moves point to starting point.")
 {
-  ok = isearch (true, lastflag & FLAG_SET_UNIARG);
+  return isearch (true, lastflag & FLAG_SET_UNIARG);
 }
-END_DEFUN
 
-DEFUN ("isearch-backward", isearch_backward)
-/*+
-Do incremental search backward.
-With a prefix argument, do a regular expression search instead.
-As you type characters, they add to the search string and are found.
-Type return to exit, leaving point at location found.
-Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.
-@kbd{C-g} when search is successful aborts and moves point to starting point.
-+*/
+SCM_DEFINE (G_isearch_backward, "isearch-backward", 0, 0, 0, (void), "\
+Do incremental search backward.\n\
+With a prefix argument, do a regular expression search instead.\n\
+As you type characters, they add to the search string and are found.\n\
+Type return to exit, leaving point at location found.\n\
+Type @kbd{C-r} to search again backward, @kbd{C-s} to search again forward.\n\
+@kbd{C-g} when search is successful aborts and moves point to starting point.")
 {
-  ok = isearch (false, lastflag & FLAG_SET_UNIARG);
+  return isearch (false, lastflag & FLAG_SET_UNIARG);
 }
-END_DEFUN
 
-DEFUN ("isearch-forward-regexp", isearch_forward_regexp)
-/*+
-Do incremental search forward for regular expression.
-With a prefix argument, do a regular string search instead.
-Like ordinary incremental search except that your input
-is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
-+*/
+SCM_DEFINE (G_isearch_forward_regexp, "isearch-forward-regexp", 0, 0, 0, (void), "\
+Do incremental search forward for regular expression.\n\
+With a prefix argument, do a regular string search instead.\n\
+Like ordinary incremental search except that your input\n\
+is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.")
 {
-  ok = isearch (true, !(lastflag & FLAG_SET_UNIARG));
+  return isearch (true, !(lastflag & FLAG_SET_UNIARG));
 }
-END_DEFUN
 
-DEFUN ("isearch-backward-regexp", isearch_backward_regexp)
-/*+
-Do incremental search forward for regular expression.
-With a prefix argument, do a regular string search instead.
-Like ordinary incremental search except that your input
-is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.
-+*/
+SCM_DEFINE (G_isearch_backward_regexp, "isearch-backward-regexp", 0, 0, 0, (void), "\
+Do incremental search forward for regular expression.\n\
+With a prefix argument, do a regular string search instead.\n\
+Like ordinary incremental search except that your input\n\
+is treated as a regexp.  See @kbd{M-x isearch-forward} for more info.")
 {
-  ok = isearch (false, !(lastflag & FLAG_SET_UNIARG));
+  return isearch (false, !(lastflag & FLAG_SET_UNIARG));
 }
-END_DEFUN
 
 /*
  * Check the case of a string.
@@ -385,23 +363,22 @@ check_case (astr as)
   return i == astr_len (as);
 }
 
-DEFUN ("query-replace", query_replace)
-/*+
-Replace occurrences of a string with other text.
-As each match is found, the user must type a character saying
-what to do with it.
-+*/
+SCM_DEFINE (G_query_replace, "query-replace", 0, 0, 0, (void), "\
+Replace occurrences of a string with other text.\n\
+As each match is found, the user must type a character saying\n\
+what to do with it.")
 {
+  bool ok;
   castr find = minibuf_read ("Query replace string: ", "");
   if (find == NULL)
-    return FUNCALL (keyboard_quit);
+    return G_keyboard_quit ();
   if (astr_len (find) == 0)
-    return leNIL;
+    return SCM_BOOL_F;
   bool find_no_upper = no_upper (astr_cstr (find), astr_len (find), false);
 
   castr repl = minibuf_read ("Query replace `%s' with: ", "", astr_cstr (find));
   if (repl == NULL)
-    return FUNCALL (keyboard_quit);
+    return G_keyboard_quit ();
 
   bool noask = false;
   size_t count = 0;
@@ -431,12 +408,13 @@ what to do with it.
             break;
           else if (c == KBD_CANCEL)	/* C-g */
             {
-             ok = FUNCALL (keyboard_quit);
+	      ok = G_keyboard_quit ();
              break;
             }
           else if (c == '!')		/* Replace all without asking. */
             noask = true;
-          else if (c == 'n' || c == KBD_RET || c == KBD_DEL) /* Do not replace. */
+          else if (c == 'n' 
+		   || c == KBD_RET || c == KBD_DEL) /* Do not replace. */
             continue;
         }
 
@@ -468,5 +446,21 @@ what to do with it.
 
   if (ok)
     minibuf_write ("Replaced %d occurrences", count);
+  return scm_from_bool (ok);
 }
-END_DEFUN
+
+void
+init_guile_search_procedures (void)
+{
+#include "search.x"
+  scm_c_export ("search-forward",
+		"search-backward",
+		"search-forward-regexp",
+		"search-backward-regexp",
+		"isearch-forward",
+		"isearch-backward",
+		"isearch-forward-regexp",
+		"isearch-backward-regexp",
+		"query-replace",
+		0);
+}

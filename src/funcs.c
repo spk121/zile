@@ -1,8 +1,9 @@
 /* Miscellaneous Emacs functions
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2011, 2012 Michael L Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <ctype.h>
+#include <libguile.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -34,25 +36,20 @@
 #include "extern.h"
 
 
-DEFUN ("suspend-emacs", suspend_emacs)
-/*+
-Stop Zile and return to superior process.
-+*/
+SCM_DEFINE (G_suspend_emacs, "suspend-emacs", 0, 0, 0, (void), "\
+Stop Zile and return to superior process.")
 {
   raise (SIGTSTP);
+  return SCM_BOOL_F;
 }
-END_DEFUN
 
-DEFUN ("keyboard-quit", keyboard_quit)
-/*+
-Cancel current command.
-+*/
+SCM_DEFINE (G_keyboard_quit, "keyboard-quit", 0, 0, 0, (void), "\
+Cancel current command.")
 {
   deactivate_mark ();
   minibuf_error ("Quit");
-  ok = leNIL;
+  return SCM_BOOL_F;
 }
-END_DEFUN
 
 void
 write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
@@ -95,7 +92,7 @@ write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), ...)
   func (ap);
   va_end (ap);
 
-  FUNCALL (beginning_of_buffer);
+  G_beginning_of_buffer ();
   set_buffer_readonly (cur_bp, true);
   set_buffer_modified (cur_bp, false);
 
@@ -141,114 +138,92 @@ write_buffers_list (va_list ap)
   while (bp != get_window_bp (old_wp));
 }
 
-DEFUN ("list-buffers", list_buffers)
-/*+
-Display a list of names of existing buffers.
-The list is displayed in a buffer named `*Buffer List*'.
-Note that buffers with names starting with spaces are omitted.
-
-@itemize -
-The @samp{M} column contains a @samp{*} for buffers that are modified.
-The @samp{R} column contains a @samp{%} for buffers that are read-only.
-@end itemize
-+*/
+SCM_DEFINE (G_list_buffers, "list-buffers", 0, 0, 0, (void), "\
+Display a list of names of existing buffers.\n\
+The list is displayed in a buffer named `*Buffer List*'.\n\
+Note that buffers with names starting with spaces are omitted.\n\
+\n\
+@itemize -\n\
+The @samp{M} column contains a @samp{*} for buffers that are modified.\n\
+The @samp{R} column contains a @samp{%} for buffers that are read-only.\n\
+@end itemize")
 {
   write_temp_buffer ("*Buffer List*", true, write_buffers_list, cur_wp);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("toggle-read-only", toggle_read_only)
-/*+
-Change whether this buffer is visiting its file read-only.
-+*/
+SCM_DEFINE (G_toggle_read_only, "toggle-read-only", 0, 0, 0, (void), "\
+Change whether this buffer is visiting its file read-only.")
 {
   set_buffer_readonly (cur_bp, !get_buffer_readonly (cur_bp));
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("auto-fill-mode", auto_fill_mode)
-/*+
-Toggle Auto Fill mode.
-In Auto Fill mode, inserting a space at a column beyond `fill-column'
-automatically breaks the line at a previous space.
-+*/
+SCM_DEFINE (G_auto_fill_mode, "auto-fill-mode", 0, 0, 0, (void), "\
+Toggle Auto Fill mode.\n\
+In Auto Fill mode, inserting a space at a column beyond `fill-column'\n\
+automatically breaks the line at a previous space.")
 {
   set_buffer_autofill (cur_bp, !get_buffer_autofill (cur_bp));
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("set-fill-column", set_fill_column)
-/*+
-Set `fill-column' to specified argument.
-Use C-u followed by a number to specify a column.
-Just C-u as argument means to use the current column.
-+*/
+SCM_DEFINE (G_set_fill_column, "set-fill-column", 0, 1, 0, (SCM n), "\
+Set `fill-column' to specified argument.\n\
+Use C-u followed by a number to specify a column.\n\
+Just C-u as argument means to use the current column.")
 {
+  long c_n = guile_to_long_or_error (s_G_set_fill_column, SCM_ARG1, n);
   size_t o = get_buffer_pt (cur_bp) - get_buffer_line_o (cur_bp);
-  long fill_col = (lastflag & FLAG_UNIARG_EMPTY) ? o : (unsigned long) uniarg;
+  size_t fill_col;
   char *buf = NULL;
 
-  if (!(lastflag & FLAG_SET_UNIARG) && arglist == NULL)
+  if (SCM_UNBNDP (n))
     {
       fill_col = minibuf_read_number ("Set fill-column to (default %d): ", o);
       if (fill_col == LONG_MAX)
-        return leNIL;
+        return SCM_BOOL_F;
       else if (fill_col == LONG_MAX - 1)
         fill_col = o;
     }
-
-  if (arglist)
-    {
-      if (arglist->next)
-        buf = arglist->next->data;
-      else
-        {
-          minibuf_error ("set-fill-column requires an explicit argument");
-          ok = leNIL;
-        }
-    }
   else
-    {
-      buf = xasprintf ("%ld", fill_col);
-      /* Only print message when run interactively. */
-      minibuf_write ("Fill column set to %s (was %d)", buf,
-                     get_variable_number ("fill-column"));
-    }
+    fill_col = c_n;
 
-  if (ok == leT)
-    set_variable ("fill-column", buf);
+  buf = xasprintf ("%d", fill_col);
+  /* Only print message when run interactively. */
+  minibuf_write ("Fill column set to %s (was %d)", buf,
+		 get_variable_number ("fill-column"));
+
+  set_variable_number ("fill-column", c_n);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN_NONINTERACTIVE ("set-mark", set_mark)
-/*+
-Set this buffer's mark to point.
-+*/
+
+SCM_DEFINE (G_set_mark, "set-mark", 0, 0, 0, (void), "\
+Set this buffer's mark to point.")
 {
   set_mark ();
   activate_mark ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("set-mark-command", set_mark_command)
-/*+
-Set the mark where point is.
-+*/
+SCM_DEFINE (G_set_mark_command, "set-mark-command", 0, 0, 0, (void), "\
+Set the mark where point is.")
 {
-  FUNCALL (set_mark);
+  SCM ok = SCM_BOOL_T;
+  G_set_mark ();
   minibuf_write ("Mark set");
+  return ok;
 }
-END_DEFUN
 
-DEFUN ("exchange-point-and-mark", exchange_point_and_mark)
-/*+
-Put the mark where point is now, and point where the mark is now.
-+*/
+SCM_DEFINE (G_exchange_point_and_mark, "exchange-point-and-mark", 0, 0, 0, (void), "\
+Put the mark where point is now, and point where the mark is now.")
 {
+  // FIXME: need interactive logic
   if (get_buffer_mark (cur_bp) == NULL)
     {
       minibuf_error ("No mark set in this buffer");
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   size_t o = get_buffer_pt (cur_bp);
@@ -256,42 +231,38 @@ Put the mark where point is now, and point where the mark is now.
   set_marker_o (get_buffer_mark (cur_bp), o);
   activate_mark ();
   thisflag |= FLAG_NEED_RESYNC;
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("mark-whole-buffer", mark_whole_buffer)
-/*+
-Put point at beginning and mark at end of buffer.
-+*/
+SCM_DEFINE (G_mark_whole_buffer, "mark-whole-buffer", 0, 0, 0, (void), "\
+Put point at beginning and mark at end of buffer.")
 {
-  FUNCALL (end_of_buffer);
-  FUNCALL (set_mark_command);
-  FUNCALL (beginning_of_buffer);
+  G_end_of_buffer ();
+  G_set_mark_command ();
+  G_beginning_of_buffer ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("quoted-insert", quoted_insert)
-/*+
-Read next input character and insert it.
-This is useful for inserting control characters.
-+*/
+SCM_DEFINE (G_quoted_insert, "quoted-insert", 0, 0, 0, (void), "\
+Read next input character and insert it.\n\
+This is useful for inserting control characters.")
 {
+  // FIXME: need interactive logic
   minibuf_write ("C-q-");
   insert_char (getkey_unfiltered (GETKEY_DEFAULT));
   minibuf_clear ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("universal-argument", universal_argument)
-/*+
-Begin a numeric argument for the following command.
-Digits or minus sign following @kbd{C-u} make up the numeric argument.
-@kbd{C-u} following the digits or minus sign ends the argument.
-@kbd{C-u} without digits or minus sign provides 4 as argument.
-Repeating @kbd{C-u} without digits or minus sign multiplies the argument
-by 4 each time.
-+*/
+SCM_DEFINE (G_universal_argument, "universal-argument", 0, 0, 0, (void), "\
+Begin a numeric argument for the following command.\n\
+Digits or minus sign following @kbd{C-u} make up the numeric argument.\n\
+@kbd{C-u} following the digits or minus sign ends the argument.\n\
+@kbd{C-u} without digits or minus sign provides 4 as argument.\n\
+Repeating @kbd{C-u} without digits or minus sign multiplies the argument\n\
+by 4 each time.")
 {
+  SCM ok = SCM_BOOL_T;
   int i = 0, arg = 1, sgn = 1;
   astr as = astr_new ();
 
@@ -300,6 +271,7 @@ by 4 each time.
 
   thisflag |= FLAG_UNIARG_EMPTY;
 
+  // FIXME: need interactive logic
   for (;;)
     {
       size_t key = do_binding_completion (as);
@@ -307,7 +279,7 @@ by 4 each time.
       /* Cancelled. */
       if (key == KBD_CANCEL)
         {
-          ok = FUNCALL (keyboard_quit);
+          ok = G_keyboard_quit ();
           break;
         }
       /* Digit pressed. */
@@ -358,25 +330,23 @@ by 4 each time.
         }
     }
 
-  if (ok == leT)
+  if (ok == SCM_BOOL_T)
     {
       last_uniarg = arg * sgn;
       thisflag |= FLAG_SET_UNIARG;
       minibuf_clear ();
     }
+  return ok;
 }
-END_DEFUN
 
-DEFUN ("back-to-indentation", back_to_indentation)
-/*+
-Move point to the first non-whitespace character on this line.
-+*/
+SCM_DEFINE (G_back_to_indentation, "back-to-indentation", 0, 0, 0, (void), "\
+Move point to the first non-whitespace character on this line.")
 {
   goto_offset (get_buffer_line_o (cur_bp));
   while (!eolp () && isspace (following_char ()))
     move_char (1);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 /***********************************************************************
                           Move through words
@@ -405,26 +375,22 @@ move_word (int dir)
   return gotword;
 }
 
-DEFUN ("forward-word", forward_word)
-/*+
-Move point forward one word (backward if the argument is negative).
-With argument, do this that many times.
-+*/
+SCM_DEFINE (G_forward_word, "forward-word", 0, 1, 0, (SCM n), "\
+Move point forward one word (backward if the argument is negative).\n\
+With argument, do this that many times.")
 {
-  ok = move_with_uniarg (uniarg, move_word);
+  long uniarg = guile_to_long_or_error ("forward-word", SCM_ARG1, n);
+  return move_with_uniarg (uniarg, move_word);
 }
-END_DEFUN
 
-DEFUN ("backward-word", backward_word)
-/*+
-Move backward until encountering the end of a word (forward if the
-argument is negative).
-With argument, do this that many times.
-+*/
+SCM_DEFINE (G_backward_word, "backward-word", 0, 1, 0, (SCM n), "\
+Move backward until encountering the end of a word (forward if the\n\
+argument is negative).\n\
+With argument, do this that many times.")
 {
-  ok = move_with_uniarg (-uniarg, move_word);
+  long uniarg = guile_to_long_or_error (s_G_backward_word, SCM_ARG1, n);
+  return move_with_uniarg (-uniarg, move_word);
 }
-END_DEFUN
 
 /***********************************************************************
                Move through balanced expressions (sexps)
@@ -523,34 +489,30 @@ move_sexp (int dir)
           break;
         }
       if (dir > 0)
-        FUNCALL (beginning_of_line);
+        G_beginning_of_line ();
       else
-        FUNCALL (end_of_line);
+        G_end_of_line ();
     }
   return false;
 }
 
-DEFUN ("forward-sexp", forward_sexp)
-/*+
-Move forward across one balanced expression (sexp).
-With argument, do it that many times.  Negative arg -N means
-move backward across N balanced expressions.
-+*/
+SCM_DEFINE (G_forward_sexp, "forward-sexp", 0, 1, 0, (SCM n), "\
+Move forward across one balanced expression (sexp).\n\
+With argument, do it that many times.  Negative arg -N means\n\
+move backward across N balanced expressions.")
 {
-  ok = move_with_uniarg (uniarg, move_sexp);
+  long uniarg = guile_to_long_or_error (s_G_forward_sexp, SCM_ARG1, n);
+  return move_with_uniarg (uniarg, move_sexp);
 }
-END_DEFUN
 
-DEFUN ("backward-sexp", backward_sexp)
-/*+
-Move backward across one balanced expression (sexp).
-With argument, do it that many times.  Negative arg -N means
-move forward across N balanced expressions.
-+*/
+SCM_DEFINE (G_backward_sexp, "backward-sexp", 0, 1, 0, (SCM n), "\
+Move backward across one balanced expression (sexp).\n\
+With argument, do it that many times.  Negative arg -N means\n\
+move forward across N balanced expressions.")
 {
-  ok = move_with_uniarg (-uniarg, move_sexp);
+  long uniarg = guile_to_long_or_error (s_G_backward_sexp, SCM_ARG1, n);
+  return move_with_uniarg (-uniarg, move_sexp);
 }
-END_DEFUN
 
 /***********************************************************************
                           Transpose functions
@@ -589,8 +551,8 @@ transpose_subr (bool (*move_func) (int dir))
     {
       if (move_func == move_line)
         { /* Add an empty line. */
-          FUNCALL (end_of_line);
-          FUNCALL (newline);
+          G_end_of_line ();
+          G_znewline (scm_from_int (1));
         }
       else
         {
@@ -612,7 +574,7 @@ transpose_subr (bool (*move_func) (int dir))
   astr as1 = astr_new ();
   astr_append_region (as1);
 
-  FUNCALL (delete_region);
+  G_delete_region ();
 
   /* Forward. */
   move_func (1);
@@ -634,7 +596,7 @@ transpose_subr (bool (*move_func) (int dir))
       /* Save and delete 2nd marked region. */
       as2 = astr_new ();
       astr_append_region (as2);
-      FUNCALL (delete_region);
+      G_delete_region ();
     }
 
   /* Insert the first string. */
@@ -661,11 +623,11 @@ transpose_subr (bool (*move_func) (int dir))
   return true;
 }
 
-static le *
+static SCM
 transpose (int uniarg, bool (*move) (int dir))
 {
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;
 
   bool ret = true;
   undo_start_sequence ();
@@ -673,105 +635,83 @@ transpose (int uniarg, bool (*move) (int dir))
     ret = transpose_subr (move);
   undo_end_sequence ();
 
-  return bool_to_lisp (ret);
+  return scm_from_bool (ret);
 }
 
-DEFUN ("transpose-chars", transpose_chars)
-/*+
-Interchange characters around point, moving forward one character.
-With prefix arg ARG, effect is to take character before point
-and drag it forward past ARG other characters (backward if ARG negative).
-If no argument and at end of line, the previous two chars are exchanged.
-+*/
+SCM_DEFINE (G_transpose_chars, "transpose-chars", 0, 1, 0, (SCM n), "\
+Interchange characters around point, moving forward one character.\n\
+With prefix arg ARG, effect is to take character before point\n\
+and drag it forward past ARG other characters (backward if ARG negative).\n\
+If no argument and at end of line, the previous two chars are exchanged.")
 {
-  ok = transpose (uniarg, move_char);
+  long c_n = guile_to_long_or_error (s_G_transpose_chars, SCM_ARG1, n);
+  return transpose (c_n, move_char);
 }
-END_DEFUN
 
-DEFUN ("transpose-words", transpose_words)
-/*+
-Interchange words around point, leaving point at end of them.
-With prefix arg ARG, effect is to take word before or around point
-and drag it forward past ARG other words (backward if ARG negative).
-If ARG is zero, the words around or after point and around or after mark
-are interchanged.
-+*/
+SCM_DEFINE (G_transpose_words, "transpose-words", 0, 1, 0, (SCM n), "\
+Interchange words around point, leaving point at end of them.\n\
+With prefix arg ARG, effect is to take word before or around point\n\
+and drag it forward past ARG other words (backward if ARG negative).\n\
+If ARG is zero, the words around or after point and around or after mark\n\
+are interchanged.")
 {
-  ok = transpose (uniarg, move_word);
+  long c_n = guile_to_long_or_error (s_G_transpose_words, SCM_ARG1, n);
+  return transpose (c_n, move_word);
 }
-END_DEFUN
 
-DEFUN ("transpose-sexps", transpose_sexps)
-/*+
-Like @kbd{M-x transpose-words} but applies to sexps.
-+*/
+SCM_DEFINE (G_transpose_sexps, "transpose-sexps", 0, 1, 0, (SCM n), "\
+Like @kbd{M-x transpose-words} but applies to sexps.")
 {
-  ok = transpose (uniarg, move_sexp);
+  long c_n = guile_to_long_or_error (s_G_transpose_sexps, SCM_ARG1, n);
+  return transpose (c_n, move_sexp);
 }
-END_DEFUN
 
-DEFUN ("transpose-lines", transpose_lines)
-/*+
-Exchange current line and previous line, leaving point after both.
-With argument ARG, takes previous line and moves it past ARG lines.
-With argument 0, interchanges line point is in with line mark is in.
-+*/
+SCM_DEFINE (G_transpose_lines, "transpose-lines", 0, 1, 0, (SCM n), "\
+Exchange current line and previous line, leaving point after both.\n\
+With argument ARG, takes previous line and moves it past ARG lines.\n\
+With argument 0, interchanges line point is in with line mark is in.")
 {
-  ok = transpose (uniarg, move_line);
+  long c_n = guile_to_long_or_error (s_G_transpose_sexps, SCM_ARG1, n);
+  return transpose (c_n, move_line);
 }
-END_DEFUN
 
-
-static le *
-mark (int uniarg, Function func)
+SCM_DEFINE (G_mark_word, "mark-word", 0, 1, 0, (SCM n), "\
+Set mark argument words away from point.")
 {
-  le * ret;
-  FUNCALL (set_mark_command);
-  ret = func (uniarg, true, NULL);
-  if (ret)
-    FUNCALL (exchange_point_and_mark);
-  return ret;
+  SCM ok;
+  G_set_mark_command ();
+  ok = G_forward_word (n);
+  if (scm_is_true (ok))
+    G_exchange_point_and_mark ();
+  return ok;
 }
 
-DEFUN ("mark-word", mark_word)
-/*+
-Set mark argument words away from point.
-+*/
+SCM_DEFINE (G_mark_sexp, "mark-sexp", 0, 1, 0, (SCM n), "\
+Set mark @i{arg} sexps from point.\n\
+The place mark goes is the same place @kbd{C-M-f} would\n\
+move to with the same argument.")
 {
-  ok = mark (uniarg, F_forward_word);
-}
-END_DEFUN
+  SCM ok;
+  G_set_mark_command ();
+  ok = G_forward_sexp (n);
 
-DEFUN ("mark-sexp", mark_sexp)
-/*+
-Set mark @i{arg} sexps from point.
-The place mark goes is the same place @kbd{C-M-f} would
-move to with the same argument.
-+*/
+  if (scm_is_true (ok))
+    G_exchange_point_and_mark ();
+  return ok;
+}
+
+SCM_DEFINE (G_forward_line, "forward-line", 0, 1, 0, (SCM gn), "\
+Move N lines forward (backward if N is negative).\n\
+Precisely, if point is on line I, move to the start of line I + N.")
 {
-  ok = mark (uniarg, F_forward_sexp);
+  long n = guile_to_long_or_error ("forward-line", SCM_ARG1, gn);
+  G_beginning_of_line ();
+  return scm_from_bool (move_line (n));
 }
-END_DEFUN
 
-DEFUN_ARGS ("forward-line", forward_line,
-            INT_OR_UNIARG (n))
-/*+
-Move N lines forward (backward if N is negative).
-Precisely, if point is on line I, move to the start of line I + N.
-+*/
-{
-  INT_OR_UNIARG_INIT (n);
-  if (ok == leT)
-    {
-      FUNCALL (beginning_of_line);
-      ok = bool_to_lisp (move_line (n));
-    }
-}
-END_DEFUN
-
-static le *
+static SCM
 move_paragraph (int uniarg, bool (*forward) (void), bool (*backward) (void),
-                     Function line_extremum)
+                     SCM (*line_extremum)())
 {
   if (uniarg < 0)
     {
@@ -788,80 +728,73 @@ move_paragraph (int uniarg, bool (*forward) (void), bool (*backward) (void),
     }
 
   if (is_empty_line ())
-    FUNCALL (beginning_of_line);
+    G_beginning_of_line ();
   else
-    line_extremum (1, false, NULL);
+    line_extremum ();
 
-  return leT;
+  return SCM_BOOL_T;
 }
 
-DEFUN ("backward-paragraph", backward_paragraph)
-/*+
-Move backward to start of paragraph.  With argument N, do it N times.
-+*/
+SCM_DEFINE (G_backward_paragraph, "backward-paragraph", 0, 1, 0, (SCM n), "\
+Move backward to start of paragraph.  With argument N, do it N times.")
 {
-  ok = move_paragraph (uniarg, previous_line, next_line, F_beginning_of_line);
+  long uniarg = guile_to_long_or_error ("backward-paragraph", SCM_ARG1, n);
+  return move_paragraph (uniarg, previous_line, next_line, G_beginning_of_line);
 }
-END_DEFUN
 
-DEFUN ("forward-paragraph", forward_paragraph)
-/*+
-Move forward to end of paragraph.  With argument N, do it N times.
-+*/
+SCM_DEFINE (G_forward_paragraph, "forward-paragraph", 0, 1, 0, (SCM n), "\
+Move forward to end of paragraph.  With argument N, do it N times.")
 {
-  ok = move_paragraph (uniarg, next_line, previous_line, F_end_of_line);
+  long uniarg = guile_to_long_or_error ("forward-paragraph", SCM_ARG1, n);
+  return move_paragraph (uniarg, next_line, previous_line, G_end_of_line);
 }
-END_DEFUN
 
-DEFUN ("mark-paragraph", mark_paragraph)
-/*+
-Put point at beginning of this paragraph, mark at end.
-The paragraph marked is the one that contains point or follows point.
-+*/
+SCM_DEFINE (G_mark_paragraph, "mark-paragraph", 0, 1, 0, (SCM n), "\
+Put point at beginning of this paragraph, mark at end.\n\
+The paragraph marked is the one that contains point or follows point.")
 {
-  if (last_command () == F_mark_paragraph)
+  if (scm_is_eq (last_command (), F_mark_paragraph ()))
     {
-      FUNCALL (exchange_point_and_mark);
-      FUNCALL_ARG (forward_paragraph, uniarg);
-      FUNCALL (exchange_point_and_mark);
+      G_exchange_point_and_mark ();
+      G_forward_paragraph (n);
+      G_exchange_point_and_mark ();
     }
   else
     {
-      FUNCALL_ARG (forward_paragraph, uniarg);
-      FUNCALL (set_mark_command);
-      FUNCALL_ARG (backward_paragraph, uniarg);
+      G_forward_paragraph (n);
+      G_set_mark_command ();
+      G_backward_paragraph(n);
     }
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("fill-paragraph", fill_paragraph)
-/*+
-Fill paragraph at or after point.
-+*/
+SCM_DEFINE (G_fill_paragraph, "fill-paragraph", 0, 0, 0, (void), "\
+Fill paragraph at or after point.")
 {
   Marker *m = point_marker ();
+  long fill_column;
 
   undo_start_sequence ();
 
-  FUNCALL (forward_paragraph);
+  G_forward_paragraph (scm_from_int (1));
   if (is_empty_line ())
     previous_line ();
   Marker *m_end = point_marker ();
 
-  FUNCALL (backward_paragraph);
+  G_backward_paragraph (scm_from_int (1));
   if (is_empty_line ())
     /* Move to next line if between two paragraphs. */
     next_line ();
 
   while (buffer_end_of_line (cur_bp, get_buffer_pt (cur_bp)) < get_marker_o (m_end))
     {
-      FUNCALL (end_of_line);
+      G_end_of_line ();
       delete_char ();
-      FUNCALL (just_one_space);
+      G_just_one_space ();
     }
   unchain_marker (m_end);
 
-  FUNCALL (end_of_line);
+  G_end_of_line ();
   while (get_goalc () > (size_t) get_variable_number ("fill-column") + 1
          && fill_break_line ())
     ;
@@ -870,9 +803,8 @@ Fill paragraph at or after point.
   unchain_marker (m);
 
   undo_end_sequence ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
-
 static bool
 setcase_word (int rcase)
 {
@@ -905,16 +837,12 @@ setcase_word_lowercase (void)
   return setcase_word (case_lower);
 }
 
-DEFUN_ARGS ("downcase-word", downcase_word,
-            INT_OR_UNIARG (arg))
-/*+
-Convert following word (or @i{arg} words) to lower case, moving over.
-+*/
+SCM_DEFINE (G_downcase_word, "downcase-word", 0, 1, 0, (SCM n), "\
+Convert following word (or @i{arg} words) to lower case, moving over.")
 {
-  INT_OR_UNIARG_INIT (arg);
-  ok = execute_with_uniarg (true, arg, setcase_word_lowercase, NULL);
+  long arg = guile_to_long_or_error (s_G_downcase_word, SCM_ARG1, n);
+  return execute_with_uniarg (true, arg, setcase_word_lowercase, NULL);
 }
-END_DEFUN
 
 static bool
 setcase_word_uppercase (void)
@@ -922,16 +850,12 @@ setcase_word_uppercase (void)
   return setcase_word (case_upper);
 }
 
-DEFUN_ARGS ("upcase-word", upcase_word,
-            INT_OR_UNIARG (arg))
-/*+
-Convert following word (or @i{arg} words) to upper case, moving over.
-+*/
+SCM_DEFINE (G_upcase_word, "upcase-word", 0, 1, 0, (SCM n), "\
+Convert following word (or @i{arg} words) to upper case, moving over.")
 {
-  INT_OR_UNIARG_INIT (arg);
-  ok = execute_with_uniarg (true, arg, setcase_word_uppercase, NULL);
+  long arg = guile_to_long_or_error (s_G_upcase_word, SCM_ARG1, n);
+  return execute_with_uniarg (true, arg, setcase_word_uppercase, NULL);
 }
-END_DEFUN
 
 static bool
 setcase_word_capitalize (void)
@@ -939,27 +863,23 @@ setcase_word_capitalize (void)
   return setcase_word (case_capitalized);
 }
 
-DEFUN_ARGS ("capitalize-word", capitalize_word,
-            INT_OR_UNIARG (arg))
-/*+
-Capitalize the following word (or @i{arg} words), moving over.
-This gives the word(s) a first character in upper case
-and the rest lower case.
-+*/
+SCM_DEFINE (G_capitalize_word, "capitalize-word", 0, 1, 0, (SCM n), "\
+Capitalize the following word (or @i{arg} words), moving over.\n\
+This gives the word(s) a first character in upper case\n\
+and the rest lower case.")
 {
-  INT_OR_UNIARG_INIT (arg);
-  ok = execute_with_uniarg (true, arg, setcase_word_capitalize, NULL);
+  long arg = guile_to_long_or_error (s_G_capitalize_word, SCM_ARG1, n);
+  return execute_with_uniarg (true, arg, setcase_word_capitalize, NULL);
 }
-END_DEFUN
 
 /*
  * Set the region case.
  */
-static le *
+static SCM
 setcase_region (int (*func) (int))
 {
   if (warn_if_readonly_buffer () || warn_if_no_mark ())
-    return leNIL;
+    return SCM_BOOL_F;
 
   Region r = calculate_the_region ();
   undo_start_sequence ();
@@ -977,26 +897,20 @@ setcase_region (int (*func) (int))
 
   undo_end_sequence ();
 
-  return leT;
+  return SCM_BOOL_T;
 }
 
-DEFUN ("upcase-region", upcase_region)
-/*+
-Convert the region to upper case.
-+*/
+SCM_DEFINE (G_upcase_region, "upcase-region", 0, 0, 0, (void), "\
+Convert the region to upper case.")
 {
-  ok = setcase_region (toupper);
+  return setcase_region (toupper);
 }
-END_DEFUN
 
-DEFUN ("downcase-region", downcase_region)
-/*+
-Convert the region to lower case.
-+*/
+SCM_DEFINE (G_downcase_region, "downcase-region", 0, 0, 0, (void), "\
+Convert the region to lower case.")
 {
-  ok = setcase_region (tolower);
+  return setcase_region (tolower);
 }
-END_DEFUN
 
 static void
 write_shell_output (va_list ap)
@@ -1037,7 +951,7 @@ done_read (void *data, size_t n, void *priv)
   astr_cat_nstr (((pipe_data *) priv)->out, (const char *)data, n);
 }
 
-static le *
+static SCM
 pipe_command (castr cmd, astr input, bool do_insert, bool do_replace)
 {
   const char *prog_argv[] = { "/bin/sh", "-c", astr_cstr (cmd), NULL };
@@ -1045,7 +959,7 @@ pipe_command (castr cmd, astr input, bool do_insert, bool do_replace)
   if (pipe_filter_ii_execute (PACKAGE_NAME, "/bin/sh", prog_argv, true, false,
                               prepare_write, done_write, prepare_read, done_read,
                               &inout) != 0)
-    return leNIL;
+    return SCM_BOOL_F;
 
   char *eol = strchr (astr_cstr (inout.out), '\n');
 
@@ -1075,7 +989,7 @@ pipe_command (castr cmd, astr input, bool do_insert, bool do_replace)
         }
     }
 
-  return leT;
+  return SCM_BOOL_T;
 }
 
 static castr
@@ -1085,7 +999,7 @@ minibuf_read_shell_command (void)
 
   if (ms == NULL)
     {
-      FUNCALL (keyboard_quit);
+      G_keyboard_quit ();
       return NULL;
     }
   if (astr_len (ms) == 0)
@@ -1094,92 +1008,98 @@ minibuf_read_shell_command (void)
   return ms;
 }
 
-DEFUN_ARGS ("shell-command", shell_command,
-            STR_ARG (cmd)
-            BOOL_ARG (insert))
-/*+
-Execute string @i{command} in inferior shell; display output, if any.
-With prefix argument, insert the command's output at point.
-
-Command is executed synchronously.  The output appears in the buffer
-`*Shell Command Output*'.  If the output is short enough to display
-in the echo area, it is shown there, but it is nonetheless available
-in buffer `*Shell Command Output*' even though that buffer is not
-automatically displayed.
-
-The optional second argument @i{output-buffer}, if non-nil,
-says to insert the output in the current buffer.
-+*/
+SCM_DEFINE (G_shell_command, "shell-command", 0, 2, 0,
+	    (SCM gcmd, SCM ginsert), "\
+Execute string @i{command} in inferior shell; display output, if any.\n\
+With prefix argument, insert the command's output at point.\n\
+\n\
+Command is executed synchronously.  The output appears in the buffer\n\
+`*Shell Command Output*'.  If the output is short enough to display\n\
+in the echo area, it is shown there, but it is nonetheless available\n\
+in buffer `*Shell Command Output*' even though that buffer is not\n\
+automatically displayed.\n\
+\n\
+The optional second argument @i{output-buffer}, if non-nil,\n\
+says to insert the output in the current buffer.")
 {
-  STR_INIT (cmd)
-  else
+  char *str;
+  astr cmd = NULL;
+  bool insert;
+
+  // FIXME: need interactive logic
+  str = guile_to_locale_string_safe (gcmd);
+  if (str != NULL)
+    cmd = astr_new_cstr (str);
+  if (cmd == NULL)
     cmd = minibuf_read_shell_command ();
-  BOOL_INIT (insert)
-  else
+  if (SCM_UNBNDP (ginsert))
     insert = lastflag & FLAG_SET_UNIARG;
+  else
+    insert = scm_to_bool (ginsert);
 
   if (cmd != NULL)
-    ok = pipe_command (cmd, astr_new (), insert, false);
+    return pipe_command (cmd, astr_new (), insert, false);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-/* The `start' and `end' arguments are fake, hence their string type,
-   so they can be ignored. */
-DEFUN_ARGS ("shell-command-on-region", shell_command_on_region,
-            STR_ARG (start)
-            STR_ARG (end)
-            STR_ARG (cmd)
-            BOOL_ARG (insert))
-/*+
-Execute string command in inferior shell with region as input.
-Normally display output (if any) in temp buffer `*Shell Command Output*';
-Prefix arg means replace the region with it.  Return the exit code of
-command.
 
-If the command generates output, the output may be displayed
-in the echo area or in a buffer.
-If the output is short enough to display in the echo area, it is shown
-there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.
-The output is available in that buffer in both cases.
-+*/
+SCM_DEFINE (G_shell_command_on_region, "shell-command-on-region",
+	    0, 2, 0, (SCM gcmd, SCM ginsert), "\
+Execute string command in inferior shell with region as input.\n\
+Normally display output (if any) in temp buffer `*Shell Command Output*';\n\
+Prefix arg means replace the region with it.  Return the exit code of\n\
+command.\n\
+\n\
+If the command generates output, the output may be displayed\n\
+in the echo area or in a buffer.\n\
+If the output is short enough to display in the echo area, it is shown\n\
+there.  Otherwise it is displayed in the buffer `*Shell Command Output*'.\n\
+The output is available in that buffer in both cases.")
 {
-  STR_INIT (start);
-  STR_INIT (end);
-  STR_INIT (cmd)
-  else
+  char *str;
+  astr cmd = NULL;
+  SCM ok = SCM_BOOL_T;
+  bool insert;
+
+  // FIXME: need interactive logic here
+  if (SCM_UNBNDP (gcmd))
     cmd = minibuf_read_shell_command ();
-  BOOL_INIT (insert)
   else
+    {
+      str = guile_to_locale_string_safe (gcmd);
+      cmd = astr_new_cstr (str);
+    }
+
+  if SCM_UNBNDP (ginsert)
     insert = lastflag & FLAG_SET_UNIARG;
+  else 
+    insert = SCM_BOOL_F;
 
   if (cmd != NULL)
     {
       if (warn_if_no_mark ())
-        ok = leNIL;
+        ok = SCM_BOOL_F;
       else
         ok = pipe_command (cmd, get_buffer_region (cur_bp, calculate_the_region ()).as, insert, true);
     }
+  return ok;
 }
-END_DEFUN
 
-DEFUN ("delete-region", delete_region)
-/*+
-Delete the text between point and mark.
-+*/
+SCM_DEFINE (G_delete_region, "delete-region", 0, 0, 0, (void), "\
+Delete the text between point and mark.")
 {
+  SCM ok = SCM_BOOL_T;
   if (warn_if_no_mark () || !delete_region (calculate_the_region ()))
-    ok = leNIL;
+    ok = SCM_BOOL_F;
   else
     deactivate_mark ();
+  return ok;
 }
-END_DEFUN
 
-DEFUN ("delete-blank-lines", delete_blank_lines)
-/*+
-On blank line, delete all surrounding blank lines, leaving just one.
-On isolated blank line, delete that one.
-On nonblank line, delete any immediately following blank lines.
-+*/
+SCM_DEFINE (G_delete_blank_lines, "delete-blank-lines", 0, 0, 0, (void), "\
+On blank line, delete all surrounding blank lines, leaving just one.\n\
+On isolated blank line, delete that one.\n\
+On nonblank line, delete any immediately following blank lines.")
 {
   Marker *m = point_marker ();
   Region r;
@@ -1188,12 +1108,12 @@ On nonblank line, delete any immediately following blank lines.
   undo_start_sequence ();
 
   /* Find following blank lines.  */
-  if (FUNCALL (forward_line) == leT && is_blank_line ())
+  if (G_forward_line (scm_from_int (1)) == SCM_BOOL_T && is_blank_line ())
     {
       r.start = get_buffer_pt (cur_bp);
       do
         r.end = buffer_next_line (cur_bp, get_buffer_pt (cur_bp));
-      while (FUNCALL (forward_line) == leT && is_blank_line ());
+      while (G_forward_line (scm_from_int (1)) == SCM_BOOL_T && is_blank_line ());
       r.end = MIN (r.end, get_buffer_size (cur_bp));
     }
   goto_offset (get_marker_o (m));
@@ -1205,7 +1125,7 @@ On nonblank line, delete any immediately following blank lines.
       r.end = MAX (r.end, buffer_next_line (cur_bp, get_buffer_pt (cur_bp)));
       do
         r.start = get_buffer_line_o (cur_bp);
-      while (FUNCALL_ARG (forward_line, -1) == leT && is_blank_line ());
+      while (G_forward_line (scm_from_int (-1)) == SCM_BOOL_T && is_blank_line ());
       goto_offset (get_marker_o (m));
       if (r.start != get_buffer_line_o (cur_bp) ||
           r.end > buffer_next_line (cur_bp, get_buffer_pt (cur_bp)))
@@ -1235,5 +1155,49 @@ On nonblank line, delete any immediately following blank lines.
 
   unchain_marker (m);
   deactivate_mark ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
+
+
+void
+init_guile_funcs_procedures (void)
+{
+#include "funcs.x"
+  scm_c_export ("suspend-emacs",
+		"keyboard-quit",
+		"list-buffers",
+		"toggle-read-only",
+		"set-fill-column",
+		"set-mark",
+		"set-mark-command",
+		"exchange-point-and-mark",
+		"mark-whole-buffer",
+		"quoted-insert",
+		"universal-argument",
+		"back-to-indentation",
+		"forward-word",
+		"backward-word",
+		"forward-sexp",
+		"backward-sexp",
+		"transpose-chars",
+		"transpose-words",
+		"transpose-sexps",
+		"transpose-lines",
+		"mark-word",
+		"mark-sexp",
+		"forward-line",
+		"backward-paragraph",
+		"forward-paragraph",
+		"mark-paragraph",
+		"fill-paragraph",
+		"downcase-word",
+		"upcase-word",
+		"capitalize-word",
+		"upcase-region",
+		"downcase-region",
+		"shell-command",
+		"shell-command-on-region",
+		"delete-region",
+		"delete-blank-lines",
+		0);
+}

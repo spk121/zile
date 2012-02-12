@@ -1,8 +1,9 @@
 /* Buffer-oriented functions
 
-   Copyright (c) 1997-2006, 2008-2012 Free Software Foundation, Inc.
+   Copyright (c) 1997-2006, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2011, 2012 Michael L Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,10 @@
 #include <config.h>
 
 #include <assert.h>
+#include <ctype.h>
+#include <libguile.h>
+#include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -133,7 +138,7 @@ buffer_line_len (Buffer *bp, size_t o)
 }
 
 /*
- * Replace `del' chars after point with `es'.
+ * Replace `oldlen' chars after point with `newlen' chars from `newtext'.
  */
 #define MIN_GAP 1024 /* Minimum gap size after resize. */
 #define MAX_GAP 4096 /* Maximum permitted gap size. */
@@ -551,7 +556,7 @@ deactivate_mark (void)
 size_t
 tab_width (Buffer * bp)
 {
-  return MAX (get_variable_number_bp (bp, "tab-width"), 1);
+  return MAX (get_variable_number ("tab-width"), 1);
 }
 
 Buffer *
@@ -623,23 +628,28 @@ kill_buffer (Buffer * kill_bp)
       resync_redisplay (wp);
 }
 
-DEFUN_ARGS ("kill-buffer", kill_buffer,
-            STR_ARG (buf))
-/*+
-Kill buffer BUFFER.
-With a nil argument, kill the current buffer.
-+*/
+SCM_DEFINE (G_kill_buffer, "kill-buffer", 0, 1, 0, (SCM gbuf), "\
+Kill buffer BUFFER.\n\
+With a nil argument, kill the current buffer.")
 {
+  SCM ok = SCM_BOOL_T;
+  astr buf;
   Buffer *bp;
 
-  STR_INIT (buf)
+  if (!interactive && SCM_UNBNDP (gbuf))
+    buf = astr_new_cstr (get_buffer_name (cur_bp));
+  else if (!interactive && !scm_is_string (gbuf))
+    guile_wrong_type_argument_error ("kill-buffer",
+				     SCM_ARG1, gbuf, "string");
+  else if (interactive && scm_is_string (gbuf))
+    buf = astr_new_cstr (scm_to_locale_string (gbuf));
   else
     {
       Completion *cp = make_buffer_completion ();
       buf = minibuf_read_completion ("Kill buffer (default %s): ",
                                      "", cp, NULL, get_buffer_name (cur_bp));
       if (buf == NULL)
-        ok = FUNCALL (keyboard_quit);
+        ok = G_keyboard_quit ();
     }
 
   if (buf && astr_len (buf) > 0)
@@ -647,22 +657,25 @@ With a nil argument, kill the current buffer.
       bp = find_buffer (astr_cstr (buf));
       if (bp == NULL)
         {
-          minibuf_error ("Buffer `%s' not found", astr_cstr (buf));
-          ok = leNIL;
+	  char *msg;
+	  asprintf (&msg, "Buffer `%s' not found", astr_cstr (buf));
+          guile_error ("kill-buffer", msg);
+          ok = SCM_BOOL_F;
         }
     }
   else
     bp = cur_bp;
 
-  if (ok == leT)
+  if (ok == SCM_BOOL_T)
     {
       if (!check_modified_buffer (bp))
-        ok = leNIL;
+        ok = SCM_BOOL_F;
       else
         kill_buffer (bp);
     }
+  return ok;
 }
-END_DEFUN
+
 
 Completion *
 make_buffer_completion (void)
@@ -690,7 +703,7 @@ check_modified_buffer (Buffer * bp)
           ("Buffer %s modified; kill anyway? (yes or no) ", get_buffer_name (bp));
         if (ans == -1)
           {
-            FUNCALL (keyboard_quit);
+            G_keyboard_quit ();
             return false;
           }
         else if (!ans)
@@ -717,9 +730,9 @@ move_char (int offset)
           thisflag |= FLAG_NEED_RESYNC;
           set_buffer_pt (cur_bp, cur_bp->pt + dir * strlen (get_buffer_eol (cur_bp)));
           if (dir > 0)
-            FUNCALL (beginning_of_line);
+            G_beginning_of_line ();
           else
-            FUNCALL (end_of_line);
+            G_end_of_line ();
         }
       else
         return false;
@@ -760,7 +773,8 @@ move_line (int n)
       func = buffer_prev_line;
     }
 
-  if (last_command () != F_next_line && last_command () != F_previous_line)
+  if (!scm_is_eq(last_command (),  F_next_line ()) 
+      && !scm_is_eq(last_command (), F_previous_line ()))
     set_buffer_goalc (cur_bp, get_goalc ());
 
   for (; n > 0; n--)
@@ -796,4 +810,13 @@ goto_offset (size_t o)
       set_buffer_goalc (cur_bp, get_goalc ());
       thisflag |= FLAG_NEED_RESYNC;
     }
+}
+
+
+void
+init_guile_buffer_procedures (void)
+{
+
+#include "buffer.x"
+  scm_c_export ("kill-buffer", 0);
 }

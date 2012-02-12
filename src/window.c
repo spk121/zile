@@ -1,8 +1,9 @@
 /* Window handling functions
 
    Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <assert.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,18 +73,16 @@ set_current_window (Window * wp)
     }
 }
 
-DEFUN ("split-window", split_window)
-/*+
-Split current window into two windows, one above the other.
-Both windows display the same buffer now current.
-+*/
+SCM_DEFINE (G_split_window, "split-window", 0, 0, 0, (void), "\
+Split current window into two windows, one above the other.\n\
+Both windows display the same buffer now current.")
 {
   /* Windows smaller than 4 lines cannot be split. */
   if (cur_wp->fheight < 4)
     {
       minibuf_error ("Window height %d too small (after splitting)",
                      cur_wp->fheight);
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   Window *newwp = (Window *) XZALLOC (Window);
@@ -96,8 +96,8 @@ Both windows display the same buffer now current.
   cur_wp->eheight = cur_wp->fheight - 1;
   if (cur_wp->topdelta >= cur_wp->eheight)
     recenter (cur_wp);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 void
 delete_window (Window * del_wp)
@@ -125,29 +125,26 @@ delete_window (Window * del_wp)
     unchain_marker (del_wp->saved_pt);
 }
 
-DEFUN ("delete-window", delete_window)
-/*+
-Remove the current window from the screen.
-+*/
+SCM_DEFINE (G_delete_window, "delete-window", 0, 0, 0, (void), "\
+Remove the current window from the screen.")
 {
   if (cur_wp == head_wp && cur_wp->next == NULL)
     {
       minibuf_error ("Attempt to delete sole ordinary window");
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   delete_window (cur_wp);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("enlarge-window", enlarge_window)
-/*+
-Make current window one line bigger.
-+*/
+
+SCM_DEFINE (G_enlarge_window,"enlarge-window", 0, 0, 0, (void), "\
+Make current window one line bigger.")
 {
   if (cur_wp == head_wp && (cur_wp->next == NULL ||
                             cur_wp->next->fheight < 3))
-    return leNIL;
+    return SCM_BOOL_F;
 
   Window *wp = cur_wp->next;
   if (wp == NULL || wp->fheight < 3)
@@ -155,7 +152,7 @@ Make current window one line bigger.
       if (wp->next == cur_wp)
         {
           if (wp->fheight < 3)
-            return leNIL;
+            return SCM_BOOL_F;
           break;
         }
 
@@ -165,17 +162,16 @@ Make current window one line bigger.
     recenter (wp);
   ++cur_wp->fheight;
   ++cur_wp->eheight;
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("shrink-window", shrink_window)
-/*+
-Make current window one line smaller.
-+*/
+
+SCM_DEFINE (G_shrink_window, "shrink-window", 0, 0, 0, (void), "\
+Make current window one line smaller.")
 {
 
   if ((cur_wp == head_wp && cur_wp->next == NULL) || cur_wp->fheight < 3)
-    return leNIL;
+    return SCM_BOOL_F;
 
   Window *wp = cur_wp->next;
   if (wp == NULL)
@@ -189,8 +185,8 @@ Make current window one line smaller.
   --cur_wp->eheight;
   if (cur_wp->topdelta >= cur_wp->eheight)
     recenter (cur_wp);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 Window *
 popup_window (void)
@@ -198,7 +194,7 @@ popup_window (void)
   if (head_wp && head_wp->next == NULL)
     {
       /* There is only one window on the screen, so split it. */
-      FUNCALL (split_window);
+      G_split_window ();
       return cur_wp->next;
     }
 
@@ -206,10 +202,8 @@ popup_window (void)
   return cur_wp->next ? cur_wp->next : head_wp;
 }
 
-DEFUN ("delete-other-windows", delete_other_windows)
-/*+
-Make the selected window fill the screen.
-+*/
+SCM_DEFINE (G_delete_other_windows, "delete-other-windows", 0, 0, 0, (void), "\
+Make the selected window fill the screen.")
 {
   for (Window *wp = head_wp, *nextwp; wp != NULL; wp = nextwp)
     {
@@ -217,19 +211,17 @@ Make the selected window fill the screen.
       if (wp != cur_wp)
         delete_window (wp);
     }
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("other-window", other_window)
-/*+
-Select the first different window on the screen.
-All windows are arranged in a cyclic order.
-This command selects the window one step away in that order.
-+*/
+SCM_DEFINE (G_other_window, "other-window", 0, 0, 0, (void), "\
+Select the first different window on the screen.\n\
+All windows are arranged in a cyclic order.\n\
+This command selects the window one step away in that order.")
 {
   set_current_window ((cur_wp->next != NULL) ? cur_wp->next : head_wp);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 /*
  * This function creates the scratch buffer and window when there are
@@ -292,4 +284,17 @@ bool
 window_bottom_visible (Window * wp)
 {
   return get_window_all_displayed (wp);
+}
+
+void
+init_guile_window_procedures (void)
+{
+#include "window.x"
+  scm_c_export ("split-window",
+		"delete-window",
+		"enlarge-window",
+		"shrink-window",
+		"delete-other-windows",
+		"other-window",
+		NULL);
 }

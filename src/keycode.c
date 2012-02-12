@@ -311,3 +311,8 @@ keyvectodesc (gl_list_t keys)
 
   return as;
 }
+
+void
+init_guile_keycode_procedures ()
+{
+}

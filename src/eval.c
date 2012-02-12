@@ -1,8 +1,9 @@
 /* Lisp eval
 
    Copyright (c) 2001, 2005-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <assert.h>
+#include <libguile.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -29,164 +31,76 @@
 #include "extern.h"
 
 
-/*
- * Zile Lisp functions.
- */
-
-struct fentry
-{
-  const char *name;		/* The function name. */
-  Function func;		/* The function pointer. */
-  bool interactive;             /* Whether function can be used interactively. */
-  const char *doc;		/* Documentation string. */
-};
-typedef struct fentry fentry;
-
-static fentry fentry_table[] = {
-#define X(zile_name, c_name, interactive, doc)   \
-  {zile_name, F_ ## c_name, interactive, doc},
-#include "tbl_funcs.h"
-#undef X
-};
-
-#define fentry_table_size (sizeof (fentry_table) / sizeof (fentry_table[0]))
-
-static fentry *
-get_fentry (const char *name)
-{
-  assert (name);
-  for (size_t i = 0; i < fentry_table_size; ++i)
-    if (STREQ (name, fentry_table[i].name))
-      return &fentry_table[i];
-  return NULL;
-}
-
-Function
-get_function (const char *name)
-{
-  fentry * f = get_fentry (name);
-  return f ? f->func : NULL;
-}
+static History *functions_history = NULL;
 
 /* Return function's interactive flag, or -1 if not found. */
+/* In the Guile port, all functions are interactive, for now. */
+#if 0
+SCM
+get_function (SCM sym)
+{
+  if (!guile_symbol_is_name_of_defined_function (sym))
+    return SCM_BOOL_F;
+
+  return sym;
+}
+
+/* For us, all functions are interactive if they have no required
+   arguments. */
 int
-get_function_interactive (const char *name)
+get_function_interactive (SCM sym)
 {
-  fentry * f = get_fentry (name);
-  return f ? f->interactive : -1;
+  if (!guile_symbol_is_name_of_defined_function (sym))
+    return 0;
+
+  SCM proc = guile_variable_ref_safe (guile_lookup_safe (sym));
+  int required, optional;
+  guile_get_procedure_arity (proc, &required, &optional);
+
+  return required == 0;
 }
 
+#define MAX_DOCUMENTATION_LENGTH (80*24)
 const char *
-get_function_doc (const char *name)
+get_function_doc (SCM sym)
 {
-  fentry * f = get_fentry (name);
-  return f ? f->doc : NULL;
-}
+  int len;
+  static char buf[MAX_DOCUMENTATION_LENGTH];
+  SCM func = guile_lookup_safe (sym);
 
-const char *
-get_function_name (Function p)
-{
-  for (size_t i = 0; i < fentry_table_size; ++i)
-    if (fentry_table[i].func == p)
-      return fentry_table[i].name;
-  return NULL;
-}
-
-
-le *leNIL, *leT;
-
-size_t
-countNodes (le * branch)
-{
-  int count;
-  for (count = 0; branch; branch = branch->next, count++)
-    ;
-  return count;
-}
-
-static le *
-evaluateBranch (le * trybranch)
-{
-  le *keyword;
-  fentry * func;
-
-  if (trybranch == NULL)
+  if (!scm_is_true (func))
     return NULL;
 
-  if (trybranch->branch)
-    keyword = evaluateBranch (trybranch->branch);
-  else
-    keyword = leNew (trybranch->data);
+  SCM doc = guile_procedure_documentation_safe (func);
+  if (!scm_is_true (doc))
+    return NULL;
 
-  if (keyword->data == NULL)
-    return leNIL;
+  len = scm_to_locale_stringbuf (doc, buf, MAX_DOCUMENTATION_LENGTH - 1);
+  if (len >= MAX_DOCUMENTATION_LENGTH -1)
+    return NULL;
+  
+  buf[len] = '\0';
+  return buf;
+}
 
-  func = get_fentry (keyword->data);
-  if (func)
-    return call_command (func->func, 1, false, trybranch);
+const char *
+get_function_name (SCM p)
+{
+  const int maxlen = 256;
+  int len;
+  static buf[maxlen];
+  len = scm_to_locale_stringbuf (scm_symbol_to_string (p), buf, maxlen-1);
+  if (len < maxlen - 1)
+  {
+    buf[len] = '\0';
+    return buf;
+  }
 
   return NULL;
 }
+#endif
 
-static le *
-evaluateNode (le * node)
-{
-  le *value;
-
-  if (node == NULL)
-    return leNIL;
-
-  if (node->branch != NULL)
-    {
-      if (node->quoted)
-        value = leDup (node->branch);
-      else
-        value = evaluateBranch (node->branch);
-    }
-  else
-    {
-      const char *s = get_variable (node->data);
-      value = leNew (s ? s : node->data);
-    }
-
-  return value;
-}
-
-DEFUN_NONINTERACTIVE ("setq", setq)
-/*+
-(setq [sym val]...)
-
-Set each sym to the value of its val.
-The symbols sym are variables; they are literal (not evaluated).
-The values val are expressions; they are evaluated.
-+*/
-{
-  le *newvalue = leNIL;
-
-  if (arglist != NULL && countNodes (arglist) >= 2)
-    {
-      for (le *current = arglist->next; current;
-           current = current->next->next)
-        {
-          newvalue = evaluateNode (current->next);
-          set_variable (current->data, newvalue->data);
-          if (current->next == NULL)
-            break; /* Cope with odd-length argument lists. */
-        }
-    }
-
-  ok = newvalue;
-}
-END_DEFUN
-
-void
-leEval (le * list)
-{
-  for (; list; list = list->next)
-    evaluateBranch (list->branch);
-}
-
-le *
+SCM
 execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backward) (void))
 {
   if (backward && uniarg < 0)
@@ -202,63 +116,71 @@ execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void), bool (*backw
   if (undo)
     undo_end_sequence ();
 
-  return bool_to_lisp (ret);
+  return scm_from_bool (ret);
 }
 
-le *
+SCM
 move_with_uniarg (int uniarg, bool (*move) (int dir))
 {
   bool ret = true;
   for (unsigned long uni = 0; ret && uni < (unsigned) abs (uniarg); ++uni)
     ret = move (uniarg < 0 ? - 1 : 1);
-  return bool_to_lisp (ret);
+  return scm_from_bool (ret);
 }
 
-le *
-execute_function (const char *name, int uniarg, bool is_uniarg)
+SCM_DEFINE (G_execute_extended_command, "execute-extended-command",
+	    0, 0, 0, (void), "\
+Read function name, then read its arguments and call it.")
 {
-  Function func = get_function (name);
-  return func ? call_command (func, uniarg, is_uniarg, NULL) : NULL;
-}
-
-DEFUN ("execute-extended-command", execute_extended_command)
-/*+
-Read function name, then read its arguments and call it.
-+*/
-{
+  SCM sym;
   astr msg = astr_new ();
 
-  if (lastflag & FLAG_SET_UNIARG)
-    {
-      if (lastflag & FLAG_UNIARG_EMPTY)
-        msg = astr_fmt ("C-u ");
-      else
-        msg = astr_fmt ("%d ", uniarg);
-    }
+  if (!interactive)
+    guile_error ("execute-extended-command",
+		 "this command cannot be used from the REPL");
+
+  /* FIXME: uniarg repeating could be implemented */
   astr_cat_cstr (msg, "M-x ");
 
   castr name = minibuf_read_function_name (astr_cstr (msg));
   if (name == NULL)
-    return false;
+    return SCM_BOOL_F;
+  
+  sym = scm_from_locale_symbol (astr_cstr (name));
+  if (!guile_symbol_is_name_of_defined_function (sym))
+    return SCM_BOOL_F;
 
-  ok = bool_to_lisp (execute_function (astr_cstr (name), uniarg, lastflag & FLAG_SET_UNIARG) == leT);
+  return call_command (guile_variable_ref_safe (guile_lookup_safe (sym)),
+		       1, false);
 }
-END_DEFUN
 
 /*
  * Read a function name from the minibuffer.
  */
-static History *functions_history = NULL;
 castr
 minibuf_read_function_name (const char *fmt, ...)
 {
   va_list ap;
   Completion *cp = completion_new (false);
+  SCM completion_func;
 
-  for (size_t i = 0; i < fentry_table_size; ++i)
-    if (fentry_table[i].interactive)
-      gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
-                         xstrdup (fentry_table[i].name));
+  completion_func = F_procedure_completions();
+  if (scm_is_true (completion_func))
+    {
+      SCM guile_completion_list = scm_call_0 (completion_func);
+      size_t len = scm_to_size_t (scm_length (guile_completion_list));
+      for (size_t i = 0; i < len; ++i)
+	{
+	  SCM entry = scm_list_ref (guile_completion_list, scm_from_size_t (i));
+	  char *name = scm_to_locale_string (scm_symbol_to_string (entry));
+	  gl_sortedlist_add (get_completion_completions (cp),
+			     completion_strcmp,
+			     name);
+	}
+    }
+  else
+    gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
+		      xstrdup(""));
 
   va_start (ap, fmt);
   castr ms = minibuf_vread_completion (fmt, "", cp, functions_history,
@@ -274,4 +196,11 @@ void
 init_eval (void)
 {
   functions_history = history_new ();
+}
+
+void
+init_guile_eval_procedures (void)
+{
+#include "eval.x"
+  scm_c_export ("execute-extended-command", 0);
 }

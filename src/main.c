@@ -1,8 +1,9 @@
 /* Program invocation, startup and shutdown
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <limits.h>
+#include <libguile.h>
 #include <locale.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -37,7 +39,8 @@
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 2011 Free Software Foundation, Inc."
+  "Copyright (C) 2012 Free Software Foundation, Inc.\n\
+Copyright (C) 2012 Michael L Gran"
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -48,6 +51,9 @@ Buffer *cur_bp = NULL, *head_bp = NULL;
 int thisflag = 0, lastflag = 0;
 /* The universal argument repeat count. */
 int last_uniarg = 1;
+
+/* True when we're not in a repl */
+bool interactive = true;
 
 static const char splash_str[] = "\
 Welcome to GNU " PACKAGE_NAME ".\n\
@@ -125,6 +131,7 @@ main (int argc, char **argv)
                                              NULL, NULL, NULL, false);
   size_t line = 1;
 
+  scm_init_guile ();
   GC_INIT ();
   set_program_name (argv[0]);
   estr_init ();
@@ -187,7 +194,7 @@ main (int argc, char **argv)
         case 3:
           printf ("Usage: %s [OPTION-OR-FILENAME]...\n"
                   "\n"
-                  "Run " PACKAGE_NAME ", the lightweight Emacs clone.\n"
+                  "Run " PACKAGE_NAME ", the lightweight Guile-using Emacs clone.\n"
                   "\n",
                   argv[0]);
 #define D(text)                                 \
@@ -255,7 +262,11 @@ main (int argc, char **argv)
     {
       astr as = get_home_dir ();
       if (as)
-        lisp_loadfile (astr_cstr (astr_cat_cstr (as, "/." PACKAGE)));
+        {
+          const char *fname = astr_cstr (astr_cat_cstr (as, "/." PACKAGE)); 
+          if (!access (fname, R_OK))
+            guile_load (fname);
+        }
     }
 
   /* Create the splash buffer & message only if no files, function or
@@ -268,7 +279,7 @@ main (int argc, char **argv)
       switch_to_buffer (bp);
       bprintf ("%s", splash_str);
       set_buffer_readonly (bp, true);
-      FUNCALL (beginning_of_buffer);
+      G_beginning_of_buffer ();
     }
 
   /* Load files and load files and run functions given on the command
@@ -282,22 +293,30 @@ main (int argc, char **argv)
         {
         case ARG_FUNCTION:
           {
-            le *res = execute_function (arg, 1, false);
-            if (res == NULL)
+	    SCM sym = scm_from_locale_symbol (arg);
+	    if (!guile_symbol_is_name_of_defined_function (sym))
               minibuf_error ("Function `%s' not defined", arg);
-            ok = res == leT;
+	    if (!guile_get_procedure_interactive_by_name (arg))
+              minibuf_error ("Function `%s' is not a procedure of zero arguments", arg);
+            SCM res = call_command (guile_variable_ref_safe (guile_lookup_safe (sym)),
+				    1, false);
+            if (res == SCM_BOOL_F)
+            ok = res == SCM_BOOL_T;
             break;
           }
         case ARG_LOADFILE:
-          ok = lisp_loadfile (arg);
-          if (!ok)
+	  if (access (arg, R_OK) != 0)
             minibuf_error ("Cannot open load file: %s\n", arg);
+	  else
+	    {
+	      guile_load (arg);
+	    }
           break;
         case ARG_FILE:
           {
             ok = find_file (arg);
             if (ok)
-              FUNCALL_ARG (goto_line, (size_t) gl_list_get_at (arg_line, i));
+             G_goto_line(scm_from_size_t (gl_list_get_at (arg_line, i)));
           }
           break;
         default:
@@ -320,12 +339,12 @@ main (int argc, char **argv)
     }
   if (c == 3)
     { /* *scratch* and two files. */
-      FUNCALL (split_window);
+      G_split_window ();
       switch_to_buffer (last_bp);
-      FUNCALL (other_window);
+      G_other_window ();
     }
   else if (c > 3) /* More than two files. */
-    FUNCALL (list_buffers);
+    G_list_buffers ();
 
   /* Reinitialise the scratch buffer to catch settings */
   init_buffer (scratch_bp);

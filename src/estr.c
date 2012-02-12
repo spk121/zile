@@ -126,7 +126,7 @@ estr_lines (estr es)
   const char *s = astr_cstr (es.as), *next;
   size_t lines = 0;
   for (size_t len = astr_len (es.as);
-       next = memmem (s, len, es.eol, es_eol_len);
+       (next = memmem (s, len, es.eol, es_eol_len));
        lines++, len -= (size_t) (next - s) + es_eol_len, s = next + es_eol_len)
     ;
   return lines;

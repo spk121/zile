@@ -25,6 +25,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <libguile.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -241,52 +242,76 @@ find_file (const char *filename)
   return true;
 }
 
-DEFUN_ARGS ("find-file", find_file,
-            STR_ARG (filename))
-/*+
-Edit file @i{filename}.
-Switch to a buffer visiting file @i{filename},
-creating one if none already exists.
-+*/
+SCM_DEFINE (G_find_file, "find-file", 0, 1, 0, (SCM filename), "\
+Edit the specified file.\n\
+Switch to a buffer visiting the file,\n\
+creating one if none already exists.")
 {
-  STR_INIT (filename)
-  else
-    {
-      filename = minibuf_read_filename ("Find file: ",
-                                        astr_cstr (get_buffer_dir (cur_bp)), NULL);
+  bool ok;
+  castr ms;
 
-      if (filename == NULL)
-        ok = FUNCALL (keyboard_quit);
+  if (!interactive && SCM_UNBNDP (filename))
+    guile_wrong_number_of_arguments_error ("find-file");
+  else if (!interactive && !scm_is_string (filename))
+    guile_wrong_type_argument_error ("find-file", SCM_ARG1, filename, "string");
+  else if (interactive && SCM_UNBNDP (filename))
+    ms = minibuf_read_filename ("Find file: ",
+				astr_cstr (get_buffer_dir (cur_bp)), NULL);
+  else
+    ms = astr_new_cstr (scm_to_locale_string (filename));
+
+  if (ms == NULL || astr_len (ms) == 0)
+    {
+      G_keyboard_quit ();
+      guile_quit_error ("find-file");
     }
 
-  if (filename == NULL || astr_len (filename) == 0)
-    ok = leNIL;
-
-  if (ok != leNIL)
-    ok = bool_to_lisp (find_file (astr_cstr (filename)));
+  ok = find_file (astr_cstr (ms));
+  if (!ok)
+    guile_error ("find-file", "cannot create buffer");
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("find-file-read-only", find_file_read_only)
-/*+
-Edit file @i{filename} but don't allow changes.
-Like `find-file' but marks buffer as read-only.
-Use @kbd{M-x toggle-read-only} to permit editing.
-+*/
+SCM_DEFINE (G_find_file_read_only, "find-file-read-only", 0, 1, 0, (SCM filename), "\
+Edit the specified file but don't allow changes.\n\
+Like `find-file' but marks buffer as read-only.\n\
+Use @kbd{M-x toggle-read-only} to permit editing.")
 {
-  ok = F_find_file (uniarg, is_uniarg, arglist);
-  if (ok == leT)
+  bool ok;
+  castr ms;
+
+  if (!interactive && SCM_UNBNDP (filename))
+    guile_wrong_number_of_arguments_error ("find-file-read-only");
+  else if (!interactive && !scm_is_string (filename))
+    guile_wrong_type_argument_error ("find-file-read-only", SCM_ARG1, filename,
+				     "string");
+  else if (interactive && SCM_UNBNDP (filename))
+    ms = minibuf_read_filename ("Find file read only: ",
+				astr_cstr (get_buffer_dir (cur_bp)), NULL);
+  else
+    ms = astr_new_cstr (scm_to_locale_string (filename));
+
+  if (ms == NULL || astr_len (ms) == 0)
+    {
+      G_keyboard_quit ();
+      guile_quit_error ("find-file-read-only");
+    }
+
+  ok = find_file (astr_cstr (ms));
+  if (!ok)
+    guile_error ("find-file-read-only", "cannot create buffer");
+  else
     set_buffer_readonly (cur_bp, true);
-}
-END_DEFUN
 
-DEFUN ("find-alternate-file", find_alternate_file)
-/*+
-Find the file specified by the user, select its buffer, kill previous buffer.
-If the current buffer now contains an empty file that you just visited
-(presumably by mistake), use this command to visit the file you really want.
-+*/
+  return SCM_BOOL_T;
+}
+
+SCM_DEFINE (G_find_alternate_file, "find-alternate-file", 0, 0, 0, (void), "\
+Find the file specified by the user, select its buffer, kill previous buffer.\n\
+If the current buffer now contains an empty file that you just visited\n\
+(presumably by mistake), use this command to visit the file you really want.")
 {
+  SCM ok = SCM_BOOL_T;
   const char *buf = get_buffer_filename (cur_bp);
   char *base = NULL;
 
@@ -296,139 +321,158 @@ If the current buffer now contains an empty file that you just visited
     base = base_name (buf);
   castr ms = minibuf_read_filename ("Find alternate: ", buf, base);
 
-  ok = leNIL;
+  ok = SCM_BOOL_F;;
   if (ms == NULL)
-    ok = FUNCALL (keyboard_quit);
+    ok = G_keyboard_quit ();
   else if (astr_len (ms) > 0 && check_modified_buffer (cur_bp))
     {
       kill_buffer (cur_bp);
-      ok = bool_to_lisp (find_file (astr_cstr (ms)));
+      ok = scm_from_bool (find_file (astr_cstr (ms)));
     }
+  return ok;
 }
-END_DEFUN
 
-DEFUN_ARGS ("switch-to-buffer", switch_to_buffer,
-            STR_ARG (buf))
-/*+
-Select buffer @i{buffer} in the current window.
-+*/
+SCM_DEFINE (G_switch_to_buffer, "switch-to-buffer", 0, 1, 0,
+	    (SCM gbuf), "\
+Select buffer @i{buffer} in the current window.")
 {
+  SCM ok = SCM_BOOL_T;  
   Buffer *bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
 
-  STR_INIT (buf)
-  else
+  // FIXME: need interactive logic here
+  char *buf = guile_to_locale_string_safe (gbuf);
+  castr cbuf = NULL;
+  if (buf == NULL)
     {
       Completion *cp = make_buffer_completion ();
-      buf = minibuf_read_completion ("Switch to buffer (default %s): ",
+      cbuf = minibuf_read_completion ("Switch to buffer (default %s): ",
                                      "", cp, NULL, get_buffer_name (bp));
 
-      if (buf == NULL)
-        ok = FUNCALL (keyboard_quit);
-    }
+      if (cbuf == NULL)
+        ok = G_keyboard_quit ();
+    }    
 
-  if (ok == leT)
+  if (ok == SCM_BOOL_T)
     {
-      if (buf && astr_len (buf) > 0)
-        {
-          bp = find_buffer (astr_cstr (buf));
-          if (bp == NULL)
-            {
-              bp = buffer_new ();
-              set_buffer_name (bp, astr_cstr (buf));
-              set_buffer_needname (bp, true);
-              set_buffer_nosave (bp, true);
-            }
-        }
+      if (cbuf && astr_len (cbuf) > 0)
+	bp = find_buffer (astr_cstr (cbuf));
+      else if (buf && strlen (buf) > 0)
+	bp = find_buffer (buf);
 
-      switch_to_buffer (bp);
+      if (bp == NULL)
+	{
+	  bp = buffer_new ();
+	  if (cbuf && astr_len (cbuf) > 0)
+	    set_buffer_name (bp, astr_cstr (cbuf));
+	  else if (buf && strlen (buf) > 0)
+	    set_buffer_name (bp, buf);
+	  set_buffer_needname (bp, true);
+	  set_buffer_nosave (bp, true);
+	}
     }
-}
-END_DEFUN
 
-DEFUN_ARGS ("insert-buffer", insert_buffer,
-            STR_ARG (buf))
-/*+
-Insert after point the contents of BUFFER.
-Puts mark after the inserted text.
-+*/
+  switch_to_buffer (bp);
+  return ok;
+}
+
+SCM_DEFINE (G_insert_buffer, "insert-buffer", 0, 1, 0,
+	    (SCM gbuf), "\
+Insert after point the contents of BUFFER.\n\
+Puts mark after the inserted text.")
 {
+  SCM ok = SCM_BOOL_T;
   Buffer *def_bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
 
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;
 
-  STR_INIT (buf)
-  else
+  // FIXME: need interactive logic here
+  char *buf = guile_to_locale_string_safe (gbuf);
+  astr cbuf = NULL;
+  if (buf == NULL)
     {
       Completion *cp = make_buffer_completion ();
-      buf = minibuf_read_completion ("Insert buffer (default %s): ",
+      cbuf = minibuf_read_completion ("Insert buffer (default %s): ",
                                      "", cp, NULL, get_buffer_name (def_bp));
-      if (buf == NULL)
-        ok = FUNCALL (keyboard_quit);
+      if (cbuf == NULL)
+        ok = G_keyboard_quit ();
     }
 
-  if (ok == leT)
+  if (ok == SCM_BOOL_T)
     {
       Buffer *bp;
 
-      if (buf && astr_len (buf) > 0)
+      if (cbuf && astr_len (cbuf) > 0)
         {
-          bp = find_buffer (astr_cstr (buf));
+          bp = find_buffer (astr_cstr (cbuf));
           if (bp == NULL)
             {
-              minibuf_error ("Buffer `%s' not found", astr_cstr (buf));
-              ok = leNIL;
+              minibuf_error ("Buffer `%s' not found", astr_cstr (cbuf));
+              ok = SCM_BOOL_F;
             }
         }
+      else if (buf && strlen (buf) > 0)
+	{
+          bp = find_buffer (buf);
+          if (bp == NULL)
+            {
+              minibuf_error ("Buffer `%s' not found", buf);
+              ok = SCM_BOOL_F;
+            }
+	}
       else
         bp = def_bp;
 
-      if (ok != leNIL)
+      if (ok != SCM_BOOL_F)
         {
           insert_buffer (bp);
-          FUNCALL (set_mark_command);
+          G_set_mark_command ();
         }
     }
+  return ok;
 }
-END_DEFUN
 
-DEFUN_ARGS ("insert-file", insert_file,
-            STR_ARG (file))
-/*+
-Insert contents of file FILENAME into buffer after point.
-Set mark after the inserted text.
-+*/
+SCM_DEFINE (G_insert_file, "insert-file", 0, 1, 0,
+	    (SCM gfile), "\
+Insert contents of file FILENAME into buffer after point.\n\
+Set mark after the inserted text.")
 {
+  SCM ok = SCM_BOOL_T;
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;
 
-  STR_INIT (file)
-  else
+  // FIXME: need interactive logic here
+  char *str = guile_to_locale_string_safe (gfile);
+  astr file = NULL;
+  if (str != NULL)
+    file = astr_new_cstr (str);
+  if (file == NULL)
+
     {
       file = minibuf_read_filename ("Insert file: ",
                                     astr_cstr (get_buffer_dir (cur_bp)), NULL);
       if (file == NULL)
-        ok = FUNCALL (keyboard_quit);
+        ok = G_keyboard_quit ();
     }
 
   if (file == NULL || astr_len (file) == 0)
-    ok = leNIL;
+    ok = SCM_BOOL_F;
 
-  if (ok != leNIL)
+  if (ok != SCM_BOOL_F)
     {
       estr es = estr_readf (astr_cstr (file));
       if (es.as != NULL)
         insert_estr (es);
       else
         {
-          ok = leNIL;
+          ok = SCM_BOOL_F;
           minibuf_error ("%s: %s", astr_cstr (file), strerror (errno));
         }
     }
   else
-    FUNCALL (set_mark_command);
+    G_set_mark_command ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 /*
  * Write buffer to given file name with given mode.
@@ -503,8 +547,10 @@ backup_and_write (Buffer * bp, const char *filename)
     {
       close (fd);
 
-      const char *backupdir = get_variable_bool ("backup-directory") ?
-        get_variable ("backup-directory") : NULL;
+      char *backupdir = NULL;
+      if (scm_is_true (get_variable_string ("backup-directory")))
+	backupdir = get_variable_string ("backup-directory");
+
       astr bfilename = create_backup_filename (filename, backupdir);
       if (bfilename && qcopy_file_preserving (filename, astr_cstr (bfilename)) == 0)
         set_buffer_backup (bp, true);
@@ -527,12 +573,12 @@ backup_and_write (Buffer * bp, const char *filename)
   return false;
 }
 
-static le *
+static SCM
 write_buffer (Buffer *bp, bool needname, bool confirm,
               const char *name0, const char *prompt)
 {
   bool ans = true;
-  le * ok = leT;
+  SCM ok  = SCM_BOOL_T;
   castr name;
 
   if (!needname)
@@ -542,9 +588,9 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
     {
       name = minibuf_read_filename (prompt, "", NULL);
       if (name == NULL)
-        return FUNCALL (keyboard_quit);
+        return G_keyboard_quit ();
       if (astr_len (name) == 0)
-        return leNIL;
+        return SCM_BOOL_F;
       confirm = true;
     }
 
@@ -552,11 +598,11 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
     {
       ans = minibuf_read_yn ("File `%s' exists; overwrite? (y or n) ", astr_cstr (name));
       if (ans == -1)
-        FUNCALL (keyboard_quit);
+        G_keyboard_quit ();
       else if (ans == false)
         minibuf_error ("Canceled");
       if (ans != true)
-        ok = leNIL;
+        ok = SCM_BOOL_F;
     }
 
   if (ans == true)
@@ -574,13 +620,13 @@ write_buffer (Buffer *bp, bool needname, bool confirm,
           undo_set_unchanged (get_buffer_last_undop (bp));
         }
       else
-        ok = leNIL;
+        ok = SCM_BOOL_F;
     }
 
   return ok;
 }
 
-static le *
+static SCM
 save_buffer (Buffer * bp)
 {
   if (get_buffer_modified (bp))
@@ -588,32 +634,26 @@ save_buffer (Buffer * bp)
                          "File to save in: ");
 
   minibuf_write ("(No changes need to be saved)");
-  return leT;
+  return SCM_BOOL_T;
 }
 
-DEFUN ("save-buffer", save_buffer)
-/*+
-Save current buffer in visited file if modified.  By default, makes the
-previous version into a backup file if this is the first save.
-+*/
+SCM_DEFINE (G_save_buffer, "save-buffer", 0, 0, 0, (void), "\
+Save current buffer in visited file if modified.  By default, makes the\n\
+previous version into a backup file if this is the first save.")
 {
-  ok = save_buffer (cur_bp);
+  return save_buffer (cur_bp);
 }
-END_DEFUN
 
-DEFUN ("write-file", write_file)
-/*+
-Write current buffer into file @i{filename}.
-This makes the buffer visit that file, and marks it as not modified.
-
-Interactively, confirmation is required unless you supply a prefix argument.
-+*/
+SCM_DEFINE (G_write_file, "write-file", 0, 0, 0, (void), "\
+Write current buffer into file @i{filename}.\n\
+This makes the buffer visit that file, and marks it as not modified.\n\
+\n\
+Interactively, confirmation is required unless you supply a prefix argument.")
 {
-  ok = write_buffer (cur_bp, true,
-                     arglist && !(lastflag & FLAG_SET_UNIARG),
+  return write_buffer (cur_bp, true,
+                     0,
                      NULL, "Write file: ");
 }
-END_DEFUN
 
 static int
 save_some_buffers (void)
@@ -643,7 +683,7 @@ save_some_buffers (void)
                 switch (c)
                   {
                   case KBD_CANCEL:	/* C-g */
-                    FUNCALL (keyboard_quit);
+                    G_keyboard_quit ();
                     return false;
                   case 'q':
                     goto endoffunc;
@@ -680,22 +720,19 @@ endoffunc:
 }
 
 
-DEFUN ("save-some-buffers", save_some_buffers)
-/*+
-Save some modified file-visiting buffers.  Asks user about each one.
-+*/
+SCM_DEFINE (G_save_some_buffers, "save-some-buffers", 0, 0, 0, (void), "\
+Save some modified file-visiting buffers.  Asks user about each one.")
 {
-  ok = bool_to_lisp (save_some_buffers ());
+  // FIXME: need interactive logic here
+  return scm_from_bool (save_some_buffers ());
 }
-END_DEFUN
 
-DEFUN ("save-buffers-kill-emacs", save_buffers_kill_emacs)
-/*+
-Offer to save each buffer, then kill this Zile process.
-+*/
+SCM_DEFINE (G_save_buffers_kill_emacs, "save-buffers-kill-emacs", 0, 0, 0, (void), "\
+Offer to save each buffer, then kill this Zile process.")
 {
+  // FIXME: need interactive logic here
   if (!save_some_buffers ())
-    return leNIL;
+    return SCM_BOOL_F;
 
   for (Buffer *bp = head_bp; bp != NULL; bp = get_buffer_next (bp))
     if (get_buffer_modified (bp) && !get_buffer_needname (bp))
@@ -705,17 +742,17 @@ Offer to save each buffer, then kill this Zile process.
             int ans = minibuf_read_yesno
               ("Modified buffers exist; exit anyway? (yes or no) ");
             if (ans == -1)
-              return FUNCALL (keyboard_quit);
+              return G_keyboard_quit ();
             else if (!ans)
-              return leNIL;
+              return SCM_BOOL_F;
             break;
           }
         break; /* We have found a modified buffer, so stop. */
       }
 
   thisflag |= FLAG_QUIT;
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 /*
  * Function called on unexpected error or Zile crash (SIGSEGV).
@@ -743,18 +780,22 @@ zile_exit (int doabort)
     exit (EXIT_CRASH);
 }
 
-DEFUN_ARGS ("cd", cd,
-       STR_ARG (dir))
-/*+
-Make DIR become the current buffer's default directory.
-+*/
+SCM_DEFINE (G_cd, "cd", 0, 1, 0, (SCM gdir), "\
+Make DIR become the current buffer's default directory.")
 {
-  if (arglist == NULL)
+  SCM ok = SCM_BOOL_T;
+  char *str;
+  astr dir = NULL;
+  
+  str = guile_to_locale_string_safe (gdir);
+  if (str != NULL)
+    dir = astr_new_cstr (str);
+  if (dir == NULL)
     dir = minibuf_read_filename ("Change default directory: ",
                                  astr_cstr (get_buffer_dir (cur_bp)), NULL);
 
   if (dir == NULL)
-    ok = FUNCALL (keyboard_quit);
+    ok = G_keyboard_quit ();
   else if (astr_len (dir) > 0)
     {
       struct stat st;
@@ -762,13 +803,31 @@ Make DIR become the current buffer's default directory.
       if (stat (astr_cstr (dir), &st) != 0 || !S_ISDIR (st.st_mode))
         {
           minibuf_error ("`%s' is not a directory", astr_cstr (dir));
-          ok = leNIL;
+          ok = SCM_BOOL_F;
         }
       else if (chdir (astr_cstr (dir)) == -1)
         {
           minibuf_write ("%s: %s", dir, strerror (errno));
-          ok = leNIL;
+          ok = SCM_BOOL_F;
         }
     }
+  return ok;
 }
-END_DEFUN
+
+void
+init_guile_file_procedures (void)
+{
+#include "file.x"
+  scm_c_export ("find-file",
+		"find-file-read-only",
+		"find-alternate-file",
+		"switch-to-buffer",
+		"insert-buffer",
+		"insert-file",
+		"save-buffer", 
+		"write-file",
+		"save-some-buffers",
+		"save-buffers-kill-emacs",
+		"cd",
+		0);		
+}

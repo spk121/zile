@@ -1,0 +1,6 @@
+(end-of-line)
+(backward-char)
+(backward-char)
+(backward-delete-char 1)
+(save-buffer)
+(save-buffers-kill-emacs)

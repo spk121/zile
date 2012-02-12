@@ -1,0 +1,1 @@
+(save-buffers-kill-emacs)

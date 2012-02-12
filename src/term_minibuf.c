@@ -1,8 +1,9 @@
 /* Minibuffer handling
 
    Copyright (c) 1997-2005, 2008-2009, 2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -76,7 +77,7 @@ maybe_close_popup (Completion *cp)
     {
       set_current_window (wp);
       if (get_completion_flags (cp) & CFLAG_CLOSE)
-        FUNCALL (delete_window);
+        G_delete_window ();
       else if (get_completion_old_bp (cp))
         switch_to_buffer (get_completion_old_bp (cp));
       set_current_window (old_wp);
@@ -126,7 +127,7 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
         case KBD_RET:
           break;
         case KBD_CTRL | 'z':
-          FUNCALL (suspend_emacs);
+          G_suspend_emacs ();
           break;
         case KBD_CANCEL:
           as = NULL;

@@ -1,8 +1,9 @@
 /* Terminal independent redisplay routines
 
    Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial port of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@
 
 #include <config.h>
 
+#include <libguile.h>
 #include <stdarg.h>
 
 #include "main.h"
@@ -99,7 +101,7 @@ resize_windows (void)
         }
     }
 
-  FUNCALL (recenter);
+  G_recenter ();
 }
 
 void
@@ -113,14 +115,20 @@ recenter (Window * wp)
     set_window_topdelta (wp, n);
 }
 
-DEFUN ("recenter", recenter)
-/*+
-Center point in window and redisplay screen.
-The desired position of point is always relative to the current window.
-+*/
+SCM_DEFINE (G_recenter, "recenter", 0, 0, 0, (void), "\
+Center point in window and redisplay screen.\n\
+The desired position of point is always relative to the current window.")
 {
   recenter (cur_wp);
   term_clear ();
   term_redisplay ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
+
+void
+init_guile_redisplay_procedures (void)
+{
+#include "redisplay.x"
+  scm_c_export ("recenter", 
+		0);
+}

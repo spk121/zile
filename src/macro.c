@@ -1,8 +1,9 @@
 /* Macro facility functions
 
    Copyright (c) 1997-2005, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <assert.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,17 +89,15 @@ cancel_kbd_macro (void)
   thisflag &= ~FLAG_DEFINING_MACRO;
 }
 
-DEFUN ("start-kbd-macro", start_kbd_macro)
-/*+
-Record subsequent keyboard input, defining a keyboard macro.
-The commands are recorded even as they are executed.
-Use @kbd{C-x )} to finish recording and make the macro available.
-+*/
+SCM_DEFINE (G_start_kbd_macro, "start-kbd-macro", 0, 0, 0, (void), "\
+Record subsequent keyboard input, defining a keyboard macro.\n\
+The commands are recorded even as they are executed.\n\
+Use @kbd{C-x )} to finish recording and make the macro available.")
 {
   if (thisflag & FLAG_DEFINING_MACRO)
     {
       minibuf_error ("Already defining a keyboard macro");
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   if (cur_mp)
@@ -107,25 +107,23 @@ Use @kbd{C-x )} to finish recording and make the macro available.
 
   thisflag |= FLAG_DEFINING_MACRO;
   cur_mp = macro_new ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("end-kbd-macro", end_kbd_macro)
-/*+
-Finish defining a keyboard macro.
-The definition was started by @kbd{C-x (}.
-The macro is now available for use via @kbd{C-x e}.
-+*/
+SCM_DEFINE (G_end_kbd_macro, "end-kbd-macro", 0, 0, 0, (void), "\
+Finish defining a keyboard macro.\n\
+The definition was started by 'C-x ('.\n\
+The macro is now available for use via 'C-x e'.")
 {
   if (!(thisflag & FLAG_DEFINING_MACRO))
     {
       minibuf_error ("Not defining a keyboard macro");
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   thisflag &= ~FLAG_DEFINING_MACRO;
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 static void
 process_keys (gl_list_t keys)
@@ -150,39 +148,55 @@ call_macro (void)
   return true;
 }
 
-DEFUN ("call-last-kbd-macro", call_last_kbd_macro)
-/*+
-Call the last keyboard macro that you defined with @kbd{C-x (}.
-A prefix argument serves as a repeat count.
-+*/
+SCM_DEFINE (G_call_last_kbd_macro, "call-last-kbd-macro", 0, 1, 0, (SCM n), "\
+Call the last keyboard macro that you defined with 'C-x ('.\n\
+A prefix argument serves as a repeat count.")
 {
+  long uniarg = guile_to_long_or_error (s_G_call_last_kbd_macro, SCM_ARG1, n);
   if (cur_mp == NULL)
     {
       minibuf_error ("No kbd macro has been defined");
-      return leNIL;
+      return SCM_BOOL_F;
     }
 
   /* FIXME: Call execute-kbd-macro (needs a way to reverse keystrtovec) */
   /* F_execute_kbd_macro (uniarg, true, leAddDataElement (leNew (NULL), astr_cstr (keyvectostr (cur_mp->keys)), false)); */
   macro_keys = cur_mp->keys;
   execute_with_uniarg (true, uniarg, call_macro, NULL);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN_NONINTERACTIVE_ARGS ("execute-kbd-macro", execute_kbd_macro,
-                   STR_ARG (keystr))
-/*+
-Execute macro as string of editor command characters.
-+*/
+SCM_DEFINE (G_execute_kbd_macro, "execute-kbd-macro", 0, 1, 0,
+	    (SCM gkeystr), "\
+Execute macro as string of editor command characters.")
 {
-  STR_INIT (keystr);
+  SCM ok = SCM_BOOL_T;
+  char *str = NULL;
+  astr keystr = NULL;
+
+  str = guile_to_locale_string_safe (gkeystr);
+  if (str != NULL)
+    keystr = astr_new_cstr (str);
+
   gl_list_t keys = keystrtovec (astr_cstr (keystr));
   if (keys)
     {
       macro_keys = keys;
-      execute_with_uniarg (true, uniarg, call_macro, NULL);
+      execute_with_uniarg (true, 1, call_macro, NULL);
     }
   else
-    ok = leNIL;
+    ok = SCM_BOOL_F;
+  return ok;
 }
-END_DEFUN
+
+
+void
+init_guile_macro_procedures (void)
+{
+#include "macro.x"
+  scm_c_export ("start-kbd-macro",
+		"call-last-kbd-macro",
+		"end-kbd-macro",
+		"execute-kbd-macro",
+		0);
+}

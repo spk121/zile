@@ -1,8 +1,9 @@
 /* Buffer fields
 
    Copyright (c) 2009, 2011 Free Software Foundation, Inc.
+   Copyright (c) 2012  Michael L. GRan
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -33,7 +34,7 @@ FIELD(Marker *, mark)     /* The mark. */
 FIELD(Marker *, markers)  /* Markers list (updated whenever text is changed). */
 FIELD(Undo *, last_undop) /* Most recent undo delta. */
 FIELD(Undo *, next_undop) /* Next undo delta to apply. */
-FIELD(Hash_table *, vars) /* Buffer-local variables. */
+FIELD(char *, module)     /* Buffer-local Guile module's name. */
 FIELD(bool, modified)     /* Modified flag. */
 FIELD(bool, nosave)       /* The buffer need not be saved. */
 FIELD(bool, needname)     /* On save, ask for a file name. */

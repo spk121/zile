@@ -1,8 +1,9 @@
 /* Key bindings and extended commands
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2011, 2012 Michael Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@
 
 #include <assert.h>
 #include <ctype.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +41,7 @@
 struct Binding
 {
   size_t key; /* The key code (for every level except the root). */
-  Function func; /* The function for this key (if a leaf node). */
+  SCM proc; /* The Guile procedure for this key (if a leaf node), or #f*/
 
   /* Branch vector, number of items, max number of items. */
   Binding *vec;
@@ -55,6 +57,7 @@ node_new (int vecmax)
 
   p->vecmax = vecmax;
   p->vec = (Binding *) XCALLOC (vecmax, struct Binding);
+  p->proc = SCM_BOOL_F;
 
   return p;
 }
@@ -76,7 +79,7 @@ add_node (Binding tree, Binding p)
      it was non-prefix and is now being made prefix, as we don't want
      to accidentally create a default for the prefix map. */
   if (tree->vecnum == 0)
-    tree->func = NULL;
+    tree->proc = SCM_BOOL_F;
 
   /* Reallocate vector if there is not enough space. */
   if (tree->vecnum + 1 >= tree->vecmax)
@@ -90,7 +93,7 @@ add_node (Binding tree, Binding p)
 }
 
 static void
-bind_key_vec (Binding tree, gl_list_t keys, size_t from, Function func)
+bind_key_vec (Binding tree, gl_list_t keys, size_t from, SCM proc)
 {
   Binding p, s = search_node (tree, (size_t) gl_list_get_at (keys, from));
   size_t n = gl_list_size (keys) - from;
@@ -101,14 +104,14 @@ bind_key_vec (Binding tree, gl_list_t keys, size_t from, Function func)
       p->key = (size_t) gl_list_get_at (keys, from);
       add_node (tree, p);
       if (n == 1)
-        p->func = func;
+        p->proc = proc;
       else if (n > 0)
-        bind_key_vec (p, keys, from + 1, func);
+        bind_key_vec (p, keys, from + 1, proc);
     }
   else if (n > 1)
-    bind_key_vec (s, keys, from + 1, func);
+    bind_key_vec (s, keys, from + 1, proc);
   else
-    s->func = func;
+    s->proc = proc;
 }
 
 static Binding
@@ -173,7 +176,7 @@ get_key_sequence (void)
     {
       astr as;
       Binding p = search_key (root_bindings, keys, 0);
-      if (p == NULL || p->func != NULL)
+      if (p == NULL || scm_is_true (scm_procedure_p (p->proc)))
         break;
       as = keyvectodesc (keys);
       gl_list_add_last (keys, (void *) do_binding_completion (as));
@@ -182,7 +185,7 @@ get_key_sequence (void)
   return keys;
 }
 
-Function
+SCM
 get_function_by_keys (gl_list_t keys)
 {
   Binding p;
@@ -193,13 +196,13 @@ get_function_by_keys (gl_list_t keys)
       size_t key = (size_t) gl_list_get_at (keys, 0);
       if (key & KBD_META &&
           (isdigit ((int) (key & 0xff)) || (int) (key & 0xff) == '-'))
-        return F_universal_argument;
+        return F_universal_argument ();
     }
 
   /* See if we've got a valid key sequence */
   p = search_key (root_bindings, keys, 0);
 
-  return p ? p->func : NULL;
+  return p ? p->proc : SCM_BOOL_F;
 }
 
 static bool
@@ -225,34 +228,35 @@ self_insert_command (void)
   return ret;
 }
 
-DEFUN ("self-insert-command", self_insert_command)
-/*+
-Insert the character you type.
-Whichever character you type to run this command is inserted.
-+*/
+SCM_DEFINE (G_self_insert_command, "self-insert-command", 0, 1, 0, (SCM gn), "\
+Insert the character you type.\n\
+Whichever character you type to run this command is inserted.")
 {
-  ok = execute_with_uniarg (true, uniarg, self_insert_command, NULL);
+  long n = guile_to_long_or_error ("self-insert-command", SCM_ARG1, gn);
+  if (interactive)
+    return execute_with_uniarg (true, n, self_insert_command, NULL);
+  return SCM_BOOL_F;
 }
-END_DEFUN
 
-static Function _last_command;
-static Function _this_command;
+static SCM _last_command;
+static SCM _this_command;
 
-Function
+SCM
 last_command (void)
 {
   return _last_command;
 }
 
 void
-set_this_command (Function cmd)
+set_this_command (SCM cmd)
 {
   _this_command = cmd;
 }
 
-le *
-call_command (Function f, int uniarg, bool uniflag, le *branch)
+SCM
+call_command (SCM proc, int uniarg, bool uniflag)
 {
+  SCM ok;
   thisflag = lastflag & FLAG_DEFINING_MACRO;
 
   /* Reset last_uniarg before function call, so recursion (e.g. in
@@ -261,8 +265,23 @@ call_command (Function f, int uniarg, bool uniflag, le *branch)
     last_uniarg = 1;
 
   /* Execute the command. */
-  _this_command = f;
-  le *ok = f (uniarg, uniflag, branch);
+  _this_command = proc;
+  if (guile_procedure_takes_uniarg_integer (proc))
+    {
+      if (uniflag)
+	ok = guile_call_procedure_with_long (proc, uniarg);
+      else
+	ok = guile_call_procedure (proc);
+    }
+  else if (guile_procedure_takes_uniarg_boolean (proc))
+    {
+      if (uniflag)
+	ok = guile_call_procedure_with_boolean (proc, uniarg);
+      else
+	ok = guile_call_procedure (proc);
+    }
+  else
+    ok = guile_call_procedure (proc);
   _last_command = _this_command;
 
   /* Only add keystrokes if we were already in macro defining mode
@@ -270,7 +289,7 @@ call_command (Function f, int uniarg, bool uniflag, le *branch)
   if (lastflag & FLAG_DEFINING_MACRO && thisflag & FLAG_DEFINING_MACRO)
     add_cmd_to_macro ();
 
-  if (cur_bp && last_command () != F_undo)
+  if (cur_bp && scm_is_eq (last_command (), F_undo ()))
     set_buffer_next_undop (cur_bp, get_buffer_last_undop (cur_bp));
 
   lastflag = thisflag;
@@ -282,12 +301,12 @@ void
 get_and_run_command (void)
 {
   gl_list_t keys = get_key_sequence ();
-  Function f = get_function_by_keys (keys);
+  SCM proc = get_function_by_keys (keys);
 
   minibuf_clear ();
 
-  if (f != NULL)
-    call_command (f, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0, NULL);
+  if (scm_is_true (proc))
+    call_command (proc, last_uniarg, (lastflag & FLAG_SET_UNIARG) != 0);
   else
     minibuf_error ("%s is undefined", astr_cstr (keyvectodesc (keys)));
 }
@@ -296,6 +315,42 @@ static Binding
 init_bindings (void)
 {
   return node_new (10);
+}
+
+#undef DEBUG_SET_KEY
+static void
+set_key (const char *keystr, const char *funcname)
+{
+  SCM funcsym;
+  gl_list_t keys;
+#ifdef DEBUG_SET_KEY
+  static FILE *fp = NULL;
+  if (fp == NULL)
+    fp = fopen ("set_key.debug", "wt");
+  fprintf(fp, "entering set key: %s %s\n", keystr, funcname);
+  fflush (fp);
+#endif
+
+  funcsym = scm_from_locale_symbol (funcname);
+  if (guile_symbol_is_name_of_defined_function (funcsym))
+    {
+      keys = keystrtovec (keystr);
+#ifdef DEBUG_SET_KEY
+      fprintf(fp, "keystr %s keys %p proc %p\n", keystr, keys,
+	      guile_variable_ref_safe (guile_lookup_safe (funcsym)));
+      fflush(fp);
+#endif
+      if (keys != NULL)
+	bind_key_vec (root_bindings, keys, 0,
+		      guile_variable_ref_safe (guile_lookup_safe (funcsym)));
+    }
+  else
+    {
+      char *msg;
+      asprintf (&msg, "cannot set key '%s': no such procedure '%s'",
+		keystr, funcname);
+      minibuf_error (msg);
+    }
 }
 
 void
@@ -312,172 +367,180 @@ init_default_bindings (void)
       if (isprint (i))
         {
           gl_list_set_at (keys, 0, (void *) i);
-          bind_key_vec (root_bindings, keys, 0, F_self_insert_command);
+          bind_key_vec (root_bindings, keys, 0, F_self_insert_command ());
         }
     }
 
-  astr as = astr_new_cstr ("\
-(global-set-key \"\\M-m\" 'back-to-indentation)\
-(global-set-key \"\\LEFT\" 'backward-char)\
-(global-set-key \"\\C-b\" 'backward-char)\
-(global-set-key \"\\BACKSPACE\" 'backward-delete-char)\
-(global-set-key \"\\M-\\BACKSPACE\" 'backward-kill-word)\
-(global-set-key \"\\M-{\" 'backward-paragraph)\
-(global-set-key \"\\C-\\M-b\" 'backward-sexp)\
-(global-set-key \"\\M-b\" 'backward-word)\
-(global-set-key \"\\M-<\" 'beginning-of-buffer)\
-(global-set-key \"\\HOME\" 'beginning-of-line)\
-(global-set-key \"\\C-a\" 'beginning-of-line)\
-(global-set-key \"\\C-xe\" 'call-last-kbd-macro)\
-(global-set-key \"\\M-c\" 'capitalize-word)\
-(global-set-key \"\\M-w\" 'copy-region-as-kill)\
-(global-set-key \"\\C-xrs\" 'copy-to-register)\
-(global-set-key \"\\C-xrx\" 'copy-to-register)\
-(global-set-key \"\\C-x\\C-o\" 'delete-blank-lines)\
-(global-set-key \"\\DELETE\" 'delete-char)\
-(global-set-key \"\\C-d\" 'delete-char)\
-(global-set-key \"\\M-\\\\\" 'delete-horizontal-space)\
-(global-set-key \"\\C-x1\" 'delete-other-windows)\
-(global-set-key \"\\C-x0\" 'delete-window)\
-(global-set-key \"\\C-hb\" 'describe-bindings)\
-(global-set-key \"\\F1b\" 'describe-bindings)\
-(global-set-key \"\\C-hf\" 'describe-function)\
-(global-set-key \"\\F1f\" 'describe-function)\
-(global-set-key \"\\C-hk\" 'describe-key)\
-(global-set-key \"\\F1k\" 'describe-key)\
-(global-set-key \"\\C-hv\" 'describe-variable)\
-(global-set-key \"\\F1v\" 'describe-variable)\
-(global-set-key \"\\C-x\\C-l\" 'downcase-region)\
-(global-set-key \"\\M-l\" 'downcase-word)\
-(global-set-key \"\\C-x)\" 'end-kbd-macro)\
-(global-set-key \"\\M->\" 'end-of-buffer)\
-(global-set-key \"\\END\" 'end-of-line)\
-(global-set-key \"\\C-e\" 'end-of-line)\
-(global-set-key \"\\C-x^\" 'enlarge-window)\
-(global-set-key \"\\C-x\\C-x\" 'exchange-point-and-mark)\
-(global-set-key \"\\M-x\" 'execute-extended-command)\
-(global-set-key \"\\M-q\" 'fill-paragraph)\
-(global-set-key \"\\C-x\\C-v\" 'find-alternate-file)\
-(global-set-key \"\\C-x\\C-f\" 'find-file)\
-(global-set-key \"\\C-x\\C-r\" 'find-file-read-only)\
-(global-set-key \"\\RIGHT\" 'forward-char)\
-(global-set-key \"\\C-f\" 'forward-char)\
-(global-set-key \"\\M-}\" 'forward-paragraph)\
-(global-set-key \"\\C-\\M-f\" 'forward-sexp)\
-(global-set-key \"\\M-f\" 'forward-word)\
-(global-set-key \"\\M-gg\" 'goto-line)\
-(global-set-key \"\\M-g\\M-g\" 'goto-line)\
-(global-set-key \"\\TAB\" 'indent-for-tab-command)\
-(global-set-key \"\\C-xi\" 'insert-file)\
-(global-set-key \"\\C-xri\" 'insert-register)\
-(global-set-key \"\\C-xrg\" 'insert-register)\
-(global-set-key \"\\C-r\" 'isearch-backward)\
-(global-set-key \"\\C-\\M-r\" 'isearch-backward-regexp)\
-(global-set-key \"\\C-s\" 'isearch-forward)\
-(global-set-key \"\\C-\\M-s\" 'isearch-forward-regexp)\
-(global-set-key \"\\M-\\SPC\" 'just-one-space)\
-(global-set-key \"\\C-g\" 'keyboard-quit)\
-(global-set-key \"\\C-xk\" 'kill-buffer)\
-(global-set-key \"\\C-k\" 'kill-line)\
-(global-set-key \"\\C-w\" 'kill-region)\
-(global-set-key \"\\C-\\M-k\" 'kill-sexp)\
-(global-set-key \"\\M-d\" 'kill-word)\
-(global-set-key \"\\C-x\\C-b\" 'list-buffers)\
-(global-set-key \"\\M-h\" 'mark-paragraph)\
-(global-set-key \"\\C-\\M-@\" 'mark-sexp)\
-(global-set-key \"\\C-xh\" 'mark-whole-buffer)\
-(global-set-key \"\\M-@\" 'mark-word)\
-(global-set-key \"\\RET\" 'newline)\
-(global-set-key \"\\C-j\" 'newline-and-indent)\
-(global-set-key \"\\DOWN\" 'next-line)\
-(global-set-key \"\\C-n\" 'next-line)\
-(global-set-key \"\\C-o\" 'open-line)\
-(global-set-key \"\\C-xo\" 'other-window)\
-(global-set-key \"\\UP\" 'previous-line)\
-(global-set-key \"\\C-p\" 'previous-line)\
-(global-set-key \"\\M-%\" 'query-replace)\
-(global-set-key \"\\C-q\" 'quoted-insert)\
-(global-set-key \"\\C-l\" 'recenter)\
-(global-set-key \"\\C-x\\C-s\" 'save-buffer)\
-(global-set-key \"\\C-x\\C-c\" 'save-buffers-kill-emacs)\
-(global-set-key \"\\C-xs\" 'save-some-buffers)\
-(global-set-key \"\\PRIOR\" 'scroll-down)\
-(global-set-key \"\\M-v\" 'scroll-down)\
-(global-set-key \"\\NEXT\" 'scroll-up)\
-(global-set-key \"\\C-v\" 'scroll-up)\
-(global-set-key \"\\C-xf\" 'set-fill-column)\
-(global-set-key \"\\C-@\" 'set-mark-command)\
-(global-set-key \"\\M-!\" 'shell-command)\
-(global-set-key \"\\M-|\" 'shell-command-on-region)\
-(global-set-key \"\\C-x2\" 'split-window)\
-(global-set-key \"\\C-x(\" 'start-kbd-macro)\
-(global-set-key \"\\C-x\\C-z\" 'suspend-emacs)\
-(global-set-key \"\\C-z\" 'suspend-emacs)\
-(global-set-key \"\\C-xb\" 'switch-to-buffer)\
-(global-set-key \"\\M-i\" 'tab-to-tab-stop)\
-(global-set-key \"\\C-x\\C-q\" 'toggle-read-only)\
-(global-set-key \"\\C-t\" 'transpose-chars)\
-(global-set-key \"\\C-x\\C-t\" 'transpose-lines)\
-(global-set-key \"\\C-\\M-t\" 'transpose-sexps)\
-(global-set-key \"\\M-t\" 'transpose-words)\
-(global-set-key \"\\C-xu\" 'undo)\
-(global-set-key \"\\C-_\" 'undo)\
-(global-set-key \"\\C-u\" 'universal-argument)\
-(global-set-key \"\\C-x\\C-u\" 'upcase-region)\
-(global-set-key \"\\M-u\" 'upcase-word)\
-(global-set-key \"\\C-hw\" 'where-is)\
-(global-set-key \"\\F1w\" 'where-is)\
-(global-set-key \"\\C-x\\C-w\" 'write-file)\
-(global-set-key \"\\C-y\" 'yank)\
-");
-  lisp_loadstring (as);
+  set_key ("\\M-m", "back-to-indentation");
+  set_key ("\\LEFT", "backward-char");
+  //set_key ("\\C-b", "backward-char");
+  set_key ("\\BACKSPACE", "backward-delete-char");
+  set_key ("\\M-\\BACKSPACE", "backward-kill-word");
+  set_key ("\\M-{", "backward-paragraph");
+  set_key ("\\C-\\M-b", "backward-sexp");
+  set_key ("\\M-b", "backward-word");
+  set_key ("\\M-<", "beginning-of-buffer");
+  set_key ("\\HOME", "beginning-of-line");
+  set_key ("\\C-a", "beginning-of-line");
+  set_key ("\\C-xe", "call-last-kbd-macro");
+  //set_key ("\\M-c", "capitalize-word");
+  set_key ("\\M-w", "copy-region-as-kill");
+  set_key ("\\C-xrs", "copy-to-register");
+  set_key ("\\C-xrx", "copy-to-register");
+  set_key ("\\C-x\\C-o", "delete-blank-lines");
+  set_key ("\\DELETE", "delete-char");
+  set_key ("\\C-d", "delete-char");
+  set_key ("\\M-\\\\", "delete-horizontal-space");
+  set_key ("\\C-x1", "delete-other-windows");
+  set_key ("\\C-x0", "delete-window");
+  //set_key ("\\C-hb", "describe-bindings");
+  set_key ("\\C-b", "describe-bindings");
+  set_key ("\\F1b", "describe-bindings");
+  set_key ("\\C-hf", "describe-function");
+  set_key ("\\F1f", "describe-function");
+  set_key ("\\C-hk", "describe-key");
+  set_key ("\\F1k", "describe-key");
+  set_key ("\\C-hv", "describe-variable");
+  set_key ("\\F1v", "describe-variable");
+  set_key ("\\C-x\\C-l", "downcase-region");
+  set_key ("\\M-l", "downcase-word");
+  set_key ("\\C-x|", "end-kbd-macro");
+  set_key ("\\M->", "end-of-buffer");
+  set_key ("\\END", "end-of-line");
+  set_key ("\\C-e", "end-of-line");
+  set_key ("\\C-x^", "enlarge-window");
+  set_key ("\\C-x\\C-x", "exchange-point-and-mark");
+  set_key ("\\M-x", "execute-extended-command");
+  set_key ("\\M-q", "fill-paragraph");
+  set_key ("\\C-x\\C-v", "find-alternate-file");
+  set_key ("\\C-x\\C-f", "find-file");
+  set_key ("\\C-x\\C-r", "find-file-read-only");
+  set_key ("\\RIGHT", "forward-char");
+  set_key ("\\C-f", "forward-char");
+  set_key ("\\M-}", "forward-paragraph");
+  set_key ("\\C-\\M-f", "forward-sexp");
+  set_key ("\\M-f", "forward-word");
+  set_key ("\\M-gg", "goto-line");
+  set_key ("\\M-g\\M-g", "goto-line");
+  set_key ("\\TAB", "indent-for-tab-command");
+  set_key ("\\C-xi", "insert-file");
+  set_key ("\\C-xri", "insert-register");
+  set_key ("\\C-xrg", "insert-register");
+  set_key ("\\C-r", "isearch-backward");
+  set_key ("\\C-\\M-r", "isearch-backward-regexp");
+  set_key ("\\C-s", "isearch-forward");
+  set_key ("\\C-\\M-s", "isearch-forward-regexp");
+  set_key ("\\M-\\SPC", "just-one-space");
+  set_key ("\\C-g", "keyboard-quit");
+  set_key ("\\C-xk", "kill-buffer");
+  set_key ("\\C-k", "kill-line");
+  set_key ("\\C-w", "kill-region");
+  set_key ("\\C-\\M-k", "kill-sexp");
+  set_key ("\\M-d", "kill-word");
+  set_key ("\\C-x\\C-b", "list-buffers");
+  set_key ("\\M-h", "mark-paragraph");
+  set_key ("\\C-\\M-@", "mark-sexp");
+  set_key ("\\C-xh", "mark-whole-buffer");
+  set_key ("\\M-@", "mark-word");
+  set_key ("\\RET", "znewline");
+  set_key ("\\C-j", "newline-and-indent");
+  set_key ("\\DOWN", "next-line");
+  set_key ("\\C-n", "next-line");
+  set_key ("\\C-o", "open-line");
+  set_key ("\\C-xo", "other-window");
+  set_key ("\\UP", "previous-line");
+  set_key ("\\C-p", "previous-line");
+  set_key ("\\M-%", "query-replace");
+  set_key ("\\C-q", "quoted-insert");
+  set_key ("\\C-l", "recenter");
+  set_key ("\\C-x\\C-s", "save-buffer");
+  set_key ("\\C-x\\C-c", "save-buffers-kill-emacs");
+  set_key ("\\C-xs", "save-some-buffers");
+  set_key ("\\PRIOR", "scroll-down");
+  set_key ("\\M-v", "scroll-down");
+  set_key ("\\NEXT", "scroll-up");
+  set_key ("\\C-v", "scroll-up");
+  set_key ("\\C-xf", "set-fill-column");
+  set_key ("\\C-@", "set-mark-command");
+  set_key ("\\M-!", "shell-command");
+  set_key ("\\M-|", "shell-command-on-region");
+  set_key ("\\C-x2", "split-window");
+  set_key ("\\C-x(", "start-kbd-macro");
+  set_key ("\\C-x\\C-z", "suspend-emacs");
+  set_key ("\\C-z", "suspend-emacs");
+  set_key ("\\C-xb", "switch-to-buffer");
+  set_key ("\\M-i", "tab-to-tab-stop");
+  set_key ("\\C-x\\C-q", "toggle-read-only");
+  set_key ("\\C-t", "transpose-chars");
+  set_key ("\\C-x\\C-t", "transpose-lines");
+  set_key ("\\C-\\M-t", "transpose-sexps");
+  set_key ("\\M-t", "transpose-words");
+  set_key ("\\C-xu", "undo");
+  set_key ("\\C-_", "undo");
+  set_key ("\\C-u", "universal-argument");
+  set_key ("\\C-x\\C-u", "upcase-region");
+  set_key ("\\M-u", "upcase-word");
+  set_key ("\\C-hw", "where-is");
+  set_key ("\\F1w", "where-is");
+  set_key ("\\C-x\\C-w", "write-file");
+  set_key ("\\C-y", "yank");
+  set_key ("\\M-c", "console");
+
 }
 
-DEFUN_ARGS ("global-set-key", global_set_key,
-            STR_ARG (keystr)
-            STR_ARG (name))
-/*+
-Bind a command to a key sequence.
-Read key sequence and function name, and bind the function to the key
-sequence.
-+*/
+SCM_DEFINE (G_set_key, "set-key", 0, 2, 0, 
+	    (SCM gkeystr, SCM gname), "\
+Bind a command to a key sequence.\n\
+Read key sequence and function name (a symbol), and bind the function to the key\n\
+sequence.")
 {
+  const char *keystr;
+  astr name, keyname;
+  SCM ok = SCM_BOOL_T;
   gl_list_t keys;
-  Function func;
 
-  STR_INIT (keystr);
-  if (keystr != NULL)
+  if (interactive && SCM_UNBNDP (gkeystr))
     {
-      keys = keystrtovec (astr_cstr (keystr));
-      if (keys == NULL)
-        {
-          minibuf_error ("Key sequence %s is invalid", astr_cstr (keystr));
-          return leNIL;
-        }
-    }
-  else
-    {
-      minibuf_write ("Set key globally: ");
+      minibuf_write ("Set key: ");
       keys = get_key_sequence ();
-      keystr = keyvectodesc (keys);
+      keyname = keyvectodesc (keys);
+      keystr = astr_cstr (keyname);
     }
-
-  STR_INIT (name)
-  else
-    name = minibuf_read_function_name ("Set key %s to command: ",
-                                       keystr);
-  if (name == NULL)
-    return leNIL;
-
-  func = get_function (astr_cstr (name));
-  if (func == NULL) /* Possible if called non-interactively */
+  else if (!interactive && SCM_UNBNDP (gkeystr))
+    guile_wrong_number_of_arguments_error ("set-key");
+  else if (scm_is_string (gkeystr))
     {
-      minibuf_error ("No such function `%s'", astr_cstr (name));
-      return leNIL;
+      keystr = scm_to_locale_string (gkeystr);
+      keys = keystrtovec (keystr);
+      if (keys == NULL)
+	guile_error ("set-key", "invalid escape character syntax");
     }
-  bind_key_vec (root_bindings, keys, 0, func);
+  else
+    guile_wrong_type_argument_error ("set-key", SCM_ARG1, gkeystr, "string");
+
+  if (interactive && SCM_UNBNDP (gname))
+    {
+      name = minibuf_read_function_name ("Set key %s to command: ",
+					 keystr);
+      if (name == NULL)
+	return SCM_BOOL_F;
+      gname = scm_from_locale_symbol (astr_cstr (name));
+    }
+  else if (!interactive && SCM_UNBNDP (gname))
+    guile_wrong_number_of_arguments_error ("set-key");
+  else if (!scm_is_symbol (gname))
+    guile_wrong_type_argument_error ("set-key", SCM_ARG2, gname, "symbol");
+  /* else 
+     gname is ok */
+  
+  if (!scm_is_true (guile_lookup_safe (gname)))
+    guile_error ("set-key", "no such function");
+
+  bind_key_vec (root_bindings, keys, 0,
+		guile_variable_ref_safe (guile_lookup_safe (gname)));
+
+  return ok;
 }
-END_DEFUN
 
 static void
 walk_bindings_tree (Binding tree, gl_list_t keys,
@@ -486,7 +549,7 @@ walk_bindings_tree (Binding tree, gl_list_t keys,
   for (size_t i = 0; i < tree->vecnum; ++i)
     {
       Binding p = tree->vec[i];
-      if (p->func != NULL)
+      if (scm_is_true (scm_procedure_p (p->proc)))
         {
           astr key = astr_new ();
           for (size_t j = 0; j < gl_list_size (keys); j++)
@@ -516,7 +579,7 @@ walk_bindings (Binding tree, void (*process) (astr key, Binding p, void *st),
 
 typedef struct
 {
-  Function f;
+  SCM f;
   astr bindings;
 } gather_bindings_state;
 
@@ -525,7 +588,7 @@ gather_bindings (astr key, Binding p, void *st)
 {
   gather_bindings_state *g = (gather_bindings_state *) st;
 
-  if (p->func == g->f)
+  if (scm_is_eq (p->proc, g->f))
     {
       if (astr_len (g->bindings) > 0)
         astr_cat_cstr (g->bindings, ", ");
@@ -533,39 +596,56 @@ gather_bindings (astr key, Binding p, void *st)
     }
 }
 
-DEFUN ("where-is", where_is)
-/*+
-Print message listing key sequences that invoke the command DEFINITION.
-Argument is a command name.
-+*/
+SCM_DEFINE (G_where_is, "where-is", 0, 1, 0, (SCM sym), "\
+Print message listing key sequences that invoke the command DEFINITION.\n\
+Argument is a command name.")
 {
-  castr name = minibuf_read_function_name ("Where is command: ");
+  castr name;
   gather_bindings_state g;
 
-  ok = leNIL;
 
-  if (name)
+  if (!interactive && SCM_UNBNDP (sym))
+    guile_wrong_number_of_arguments_error ("where-is");
+  else if (!interactive && !scm_is_symbol (sym))
+    guile_wrong_type_argument_error ("where-is", SCM_ARG1, sym, "symbol");
+  else if (!interactive && scm_is_symbol (sym))
     {
-      g.f = get_function (astr_cstr (name));
+      char *csym = scm_to_locale_string (scm_symbol_to_string (sym));
+      name = astr_new_cstr (csym);
+      free (csym);
+    }
+  else
+    name = minibuf_read_function_name ("Where is command: ");
+
+  if (name && astr_cstr (name))
+    {
+      g.f = scm_from_locale_symbol (astr_cstr (name));
       if (g.f)
         {
           g.bindings = astr_new ();
           walk_bindings (root_bindings, gather_bindings, &g);
 
           if (astr_len (g.bindings) == 0)
-            minibuf_write ("%s is not on any key", astr_cstr (name));
+	    if (interactive)
+	      minibuf_write ("%s is not on any key", astr_cstr (name));
+	    else
+	      return scm_from_locale_string ("");
           else
-            minibuf_write ("%s is on %s", astr_cstr (name), astr_cstr (g.bindings));
-          ok = leT;
+	    if (interactive)
+	      minibuf_write ("%s is on %s", astr_cstr (name), astr_cstr (g.bindings));
+	    else
+	      return scm_from_locale_string (astr_cstr (g.bindings));
         }
     }
+  return SCM_BOOL_F;
 }
-END_DEFUN
 
 static void
 print_binding (astr key, Binding p, void *st _GL_UNUSED_PARAMETER)
 {
-  bprintf ("%-15s %s\n", astr_cstr (key), get_function_name (p->func));
+  SCM name = guile_procedure_name_safe (p->proc);
+  bprintf ("%-15s %s\n", astr_cstr (key),
+	   scm_to_locale_string (scm_symbol_to_string (name)));
 }
 
 static void
@@ -578,11 +658,75 @@ write_bindings_list (va_list ap _GL_UNUSED_PARAMETER)
   walk_bindings (root_bindings, print_binding, NULL);
 }
 
-DEFUN ("describe-bindings", describe_bindings)
-/*+
-Show a list of all defined keys, and their definitions.
-+*/
+SCM_DEFINE (G_describe_bindings, "describe-bindings", 0, 0, 0, (void), "\
+Show a list of all defined keys, and their definitions.")
 {
-  write_temp_buffer ("*Help*", true, write_bindings_list);
+  if (interactive)
+    write_temp_buffer ("*Help*", true, write_bindings_list);
+  else
+    guile_error ("describe-bindings",
+		 "this function cannot be called from the REPL");
+  return SCM_BOOL_T;
 }
-END_DEFUN
+
+static void
+display_binding (astr key, Binding p, void *st _GL_UNUSED_PARAMETER)
+{
+  char *buf, *str = NULL;
+  SCM name;
+  
+  name = guile_procedure_name_safe (p->proc);
+  if (scm_is_true (name))
+    str = guile_to_locale_string_safe (scm_symbol_to_string (name));
+  if (str)
+    asprintf (&buf, "%-15s %s\n", astr_cstr (key), str);
+  else
+    asprintf (&buf, "%-15s <unknown>\n", astr_cstr (key));
+    
+  scm_simple_format (scm_current_output_port (),
+		     scm_from_locale_string ("~A"),
+		     scm_list_1 (scm_from_locale_string (buf)));;
+  free (buf);
+}
+
+static void
+display_bindings_list (void)
+{
+  char *buf;
+  asprintf (&buf, "Key translations:\n");
+  scm_simple_format (scm_current_output_port(), scm_from_locale_string (buf),
+		     SCM_EOL);
+  free (buf);
+  asprintf (&buf, "%-15s %s\n", "key", "binding");
+  scm_simple_format (scm_current_output_port(), scm_from_locale_string (buf),
+		     SCM_EOL);
+  free (buf);
+  asprintf (&buf, "%-15s %s\n", "---", "-------");
+  scm_simple_format (scm_current_output_port(), scm_from_locale_string (buf),
+		     SCM_EOL);
+  free (buf);
+
+  walk_bindings (root_bindings, display_binding, NULL);
+}
+
+SCM_DEFINE (G_key_map, "key-map", 0, 0, 0, (void), "\
+A REPL-only func[tion to print the key map.")
+{
+  if (!interactive)
+    display_bindings_list ();
+  else
+    G_describe_bindings ();
+  return SCM_BOOL_T;
+}
+
+void
+init_guile_bind_procedures ()
+{
+#include "bind.x"
+  scm_c_export ("self-insert-command",
+		"where-is",
+		"set-key",
+		"describe-bindings",
+		"key-map",
+		0);
+}

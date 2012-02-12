@@ -1,8 +1,9 @@
 /* Line-oriented editing functions
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <ctype.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,15 +53,13 @@ insert_tab (void)
   return true;
 }
 
-DEFUN ("tab-to-tab-stop", tab_to_tab_stop)
-/*+
-Insert a tabulation at the current point position into the current
-buffer.
-+*/
+SCM_DEFINE (G_tab_to_tab_stop, "tab-to-tab-stop", 0, 1, 0, (SCM n), "\
+Insert a tabulation at the current point position into the current\n\
+buffer.")
 {
-  ok = execute_with_uniarg (true, uniarg, insert_tab, NULL);
+  long uniarg = guile_to_long_or_error (s_G_tab_to_tab_stop, SCM_ARG1, n);
+  return execute_with_uniarg (true, uniarg, insert_tab, NULL);
 }
-END_DEFUN
 
 /*
  * Insert a newline at the current position without moving the cursor.
@@ -122,7 +122,7 @@ fill_break_line (void)
       if (break_col >= 1) /* Break line. */
         {
           goto_offset (get_buffer_line_o (cur_bp) + break_col);
-          FUNCALL (delete_horizontal_space);
+          G_delete_horizontal_space ();
           insert_newline ();
           goto_offset (get_marker_o (m));
           break_made = true;
@@ -145,24 +145,20 @@ newline (void)
   return insert_newline ();
 }
 
-DEFUN ("newline", newline)
-/*+
-Insert a newline at the current point position into
-the current buffer.
-+*/
+SCM_DEFINE (G_znewline, "znewline", 0, 1, 0, (SCM n), "\
+Insert a newline at the current point position into\n\
+the current buffer.")
 {
-  ok = execute_with_uniarg (true, uniarg, newline, NULL);
+  long uniarg = guile_to_long_or_error (s_G_znewline, SCM_ARG1, n);
+  return execute_with_uniarg (true, uniarg, newline, NULL);
 }
-END_DEFUN
 
-DEFUN ("open-line", open_line)
-/*+
-Insert a newline and leave point before it.
-+*/
+SCM_DEFINE (G_open_line, "open-line", 0, 1, 0, (SCM n), "\
+Insert a newline and leave point before it.")
 {
-  ok = execute_with_uniarg (true, uniarg, intercalate_newline, NULL);
+  long uniarg = guile_to_long_or_error (s_G_open_line, SCM_ARG1, n);
+  return execute_with_uniarg (true, uniarg, intercalate_newline, NULL);
 }
-END_DEFUN
 
 bool
 insert_newline (void)
@@ -170,16 +166,13 @@ insert_newline (void)
   return insert_estr ((estr) {.as = astr_new_cstr ("\n"), .eol = coding_eol_lf});
 }
 
-DEFUN_NONINTERACTIVE_ARGS ("insert", insert,
-                           STR_ARG (arg))
-/*+
-Insert the argument at point.
-+*/
+SCM_DEFINE (G_insert, "insert", 0, 1, 0, (SCM garg), "\
+Insert the argument at point.")
 {
-  STR_INIT (arg);
-  bprintf ("%s", astr_cstr (arg));
+  char *arg = guile_to_locale_string_safe (garg);
+  bprintf ("%s", arg);
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 void
 bprintf (const char *fmt, ...)
@@ -206,32 +199,23 @@ backward_delete_char (void)
   return true;
 }
 
-DEFUN_ARGS ("delete-char", delete_char,
-            INT_OR_UNIARG (n))
-/*+
-Delete the following @i{n} characters (previous if @i{n} is negative).
-+*/
+SCM_DEFINE (G_delete_char, "delete-char", 0, 1, 0,
+	    (SCM n), "\
+Delete the following @i{n} characters (previous if @i{n} is negative).")
 {
-  INT_OR_UNIARG_INIT (n);
-  ok = execute_with_uniarg (true, n, delete_char, backward_delete_char);
+  long c_n = guile_to_long_or_error ("delete-char", SCM_ARG1, n);
+  return execute_with_uniarg (true, c_n, delete_char, backward_delete_char);
 }
-END_DEFUN
 
-DEFUN_ARGS ("backward-delete-char", backward_delete_char,
-            INT_OR_UNIARG (n))
-/*+
-Delete the previous @i{n} characters (following if @i{n} is negative).
-+*/
+SCM_DEFINE (G_backward_delete_char, "backward-delete-char", 0, 1, 0, (SCM n), "\
+Delete the previous @i{n} characters (following if @i{n} is negative).")
 {
-  INT_OR_UNIARG_INIT (n);
-  ok = execute_with_uniarg (true, n, backward_delete_char, delete_char);
+  long uniarg = guile_to_long_or_error (s_G_backward_delete_char, SCM_ARG1, n);
+  return execute_with_uniarg (true, uniarg, backward_delete_char, delete_char);
 }
-END_DEFUN
 
-DEFUN ("delete-horizontal-space", delete_horizontal_space)
-/*+
-Delete all spaces and tabs around point.
-+*/
+SCM_DEFINE (G_delete_horizontal_space, "delete-horizontal-space", 0, 0, 0, (void), "\
+Delete all spaces and tabs around point.")
 {
   undo_start_sequence ();
 
@@ -242,20 +226,18 @@ Delete all spaces and tabs around point.
     backward_delete_char ();
 
   undo_end_sequence ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("just-one-space", just_one_space)
-/*+
-Delete all spaces and tabs around point, leaving one space.
-+*/
+SCM_DEFINE (G_just_one_space, "just-one-space", 0, 0, 0, (void), "\
+Delete all spaces and tabs around point, leaving one space.")
 {
   undo_start_sequence ();
-  FUNCALL (delete_horizontal_space);
+  G_delete_horizontal_space ();
   insert_char (' ');
   undo_end_sequence ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
 /***********************************************************************
                          Indentation command
@@ -269,32 +251,31 @@ previous_nonblank_goalc (void)
   size_t cur_goalc = get_goalc ();
 
   /* Find previous non-blank line. */
-  while (FUNCALL_ARG (forward_line, -1) == leT && is_blank_line ());
+  while (scm_is_true (G_forward_line (scm_from_int (-1))) && is_blank_line ());
 
   /* Go to `cur_goalc' in that non-blank line. */
   while (!eolp () && get_goalc () < cur_goalc)
     move_char (1);
 }
 
-DEFUN ("indent-relative", indent_relative)
-/*+
-Space out to under next indent point in previous nonblank line.
-An indent point is a non-whitespace character following whitespace.
-The following line shows the indentation points in this line.
-    ^         ^    ^     ^   ^           ^      ^  ^    ^
-If the previous nonblank line has no indent points beyond the
-column point starts at, `tab-to-tab-stop' is done instead, unless
-this command is invoked with a numeric argument, in which case it
-does nothing.
-+*/
+SCM_DEFINE (G_indent_relative, "indent-relative", 0, 0, 0, (void), "\
+Space out to under next indent point in previous nonblank line.\n\
+An indent point is a non-whitespace character following whitespace.\n\
+The following line shows the indentation points in this line.\n\
+    |         |    |     |   |           |      |  |    |\n\
+If the previous nonblank line has no indent points beyond the\n\
+column point starts at, `tab-to-tab-stop' is done instead, unless\n\
+this command is invoked with a numeric argument, in which case it\n\
+does nothing.")
 {
+  SCM ok = SCM_BOOL_T;
   size_t target_goalc = 0, cur_goalc = get_goalc ();
   size_t t = tab_width (cur_bp);
 
-  ok = leNIL;
+  ok = SCM_BOOL_F;;
 
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;;
 
   deactivate_mark ();
 
@@ -337,20 +318,20 @@ does nothing.
           do
             {
               if (cur_goalc % t == 0 && cur_goalc + t <= target_goalc)
-                ok = bool_to_lisp (insert_tab ());
+                ok = scm_from_bool (insert_tab ());
               else
-                ok = bool_to_lisp (insert_char (' '));
+                ok = scm_from_bool (insert_char (' '));
             }
-          while (ok == leT && (cur_goalc = get_goalc ()) < target_goalc);
+          while (ok == SCM_BOOL_T && (cur_goalc = get_goalc ()) < target_goalc);
         }
       else
-        ok = bool_to_lisp (insert_tab ());
+        ok = scm_from_bool (insert_tab ());
     }
   else
-    ok = bool_to_lisp (insert_tab ());
+    ok = scm_from_bool (insert_tab ());
   undo_end_sequence ();
+  return ok;
 }
-END_DEFUN
 
 static size_t
 previous_line_indent (void)
@@ -358,8 +339,8 @@ previous_line_indent (void)
   size_t cur_indent;
   Marker *m = point_marker ();
 
-  FUNCALL (previous_line);
-  FUNCALL (beginning_of_line);
+  G_previous_line (scm_from_int (1));
+  G_beginning_of_line ();
 
   /* Find first non-blank char. */
   while (!eolp () && (isspace (following_char ())))
@@ -374,31 +355,27 @@ previous_line_indent (void)
   return cur_indent;
 }
 
-DEFUN ("indent-for-tab-command", indent_for_tab_command)
-/*+
-Indent line or insert a tab.
-Depending on `tab-always-indent', either insert a tab or indent.
-If initial point was within line's indentation, position after
-the indentation.  Else stay at same point in text.
-+*/
+SCM_DEFINE (G_indent_for_tab_command, "indent-for-tab-command", 0, 0, 0, (void), "\
+Indent line or insert a tab.\n\
+Depending on `tab-always-indent', either insert a tab or indent.\n\
+If initial point was within line's indentation, position after\n\
+the indentation.  Else stay at same point in text.")
 {
   if (get_variable_bool ("tab-always-indent"))
-    return bool_to_lisp (insert_tab ());
+    return scm_from_bool (insert_tab ());
   else if (get_goalc () < previous_line_indent ())
-    return FUNCALL (indent_relative);
+    return G_indent_relative ();
+  return SCM_BOOL_T;
 }
-END_DEFUN
 
-DEFUN ("newline-and-indent", newline_and_indent)
-/*+
-Insert a newline, then indent.
-Indentation is done using the `indent-for-tab-command' function.
-+*/
+SCM_DEFINE (G_newline_and_indent, "newline-and-indent", 0, 0, 0, (void), "\
+Insert a newline, then indent. \n\
+Indentation is done using the `indent-for-tab-command' function.")
 {
-  ok = leNIL;
+  SCM ok = SCM_BOOL_F;
 
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;
 
   deactivate_mark ();
 
@@ -416,9 +393,28 @@ Indentation is done using the `indent-for-tab-command' function.
       /* Only indent if we're in column > 0 or we're in column 0 and
          there is a space character there in the last non-blank line. */
       if (indent)
-        FUNCALL (indent_for_tab_command);
-      ok = leT;
+        G_indent_for_tab_command ();
+      ok = SCM_BOOL_T;
     }
   undo_end_sequence ();
+  return ok;
 }
-END_DEFUN
+
+void
+init_guile_line_procedures (void)
+{
+#include "line.x"
+  scm_c_export ("tab-to-tab-stop",
+		"znewline",
+		"open-line",
+		"insert",
+		"delete-char",
+		"backward-delete-char",
+		"delete-horizontal-space",
+		"just-one-space",
+		"indent-relative",
+		"indent-for-tab-command",
+		"newline-and-indent",
+		0);
+}
+

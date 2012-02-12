@@ -1,8 +1,9 @@
 /* Registers facility functions
 
    Copyright (c) 2001, 2003-2006, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial port of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@
 #include <config.h>
 
 #include <ctype.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,21 +35,23 @@
 
 static estr regs[NUM_REGISTERS];
 
-DEFUN_ARGS ("copy-to-register", copy_to_register,
-            INT_ARG (reg))
-/*+
-Copy region into register @i{register}.
-+*/
+SCM_DEFINE (G_copy_to_register, "copy-to-register", 0, 1, 0,
+	    (SCM greg), "\
+Copy region into register.")
 {
-  INT_INIT (reg)
-  else
+  long reg;
+  SCM ok = SCM_BOOL_T;
+
+  if (SCM_UNBNDP (greg)) 
     {
       minibuf_write ("Copy to register: ");
       reg = getkey (GETKEY_DEFAULT);
     }
+  else 
+    reg = guile_to_long_or_error ("copy-to-register", SCM_ARG1, greg);
 
   if (reg == KBD_CANCEL)
-    ok = FUNCALL (keyboard_quit);
+    ok = G_keyboard_quit ();
   else
     {
       minibuf_clear ();
@@ -57,12 +61,12 @@ Copy region into register @i{register}.
                                being a power of 2. */
 
       if (warn_if_no_mark ())
-        ok = leNIL;
+        ok = SCM_BOOL_F;
       else
         regs[reg] = get_buffer_region (cur_bp, calculate_the_region ());
     }
+  return ok;
 }
-END_DEFUN
 
 static int regnum;
 
@@ -73,25 +77,24 @@ insert_register (void)
   return true;
 }
 
-DEFUN_ARGS ("insert-register", insert_register,
-            INT_ARG (reg))
-/*+
-Insert contents of the user specified register.
-Puts point before and mark after the inserted text.
-+*/
+SCM_DEFINE (G_insert_register, "insert-register", 0, 1, 0, 
+	    (SCM greg), "\
+Insert contents of the user specified register.\n\
+Puts point before and mark after the inserted text.")
 {
+  SCM ok = SCM_BOOL_T;
   if (warn_if_readonly_buffer ())
-    return leNIL;
+    return SCM_BOOL_F;
 
-  INT_INIT (reg)
-  else
+  long reg = guile_to_long_or_error (s_G_insert_register, SCM_ARG1, greg);
+  if (SCM_UNBNDP (greg))
     {
       minibuf_write ("Insert register: ");
       reg = getkey (GETKEY_DEFAULT);
     }
 
   if (reg == KBD_CANCEL)
-    ok = FUNCALL (keyboard_quit);
+    ok = G_keyboard_quit ();
   else
     {
       minibuf_clear ();
@@ -100,19 +103,19 @@ Puts point before and mark after the inserted text.
       if (regs[reg].as == NULL)
         {
           minibuf_error ("Register does not contain text");
-          ok = leNIL;
+          ok = SCM_BOOL_F;
         }
       else
         {
-          FUNCALL (set_mark_command);
+          G_set_mark_command ();
           regnum = reg;
-          execute_with_uniarg (true, uniarg, insert_register, NULL);
-          FUNCALL (exchange_point_and_mark);
+	  insert_register ();
+          G_exchange_point_and_mark ();
           deactivate_mark ();
         }
     }
+  return ok;
 }
-END_DEFUN
 
 static void
 write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
@@ -135,11 +138,19 @@ write_registers_list (va_list ap _GL_UNUSED_PARAMETER)
       }
 }
 
-DEFUN ("list-registers", list_registers)
-/*+
-List defined registers.
-+*/
+SCM_DEFINE (G_list_registers, "list-registers", 0, 0, 0, (void), "\
+List defined registers.")
 {
   write_temp_buffer ("*Registers List*", true, write_registers_list);
+  return SCM_BOOL_T;
 }
-END_DEFUN
+
+void
+init_guile_registers_procedures (void)
+{
+#include "registers.x"
+  scm_c_export ("copy-to-register",
+		"insert-register",
+		"list-registers",
+		0);
+}

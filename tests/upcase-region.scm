@@ -1,0 +1,6 @@
+(set-mark )
+(forward-line)
+(forward-line)
+(upcase-region  )
+(save-buffer)
+(save-buffers-kill-emacs)

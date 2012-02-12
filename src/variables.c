@@ -1,8 +1,9 @@
 /* Zile variables handling functions
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2011, 2012 Michael L Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -22,156 +23,210 @@
 #include <config.h>
 
 #include <assert.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "hash.h"
 
 #include "main.h"
 #include "extern.h"
 
-/*
- * Variable type.
- */
-struct var_entry
-{
-  char *var;			/* Variable name. */
-  char *defval;			/* Default value. */
-  char *val;			/* Current value, if any. */
-  bool local;			/* If true, becomes local when set. */
-  const char *doc;              /* Documentation */
-};
-typedef struct var_entry var_entry;
-
-static Hash_table *main_vars;
-
-static size_t
-var_hash (const void *v, size_t n)
-{
-  return hash_string (((const var_entry *) v)->var, n);
-}
-
-static bool
-var_cmp (const void *v, const void *w)
-{
-  return STREQ (((const var_entry *) v)->var, ((const var_entry *) w)->var);
-}
-
-static void
-init_builtin_var (const char *var, const char *defval, bool local, const char *doc)
-{
-  var_entry *p = XZALLOC (var_entry);
-  p->var = xstrdup (var);
-  p->defval = xstrdup (defval);
-  p->val = xstrdup (defval);
-  p->local = local;
-  p->doc = doc;
-  assert (hash_insert (main_vars, p));
-}
-
-static Hash_table *
-new_varlist (void)
-{
-  /* Initial size is big enough for default variables and some more */
-  return hash_initialize (32, NULL, var_hash, var_cmp, NULL);
-}
+SCM_GLOBAL_VARIABLE_INIT (Gvar_inhibit_splash_screen, "inhibit-splash-screen",
+			  SCM_BOOL_F);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_standard_indent, "standard-indent",
+			  scm_from_long (4));
+SCM_GLOBAL_VARIABLE_INIT (Gvar_tab_width, "tab-width",
+			  scm_from_long (8));
+SCM_GLOBAL_VARIABLE_INIT (Gvar_tab_always_indent, "tab-always-indent",
+			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_indent_tabs_mode, "indent-tabs-mode",
+			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_fill_column, "fill-column",
+			  scm_from_long (70));
+SCM_GLOBAL_VARIABLE_INIT (Gvar_auto_fill_mode, "%auto-fill-mode",
+			  SCM_BOOL_F);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_kill_whole_line, "kill-whole-line",
+			  SCM_BOOL_F);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_case_fold_search, "case-fold-search",
+			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_case_replace, "case-replace",
+			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_transient_mark_mode, "transient-mark-mode",
+			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_highlight_nonselected_windows,
+			  "highlight-nonselected-windows",
+			  SCM_BOOL_F);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_make_backup_files, "make-backup-files",
+			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_backup_directory, "backup-directory",
+			  SCM_BOOL_F);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_t, "t", SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE (Gvar_setq, "setq");
 
 void
 init_variables (void)
 {
-  main_vars = new_varlist ();
-#define X(var, defval, local, doc)              \
-  init_builtin_var (var, defval, local, doc);
-#include "tbl_vars.h"
-#undef X
 }
 
+
+/* Set variable to bool, number, or string based on */
 void
 set_variable (const char *var, const char *val)
 {
-  Hash_table *var_list;
-  struct var_entry *ent, *key = XZALLOC (var_entry);
-  var_entry *p = XZALLOC (var_entry), *q;
-
-  /* Find whether variable is buffer-local when set, and if needed
-     create a buffer-local variable list. */
-  key->var = xstrdup (var);
-  ent = hash_lookup (main_vars, key);
-  if (ent && ent->local && get_buffer_vars (cur_bp) == NULL)
-    set_buffer_vars (cur_bp, new_varlist ());
-  var_list = (ent && ent->local) ? get_buffer_vars (cur_bp) : main_vars;
-
-  /* Insert variable if it doesn't already exist. */
-  p->var = xstrdup (var);
-  q = hash_insert (var_list, p);
-
-  /* Update value */
-  q->val = xstrdup (val);
-
-  /* If variable is new, initialise other fields. */
-  if (q == p)
+  /* Decide if VAL is boolean, integer, or string. */
+  if (strcmp (val, "#t") == 0)
+    set_variable_bool (var, 1);
+  else if (strcmp (val, "#f") == 0)
+    set_variable_bool (var, 0);
+  else
     {
-      if (var_list == main_vars)
-        {
-          p->defval = xstrdup (val);
-          p->local = false;
-          p->doc = "";
-        }
+      char *tail;
+      long n;
+      errno = 0;
+      n = strtol (val, &tail, 0);
+      if (errno == 0 && tail - val == strlen (val) - 1)
+        set_variable_number (var, n);
+      else
+        set_variable_string (var, val);
     }
 }
 
-static var_entry *
-get_variable_entry (Buffer * bp, const char *var)
+void
+set_variable_bool (const char *var, int val)
 {
-  var_entry *p = NULL, *key = XZALLOC (var_entry);
-
-  key->var = xstrdup (var);
-
-  if (bp && get_buffer_vars (bp))
-    p = hash_lookup (get_buffer_vars (bp), key);
-
-  if (p == NULL)
-    p = hash_lookup (main_vars, key);
-
-  return p;
+  guile_c_define_safe (var, scm_from_bool (val));
 }
 
-const char *
-get_variable_doc (const char *var, const char **defval)
+#if HAVE_SCM_ELISP_NIL == 1
+void
+set_variable_nil (const char *var)
 {
-  var_entry *p = get_variable_entry (NULL, var);
-  if (p != NULL)
+  guile_c_define_safe (var, SCM_ELISP_NIL);
+}
+#endif
+
+void
+set_variable_string (const char *var, const char *str)
+{
+  guile_c_define_safe (var, guile_from_locale_string_safe (str));
+}
+
+void
+set_variable_number (const char *var, long val)
+{
+  guile_c_define_safe (var, scm_from_long (val));
+}
+
+SCM
+get_variable_entry (const char *var)
+{
+  SCM gvar;
+
+  //if (bp)
+    //gvar = scm_c_private_variable (get_buffer_module (bp), var);
+  //else if (cur_bp)
+    //gvar = scm_c_private_variable (get_buffer_module (cur_bp), var);
+  //else
+    //gvar = scm_c_private_variable ("zile", var);
+
+  gvar = guile_lookup_safe (scm_from_locale_symbol (var));
+
+  return gvar;
+}
+
+/* Since the return value is #f when var is false, and is
+   also #f, when var is not found, OK can be used
+   to clarify.  */
+bool
+get_variable_bool (const char *var)
+{
+  SCM gvar, gval;
+  gvar = get_variable_entry (var);
+  if (!scm_is_true (gvar))
     {
-      *defval = p->defval;
-      return p->doc;
+      return SCM_BOOL_F;
     }
+  gval = guile_variable_ref_safe (gvar);
+  return scm_is_true (gval);
+}
+
+long
+get_variable_number (const char *var)
+{
+  SCM gvar, gval;
+  gvar = get_variable_entry (var);
+  if (!scm_is_true (gvar))
+    {
+      return 1;
+    }
+  gval = guile_variable_ref_safe (gvar);
+  if (!scm_is_integer (gval) || !scm_is_true (scm_exact_p (gval)))
+    {
+      return 1;
+    }
+  return scm_to_long (gval);
+}
+
+char *
+get_variable_string (const char *var)
+{
+  SCM gvar, gval;
+  gvar = get_variable_entry (var);
+  if (!scm_is_true (gvar))
+    {
+      return NULL;
+    }
+  gval = guile_variable_ref_safe (gvar);
+  if (!scm_is_string (gval))
+    {
+      return NULL;
+    }
+  return guile_to_locale_string_safe (gval);
+}
+
+#if 0
+char *
+get_variable_bp (Buffer * bp, const char *var)
+{
+  SCM gvar = get_variable_entry_bp (bp, var);
+  SCM val;
+  if (scm_is_true (gvar))
+    {
+      val = scm_variable_ref (gvar);
+      if (!scm_is_string (val))
+        scm_misc_error ("zile","'~s' is not an string", scm_list_1 (gvar));
+      return scm_to_locale_string (val);
+    }
+  scm_misc_error ("zile", "'~a' not found", scm_list_1 (gvar));
+
+  /* unreachable */
   return NULL;
 }
 
-static const char *
-get_variable_bp (Buffer * bp, const char *var)
-{
-  var_entry *p = get_variable_entry (bp, var);
-  return p ? p->val : NULL;
-}
-
-const char *
+char *
 get_variable (const char *var)
 {
   return get_variable_bp (cur_bp, var);
 }
 
 long
-get_variable_number_bp (Buffer * bp, const char *var)
+get_variable_number_bp (Buffer *bp, const char *var)
 {
-  long t = 0;
-  const char *s = get_variable_bp (bp, var);
+  SCM gvar = get_variable_entry_bp (bp, var);
+  SCM val;
+  if (scm_is_true (gvar))
+    {
+      val = scm_variable_ref (gvar);
+      if (!scm_is_integer (val) || !scm_is_true (scm_exact_p (val)))
+        scm_misc_error ("zile","'~s' is not an integer", scm_list_1 (gvar));
+      return scm_to_long (val);
+    }
+  scm_misc_error ("zile", "'~a' not found", scm_list_1 (gvar));
 
-  if (s)
-    t = strtol (s, NULL, 10);
-  /* FIXME: Check result and signal error. */
-
-  return t;
+  /* unreachable */
+  return LONG_MAX;
 }
 
 long
@@ -181,26 +236,42 @@ get_variable_number (const char *var)
 }
 
 bool
+get_variable_bool_bp (Buffer *bp, const char *var)
+{
+  SCM gvar = get_variable_entry (bp, var);
+  SCM val;
+  if (scm_is_true (gvar))
+    {
+      val = scm_variable_ref (gvar);
+      return scm_to_bool (val);
+    }
+  scm_misc_error ("zile", "'~a' not found", scm_list_1 (gvar));
+
+  /* unreachable */
+  return 0;
+}
+
+bool
 get_variable_bool (const char *var)
 {
-  const char *p = get_variable (var);
-  if (p != NULL)
-    return !STREQ (p, "nil");
-
-  return false;
+  return get_variable_bool_bp (cur_bp, var);
 }
+#endif
+
 
 castr
 minibuf_read_variable_name (const char *fmt, ...)
 {
+  #if 0
   Completion *cp = completion_new (false);
+  SCM completion_list = scm_call_0 (var_completions_func);
 
-  for (var_entry *p = hash_get_first (main_vars);
-       p != NULL;
-       p = hash_get_next (main_vars, p))
+  for (int i = 0; i < scm_to_int (scm_length (completion_list)); i++)
     {
+      SCM entry = scm_list_ref (completion_list, scm_from_int (i));
+      char *name = scm_to_locale_string (scm_symbol_to_string (entry));
       gl_sortedlist_add (get_completion_completions (cp), completion_strcmp,
-                         xstrdup (p->var));
+                         xstrdup (name));
     }
 
   va_list ap;
@@ -212,27 +283,47 @@ minibuf_read_variable_name (const char *fmt, ...)
   va_end (ap);
 
   return ms;
+  #endif
+  return (castr) NULL;
 }
 
-DEFUN_ARGS ("set-variable", set_variable,
-            STR_ARG (var)
-            STR_ARG (val))
-/*+
-Set a variable value to the user-specified value.
-+*/
+SCM_DEFINE (G_set_variable, "set-variable", 2, 0, 0, 
+	    (SCM gvar, SCM gval), "\
+Set a variable value to the user-specified value.")
 {
-  STR_INIT (var)
+  castr val;
+  SCM ok = SCM_BOOL_T;
+  char *str = NULL;
+  astr var = NULL;
+  
+  str = guile_to_locale_string_safe (gvar);
+  if (str != NULL)
+    var = astr_new_cstr (str);
   else
     var = minibuf_read_variable_name ("Set variable: ");
+  
   if (var == NULL)
-    return leNIL;
-  STR_INIT (val)
-  else
-    val = minibuf_read ("Set %s to value: ", "", var);
-  if (val == NULL)
-    ok = FUNCALL (keyboard_quit);
+    return SCM_BOOL_F;
 
-  if (ok == leT)
-    set_variable (astr_cstr (var), astr_cstr (val));
+  if (SCM_UNBNDP (gval))
+    {
+      val = minibuf_read ("Set %s to value: ", "",  astr_cstr (var));
+      if (val == NULL)
+	ok = G_keyboard_quit ();
+      else
+	set_variable (astr_cstr (var), astr_cstr (val));
+    }
+  else
+    guile_c_define_safe (astr_cstr (var), gval);
+
+  return ok;
 }
-END_DEFUN
+
+void
+init_guile_variables_procedures (void)
+{
+#include "variables.x"
+  scm_c_export ("set-variable",
+		0);
+  scm_c_define ("setq", scm_c_lookup ("define"));
+}

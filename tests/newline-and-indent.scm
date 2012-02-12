@@ -1,0 +1,8 @@
+(newline-and-indent)
+(forward-line)
+(newline-and-indent)
+(forward-line)
+(newline-and-indent)
+(newline-and-indent)
+(save-buffer)
+(save-buffers-kill-emacs)

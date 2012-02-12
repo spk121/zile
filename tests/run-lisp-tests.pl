@@ -41,7 +41,7 @@ my $zile_fail = 0;
 my $emacs_pass = 0;
 my $emacs_fail = 0;
 
-my @zile_cmd = ("$builddir/src/zile");
+my @zile_cmd = ("$builddir/src/zile-on-guile");
 unshift @zile_cmd, (split ' ', $ENV{VALGRIND}) if $ENV{VALGRIND};
 
 sub run_test {
@@ -69,10 +69,13 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   $edit_file =~ s/^\Q$srcdir/$builddir/e;	# ./tests/zile-only/backward_delete_char.input
   my $lisp_file = "$test.el";
   $lisp_file =~ s/^\Q$srcdir/$abs_srcdir/e;
-  my @args = ("--no-init-file", $edit_file, "--load", $lisp_file);
+  my $scheme_file = "$test.scm";
+  $scheme_file =~ s/^\Q$srcdir/$abs_srcdir/e;
 
   mkpath(dirname($edit_file));
 
+  my @args = ("--no-init-file", $edit_file, "--load", $lisp_file);
+  my @args2 = ("--no-init-file", $edit_file, "--load", $scheme_file);
   if ($ENV{EMACSPROG}) {
     if (run_test($test, $name, "Emacs", $edit_file, $ENV{EMACSPROG}, @args, "--batch", "--quick")) {
       $emacs_pass++;
@@ -83,14 +86,14 @@ for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
     }
   }
 
-  if (run_test($test, $name, "Zile", $edit_file, @zile_cmd, @args)) {
+  if (run_test($test, $name, "Zile-on-Guile", $edit_file, @zile_cmd, @args2)) {
     $zile_pass++;
   } else {
     $zile_fail++;
   }
 }
 
-print STDERR "Zile: $zile_pass pass(es) and $zile_fail failure(s)\n";
+print STDERR "Zile-on-Guile: $zile_pass pass(es) and $zile_fail failure(s)\n";
 print STDERR "Emacs: $emacs_pass pass(es) and $emacs_fail failure(s)\n";
 
 exit $zile_fail + $emacs_fail;

@@ -1,8 +1,9 @@
 /* Completion facility functions
 
    Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@
 #include <sys/stat.h>
 #include <assert.h>
 #include <dirent.h>
+#include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,9 +110,9 @@ completion_scroll_up (void)
   Window *wp = find_window ("*Completions*");
   assert (wp != NULL);
   set_current_window (wp);
-  if (FUNCALL (scroll_up) == leNIL)
+  if (!scm_is_true (G_scroll_up (scm_from_int(1))))
     {
-      FUNCALL (beginning_of_buffer);
+      G_beginning_of_buffer ();
       resync_redisplay (cur_wp);
     }
   set_current_window (old_wp);
@@ -128,9 +130,9 @@ completion_scroll_down (void)
   Window *wp = find_window ("*Completions*");
   assert (wp != NULL);
   set_current_window (wp);
-  if (FUNCALL (scroll_down) == leNIL)
+  if (!scm_is_true (G_scroll_down (scm_from_int (1))))
     {
-      FUNCALL (end_of_buffer);
+      G_end_of_buffer ();
       resync_redisplay (cur_wp);
     }
   set_current_window (old_wp);

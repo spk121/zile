@@ -1,8 +1,9 @@
 /* Minibuffer facility functions
 
    Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial port of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -94,7 +95,7 @@ minibuf_error (const char *fmt, ...)
   minibuf_vwrite (fmt, ap);
   va_end (ap);
 
-  ding ();
+  // ding ();
 }
 
 /*
@@ -133,7 +134,7 @@ minibuf_read_number (const char *fmt, ...)
       if (as == NULL || astr_cstr (as) == NULL)
         {
           n = LONG_MAX;
-          FUNCALL (keyboard_quit);
+          G_keyboard_quit ();
           break;
         }
       if (strlen (astr_cstr (as)) == 0)
@@ -295,7 +296,7 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
 
       if (ms == NULL) /* Cancelled. */
         {
-          FUNCALL (keyboard_quit);
+	  G_keyboard_quit ();
           break;
         }
       else if (astr_len (ms) == 0)

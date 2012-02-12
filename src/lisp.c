@@ -1,8 +1,9 @@
 /* Lisp parser
 
    Copyright (c) 2001, 2005, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2011 Michael L Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -21,200 +22,173 @@
 
 #include <config.h>
 
+#include <libguile.h>
 #include <stdlib.h>
 
 #include "main.h"
 #include "extern.h"
 
+static SCM
+guile_use_module_body (void *data)
+{
+  const char *filename = data;
+  scm_c_use_module (filename);
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+guile_use_module_handler (void *data, SCM key, SCM exception)
+{
+  const char *filename = data;
+  char *c_key;
+  SCM subr, message, args, rest;
+  SCM message_args, formatted_message;
+  char *c_message;
+  
+  /* Key is the exception type, a symbol. */
+  /* exception is a list of 4 elements:
+     - subr: a subroutine name (symbol?) or #f
+     - message: a format string
+     - args: a list of arguments that are tokens for the message
+     - rest: the errno, if any */
+  if (scm_is_true (key))
+    c_key = scm_to_locale_string (scm_symbol_to_string (key));
+  else
+    c_key = NULL;
+
+  if (scm_to_int (scm_length (exception)) > 0)
+    subr = scm_list_ref (exception, scm_from_int (0));
+  else
+    subr = SCM_BOOL_F;
+  if (scm_to_int (scm_length (exception)) > 1)
+    {
+      message = scm_list_ref (exception, scm_from_int (1));
+      if (scm_to_int (scm_length (exception)) > 2)
+	args = scm_list_ref (exception, scm_from_int (2));
+      else
+	args = SCM_EOL;
+    }
+  else
+    {
+      message = scm_from_locale_string ("unknown error");
+      args = SCM_EOL;
+    }
+  // rest = scm_list_ref (exception, scm_from_int (3));
+
+  message_args = scm_simple_format (SCM_BOOL_F, message, args);
+
+  if (scm_is_true (subr))
+    formatted_message 
+      = scm_simple_format (SCM_BOOL_F,
+			   scm_from_locale_string ("Guile error in ~S, ~A~%"),
+			   scm_list_2 (subr, message_args));
+  else
+    formatted_message 
+      = scm_simple_format (SCM_BOOL_F,
+			   scm_from_locale_string ("Guile error: ~A~%"),
+			   scm_list_1 (message_args));
+  /* One aggravating bug I made was when I put the load path
+     to the srcdir and then scm_c_use_module tried to load
+     the zile executable as a module.  When you do that, you 
+     end up with "Unbound variable: \\x7ELF <binary junk>.
+     The binary junk caused the following scm_to_locale_string to 
+     fail because the string contains nulls. */
+  //c_message = scm_to_locale_string (formatted_message);
+
+  /* Send the message to the best handler. */
+  scm_simple_format (scm_current_error_port (), formatted_message, SCM_EOL);
+  //fprintf (stderr, "%s\n", c_message);
+  //fflush (stderr);
+  //free (c_message);
+  return SCM_UNSPECIFIED;
+}
+
 void
 init_lisp (void)
 {
-  leNIL = leNew ("nil");
-  leT = leNew ("t");
+  /* Load Zile's Guile procedures into the top level environment.  */
+  /* Init Guile first. */
+  guile_c_resolve_module_safe ("zile");
+  init_guile_guile_procedures ();
+
+
+  init_guile_basic_procedures ();
+  init_guile_bind_procedures ();
+  init_guile_buffer_procedures ();
+  init_guile_eval_procedures ();
+  init_guile_file_procedures ();
+  init_guile_funcs_procedures ();
+  init_guile_help_procedures ();
+  init_guile_keycode_procedures ();
+  init_guile_killring_procedures ();
+  init_guile_line_procedures ();
+  init_guile_lisp_procedures ();
+  init_guile_macro_procedures ();
+  init_guile_redisplay_procedures ();
+  init_guile_registers_procedures ();
+  init_guile_search_procedures ();
+  init_guile_undo_procedures ();
+  init_guile_variables_procedures ();
+  init_guile_window_procedures ();
+
+  /* Now switch back to the REPL's module */
+  guile_c_resolve_module_safe ("guile-user");
+  /* And import the zile module */
+  scm_c_catch (SCM_BOOL_T,
+	       guile_use_zile_module, "zile module",
+	       guile_error_handler, NULL,
+	       NULL, NULL);
 }
 
 
-enum tokenname
+
+SCM_DEFINE (G_console, "console", 0, 0, 0, (void), "\
+Suspend the editor and bring up the REPL for this buffer's module.")
 {
-  T_EOF,
-  T_CLOSEPAREN,
-  T_OPENPAREN,
-  T_NEWLINE,
-  T_QUOTE,
-  T_WORD
-};
+  SCM var, func;
 
-static int
-read_char (astr as, size_t * pos)
-{
-  if ((size_t) *pos < astr_len (as))
-    return astr_get (as, (*pos)++);
-  return EOF;
-}
+  /* Suspend the CRT screen handling.  */
+  interactive = false;
+  set_guile_error_port_to_stderr ();
+  term_close ();
+  /* Switch to the current buffer's module.  */
+  printf ("\n\n");
+  printf ("+-------------------------------------------------------+\n");
+  printf ("| This is the Zile debug console for this buffer.       |\n");
+  printf ("| \"(quit)\" to quit back to the editor                   |\n");
+  printf ("| \"(zile-intro)\" for an introduction                    |\n");
+  printf ("| \"(zile-procedures)\" to see Zile's functions           |\n");
+  printf ("| \"(key-map)\" to see Zile's keymap                      |\n");
+  printf ("+-------------------------------------------------------+\n");
+  printf ("\n\n");
+  
+  fflush (stdout);
+#if 0
+  if (cur_bp)
+    scm_set_current_module (scm_c_resolve_module (get_buffer_module (cur_bp)));
+  else
+    scm_set_current_module (scm_c_resolve_module ("zile"));
+  // FIXME was system repl repl
+  scm_call_1 (scm_c_module_lookup (scm_current_module (), "start-repl"),
+              scm_from_locale_symbol ("scheme"));
+#endif
 
-static astr
-read_token (enum tokenname *tokenid, astr as, size_t * pos)
-{
-  int c;
-  int doublequotes = 0;
-  astr tok = astr_new ();
+  var = scm_c_lookup ("scm-style-repl");
+  func = scm_variable_ref (var);
+  scm_call_0 (func);
 
-  *tokenid = T_EOF;
-
-  /* Chew space to next token */
-  do
-    {
-      c = read_char (as, pos);
-
-      /* Munch comments */
-      if (c == ';')
-        do
-          c = read_char (as, pos);
-        while (c != EOF && c != '\n');
-    }
-  while (c != EOF && (c == ' ' || c == '\t'));
-
-  /* Snag token */
-  if (c == '(')
-    {
-      *tokenid = T_OPENPAREN;
-      return tok;
-    }
-  else if (c == ')')
-    {
-      *tokenid = T_CLOSEPAREN;
-      return tok;
-    }
-  else if (c == '\'')
-    {
-      *tokenid = T_QUOTE;
-      return tok;
-    }
-  else if (c == '\n')
-    {
-      *tokenid = T_NEWLINE;
-      return tok;
-    }
-  else if (c == EOF)
-    {
-      *tokenid = T_EOF;
-      return tok;
-    }
-
-  /* It looks like a string. Snag to the next whitespace. */
-  if (c == '\"')
-    {
-      doublequotes = 1;
-      c = read_char (as, pos);
-    }
-
-  for (;;)
-    {
-      astr_cat_char (tok, (char) c);
-
-      if (!doublequotes)
-        {
-          if (c == ')' || c == '(' || c == ';' || c == ' ' || c == '\n'
-              || c == '\r' || c == EOF)
-            {
-              (*pos)--;
-              astr_truncate (tok, astr_len (tok) - 1);
-              *tokenid = T_WORD;
-              return tok;
-            }
-        }
-      else
-        {
-          switch (c)
-            {
-            case '\n':
-            case '\r':
-            case EOF:
-              (*pos)--;
-              /* Fall through */
-
-            case '\"':
-              astr_truncate (tok, astr_len (tok) -1);
-              *tokenid = T_WORD;
-              return tok;
-              break;
-
-            default:
-              break;
-            }
-        }
-
-      c = read_char (as, pos);
-    }
-
-  return tok;
-}
-
-static le *
-lisp_read (le * list, astr as, size_t * pos)
-{
-  int quoted = false;
-
-  for (;;)
-    {
-      enum tokenname tokenid;
-      astr tok = read_token (&tokenid, as, pos);
-
-      switch (tokenid)
-        {
-        case T_QUOTE:
-          quoted = true;
-          break;
-
-        case T_OPENPAREN:
-          list = leAddBranchElement (list, lisp_read (NULL, as, pos), quoted);
-          quoted = false;
-          break;
-
-        case T_NEWLINE:
-          quoted = false;
-          break;
-
-        case T_WORD:
-          list = leAddDataElement (list, astr_cstr (tok), quoted);
-          quoted = false;
-          break;
-
-        case T_CLOSEPAREN:
-        case T_EOF:
-          return list;
-
-        default:
-          break;
-        }
-    }
+  printf ("Press <ENTER> key to re-enter zile...\n");
+  set_guile_error_port_to_minibuffer ();
+  term_getkey (-1);
+  term_refresh ();
+  interactive = true;
+  return SCM_BOOL_T;
 }
 
 void
-lisp_loadstring (astr as)
+init_guile_lisp_procedures (void)
 {
-  size_t pos = 0;
-  leEval (lisp_read (NULL, as, &pos));
+#include "lisp.x"
+  scm_c_export ("console",
+		0);
 }
-
-bool
-lisp_loadfile (const char *file)
-{
-  astr bs = astr_readf (file);
-  if (bs == NULL)
-    return false;
-  lisp_loadstring (bs);
-  return true;
-}
-
-DEFUN ("load", load)
-/*+
-Execute a file of Lisp code named FILE.
-+*/
-{
-  if (arglist && countNodes (arglist) >= 2)
-    ok = bool_to_lisp (lisp_loadfile (arglist->next->data));
-  else
-    ok = leNIL;
-}
-END_DEFUN

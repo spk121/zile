@@ -22,7 +22,7 @@ dnl MA 02111-1301, USA.
 AC_PREREQ([2.61])
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile, 2.4.5, bug-zile@gnu.org)
+AC_INIT(zile-on-guile, 0.0, spk121@yahoo.com)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -119,6 +119,10 @@ AC_COMPILE_IFELSE(
  with_included_regex=yes])
 gl_INIT
 
+dnl Guile 
+GUILE_FLAGS
+GUILE_SITE_DIR
+
 dnl Curses
 AX_WITH_CURSES
 if test "$ax_cv_curses" != "yes"; then
@@ -182,7 +186,23 @@ if test -z "$PERL"; then
   AC_MSG_FAILURE([cannot find perl])
 fi
 
+pkgdatadir="$datadir/$PACKAGE"
+if test "x$guilesitedir" = "x"; then
+   guilesitedir="$pkgdatadir"
+fi
+AC_SUBST([guilesitedir])
+
 dnl Generate output
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile lib/Makefile src/tbl_opts.h])
 AC_OUTPUT
+
+if test "$guilesitedir" != "$GUILE_SITE"; then
+   # Guile has a different prefix than this module
+   AC_MSG_WARN([]
+   [The Guile modules will be installed in ${guilesitedir}.]
+   [You should probably re-run `configure' with]
+   [`--with-guilesitedir=$GUILE_SITE']
+   [Otherwise, you will have to adjust the `GUILE_LOAD_PATH' environment]
+   [variable.])
+fi

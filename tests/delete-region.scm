@@ -1,0 +1,5 @@
+(set-mark )
+(forward-line)
+(kill-region  )
+(save-buffer)
+(save-buffers-kill-emacs)

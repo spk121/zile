@@ -1,8 +1,9 @@
 /* Main types and definitions
 
    Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Grajn
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial port of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -34,7 +35,6 @@
 #include "minmax.h"
 #include "hash.h"
 #include "gl_xlist.h"
-#include "unused-parameter.h"
 
 #ifdef HAVE_GC_H
 #include <gc.h>
@@ -47,6 +47,8 @@
 #include "lists.h"
 
 #define ZILE_VERSION_STRING	"GNU " PACKAGE_NAME " " VERSION
+
+#define _GL_UNUSED_PARAMETER
 
 /*--------------------------------------------------------------------------
  * Main editor structures.
@@ -112,93 +114,6 @@ enum
 /*--------------------------------------------------------------------------
  * Zile commands to C bindings.
  *--------------------------------------------------------------------------*/
-
-/*
- * The type of a Zile exported function.
- * `uniarg' is the universal argument, if any, whose presence is
- * indicated by `is_uniarg'.
- */
-typedef le * (*Function) (long uniarg, bool is_uniarg, le * list);
-
-/* Turn a bool into a Lisp boolean */
-#define bool_to_lisp(b) ((b) ? leT : leNIL)
-
-/* Define an interactive function. */
-#define DEFUN(zile_func, c_func) \
-  DEFUN_ARGS(zile_func, c_func, )
-#define DEFUN_ARGS(zile_func, c_func, args) \
-  le * F_ ## c_func (long uniarg _GL_UNUSED_PARAMETER, bool is_uniarg _GL_UNUSED_PARAMETER, le *arglist _GL_UNUSED_PARAMETER) \
-  {                                                                     \
-    le * ok = leT;                                                      \
-    args
-#define END_DEFUN    \
-    return ok;       \
-  }
-
-/* Define a non-user-visible function. */
-#define DEFUN_NONINTERACTIVE(zile_func, c_func) \
-  DEFUN(zile_func, c_func)
-#define DEFUN_NONINTERACTIVE_ARGS(zile_func, c_func, args) \
-  DEFUN_ARGS(zile_func, c_func, args)
-
-/* String argument. */
-#define STR_ARG(name)                           \
-  castr name = NULL;
-#define STR_INIT(name)                                  \
-  if (arglist && arglist->next)                         \
-    {                                                   \
-      if (arglist->next->data)                          \
-        name = astr_new_cstr (arglist->next->data);     \
-      arglist = arglist->next;                          \
-    }
-
-/* Integer argument. */
-#define INT_ARG(name) \
-  long name = 1;
-#define INT_INIT(name) \
-  if (arglist && arglist->next)                 \
-    {                                           \
-      const char *s = arglist->next->data;      \
-      arglist = arglist->next;                  \
-      if (s != NULL)                            \
-        name = strtol (s, NULL, 10);            \
-      if (name == LONG_MAX)                     \
-        ok = leNIL;                             \
-    }
-
-/* Integer argument which can either be argument or uniarg. */
-#define INT_OR_UNIARG(name) \
-  long name = 1;            \
-  bool noarg = false;
-#define INT_OR_UNIARG_INIT(name)                             \
-  INT_INIT (name)                                            \
-  else                                                       \
-    {                                                        \
-      if (!(lastflag & FLAG_SET_UNIARG) && !is_uniarg &&     \
-          (arglist == NULL || arglist->next == NULL))        \
-        noarg = true;                                        \
-      name = uniarg;                                         \
-    }
-
-/* Boolean argument. */
-#define BOOL_ARG(name)                          \
-  bool name = true;
-#define BOOL_INIT(name)                         \
-  if (arglist && arglist->next)                 \
-    {                                           \
-      const char *s = arglist->next->data;      \
-      arglist = arglist->next;                  \
-      if (s != NULL && STREQ (s, "nil"))        \
-        name = false;                           \
-    }
-
-/* Call an interactive function. */
-#define FUNCALL(c_func)                         \
-  F_ ## c_func (1, false, leNIL)
-
-/* Call an interactive function with a universal argument. */
-#define FUNCALL_ARG(c_func, uniarg)             \
-  F_ ## c_func (uniarg, true, leNIL)
 
 /*--------------------------------------------------------------------------
  * Keyboard handling.

@@ -1,6 +1,7 @@
 TAGS
 .deps
 .dirstamp
+*.x
 astr
 zile
 tbl_funcs.h

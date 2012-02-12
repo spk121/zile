@@ -1,8 +1,9 @@
 /* Marker facility functions
 
    Copyright (c) 2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 2012 Michael L. Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial port of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -141,7 +142,7 @@ push_mark (void)
       gl_list_add_last (mark_ring, m);
     }
 
-  FUNCALL (set_mark);
+  G_set_mark ();
 }
 
 /* Pop a mark from the mark-ring and make it the current mark. */
