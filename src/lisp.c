@@ -190,5 +190,5 @@ init_guile_lisp_procedures (void)
 {
 #include "lisp.x"
   scm_c_export ("console",
-		0);
+		NULL);
 }

@@ -202,5 +202,5 @@ void
 init_guile_eval_procedures (void)
 {
 #include "eval.x"
-  scm_c_export ("execute-extended-command", 0);
+  scm_c_export ("execute-extended-command", NULL);
 }

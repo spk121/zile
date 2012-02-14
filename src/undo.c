@@ -159,5 +159,5 @@ init_guile_undo_procedures (void)
 {
 #include "undo.x"
   scm_c_export ("undo",
-		0);
+		NULL);
 }

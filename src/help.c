@@ -179,5 +179,5 @@ init_guile_help_procedures (void)
   scm_c_export ("describe-function",
 		"describe-variable",
 		"describe-key",
-		0);
+		NULL);
 }

@@ -415,6 +415,6 @@ init_guile_line_procedures (void)
 		"indent-relative",
 		"indent-for-tab-command",
 		"newline-and-indent",
-		0);
+		NULL);
 }
 

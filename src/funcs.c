@@ -1199,5 +1199,5 @@ init_guile_funcs_procedures (void)
 		"shell-command-on-region",
 		"delete-region",
 		"delete-blank-lines",
-		0);
+		NULL);
 }

@@ -271,5 +271,5 @@ init_guile_killring_procedures (void)
 		"backward-kill-word",
 		"kill-sexp",
 		"yank",
-		0);
+		NULL);
 }

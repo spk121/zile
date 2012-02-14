@@ -264,5 +264,5 @@ init_guile_basic_procedures (void)
 		"forward-char",
 		"backward-char",
 		"scroll-down",
-		"scroll-up", 0);
+		"scroll-up", NULL);
 }

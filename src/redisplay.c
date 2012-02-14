@@ -130,5 +130,5 @@ init_guile_redisplay_procedures (void)
 {
 #include "redisplay.x"
   scm_c_export ("recenter", 
-		0);
+		NULL);
 }

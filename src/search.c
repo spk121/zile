@@ -462,5 +462,5 @@ init_guile_search_procedures (void)
 		"isearch-forward-regexp",
 		"isearch-backward-regexp",
 		"query-replace",
-		0);
+		NULL);
 }

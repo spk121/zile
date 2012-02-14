@@ -829,5 +829,5 @@ init_guile_file_procedures (void)
 		"save-some-buffers",
 		"save-buffers-kill-emacs",
 		"cd",
-		0);		
+		NULL);		
 }

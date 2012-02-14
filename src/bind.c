@@ -728,5 +728,5 @@ init_guile_bind_procedures ()
 		"set-key",
 		"describe-bindings",
 		"key-map",
-		0);
+		NULL);
 }

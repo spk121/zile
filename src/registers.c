@@ -152,5 +152,5 @@ init_guile_registers_procedures (void)
   scm_c_export ("copy-to-register",
 		"insert-register",
 		"list-registers",
-		0);
+		NULL);
 }

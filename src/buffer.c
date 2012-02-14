@@ -818,5 +818,5 @@ init_guile_buffer_procedures (void)
 {
 
 #include "buffer.x"
-  scm_c_export ("kill-buffer", 0);
+  scm_c_export ("kill-buffer", NULL);
 }

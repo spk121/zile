@@ -198,5 +198,5 @@ init_guile_macro_procedures (void)
 		"call-last-kbd-macro",
 		"end-kbd-macro",
 		"execute-kbd-macro",
-		0);
+		NULL);
 }

@@ -324,6 +324,6 @@ init_guile_variables_procedures (void)
 {
 #include "variables.x"
   scm_c_export ("set-variable",
-		0);
+		NULL);
   scm_c_define ("setq", scm_c_lookup ("define"));
 }
