@@ -243,6 +243,14 @@ Put point at beginning and mark at end of buffer.")
   return SCM_BOOL_T;
 }
 
+SCM_DEFINE (G_read_char, "read-char", 0, 0, 0, (void), "\
+Returns the character of the next key press. Events that are not\n\
+characters are ignored.")
+{
+  size_t c = getkey_unfiltered (GETKEY_DEFAULT);
+  return scm_integer_to_char (scm_from_char (c));
+}
+
 SCM_DEFINE (G_quoted_insert, "quoted-insert", 0, 0, 0, (void), "\
 Read next input character and insert it.\n\
 This is useful for inserting control characters.")
@@ -1172,6 +1180,7 @@ init_guile_funcs_procedures (void)
 		"set-mark-command",
 		"exchange-point-and-mark",
 		"mark-whole-buffer",
+		"read-char",
 		"quoted-insert",
 		"universal-argument",
 		"back-to-indentation",
