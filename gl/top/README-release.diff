@@ -23,7 +23,7 @@
 +
  Here are most of the steps we (maintainers) follow when making a release.
  
- * start from a clean, up-to-date git directory.
+ * Start from a clean, up-to-date git directory:
 @@ -16,14 +36,19 @@
  * Ensure that you've pushed all changes that belong in the release
    and that the NixOS/Hydra autobuilder is reporting all is well:
@@ -39,13 +39,13 @@
  
 -* Run "make distcheck"
 +    make check syntax-check
-+ 
++
 +  succeeds.
-+ 
++
 +* Run
-+ 
++
 +    make "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" distcheck
-+ 
++
 +  (Make sure you have any needed Valgrind suppressions files.)
  
  * Set the date, version number, and release type [stable/alpha/beta] on
