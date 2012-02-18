@@ -2,6 +2,11 @@
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+** Bug fixes
+
+   Fix a crash in non-incremental search the first time it is used
+   interactively.
+
 
 * Noteworthy changes in release 2.4.5 (2012-02-08) [stable]
 
