@@ -65,6 +65,8 @@ loc-all:
 	cd $(srcdir) &&					\
 	$(CLOC) $(PRODUCTIONSOURCES) $(LISP_ALL_TESTS) $(srcdir)/tests/run-lisp-tests.pl
 
+# FIXME: Mention "make release" in README-release patch
+# FIXME: Add a pre-release target containing README-release commands
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
 	woger gnu,freecode upload=ftp.gnu.org package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) description="the tiny Emacs clone" notes=release-notes email=~/announce-$(PACKAGE)-$(VERSION) dist_type="tar.gz" && \
