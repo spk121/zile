@@ -6,6 +6,7 @@
 /depcomp
 /do-release-commit-and-tag
 /gendocs.sh
+/gitlog-to-changelog
 /gnupload
 /install-sh
 /mdate-sh
