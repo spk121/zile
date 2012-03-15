@@ -321,7 +321,9 @@ init_default_bindings (void)
 (global-set-key \"\\LEFT\" 'backward-char)\
 (global-set-key \"\\C-b\" 'backward-char)\
 (global-set-key \"\\BACKSPACE\" 'backward-delete-char)\
+(global-set-key \"\\C-?\" 'backward-delete-char)\
 (global-set-key \"\\M-\\BACKSPACE\" 'backward-kill-word)\
+(global-set-key \"\\C-\\M-?\" 'backward-kill-word)\
 (global-set-key \"\\M-{\" 'backward-paragraph)\
 (global-set-key \"\\C-\\M-b\" 'backward-sexp)\
 (global-set-key \"\\M-b\" 'backward-word)\
