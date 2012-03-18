@@ -64,7 +64,8 @@ sub run_test {
 
 for my $test (@ARGV) {				# ../tests/zile-only/backward_delete_char.el
   $test =~ s/\.el$//;				# ../tests/zile-only/backward_delete_char
-  my $name = basename($test);			# backward_delete_char
+  my $name = $test;
+  $name =~ s|^\Q$srcdir/tests/||;		# zile-only/backward_delete_char
   my $edit_file = "$test.input";
   $edit_file =~ s/^\Q$srcdir/$builddir/e;	# ./tests/zile-only/backward_delete_char.input
   my $lisp_file = "$test.el";
