@@ -467,7 +467,7 @@ sequence.
   STR_INIT (name)
   else
     name = minibuf_read_function_name ("Set key %s to command: ",
-                                       keystr);
+                                       astr_cstr (keystr));
   if (name == NULL)
     return leNIL;
 
