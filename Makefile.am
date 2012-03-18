@@ -1,6 +1,6 @@
 # Top-level Makefile.am
 #
-# Copyright (c) 1997-2011 Free Software Foundation, Inc.
+# Copyright (c) 1997-2012 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -19,7 +19,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-CLOC = cloc --force-lang="C",h --force-lang="C",in
+CLOC = cloc --force-lang="C",h --autoconf
 
 SUBDIRS = lib .
 
