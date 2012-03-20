@@ -1,6 +1,15 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
-* Noteworthy changes in release 2.4.7 (2012-03-20) [stable]
+* Noteworthy changes in release ?.? (????-??-??) [?]
+
+** Bug fixes
+
+  Fix a potential crash and cosmetic bug in global-set-key when used
+  interactively.
+
+** Build-related
+
+  Add lots more tests.
 
 
 * Noteworthy changes in release 2.4.6 (2012-02-18) [stable]
