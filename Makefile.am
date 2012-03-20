@@ -70,7 +70,7 @@ prerelease:
 	git checkout master && \
 	git pull origin master && \
 	git diff --exit-code && \
-	git push origin master && \x
+	git push origin master && \
 	make "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" check syntax-check distcheck
 
 # FIXME: Mention "make release" in README-release patch
