@@ -66,12 +66,13 @@ loc-all:
 	$(CLOC) $(PRODUCTIONSOURCES) $(LISP_ALL_TESTS) $(srcdir)/tests/run-lisp-tests.pl
 
 prerelease:
-	{ make -k maintainer-clean || { ./configure && make maintainer-clean; } } && \
+	{ $(MAKE) -k maintainer-clean || { ./configure && $(MAKE) maintainer-clean; } } && \
 	git checkout master && \
 	git pull origin master && \
 	git diff --exit-code && \
 	git push origin master && \
-	make "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" check syntax-check distcheck
+	./bootstrap && ./configure && \
+	$(MAKE) "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" check syntax-check distcheck
 
 # FIXME: Mention "make release" in README-release patch
 release:
