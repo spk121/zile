@@ -339,8 +339,6 @@ main (int argc, char **argv)
     {
       if (lastflag & FLAG_NEED_RESYNC)
         window_resync (cur_wp);
-      term_redisplay ();
-      term_refresh ();
       get_and_run_command ();
     }
 

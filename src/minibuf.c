@@ -65,8 +65,12 @@ minibuf_refresh (void)
 static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
-  minibuf_contents = xvasprintf (fmt, ap);
-  minibuf_refresh ();
+  char *s = xvasprintf (fmt, ap);
+  if (minibuf_contents == NULL || strcmp (s, minibuf_contents))
+    {
+      minibuf_refresh ();
+      minibuf_contents = s;
+    }
 }
 
 /*

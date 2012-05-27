@@ -42,7 +42,14 @@ lastkey (void)
 size_t
 getkey (int mode)
 {
-  _last_key = term_getkey (mode);
+  _last_key = term_getkey (0);
+
+  if (_last_key == KBD_NOKEY)
+    {
+      term_redisplay ();
+      term_refresh ();
+      _last_key = term_getkey (mode);
+    }
 
   if (thisflag & FLAG_DEFINING_MACRO)
     add_key_to_cmd (_last_key);
