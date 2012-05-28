@@ -233,7 +233,7 @@ codetokey (int c)
       return KBD_F12;
     default:
       if (c > 0xff || c < 0)
-        return KBD_NOKEY;	/* Undefined behaviour. */
+        return KBD_NOKEY;	/* ERR (no key) or undefined behaviour. */
       return c;
     }
 }
