@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -37,7 +37,7 @@
 #include "extern.h"
 
 #define ZILE_COPYRIGHT_STRING \
-  "Copyright (C) 2011 Free Software Foundation, Inc."
+  "Copyright (C) 2012 Free Software Foundation, Inc."
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
