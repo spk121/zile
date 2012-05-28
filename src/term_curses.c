@@ -1,6 +1,6 @@
 /* Curses terminal
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -393,8 +393,6 @@ get_char (int delay)
           resize_windows ();
       } while (c == KEY_RESIZE);
 #endif
-
-      timeout (-1);
     }
 
   return c;
