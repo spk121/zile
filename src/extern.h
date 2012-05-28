@@ -231,7 +231,6 @@ castr minibuf_read_filename (const char *fmt, const char *value,
 void minibuf_clear (void);
 
 /* redisplay.c ------------------------------------------------------------ */
-void resync_redisplay (Window * wp);
 void resize_windows (void);
 void recenter (Window * wp);
 
@@ -297,6 +296,7 @@ void delete_window (Window * del_wp);
 size_t window_o (Window * wp);
 bool window_top_visible (Window * wp);
 bool window_bottom_visible (Window * wp);
+void window_resync (Window * wp);
 
 
 /*

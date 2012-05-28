@@ -1,6 +1,6 @@
 /* Window fields
 
-   Copyright (c) 2009, 2011 Free Software Foundation, Inc.
+   Copyright (c) 2009-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -22,7 +22,6 @@
 FIELD(Window *, next)		/* The next window in window list. */
 FIELD(Buffer *, bp)		/* The buffer displayed in window. */
 FIELD(size_t, topdelta)		/* The top line delta from point. */
-FIELD(int, lastpointn)		/* The last point line number. */
 FIELD(size_t, start_column)	/* The start column of the window (>0 if scrolled
                                    sideways). */
 FIELD(Marker *, saved_pt)	/* The point line pointer, line number and offset

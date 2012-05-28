@@ -300,7 +300,7 @@ isearch (int forward, int regexp)
 
       if (thisflag & FLAG_NEED_RESYNC)
         {
-          resync_redisplay (cur_wp);
+          window_resync (cur_wp);
           term_redisplay ();
         }
     }
@@ -412,7 +412,7 @@ what to do with it.
       if (!noask)
         {
           if (thisflag & FLAG_NEED_RESYNC)
-            resync_redisplay (cur_wp);
+            window_resync (cur_wp);
           for (;;)
             {
               minibuf_write
@@ -464,7 +464,7 @@ what to do with it.
     }
 
   if (thisflag & FLAG_NEED_RESYNC)
-    resync_redisplay (cur_wp);
+    window_resync (cur_wp);
 
   if (ok)
     minibuf_write ("Replaced %d occurrences", count);

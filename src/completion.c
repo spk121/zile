@@ -1,6 +1,6 @@
 /* Completion facility functions
 
-   Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2004, 2008-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -111,7 +111,7 @@ completion_scroll_up (void)
   if (FUNCALL (scroll_up) == leNIL)
     {
       FUNCALL (beginning_of_buffer);
-      resync_redisplay (cur_wp);
+      window_resync (cur_wp);
     }
   set_current_window (old_wp);
 
@@ -131,7 +131,7 @@ completion_scroll_down (void)
   if (FUNCALL (scroll_down) == leNIL)
     {
       FUNCALL (end_of_buffer);
-      resync_redisplay (cur_wp);
+      window_resync (cur_wp);
     }
   set_current_window (old_wp);
 

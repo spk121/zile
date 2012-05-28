@@ -1,6 +1,6 @@
 /* Window handling functions
 
-   Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2004, 2008-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -37,6 +37,7 @@ struct Window
 #define FIELD(ty, name) ty name;
 #include "window.h"
 #undef FIELD
+  int lastpointn;		/* The last point line number. */
 };
 
 #define FIELD(ty, field)                        \
@@ -292,4 +293,23 @@ bool
 window_bottom_visible (Window * wp)
 {
   return get_window_all_displayed (wp);
+}
+
+void
+window_resync (Window * wp)
+{
+  size_t n = offset_to_line (wp->bp, get_buffer_pt (wp->bp));
+  ptrdiff_t delta = n - wp->lastpointn;
+
+  if (delta)
+    {
+      if ((delta > 0 && wp->topdelta + delta < wp->eheight) ||
+          (delta < 0 && wp->topdelta >= (size_t) (-delta)))
+        wp->topdelta += delta;
+      else if (n > wp->eheight / 2)
+        wp->topdelta = wp->eheight / 2;
+      else
+        wp->topdelta = n;
+    }
+  wp->lastpointn = n;
 }
