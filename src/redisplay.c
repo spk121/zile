@@ -115,12 +115,12 @@ recenter (Window * wp)
 
 DEFUN ("recenter", recenter)
 /*+
-Center point in window and redisplay screen.
-The desired position of point is always relative to the current window.
+Center point in selected window and redisplay frame.
 +*/
 {
   recenter (cur_wp);
   term_clear ();
   term_redisplay ();
+  term_refresh ();
 }
 END_DEFUN
