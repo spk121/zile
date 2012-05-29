@@ -22,9 +22,20 @@
 #include <config.h>
 
 #include <assert.h>
+#include <gethrxtime.h>
 
 #include "main.h"
 #include "extern.h"
+
+/* Maximum time to avoid screen updates when catching up with buffered
+   input, in milliseconds. */
+#define MAX_RESYNC_MS 500
+
+#if XTIME_PRECISION == 1
+#  define MAX_RESYNC_PAUSE 1
+#else
+#  define MAX_RESYNC_PAUSE (MAX_RESYNC_MS * 1000000)
+#endif
 
 static size_t _last_key;
 
@@ -42,13 +53,18 @@ lastkey (void)
 size_t
 getkey (int mode)
 {
+  static xtime_t resync_stamp = 0;
+  xtime_t resync_pause = gethrxtime () - resync_stamp;
+
   _last_key = term_getkey (0);
 
-  if (_last_key == KBD_NOKEY)
+  if (_last_key == KBD_NOKEY || resync_pause >= MAX_RESYNC_PAUSE)
     {
       term_redisplay ();
       term_refresh ();
       _last_key = term_getkey (mode);
+
+      resync_stamp = gethrxtime ();
     }
 
   if (thisflag & FLAG_DEFINING_MACRO)

@@ -189,3 +189,7 @@
 /locale_h.m4
 /localeconv.m4
 /off_t.m4
+/clock_time.m4
+/gethrxtime.m4
+/gettime.m4
+/timespec.m4
