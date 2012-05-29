@@ -22,7 +22,7 @@
 #include <config.h>
 
 #include <assert.h>
-#include <gethrxtime.h>
+#include <sys/time.h>
 
 #include "main.h"
 #include "extern.h"
@@ -31,10 +31,25 @@
    input, in milliseconds. */
 #define MAX_RESYNC_MS 500
 
-#if XTIME_PRECISION == 1
-#  define MAX_RESYNC_PAUSE 1
-#else
-#  define MAX_RESYNC_PAUSE (MAX_RESYNC_MS * 1000000)
+/* These are not required for POSIX.1-2001, and not always defined in
+   the system headers. */
+#if !defined(timeradd)
+#  define timeradd(_a, _b, _result)				\
+   do {								\
+	(_result)->tv_sec  = (_a)->tv_sec + (_b)->tv_sec;	\
+	(_result)->tv_usec = (_a)->tv_usec + (_b)->tv_usec;	\
+	if ((_result)->tv_usec > 1000000) {			\
+	  ++(_result)->tv_sec;					\
+	  (_result)->tv_usec -= 1000000;			\
+	}							\
+   while (0)
+#endif
+
+#if !defined(timercmp)
+#  define timercmp(_a, _b, _CMP)				\
+   (((_a)->tv_sec == (_b)->tv_sec)				\
+    ? ((_a)->tv_usec _CMP (_b)->tv_usec)			\
+    : ((_a)->tv_sec  _CMP (_b)->tv_sec))
 #endif
 
 static size_t _last_key;
@@ -53,18 +68,20 @@ lastkey (void)
 size_t
 getkey (int mode)
 {
-  static xtime_t resync_stamp = 0;
-  xtime_t resync_pause = gethrxtime () - resync_stamp;
+  static struct timeval next_refresh = { 0, 0 };
+  static struct timeval refresh_wait = {
+    MAX_RESYNC_MS / 1000, (MAX_RESYNC_MS % 1000) * 1000 };
+  static struct timeval now;
 
+  gettimeofday (&now, NULL);
   _last_key = term_getkey (0);
 
-  if (_last_key == KBD_NOKEY || resync_pause >= MAX_RESYNC_PAUSE)
+  if (_last_key == KBD_NOKEY || !timercmp (&now, &next_refresh, <))
     {
       term_redisplay ();
       term_refresh ();
       _last_key = term_getkey (mode);
-
-      resync_stamp = gethrxtime ();
+      timeradd (&now, &refresh_wait, &next_refresh);
     }
 
   if (thisflag & FLAG_DEFINING_MACRO)
