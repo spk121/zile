@@ -62,32 +62,45 @@ lastkey (void)
 }
 
 /*
- * Get a keystroke, waiting for up to GETKEY_DELAYED ms, and translate
- * it into a keycode.
+ * Get a keystroke, waiting for up to delay ms, and translate it into
+ * a keycode.
  */
 size_t
-getkey (int mode)
+getkeystroke (int delay)
+{
+  _last_key = term_getkey (delay);
+
+  if (_last_key != KBD_NOKEY && (thisflag & FLAG_DEFINING_MACRO))
+    add_key_to_cmd (_last_key);
+
+  return _last_key;
+}
+
+/*
+ * Return the next keystroke, refreshing the screen only when the input
+ * buffer is empty, or MAX_RESYNC_MS have elapsed since the last
+ * screen refresh.
+ */
+size_t
+getkey (int delay)
 {
   static struct timeval next_refresh = { 0, 0 };
   static struct timeval refresh_wait = {
     MAX_RESYNC_MS / 1000, (MAX_RESYNC_MS % 1000) * 1000 };
   static struct timeval now;
+  size_t keycode = getkeystroke (0);
 
   gettimeofday (&now, NULL);
-  _last_key = term_getkey (0);
 
-  if (_last_key == KBD_NOKEY || !timercmp (&now, &next_refresh, <))
+  if (keycode == KBD_NOKEY || !timercmp (&now, &next_refresh, <))
     {
       term_redisplay ();
       term_refresh ();
-      _last_key = term_getkey (mode);
+      keycode = getkeystroke (delay);
       timeradd (&now, &refresh_wait, &next_refresh);
     }
 
-  if (thisflag & FLAG_DEFINING_MACRO)
-    add_key_to_cmd (_last_key);
-
-  return _last_key;
+  return keycode;
 }
 
 size_t
