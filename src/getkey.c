@@ -96,9 +96,11 @@ getkey (int delay)
     {
       term_redisplay ();
       term_refresh ();
-      keycode = getkeystroke (delay);
       timeradd (&now, &refresh_wait, &next_refresh);
     }
+
+  if (keycode == KBD_NOKEY)
+    keycode = getkeystroke (delay);
 
   return keycode;
 }
