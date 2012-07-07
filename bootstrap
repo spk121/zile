@@ -134,7 +134,6 @@ gnulib_modules=
 gnulib_non_module_files="
         build-aux/compile
         build-aux/install-sh
-        build-aux/missing
         build-aux/mdate-sh
         build-aux/texinfo.tex
         build-aux/depcomp
@@ -601,12 +600,18 @@ func_install_gnulib_non_module_files ()
         case $file in
           */COPYING*) dest=COPYING;;
           */INSTALL) dest=INSTALL;;
+	  build-aux/missing) dest=
+            func_warning settings "\
+Please remove build-aux/missing from gnulib_module_files in
+\`bootstrap.conf', as it may clash with Automake's version."
+            ;;
           build-aux/*) dest=$build_aux/`expr "$file" : 'build-aux/\(.*\)'`;;
           *) dest=$file;;
         esac
 
         # Be sure to show all copying errors before bailing out
-	func_gnulib_tool_copy_file "$file" "$dest" \
+	test -z "$dest" \
+	    || func_gnulib_tool_copy_file "$file" "$dest" \
 	    || maybe_exit_cmd="exit $EXIT_FAILURE"
       done
 
