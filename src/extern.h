@@ -153,6 +153,7 @@ void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), 
 void pushkey (size_t key);
 void ungetkey (size_t key);
 size_t lastkey (void);
+size_t getkeystroke (int delay);
 size_t getkey (int delay);
 size_t getkey_unfiltered (int delay);
 void waitkey (void);
