@@ -219,7 +219,7 @@ minibuf_read_yn (const char *fmt, ...)
     size_t key;
 
     minibuf_write ("%s%s", errmsg, buf);
-    key = getkeystroke (GETKEY_DEFAULT);
+    key = getkey (GETKEY_DEFAULT);
     switch (key)
       {
       case 'y':
