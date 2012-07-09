@@ -1,6 +1,6 @@
 /* memrmem
 
-   Copyright (c) 2011 Free Software Foundation, Inc.
+   Copyright (c) 2011-2012 Free Software Foundation, Inc.
 
    Based on strrstr.c:
 
@@ -31,7 +31,8 @@
 #include "memrmem.h"
 
 
-const char *memrmem (const char *s, size_t slen, const char *t, size_t tlen)
+const char *
+memrmem (const char *s, size_t slen, const char *t, size_t tlen)
 {
   if (slen >= tlen)
     {
