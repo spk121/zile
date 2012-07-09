@@ -28,7 +28,7 @@ bool previous_line (void);
 bool next_line (void);
 
 /* bind.c ----------------------------------------------------------------- */
-Function last_command (void);
+_GL_ATTRIBUTE_PURE Function last_command (void);
 void set_this_command (Function cmd);
 size_t do_binding_completion (astr as);
 gl_list_t get_key_sequence (void);
@@ -54,31 +54,31 @@ bool insert_estr (estr as);
 void set_buffer_text (Buffer *bp, estr es);
 castr get_buffer_pre_point (Buffer *bp);
 castr get_buffer_post_point (Buffer *bp);
-size_t get_buffer_pt (Buffer *bp);
-size_t get_buffer_size (Buffer * bp);
-const char *get_buffer_eol (Buffer *bp);
-size_t buffer_prev_line (Buffer *bp, size_t o);
-size_t buffer_next_line (Buffer *bp, size_t o);
-size_t buffer_start_of_line (Buffer *bp, size_t o);
-size_t buffer_end_of_line (Buffer *bp, size_t o);
-size_t buffer_line_len (Buffer *bp, size_t o);
-size_t get_region_size (const Region r);
-size_t get_buffer_line_o (Buffer *bp);
-char get_buffer_char (Buffer *bp, size_t o);
+_GL_ATTRIBUTE_PURE size_t get_buffer_pt (Buffer *bp);
+_GL_ATTRIBUTE_PURE size_t get_buffer_size (Buffer * bp);
+_GL_ATTRIBUTE_PURE const char *get_buffer_eol (Buffer *bp);
+_GL_ATTRIBUTE_PURE size_t buffer_prev_line (Buffer *bp, size_t o);
+_GL_ATTRIBUTE_PURE size_t buffer_next_line (Buffer *bp, size_t o);
+_GL_ATTRIBUTE_PURE size_t buffer_start_of_line (Buffer *bp, size_t o);
+_GL_ATTRIBUTE_PURE size_t buffer_end_of_line (Buffer *bp, size_t o);
+_GL_ATTRIBUTE_PURE size_t buffer_line_len (Buffer *bp, size_t o);
+_GL_ATTRIBUTE_CONST size_t get_region_size (const Region r);
+_GL_ATTRIBUTE_PURE size_t get_buffer_line_o (Buffer *bp);
+_GL_ATTRIBUTE_PURE char get_buffer_char (Buffer *bp, size_t o);
 void free_buffer (Buffer * bp);
 void init_buffer (Buffer * bp);
 void insert_buffer (Buffer * bp);
 Buffer * buffer_new (void);
-const char *get_buffer_filename_or_name (Buffer * bp);
+_GL_ATTRIBUTE_PURE const char *get_buffer_filename_or_name (Buffer * bp);
 void set_buffer_names (Buffer * bp, const char *filename);
-Buffer * find_buffer (const char *name);
+_GL_ATTRIBUTE_PURE Buffer * find_buffer (const char *name);
 void switch_to_buffer (Buffer * bp);
 int warn_if_no_mark (void);
 int warn_if_readonly_buffer (void);
-Region region_new (size_t o1, size_t o2);
+_GL_ATTRIBUTE_CONST Region region_new (size_t o1, size_t o2);
 Region calculate_the_region (void);
 bool delete_region (const Region r);
-bool in_region (size_t o, size_t x, Region r);
+_GL_ATTRIBUTE_CONST bool in_region (size_t o, size_t x, Region r);
 void set_temporary_buffer (Buffer * bp);
 void activate_mark (void);
 void deactivate_mark (void);
@@ -91,7 +91,7 @@ Completion *make_buffer_completion (void);
 bool check_modified_buffer (Buffer * bp);
 bool move_char (int dir);
 bool move_line (int n);
-size_t offset_to_line (Buffer *bp, size_t offset);
+_GL_ATTRIBUTE_PURE size_t offset_to_line (Buffer *bp, size_t offset);
 void goto_offset (size_t o);
 
 /* completion.c ----------------------------------------------------------- */
@@ -104,35 +104,35 @@ void goto_offset (size_t o);
 #include "completion.h"
 #undef FIELD
 #undef FIELD_STR
-int completion_strcmp (const void *p1, const void *p2);
+_GL_ATTRIBUTE_PURE int completion_strcmp (const void *p1, const void *p2);
 Completion *completion_new (int fileflag);
 void completion_scroll_up (void);
 void completion_scroll_down (void);
 int completion_try (Completion * cp, astr search, int popup_when_complete);
 
 /* editfns.c -------------------------------------------------------------- */
-bool is_empty_line (void);
-bool is_blank_line (void);
-int following_char (void);
-int preceding_char (void);
-bool bobp (void);
-bool eobp (void);
-bool bolp (void);
-bool eolp (void);
+_GL_ATTRIBUTE_PURE bool is_empty_line (void);
+_GL_ATTRIBUTE_PURE bool is_blank_line (void);
+_GL_ATTRIBUTE_PURE int following_char (void);
+_GL_ATTRIBUTE_PURE int preceding_char (void);
+_GL_ATTRIBUTE_PURE bool bobp (void);
+_GL_ATTRIBUTE_PURE bool eobp (void);
+_GL_ATTRIBUTE_PURE bool bolp (void);
+_GL_ATTRIBUTE_PURE bool eolp (void);
 void ding (void);
 
 /* eval.c ----------------------------------------------------------------- */
 extern le *leNIL, *leT;
-size_t countNodes (le * branch);
+_GL_ATTRIBUTE_PURE size_t countNodes (le * branch);
 void leEval (le * list);
 le *execute_with_uniarg (bool undo, int uniarg, bool (*forward) (void),
                          bool (*backward) (void));
 le *move_with_uniarg (int uniarg, bool (*move) (int dir));
 le *execute_function (const char *name, int uniarg, bool is_uniarg);
-Function get_function (const char *name);
-const char *get_function_doc (const char *name);
-int get_function_interactive (const char *name);
-const char *get_function_name (Function p);
+_GL_ATTRIBUTE_PURE Function get_function (const char *name);
+_GL_ATTRIBUTE_PURE const char *get_function_doc (const char *name);
+_GL_ATTRIBUTE_PURE int get_function_interactive (const char *name);
+_GL_ATTRIBUTE_PURE const char *get_function_name (Function p);
 castr minibuf_read_function_name (const char *fmt, ...);
 void init_eval (void);
 
@@ -152,7 +152,7 @@ void write_temp_buffer (const char *name, bool show, void (*func) (va_list ap), 
 /* getkey.c --------------------------------------------------------------- */
 void pushkey (size_t key);
 void ungetkey (size_t key);
-size_t lastkey (void);
+_GL_ATTRIBUTE_PURE size_t lastkey (void);
 size_t getkeystroke (int delay);
 size_t getkey (int delay);
 size_t getkey_unfiltered (int delay);
@@ -212,7 +212,7 @@ void set_mark (void);
 
 /* minibuf.c -------------------------------------------------------------- */
 void init_minibuf (void);
-int minibuf_no_error (void);
+_GL_ATTRIBUTE_PURE int minibuf_no_error (void);
 void minibuf_refresh (void);
 void minibuf_write (const char *fmt, ...);
 void minibuf_error (const char *fmt, ...);
@@ -250,8 +250,8 @@ void term_addch (char c);
 void term_addstr (const char *s);
 void term_attrset (size_t attr);
 void term_beep (void);
-size_t term_width (void);
-size_t term_height (void);
+_GL_ATTRIBUTE_PURE size_t term_width (void);
+_GL_ATTRIBUTE_PURE size_t term_height (void);
 size_t term_getkey (int delay);
 int term_getkey_unfiltered (int delay);
 void term_ungetkey (size_t key);
@@ -296,7 +296,7 @@ void set_current_window (Window * wp);
 void delete_window (Window * del_wp);
 size_t window_o (Window * wp);
 bool window_top_visible (Window * wp);
-bool window_bottom_visible (Window * wp);
+_GL_ATTRIBUTE_PURE bool window_bottom_visible (Window * wp);
 void window_resync (Window * wp);
 
 

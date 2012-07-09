@@ -1,6 +1,6 @@
 /* Dynamically allocated strings
 
-   Copyright (c) 2001-2011 Free Software Foundation, Inc.
+   Copyright (c) 2001-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -63,17 +63,17 @@ castr castr_new_nstr (const char *s, size_t n);
  * Convert as into a C null-terminated string.
  * as[0] to as[astr_len (as) - 1] inclusive may be read.
  */
-const char *astr_cstr (castr as);
+_GL_ATTRIBUTE_PURE const char *astr_cstr (castr as);
 
 /*
  * Return the length of the argument string `as'.
  */
-size_t astr_len (castr as);
+_GL_ATTRIBUTE_PURE size_t astr_len (castr as);
 
 /*
  * Return the `pos'th character of `as'.
  */
-char astr_get (castr as, size_t pos);
+_GL_ATTRIBUTE_PURE char astr_get (castr as, size_t pos);
 
 /*
  * Return a new astr consisting of `size' characters from string `as'

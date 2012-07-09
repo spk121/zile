@@ -89,7 +89,7 @@ enum
  *--------------------------------------------------------------------------*/
 
 #define GETTER(Obj, name, ty, field)            \
-  ty                                            \
+  _GL_ATTRIBUTE_PURE ty                         \
   get_ ## name ## _ ## field (const Obj *p)     \
   {                                             \
     return p->field;                            \

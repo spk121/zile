@@ -1,6 +1,6 @@
 /* Dynamically allocated encoded strings
 
-   Copyright (c) 2011 Free Software Foundation, Inc.
+   Copyright (c) 2011-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -40,12 +40,12 @@ void estr_init (void);
  */
 estr estr_new_astr (castr as);
 
-size_t estr_prev_line (estr es, size_t o);
-size_t estr_next_line (estr es, size_t o);
-size_t estr_start_of_line (estr es, size_t o);
-size_t estr_end_of_line (estr es, size_t o);
-size_t estr_line_len (estr es, size_t o);
-size_t estr_lines (estr es);
+_GL_ATTRIBUTE_PURE size_t estr_prev_line (estr es, size_t o);
+_GL_ATTRIBUTE_PURE size_t estr_next_line (estr es, size_t o);
+_GL_ATTRIBUTE_PURE size_t estr_start_of_line (estr es, size_t o);
+_GL_ATTRIBUTE_PURE size_t estr_end_of_line (estr es, size_t o);
+_GL_ATTRIBUTE_PURE size_t estr_line_len (estr es, size_t o);
+_GL_ATTRIBUTE_PURE size_t estr_lines (estr es);
 estr estr_replace_estr (estr es, size_t pos, estr src);
 estr estr_cat (estr es, estr src);
 

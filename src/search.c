@@ -371,7 +371,7 @@ END_DEFUN
  * Returns 2 if it is all upper case, 1 if just the first letter is,
  * and 0 otherwise.
  */
-static int
+static _GL_ATTRIBUTE_PURE int
 check_case (astr as)
 {
   size_t i;

@@ -139,7 +139,7 @@ term_close (void)
   endwin ();
 }
 
-static size_t
+static _GL_ATTRIBUTE_PURE size_t
 codetokey (int c)
 {
   switch (c)

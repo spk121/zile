@@ -51,7 +51,7 @@ static fentry fentry_table[] = {
 
 #define fentry_table_size (sizeof (fentry_table) / sizeof (fentry_table[0]))
 
-static fentry *
+static _GL_ATTRIBUTE_PURE fentry *
 get_fentry (const char *name)
 {
   assert (name);
