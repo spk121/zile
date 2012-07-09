@@ -1,6 +1,6 @@
 /* Getting and ungetting key strokes
 
-   Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2004, 2008-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -33,7 +33,7 @@
 
 /* These are not required for POSIX.1-2001, and not always defined in
    the system headers. */
-#if !defined(timeradd)
+#ifndef timeradd
 #  define timeradd(_a, _b, _result)				\
    do {								\
 	(_result)->tv_sec  = (_a)->tv_sec + (_b)->tv_sec;	\
@@ -45,7 +45,7 @@
    while (0)
 #endif
 
-#if !defined(timercmp)
+#ifndef timercmp
 #  define timercmp(_a, _b, _CMP)				\
    (((_a)->tv_sec == (_b)->tv_sec)				\
     ? ((_a)->tv_usec _CMP (_b)->tv_usec)			\
