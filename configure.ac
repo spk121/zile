@@ -74,7 +74,14 @@ if test "$gl_gcc_warnings" = yes; then
   dnl Add some more safety measures
   gl_WARN_ADD([-D_FORTIFY_SOURCE=2])
   gl_WARN_ADD([-fmudflap])
+
+  # When compiling with GCC, prefer -isystem to -I when including system
+  # include files, to avoid generating useless diagnostics for the files.
+  ISYSTEM='-isystem '
+else
+  ISYSTEM='-I'
 fi
+AC_SUBST([ISYSTEM])
 
 dnl help2man
 AX_WITH_PROG([HELP2MAN], [help2man])
