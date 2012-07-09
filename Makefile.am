@@ -69,7 +69,7 @@ prerelease:
 	git diff --exit-code && \
 	git push origin master && \
 	./bootstrap && ./configure && \
-	$(MAKE) "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" check syntax-check distcheck
+	$(MAKE) "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" check distcheck
 
 ## ------------- ##
 ## Distribution. ##
