@@ -50,7 +50,7 @@ index 29ba260..baaa7eb 100644
 +  belong in the release, and that all tests pass:
  
 -    ./bootstrap && ./configure
-+    make "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" prerelease
++    make prerelease
  
 -* Pre-release testing: ensure that the following command succeeds:
 +  (Make sure you have any needed Valgrind suppressions files.)
