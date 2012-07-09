@@ -1,6 +1,6 @@
 /* Kill ring facility functions
 
-   Copyright (c) 2001, 2003-2011 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2003-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
