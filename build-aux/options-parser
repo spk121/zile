@@ -590,24 +590,44 @@ func_echo ()
 }
 
 
-# func_error ARG...
-# -----------------
-# Echo program name prefixed message to standard error.
-func_error ()
+# func_echo_infix_1 INFIX ARG...
+# ------------------------------
+# Echo program name, followed by INFIX on the first line, with any
+# additional lines not showing INFIX.
+func_echo_infix_1 ()
 {
     $require_term_colors
 
+    _G_infix=$1; shift
+    _G_prefix="$progname: $tc_standout$tc_red$_G_infix$tc_reset: "
     _G_message=$*
-    _G_prefix="$progname: $tc_standout${tc_red}error$tc_reset: "
 
     save_IFS=$IFS
     IFS=$nl
     for _G_line in $_G_message; do
       IFS=$save_IFS
       $bs_echo "$_G_prefix$tc_bold$_G_line$tc_reset" 1>&2
-      _G_prefix="$progname:        "
+      _G_prefix="$progname: `echo $_G_infix | sed 's,., ,g'`  "
     done
     IFS=$save_IFS
+}
+
+
+# func_warn ARG...
+# ----------------
+# Echo program name (and 'warning') prefixed message to standard error.
+func_warn ()
+{
+    func_echo_infix_1 warning "$*"
+}
+
+
+# func_error ARG...
+# -----------------
+# Echo program name prefixed message to standard error.
+func_error ()
+{
+    func_echo_infix_1 error "$*"
 }
 
 

@@ -2385,7 +2385,7 @@ bootstrap_options_prep ()
 {
     $debug_cmd
 
-    warning_func=func_error
+    warning_func=func_warn
 
     # Option defaults:
     opt_copy=${copy-'false'}
