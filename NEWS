@@ -1,5 +1,23 @@
 * Noteworthy changes in release ?.? (????-??-??) [?]
 
+* Noteworthy changes in release ?.? (????-??-??) [?]
+
+** New features
+
+  Improve feedback during large pastes.
+
+  Various minor code improvements.
+
+** Build-related
+
+  Fix a bug in parallel builds.
+
+  Update gnulib to fix building with glibc 2.16.
+
+  Various minor fixes and improvements.
+
+  Use more GCC attributes.
+
 
 * Noteworthy changes in release 2.4.7 (2012-03-20) [stable]
 
