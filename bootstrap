@@ -1262,7 +1262,7 @@ func_require_gnulib_merge_changelog ()
     test -f ChangeLog && {
       $require_git
 
-      test true = "$GIT" || {
+      $EGREP '^(/|)ChangeLog$' .gitignore || test true = "$GIT" || {
         if $GIT config merge.merge-changelog.driver >/dev/null ; then
           :
         elif (git-merge-changelog --version) >/dev/null 2>&1 ; then
