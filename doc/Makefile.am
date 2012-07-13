@@ -22,17 +22,20 @@
 edit = sed \
 	-e 's|@pkgdatadir[@]|$(pkgdatadir)|g'
 
-MAINTAINERCLEANFILES += doc/zile.1.in doc/zile.1
-DISTCLEANFILES += doc/zile.1 doc/zile.1.in
+MAINTAINERCLEANFILES += $(srcdir)/doc/zile.1.in doc/zile.1
+DISTCLEANFILES += doc/zile.1
 EXTRA_DIST += doc/man-extras doc/zile.1.in
 dist_man_MANS = doc/zile.1
 
-doc/zile.1: doc/zile.1.in doc/Makefile.am config.status
+doc/zile.1: $(srcdir)/doc/zile.1.in doc/Makefile.am config.status
 	@test -d doc || mkdir doc
 	rm -f $@ $@.tmp
 	$(edit) $(abs_srcdir)/doc/zile.1.in >$@.tmp
 	mv $@.tmp $@
 
-doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac $(builddir)/src/zile$(EXEEXT)
+$(srcdir)/doc/zile.1.in: doc/man-extras build-aux/zile-help2man-wrapper configure.ac $(builddir)/src/zile$(EXEEXT)
 	@test -d doc || mkdir doc
-	$(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper
+## Exit gracefully if zile.1.in is not writeable, such as during distcheck!
+	$(AM_V_GEN)if ( touch $@.w && rm -f $@.w; ) >/dev/null 2>&1; then \
+	  $(HELP2MAN) --output=$@ --no-info --name="Zile Is Lossy Emacs" --include $(srcdir)/doc/man-extras $(srcdir)/build-aux/zile-help2man-wrapper; \
+	fi
