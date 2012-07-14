@@ -1,0 +1,20 @@
+--- gnulib/top/maint.mk	2012-07-07 18:15:13.000000000 +0700
++++ maint.mk	2012-07-14 17:20:08.000000000 +0700
+@@ -1274,7 +1274,7 @@
+ 	    $$(case ,$(bootstrap-tools), in (*,gnulib,*)		\
+ 	       echo --gnulib-version=$(gnulib-version);; esac)		\
+ 	    --no-print-checksums					\
+-	    $(addprefix --url-dir=, $(url_dir_list))
++	    $(addprefix --url-dir=, $(url_dir_list)) > ~/announce-$(my_distdir)
+ 
+ ## ---------------- ##
+ ## Updating files.  ##
+@@ -1361,7 +1361,7 @@
+ release-prep:
+ 	case $$RELEASE_TYPE in alpha|beta|stable) ;; \
+ 	  *) echo "invalid RELEASE_TYPE: $$RELEASE_TYPE" 1>&2; exit 1;; esac
+-	$(MAKE) --no-print-directory -s announcement > ~/announce-$(my_distdir)
++	$(MAKE) --no-print-directory -s announcement
+ 	if test -d $(release_archive_dir); then			\
+ 	  ln $(rel-files) $(release_archive_dir);		\
+ 	  chmod a-w $(rel-files);				\
