@@ -92,7 +92,6 @@ dist-hook: $(changelog)
 
 distcheck-hook: syntax-check
 
-# FIXME: Mention "make release" in README-release patch
 release:
 	agrep -d '^\* Note' $(VERSION) NEWS | tail -n +3 | head -n -1 | grep -v '^\*\*' > release-notes && \
 	woger gnu,freecode upload=ftp.gnu.org package=$(PACKAGE) package_name="$(PACKAGE_NAME)" version=$(VERSION) description="the tiny Emacs clone" notes=release-notes email=~/announce-$(PACKAGE)-$(VERSION) dist_type="tar.gz" && \
