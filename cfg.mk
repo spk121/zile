@@ -28,6 +28,9 @@ old_NEWS_hash := 134de26d1acfaaa3e223cd7040a50300
 # Don't check test outputs or diff patches
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
 
+# Don't send release announcements to Translation Project
+translation_project_ =
+
 local-checks-to-skip = \
 	sc_bindtextdomain \
 	sc_error_message_period \
