@@ -1,8 +1,8 @@
---- a/top/README-release	2012-07-15 20:55:43.438990037 +0100
-+++ b/top/README-release	2012-07-15 21:07:57.462972266 +0100
+--- gnulib/top/README-release	2012-09-10 22:14:18.164882316 +0100
++++ HACKING	2012-09-11 02:22:51.070623635 +0100
 @@ -1,35 +1,40 @@
 -Here are most of the steps we (maintainers) follow when making a release.
-+                      GNU Zile developers’ notes
++                      GNU Zile developers' notes
 +                      --------------------------
  
 -* Start from a clean, up-to-date git directory on "master":
@@ -36,37 +36,31 @@
  
 -* Check that the NixOS/Hydra autobuilder is reporting all is well:
 +Here are most of the steps we (maintainers) follow when making a release.
-+
+ 
+-    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
 +* Ensure that the latest stable versions of autoconf, automake, etc.
 +  are in your PATH.  See the buildreq list in bootstrap.conf for
 +  the complete list of tools.
  
--    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
+-* Run the following command to download any new translations:
 +* Start from a clean, up-to-date git directory on "master", ensure
 +  that you have no uncommitted diffs, have pushed all changes that
 +  belong in the release, and that all tests pass:
  
--* Run the following command to download any new translations:
+-    ./bootstrap && ./configure
 +    make prerelease
  
--    ./bootstrap && ./configure
+-* Pre-release testing: ensure that the following command succeeds:
 +  (Make sure you have any needed Valgrind suppressions files.)
  
--* Pre-release testing: ensure that the following command succeeds:
-+* Check that the NixOS/Hydra autobuilder is reporting all is well:
- 
 -    make check syntax-check distcheck
-+    http://hydra.nixos.org/jobset/gnu/zile-master
++* Check that the NixOS/Hydra autobuilder is reporting all is well:
++
++    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
  
- * From top_srcdir, run:
- 
-@@ -53,54 +58,11 @@
-   it builds and passes all tests.
- 
- * While that's happening, write the release announcement that you will
--  soon post.  Start with the template, $HOME/announce-@PACKAGE@-X.Y
-+  soon post.  Start with the template, $HOME/announce-zile-X.Y
-   that was just created by that "make" command.
+ * To (i) set the date, version number, and release type [stable/alpha/beta]
+   on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run
+@@ -53,45 +58,6 @@
  
  Once all the builds and tests have passed,
  
@@ -84,17 +78,15 @@
 -* Announce it on Savannah first, so you can include the savannah.org
 -  announcement link in the email message.
 -
--  From here:
+-  Go to the news-submission form:
 -
--    https://savannah.gnu.org/projects/@PACKAGE@/
+-    https://savannah.gnu.org/news/submit.php?group=@PACKAGE@
 -
--  click on "Submit news", then write something like the following:
--  (If there is no such button, then enable "News" for the project via
--  the "Main->Select Features" menu item, or via this link:
+-  If it does not work, then enable "News" for the project via this link:
 -
 -    https://savannah.gnu.org/project/admin/editgroupfeatures.php?group=@PACKAGE@
 -
--  )
+-  Write something like the following:
 -
 -    Subject: @PACKAGE@-X.Y released [stable]
 -    +verbatim+
@@ -107,14 +99,12 @@
 -
 -* Send the announcement email message.
 -
--* After each non-alpha release, update the on-line manual accessible via
+-* After each non-alpha release, run
 -
--    http://www.gnu.org/software/@PACKAGE@/manual/
+-    make web-manual-update
 -
--  by running this from top_srcdir:
--
--    build-aux/gnu-web-doc-update
+-  to update the on-line manual accessible at
 +* Run:
  
--  possibly with "-C <BUILDDIR>"
+-    http://www.gnu.org/software/@PACKAGE@/manual/
 +    make release
