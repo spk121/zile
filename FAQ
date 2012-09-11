@@ -1,6 +1,6 @@
                 Zile FAQ - Frequently Asked Questions
 
-        Copyright (c) 1997-2011 Free Software Foundation, Inc.
+        Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
      Copying and distribution of this file, with or without
      modification, are permitted in any medium without royalty
@@ -23,7 +23,6 @@ INDEX
    2.4 I like the xyz function of Emacs but it's not in Zile!
    2.5 Does Zile support Unicode/UTF-8?
    2.6 Zile doesn't compile, or its tests don't pass.
-   2.7 Zile has a bug!
 
 ------------------------------------------------------------------------------
 
@@ -113,8 +112,3 @@ INDEX
     maintainers will not accept non-POSIX compatibility patches to
     Zile.  This helps everyone: a wider range of systems get to run
     more POSIX code, and Zile is not burdened with special-case code.
-
-2.7 Zile has a bug!
-
-    For instructions on reporting bugs, see the REPORTING BUGS
-    section in the README file, or send email to <bug-zile@gnu.org>.
