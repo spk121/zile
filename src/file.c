@@ -418,15 +418,16 @@ Set mark after the inserted text.
     {
       estr es = estr_readf (astr_cstr (file));
       if (es.as != NULL)
-        insert_estr (es);
+        {
+          insert_estr (es);
+          FUNCALL (set_mark_command);
+        }
       else
         {
           ok = leNIL;
           minibuf_error ("%s: %s", astr_cstr (file), strerror (errno));
         }
     }
-  else
-    FUNCALL (set_mark_command);
 }
 END_DEFUN
 
