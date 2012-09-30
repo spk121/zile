@@ -70,6 +70,9 @@ find_substr (castr as1, castr as2, const char *n, size_t nsize, size_t from, siz
   pattern.not_bol = notbol;
   pattern.not_eol = noteol;
   if (!re_find_err)
+    /* FIXME: The current implementation memcpys the two strings into
+       a freshly malloced block, i.e. is horribly inefficient for
+       large buffers. */
     ret = re_search_2 (&pattern,
                        astr_cstr (as1), (int) astr_len (as1),
                        astr_cstr (as2), (int) astr_len (as2),
