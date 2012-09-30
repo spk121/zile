@@ -57,7 +57,7 @@
  
  * To (i) set the date, version number, and release type [stable/alpha/beta]
    on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run
-@@ -44,54 +45,12 @@
+@@ -44,57 +45,12 @@
      # "TYPE" must be stable, beta or alpha
      make TYPE
  
@@ -73,7 +73,10 @@
  
  Once all the builds and tests have passed,
  
--* Run the gnupload command that was suggested by your "make TYPE" run above.
+-* Run the gnupload command that was suggested by your "make release"
+-  run above, or run
+-
+-    make upload RELEASE='X.Y TYPE'
 -
 -* Wait a few minutes (maybe up to 30?) and then use the release URLs to
 -  download all tarball/signature pairs and use gpg --verify to ensure
