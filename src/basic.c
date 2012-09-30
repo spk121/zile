@@ -121,7 +121,7 @@ Beginning of buffer is position 1.
   if (ok == leNIL || n >= LONG_MAX - 1)
     return leNIL;
 
-  goto_offset (MAX (n, 1) - 1);
+  goto_offset (MIN (get_buffer_size (cur_bp), MAX (n, 1) - 1));
 }
 END_DEFUN
 
