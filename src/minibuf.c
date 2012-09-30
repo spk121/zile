@@ -68,8 +68,8 @@ minibuf_vwrite (const char *fmt, va_list ap)
   char *s = xvasprintf (fmt, ap);
   if (minibuf_contents == NULL || strcmp (s, minibuf_contents))
     {
-      minibuf_refresh ();
       minibuf_contents = s;
+      minibuf_refresh ();
     }
 }
 
@@ -339,5 +339,5 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
 void
 minibuf_clear (void)
 {
-  minibuf_write ("");
+  term_minibuf_write ("");
 }
