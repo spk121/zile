@@ -119,4 +119,4 @@
 +* Run:
  
 -    http://www.gnu.org/software/@PACKAGE@/manual/
-+    make release
++    make dorelease
