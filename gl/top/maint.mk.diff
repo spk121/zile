@@ -1,21 +1,21 @@
-diff --git a/top/maint.mk b/top/maint.mk
-index e52deb4..f3e4ef9 100644
---- a/top/maint.mk
-+++ b/top/maint.mk
-@@ -1327,7 +1327,7 @@ announcement: NEWS ChangeLog $(rel-files)
+--- maint.mk	2012-10-01 21:07:57.155761220 +0100
++++ /home/rrt/repo/gnulib/top/maint.mk	2012-09-30 20:29:29.560723573 +0100
+@@ -1327,7 +1327,7 @@
  	    $$(case ,$(bootstrap-tools), in (*,gnulib,*)		\
  	       echo --gnulib-version=$(gnulib-version);; esac)		\
  	    --no-print-checksums					\
--	    $(addprefix --url-dir=, $(url_dir_list))
-+	    $(addprefix --url-dir=, $(url_dir_list)) ~/announce-$(my_distdir)
+-	    $(addprefix --url-dir=, $(url_dir_list)) ~/announce-$(my_distdir)
++	    $(addprefix --url-dir=, $(url_dir_list))
  
  .PHONY: release-commit
  release-commit:
-@@ -1428,7 +1428,6 @@ gl_noteworthy_news_ = * Noteworthy changes in release ?.? (????-??-??) [?]
+@@ -1427,7 +1427,8 @@
+ gl_noteworthy_news_ = * Noteworthy changes in release ?.? (????-??-??) [?]
  .PHONY: release-prep
  release-prep:
- 	$(AM_V_GEN)$(MAKE) --no-print-directory -s announcement \
--	  > ~/announce-$(my_distdir)
+-	$(AM_V_GEN)$(MAKE) --no-print-directory -s announcement
++	$(AM_V_GEN)$(MAKE) --no-print-directory -s announcement \
++	  > ~/announce-$(my_distdir)
  	$(AM_V_at)if test -d $(release_archive_dir); then	\
  	  ln $(rel-files) $(release_archive_dir);		\
  	  chmod a-w $(rel-files);				\
