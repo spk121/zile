@@ -38,8 +38,9 @@ footprint systems (a typical binary is about 100Kb) and quick editing
 sessions (it starts up and shuts down instantly).
 
 Zile is written in **ISO C99** using **POSIX.1-2008** APIs, using
-[libgc][]. It can be built on many other platforms
-thanks to its use of [gnulib][].
+[libgc][]. It can be built on many other platforms thanks to its use
+of [gnulib][] (version 7.2 or later seems to be required for testing
+with Valgrind, but older versions seem to work fine for normal use).
 
   [Emacs]:   http://www.gnu.org/s/emacs
   [libgc]:   http://www.hpl.hp.com/personal/Hans_Boehm/gc
