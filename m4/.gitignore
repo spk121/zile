@@ -193,3 +193,4 @@
 /gethrxtime.m4
 /gettime.m4
 /timespec.m4
+/extern-inline.m4
