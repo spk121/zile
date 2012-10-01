@@ -4,6 +4,12 @@ GNU Zile NEWS                                         -*- outline -*-
 
 ** Bug fixes
 
+  Fix crash on out-of-range goto-char. 
+
+  Set mark on insert-file.
+  
+  Minor documentation fixes.
+
   Build system cleanups.
 
 * Noteworthy changes in release 2.4.8 (2012-07-13) [stable]
