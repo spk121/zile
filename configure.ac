@@ -84,7 +84,8 @@ fi
 AC_SUBST([ISYSTEM])
 
 dnl help2man
-AX_WITH_PROG([HELP2MAN], [help2man])
+dnl Set a value even if not found, so that an invocation via build-aux/missing works
+AX_WITH_PROG([HELP2MAN], [help2man], [help2man])
 
 dnl Code complexity reports
 AC_PATH_PROG([PMCCABE], [pmccabe], [false])
