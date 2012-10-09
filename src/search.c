@@ -425,6 +425,7 @@ what to do with it.
               if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
                   || c == 'n' || c == 'q' || c == '.' || c == '!')
                 break;
+              /* FIXME: Remove this prompt (see Lua Zile) */
               minibuf_error ("Please answer y, n, !, . or q.");
               waitkey ();
             }
