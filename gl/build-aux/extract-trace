@@ -1,19 +1,18 @@
 #! /bin/sh
 
-# Make sure we've evaluated the option-parser library.
-test -n "$progpath" || . `echo "$0" |${SED-sed} 's|[^/]*$||'`/options-parser
-
-# Set a version string.
-scriptversion=2011-11-21.10; # UTC
-
 # Extract macro arguments from autotools input with GNU M4.
 # Written by Gary V. Vaughan, 2010
 #
-# Copyright (C) 2010, 2011 Free Software Foundation, Inc.
+# Copyright (C) 2010-2012 Free Software Foundation, Inc.
 # This is free software; see the source for copying conditions.  There is NO
 # warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-#
-##### PLEASE CHECK `--version' WORKS AFTER EDITING THE ABOVE COPYRIGHT #####
+
+# Make sure we've evaluated scripts we depend on.
+test -z "$progpath" && . `echo "$0" |${SED-sed} 's|[^/]*$||'`/funclib.sh
+test extract-trace = "$progname" && . `echo "$0" |${SED-sed} 's|[^/]*$||'`/options-parser
+
+# Set a version string.
+scriptversion=2012-10-07.10; # UTC
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,34 +27,20 @@ scriptversion=2011-11-21.10; # UTC
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Please report bugs or propose patches to gary@gnu.org.
+
 
 ## ------ ##
 ## Usage. ##
 ## ------ ##
 
-# Run `./extract-trace --help' for help with using this script from the
+# Run './extract-trace --help' for help with using this script from the
 # command line.
 #
-# Or source first `options-parser' and then this file into your own
+# Or source first 'options-parser' and then this file into your own
 # scripts in order to make use of the function and variable framework
 # they define, and also to avoid the overhead of forking to run this
 # script in its own process on every call.
-
-
-## -------------- ##
-## Configuration. ##
-## -------------- ##
-
-usage='$progname MACRO_NAME FILE [...]'
-
-long_help_message='
-The first argument to this program is the name of an autotools macro
-whose arguments you want to extract by examining the files listed in the
-remaining arguments using the same tool that Autoconf and Automake use,
-GNU M4.
-
-The arguments are returned separated by colons, with each traced call
-on a separate line.'
 
 
 
@@ -64,7 +49,7 @@ on a separate line.'
 ## ------------------##
 
 # This section contains the helper functions used by the rest of
-# `extract-trace'.
+# 'extract-trace'.
 
 
 # func_autoconf_configure MAYBE-CONFIGURE-FILE
@@ -86,8 +71,8 @@ func_autoconf_configure ()
     test -n "$_G_ac_init"
     _G_status=$?
 
-    test 0 -ne $_G_status \
-      && func_verbose "\`$1' not using Autoconf"
+    test 0 -ne "$_G_status" \
+      && func_verbose "'$1' not using Autoconf"
 
     (exit $_G_status)
 }
@@ -120,7 +105,7 @@ func_find_tool ()
     fi
     if test -n "$_G_find_tool_res"; then
       func_tool_version_output >/dev/null $_G_find_tool_res "\
-${_G_find_tool_error_prefix}Cannot run \`$_G_find_tool_res --version'"
+${_G_find_tool_error_prefix}Cannot run '$_G_find_tool_res --version'"
 
       # Make sure the result is exported to the environment for children
       # to use.
@@ -136,12 +121,12 @@ One of these is required:
 
 # func_tool_version_output CMD [FATAL-ERROR-MSG]
 # ----------------------------------------------
-# Attempt to run `CMD --version', discarding errors.  The output can be
+# Attempt to run 'CMD --version', discarding errors.  The output can be
 # ignored by redirecting stdout, and this function used simply to test
 # whether the command exists and exits normally when passed a
-# `--version' argument.
+# '--version' argument.
 # When FATAL-ERROR-MSG is given, then this function will display the
-# message and exit if running `CMD --version' returns a non-zero exit
+# message and exit if running 'CMD --version' returns a non-zero exit
 # status.
 func_tool_version_output ()
 {
@@ -150,10 +135,10 @@ func_tool_version_output ()
     _G_cmd=$1
     _G_fatal_error_msg=$2
 
-    # Some tools, like `git2cl' produce thousands of lines of output
+    # Some tools, like 'git2cl' produce thousands of lines of output
     # unless stdin is /dev/null - in that case we want to return
     # successfully without saving all of that output.  Other tools,
-    # such as `help2man' exit with a non-zero status when stdin comes
+    # such as 'help2man' exit with a non-zero status when stdin comes
     # from /dev/null, so we re-execute without /dev/null if that
     # happens.  This means that occasionally, the output from both calls
     # ends up in the result, but the alternative would be to discard the
@@ -161,7 +146,7 @@ func_tool_version_output ()
     { $_G_cmd --version </dev/null || $_G_cmd --version; } 2>/dev/null
     _G_status=$?
 
-    test 0 -ne $_G_status && test -n "$_G_fatal_error_msg" \
+    test 0 -ne "$_G_status" && test -n "$_G_fatal_error_msg" \
         && func_fatal_error "$_G_fatal_error_msg"
 
     (exit $_G_status)
@@ -176,9 +161,9 @@ func_tool_version_output ()
 # particular resource (a file, or a non-empty configuration variable for
 # example) is available, and if appropriate to extract default values
 # from pertinent package files.  Where a variable already has a non-
-# empty value (as set by the package's `bootstrap.conf'), that value is
+# empty value (as set by the package's 'bootstrap.conf'), that value is
 # used in preference to deriving the default. Call them using their
-# associated `require_*' variable to ensure that they are executed, at
+# associated 'require_*' variable to ensure that they are executed, at
 # most, once.
 #
 # It's entirely deliberate that calling these functions can set
@@ -189,9 +174,9 @@ func_tool_version_output ()
 
 # require_configure_ac
 # --------------------
-# Ensure that there is a `configure.ac' or `configure.in' file in the
+# Ensure that there is a 'configure.ac' or 'configure.in' file in the
 # current directory which contains an uncommented call to AC_INIT, and
-# that `$configure_ac' contains its name.
+# that '$configure_ac' contains its name.
 require_configure_ac=func_require_configure_ac
 func_require_configure_ac ()
 {
@@ -202,7 +187,7 @@ func_require_configure_ac ()
     test -z "$configure_ac" \
       && func_autoconf_configure configure.in && configure_ac=configure.in
     test -z "$configure_ac" \
-      || func_verbose "found \`$configure_ac'"
+      || func_verbose "found '$configure_ac'"
 
     require_configure_ac=:
 }
@@ -222,7 +207,7 @@ func_require_gnu_m4 ()
     }
 
     test -n "$M4" || func_fatal_error "\
-Please install GNU M4, or \`export M4=/path/to/gnu/m4'."
+Please install GNU M4, or 'export M4=/path/to/gnu/m4'."
 
     func_verbose "export M4='$M4'"
 
@@ -238,15 +223,15 @@ Please install GNU M4, or \`export M4=/path/to/gnu/m4'."
 ## --------------- ##
 
 # This section contains the high level functions used when calling this
-# file as a script. `func_extract_trace' is probably the only one that you
+# file as a script. 'func_extract_trace' is probably the only one that you
 # won't want to replace if you source this file into your own script.
 
 
 # func_extract_trace MACRO_NAMES [FILENAME]...
 # --------------------------------------------
-# set `$func_extract_trace_result' to a colon delimited list of arguments
+# set '$func_extract_trace_result' to a colon delimited list of arguments
 # to any of the comma separated list of MACRO_NAMES in FILENAME. If no
-# FILENAME is given, then `$configure_ac' is assumed.
+# FILENAME is given, then '$configure_ac' is assumed.
 func_extract_trace ()
 {
     $debug_cmd
@@ -265,11 +250,11 @@ func_extract_trace ()
     # Generate an error if the first file is missing
     <"$1"
 
-    # Sadly, we can't use `autom4te' tracing to extract macro arguments,
+    # Sadly, we can't use 'autom4te' tracing to extract macro arguments,
     # because it complains about things we want to ignore at bootstrap
     # time - like missing m4_include files; AC_PREREQ being newer than
     # the installed autoconf; and returns nothing when tracing
-    # `AM_INIT_AUTOMAKE' when aclocal hasn't been generated yet.
+    # 'AM_INIT_AUTOMAKE' when aclocal hasn't been generated yet.
     #
     # The following tries to emulate a less persnickety version of (and
     # due to not having to wait for Perl startup on every invocation,
@@ -281,7 +266,7 @@ func_extract_trace ()
     # it for reading Autoconf macros, while still providing some of the
     # functionality generally used at m4-time to supply dynamic
     # arguments to Autocof functions, but without following
-    # `m4_s?include' files.
+    # 'm4_s?include' files.
     _G_mini='
         # Initialisation.
         m4_changequote([,])
@@ -363,11 +348,38 @@ func_extract_trace ()
 }
 
 
+# func_extract_trace_first MACRO_NAMES [FILENAME]...
+# --------------------------------------------------
+# Exactly like func_extract_trace, except that only the first argument
+# to the first invocation of one of the comma separated MACRO_NAMES is
+# returned in '$func_extract_trace_first_result'.
+func_extract_trace_first ()
+{
+    $debug_cmd
+
+    func_extract_trace ${1+"$@"}
+    func_extract_trace_first_result=`$bs_echo "$func_extract_trace_result" \
+      |$SED 's|:.*$||g;1q'`
+}
+
+
 # func_main [ARG]...
 # ------------------
 func_main ()
 {
     $debug_cmd
+
+    # Configuration.
+    usage='$progname MACRO_NAME FILE [...]'
+
+    long_help_message='
+The first argument to this program is the name of an autotools macro
+whose arguments you want to extract by examining the files listed in the
+remaining arguments using the same tool that Autoconf and Automake use,
+GNU M4.
+
+The arguments are returned separated by colons, with each traced call
+on a separate line.'
 
     # Option processing.
     func_options "$@"
@@ -393,15 +405,13 @@ func_main ()
 ## Actually perform the trace. ##
 ## --------------------------- ##
 
-# Only call `func_main' if this script was called directly.
+# Only call 'func_main' if this script was called directly.
 test extract-trace = "$progname" && func_main "$@"
 
 # Local variables:
 # mode: shell-script
 # sh-indentation: 2
 # eval: (add-hook 'write-file-hooks 'time-stamp)
-# time-stamp-start: "scriptversion="
-# time-stamp-format: "%:y-%02m-%02d.%02H"
+# time-stamp-pattern: "10/scriptversion=%:y-%02m-%02d.%02H; # UTC"
 # time-stamp-time-zone: "UTC"
-# time-stamp-end: "; # UTC"
 # End:
