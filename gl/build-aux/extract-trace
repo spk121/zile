@@ -60,7 +60,10 @@ func_autoconf_configure ()
 {
     $debug_cmd
 
-    _G_sed_no_comment='s|#.*$||; s|^dnl .*$||; s| dnl .*$||;'
+    _G_sed_no_comment='
+      s|#.*$||
+      s|^dnl .*$||
+      s| dnl .*$||'
     _G_ac_init=
 
     # If we were passed a genuine file, make sure it calls AC_INIT.
@@ -359,7 +362,7 @@ func_extract_trace_first ()
 
     func_extract_trace ${1+"$@"}
     func_extract_trace_first_result=`$bs_echo "$func_extract_trace_result" \
-      |$SED 's|:.*$||g;1q'`
+      |$SED -e 's|:.*$||g' -e 1q`
 }
 
 

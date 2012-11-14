@@ -322,16 +322,30 @@ func_require_term_colors ()
     $debug_cmd
 
     test -t 1 && {
-      test -n "`tput sgr0 2>/dev/null`" && {
-        tc_reset=`tput sgr0`
-        test -n "`tput bold 2>/dev/null`" && tc_bold=`tput bold`
+      # COLORTERM and USE_ANSI_COLORS environment variables take
+      # precedence, because most terminfo databases neglect to describe
+      # whether color sequences are supported.
+      test -n "${COLORTERM+set}" && : ${USE_ANSI_COLORS="1"}
+
+      if test 1 = "$USE_ANSI_COLORS"; then
+        # Standard ANSI escape sequences
+        tc_reset='[0m'
+        tc_bold='[1m';   tc_standout='[7m'
+        tc_red='[31m';   tc_green='[32m'
+        tc_blue='[34m';  tc_cyan='[36m'
+      else
+        # Otherwise trust the terminfo database after all.
+        test -n "`tput sgr0 2>/dev/null`" && {
+          tc_reset=`tput sgr0`
+          test -n "`tput bold 2>/dev/null`" && tc_bold=`tput bold`
           tc_standout=$tc_bold
-      test -n "`tput smso 2>/dev/null`" && tc_standout=`tput smso`
-        test -n "`tput setaf 1 2>/dev/null`" && tc_red=`tput setaf 1`
-        test -n "`tput setaf 2 2>/dev/null`" && tc_green=`tput setaf 2`
-        test -n "`tput setaf 4 2>/dev/null`" && tc_blue=`tput setaf 4`
-        test -n "`tput setaf 5 2>/dev/null`" && tc_cyan=`tput setaf 5`
-      }
+          test -n "`tput smso 2>/dev/null`" && tc_standout=`tput smso`
+          test -n "`tput setaf 1 2>/dev/null`" && tc_red=`tput setaf 1`
+          test -n "`tput setaf 2 2>/dev/null`" && tc_green=`tput setaf 2`
+          test -n "`tput setaf 4 2>/dev/null`" && tc_blue=`tput setaf 4`
+          test -n "`tput setaf 5 2>/dev/null`" && tc_cyan=`tput setaf 5`
+        }
+      fi
     }
 
     require_term_colors=:
@@ -360,7 +374,7 @@ func_require_term_colors ()
     : ${_G_HAVE_XSI_OPS="yes"}
     # The += operator was introduced in bash 3.1
     case $BASH_VERSION in
-      [12].* | 3.0 | 3.0.*) ;;
+      [12].* | 3.0 | 3.0*) ;;
       *)
         : ${_G_HAVE_PLUSEQ_OP="yes"}
         ;;
@@ -604,7 +618,7 @@ func_error ()
 
     $require_term_colors
 
-    func_echo_infix_1 "$tc_standout${tc_red}error$tc_reset" "$*" >&2
+    func_echo_infix_1 "  $tc_standout${tc_red}error$tc_reset" "$*" >&2
 }
 
 
@@ -1019,8 +1033,8 @@ else
     $debug_cmd
 
     case $2 in
-      .*) func_stripname_result=`$ECHO "$3" | $SED "s%^$1%%; s%\\\\$2\$%%"`;;
-      *)  func_stripname_result=`$ECHO "$3" | $SED "s%^$1%%; s%$2\$%%"`;;
+      .*) func_stripname_result=`$ECHO "$3" | $SED -e "s%^$1%%" -e "s%\\\\$2\$%%"`;;
+      *)  func_stripname_result=`$ECHO "$3" | $SED -e "s%^$1%%" -e "s%$2\$%%"`;;
     esac
   }
 fi
@@ -1092,7 +1106,7 @@ func_tr_sh ()
 
     case $1 in
     [0-9]* | *[!a-zA-Z0-9_]*)
-      func_tr_sh_result=`$ECHO "$1" | $SED 's/^\([0-9]\)/_\1/; s/[^a-zA-Z0-9_]/_/g'`
+      func_tr_sh_result=`$ECHO "$1" | $SED -e 's/^\([0-9]\)/_\1/' -e 's/[^a-zA-Z0-9_]/_/g'`
       ;;
     * )
       func_tr_sh_result=$1
@@ -1716,7 +1730,12 @@ func_usage_message ()
 
     eval \$bs_echo \""Usage: $usage"\"
     echo
-    $SED -n 's|^# ||;/^Written by/{x;p;x;};h' < "$progpath"
+    $SED -n 's|^# ||
+        /^Written by/{
+          x;p;x
+        }
+	h
+	/^Written by/q' < "$progpath"
     echo
     eval \$bs_echo \""$usage_message"\"
 }
@@ -1824,7 +1843,10 @@ func_autoconf_configure ()
 {
     $debug_cmd
 
-    _G_sed_no_comment='s|#.*$||; s|^dnl .*$||; s| dnl .*$||;'
+    _G_sed_no_comment='
+      s|#.*$||
+      s|^dnl .*$||
+      s| dnl .*$||'
     _G_ac_init=
 
     # If we were passed a genuine file, make sure it calls AC_INIT.
@@ -2123,7 +2145,7 @@ func_extract_trace_first ()
 
     func_extract_trace ${1+"$@"}
     func_extract_trace_first_result=`$bs_echo "$func_extract_trace_result" \
-      |$SED 's|:.*$||g;1q'`
+      |$SED -e 's|:.*$||g' -e 1q`
 }
 
 
@@ -3285,7 +3307,7 @@ func_require_buildreq_automake ()
       # ...and AM_INIT_AUTOMAKE is declared...
       test -n "$func_extract_trace_result" && {
         automake_version=`$bs_echo "$func_extract_trace_result" \
-           |$SED 's|[^0-9]*||; s| .*$||'`
+           |$SED -e 's|[^0-9]*||' -e 's| .*$||'`
         test -n "$automake_version" || automake_version=-
 
         func_append buildreq "\
@@ -3318,7 +3340,7 @@ func_require_buildreq_patch ()
       # The ugly find invocation is necessary to exit with non-zero
       # status for old find binaries that don't support -exec fully.
       if test ! -d "$local_gl_dir" \
-          || find "$local_gl_dir" -name *.diff -exec false {} +; then :
+          || find "$local_gl_dir" -name *.diff -exec false {} \; ; then :
       else
           func_append buildreq 'patch - http://www.gnu.org/s/patch
 '
@@ -3562,13 +3584,15 @@ func_require_dotgitmodules_parameters ()
                                    /[	 ]*path *= */{
 			             s|[   ]*||g;s|^[^=]*=||;p
 			           }
-		                 };d' .gitmodules |$SED 1q`
+		                 }
+				 d' .gitmodules |$SED 1q`
       test -n "$gnulib_url" \
         || gnulib_url=`$SED -e '/^.submodule "gnulib".$/,${
                                   /[	 ]*url *= */{
 			            s|[   ]*||g;s|^[^=]*=||;p
 			          }
-		                };d' .gitmodules |$SED 1q`
+		                }
+				d' .gitmodules |$SED 1q`
 
       func_verbose "gnulib_path='$gnulib_path'"
       func_verbose "gnulib_url='$gnulib_url'"
@@ -3597,16 +3621,13 @@ func_require_gnulib_submodule ()
       $require_gnulib_url
 
       if test -f .gitmodules && test -f "$gnulib_path/gnulib-tool"; then
-        func_show_eval "$GIT submodule update" \
-            'func_fatal_error "Unable to update gnulib submodule."'
+        : All present and correct.
 
       elif test -n "$opt_gnulib_srcdir"; then
         # Older git can't clone into an empty directory.
         rmdir "$gnulib_path" 2>/dev/null
         func_show_eval "$GIT clone --reference '$opt_gnulib_srcdir' \
                 '$gnulib_url' '$gnulib_path'" \
-            && func_show_eval "$GIT submodule init" \
-            && func_show_eval "$GIT submodule update" \
             || func_fatal_error "Unable to fetch gnulib submodule."
 
       # Without --gnulib-srcdir, and no existing checked out submodule, we
@@ -3621,13 +3642,15 @@ func_require_gnulib_submodule ()
         func_show_eval "$GIT clone $shallow '$gnulib_url' '$gnulib_path'" \
           func_cleanup_gnulib
 
-        func_show_eval "$GIT submodule update" \
-            'func_fatal_error "Unable to update gnulib submodule."'
-
 	# FIXME: Solaris /bin/sh will try to execute '-' if any of
 	#        these signals are caught after this.
         trap - 1 2 13 15
       fi
+
+      # Make sure we've checked out the correct revision of gnulib.
+      func_show_eval "$GIT submodule init" \
+          && func_show_eval "$GIT submodule update" \
+          ||  func_fatal_error "Unable to update gnulib submodule."
     fi
 
     require_gnulib_submodule=:
@@ -3788,7 +3811,8 @@ func_require_package ()
       $require_package_name
 
       package=`echo "$package_name" \
-        |$SED 's/GNU //;y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
+        |$SED -e 's/GNU //' \
+	      -e 'y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/'`
     }
 
     func_verbose "package='$package'"
@@ -4240,13 +4264,15 @@ func_show_eval ()
 {
     $debug_cmd
 
+    $require_term_colors
+
     _G_cmd=$1
     _G_fail_exp=${2-':'}
 
     ${opt_silent-'false'} || {
       func_quote_for_eval $_G_cmd
       eval func_truncate_cmd $func_quote_for_eval_result
-      func_echo "running: $func_truncate_cmd_result"
+      func_echo "running: $tc_bold$func_truncate_cmd_result$tc_reset"
     }
 
     ${opt_dry_run-'false'} || {
@@ -4425,11 +4451,12 @@ func_check_versions ()
       _G_instver=`func_get_version $_G_app`
 
       test -z "$_G_instver" \
-          || func_verbose "found '$_G_app' version $_G_instver"
+          || func_verbose "found '$_G_app' version $_G_instver."
 
       # Fail if --version didn't work.
       if test -z "$_G_instver"; then
-        func_error "'$_G_app' not found"
+        func_error "Prerequisite '$_G_app' not found. Please install it, or
+'export $_G_appvar=/path/to/$_G_app'."
         func_check_versions_result=false
 
       # Fail if a new version than what we have is required.
@@ -4494,7 +4521,7 @@ func_update_po_files ()
     test -d "$_G_ref_po_dir" || mkdir $_G_ref_po_dir || return
     func_download_po_files $_G_ref_po_dir $_G_domain \
       && ls "$_G_ref_po_dir"/*.po 2>/dev/null \
-         |$SED 's|.*/||; s|\.po$||' > "$_G_po_dir/LINGUAS" || return
+         |$SED -e 's|.*/||' -e 's|\.po$||' > "$_G_po_dir/LINGUAS" || return
 
     # Find sha1sum, named gsha1sum on MacPorts, and shasum on MacOS 10.6+.
     func_find_tool SHA1SUM sha1sum gsha1sum shasum

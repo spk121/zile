@@ -555,7 +555,12 @@ func_usage_message ()
 
     eval \$bs_echo \""Usage: $usage"\"
     echo
-    $SED -n 's|^# ||;/^Written by/{x;p;x;};h' < "$progpath"
+    $SED -n 's|^# ||
+        /^Written by/{
+          x;p;x
+        }
+	h
+	/^Written by/q' < "$progpath"
     echo
     eval \$bs_echo \""$usage_message"\"
 }

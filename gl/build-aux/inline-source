@@ -31,9 +31,6 @@ scriptversion=2012-10-11.10; # UTC
 # Please report bugs or propose patches to bug-libtool@gnu.org.
 
 
-: ${AWK="awk"}
-
-
 ## ------ ##
 ## Usage. ##
 ## ------ ##
@@ -69,6 +66,46 @@ func_options ${1+"$@"}
 eval set dummy "$func_options_result"; shift
 
 
+## -------------------- ##
+## Resource management. ##
+## -------------------- ##
+
+# require_AWK
+# -----------
+# Search for a "not hopeless" awk.
+require_AWK=func_require_AWK
+func_require_AWK ()
+{
+    $debug_cmd
+
+    test -n "$AWK" || {
+      # Find the first executable in the list.
+      for _G_prog in gawk mawk nawk awk
+      do
+        require_AWK_IFS=$IFS
+	IFS=${PATH_SEPARATOR-:}
+	for _G_dir in $PATH
+        do
+	  IFS=$require_AWK_IFS
+          if test -f "$_G_dir/$_G_prog" && test -x "$_G_dir/$_G_prog"
+	  then
+	    AWK="$_G_dir/$_G_prog"
+            break 2
+          fi
+        done
+	IFS=$require_AWK_IFS
+      done
+    }
+
+    test -n "$AWK" || func_fatal_error "\
+Please install GNU Awk, or 'export AWK=/path/to/gnu/awk'."
+
+    func_verbose "found '$AWK'."
+
+    require_AWK=:
+}
+
+
 ## --------------- ##
 ## Core functions. ##
 ## --------------- ##
@@ -78,6 +115,8 @@ eval set dummy "$func_options_result"; shift
 # Output the contents of file included by LINE.
 func_include ()
 {
+    $require_AWK
+
     test -f "$1" \
         || func_fatal_error "file '$1' not found"
 

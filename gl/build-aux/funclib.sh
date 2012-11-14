@@ -312,16 +312,30 @@ func_require_term_colors ()
     $debug_cmd
 
     test -t 1 && {
-      test -n "`tput sgr0 2>/dev/null`" && {
-        tc_reset=`tput sgr0`
-        test -n "`tput bold 2>/dev/null`" && tc_bold=`tput bold`
+      # COLORTERM and USE_ANSI_COLORS environment variables take
+      # precedence, because most terminfo databases neglect to describe
+      # whether color sequences are supported.
+      test -n "${COLORTERM+set}" && : ${USE_ANSI_COLORS="1"}
+
+      if test 1 = "$USE_ANSI_COLORS"; then
+        # Standard ANSI escape sequences
+        tc_reset='[0m'
+        tc_bold='[1m';   tc_standout='[7m'
+        tc_red='[31m';   tc_green='[32m'
+        tc_blue='[34m';  tc_cyan='[36m'
+      else
+        # Otherwise trust the terminfo database after all.
+        test -n "`tput sgr0 2>/dev/null`" && {
+          tc_reset=`tput sgr0`
+          test -n "`tput bold 2>/dev/null`" && tc_bold=`tput bold`
           tc_standout=$tc_bold
-      test -n "`tput smso 2>/dev/null`" && tc_standout=`tput smso`
-        test -n "`tput setaf 1 2>/dev/null`" && tc_red=`tput setaf 1`
-        test -n "`tput setaf 2 2>/dev/null`" && tc_green=`tput setaf 2`
-        test -n "`tput setaf 4 2>/dev/null`" && tc_blue=`tput setaf 4`
-        test -n "`tput setaf 5 2>/dev/null`" && tc_cyan=`tput setaf 5`
-      }
+          test -n "`tput smso 2>/dev/null`" && tc_standout=`tput smso`
+          test -n "`tput setaf 1 2>/dev/null`" && tc_red=`tput setaf 1`
+          test -n "`tput setaf 2 2>/dev/null`" && tc_green=`tput setaf 2`
+          test -n "`tput setaf 4 2>/dev/null`" && tc_blue=`tput setaf 4`
+          test -n "`tput setaf 5 2>/dev/null`" && tc_cyan=`tput setaf 5`
+        }
+      fi
     }
 
     require_term_colors=:
@@ -350,7 +364,7 @@ func_require_term_colors ()
     : ${_G_HAVE_XSI_OPS="yes"}
     # The += operator was introduced in bash 3.1
     case $BASH_VERSION in
-      [12].* | 3.0 | 3.0.*) ;;
+      [12].* | 3.0 | 3.0*) ;;
       *)
         : ${_G_HAVE_PLUSEQ_OP="yes"}
         ;;
@@ -594,7 +608,7 @@ func_error ()
 
     $require_term_colors
 
-    func_echo_infix_1 "$tc_standout${tc_red}error$tc_reset" "$*" >&2
+    func_echo_infix_1 "  $tc_standout${tc_red}error$tc_reset" "$*" >&2
 }
 
 
@@ -1009,8 +1023,8 @@ else
     $debug_cmd
 
     case $2 in
-      .*) func_stripname_result=`$ECHO "$3" | $SED "s%^$1%%; s%\\\\$2\$%%"`;;
-      *)  func_stripname_result=`$ECHO "$3" | $SED "s%^$1%%; s%$2\$%%"`;;
+      .*) func_stripname_result=`$ECHO "$3" | $SED -e "s%^$1%%" -e "s%\\\\$2\$%%"`;;
+      *)  func_stripname_result=`$ECHO "$3" | $SED -e "s%^$1%%" -e "s%$2\$%%"`;;
     esac
   }
 fi
@@ -1082,7 +1096,7 @@ func_tr_sh ()
 
     case $1 in
     [0-9]* | *[!a-zA-Z0-9_]*)
-      func_tr_sh_result=`$ECHO "$1" | $SED 's/^\([0-9]\)/_\1/; s/[^a-zA-Z0-9_]/_/g'`
+      func_tr_sh_result=`$ECHO "$1" | $SED -e 's/^\([0-9]\)/_\1/' -e 's/[^a-zA-Z0-9_]/_/g'`
       ;;
     * )
       func_tr_sh_result=$1
