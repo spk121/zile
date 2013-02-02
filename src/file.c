@@ -552,7 +552,7 @@ backup_and_write (Buffer * bp, const char *filename)
       close (fd);
 
       char *backupdir = NULL;
-      if (scm_is_true (get_variable_string ("backup-directory")))
+      if (get_variable_string ("backup-directory") != NULL)
 	backupdir = get_variable_string ("backup-directory");
 
       astr bfilename = create_backup_filename (filename, backupdir);
