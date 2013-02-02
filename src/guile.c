@@ -1,6 +1,6 @@
 /* Guile interaction helper functions
 
-   Copyright (c) 2011, 2012 Michael L. Gran
+   Copyright (c) 2011, 2012, 2013 Michael L. Gran
 
    This file is part of Michael's fork of GNU Zile.
 
@@ -322,7 +322,7 @@ guile_get_procedure_documentation_by_name (const char *name)
   return buf;
 }
 
-const char *
+bool
 guile_get_procedure_interactive_by_name (const char *name)
 {
   SCM sym, proc;

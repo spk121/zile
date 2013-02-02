@@ -214,7 +214,7 @@ SCM guile_procedure_documentation_safe (SCM var);
 SCM guile_procedure_name_safe (SCM var);
 SCM guile_use_zile_module (void *unused);
 const char * guile_get_procedure_documentation_by_name (const char *proc);
-const char * guile_get_procedure_interactive_by_name (const char *name);
+bool guile_get_procedure_interactive_by_name (const char *name);
 const char *guile_get_procedure_name_by_name (const char *name);
 SCM guile_error_handler (void *data, SCM key, SCM exception);
 void guile_error (const char *function_name, const char *msg);
