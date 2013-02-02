@@ -27,10 +27,6 @@ LISP_TESTS =						\
 	$(srcdir)/tests/*.el				\
 	$(srcdir)/tests/interactive/*.el
 
-SCHEME_TESTS =						\
-	$(srcdir)/tests/*.scm				\
-	$(srcdir)/tests/interactive/*.scm
-
 LISP_TESTS_ZILE_ONLY =					\
 	$(srcdir)/tests/regression/*.el			\
 	$(srcdir)/tests/zile-only/*.el			\
@@ -62,7 +58,6 @@ LISP_TESTS_ENVIRONMENT =				\
 
 EXTRA_DIST +=						\
 	$(LISP_ALL_TESTS)				\
-	$(SCHEME_TESTS)					\
 	$(LISP_TESTS_OUTPUTS)				\
 	tests/test.input				\
 	tests/run-lisp-tests.pl				\
@@ -146,7 +141,6 @@ ZILE_GUILE_TESTS_NOT_RUN = \
 	$(srcdir)/tests/set-fill-column.el \
 	$(srcdir)/tests/set-variable.el \
 	$(srcdir)/tests/setq-nonexistent-variable.el
-
 
 
 check-local: $(builddir)/src/zile-on-guile$(EXEEXT)
