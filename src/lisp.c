@@ -163,17 +163,9 @@ Suspend the editor and bring up the REPL for this buffer's module.")
   printf ("\n\n");
   
   fflush (stdout);
-#if 0
-  if (cur_bp)
-    scm_set_current_module (scm_c_resolve_module (get_buffer_module (cur_bp)));
-  else
-    scm_set_current_module (scm_c_resolve_module ("zile"));
-  // FIXME was system repl repl
-  scm_call_1 (scm_c_module_lookup (scm_current_module (), "start-repl"),
-              scm_from_locale_symbol ("scheme"));
-#endif
 
-  var = scm_c_lookup ("scm-style-repl");
+  scm_c_use_module ("system repl repl");
+  var = scm_c_lookup ("start-repl");
   func = scm_variable_ref (var);
   scm_call_0 (func);
 
