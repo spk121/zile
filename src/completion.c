@@ -113,7 +113,7 @@ completion_scroll_up (void)
   if (!scm_is_true (G_scroll_up (scm_from_int(1))))
     {
       G_beginning_of_buffer ();
-      resync_redisplay (cur_wp);
+      //resync_redisplay (cur_wp);
     }
   set_current_window (old_wp);
 
@@ -133,7 +133,7 @@ completion_scroll_down (void)
   if (!scm_is_true (G_scroll_down (scm_from_int (1))))
     {
       G_end_of_buffer ();
-      resync_redisplay (cur_wp);
+      //resync_redisplay (cur_wp);
     }
   set_current_window (old_wp);
 
