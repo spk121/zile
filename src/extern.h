@@ -42,8 +42,8 @@ SCM G_scroll_up (SCM gn);
 void init_guile_basic_procedures (void);
 
 /* bind.c ----------------------------------------------------------------- */
-_GL_ATTRIBUTE_PURE Function last_command (void);
-void set_this_command (Function cmd);
+_GL_ATTRIBUTE_PURE SCM last_command (void);
+void set_this_command (SCM cmd);
 size_t do_binding_completion (astr as);
 gl_list_t get_key_sequence (void);
 SCM get_function_by_keys (gl_list_t keys);
@@ -118,6 +118,7 @@ bool move_char (int dir);
 bool move_line (int n);
 _GL_ATTRIBUTE_PURE size_t offset_to_line (Buffer *bp, size_t offset);
 void goto_offset (size_t o);
+void init_guile_buffer_procedures (void);
 
 /* completion.c ----------------------------------------------------------- */
 #define FIELD(ty, field)                                        \
@@ -418,4 +419,5 @@ bool window_bottom_visible (Window * wp);
 SCM G_split_window (void);
 SCM G_other_window (void);
 SCM G_delete_window (void);
+void window_resync (Window * wp);
 void init_guile_window_procedures (void);

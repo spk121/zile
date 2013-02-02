@@ -238,3 +238,31 @@ Scroll text of current window upward near full screen.")
   ok = execute_with_uniarg (false, n, scroll_up, scroll_down);
   return ok;
 }
+
+
+void
+init_guile_basic_procedures (void)
+{
+#include "basic.x"
+  guile_procedure_set_uniarg_integer ("previous-line");
+  guile_procedure_set_uniarg_integer ("next-line");
+  guile_procedure_set_uniarg_integer ("goto-char");
+  guile_procedure_set_uniarg_integer ("goto-line");
+  guile_procedure_set_uniarg_integer ("backward-char");
+  guile_procedure_set_uniarg_integer ("forward-char");
+  guile_procedure_set_uniarg_integer ("scroll-down");
+  guile_procedure_set_uniarg_integer ("scroll-up");
+
+  scm_c_export ("beginning-of-line",
+		"end-of-line",
+		"previous-line",
+		"next-line",
+		"goto-char",
+		"goto-line",
+		"beginning-of-buffer",
+		"end-of-buffer",
+		"forward-char",
+		"backward-char",
+		"scroll-down",
+		"scroll-up", NULL);
+}
