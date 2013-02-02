@@ -152,7 +152,7 @@ For example, (set-key \"\\C-f\" 'forward-char)"
   "  \"\\\\M-x\" is Alt+x"
   "  \"\\\\F3\"  is the function key F3"
   ""
-  "For example (set-key \"F9\" 'blammo)"
+  "For example (set-key \"\\\\F9\" 'blammo)"
   ""
   "The, ',q' will take you back to your buffer, so you can try it out."
   "")))
