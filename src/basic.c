@@ -122,10 +122,9 @@ Set point to a position. The beginning of the buffer is position 1.")
   if (n >= LONG_MAX - 1)
     return SCM_BOOL_F;
 
-  buffer_size = get_buffer_size (cur_bp);
-  goto_offset (MIN ((size_t) (MAX (n, 1) - 1), buffer_size));
+goto_offset (MIN (get_buffer_size (cur_bp), MAX (n, 1) - 1));
 
-  return SCM_BOOL_T;
+  goto_offset (MAX (n, 1) - 1);
 }
 
 SCM_DEFINE (G_goto_line, "goto-line", 0, 1, 0, (SCM gn), "\
@@ -237,32 +236,4 @@ Scroll text of current window upward near full screen.")
 
   ok = execute_with_uniarg (false, n, scroll_up, scroll_down);
   return ok;
-}
-
-
-void
-init_guile_basic_procedures (void)
-{
-#include "basic.x"
-  guile_procedure_set_uniarg_integer ("previous-line");
-  guile_procedure_set_uniarg_integer ("next-line");
-  guile_procedure_set_uniarg_integer ("goto-char");
-  guile_procedure_set_uniarg_integer ("goto-line");
-  guile_procedure_set_uniarg_integer ("backward-char");
-  guile_procedure_set_uniarg_integer ("forward-char");
-  guile_procedure_set_uniarg_integer ("scroll-down");
-  guile_procedure_set_uniarg_integer ("scroll-up");
-
-  scm_c_export ("beginning-of-line",
-		"end-of-line",
-		"previous-line",
-		"next-line",
-		"goto-char",
-		"goto-line",
-		"beginning-of-buffer",
-		"end-of-buffer",
-		"forward-char",
-		"backward-char",
-		"scroll-down",
-		"scroll-up", NULL);
 }

@@ -1,6 +1,6 @@
 /* Search and replace functions
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
    Copyright (c) 2012 Michael L. Gran
 
    This file is part of Michael Gran's unofficial fork of GNU Zile.
@@ -72,6 +72,9 @@ find_substr (castr as1, castr as2, const char *n, size_t nsize, size_t from, siz
   pattern.not_bol = notbol;
   pattern.not_eol = noteol;
   if (!re_find_err)
+    /* FIXME: The current implementation memcpys the two strings into
+       a freshly malloced block, i.e. is horribly inefficient for
+       large buffers. */
     ret = re_search_2 (&pattern,
                        astr_cstr (as1), (int) astr_len (as1),
                        astr_cstr (as2), (int) astr_len (as2),
@@ -117,7 +120,7 @@ do_search (bool forward, bool regexp, castr pattern)
   SCM ok = SCM_BOOL_F;
 
   if (pattern == NULL)
-    pattern = minibuf_read ("%s%s: ", astr_cstr (last_search),
+    pattern = minibuf_read ("%s%s: ", last_search ? astr_cstr (last_search) : NULL,
                             regexp ? "RE search" : "Search", forward ? "" : " backward");
 
   if (pattern == NULL)
@@ -389,7 +392,7 @@ what to do with it.")
       if (!noask)
         {
           if (thisflag & FLAG_NEED_RESYNC)
-            resync_redisplay (cur_wp);
+            window_resync (cur_wp);
           for (;;)
             {
               minibuf_write
@@ -399,6 +402,7 @@ what to do with it.")
               if (c == KBD_CANCEL || c == KBD_RET || c == ' ' || c == 'y'
                   || c == 'n' || c == 'q' || c == '.' || c == '!')
                 break;
+              /* FIXME: Remove this prompt (see Lua Zile) */
               minibuf_error ("Please answer y, n, !, . or q.");
               waitkey ();
             }
@@ -413,8 +417,7 @@ what to do with it.")
             }
           else if (c == '!')		/* Replace all without asking. */
             noask = true;
-          else if (c == 'n' 
-		   || c == KBD_RET || c == KBD_DEL) /* Do not replace. */
+          else if (c == 'n' || c == KBD_RET || c == KBD_DEL) /* Do not replace. */
             continue;
         }
 
@@ -442,7 +445,7 @@ what to do with it.")
     }
 
   if (thisflag & FLAG_NEED_RESYNC)
-    resync_redisplay (cur_wp);
+    window_resync (cur_wp);
 
   if (ok)
     minibuf_write ("Replaced %d occurrences", count);

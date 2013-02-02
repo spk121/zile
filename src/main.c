@@ -1,6 +1,6 @@
 /* Program invocation, startup and shutdown
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
    Copyright (c) 2012 Michael L. Gran
 
    This file is part of Michael Gran's unofficial fork of GNU Zile.
@@ -40,7 +40,7 @@
 
 #define ZILE_COPYRIGHT_STRING \
   "Copyright (C) 2012 Free Software Foundation, Inc.\n\
-Copyright (C) 2012 Michael L Gran"
+Copyright (C) 2013 Michael L Gran"
 
 /* The current window; the first window in list. */
 Window *cur_wp = NULL, *head_wp = NULL;
@@ -316,7 +316,7 @@ main (int argc, char **argv)
           {
             ok = find_file (arg);
             if (ok)
-             G_goto_line(scm_from_size_t (gl_list_get_at (arg_line, i)));
+              FUNCALL_ARG (goto_line, (size_t) gl_list_get_at (arg_line, i));
           }
           break;
         default:
@@ -357,9 +357,7 @@ main (int argc, char **argv)
   while (!(thisflag & FLAG_QUIT))
     {
       if (lastflag & FLAG_NEED_RESYNC)
-        resync_redisplay (cur_wp);
-      term_redisplay ();
-      term_refresh ();
+        window_resync (cur_wp);
       get_and_run_command ();
     }
 

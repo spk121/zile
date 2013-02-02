@@ -22,7 +22,7 @@ dnl MA 02111-1301, USA.
 AC_PREREQ([2.61])
 
 dnl Initialise autoconf and automake
-AC_INIT(zile-on-guile, 0.0, spk121@yahoo.com)
+AC_INIT(Zile, 2.4.5, bug-zile@gnu.org)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall -Werror std-options])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
@@ -74,10 +74,18 @@ if test "$gl_gcc_warnings" = yes; then
   dnl Add some more safety measures
   gl_WARN_ADD([-D_FORTIFY_SOURCE=2])
   gl_WARN_ADD([-fmudflap])
+
+  # When compiling with GCC, prefer -isystem to -I when including system
+  # include files, to avoid generating useless diagnostics for the files.
+  ISYSTEM='-isystem '
+else
+  ISYSTEM='-I'
 fi
+AC_SUBST([ISYSTEM])
 
 dnl help2man
-AX_WITH_PROG([HELP2MAN], [help2man])
+dnl Set a value even if not found, so that an invocation via build-aux/missing works
+AX_WITH_PROG([HELP2MAN], [help2man], [help2man])
 
 dnl Code complexity reports
 AC_PATH_PROG([PMCCABE], [pmccabe], [false])

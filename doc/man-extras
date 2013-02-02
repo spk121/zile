@@ -10,7 +10,7 @@ of memory.
 [files]
 ~/.zile \(em user's Zile init file
 .PP
-@pkgdatadir@/dotzile-extra.el \(em which contains some useful
+@pkgdatadir@/dotzile.sample \(em which contains some useful
 code for the init file.
 
 [author]

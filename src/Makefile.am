@@ -23,19 +23,8 @@
 doc_DATA += src/dotzile.sample
 
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
-AM_CPPFLAGS = -I$(builddir)/src\
-	-I$(srcdir)/src\
-	-I$(builddir)/lib\
-	-I$(srcdir)/lib\
-	-DPATH_DOCDIR="\"$(docdir)\""\
-	$(LIBGC_CPPFLAGS)\
-	$(GUILE_CFLAGS)
-LDADD = $(builddir)/lib/libzile.a\
-	$(LIB_ACL)\
-	$(LIB_EACCESS)\
-	$(LIBINTL)\
-	$(CURSES_LIB) \
-	$(GUILE_LDFLAGS)
+AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src -I$(builddir)/lib -I$(srcdir)/lib -DPATH_DOCDIR="\"$(docdir)\"" $(LIBGC_CPPFLAGS) $(GUILE_CFLAGS)
+LDADD = $(builddir)/lib/lib$(PACKAGE).a $(LIB_ACL) $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB) $(GUILE_LDFLAGS)
 
 BUILT_SOURCES =						\
 	src/basic.x					\
@@ -91,6 +80,7 @@ src_zile_on_guile_base_SOURCE_FILES =				\
 	src/estr.h					\
 	src/extern.h					\
 	src/main.h					\
+	src/tbl_vars.h					\
 	src/lists.c					\
 	src/lists.h					\
 	src/buffer.h					\

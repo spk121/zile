@@ -23,10 +23,13 @@ GNULIB_SRCDIR ?= $(srcdir)/gnulib
 gnulib_dir = $(GNULIB_SRCDIR)
 
 # Set format of NEWS
-old_NEWS_hash := eff9ec6b6bc7027dc179637c1e5df71f
+old_NEWS_hash := c14e59632c78c948aa5e5ef373a5d689
 
 # Don't check test outputs or diff patches
 VC_LIST_ALWAYS_EXCLUDE_REGEX = \.(output|diff)$$
+
+# Don't send release announcements to Translation Project
+translation_project_ =
 
 local-checks-to-skip = \
 	sc_bindtextdomain \

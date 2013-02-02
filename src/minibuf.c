@@ -66,8 +66,12 @@ minibuf_refresh (void)
 static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
-  minibuf_contents = xvasprintf (fmt, ap);
-  minibuf_refresh ();
+  char *s = xvasprintf (fmt, ap);
+  if (minibuf_contents == NULL || strcmp (s, minibuf_contents))
+    {
+      minibuf_contents = s;
+      minibuf_refresh ();
+    }
 }
 
 /*
@@ -216,7 +220,7 @@ minibuf_read_yn (const char *fmt, ...)
     size_t key;
 
     minibuf_write ("%s%s", errmsg, buf);
-    key = getkey (GETKEY_DEFAULT);
+    key = getkeystroke (GETKEY_DEFAULT);
     switch (key)
       {
       case 'y':
@@ -336,5 +340,5 @@ minibuf_vread_completion (const char *fmt, const char *value, Completion * cp,
 void
 minibuf_clear (void)
 {
-  minibuf_write ("");
+  term_minibuf_write ("");
 }

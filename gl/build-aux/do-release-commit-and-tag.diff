@@ -1,0 +1,67 @@
+--- gnulib/build-aux/do-release-commit-and-tag	2012-07-14 16:32:48.000000000 +0700
++++ build-aux/do-release-commit-and-tag	2012-07-14 16:32:28.000000000 +0700
+@@ -116,6 +116,53 @@
+ ## First, sanity checks.  ##
+ ## ---------------------- ##
+ 
++# func_sort_ver VER1 VER2
++# -----------------------
++# `sort -V' is not generally available.
++# Note this deviates from the version comparison in automake
++# in that it treats 1.5 < 1.5.0, and treats 1.4.4a < 1.4-p3a
++# but this should suffice as we won't be specifying old
++# version formats or redundant trailing .0 in new projects.
++# If we did want full compatibility then we should probably
++# use m4_version_compare from autoconf.
++func_sort_ver ()
++{
++    $debug_cmd
++
++    ver1=$1
++    ver2=$2
++
++    # Split on '.' and compare each component.
++    i=1
++    while : ; do
++      p1=`echo "$ver1" |cut -d. -f$i`
++      p2=`echo "$ver2" |cut -d. -f$i`
++      if test ! "$p1"; then
++        echo "$1 $2"
++        break
++      elif test ! "$p2"; then
++        echo "$2 $1"
++        break
++      elif test ! "$p1" = "$p2"; then
++        if test "$p1" -gt "$p2" 2>/dev/null; then # numeric comparison
++          echo "$2 $1"
++        elif test "$p2" -gt "$p1" 2>/dev/null; then # numeric comparison
++          echo "$1 $2"
++        else # numeric, then lexicographic comparison
++          lp=`printf "$p1\n$p2\n" |sort -n |tail -n1`
++          if test "$lp" = "$p2"; then
++            echo "$1 $2"
++          else
++            echo "$2 $1"
++          fi
++        fi
++        break
++      fi
++      i=`expr $i + 1`
++    done
++}
++
++
+ # Verify that $ver looks like a version number, and...
+ echo "$ver"|grep -E '^[0-9][0-9.]*[0-9]$' > /dev/null \
+   || die "invalid version: $ver"
+@@ -123,8 +170,8 @@
+   || die 'failed to determine previous version number from .prev-version'
+ 
+ # Verify that $ver is sensible (> .prev-version).
+-case $(printf "$prev_ver\n$ver\n"|sort -V -u|tr '\n' ':') in
+-  "$prev_ver:$ver:") ;;
++case $(func_sort_ver "$prev_ver" "$ver") in
++  "$prev_ver $ver") ;;
+   *) die "invalid version: $ver (<= $prev_ver)";;
+ esac
+ 

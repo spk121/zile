@@ -1,6 +1,6 @@
 /* Getting and ungetting key strokes
 
-   Copyright (c) 1997-2004, 2008-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2004, 2008-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -22,9 +22,35 @@
 #include <config.h>
 
 #include <assert.h>
+#include <sys/time.h>
 
 #include "main.h"
 #include "extern.h"
+
+/* Maximum time to avoid screen updates when catching up with buffered
+   input, in milliseconds. */
+#define MAX_RESYNC_MS 500
+
+/* These are not required for POSIX.1-2001, and not always defined in
+   the system headers. */
+#ifndef timeradd
+#  define timeradd(_a, _b, _result)				\
+   do {								\
+	(_result)->tv_sec  = (_a)->tv_sec + (_b)->tv_sec;	\
+	(_result)->tv_usec = (_a)->tv_usec + (_b)->tv_usec;	\
+	if ((_result)->tv_usec > 1000000) {			\
+	  ++(_result)->tv_sec;					\
+	  (_result)->tv_usec -= 1000000;			\
+	}							\
+   while (0)
+#endif
+
+#ifndef timercmp
+#  define timercmp(_a, _b, _CMP)				\
+   (((_a)->tv_sec == (_b)->tv_sec)				\
+    ? ((_a)->tv_usec _CMP (_b)->tv_usec)			\
+    : ((_a)->tv_sec  _CMP (_b)->tv_sec))
+#endif
 
 static size_t _last_key;
 
@@ -36,18 +62,47 @@ lastkey (void)
 }
 
 /*
- * Get a keystroke, waiting for up to GETKEY_DELAYED ms, and translate
- * it into a keycode.
+ * Get a keystroke, waiting for up to delay ms, and translate it into
+ * a keycode.
  */
 size_t
-getkey (int mode)
+getkeystroke (int delay)
 {
-  _last_key = term_getkey (mode);
+  _last_key = term_getkey (delay);
 
-  if (thisflag & FLAG_DEFINING_MACRO)
+  if (_last_key != KBD_NOKEY && (thisflag & FLAG_DEFINING_MACRO))
     add_key_to_cmd (_last_key);
 
   return _last_key;
+}
+
+/*
+ * Return the next keystroke, refreshing the screen only when the input
+ * buffer is empty, or MAX_RESYNC_MS have elapsed since the last
+ * screen refresh.
+ */
+size_t
+getkey (int delay)
+{
+  static struct timeval next_refresh = { 0, 0 };
+  static struct timeval refresh_wait = {
+    MAX_RESYNC_MS / 1000, (MAX_RESYNC_MS % 1000) * 1000 };
+  static struct timeval now;
+  size_t keycode = getkeystroke (0);
+
+  gettimeofday (&now, NULL);
+
+  if (keycode == KBD_NOKEY || !timercmp (&now, &next_refresh, <))
+    {
+      term_redisplay ();
+      term_refresh ();
+      timeradd (&now, &refresh_wait, &next_refresh);
+    }
+
+  if (keycode == KBD_NOKEY)
+    keycode = getkeystroke (delay);
+
+  return keycode;
 }
 
 size_t

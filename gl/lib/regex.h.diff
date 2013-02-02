@@ -1,0 +1,15 @@
+diff --git a/lib/regex.h b/lib/regex.h
+index 89a8143..8fab9f6 100644
+--- a/lib/regex.h
++++ b/lib/regex.h
+@@ -227,5 +227,9 @@ typedef unsigned long int reg_syntax_t;
+ /* If this bit is set, then no_sub will be set to 1 during
+    re_compile_pattern.  */
+ # define RE_NO_SUB (RE_CONTEXT_INVALID_DUP << 1)
++
++/* If this bit is set, then all special characters are ignored
++   by re_compile_pattern. */
++# define RE_PLAIN (RE_NO_SUB << 1)
+ #endif
+ 
+ /* This global variable defines the particular regexp syntax to use (for

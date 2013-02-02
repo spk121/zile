@@ -6,6 +6,7 @@
 /depcomp
 /do-release-commit-and-tag
 /gendocs.sh
+/gitlog-to-changelog
 /gnupload
 /install-sh
 /mdate-sh
@@ -17,3 +18,9 @@
 /update-copyright
 /useless-if-before-free
 /vc-list-files
+/gnu-web-doc-update
+/bootstrap.in
+/extract-trace
+/funclib.sh
+/inline-source
+/options-parser

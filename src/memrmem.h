@@ -1,6 +1,6 @@
 /* memrmem
 
-   Copyright (c) 2011 Free Software Foundation, Inc.
+   Copyright (c) 2011-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -19,4 +19,4 @@
    Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
    MA 02111-1301, USA.  */
 
-const char *memrmem (const char *s, size_t slen, const char *t, size_t tlen);
+_GL_ATTRIBUTE_PURE const char *memrmem (const char *s, size_t slen, const char *t, size_t tlen);

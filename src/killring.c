@@ -1,6 +1,6 @@
 /* Kill ring facility functions
 
-   Copyright (c) 2001, 2003-2011 Free Software Foundation, Inc.
+   Copyright (c) 2001, 2003-2012 Free Software Foundation, Inc.
    Copyright (c) 2012 Michael L. Gran
 
    This file is part of Michael Gran's unofficial fork ok GNU Zile.

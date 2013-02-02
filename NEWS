@@ -1,6 +1,58 @@
-* Noteworthy changes in release ?.? (????-??-??) [?]
+GNU Zile NEWS                                         -*- outline -*-
 
 * Noteworthy changes in release ?.? (????-??-??) [?]
+
+
+* Noteworthy changes in release 2.4.9 (2012-10-01) [stable]
+
+** Bug fixes
+
+  Fix crash on out-of-range goto-char.
+
+  Set mark on insert-file.
+
+  Minor documentation fixes.
+
+  Build system cleanups.
+
+
+* Noteworthy changes in release 2.4.8 (2012-07-13) [stable]
+
+** New features
+
+  Improve feedback during large pastes.
+
+  Various minor code improvements.
+
+** Build-related
+
+  Fix a bug in parallel builds.
+
+  Update gnulib to fix building with glibc 2.16.
+
+  Various minor fixes and improvements.
+
+  Use more GCC attributes.
+
+
+* Noteworthy changes in release 2.4.7 (2012-03-20) [stable]
+
+** Bug fixes
+
+  Fix a potential crash and cosmetic bug in global-set-key when used
+  interactively.
+
+** Build-related
+
+  Add lots more tests.
+
+
+* Noteworthy changes in release 2.4.6 (2012-02-18) [stable]
+
+** Bug fixes
+
+   Fix a crash in non-incremental search the first time it is used
+   interactively.
 
 
 * Noteworthy changes in release 2.4.5 (2012-02-08) [stable]

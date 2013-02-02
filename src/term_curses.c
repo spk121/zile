@@ -1,6 +1,6 @@
 /* Curses terminal
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
 
    This file is part of GNU Zile.
 
@@ -139,7 +139,7 @@ term_close (void)
   endwin ();
 }
 
-static size_t
+static _GL_ATTRIBUTE_PURE size_t
 codetokey (int c)
 {
   switch (c)
@@ -233,7 +233,7 @@ codetokey (int c)
       return KBD_F12;
     default:
       if (c > 0xff || c < 0)
-        return KBD_NOKEY;	/* Undefined behaviour. */
+        return KBD_NOKEY;	/* ERR (no key) or undefined behaviour. */
       return c;
     }
 }
@@ -393,8 +393,6 @@ get_char (int delay)
           resize_windows ();
       } while (c == KEY_RESIZE);
 #endif
-
-      timeout (-1);
     }
 
   return c;

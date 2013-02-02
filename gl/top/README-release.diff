@@ -1,0 +1,122 @@
+--- gnulib/top/README-release	2012-09-10 22:14:18.164882316 +0100
++++ HACKING	2012-09-13 23:08:05.625825243 +0100
+@@ -1,35 +1,36 @@
+-Here are most of the steps we (maintainers) follow when making a release.
++                      GNU Zile developers' notes
++                      --------------------------
+ 
+-* Start from a clean, up-to-date git directory on "master":
++     Copyright (c) 2011-2012 Free Software Foundation, Inc.
+ 
+-    make -k maintainer-clean || { ./configure && make maintainer-clean; }
+-    git checkout master
+-    git pull origin master
++     Copying and distribution of this file, with or without
++     modification, are permitted in any medium without royalty
++     provided the copyright notice and this notice are preserved.
+ 
+-* Ensure that the latest stable versions of autoconf, automake, etc.
+-  are in your PATH.  See the buildreq list in bootstrap.conf for
+-  the complete list of tools.
+ 
+-* Ensure that you have no uncommitted diffs.  This should produce no
+-  output:
++Making a release
++----------------
+ 
+-    git diff
++To make a release automatically, you need ncftp, and woger, from
++http://rrt.sc3d.org/Software/woger
+ 
+-* Ensure that you've pushed all changes that belong in the release:
++Here are the steps we (maintainers) follow when making a release.
+ 
+-    git push origin master
+-
+-* Check that the NixOS/Hydra autobuilder is reporting all is well:
++* Ensure that acceptable versions of autoconf, automake, etc.
++  are in your PATH.  See the buildreq list in bootstrap.conf for
++  the complete list of tools.
+ 
+-    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
++* Start from a clean, up-to-date git directory on "master", ensure
++  that you have no uncommitted diffs, have pushed all changes that
++  belong in the release, and that all tests pass:
+ 
+-* Run the following command to download any new translations:
++    make prerelease
+ 
+-    ./bootstrap && ./configure
++  (Make sure you have any needed Valgrind suppressions files.)
+ 
+-* Pre-release testing: ensure that the following command succeeds:
++* Check that the NixOS/Hydra autobuilder is reporting all is well:
+ 
+-    make check syntax-check distcheck
++    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
+ 
+ * To (i) set the date, version number, and release type [stable/alpha/beta]
+   on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run
+@@ -44,57 +45,12 @@
+     # "TYPE" must be stable, beta or alpha
+     make TYPE
+ 
+-* Test the tarball.  Copy it to a few odd-ball systems and ensure that
+-  it builds and passes all tests.
+-
+-* While that's happening, write the release announcement that you will
+-  soon post.  Start with the template, $HOME/announce-@PACKAGE@-X.Y
+-  that was just created by that "make" command.
++* Write the release announcement that you will soon post.  Start with
++  the template, $HOME/announce-@PACKAGE@-X.Y that was just created by
++  that "make" command.
+ 
+ Once all the builds and tests have passed,
+ 
+-* Run the gnupload command that was suggested by your "make release"
+-  run above, or run
+-
+-    make upload RELEASE='X.Y TYPE'
+-
+-* Wait a few minutes (maybe up to 30?) and then use the release URLs to
+-  download all tarball/signature pairs and use gpg --verify to ensure
+-  that they're all valid.
+-
+-* Push the NEWS-updating changes and the new tag:
+-
+-    v=$(cat .prev-version)
+-    git push origin master tag v$v
+-
+-* Announce it on Savannah first, so you can include the savannah.org
+-  announcement link in the email message.
+-
+-  Go to the news-submission form:
+-
+-    https://savannah.gnu.org/news/submit.php?group=@PACKAGE@
+-
+-  If it does not work, then enable "News" for the project via this link:
+-
+-    https://savannah.gnu.org/project/admin/editgroupfeatures.php?group=@PACKAGE@
+-
+-  Write something like the following:
+-
+-    Subject: @PACKAGE@-X.Y released [stable]
+-    +verbatim+
+-    ...paste the announcement here...
+-    -verbatim-
+-
+-  Then go here to approve it:
+-
+-    https://savannah.gnu.org/news/approve.php?group=@PACKAGE@
+-
+-* Send the announcement email message.
+-
+-* After each non-alpha release, run
+-
+-    make web-manual-update
+-
+-  to update the on-line manual accessible at
++* Run:
+ 
+-    http://www.gnu.org/software/@PACKAGE@/manual/
++    make dorelease

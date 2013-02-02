@@ -121,7 +121,7 @@ term_minibuf_read (const char *prompt, const char *value, size_t pos,
 
       thistab = -1;
 
-      switch (c = getkey (GETKEY_DEFAULT))
+      switch (c = getkeystroke (GETKEY_DEFAULT))
         {
         case KBD_NOKEY:
         case KBD_RET:

@@ -1,8 +1,9 @@
 /* Disk file handling
 
-   Copyright (c) 1997-2011 Free Software Foundation, Inc.
+   Copyright (c) 1997-2012 Free Software Foundation, Inc.
+   Copyright (c) 2012, 2013 Michael L Gran
 
-   This file is part of GNU Zile.
+   This file is part of Michael Gran's unofficial fork of GNU Zile.
 
    GNU Zile is free software; you can redistribute it and/or modify it
    under the terms of the GNU General Public License as published by
@@ -412,14 +413,14 @@ Puts mark after the inserted text.")
             }
         }
       else if (buf && strlen (buf) > 0)
-	{
+	    {
           bp = find_buffer (buf);
           if (bp == NULL)
             {
               minibuf_error ("Buffer `%s' not found", buf);
               ok = SCM_BOOL_F;
             }
-	}
+	    }
       else
         bp = def_bp;
 
@@ -462,7 +463,10 @@ Set mark after the inserted text.")
     {
       estr es = estr_readf (astr_cstr (file));
       if (es.as != NULL)
-        insert_estr (es);
+	    {
+          insert_estr (es);
+          G_set_mark_command ();
+        }
       else
         {
           ok = SCM_BOOL_F;

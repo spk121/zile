@@ -1,0 +1,14 @@
+# This file is expected to be used via gitlog-to-changelog's --amend=FILE
+# option.  It specifies what changes to make to each given SHA1's commit
+# log and metadata, using Perl-eval'able expressions.
+
+# For example:
+#
+# 0fe4d0740effaec9d08ee9683fb493d8ad0bd8b5
+# # Date:   Mon Oct 17 16:43:18 2011 +0700
+# # Use canonical gnu email address.
+# s|vaughan\.pe|gnu.org|g;
+# # No empty lines in a single commit.
+# s|\n\n|\n|g;
+# # Fix a typo.
+# s|soure|source|
