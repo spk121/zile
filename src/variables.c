@@ -76,9 +76,9 @@ void
 set_variable (const char *var, const char *val)
 {
   /* Decide if VAL is boolean, integer, or string. */
-  if (strcmp (val, "#t") == 0)
+  if (STREQ (val, "#t"))
     set_variable_bool (var, 1);
-  else if (strcmp (val, "#f") == 0)
+  else if (STREQ (val, "#f") == 0)
     set_variable_bool (var, 0);
   else
     {
