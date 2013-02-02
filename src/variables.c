@@ -22,13 +22,11 @@
 
 #include <config.h>
 
-#include <assert.h>
 #include <libguile.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "hash.h"
 
 #include "main.h"
 #include "extern.h"
