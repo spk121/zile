@@ -287,6 +287,7 @@ window_bottom_visible (Window * wp)
 {
   return get_window_all_displayed (wp);
 }
+
 void
 window_resync (Window * wp)
 {
