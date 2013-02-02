@@ -1,6 +1,7 @@
 dnl configure.ac
 dnl
 dnl Copyright (c) 1997-2012 Free Software Foundation, Inc.
+dnl Copyright (c) 2013 Michael L. Gran
 dnl
 dnl This file is part of GNU Zile.
 dnl
@@ -127,7 +128,15 @@ AC_COMPILE_IFELSE(
  with_included_regex=yes])
 gl_INIT
 
-dnl Guile 
+AC_ARG_WITH([guilemoduledir],
+  [use the specified installation path for Guile modules],
+  [case "x$withval" in
+    xyes|xno) guilemoduledir="";;
+    *)        guilemoduledir="$withval";;
+   esac],
+  [guilemoduledir=""])
+
+dnl Guile
 GUILE_FLAGS
 GUILE_SITE_DIR
 
@@ -205,12 +214,12 @@ AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([Makefile lib/Makefile src/tbl_opts.h])
 AC_OUTPUT
 
-if test "$guilesitedir" != "$GUILE_SITE"; then
+if test "$guilemoduledir" != "$GUILE_SITE"; then
    # Guile has a different prefix than this module
    AC_MSG_WARN([]
-   [The Guile modules will be installed in ${guilesitedir}.]
+   [The Guile modules will be installed in ${guilemoduledir}.]
    [You should probably re-run `configure' with]
-   [`--with-guilesitedir=$GUILE_SITE']
+   [`--with-guilemoduledir=$GUILE_SITE']
    [Otherwise, you will have to adjust the `GUILE_LOAD_PATH' environment]
    [variable.])
 fi
