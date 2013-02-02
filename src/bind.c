@@ -495,7 +495,7 @@ Read key sequence and function name (a symbol), and bind the function to the key
 sequence.")
 {
   const char *keystr;
-  astr name, keyname;
+  astr keyname;
   SCM ok = SCM_BOOL_T;
   gl_list_t keys;
 
@@ -507,7 +507,10 @@ sequence.")
       keystr = astr_cstr (keyname);
     }
   else if (!interactive && SCM_UNBNDP (gkeystr))
-    guile_wrong_number_of_arguments_error ("set-key");
+    {
+      guile_wrong_number_of_arguments_error ("set-key");
+      return SCM_UNSPECIFIED;
+    }
   else if (scm_is_string (gkeystr))
     {
       keystr = scm_to_locale_string (gkeystr);
@@ -520,8 +523,8 @@ sequence.")
 
   if (interactive && SCM_UNBNDP (gname))
     {
-      name = minibuf_read_function_name ("Set key %s to command: ",
-					 keystr);
+      const astr name = minibuf_read_function_name ("Set key %s to command: ",
+						    keystr);
       if (name == NULL)
 	return SCM_BOOL_F;
       gname = scm_from_locale_symbol (astr_cstr (name));

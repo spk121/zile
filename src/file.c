@@ -254,7 +254,10 @@ creating one if none already exists.")
   if (!interactive && SCM_UNBNDP (filename))
     guile_wrong_number_of_arguments_error ("find-file");
   else if (!interactive && !scm_is_string (filename))
-    guile_wrong_type_argument_error ("find-file", SCM_ARG1, filename, "string");
+    {
+      guile_wrong_type_argument_error ("find-file", SCM_ARG1, filename, "string");
+      return SCM_UNSPECIFIED;
+    }
   else if (interactive && SCM_UNBNDP (filename))
     ms = minibuf_read_filename ("Find file: ",
 				astr_cstr (get_buffer_dir (cur_bp)), NULL);
@@ -284,8 +287,11 @@ Use @kbd{M-x toggle-read-only} to permit editing.")
   if (!interactive && SCM_UNBNDP (filename))
     guile_wrong_number_of_arguments_error ("find-file-read-only");
   else if (!interactive && !scm_is_string (filename))
-    guile_wrong_type_argument_error ("find-file-read-only", SCM_ARG1, filename,
-				     "string");
+    {
+      guile_wrong_type_argument_error ("find-file-read-only", SCM_ARG1, filename,
+				       "string");
+      return SCM_UNSPECIFIED;
+    }
   else if (interactive && SCM_UNBNDP (filename))
     ms = minibuf_read_filename ("Find file read only: ",
 				astr_cstr (get_buffer_dir (cur_bp)), NULL);

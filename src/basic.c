@@ -108,7 +108,7 @@ column, or at the end of the line if it is not long enough.")
 SCM_DEFINE  (G_goto_char, "goto-char", 0, 1, 0, (SCM gn), "\
 Set point to a position. The beginning of the buffer is position 1.")
 {
-  long n;
+  long n = 0;
   size_t buffer_size;
 
   if (SCM_UNBNDP (gn) && interactive)
@@ -131,7 +131,7 @@ Set point to a position. The beginning of the buffer is position 1.")
 SCM_DEFINE (G_goto_line, "goto-line", 0, 1, 0, (SCM gn), "\
 Goto the given line number, counting from line 1 at beginning of buffer.")
 {
-  long n;
+  long n = 0;
 
   if (SCM_UNBNDP (gn) && interactive)
     n = minibuf_read_number ("Goto line: ");

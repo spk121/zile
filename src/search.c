@@ -371,7 +371,7 @@ Replace occurrences of a string with other text.\n\
 As each match is found, the user must type a character saying\n\
 what to do with it.")
 {
-  bool ok;
+  bool ok = SCM_BOOL_T;
   castr find = minibuf_read ("Query replace string: ", "");
   if (find == NULL)
     return G_keyboard_quit ();

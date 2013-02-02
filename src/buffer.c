@@ -639,8 +639,11 @@ With a nil argument, kill the current buffer.")
   if (!interactive && SCM_UNBNDP (gbuf))
     buf = astr_new_cstr (get_buffer_name (cur_bp));
   else if (!interactive && !scm_is_string (gbuf))
-    guile_wrong_type_argument_error ("kill-buffer",
-				     SCM_ARG1, gbuf, "string");
+    {
+      guile_wrong_type_argument_error ("kill-buffer",
+				       SCM_ARG1, gbuf, "string");
+      return SCM_UNSPECIFIED;
+    }
   else if (interactive && scm_is_string (gbuf))
     buf = astr_new_cstr (scm_to_locale_string (gbuf));
   else
