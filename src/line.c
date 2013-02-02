@@ -268,14 +268,12 @@ column point starts at, `tab-to-tab-stop' is done instead, unless\n\
 this command is invoked with a numeric argument, in which case it\n\
 does nothing.")
 {
-  SCM ok = SCM_BOOL_T;
+  SCM ok = SCM_BOOL_F;
   size_t target_goalc = 0, cur_goalc = get_goalc ();
   size_t t = tab_width (cur_bp);
 
-  ok = SCM_BOOL_F;;
-
   if (warn_if_readonly_buffer ())
-    return SCM_BOOL_F;;
+    return SCM_BOOL_F;
 
   deactivate_mark ();
 
