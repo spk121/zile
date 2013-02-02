@@ -97,9 +97,6 @@ guile_use_module_handler (void *data, SCM key, SCM exception)
 
   /* Send the message to the best handler. */
   scm_simple_format (scm_current_error_port (), formatted_message, SCM_EOL);
-  //fprintf (stderr, "%s\n", c_message);
-  //fflush (stderr);
-  //free (c_message);
   return SCM_UNSPECIFIED;
 }
 
