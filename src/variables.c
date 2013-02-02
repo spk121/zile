@@ -53,6 +53,7 @@ SCM_GLOBAL_VARIABLE_INIT (Gvar_case_fold_search, "case-fold-search",
 			  SCM_BOOL_T);
 SCM_GLOBAL_VARIABLE_INIT (Gvar_case_replace, "case-replace",
 			  SCM_BOOL_T);
+SCM_GLOBAL_VARIABLE_INIT (Gvar_ring_bell, "ring-bell", SCM_BOOL_F);
 SCM_GLOBAL_VARIABLE_INIT (Gvar_transient_mark_mode, "transient-mark-mode",
 			  SCM_BOOL_T);
 SCM_GLOBAL_VARIABLE_INIT (Gvar_highlight_nonselected_windows,
