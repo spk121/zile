@@ -481,7 +481,7 @@ Set mark after the inserted text.")
     }
   else
     G_set_mark_command ();
-  return SCM_BOOL_T;
+  return ok;
 }
 
 /*
