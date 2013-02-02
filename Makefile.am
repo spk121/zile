@@ -41,7 +41,7 @@ EXTRA_DIST =						\
 
 doc_DATA = AUTHORS FAQ NEWS
 
-include doc/Makefile.am
+# include doc/Makefile.am
 include src/Makefile.am
 include tests/Makefile.am
 
