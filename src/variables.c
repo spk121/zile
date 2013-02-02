@@ -86,7 +86,7 @@ set_variable (const char *var, const char *val)
       long n;
       errno = 0;
       n = strtol (val, &tail, 0);
-      if (errno == 0 && tail - val == strlen (val) - 1)
+      if (errno == 0 && ((int) tail - (int) val == strlen (val) - 1))
         set_variable_number (var, n);
       else
         set_variable_string (var, val);
