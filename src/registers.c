@@ -42,12 +42,12 @@ Copy region into register.")
   long reg;
   SCM ok = SCM_BOOL_T;
 
-  if (SCM_UNBNDP (greg)) 
+  if (SCM_UNBNDP (greg))
     {
       minibuf_write ("Copy to register: ");
       reg = getkey (GETKEY_DEFAULT);
     }
-  else 
+  else
     reg = guile_to_long_or_error ("copy-to-register", SCM_ARG1, greg);
 
   if (reg == KBD_CANCEL)
@@ -77,7 +77,7 @@ insert_register (void)
   return true;
 }
 
-SCM_DEFINE (G_insert_register, "insert-register", 0, 1, 0, 
+SCM_DEFINE (G_insert_register, "insert-register", 0, 1, 0,
 	    (SCM greg), "\
 Insert contents of the user specified register.\n\
 Puts point before and mark after the inserted text.")

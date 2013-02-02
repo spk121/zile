@@ -776,7 +776,7 @@ move_line (int n)
       func = buffer_prev_line;
     }
 
-  if (!scm_is_eq(last_command (),  F_next_line ()) 
+  if (!scm_is_eq(last_command (),  F_next_line ())
       && !scm_is_eq(last_command (), F_previous_line ()))
     set_buffer_goalc (cur_bp, get_goalc ());
 

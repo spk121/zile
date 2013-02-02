@@ -263,7 +263,7 @@ main (int argc, char **argv)
       astr as = get_home_dir ();
       if (as)
         {
-          const char *fname = astr_cstr (astr_cat_cstr (as, "/." PACKAGE)); 
+          const char *fname = astr_cstr (astr_cat_cstr (as, "/." PACKAGE));
           if (!access (fname, R_OK))
             guile_load (fname);
         }

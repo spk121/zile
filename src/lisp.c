@@ -44,7 +44,7 @@ guile_use_module_handler (void *data, SCM key, SCM exception)
   SCM subr, message, args, rest;
   SCM message_args, formatted_message;
   char *c_message;
-  
+
   /* Key is the exception type, a symbol. */
   /* exception is a list of 4 elements:
      - subr: a subroutine name (symbol?) or #f
@@ -78,20 +78,20 @@ guile_use_module_handler (void *data, SCM key, SCM exception)
   message_args = scm_simple_format (SCM_BOOL_F, message, args);
 
   if (scm_is_true (subr))
-    formatted_message 
+    formatted_message
       = scm_simple_format (SCM_BOOL_F,
 			   scm_from_locale_string ("Guile error in ~S, ~A~%"),
 			   scm_list_2 (subr, message_args));
   else
-    formatted_message 
+    formatted_message
       = scm_simple_format (SCM_BOOL_F,
 			   scm_from_locale_string ("Guile error: ~A~%"),
 			   scm_list_1 (message_args));
   /* One aggravating bug I made was when I put the load path
      to the srcdir and then scm_c_use_module tried to load
-     the zile executable as a module.  When you do that, you 
+     the zile executable as a module.  When you do that, you
      end up with "Unbound variable: \\x7ELF <binary junk>.
-     The binary junk caused the following scm_to_locale_string to 
+     The binary junk caused the following scm_to_locale_string to
      fail because the string contains nulls. */
   //c_message = scm_to_locale_string (formatted_message);
 
@@ -158,7 +158,7 @@ Suspend the editor and bring up the REPL for this buffer's module.")
   printf ("| \"(key-map)\" to see Zile's keymap                      |\n");
   printf ("+-------------------------------------------------------+\n");
   printf ("\n\n");
-  
+
   fflush (stdout);
 
   scm_c_use_module ("system repl repl");

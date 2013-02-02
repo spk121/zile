@@ -1080,7 +1080,7 @@ The output is available in that buffer in both cases.")
 
   if SCM_UNBNDP (ginsert)
     insert = lastflag & FLAG_SET_UNIARG;
-  else 
+  else
     insert = SCM_BOOL_F;
 
   if (cmd != NULL)

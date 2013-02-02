@@ -415,4 +415,3 @@ init_guile_line_procedures (void)
 		"newline-and-indent",
 		NULL);
 }
-

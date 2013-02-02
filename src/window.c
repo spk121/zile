@@ -40,7 +40,7 @@ struct Window
 #define FIELD(ty, name) ty name;
 #include "window.h"
 #undef FIELD
-  int lastpointn;		/* The last point line number. */
+  int lastpointn;               /* The last point line number. */
 };
 
 #define FIELD(ty, field)                        \
@@ -313,10 +313,10 @@ init_guile_window_procedures (void)
 {
 #include "window.x"
   scm_c_export ("split-window",
-		"delete-window",
-		"enlarge-window",
-		"shrink-window",
-		"delete-other-windows",
-		"other-window",
-		NULL);
+                "delete-window",
+                "enlarge-window",
+                "shrink-window",
+                "delete-other-windows",
+                "other-window",
+                NULL);
 }

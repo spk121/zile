@@ -1,4 +1,4 @@
-			    ZILE-ON-GUILE
+                            ZILE-ON-GUILE
 
 INTRODUCTION
 
@@ -28,7 +28,7 @@ find-file -> open file
 write-file -> save file
 
 Also, in the documentation of EMACS-like editors, it is commonplace
-to use the abbreviation 'C-x' to mean Ctrl+x and 'M-x' to mean 
+to use the abbreviation 'C-x' to mean Ctrl+x and 'M-x' to mean
 Alt+x. The Alt key, for EMACS-like editors, is often called the 'Meta'
 key, despite the fact that there hasn't been a keyboard with a 'Meta'
 key for a few decades now.
@@ -37,111 +37,111 @@ Zile-on-Guile has the following editing commands available on startup.
 
 KEY             COMMAND
 Alt+m           back-to-indentation
-LEFT	        backward-char
-Ctrl+b	        backward-char
-BACKSPACE       backward-delete-char  
+LEFT            backward-char
+Ctrl+b          backward-char
+BACKSPACE       backward-delete-char
 Alt+BACKSPACE   backward-kill-word
 Ctrl+Alt+b      backward-sexp
 Alt+b           backward-word
 Alt+<           beginning-of-buffer
-HOME 	        beginning-of-line
+HOME            beginning-of-line
 Ctrl+a          beginning-of-line
 Ctrl+x, a       call-last-kbd-macro
 Alt+w           copy-region-as-kill
 Ctrl+x, r, s    copy-to-register
 Ctrl+x, r, x    copy-to-register
 Ctrl+x, Ctrl+o  delete-blank-lines
-DELETE		delete-char
-Ctrl+d		delete-char
-Alt+\		delete-horizontal-space
-Ctrl+x, 1	delete-other-window
-Ctrl+x, 0	delete-window
-Ctrl+h, b	describe-bindings
-F1, b		describe-bindings
-Ctrl+h, f	describe-function
-F1, f		describe-function
-Ctrl+h, k	describe-key
-F1, k		describe-key
-Ctrl+h, v	describe-variable
-F1, v		describe-variable
+DELETE          delete-char
+Ctrl+d          delete-char
+Alt+\           delete-horizontal-space
+Ctrl+x, 1       delete-other-window
+Ctrl+x, 0       delete-window
+Ctrl+h, b       describe-bindings
+F1, b           describe-bindings
+Ctrl+h, f       describe-function
+F1, f           describe-function
+Ctrl+h, k       describe-key
+F1, k           describe-key
+Ctrl+h, v       describe-variable
+F1, v           describe-variable
 Ctrl+x, Ctrl+l  downcase-region
-Alt+l		downcase-word
-Ctrl+x, |	end-kbd-macro
-Alt+>		end-of-buffer
-END		end-of-line
-Ctrl+e		end-of-line
-Ctrl+x, ^	enlarge-window
+Alt+l           downcase-word
+Ctrl+x, |       end-kbd-macro
+Alt+>           end-of-buffer
+END             end-of-line
+Ctrl+e          end-of-line
+Ctrl+x, ^       enlarge-window
 Ctrl+x, Ctrl+x  exchange-point-and-mark
-Alt+x		execute-extended-command
-Alt+q		fill-paragraph
-Ctrl+x Ctrl+v	find-alternate-file
+Alt+x           execute-extended-command
+Alt+q           fill-paragraph
+Ctrl+x Ctrl+v   find-alternate-file
 Ctrl+x, Ctrl+f  find-file
 Ctrl+x, Ctrl+r  find-file-read-only
-RIGHT		forward-char
-Ctrl+f		forward-char
-Alt+}		forward-paragraph
-Ctrl+Alt+f	forward-sexp
-Alt+f		forward-word
-Alt+g, g	goto-line
-Alt+g, Alt+g	goto-line
-TAB    		indent-for-tab-command
-Ctrl+x, i	insert-file
-Ctrl+x, r, i	insert-register
-Ctrl+x, r, g	insert-register
-Ctrl+r	   	isearch-backward
-Ctrl+Alt+r	isearch-backward-regexp
-Ctrl+s		isearch-forward
-Ctrl+Alt+s	isearch-forward-regexp
-Alt+SPACE	just-one-space
-Ctrl+g		keyboard-quit
-Ctrl+x, k	kill-buffer
-Ctrl+k		kill-line
-Ctrl+w		kill-region
-Ctrl+Alt+k	kill-sexp
-Alt+d		kill-word
+RIGHT           forward-char
+Ctrl+f          forward-char
+Alt+}           forward-paragraph
+Ctrl+Alt+f      forward-sexp
+Alt+f           forward-word
+Alt+g, g        goto-line
+Alt+g, Alt+g    goto-line
+TAB             indent-for-tab-command
+Ctrl+x, i       insert-file
+Ctrl+x, r, i    insert-register
+Ctrl+x, r, g    insert-register
+Ctrl+r          isearch-backward
+Ctrl+Alt+r      isearch-backward-regexp
+Ctrl+s          isearch-forward
+Ctrl+Alt+s      isearch-forward-regexp
+Alt+SPACE       just-one-space
+Ctrl+g          keyboard-quit
+Ctrl+x, k       kill-buffer
+Ctrl+k          kill-line
+Ctrl+w          kill-region
+Ctrl+Alt+k      kill-sexp
+Alt+d           kill-word
 Ctrl+x, Ctrl+b  list-buffers
-Alt+h		mark-paragraph
-Ctrl+Alt+@	mark-sexp
-Ctrl+x, h	mark-whole-buffer
-Alt+@		mark-word
-RET		newline
-Ctrl+j		newline-and-indent
-DOWN		next-line
-Ctrl+n		next-line
-Ctrl+o		open-line
-Ctrl+x, o	other-window
-UP		previous-line
-Ctrl+p		previous-line
-Alt+%		query-replace
-Ctrl+q		quoted-insert
-Ctrl+l		recenter
+Alt+h           mark-paragraph
+Ctrl+Alt+@      mark-sexp
+Ctrl+x, h       mark-whole-buffer
+Alt+@           mark-word
+RET             newline
+Ctrl+j          newline-and-indent
+DOWN            next-line
+Ctrl+n          next-line
+Ctrl+o          open-line
+Ctrl+x, o       other-window
+UP              previous-line
+Ctrl+p          previous-line
+Alt+%           query-replace
+Ctrl+q          quoted-insert
+Ctrl+l          recenter
 Ctrl+x, Ctrl+s  save-buffer
 Ctrl+x, Ctrl+c  save-buffer-kill-emacs
 Ctrl+x, s       save-some-buffers
-Alt+v		scroll-down
-Ctrl+v		scroll-up
-Ctrl+x, f	set-fill-column
-Ctrl+@		set-mark-command
-Alt+!		shell-command
-Alt+|		shell-command-on-region
-Ctrl+x, 2	split-window
-Ctrl+x, (	start-kbd-macro
-Ctrl+x, Ctrl+z	suspend-emacs
-Ctrl+z		suspend-emacs
-Ctrl+x, b	switch-to-buffer
-Alt+i		tab-to-tab-stop
+Alt+v           scroll-down
+Ctrl+v          scroll-up
+Ctrl+x, f       set-fill-column
+Ctrl+@          set-mark-command
+Alt+!           shell-command
+Alt+|           shell-command-on-region
+Ctrl+x, 2       split-window
+Ctrl+x, (       start-kbd-macro
+Ctrl+x, Ctrl+z  suspend-emacs
+Ctrl+z          suspend-emacs
+Ctrl+x, b       switch-to-buffer
+Alt+i           tab-to-tab-stop
 Ctrl+x, Ctrl+q  toggle-read-only
-Ctrl+t		transpose-chars
-Ctrl+x, Ctrl+t	transpose-lines
-Ctrl+Alt+t	transpose-sexps
-Alt+t		transpose-words
-Ctrl+x, u	undo
-Ctrl+_		undo
-Ctrl+u		universal-argument
+Ctrl+t          transpose-chars
+Ctrl+x, Ctrl+t  transpose-lines
+Ctrl+Alt+t      transpose-sexps
+Alt+t           transpose-words
+Ctrl+x, u       undo
+Ctrl+_          undo
+Ctrl+u          universal-argument
 Ctrl+x, Ctrl+u  upcase-region
-Alt+u		upcase-word
-Ctrl+h, w	where-is
-F1, w		where-is
+Alt+u           upcase-word
+Ctrl+h, w       where-is
+F1, w           where-is
 Ctrl+x, Ctrl+w  write-file
-Ctrl+y		yank
-Alt+c		console
+Ctrl+y          yank
+Alt+c           console

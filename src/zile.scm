@@ -17,7 +17,7 @@
  ;;   You should have received a copy of the GNU General Public License
  ;;   along with GNU Zile; see the file COPYING.  If not, write to the
  ;;   Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
- ;;   MA 02111-1301, USA.  
+ ;;   MA 02111-1301, USA.
 
 
 (define-module (zile)
@@ -75,9 +75,9 @@ or integer"
 	     ;; else
              (apply append
                     (hash-map->list var? (module-obarray (current-module))))))
-        (zile-list 
+        (zile-list
          (apply append
-          (hash-map->list 
+          (hash-map->list
            var?
            (module-obarray (module-public-interface (resolve-module '(zile))))))))
     (append local-list zile-list)))
@@ -98,11 +98,11 @@ that requires no arguments"
 	     (eq? 0 (procedure-minimum-arity (variable-ref var))))
         (list sym)
         '()))
-  
+
   (let ((local-list '())
-        (zile-list 
+        (zile-list
          (apply append
-		(hash-map->list 
+		(hash-map->list
 		 proc?
 		 (module-obarray (module-public-interface (current-module)))))))
     (append local-list zile-list)))
@@ -115,9 +115,9 @@ that requires no arguments"
 	     (procedure? (variable-ref var)))
         (list sym)
         '()))
-  (let ((zile-list 
+  (let ((zile-list
          (apply append
-          (hash-map->list 
+          (hash-map->list
            proc?
            (module-obarray (module-public-interface (current-module)))))))
     zile-list))

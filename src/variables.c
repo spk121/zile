@@ -287,7 +287,7 @@ minibuf_read_variable_name (const char *fmt, ...)
   return (castr) NULL;
 }
 
-SCM_DEFINE (G_set_variable, "set-variable", 2, 0, 0, 
+SCM_DEFINE (G_set_variable, "set-variable", 2, 0, 0,
 	    (SCM gvar, SCM gval), "\
 Set a variable value to the user-specified value.")
 {
@@ -295,13 +295,13 @@ Set a variable value to the user-specified value.")
   SCM ok = SCM_BOOL_T;
   char *str = NULL;
   astr var = NULL;
-  
+
   str = guile_to_locale_string_safe (gvar);
   if (str != NULL)
     var = astr_new_cstr (str);
   else
     var = minibuf_read_variable_name ("Set variable: ");
-  
+
   if (var == NULL)
     return SCM_BOOL_F;
 

@@ -343,7 +343,7 @@ SCM_DEFINE (G_switch_to_buffer, "switch-to-buffer", 0, 1, 0,
 	    (SCM gbuf), "\
 Select buffer @i{buffer} in the current window.")
 {
-  SCM ok = SCM_BOOL_T;  
+  SCM ok = SCM_BOOL_T;
   Buffer *bp = ((get_buffer_next (cur_bp) != NULL) ? get_buffer_next (cur_bp) : head_bp);
 
   // FIXME: need interactive logic here
@@ -357,7 +357,7 @@ Select buffer @i{buffer} in the current window.")
 
       if (cbuf == NULL)
         ok = G_keyboard_quit ();
-    }    
+    }
 
   if (ok == SCM_BOOL_T)
     {
@@ -796,7 +796,7 @@ Make DIR become the current buffer's default directory.")
   SCM ok = SCM_BOOL_T;
   char *str;
   astr dir = NULL;
-  
+
   str = guile_to_locale_string_safe (gdir);
   if (str != NULL)
     dir = astr_new_cstr (str);
@@ -834,10 +834,10 @@ init_guile_file_procedures (void)
 		"switch-to-buffer",
 		"insert-buffer",
 		"insert-file",
-		"save-buffer", 
+		"save-buffer",
 		"write-file",
 		"save-some-buffers",
 		"save-buffers-kill-emacs",
 		"cd",
-		NULL);		
+		NULL);
 }

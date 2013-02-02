@@ -69,13 +69,13 @@ lookup_procedure (const char *name)
   while (0)
 
 SCM F_mark_paragraph ()
-{ 
-  F_LOOKUP("mark-paragraph"); 
+{
+  F_LOOKUP("mark-paragraph");
 }
 
 SCM F_universal_argument ()
 {
-  F_LOOKUP("universal-argument"); 
+  F_LOOKUP("universal-argument");
 }
 
 SCM F_undo ()
@@ -123,7 +123,7 @@ SCM F_process_use_modules ()
  *    Only SCM_DEFINED's functions are allowed to use
  *    Guile commands that aren't on this list, because their
  *    exceptions will be caught.
- *                     
+ *
  ****************************************************************/
 
 struct name_value
@@ -290,10 +290,10 @@ SCM
 guile_use_zile_module (void *unused)
 {
   return scm_call_1 (scm_variable_ref (scm_c_lookup ("process-use-modules")),
-		     scm_list_1 
-		     (scm_list_1 
-		      (scm_list_1 
-		       (scm_string_to_symbol 
+		     scm_list_1
+		     (scm_list_1
+		      (scm_list_1
+		       (scm_string_to_symbol
 			(scm_from_locale_string ("zile"))))));
 }
 
@@ -317,7 +317,7 @@ guile_get_procedure_documentation_by_name (const char *name)
   len = scm_to_locale_stringbuf (doc, buf, MAX_DOCUMENTATION_LENGTH - 1);
   if (len >= MAX_DOCUMENTATION_LENGTH -1)
     return NULL;
-  
+
   buf[len] = '\0';
   return buf;
 }
@@ -358,7 +358,7 @@ guile_get_procedure_name_by_name (const char *name)
   proc = guile_variable_ref_safe (guile_lookup_safe (sym));
   if (!scm_is_true (proc))
     return NULL;
-  
+
   procname = guile_procedure_name_safe (proc);
   if (!scm_is_true (procname))
     return NULL;
@@ -462,11 +462,11 @@ guile_append_newline_if_necessary (SCM s_msg)
 				    scm_from_int (0),
 				    scm_string_length (s_msg))))
     s_msg = scm_string_append (scm_list_2 (s_msg,
-					   scm_string 
-					   (scm_list_1 
+					   scm_string
+					   (scm_list_1
 					    (SCM_MAKE_CHAR ('\n')))));
   return s_msg;
-}  
+}
 
 void
 guile_error (const char *function_name, const char *msg)
@@ -541,7 +541,7 @@ guile_quit_error (const char *function_name)
 			 SCM_EOL,
 			 SCM_BOOL_F));
 }
-			 
+
 
 void
 guile_read_only_error (const char *function_name, const char *buffer_name)
@@ -591,7 +591,7 @@ guile_wrong_number_of_arguments_error (const char *function_name)
 
 
 void
-guile_wrong_type_argument_error (const char *function_name, 
+guile_wrong_type_argument_error (const char *function_name,
 				 int position, SCM variable, const char *type)
 {
   SCM s_function_name = scm_from_locale_string (function_name);
@@ -636,7 +636,7 @@ _guile_default_error_handler (void *data, SCM key, SCM exception)
   SCM subr, message, args, rest;
   SCM message_args, formatted_message;
   char *c_message;
-  
+
   /* Key is the exception type, a symbol. */
   /* exception is a list of 4 elements:
      - subr: a subroutine name (symbol?) or #f
@@ -686,7 +686,7 @@ guile_error_handler (void *data, SCM key, SCM exception)
   SCM subr, message, args, rest;
   SCM message_args, formatted_message;
   char *c_message;
-  
+
   /* Key is the exception type, a symbol. */
   /* exception is a list of 4 elements:
      - subr: a subroutine name (symbol?) or #f
@@ -740,7 +740,7 @@ set_guile_error_port_to_stderr (void)
  * properly handling uniargs and errors.
  ****************************************************************/
 
-/* This alist contains the uniarg behavior of a function.  The the
+/* This alist contains the uniarg behavior of a function.  The
  * function symbol is the alist key.  The alist value is either
  * 'integer or 'bool. A function in this list will receive a uniarg
  * when called, if one is available. */
@@ -768,7 +768,7 @@ guile_procedure_set_uniarg_boolean (const char *func)
   SCM sym;
   assert (func != NULL && strlen (func) > 0 && strlen (func) < NAME_LEN_MAX);
   sym = scm_string_to_symbol (scm_from_locale_string (func));
-  
+
   guile_procedure_uniarg_alist = scm_assq_set_x (guile_procedure_uniarg_alist,
 						 sym,
 						 scm_from_locale_symbol ("bool"));
@@ -781,7 +781,7 @@ guile_procedure_set_uniarg_none (const char *func)
   SCM sym;
   assert (func != NULL && strlen (func) > 0 && strlen (func) < NAME_LEN_MAX);
   sym = scm_string_to_symbol (scm_from_locale_string (func));
-  
+
   guile_procedure_uniarg_alist = scm_assq_remove_x (guile_procedure_uniarg_alist,
 						    sym);
 }
@@ -919,11 +919,11 @@ guile_load (const char *filename)
  * minibuffer at the bottom of the screen.
  ****************************************************************/
 
-/* GUILE ERROR PORT 
+/* GUILE ERROR PORT
  *
- * Some Guile warnings can't be caught and are printed to 
+ * Some Guile warnings can't be caught and are printed to
  * the Guile's current-error-port.  To handle this, we
- * make a custom error port that would print errors to 
+ * make a custom error port that would print errors to
  * the minibuffer. */
 
 /* The port receives data using this function. */
@@ -942,8 +942,8 @@ guile_error_port_write (SCM port, const void *data, size_t size)
       memset (minibuf_buffer, 0, 80);
     }
 
-  strncat (minibuf_buffer, buf, minibuf_buffer_size - 1); 
-  
+  strncat (minibuf_buffer, buf, minibuf_buffer_size - 1);
+
   //if (strchr (minibuf_buffer, '\n'))
   //  {
   while ((cr = strchr (minibuf_buffer, '\n')) != NULL)

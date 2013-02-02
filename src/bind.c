@@ -488,7 +488,7 @@ init_default_bindings (void)
 
 }
 
-SCM_DEFINE (G_set_key, "set-key", 0, 2, 0, 
+SCM_DEFINE (G_set_key, "set-key", 0, 2, 0,
 	    (SCM gkeystr, SCM gname), "\
 Bind a command to a key sequence.\n\
 Read key sequence and function name (a symbol), and bind the function to the key\n\
@@ -533,9 +533,9 @@ sequence.")
     guile_wrong_number_of_arguments_error ("set-key");
   else if (!scm_is_symbol (gname))
     guile_wrong_type_argument_error ("set-key", SCM_ARG2, gname, "symbol");
-  /* else 
+  /* else
      gname is ok */
-  
+
   if (!scm_is_true (guile_lookup_safe (gname)))
     guile_error ("set-key", "no such function");
 
@@ -677,7 +677,7 @@ display_binding (astr key, Binding p, void *st _GL_UNUSED_PARAMETER)
 {
   char *buf, *str = NULL;
   SCM name;
-  
+
   name = guile_procedure_name_safe (p->proc);
   if (scm_is_true (name))
     str = guile_to_locale_string_safe (scm_symbol_to_string (name));
@@ -685,7 +685,7 @@ display_binding (astr key, Binding p, void *st _GL_UNUSED_PARAMETER)
     asprintf (&buf, "%-15s %s\n", astr_cstr (key), str);
   else
     asprintf (&buf, "%-15s <unknown>\n", astr_cstr (key));
-    
+
   scm_simple_format (scm_current_output_port (),
 		     scm_from_locale_string ("~A"),
 		     scm_list_1 (scm_from_locale_string (buf)));;

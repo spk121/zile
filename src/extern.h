@@ -225,7 +225,7 @@ void guile_quit_error (const char *function_name);
 void guile_read_only_error (const char *function_name, const char *buffer_name);
 void guile_void_function_error (const char *function_name);
 void guile_wrong_number_of_arguments_error (const char *function_name);
-void guile_wrong_type_argument_error (const char *function_name, 
+void guile_wrong_type_argument_error (const char *function_name,
 				      int position, SCM variable, const char *type);
 long guile_to_long_or_error (const char *function_name, int position, SCM n);
 void guile_procedure_set_uniarg_integer (const char *func);

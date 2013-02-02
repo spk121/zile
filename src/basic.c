@@ -117,8 +117,8 @@ Set point to a position. The beginning of the buffer is position 1.")
     guile_wrong_number_of_arguments_error ("goto-char");
   else
     n = guile_to_long_or_error ("goto-char", SCM_ARG1, gn);
-  
-  /* minibuf return LONG_MAX or LONG_MAX-1 on error */  
+
+  /* minibuf return LONG_MAX or LONG_MAX-1 on error */
   if (n >= LONG_MAX - 1)
     return SCM_BOOL_F;
 
@@ -140,7 +140,7 @@ Goto the given line number, counting from line 1 at beginning of buffer.")
   else
     n = guile_to_long_or_error ("goto-line", SCM_ARG1, gn);
 
-  /* minibuf return LONG_MAX or LONG_MAX-1 on error */  
+  /* minibuf return LONG_MAX or LONG_MAX-1 on error */
   if (n >= LONG_MAX - 1)
     return SCM_BOOL_F;
 
@@ -163,7 +163,7 @@ Move point to the end of the buffer; leave mark at previous position.")
   return SCM_BOOL_T;
 }
 
-SCM_DEFINE (G_backward_char, "backward-char", 0, 1, 0, 
+SCM_DEFINE (G_backward_char, "backward-char", 0, 1, 0,
 	    (SCM gn), "\
 Move point left N characters (right if N is negative).\n\
 On attempt to pass beginning or end of buffer, stop and signal error.")

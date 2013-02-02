@@ -22,7 +22,6 @@
 
 #include <config.h>
 
-#include <assert.h>
 #include <libguile.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -78,7 +77,7 @@ get_function_doc (SCM sym)
   len = scm_to_locale_stringbuf (doc, buf, MAX_DOCUMENTATION_LENGTH - 1);
   if (len >= MAX_DOCUMENTATION_LENGTH -1)
     return NULL;
-  
+
   buf[len] = '\0';
   return buf;
 }
@@ -145,7 +144,7 @@ Read function name, then read its arguments and call it.")
   castr name = minibuf_read_function_name (astr_cstr (msg));
   if (name == NULL)
     return SCM_BOOL_F;
-  
+
   sym = scm_from_locale_symbol (astr_cstr (name));
   if (!guile_symbol_is_name_of_defined_function (sym))
     return SCM_BOOL_F;
@@ -153,7 +152,7 @@ Read function name, then read its arguments and call it.")
   SCM ret = call_command (guile_variable_ref_safe (guile_lookup_safe (sym)),
 			  1, false);
   SCM sret = scm_simple_format (SCM_BOOL_F, scm_from_locale_string ("~s"),
-				scm_list_1 (ret)); 
+				scm_list_1 (ret));
   minibuf_write (scm_to_locale_string (sret));
   return ret;
 }

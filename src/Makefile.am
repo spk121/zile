@@ -21,12 +21,11 @@
 # MA 02111-1301, USA.
 
 # doc_DATA += src/dotzile.sample
-
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src -I$(builddir)/lib -I$(srcdir)/lib -DPATH_DOCDIR="\"$(docdir)\"" $(LIBGC_CPPFLAGS) $(GUILE_CFLAGS)
 LDADD = $(builddir)/lib/libzile.a $(LIB_ACL) $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB) $(GUILE_LDFLAGS)
 
-BUILT_SOURCES =						\
+BUILT_SOURCES =					\
 	src/basic.x					\
 	src/buffer.x					\
 	src/bind.x					\
@@ -39,18 +38,18 @@ BUILT_SOURCES =						\
 	src/line.x					\
 	src/lisp.x					\
 	src/macro.x					\
-	src/redisplay.x					\
-	src/registers.x					\
+	src/redisplay.x				\
+	src/registers.x				\
 	src/search.x					\
 	src/undo.x					\
-	src/variables.x					\
-	src/window.x 					
+	src/variables.x				\
+	src/window.x
 
 bin_PROGRAMS = src/zile-on-guile
 
 src_zile_on_guile_LDADD = $(LDADD) $(LIBOBJS)
 
-src_zile_on_guile_function_SOURCE_FILES =			\
+src_zile_on_guile_function_SOURCE_FILES =		\
 	src/basic.c					\
 	src/bind.c					\
 	src/buffer.c					\
@@ -63,15 +62,15 @@ src_zile_on_guile_function_SOURCE_FILES =			\
 	src/line.c					\
 	src/lisp.c					\
 	src/macro.c					\
-	src/redisplay.c					\
-	src/registers.c					\
+	src/redisplay.c				\
+	src/registers.c				\
 	src/search.c					\
 	src/undo.c					\
-	src/variables.c					\
+	src/variables.c				\
 	src/window.c
 
-src_zile_on_guile_base_SOURCE_FILES =				\
-	$(src_zile_on_guile_function_SOURCE_FILES)		\
+src_zile_on_guile_base_SOURCE_FILES =			\
+	$(src_zile_on_guile_function_SOURCE_FILES)	\
 	src/memrmem.h					\
 	src/memrmem.c					\
 	src/astr.c					\
@@ -80,7 +79,6 @@ src_zile_on_guile_base_SOURCE_FILES =				\
 	src/estr.h					\
 	src/extern.h					\
 	src/main.h					\
-	src/tbl_vars.h					\
 	src/lists.c					\
 	src/lists.h					\
 	src/buffer.h					\
@@ -127,7 +125,7 @@ src/registers.x: src/registers.c
 src/search.x:	src/search.c
 src/undo.x:	src/undo.c
 src/variables.x: src/variables.c
-src/window.x: 	src/window.c
+src/window.x:	src/window.c
 
 
 
@@ -139,7 +137,7 @@ check-syntax:
 
 TESTS_ENVIRONMENT =					\
 	srcdir=$(srcdir)/src				\
-	builddir=$(builddir)src				\
+	builddir=$(builddir)src			\
 	$(VALGRIND)
 
 check_PROGRAMS = src/astr
@@ -150,9 +148,7 @@ src_astr_CPPFLAGS = -DTEST -DSRCPATH="\"$(top_srcdir)/src\"" $(AM_CPPFLAGS)
 src_astr_LDADD = $(LDADD) src/memrmem.o
 
 EXTRA_DIST +=						\
-	src/dotzile.sample				\
-	src/tbl_opts.h.in				\
-	src/tbl_vars.h.in
+	src/tbl_opts.h.in
 
 
 dist_guilesite_DATA = src/zile.scm
