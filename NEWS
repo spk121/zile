@@ -1,7 +1,10 @@
 GNU Zile NEWS                                         -*- outline -*-
 
-* Noteworthy changes in release ?.? (????-??-??) [?]
+* Noteworthy changes in release 2.4.9.1 (2012-02-02) [guile]
 
+  Rebaseline with master.
+
+  Use Guile-2.0 repl.
 
 * Noteworthy changes in release 2.4.9 (2012-10-01) [stable]
 
