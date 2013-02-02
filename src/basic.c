@@ -122,9 +122,10 @@ Set point to a position. The beginning of the buffer is position 1.")
   if (n >= LONG_MAX - 1)
     return SCM_BOOL_F;
 
-goto_offset (MIN (get_buffer_size (cur_bp), MAX (n, 1) - 1));
+  buffer_size = get_buffer_size (cur_bp);
+  goto_offset (MIN ((size_t) (MAX (n, 1) - 1), buffer_size));
 
-  goto_offset (MAX (n, 1) - 1);
+  return scm_from_long (n);
 }
 
 SCM_DEFINE (G_goto_line, "goto-line", 0, 1, 0, (SCM gn), "\
