@@ -167,10 +167,11 @@ Suspend the editor and bring up the REPL for this buffer's module.")
   scm_call_0 (func);
 
   printf ("Press <ENTER> key to re-enter zile...\n");
+  fflush (stdout);
   set_guile_error_port_to_minibuffer ();
-  term_getkey (-1);
-  term_refresh ();
+  scm_read_char (scm_current_input_port ());
   interactive = true;
+  G_recenter ();
   return SCM_BOOL_T;
 }
 
