@@ -67,7 +67,13 @@ static void
 minibuf_vwrite (const char *fmt, va_list ap)
 {
   char *s = xvasprintf (fmt, ap);
-  if (minibuf_contents == NULL || strcmp (s, minibuf_contents))
+  /* Catch minibuf errors if we're at the Guile console */
+  if (!interactive)
+    {
+      scm_display (scm_from_locale_string (s), scm_current_output_port ());
+      scm_newline (scm_current_output_port ());
+    }
+  else if (minibuf_contents == NULL || strcmp (s, minibuf_contents))
     {
       minibuf_contents = s;
       minibuf_refresh ();
