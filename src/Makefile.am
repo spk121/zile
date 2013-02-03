@@ -151,5 +151,5 @@ EXTRA_DIST +=						\
 	src/tbl_opts.h.in
 
 
-dist_guilesite_DATA = src/zile.scm
+guilemodule_DATA = src/zile.scm
 ETAGS_ARGS = src/zile.scm

@@ -134,11 +134,15 @@ AC_ARG_WITH([guilemoduledir],
     xyes|xno) guilemoduledir="";;
     *)        guilemoduledir="$withval";;
    esac],
-  [guilemoduledir=""])
+  [guilemoduledir=${pkgdatadir}])
 
 dnl Guile
 GUILE_FLAGS
 GUILE_SITE_DIR
+pkgdatadir="$datadir/$PACKAGE_NAME"
+if test "x$guilemoduledir" = "x"; then
+  guilemoduledir="$pkgdatadir"
+fi
 
 dnl Curses
 AX_WITH_CURSES
@@ -204,10 +208,10 @@ if test -z "$PERL"; then
 fi
 
 pkgdatadir="$datadir/$PACKAGE"
-if test "x$guilesitedir" = "x"; then
-   guilesitedir="$pkgdatadir"
+if test "x$guilemoduledir" = "x"; then
+   guilemoduledir="$pkgdatadir"
 fi
-AC_SUBST([guilesitedir])
+AC_SUBST([guilemoduledir])
 
 dnl Generate output
 AC_CONFIG_HEADERS([config.h])
