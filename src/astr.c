@@ -298,16 +298,6 @@ assert_eq (astr as, const char *s)
     }
 }
 
-/* Stub to make xalloc_die happy. */
-void zile_exit (int doabort);
-
-_Noreturn void
-zile_exit (int doabort _GL_UNUSED_PARAMETER)
-{
-  exit (EXIT_CRASH);
-}
-
-
 int
 main (int argc _GL_UNUSED_PARAMETER, char **argv)
 {
