@@ -25,7 +25,7 @@ AC_PREREQ([2.61])
 dnl Initialise autoconf and automake
 AC_INIT(Zile-on-Guile, 2.4.5.1, bug-zile@gnu.org)
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([-Wall -Werror std-options])
+AM_INIT_AUTOMAKE([-Wall std-options])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 dnl Checks for programs
