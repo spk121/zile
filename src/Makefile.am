@@ -20,7 +20,7 @@
 # Free Software Foundation, Fifth Floor, 51 Franklin Street, Boston,
 # MA 02111-1301, USA.
 
-AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
+AM_CFLAGS = $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(builddir)/src -I$(srcdir)/src -I$(builddir)/lib -I$(srcdir)/lib -DPATH_DOCDIR="\"$(docdir)\"" $(LIBGC_CPPFLAGS) $(GUILE_CFLAGS)
 LDADD = $(builddir)/lib/libzile.a $(LIB_ACL) $(LIB_EACCESS) $(LIBINTL) $(CURSES_LIB) $(GUILE_LDFLAGS)
 
