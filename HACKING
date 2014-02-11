@@ -1,0 +1,57 @@
+                      GNU Zile developers' notes
+                      --------------------------
+
+     Copyright (c) 2011-2014 Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without
+     modification, are permitted in any medium without royalty
+     provided the copyright notice and this notice are preserved.
+
+
+Making a release
+----------------
+
+To make a release automatically, you need ncftp, and woger, from
+http://rrt.sc3d.org/Software/woger
+
+Here are the steps we (maintainers) follow when making a release.
+
+* Ensure that acceptable versions of autoconf, automake, etc.
+  are in your PATH.  See the buildreq list in bootstrap.conf for
+  the complete list of tools.
+
+* Start from a clean, up-to-date git directory on the branch you want
+  to release from, ensure that you have no uncommitted diffs, have
+  pushed all changes that belong in the release, and that all tests
+  pass:
+
+    make prerelease
+
+  (Make sure you have any needed Valgrind suppressions files.)
+
+* Check that the NixOS/Hydra autobuilder is reporting all is well:
+
+    http://hydra.nixos.org/jobset/gnu/zile-on-guile-master
+
+* To (i) set the date, version number, and release TYPE on line 3 of
+  NEWS, (ii) commit that, and (iii) tag the release, run
+
+    # "TYPE" must be stable, beta or alpha
+    make release-commit RELEASE='X.Y TYPE'
+
+* Run the following to create release tarballs.  Your choice selects the
+  corresponding upload-to destination in the emitted gnupload command.
+  The different destinations are specified in cfg.mk.  See the definitions
+  of gnu_ftp_host-{alpha,beta,stable}.
+
+    make release RELEASE='X.Y TYPE'
+
+* Write the release announcement that you will soon post.  Start with
+  the template, $HOME/announce-zile-on-guile-X.Y that was just created by
+  that "make" command.
+
+Once all the builds and tests have passed,
+
+* Run:
+
+    make dorelease
