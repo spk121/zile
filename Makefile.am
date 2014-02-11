@@ -1,6 +1,6 @@
 # Top-level Makefile.am
 #
-# Copyright (c) 1997-2012 Free Software Foundation, Inc.
+# Copyright (c) 1997-2014 Free Software Foundation, Inc.
 #
 # This file is part of GNU Zile.
 #
@@ -64,10 +64,10 @@ loc-all:
 
 prerelease:
 	{ $(MAKE) -k maintainer-clean || { ./configure && $(MAKE) maintainer-clean; } } && \
-	git checkout master && \
-	git pull origin master && \
+	git checkout HEAD && \
+	git pull && \
 	git diff --exit-code && \
-	git push origin master && \
+	git push && \
 	./bootstrap && ./configure && \
 	$(MAKE) "DISTCHECK_CONFIGURE_FLAGS=--enable-valgrind" check distcheck
 
