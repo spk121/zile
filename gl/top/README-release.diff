@@ -1,12 +1,12 @@
---- gnulib/top/README-release	2012-09-10 22:14:18.164882316 +0100
-+++ HACKING	2012-09-13 23:08:05.625825243 +0100
-@@ -1,35 +1,36 @@
+--- gnulib/top/README-release	2014-02-05 00:22:05.819432095 +0000
++++ HACKING	2014-02-11 17:09:17.118219553 +0000
+@@ -1,35 +1,37 @@
 -Here are most of the steps we (maintainers) follow when making a release.
 +                      GNU Zile developers' notes
 +                      --------------------------
  
 -* Start from a clean, up-to-date git directory on "master":
-+     Copyright (c) 2011-2012 Free Software Foundation, Inc.
++     Copyright (c) 2011-2014 Free Software Foundation, Inc.
  
 -    make -k maintainer-clean || { ./configure && make maintainer-clean; }
 -    git checkout master
@@ -39,9 +39,10 @@
 +  the complete list of tools.
  
 -    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
-+* Start from a clean, up-to-date git directory on "master", ensure
-+  that you have no uncommitted diffs, have pushed all changes that
-+  belong in the release, and that all tests pass:
++* Start from a clean, up-to-date git directory on the branch you want
++  to release from, ensure that you have no uncommitted diffs, have
++  pushed all changes that belong in the release, and that all tests
++  pass:
  
 -* Run the following command to download any new translations:
 +    make prerelease
@@ -53,13 +54,13 @@
 +* Check that the NixOS/Hydra autobuilder is reporting all is well:
  
 -    make check syntax-check distcheck
-+    http://hydra.nixos.org/jobset/gnu/@PACKAGE@-master
++    http://hydra.nixos.org/jobset/gnu/zile-BRANCH
  
- * To (i) set the date, version number, and release type [stable/alpha/beta]
-   on line 3 of NEWS, (ii) commit that, and (iii) tag the release, run
-@@ -44,57 +45,12 @@
-     # "TYPE" must be stable, beta or alpha
-     make TYPE
+ * To (i) set the date, version number, and release TYPE on line 3 of
+   NEWS, (ii) commit that, and (iii) tag the release, run
+@@ -44,57 +46,12 @@
+ 
+     make release RELEASE='X.Y TYPE'
  
 -* Test the tarball.  Copy it to a few odd-ball systems and ensure that
 -  it builds and passes all tests.
@@ -68,7 +69,7 @@
 -  soon post.  Start with the template, $HOME/announce-@PACKAGE@-X.Y
 -  that was just created by that "make" command.
 +* Write the release announcement that you will soon post.  Start with
-+  the template, $HOME/announce-@PACKAGE@-X.Y that was just created by
++  the template, $HOME/announce-zile-X.Y that was just created by
 +  that "make" command.
  
  Once all the builds and tests have passed,
