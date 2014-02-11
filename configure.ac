@@ -23,7 +23,7 @@ dnl MA 02111-1301, USA.
 AC_PREREQ([2.61])
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile-on-Guile, 2.4.9.1, bug-zile@gnu.org)
+AC_INIT(Zile-on-Guile, 2.4.10.1, bug-zile@gnu.org)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall std-options])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
