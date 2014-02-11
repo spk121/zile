@@ -59,7 +59,7 @@
  * To (i) set the date, version number, and release TYPE on line 3 of
    NEWS, (ii) commit that, and (iii) tag the release, run
 @@ -44,57 +46,12 @@
- 
+
      make release RELEASE='X.Y TYPE'
  
 -* Test the tarball.  Copy it to a few odd-ball systems and ensure that
