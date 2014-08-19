@@ -194,3 +194,4 @@
 /gettime.m4
 /timespec.m4
 /extern-inline.m4
+/absolute-header.m4
