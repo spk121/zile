@@ -37,11 +37,11 @@ BUILT_SOURCES =					\
 	src/line.x					\
 	src/lisp.x					\
 	src/macro.x					\
-	src/redisplay.x				\
-	src/registers.x				\
+	src/redisplay.x					\
+	src/registers.x					\
 	src/search.x					\
 	src/undo.x					\
-	src/variables.x				\
+	src/variables.x					\
 	src/window.x
 
 bin_PROGRAMS = src/zile-on-guile
@@ -94,7 +94,8 @@ src_zile_on_guile_base_SOURCE_FILES =			\
 	src/window.h					\
 	src/term_minibuf.c				\
 	src/term_redisplay.c				\
-	src/term_curses.c
+	src/term_curses.c				\
+	src/zile.scm
 
 src_zile_on_guile_SOURCES =					\
 	$(src_zile_on_guile_base_SOURCE_FILES)			\
