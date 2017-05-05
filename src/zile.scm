@@ -30,6 +30,7 @@
 	    zile-procedures
 	    zile-intro
 	    set-key
+	    global-set-key
 	    setq
             ))
 
@@ -122,11 +123,11 @@ that requires no arguments"
            (module-obarray (module-public-interface (current-module)))))))
     zile-list))
 
-(define (set-key key sym)
+(define (global-set-key key sym)
   "Bind the key sequence KEY to the procedure SYM, where SYM is the
 a symbol of the procedure's name.
-For example, (set-key \"\\C-f\" 'forward-char)"
-  (global-set-key key sym))
+For example, (global-set-key \"\\C-f\" 'forward-char)"
+  (set-key key sym))
 
 (define (zile-intro)
   (let ((txt (list
@@ -140,6 +141,7 @@ For example, (set-key \"\\C-f\" 'forward-char)"
   "   (export blammo)"
   ""
   "Then use 'set-key' set a key sequence to call that procedure."
+  "This procedure is also known as 'global-set-key'."
   ""
   "(set-key <key> <command>)"
   ""
