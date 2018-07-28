@@ -1,6 +1,6 @@
 dnl configure.ac
 dnl
-dnl Copyright (c) 1997-2012 Free Software Foundation, Inc.
+dnl Copyright (c) 1997-2014 Free Software Foundation, Inc.
 dnl Copyright (c) 2013 Michael L. Gran
 dnl
 dnl This file is part of GNU Zile.
@@ -23,7 +23,7 @@ dnl MA 02111-1301, USA.
 AC_PREREQ([2.61])
 
 dnl Initialise autoconf and automake
-AC_INIT(Zile-on-Guile, 2.4.5.1, bug-zile@gnu.org)
+AC_INIT(Zile-on-Guile, 2.4.9.1, bug-zile@gnu.org)
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall std-options])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
