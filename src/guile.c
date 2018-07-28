@@ -1,6 +1,6 @@
 /* Guile interaction helper functions
 
-   Copyright (c) 2011, 2012, 2013 Michael L. Gran
+   Copyright (c) 2011, 2012, 2013, 2018 Michael L. Gran
 
    This file is part of Michael's fork of GNU Zile.
 
@@ -28,7 +28,7 @@
 #include "extern.h"
 #define NAME_LEN_MAX (200)
 
-scm_t_bits minibuf_port_type;
+scm_t_port_type *minibuf_port_type;
 SCM minibuf_port;
 const size_t minibuf_buffer_size = 80;
 char minibuf_buffer[80];
@@ -927,10 +927,10 @@ guile_load (const char *filename)
  * the minibuffer. */
 
 /* The port receives data using this function. */
-void
-guile_error_port_write (SCM port, const void *data, size_t size)
+static size_t
+guile_error_port_write (SCM port, SCM src, size_t start, size_t size)
 {
-  char *buf = strndup (data, size + 1);
+  char *buf = scm_to_locale_string (src);
   char *cr;
 
   buf[size] = '\0';
@@ -953,13 +953,14 @@ guile_error_port_write (SCM port, const void *data, size_t size)
   //  }
 
   free (buf);
+  return size;
 }
 
 /* This function would be used to fill the read-out buffer of the port
    before getting a character from the port, but we don't need this
    since this port will be write-only. */
-int
-guile_error_port_fill_input (SCM port)
+static size_t
+guile_error_port_fill_input (SCM port, SCM dst, size_t start, size_t count)
 {
   return 0;
 }
@@ -1010,8 +1011,8 @@ init_guile_guile_procedures (void)
   minibuf_port_type = scm_make_port_type ("minibuf-port",
 					  guile_error_port_fill_input,
 					  guile_error_port_write);
-  minibuf_port = scm_new_port_table_entry (minibuf_port_type);
-  SCM_SET_CELL_TYPE (minibuf_port, minibuf_port_type | SCM_OPN | SCM_WRTNG);
+  minibuf_port = scm_c_make_port (minibuf_port_type, SCM_OPN | SCM_WRTNG,
+				  0);
   stderr_port = scm_current_error_port ();
   scm_set_current_error_port (minibuf_port);
   #include "guile.x"
